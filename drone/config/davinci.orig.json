@@ -1,0 +1,57 @@
+{
+    "logOnFile": true,
+    "phyMode": "DsssRate1Mbps",
+    "duration": 100.0,
+    "drones": [
+        {
+            "acceleration": 1.0,
+            "maxSpeed": 30.0,
+            "applicationStartTime": 1.0,
+            "applicationStopTime": 99.0,
+            "trajectory": [
+                {
+                    "position": [0.0, 0.0, 0.0],
+                    "interest": 0,
+                    "restTime": 3.0
+                },
+                {
+                    "position": [1.0, 10.0, 0.0],
+                    "interest": 1
+                },
+                {
+                    "position": [100.0, 10.0, 0.0],
+                    "interest": 0
+                }
+            ]
+        },
+        {
+            "acceleration": 2.0,
+            "maxSpeed": 15.0,
+            "applicationStartTime": 1.0,
+            "applicationStopTime": 99.0,
+            "trajectory": [
+                {
+                    "position": [100.0, 10.0, 0.0],
+                    "interest": 0,
+                    "restTime": 3.0
+                },
+                {
+                    "position": [50.0, 50.0, 0.0],
+                    "interest": 1
+                },
+                {
+                    "position": [0.0, 1.0, 0.0],
+                    "interest": 0
+                }
+            ]
+        }
+    ],
+    "ZSPs": [
+        {
+            "position": [10.0, 10.0, 0.0]
+        }
+    ],
+    "logComponents": [
+        "ReportSimulation"
+    ]
+}

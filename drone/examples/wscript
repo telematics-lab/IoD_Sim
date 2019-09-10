@@ -1,0 +1,24 @@
+def build(bld):
+    obj = bld.create_ns3_program('drone-scenario-allen',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet', 'report'])
+    obj.source = 'scenario-allen.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-babbage',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-babbage.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-davinci',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-davinci.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-easley',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-easley.cc'

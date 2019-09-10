@@ -1,0 +1,211 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "configure",
+      "type": "shell",
+      "command": "./waf configure --enable-examples --enable-mpi --disable-python",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "build"
+    },
+    {
+      "label": "configure (local)",
+      "type": "shell",
+      "command": "./waf configure --enable-examples --enable-mpi --disable-python",
+      "options": {
+        "cwd": "${workspaceFolder}/ns-3-dev/"
+      },
+      "group": "build"
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "./waf build -j${input:cores}",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "build"
+    },
+    {
+      "label": "build (local)",
+      "type": "shell",
+      "command": "./waf build -j${input:cores}",
+      "options": {
+        "cwd": "${workspaceFolder}/ns-3-dev/"
+      },
+      "group": "build",
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "run allen",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen --numDrones=${input:numDrones}\"",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run babbage",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-babbage --numDrones=${input:numDrones} --duration=${input:duration}\"",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run davinci",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run davinci (local)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns-3-dev/"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run easley",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-easley --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "/opt/drone/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "docs",
+      "type": "shell",
+      "command": "make html",
+      "options": {
+        "cwd": "${workspaceFolder}/docs"
+      },
+      "windows": {
+        "command": "./make.bat html",
+        "options": {
+          "cwd": "${workspaceFolder}/docs"
+        }
+      },
+      "group": "build"
+    },
+    {
+      "label": "docs (venv)",
+      "type": "shell",
+      "command": "make html",
+      "options": {
+        "cwd": "${workspaceFolder}/docs",
+        "env": {
+          "SPHINXBUILD": "${workspaceFolder}/venv/Scripts/sphinx-build"
+        }
+      },
+      "windows": {
+        "command": "./make.bat html",
+        "options": {
+          "cwd": "${workspaceFolder}/docs",
+          "env": {
+            "SPHINXBUILD": "${workspaceFolder}\\venv\\Scripts\\sphinx-build.exe"
+          }
+        }
+      },
+      "group": "build",
+      "dependsOn": [
+        "docs (venv) - clean"
+      ]
+    },
+    {
+      "label": "docs (venv) - clean",
+      "type": "shell",
+      "command": "make clean",
+      "options": {
+        "cwd": "${workspaceFolder}/docs",
+        "env": {
+          "SPHINXBUILD": "${workspaceFolder}/venv/Scripts/sphinx-build"
+        }
+      },
+      "windows": {
+        "command": "./make.bat clean",
+        "options": {
+          "cwd": "${workspaceFolder}/docs",
+          "env": {
+            "SPHINXBUILD": "${workspaceFolder}\\venv\\Scripts\\sphinx-build.exe"
+          }
+        }
+      }
+    },
+    {
+      "label": "docs (venv) - open",
+      "type": "shell",
+      "command": "xdg-open ./_build/html/index.html",
+      "options": {
+        "cwd": "${workspaceFolder}/docs"
+      },
+      "windows": {
+        "command": ".\\_build\\html\\index.html",
+        "options": {
+          "cwd": "${workspaceFolder}\\docs"
+        }
+      },
+      "dependsOn": [
+        "docs (venv)"
+      ]
+    },
+    {
+      "type": "shell",
+      "label": "g++ build active file",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-g",
+        "${file}",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "options": {
+        "cwd": "/usr/bin"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cores",
+      "type": "promptString",
+      "description": "Number of cores to use during build",
+      "default": "1"
+    },
+    {
+      "id": "numDrones",
+      "type": "promptString",
+      "description": "Number of drones to simulate",
+      "default": "1"
+    },
+    {
+      "id": "duration",
+      "type": "promptString",
+      "description": "Duration of this simulation, in seconds",
+      "default": "10"
+    },
+    {
+      "id": "configFileDaVinci",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/davinci.json"
+    },
+    {
+      "id": "configFileEasley",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/easley.json"
+    }
+  ]
+}

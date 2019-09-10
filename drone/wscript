@@ -1,0 +1,62 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+# def options(opt):
+#     pass
+
+# def configure(conf):
+#     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
+
+def build(bld):
+    module = bld.create_ns3_module('drone', ['core', 'network', 'applications', 'mobility', 'report'])
+    module.source = [
+        'model/constant-acceleration-drone-mobility-model.cc',
+        'model/constant-acceleration-param.cc',
+        'model/constant-acceleration-flight.cc',
+        'model/drone-communications.cc',
+        'model/drone-list.cc',
+        'model/speed-coefficients.cc',
+        'model/parametric-speed-drone-mobility-model.cc',
+        'model/parametric-speed-flight.cc',
+        'model/parametric-speed-param.cc',
+        'model/planner.cc',
+        'model/drone-client.cc',
+        'model/drone-server.cc',
+        'model/proto-point.cc',
+        'model/flight-plan.cc',
+        'model/curve.cc',
+        'model/curve-point.cc',
+        'model/zsp-list.cc',
+        'helper/scenario-configuration-helper.cc',
+        ]
+
+    #module_test = bld.create_ns3_module_test_library('drone')
+    #module_test.source = [
+    #    ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'drone'
+    headers.source = [
+        'model/constant-acceleration-drone-mobility-model.h',
+        'model/constant-acceleration-param.h',
+        'model/constant-acceleration-flight.h',
+        'model/drone-communications.h',
+        'model/drone-list.h',
+        'model/speed-coefficients.h',
+        'model/parametric-speed-drone-mobility-model.h',
+        'model/parametric-speed-flight.h',
+        'model/parametric-speed-param.h',
+        'model/planner.h',
+        'model/drone-client.h',
+        'model/drone-server.h',
+        'model/proto-point.h',
+        'model/flight-plan.h',
+        'model/curve.h',
+        'model/curve-point.h',
+        'model/zsp-list.h',
+        'helper/scenario-configuration-helper.h',
+        ]
+
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
+
+    # bld.ns3_python_bindings()

@@ -1,0 +1,174 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:annotation>
+        <xs:documentation xml:lang="en">
+            Copyright (c) 2019  The IoD_Sim Authors.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleType name="TransferType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="hello"/>
+            <xs:enumeration value="update"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Communication">
+        <xs:sequence>
+            <xs:element name="transfer" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="direction">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="transmitted"/>
+                                    <xs:enumeration value="received"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="length" type="xs:positiveInteger"/>  <!-- bytes -->
+                        <xs:element name="time" type="xs:positiveInteger"/>    <!-- nanoseconds from the start of the simulation -->
+                        <xs:element name="sequenceNumber" type="xs:positiveInteger"/>
+                        <xs:element name="payload" type="xs:string"/>
+                    </xs:sequence>
+                    <xs:attribute name="type" type="TransferType"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="WifiPhyLayer">
+        <xs:sequence>
+            <xs:element name="standard">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="802.11a"/>
+                        <xs:enumeration value="802.11b"/>
+                        <xs:enumeration value="802.11g"/>
+                        <xs:enumeration value="802.11n"/>
+                        <xs:enumeration value="802.11ac"/>
+                        <xs:enumeration value="802.11ax"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="frequency" type="xs:decimal"/>            <!-- GHz -->
+            <xs:element name="propagationDelayModel" type="xs:string"/> <!-- e.g. ns3::ConstantSpeedPropagationDelayModel -->
+            <xs:element name="propagationLossModel" type="xs:string"/>  <!-- e.g. ns3::FriisPropagationLossModel -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="WifiMacLayer">
+        <xs:sequence>
+            <xs:element name="ssid" type="xs:string"/>
+            <xs:element name="mode" type="xs:string"/> <!-- e.g. DsssRate1Mbps -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Ipv4Layer">
+        <xs:sequence>
+            <xs:element name="ipAddress" type="xs:string"/>  <!-- e.g. 10.1.2.103    -->
+            <xs:element name="subnetMask" type="xs:string"/> <!-- e.g. 255.255.255.0 -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DroneControlLayer">
+        <xs:sequence>
+            <xs:element name="notImplemented" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProtocolStack">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="phy" type="WifiPhyLayer"/>
+                <xs:element name="mac" type="WifiMacLayer"/>
+                <xs:element name="ipv4" type="Ipv4Layer"/>
+                <xs:element name="droneControl" type="DroneControlLayer"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Location">
+        <xs:sequence>
+            <xs:element name="x" type="xs:decimal"/>
+            <xs:element name="y" type="xs:decimal"/>
+            <xs:element name="z" type="xs:decimal"/>
+            <xs:element name="t" type="xs:positiveInteger" minOccurs="0"/> <!-- nanoseconds, optional -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Trajectory">
+        <xs:sequence>
+            <xs:element name="location" type="Location" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CumulativeDataType">
+        <xs:sequence>
+            <xs:element name="kind" type="TransferType"/>
+            <xs:element name="amount" type="xs:positiveInteger"/> <!-- bytes -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Drones">
+        <xs:sequence>
+            <xs:element name="drone" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="trajectory" type="Trajectory"/>
+                        <xs:element name="stack" type="ProtocolStack" minOccurs="1" maxOccurs="unbounded"/>
+                        <xs:element name="dataTxToZsp" type="Communication"/>
+                        <xs:element name="dataRxFromZsp" type="Communication"/>
+                        <xs:element name="cumulativeDataTx" type="CumulativeDataType"/>
+                        <xs:element name="cumulativeDataRx" type="CumulativeDataType"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Zsps">
+        <xs:sequence>
+            <xs:element name="zsp" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="position" type="Location"/>
+                        <xs:element name="stack" type="ProtocolStack" minOccurs="1" maxOccurs="unbounded"/>
+                        <xs:element name="dataFromDrones" type="Communication"/>
+                        <xs:element name="dataToDrones" type="Communication"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="seconds">
+        <xs:restriction base="xs:decimal">
+            <xs:minInclusive value="0.0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Duration">
+        <xs:sequence>
+            <xs:element name="real" type="seconds"/>    <!-- seconds -->
+            <xs:element name="virtual" type="seconds"/> <!-- seconds -->
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="Simulation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="startTime" type="xs:dateTime"/>
+                <xs:element name="endTime" type="xs:dateTime"/>
+                <xs:element name="duration" type="Duration"/>
+                <xs:element name="zsps" type="Zsps"/>
+                <xs:element name="drones" type="Drones"/>
+            </xs:sequence>
+            <xs:attribute name="scenario" type="xs:string"/>
+            <xs:attribute name="executedAt" type="xs:dateTime"/>
+            <xs:attribute name="zsps" type="xs:positiveInteger"/>
+            <xs:attribute name="drones" type="xs:positiveInteger"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
