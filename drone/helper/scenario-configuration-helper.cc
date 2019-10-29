@@ -41,7 +41,7 @@ ScenarioConfigurationHelper::Initialize (int argc,
   std::stringstream dateTime;
 
   dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d.%H-%M-%S");
-  
+
   m_dateTime = dateTime.str ();
   m_name = name;
 
@@ -87,6 +87,65 @@ ScenarioConfigurationHelper::GetLoggingFilePath () const
   ss << GetResultsPath () << ".log";
 
   return ss.str ();
+}
+
+const std::string
+ScenarioConfigurationHelper::GetPhyPropagationLossModel () const
+{
+  constexpr const char* jRootKey = "phyPropagationLoss";
+  constexpr const char* jModelKey = "model";
+
+  NS_ASSERT (m_config.HasMember (jRootKey));
+  NS_ASSERT_MSG (m_config[jRootKey].IsObject (),
+                 jRootKey << " must be a valid JSON object per specification.");
+
+  NS_ASSERT (m_config[jRootKey].HasMember (jModelKey));
+  NS_ASSERT_MSG (m_config[jRootKey][jModelKey].IsString (),
+                 jModelKey << " must be a valid JSON string per specification.");
+
+  return m_config[jRootKey][jModelKey].GetString ();
+}
+
+const std::vector<std::pair<std::string, float>>
+ScenarioConfigurationHelper::GetThreeLogDistancePropagationLossModelAttributes () const
+{
+  constexpr const char* jRootKey = "phyPropagationLoss";
+  constexpr const char* jAttrKey = "attributes";
+
+  NS_ASSERT (m_config.HasMember (jRootKey));
+  NS_ASSERT_MSG (m_config[jRootKey].IsObject (),
+                 jRootKey << " must be a valid JSON object per specification.");
+
+  NS_ASSERT (m_config[jRootKey].HasMember (jAttrKey));
+  NS_ASSERT_MSG (m_config[jRootKey][jAttrKey].IsArray (),
+                 jAttrKey << " must be a valid JSON array per specification.");
+
+  const auto jAttrArr = m_config[jRootKey][jAttrKey].GetArray ();
+
+  // check if we have an array of objects
+  for (auto& el : jAttrArr) {
+    NS_ASSERT_MSG (el.IsObject (),
+                   jAttrKey << " must be a valid array of objects.");
+
+    NS_ASSERT_MSG (el.HasMember("key")
+                   && el["key"].IsString ()
+                   && el.HasMember("value")
+                   && !el["value"].IsArray()
+                   && !el["value"].IsObject(),
+                   jAttrKey << " contains a malformed structure.");
+  }
+
+  // "safe" to decode the data
+  std::vector<std::pair<std::string, float>> attrList;
+
+  for (auto& el : jAttrArr) {
+    const std::string attrKey = el["key"].GetString();
+    const float attrVal = el["value"].GetFloat();
+
+    attrList.push_back({attrKey, attrVal});
+  }
+
+  return attrList;
 }
 
 const std::string

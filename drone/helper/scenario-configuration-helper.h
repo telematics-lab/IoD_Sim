@@ -46,7 +46,7 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
 public:
   /**
    * \brief Bootstrap Singleton with basic data.
-   * 
+   *
    * \param argc The number of command line arguments.
    * \param argv The list of command line arguments.
    * \param name The name of the scenario.
@@ -85,6 +85,16 @@ public:
    * \return the phy mode for WiFi communications.
    */
   const std::string GetPhyMode () const;
+
+  /**
+   * \return the phy path loss to use
+   */
+  const std::string GetPhyPropagationLossModel () const;
+
+  /**
+   * \return the phy parameters
+   */
+  const std::vector<std::pair<std::string, float>> GetThreeLogDistancePropagationLossModelAttributes () const;
 
   /**
    * \return the duration of the simulation in seconds.

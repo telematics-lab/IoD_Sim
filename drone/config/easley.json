@@ -1,6 +1,18 @@
 {
     "logOnFile": true,
     "phyMode": "DsssRate1Mbps",
+    "phyPropagationLoss": {
+        "model": "ns3::ThreeLogDistancePropagationLossModel",
+        "attributes": [
+            {"key": "Distance0", "value": 1},
+            {"key": "Distance1", "value": 200},
+            {"key": "Distance2", "value": 500},
+            {"key": "Exponent0", "value": 1.9},
+            {"key": "Exponent1", "value": 3.8},
+            {"key": "Exponent2", "value": 3.8},
+            {"key": "ReferenceLoss", "value": 46.6777}
+        ]
+    },
     "duration": 300.0,
     "drones": [
         {

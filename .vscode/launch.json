@@ -53,6 +53,30 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
+      "name": "Easley - Three Log Distances",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/ns-3-dev/build/src/drone/examples/ns3-dev-drone-scenario-easley-threelogdist-debug",
+      "args": ["--config=./src/drone/config/easley.json"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/ns-3-dev/",
+      "environment": [{
+        "name": "LD_LIBRARY_PATH",
+        "value": "${env:LD_LIBRARY_PATH}:${workspaceFolder}/ns-3-dev/build/lib/"
+      }],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build (local)",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
       "name": "Allen",
       "type": "cppdbg",
       "request": "launch",

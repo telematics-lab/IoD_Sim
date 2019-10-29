@@ -17,8 +17,20 @@ def build(bld):
                                   'internet'])
     obj.source = 'scenario-davinci.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-davinci-threelogdist',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-davinci-threelogdist.cc'
+
     obj = bld.create_ns3_program('drone-scenario-easley',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
                                   'internet'])
     obj.source = 'scenario-easley.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-easley-threelogdist',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-easley-threelogdist.cc'
