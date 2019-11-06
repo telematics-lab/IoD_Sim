@@ -70,19 +70,19 @@ private:
   /**
    * Internal helper to treat a NetDevice as a WifiNetDevice
    */
-  static Ptr<WifiNetDevice>   InitializeNetDevice (Ptr<NetDevice> dev);
+  static Ptr<WifiNetDevice> InitializeNetDevice (Ptr<NetDevice> dev);
   /**
    * Internal helper to get the Phy Layer of a given WifiNetDevice
    */
-  static Ptr<WifiPhy>         InitializePhy       (Ptr<WifiNetDevice> dev);
+  static Ptr<WifiPhy> InitializePhy (Ptr<WifiNetDevice> dev);
   /**
    * Internal helper to get the Wifi Channel of a given WifiNetDevice
    */
-  static Ptr<YansWifiChannel> InitializeChannel   (Ptr<WifiNetDevice> dev);
+  static Ptr<YansWifiChannel> InitializeChannel (Ptr<WifiNetDevice> dev);
   /**
    * Internal helper to get the MAC Layer of a given WifiNetDevice
    */
-  static Ptr<WifiMac>         InitializeMac       (Ptr<WifiNetDevice> dev);
+  static Ptr<WifiMac> InitializeMac (Ptr<WifiNetDevice> dev);
 
   Ptr<WifiNetDevice> m_dev;       /// Wifi Network Device to be inspected
   Ptr<WifiPhy> m_phy;             /// Wifi Phy Device, as cache
