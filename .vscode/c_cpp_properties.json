@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/ns-3-dev/build/**",
                 "${workspaceFolder}/**",
                 "/usr/include/libxml2/**"
             ],
