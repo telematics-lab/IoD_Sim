@@ -19,7 +19,13 @@
  */
 #ifndef WIFI_PHY_LAYER_H
 #define WIFI_PHY_LAYER_H
+
 #include <libxml/xmlwriter.h>
+
+#include <ns3/packet.h>
+#include <ns3/mac48-address.h>
+#include <ns3/wifi-phy.h>
+#include <ns3/wifi-tx-vector.h>
 
 #include "protocol-layer.h"
 
@@ -49,7 +55,36 @@ public:
    * \param handle the XML handler to write data on
    */
   virtual void Write (xmlTextWriterPtr handle);
+
+protected:
+  /**
+   * Private initialization of the object
+   */
+  virtual void DoInitialize ();
+
 private:
+  /**
+   * Initialize RSSI monitor in order to build a history of the RSSI for
+   * the current entity with the current network device
+   */
+  void DoInitializeRssiMonitor ();
+
+  /**
+   * Handle the arrival of new RSSI data
+   */
+  void DoMonitorRssi (std::string context,
+                      Ptr<const Packet> packet,
+                      uint16_t channelFreqMhz,
+                      WifiTxVector txVector,
+                      MpduInfo aMpdu,
+                      SignalNoiseDbm signalNoise);
+
+  uint32_t m_droneReference;            /// ID of the drone
+  uint32_t m_netdevReference;           /// ID of the network device
+
+  /// RSSI history of the device
+  std::vector<std::tuple<Time, Mac48Address, double>> m_rssi;
+
   double m_frequency;                   /// the carrier frequency set
   std::string m_standard;               /// the wifi standard used
   std::string m_propagationDelayModel;  /// the prop. delay model set

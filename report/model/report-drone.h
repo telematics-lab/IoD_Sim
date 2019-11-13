@@ -85,6 +85,7 @@ private:
    */
   void DoMonitorTrajectory (const Ptr<const MobilityModel> mobility);
 
+
   /// drone trajectory
   std::vector<ReportLocation> m_trajectory;
   /// abstract representation of the network stacks used

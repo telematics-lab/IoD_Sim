@@ -186,13 +186,15 @@ ReportDrone::DoInitializeNetworkStacks ()
               "PropagationLossModel", StringValue (inspector.GetPropagationLossModel ()));
           auto macLayer = CreateObjectWithAttributes<WifiMacLayer>
             ("Ssid", StringValue (inspector.GetWifiSsid ()),
-              "Mode", StringValue (inspector.GetWifiMode ()));
+             "Mode", StringValue (inspector.GetWifiMode ()));
           auto ipv4AddressMask = GetIpv4Address ();
           auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
             ("Ipv4Address", StringValue (std::get<0> (ipv4AddressMask)),
-              "SubnetMask", StringValue (std::get<1> (ipv4AddressMask)));
+             "SubnetMask", StringValue (std::get<1> (ipv4AddressMask)));
           auto droneControlLayer = CreateObjectWithAttributes<DroneControlLayer>
             ("NotImplemented", StringValue ());
+
+          phyLayer->Initialize ();
 
           ifaces.push_back (i);
           m_networkStacks.push_back ({});

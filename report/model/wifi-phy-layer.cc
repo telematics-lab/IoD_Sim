@@ -19,9 +19,13 @@
  */
 #include "wifi-phy-layer.h"
 
+#include <ns3/config.h>
 #include <ns3/integer.h>
+#include <ns3/ipv4-header.h>
 #include <ns3/log.h>
+#include <ns3/simulator.h>
 #include <ns3/string.h>
+#include <ns3/wifi-mac-header.h>
 
 namespace ns3 {
 
@@ -50,6 +54,14 @@ WifiPhyLayer::GetTypeId ()
                    StringValue (),
                    MakeStringAccessor (&WifiPhyLayer::m_propagationLossModel),
                    MakeStringChecker ())
+    .AddAttribute ("DroneId", "ID of the drone",
+                   IntegerValue (),
+                   MakeIntegerAccessor (&WifiPhyLayer::m_droneReference),
+                   MakeIntegerChecker<uint32_t> ())
+    .AddAttribute ("NetdevId", "ID of the Network Device of the given drone",
+                   IntegerValue (),
+                   MakeIntegerAccessor (&WifiPhyLayer::m_netdevReference),
+                   MakeIntegerChecker<uint32_t> ())
     ;
 
   return tid;
@@ -104,8 +116,90 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
                                   BAD_CAST m_propagationLossModel.c_str ());
   NS_ASSERT (rc >= 0);
 
+  rc = xmlTextWriterStartElement (h,
+                                  BAD_CAST "signal");
+  NS_ASSERT (rc >= 0);
+
+  for (auto& sig : m_rssi)
+    {
+      std::ostringstream bSig, bTx, bTime;
+
+      rc = xmlTextWriterStartElement (h,
+                                      BAD_CAST "rssi");
+      NS_ASSERT (rc >= 0);
+
+      bTime << std::get<0>(sig).GetNanoSeconds ();
+      rc = xmlTextWriterWriteAttribute (h,
+                                        BAD_CAST "time",
+                                        BAD_CAST bTime.str ().c_str ());
+      NS_ASSERT (rc >= 0);
+
+      bTx << std::get<1>(sig);
+      rc = xmlTextWriterWriteAttribute (h,
+                                        BAD_CAST "from",
+                                        BAD_CAST bTx.str ().c_str ());
+      NS_ASSERT (rc >= 0);
+
+      bSig << std::get<2>(sig);
+      rc = xmlTextWriterWriteAttribute (h,
+                                        BAD_CAST "value",
+                                        BAD_CAST bSig.str ().c_str ());
+      NS_ASSERT (rc >= 0);
+
+      rc = xmlTextWriterEndElement (h);
+      NS_ASSERT (rc >= 0);
+    }
+
   rc = xmlTextWriterEndElement(h);
   NS_ASSERT (rc >= 0);
+
+  rc = xmlTextWriterEndElement(h);
+  NS_ASSERT (rc >= 0);
+}
+
+void
+WifiPhyLayer::DoInitialize ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  DoInitializeRssiMonitor ();
+
+  ProtocolLayer::DoInitialize ();
+}
+
+void
+WifiPhyLayer::DoInitializeRssiMonitor ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  /* set callback using ns-3 XPath addressing system */
+  std::stringstream xPathCallback;
+
+  xPathCallback << "/NodeList/" << m_droneReference
+                << "/DeviceList/" << m_netdevReference
+                << "/$ns3::WifiNetDevice/Phy/MonitorSnifferRx";
+  Config::Connect (xPathCallback.str (),
+                   MakeCallback (&WifiPhyLayer::DoMonitorRssi, this));
+}
+
+void
+WifiPhyLayer::DoMonitorRssi (std::string x,
+                             Ptr<const Packet> packet,
+                             uint16_t channelFreqMhz,
+                             WifiTxVector txVector,
+                             MpduInfo aMpdu,
+                             SignalNoiseDbm signalNoise)
+{
+  NS_LOG_FUNCTION_NOARGS ();
+  WifiMacHeader wifiMacHeader;
+  Ipv4Header ipv4Header;
+
+  auto pCopy = packet->Copy ();
+
+  pCopy->RemoveHeader (wifiMacHeader);
+  if (!wifiMacHeader.IsData ())  // Look up DATA frames only
+    return;
+
+  m_rssi.push_back({ Simulator::Now(), wifiMacHeader.GetAddr2 (), signalNoise.signal });
 }
 
 } // namespace ns3

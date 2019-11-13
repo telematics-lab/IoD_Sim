@@ -140,7 +140,7 @@ protected:
   /// monitored traffic Tx
   std::vector<Ptr<ReportTransfer>> m_dataTx;
 
-  uint32_t m_reference; /// Entity UID of reference
+  uint32_t m_reference;    /// Entity UID of reference
 private:
   /**
    * Object internal initialization

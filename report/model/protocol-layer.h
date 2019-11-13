@@ -18,8 +18,11 @@ public:
      * \param handle the XML handler to write data on
      */
     virtual void Write (xmlTextWriterPtr handle) = 0;
-private:
-
+protected:
+    /**
+     * Object internal initialization
+     */
+    virtual void DoInitialize () { Object::DoInitialize (); };
 };
 
 } // namespace ns3
