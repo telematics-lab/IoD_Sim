@@ -1,3 +1,11 @@
+# Ignore upstream repository
 ns-3*
+
+# Ignore third-party builds
 third_party/*
+
+# Ignore user scenario results
 results/
+
+# Ignore Python cache
+__pycache__
