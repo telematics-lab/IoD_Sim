@@ -112,7 +112,7 @@ def generate_rssi_graph(root):
 
             entries.append({
                 'value': float(s.attrib['value']),
-                'time':  float(s.attrib['time']) * 0.000000001,
+                'time':  float(s.attrib['time']) * 0.000000001, # ns to s
                 'from':  s.attrib['from']
             })
 

@@ -1,0 +1,38 @@
+{
+    "logOnFile": true,
+    "phyMode": "Ofdm54Mbps",
+    "duration": 300.0,
+
+    "drones": [
+        {
+            "acceleration": 0.5,
+            "maxSpeed": 50.0,
+            "applicationStartTime": 1.0,
+            "applicationStopTime": 299.0,
+            "trajectory": [
+                {
+                    "position": [0.0, 0.0, 0.0],
+                    "interest": 0
+                },
+                {
+                    "position": [30.0, 30.0, 30.0],
+                    "interest": 1
+                },
+                {
+                    "position": [60.0, 60.0, 60.0],
+                    "interest": 0
+                }
+            ]
+        }
+    ],
+
+    "ZSPs": [
+        {
+            "position": [0.0, 0.0, 0.0]
+        }
+    ],
+
+    "logComponents": [
+
+    ]
+}
