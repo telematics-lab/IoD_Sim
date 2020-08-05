@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2019 The IoD_Sim Authors.
+ * Copyright (c) 2018-2020 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -31,7 +31,7 @@ namespace ns3 {
 /**
  * \brief keep track of a set of coefficients.
  *
- * This is useful if we want to operate on more than one SpeedCoefficients 
+ * This is useful if we want to operate on more than one SpeedCoefficients
  * at a time or just keep them organized in a data structure and pass it to a
  * MobilityModel compatible with the IoD proposed strucutres.
  */
@@ -43,7 +43,7 @@ public:
   SpeedCoefficients ();
   SpeedCoefficients (std::vector<double> coefficients);
   SpeedCoefficients (const SpeedCoefficients &a);
-  
+
   Iterator Begin () const;
   Iterator End () const;
 

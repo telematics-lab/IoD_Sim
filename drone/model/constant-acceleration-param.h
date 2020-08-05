@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2019 The IoD_Sim Authors.
+ * Copyright (c) 2018-2020 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@
 
 namespace ns3 {
 
-class ConstantAccelerationParam 
+class ConstantAccelerationParam
 {
 public:
   ConstantAccelerationParam (double acceleration,

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2019 The IoD_Sim Authors.
+ * Copyright (c) 2018-2020 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -33,7 +33,7 @@ SpeedCoefficients::SpeedCoefficients (std::vector<double> coeffs)
 {
   for (auto c : coeffs)
     {
-      Add (c);  
+      Add (c);
     }
 }
 
@@ -76,7 +76,7 @@ SpeedCoefficients::Get () const
   return v;
 }
 
-double 
+double
 SpeedCoefficients::Get (const uint32_t i) const
 {
   return m_speedCoefficients[i];

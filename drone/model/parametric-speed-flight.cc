@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2019 The IoD_Sim Authors.
+ * Copyright (c) 2018-2020 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -72,7 +72,7 @@ ParametricSpeedFlight::Generate ()
   m_time = Seconds (FindTime ());
 }
 
-void 
+void
 ParametricSpeedFlight::Update (const double &t) const
 {
   NS_LOG_FUNCTION (t);
@@ -82,23 +82,23 @@ ParametricSpeedFlight::Update (const double &t) const
   UpdatePosition ();
   UpdateVelocity ();
 
-  NS_LOG_LOGIC ("t: " << t << " speed: " << m_currentSpeed 
+  NS_LOG_LOGIC ("t: " << t << " speed: " << m_currentSpeed
                 << " dist: " << m_currentDistance);
 }
 
-Time   
+Time
 ParametricSpeedFlight::GetTime () const
 {
   return m_time;
 }
 
-Vector 
+Vector
 ParametricSpeedFlight::GetPosition () const
 {
   return m_currentPosition.GetPosition ();
 }
 
-Vector 
+Vector
 ParametricSpeedFlight::GetVelocity () const
 {
   return m_currentVelocity;
@@ -253,7 +253,7 @@ ParametricSpeedFlight::FindTime () const
 
   NS_LOG_LOGIC ("Using " << gsl_root_fdfsolver_name (s) << " method.");
   NS_LOG_LOGIC ("iter\t root");
-  
+
   do
     {
       iter++;
@@ -265,7 +265,7 @@ ParametricSpeedFlight::FindTime () const
       if (status == GSL_SUCCESS)
         NS_LOG_LOGIC ("Converged:");
 
-      NS_LOG_LOGIC (std::fixed << std::setw (4) << iter << "\t" 
+      NS_LOG_LOGIC (std::fixed << std::setw (4) << iter << "\t"
                     << std::fixed << std::setw (10) << std::setprecision (7) << x);
     }
   while (status == GSL_CONTINUE && iter < max_iter);
