@@ -38,7 +38,25 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'report'
     headers.source = [
+            'model/drone-control-layer.h',
+            'model/ipv4-layer.h',
+            'model/protocol-layer.h',
+            'model/report-container.h',
+            'model/report-data-stats.h',
+            'model/report-default-iterator.h',
+            'model/report-drone.h',
+            'model/report-entity.h',
+            'model/report-location.h',
+            'model/report-protocol-stack.h',
+            'model/report-simulation.h',
+            'model/report-transfer.h',
+            'model/report-zsp.h',
             'model/report.h',
+            'model/simulation-duration.h',
+            'model/transfer-direction.h',
+            'model/wifi-inspector.h',
+            'model/wifi-mac-layer.h',
+            'model/wifi-phy-layer.h',
             'helper/report-helper.h'
         ]
 

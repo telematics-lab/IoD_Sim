@@ -20,7 +20,7 @@
 #include "report-simulation.h"
 
 #include <ns3/config.h>
-#include <ns3/iodsim-node.h>
+//#include <ns3/iodsim-node.h>
 #include <ns3/log.h>
 #include <ns3/simulator.h>
 #include <ns3/string.h>

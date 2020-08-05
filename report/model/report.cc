@@ -23,6 +23,8 @@
 #include <ns3/object-factory.h>
 #include <ns3/string.h>
 
+#include "report-simulation.h"
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("Report");
