@@ -4,8 +4,9 @@ ns-3*
 # Ignore third-party builds
 third_party/*
 
-# Ignore user scenario results
-results/
+# Ignore user scenario results, but keep directory in place
+results/*
+!results/.placeholder
 
 # Ignore Python cache
 __pycache__
