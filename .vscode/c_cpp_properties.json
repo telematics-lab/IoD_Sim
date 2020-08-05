@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/ns-3-dev/build/**",
+                "${workspaceFolder}/ns3/build/**",
                 "${workspaceFolder}/**",
                 "/usr/include/libxml2/**"
             ],
@@ -12,7 +12,7 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
-            "compileCommands": "${workspaceFolder}/ns-3-dev/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/ns3/build/compile_commands.json"
         }
     ],
     "version": 4
