@@ -59,6 +59,15 @@
       "group": "test"
     },
     {
+      "label": "run LTE LENA CostVelocity",
+      "type": "shell",
+      "command": "./waf --run \"lte-lena-costvelocity\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "docs",
       "type": "shell",
       "command": "make html",
