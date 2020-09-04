@@ -76,7 +76,7 @@ ConstantAccelerationFlight::Update (const double &t) const
           m_currentSpeed = m_acceleration * t;
           m_currentDistance = 0.5 * m_acceleration * std::pow (t, 2);
         }
-      else if (t < m_time - m_accelerationZoneTime)
+      else if (t < m_time.GetSeconds () - m_accelerationZoneTime)
         {
           m_currentSpeed = m_maxSpeed;
           m_currentDistance = 0.5 * (m_maxSpeed / m_acceleration)
@@ -96,7 +96,7 @@ ConstantAccelerationFlight::Update (const double &t) const
     }
   else
     {
-      if (t <= m_time / 2.0)
+      if (t <= m_time.GetSeconds () / 2.0)
         {
           m_currentSpeed = m_acceleration * t;
           m_currentDistance = 0.5 * m_acceleration * std::pow (t, 2);
