@@ -105,7 +105,7 @@ int main (int argc, char *argv[])
    BuildingsHelper::Install (enbNodes);
 
  //Finalize the building and mobility model configuration
-   BuildingsHelper::MakeMobilityModelConsistent ();
+  //BuildingsHelper::MakeMobilityModelConsistent ();  // DEPRECATED in ns-3-31
 
  //using the Proportional Fair (PF) scheduler
    lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
