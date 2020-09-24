@@ -27,6 +27,11 @@
 #include <ns3/ipv4-address-helper.h>
 #include <ns3/ipv4-interface-container.h>
 #include <ns3/internet-stack-helper.h>
+#include <ns3/yans-wifi-helper.h>
+#include <ns3/ssid.h>
+#include <ns3/config.h>
+#include <ns3/double.h>
+#include <ns3/string.h>
 
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/drone-list.h>
@@ -122,12 +127,64 @@ void Scenario::Run()
 
 void Scenario::ConfigurePhy()
 {
-  // TO COMPLETE
+  NS_LOG_FUNCTION_NOARGS();
+
+  // WiFi Specific configuration
+  YansWifiChannelHelper wifiChannel;
+  AsciiTraceHelper ascii;
+  m_wifiPhy = YansWifiPhyHelper::Default();
+
+  Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
+  Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
+  Config::SetDefault("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue(CONFIGURATOR->GetPhyMode()));
+
+  m_wifi.SetStandard(WIFI_PHY_STANDARD_80211n_2_4GHZ);
+  m_wifiPhy.SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
+  wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+
+  const std::string propagationLossModel = CONFIGURATOR->GetPhyPropagationLossModel();
+  NS_ASSERT_MSG(propagationLossModel == "ns3::ThreeLogDistancePropagationLossModel",
+      propagationLossModel << " decoder is not implemented!");
+
+  const auto propLossAttr = CONFIGURATOR->GetThreeLogDistancePropagationLossModelAttributes();
+
+  wifiChannel.AddPropagationLoss(CONFIGURATOR->GetPhyPropagationLossModel(),
+      propLossAttr[0].first, DoubleValue(propLossAttr[0].second),
+      propLossAttr[1].first, DoubleValue(propLossAttr[1].second),
+      propLossAttr[2].first, DoubleValue(propLossAttr[2].second),
+      propLossAttr[3].first, DoubleValue(propLossAttr[3].second),
+      propLossAttr[4].first, DoubleValue(propLossAttr[4].second),
+      propLossAttr[5].first, DoubleValue(propLossAttr[5].second),
+      propLossAttr[6].first, DoubleValue(propLossAttr[6].second),
+      propLossAttr[7].first, DoubleValue(propLossAttr[7].second));
+
+  m_wifiPhy.SetChannel(wifiChannel.Create());
 }
 
 void Scenario::ConfigureMac()
 {
-  // TO COMPLETE
+  NS_LOG_FUNCTION_NOARGS();
+
+  const std::string phyMode = CONFIGURATOR->GetPhyMode();
+
+  WifiMacHelper wifiMac;
+  Ssid ssid = Ssid("wifi-default");
+
+  m_wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
+      "DataMode", StringValue(phyMode),
+      "ControlMode", StringValue(phyMode));
+
+  wifiMac.SetType("ns3::StaWifiMac",
+      "Ssid", SsidValue(ssid));
+
+  NetDeviceContainer dronesDevices = m_wifi.Install(m_wifiPhy, wifiMac, m_drones);
+  m_netDevices.Add(dronesDevices);
+
+  wifiMac.SetType("ns3::ApWifiMac",
+      "Ssid", SsidValue(ssid));
+
+  NetDeviceContainer zspsDevices = m_wifi.Install(m_wifiPhy, wifiMac, m_zsps);
+  m_netDevices.Add(zspsDevices);
 }
 
 
@@ -241,7 +298,17 @@ void Scenario::ConfigureApplicationZsps()
 
 void Scenario::ConfigureSimulator()
 {
-  // TO COMPLETE
+  NS_LOG_FUNCTION_NOARGS();
+
+  std::stringstream phyTraceLog, pcapLog;
+  AsciiTraceHelper ascii;
+
+  phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
+  pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
+
+  Report::Get()->Initialize("LTE-Easley", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
+
+  Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
 }
 
 } // namespace ns3
