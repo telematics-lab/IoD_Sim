@@ -44,13 +44,15 @@
 
 #include <ns3/report.h>
 
+NS_LOG_COMPONENT_DEFINE("Scenario");
+
 namespace ns3
 {
 
 class Scenario
 {
 public:
-  using ms = std::chrono::duration<float, std::milli>
+  using ms = std::chrono::duration<float, std::milli>;
 
   Scenario(int argc, char **argv);
   virtual ~Scenario();
@@ -76,10 +78,7 @@ private:
   void ConfigureApplicationDrones();
   void ConfigureApplicationZsps();
   void ConfigureSimulator();
-}
-
-
-NS_LOG_COMPONENT_DEFINE("Scenario");
+};
 
 
 Scenario::Scenario(int argc, char **argv)
@@ -94,10 +93,10 @@ Scenario::Scenario(int argc, char **argv)
     ZspList::Add(*zsp);
 
   for (auto drone = m_drones.Begin(); drone != m_drones.End(); drone++)
-    DroneList::Add(*drone)
+    DroneList::Add(*drone);
 
-  ConfigurePhy()
-  ConfigureMac()
+  ConfigurePhy();
+  ConfigureMac();
   ConfigureMobility();
   ConfigureApplication();
   ConfigureSimulator();
@@ -107,7 +106,7 @@ Scenario::~Scenario() {}
 
 void Scenario::Run()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   std::chrono::high_resolution_clock timer;
   auto start = timer.now();
@@ -127,7 +126,7 @@ void Scenario::Run()
 
 void Scenario::ConfigurePhy()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   // WiFi Specific configuration
   YansWifiChannelHelper wifiChannel;
@@ -163,7 +162,7 @@ void Scenario::ConfigurePhy()
 
 void Scenario::ConfigureMac()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   const std::string phyMode = CONFIGURATOR->GetPhyMode();
 
@@ -190,14 +189,14 @@ void Scenario::ConfigureMac()
 
 void Scenario::ConfigureMobility()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
   ConfigureMobilityDrones();
   ConfigureMobilityZsps();
 }
 
 void Scenario::ConfigureMobilityDrones()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   MobilityHelper mobilityDrones;
 
@@ -213,7 +212,7 @@ void Scenario::ConfigureMobilityDrones()
 
 void Scenario::ConfigureMobilityZsps()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
   MobilityHelper mobilityZsps;
   auto positionAllocatorZsps = CreateObject<ListPositionAllocator>();
 
@@ -221,13 +220,13 @@ void Scenario::ConfigureMobilityZsps()
 
   mobilityZsps.SetPositionAllocator(positionAllocatorZsps);
   mobilityZsps.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobilityZsps.install(m_zsps);
+  mobilityZsps.Install(m_zsps);
 }
 
 
 void Scenario::ConfigureNetwork()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   InternetStackHelper internet;
   Ipv4AddressHelper ipv4;
@@ -237,12 +236,12 @@ void Scenario::ConfigureNetwork()
 
   NS_LOG_INFO("> Assigning IP Addresses:");
   ipv4.SetBase("10.0.0.0", m_ifaceNetMask);
-  m_ifaceIps = ipv4.assign(m_netDevices);
+  m_ifaceIps = ipv4.Assign(m_netDevices);
 
   for (uint32_t i = 0; i < m_netDevices.GetN(); i++)
   {
-    auto netDev_id = m_netDevices.Get(i)->GetNode()->GetId()
-    auto address = m_ifaceIps.GetAddress(i, 0)
+    auto netDev_id = m_netDevices.Get(i)->GetNode()->GetId();
+    auto address = m_ifaceIps.GetAddress(i, 0);
     NS_LOG_INFO("[Node " << netDev_id << "] assigned address: " << address);
   }
 }
@@ -250,14 +249,14 @@ void Scenario::ConfigureNetwork()
 
 void Scenario::ConfigureApplication()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
   ConfigureApplicationDrones();
   ConfigureApplicationZsps();
 }
 
 void Scenario::ConfigureApplicationDrones()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   for (uint32_t i = 0; i < m_drones.GetN(); i++)
   {
@@ -267,9 +266,9 @@ void Scenario::ConfigureApplicationDrones()
         "Duration", DoubleValue(CONFIGURATOR->GetDuration()));
 
     double droneAppStartTime = CONFIGURATOR->GetDroneApplicationStartTime(i);
-    client.SetStartTime(Seconds(droneAppStartTime));
+    client->SetStartTime(Seconds(droneAppStartTime));
     double droneAppStopTime = CONFIGURATOR->GetDroneApplicationStopTime(i);
-    client.SetStopTime(Seconds(droneAppStopTime));
+    client->SetStopTime(Seconds(droneAppStopTime));
 
     m_drones.Get(i)->AddApplication(client);
 
@@ -279,7 +278,7 @@ void Scenario::ConfigureApplicationDrones()
 
 void Scenario::ConfigureApplicationZsps()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   auto server = CreateObjectWithAttributes<DroneServer>(
         "Ipv4Address", Ipv4AddressValue(m_ifaceIps.GetAddress(m_ifaceIps.GetN() - 1)),
@@ -298,7 +297,7 @@ void Scenario::ConfigureApplicationZsps()
 
 void Scenario::ConfigureSimulator()
 {
-  NS_LOG_FUNCTION_NOARGS();
+  //NS_LOG_FUNCTION_NOARGS();
 
   std::stringstream phyTraceLog, pcapLog;
   AsciiTraceHelper ascii;
