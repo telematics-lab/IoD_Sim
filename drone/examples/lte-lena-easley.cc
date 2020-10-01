@@ -24,20 +24,23 @@
 #include <ns3/simulator.h>
 #include <ns3/mobility-helper.h>
 #include <ns3/object-factory.h>
-#include <ns3/ipv4-address-helper.h>
-#include <ns3/ipv4-interface-container.h>
-#include <ns3/internet-stack-helper.h>
-#include <ns3/yans-wifi-helper.h>
-#include <ns3/ssid.h>
+//#include <ns3/ipv4-address-helper.h>
+//#include <ns3/ipv4-interface-container.h>
+//#include <ns3/internet-stack-helper.h>
+//#include <ns3/yans-wifi-helper.h>
+//#include <ns3/ssid.h>
 #include <ns3/config.h>
 #include <ns3/double.h>
 #include <ns3/string.h>
 
+#include <ns3/lte-helper.h>
+#include <ns3/config-store.h>
+
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/drone-list.h>
 #include <ns3/zsp-list.h>
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
+//#include <ns3/drone-client.h>
+//#include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
 #include <ns3/speed-coefficients.h>
@@ -63,27 +66,27 @@ private:
   NodeContainer m_drones;
   NodeContainer m_zsps;
   NetDeviceContainer m_netDevices;
-  WifiHelper m_wifi;
-  YansWifiPhyHelper m_wifiPhy;
-  Ipv4InterfaceContainer m_ifaceIps;
-  const char *m_ifaceNetMask;
+  Ptr<LteHelper> lteHelper;
 
-  void ConfigurePhy();
-  void ConfigureMac();
+  void ConfigureSimulator();
   void ConfigureMobility();
   void ConfigureMobilityDrones();
   void ConfigureMobilityZsps();
-  void ConfigureNetwork();
-  void ConfigureApplication();
-  void ConfigureApplicationDrones();
-  void ConfigureApplicationZsps();
-  void ConfigureSimulator();
+  void ConfigureProtocol();
+  void ConfigurePhy();
+  void ConfigureMac();
+  void ConfigureRlc();
+  //void ConfigureNetwork();
+  //void ConfigureApplication();
+  //void ConfigureApplicationDrones();
+  //void ConfigureApplicationZsps();
 };
 
 
+Scenario::~Scenario() {}
+
 Scenario::Scenario(int argc, char **argv)
 {
-  m_ifaceNetMask = "255.0.0.0";
   CONFIGURATOR->Initialize(argc, argv, "LTE-Easley");
 
   m_drones.Create(CONFIGURATOR->GetDronesN());
@@ -95,18 +98,30 @@ Scenario::Scenario(int argc, char **argv)
   for (auto drone = m_drones.Begin(); drone != m_drones.End(); drone++)
     DroneList::Add(*drone);
 
-  ConfigurePhy();
-  ConfigureMac();
   ConfigureMobility();
-  ConfigureApplication();
+  ConfigureProtocol();
+  //ConfigureApplication();
   ConfigureSimulator();
 }
 
-Scenario::~Scenario() {}
+void Scenario::ConfigureSimulator()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  std::stringstream phyTraceLog, pcapLog;
+  //AsciiTraceHelper ascii;
+
+  phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
+  pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
+
+  Report::Get()->Initialize("LTE-Easley", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
+
+  Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
+}
 
 void Scenario::Run()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
   std::chrono::high_resolution_clock timer;
   auto start = timer.now();
@@ -124,106 +139,78 @@ void Scenario::Run()
 }
 
 
+void Scenario::ConfigureProtocol()
+{
+  NS_LOG_FUNCTION_NOARGS();
+/*
+  Config::SetDefault("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue(true));
+  Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(true));
+  Config::SetDefault("ns3::LteHelper::UseIdealRrc", BooleanValue(true));
+  Config::SetDefault("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue(true));
+*/
+
+  ConfigStore config;
+  config.ConfigureDefaults();
+
+  lteHelper = CreateObject<LteHelper>();
+
+  ConfigurePhy();
+  ConfigureMac();
+  ConfigureRlc();
+  //ConfigureNetwork();
+}
+
 void Scenario::ConfigurePhy()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
-  // WiFi Specific configuration
-  YansWifiChannelHelper wifiChannel;
-  AsciiTraceHelper ascii;
-  m_wifiPhy = YansWifiPhyHelper::Default();
+  lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
 
-  Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
-  Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
-  Config::SetDefault("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue(CONFIGURATOR->GetPhyMode()));
-
-  m_wifi.SetStandard(WIFI_PHY_STANDARD_80211n_2_4GHZ);
-  m_wifiPhy.SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
-  wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-
-  const std::string propagationLossModel = CONFIGURATOR->GetPhyPropagationLossModel();
-  NS_ASSERT_MSG(propagationLossModel == "ns3::ThreeLogDistancePropagationLossModel",
-      propagationLossModel << " decoder is not implemented!");
-
-  const auto propLossAttr = CONFIGURATOR->GetThreeLogDistancePropagationLossModelAttributes();
-
-  wifiChannel.AddPropagationLoss(CONFIGURATOR->GetPhyPropagationLossModel(),
-      propLossAttr[0].first, DoubleValue(propLossAttr[0].second),
-      propLossAttr[1].first, DoubleValue(propLossAttr[1].second),
-      propLossAttr[2].first, DoubleValue(propLossAttr[2].second),
-      propLossAttr[3].first, DoubleValue(propLossAttr[3].second),
-      propLossAttr[4].first, DoubleValue(propLossAttr[4].second),
-      propLossAttr[5].first, DoubleValue(propLossAttr[5].second),
-      propLossAttr[6].first, DoubleValue(propLossAttr[6].second),
-      propLossAttr[7].first, DoubleValue(propLossAttr[7].second));
-
-  m_wifiPhy.SetChannel(wifiChannel.Create());
+  lteHelper->EnablePhyTraces();
 }
 
 void Scenario::ConfigureMac()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
-  const std::string phyMode = CONFIGURATOR->GetPhyMode();
+  lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
+  //lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-  WifiMacHelper wifiMac;
-  Ssid ssid = Ssid("wifi-default");
+  NetDeviceContainer ueDevices = lteHelper->InstallUeDevice(m_drones);
+  m_netDevices.Add(ueDevices);
 
-  m_wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
-      "DataMode", StringValue(phyMode),
-      "ControlMode", StringValue(phyMode));
+  NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice(m_zsps);
+  m_netDevices.Add(enbDevices);
 
-  wifiMac.SetType("ns3::StaWifiMac",
-      "Ssid", SsidValue(ssid));
+  lteHelper->Attach(ueDevices, enbDevices.Get(0));
 
-  NetDeviceContainer dronesDevices = m_wifi.Install(m_wifiPhy, wifiMac, m_drones);
-  m_netDevices.Add(dronesDevices);
+  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
+  GbrQosInformation qos;
+  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
+  //qos.gbrUl = 132;
+  //qos.mbrDl = qos.gbrDl;
+  //qos.mbrUl = qos.gbrUl;
+  qos.gbrDl = 20000000; 	   // Downlink GBR (bit/s) ---> 20 Mbps
+  qos.gbrUl = 5000000;	 	  // Uplink GBR ---> 5 Mbps
+  qos.mbrDl = 20000000;		 // Downlink MBR
+  qos.mbrUl = 5000000; 		// Uplink MBR,
+  EpsBearer bearer(q, qos);
+  lteHelper->ActivateDataRadioBearer (ueDevices, bearer);
 
-  wifiMac.SetType("ns3::ApWifiMac",
-      "Ssid", SsidValue(ssid));
-
-  NetDeviceContainer zspsDevices = m_wifi.Install(m_wifiPhy, wifiMac, m_zsps);
-  m_netDevices.Add(zspsDevices);
+  lteHelper->EnableMacTraces();
 }
 
-
-void Scenario::ConfigureMobility()
+void Scenario::ConfigureRlc()
 {
-  //NS_LOG_FUNCTION_NOARGS();
-  ConfigureMobilityDrones();
-  ConfigureMobilityZsps();
+  NS_LOG_FUNCTION_NOARGS();
+  // add Radio Bearer related things here
+  // Needs ueDevices to be passed from ConfigureMac() procedure
+
+  lteHelper->EnableRlcTraces();
 }
 
-void Scenario::ConfigureMobilityDrones()
-{
-  //NS_LOG_FUNCTION_NOARGS();
-
-  MobilityHelper mobilityDrones;
-
-  for (uint32_t i = 0; i < m_drones.GetN(); i++)
-  {
-    mobilityDrones.SetMobilityModel("ns3::ParametricSpeedDroneMobilityModel",
-        "SpeedCoefficients", SpeedCoefficientsValue(CONFIGURATOR->GetDroneSpeedCoefficients(i)),
-        "FlightPlan", FlightPlanValue(CONFIGURATOR->GetDroneFlightPlan(i)),
-        "CurveStep", DoubleValue(CONFIGURATOR->GetCurveStep()));
-    mobilityDrones.Install(m_drones.Get(i));
-  }
-}
-
-void Scenario::ConfigureMobilityZsps()
-{
-  //NS_LOG_FUNCTION_NOARGS();
-  MobilityHelper mobilityZsps;
-  auto positionAllocatorZsps = CreateObject<ListPositionAllocator>();
-
-  CONFIGURATOR->GetZspsPosition(positionAllocatorZsps);
-
-  mobilityZsps.SetPositionAllocator(positionAllocatorZsps);
-  mobilityZsps.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobilityZsps.Install(m_zsps);
-}
-
-
+/*
 void Scenario::ConfigureNetwork()
 {
   //NS_LOG_FUNCTION_NOARGS();
@@ -245,18 +232,56 @@ void Scenario::ConfigureNetwork()
     NS_LOG_INFO("[Node " << netDev_id << "] assigned address: " << address);
   }
 }
+*/
 
 
+void Scenario::ConfigureMobility()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  ConfigureMobilityDrones();
+  ConfigureMobilityZsps();
+}
+
+void Scenario::ConfigureMobilityDrones()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  MobilityHelper mobilityDrones;
+
+  for (uint32_t i = 0; i < m_drones.GetN(); i++)
+  {
+    mobilityDrones.SetMobilityModel("ns3::ParametricSpeedDroneMobilityModel",
+        "SpeedCoefficients", SpeedCoefficientsValue(CONFIGURATOR->GetDroneSpeedCoefficients(i)),
+        "FlightPlan", FlightPlanValue(CONFIGURATOR->GetDroneFlightPlan(i)),
+        "CurveStep", DoubleValue(CONFIGURATOR->GetCurveStep()));
+    mobilityDrones.Install(m_drones.Get(i));
+  }
+}
+
+void Scenario::ConfigureMobilityZsps()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  MobilityHelper mobilityZsps;
+  auto positionAllocatorZsps = CreateObject<ListPositionAllocator>();
+
+  CONFIGURATOR->GetZspsPosition(positionAllocatorZsps);
+
+  mobilityZsps.SetPositionAllocator(positionAllocatorZsps);
+  mobilityZsps.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobilityZsps.Install(m_zsps);
+}
+
+/*
 void Scenario::ConfigureApplication()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
   ConfigureApplicationDrones();
   ConfigureApplicationZsps();
 }
 
 void Scenario::ConfigureApplicationDrones()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
   for (uint32_t i = 0; i < m_drones.GetN(); i++)
   {
@@ -278,7 +303,7 @@ void Scenario::ConfigureApplicationDrones()
 
 void Scenario::ConfigureApplicationZsps()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
   auto server = CreateObjectWithAttributes<DroneServer>(
         "Ipv4Address", Ipv4AddressValue(m_ifaceIps.GetAddress(m_ifaceIps.GetN() - 1)),
@@ -293,22 +318,7 @@ void Scenario::ConfigureApplicationZsps()
 
   NS_LOG_LOGIC("[Server 0] active from " << zspAppStartTime << "s to " << zspAppStopTime << "s.");
 }
-
-
-void Scenario::ConfigureSimulator()
-{
-  //NS_LOG_FUNCTION_NOARGS();
-
-  std::stringstream phyTraceLog, pcapLog;
-  AsciiTraceHelper ascii;
-
-  phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
-  pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
-
-  Report::Get()->Initialize("LTE-Easley", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
-
-  Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
-}
+*/
 
 } // namespace ns3
 
