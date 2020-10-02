@@ -53,3 +53,7 @@ def build(bld):
     obj = bld.create_ns3_program('lte-lena-easley',
                                  ['drone', 'mobility', 'lte', 'wifi'])
     obj.source = 'lte-lena-easley.cc'
+
+    obj = bld.create_ns3_program('lte-lena-simple-davinci-class',
+                                 ['lte', 'drone', 'wifi'])
+    obj.source = 'lte-lena-simple-davinci-class.cc'
