@@ -95,6 +95,15 @@
       "group": "test"
     },
     {
+      "label": "run debug",
+      "type": "shell",
+      "command": "./waf --run \"${input:scenario} --config=${input:configFileDaVinci}\" --gdb",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "docs",
       "type": "shell",
       "command": "make html",
@@ -186,6 +195,12 @@
     }
   ],
   "inputs": [
+    {
+      "id": "scenario",
+      "type": "promptString",
+      "description": "Name of the scenario to run",
+      "default": "lte-lena-simple-davinci-class"
+    },
     {
       "id": "cores",
       "type": "promptString",

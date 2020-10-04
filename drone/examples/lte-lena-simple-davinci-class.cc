@@ -16,35 +16,53 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <chrono>
+#include <ns3/ptr.h>
+#include <ns3/core-module.h>
+#include <ns3/network-module.h>
+#include <ns3/mobility-module.h>
+#include <ns3/lte-module.h>
+#include <ns3/config-store.h>
+#include <ns3/buildings-helper.h>
 
+//#include <cerrno>
+//#include <cstdio>
+//#include <cstdlib>
+#include <chrono>
+//#include <vector>
+//#include <ns3/assert.h>
+//#include <ns3/command-line.h>
+#include <ns3/config.h>
 #include <ns3/log.h>
-#include <ns3/node-container.h>
-#include <ns3/net-device-container.h>
-#include <ns3/simulator.h>
-#include <ns3/mobility-helper.h>
-#include <ns3/object-factory.h>
+//#include "ns3/flow-monitor-module.h"
+//#include <ns3/flow-monitor-helper.h>
+
+//#include <ns3/drone-client.h>
+//#include <ns3/drone-server.h>
+#include <ns3/flight-plan.h>
+#include <ns3/proto-point.h>
+#include <ns3/scenario-configuration-helper.h>
+
+
+//#include <ns3/node-container.h>
+//#include <ns3/net-device-container.h>
+//#include <ns3/simulator.h>
+//#include <ns3/mobility-helper.h>
+//#include <ns3/object-factory.h>
 //#include <ns3/ipv4-address-helper.h>
 //#include <ns3/ipv4-interface-container.h>
 //#include <ns3/internet-stack-helper.h>
 //#include <ns3/yans-wifi-helper.h>
 //#include <ns3/ssid.h>
-#include <ns3/config.h>
-#include <ns3/double.h>
-#include <ns3/string.h>
+//#include <ns3/double.h>
+//#include <ns3/string.h>
 
-#include <ns3/lte-helper.h>
-#include <ns3/config-store.h>
-#include <ns3/buildings-helper.h>
+//#include <ns3/lte-helper.h>
 
-#include <ns3/scenario-configuration-helper.h>
-#include <ns3/drone-list.h>
-#include <ns3/zsp-list.h>
+//#include <ns3/drone-list.h>
+//#include <ns3/zsp-list.h>
 //#include <ns3/drone-client.h>
 //#include <ns3/drone-server.h>
-#include <ns3/flight-plan.h>
-#include <ns3/proto-point.h>
-#include <ns3/speed-coefficients.h>
+//#include <ns3/speed-coefficients.h>
 
 #include <ns3/report.h>
 
@@ -162,6 +180,8 @@ void Scenario::ConfigureProtocol()
   ConfigureMac();
   ConfigureRlc();
   //ConfigureNetwork();
+
+  lteHelper->EnableTraces();
 }
 
 void Scenario::ConfigurePhy()
@@ -169,8 +189,6 @@ void Scenario::ConfigurePhy()
   NS_LOG_FUNCTION_NOARGS();
 
   lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
-
-  lteHelper->EnablePhyTraces();
 }
 
 void Scenario::ConfigureMac()
@@ -181,11 +199,11 @@ void Scenario::ConfigureMac()
   lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-  NetDeviceContainer ueDevices = lteHelper->InstallUeDevice(m_drones);
-  m_netDevices.Add(ueDevices);
-
   NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice(m_zsps);
-  m_netDevices.Add(enbDevices);
+  //m_netDevices.Add(enbDevices);
+
+  NetDeviceContainer ueDevices = lteHelper->InstallUeDevice(m_drones);
+  //m_netDevices.Add(ueDevices);
 
   lteHelper->Attach(ueDevices, enbDevices.Get(0));
 
@@ -201,8 +219,6 @@ void Scenario::ConfigureMac()
   qos.mbrUl = 5000000; 		// Uplink MBR,
   EpsBearer bearer(q, qos);
   lteHelper->ActivateDataRadioBearer (ueDevices, bearer);
-
-  lteHelper->EnableMacTraces();
 }
 
 void Scenario::ConfigureRlc()
@@ -211,11 +227,9 @@ void Scenario::ConfigureRlc()
   // add Radio Bearer related things here
   // Needs ueDevices to be passed from ConfigureMac() procedure
 
-  Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
-  rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (0.04)));
-  rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (1.0)));
-
-  lteHelper->EnableRlcTraces();
+  //Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
+  //rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (0.04)));
+  //rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (1.0)));
 }
 
 /*
