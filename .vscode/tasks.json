@@ -68,6 +68,33 @@
       "group": "test"
     },
     {
+      "label": "run LTE-Easley",
+      "type": "shell",
+      "command": "./waf --run \"lte-lena-easley --config=${input:configFileLteEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run lte-lena-simple-davinci",
+      "type": "shell",
+      "command": "./waf --run \"lte-lena-simple-davinci --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run lte-lena-simple-davinci-class",
+      "type": "shell",
+      "command": "./waf --run \"lte-lena-simple-davinci-class --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "docs",
       "type": "shell",
       "command": "make html",
@@ -188,6 +215,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/easley.json"
+    },
+    {
+      "id": "configFileLteEasley",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/easley.json" // To be changed
     }
   ]
 }
