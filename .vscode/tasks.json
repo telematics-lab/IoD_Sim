@@ -68,15 +68,6 @@
       "group": "test"
     },
     {
-      "label": "run LTE-Easley",
-      "type": "shell",
-      "command": "./waf --run \"lte-lena-easley --config=${input:configFileLteEasley}\"",
-      "options": {
-        "cwd": "${workspaceFolder}/ns3"
-      },
-      "group": "test"
-    },
-    {
       "label": "run lte-lena-simple-davinci",
       "type": "shell",
       "command": "./waf --run \"lte-lena-simple-davinci --config=${input:configFileDaVinci}\"",
@@ -86,9 +77,9 @@
       "group": "test"
     },
     {
-      "label": "run lte-lena-simple-davinci-class",
+      "label": "run lte-scenario-basic",
       "type": "shell",
-      "command": "./waf --run \"lte-lena-simple-davinci-class --config=${input:configFileDaVinci}\"",
+      "command": "./waf --run \"lte-scenario-basic --config=${input:configFileLteBasic}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -97,7 +88,7 @@
     {
       "label": "run debug",
       "type": "shell",
-      "command": "./waf --run \"${input:scenario} --config=${input:configFileDaVinci}\" --gdb",
+      "command": "./waf --run \"${input:scenario} --config=${input:configFileLteBasic}\" --gdb",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -199,7 +190,7 @@
       "id": "scenario",
       "type": "promptString",
       "description": "Name of the scenario to run",
-      "default": "lte-lena-simple-davinci-class"
+      "default": "lte-scenario-basic"
     },
     {
       "id": "cores",
@@ -232,7 +223,7 @@
       "default": "./src/drone/config/easley.json"
     },
     {
-      "id": "configFileLteEasley",
+      "id": "configFileLteBasic",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/easley.json" // To be changed

@@ -1,3 +1,7 @@
+/**
+ * \brief This is formally incorrect
+ * /
+
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2018-2020 The IoD_Sim Authors.
@@ -34,13 +38,14 @@
 #include <ns3/string.h>
 
 #include <ns3/lte-helper.h>
+#include <ns3/trace-helper.h>
 #include <ns3/config-store.h>
 
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/drone-list.h>
 #include <ns3/zsp-list.h>
-//#include <ns3/drone-client.h>
-//#include <ns3/drone-server.h>
+#include <ns3/drone-client.h>
+#include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
 #include <ns3/speed-coefficients.h>
@@ -108,11 +113,11 @@ void Scenario::ConfigureSimulator()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  std::stringstream phyTraceLog, pcapLog;
+  //std::stringstream phyTraceLog, pcapLog;
   //AsciiTraceHelper ascii;
 
-  phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
-  pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
+  //phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
+  //pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
 
   Report::Get()->Initialize("LTE-Easley", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
 
@@ -210,10 +215,9 @@ void Scenario::ConfigureRlc()
   lteHelper->EnableRlcTraces();
 }
 
-/*
 void Scenario::ConfigureNetwork()
 {
-  //NS_LOG_FUNCTION_NOARGS();
+  NS_LOG_FUNCTION_NOARGS();
 
   InternetStackHelper internet;
   Ipv4AddressHelper ipv4;
@@ -232,7 +236,6 @@ void Scenario::ConfigureNetwork()
     NS_LOG_INFO("[Node " << netDev_id << "] assigned address: " << address);
   }
 }
-*/
 
 
 void Scenario::ConfigureMobility()
@@ -271,7 +274,7 @@ void Scenario::ConfigureMobilityZsps()
   mobilityZsps.Install(m_zsps);
 }
 
-/*
+
 void Scenario::ConfigureApplication()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -318,7 +321,6 @@ void Scenario::ConfigureApplicationZsps()
 
   NS_LOG_LOGIC("[Server 0] active from " << zspAppStartTime << "s to " << zspAppStopTime << "s.");
 }
-*/
 
 } // namespace ns3
 
