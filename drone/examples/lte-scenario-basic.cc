@@ -20,7 +20,7 @@
  * Copyright (c) 2011-2018 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
  * Authors: Jaume Nin <jaume.nin@cttc.cat>
  *          Manuel Requena <manuel.requena@cttc.es>
- * Edited to use drones and a zsp in a Scenario singleton
+ * Edited to use drones and a host as a zsp in a Scenario singleton
  * Author: Michele Abruzzese <michele.abruzzese93@gmail.com>
  */
 
@@ -46,7 +46,7 @@
 
 #include <ns3/report.h>
 
-NS_LOG_COMPONENT_DEFINE("LteScenarioBasic");
+NS_LOG_COMPONENT_DEFINE("Scenario");
 
 namespace ns3
 {
@@ -195,8 +195,8 @@ void Scenario::ConfigureMac()
   lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-  _enbDevs = lteHelper->InstallEnbDevice(_antennas);
   _ueDevs = lteHelper->InstallUeDevice(_drones);
+  _enbDevs = lteHelper->InstallEnbDevice(_antennas);
 
   lteHelper->Attach(_ueDevs);
 }
@@ -348,6 +348,8 @@ void Scenario::ConfigureApplicationHosts()
 
 int main(int argc, char **argv)
 {
+  ns3::LogComponentEnable("Scenario", ns3::LOG_LEVEL_ALL);
+
   ns3::Scenario scenario(argc, argv);
   scenario.Run();
 
