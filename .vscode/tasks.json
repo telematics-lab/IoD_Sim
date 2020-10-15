@@ -226,7 +226,7 @@
       "id": "configFileLteBasic",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/easley.json" // To be changed
+      "default": "./src/drone/config/lte-basic.json"
     }
   ]
 }
