@@ -42,7 +42,7 @@
 #include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
-#include <ns3/speed-coefficients.h>
+//#include <ns3/speed-coefficients.h>
 
 #include <ns3/report.h>
 
@@ -91,10 +91,10 @@ Scenario::Scenario(int argc, char **argv)
   CONFIGURATOR->Initialize(argc, argv, "LteScenarioBasic");
 
   _hosts.Create(1);
-  _drones.Create(CONFIGURATOR->GetDronesN());
-  _antennas.Create(CONFIGURATOR->GetZspsN());
+  _antennas.Create(1);
+  _drones.Create(2);
 
-  for (auto zsp = _antennas.Begin(); zsp != _antennas.End(); zsp++)
+  for (auto zsp = _hosts.Begin(); zsp != _hosts.End(); zsp++)
     ZspList::Add(*zsp);
 
   for (auto drone = _drones.Begin(); drone != _drones.End(); drone++)
@@ -119,7 +119,7 @@ void Scenario::ConfigureSimulator()
   //phyTraceLog << CONFIGURATOR->GetResultsPath() << "-phy.log";
   //pcapLog << CONFIGURATOR->GetResultsPath() << "-host";
 
-  Report::Get()->Initialize("LTE-Easley", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
+  //Report::Get()->Initialize("LTE-Scenario-Basic", CONFIGURATOR->GetCurrentDateTime(), CONFIGURATOR->GetResultsPath());
 
   Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
 }
@@ -134,7 +134,7 @@ void Scenario::Run()
   //Simulator::Stop(simulation_time);
   Simulator::Run();
 
-  Report::Get()->Save();
+  //Report::Get()->Save();
 
   Simulator::Destroy();
 
@@ -201,10 +201,6 @@ void Scenario::ConfigureProtocol()
   epcHelper = CreateObject<PointToPointEpcHelper>();
   lteHelper->SetEpcHelper(epcHelper);
 
-  InternetStackHelper internet;
-  internet.Install(_hosts);
-  internet.Install(_drones);
-
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute("DataRate", DataRateValue(DataRate("100Gb/s")));
   p2ph.SetDeviceAttribute("Mtu", UintegerValue(1500));
@@ -217,8 +213,30 @@ void Scenario::ConfigureProtocol()
   //lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-  _ueDevs = lteHelper->InstallUeDevice(_drones);
+  InternetStackHelper internet;
+  internet.Install(_hosts);
+  internet.Install(_drones);
+
   _enbDevs = lteHelper->InstallEnbDevice(_antennas);
+  _ueDevs = lteHelper->InstallUeDevice(_drones);
+
+  lteHelper->Attach(_ueDevs);
+
+/*
+  //ConfigureRlc();
+  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
+  GbrQosInformation qos;
+  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
+  //qos.gbrUl = 132;
+  //qos.mbrDl = qos.gbrDl;
+  //qos.mbrUl = qos.gbrUl;
+  qos.gbrDl = 20000000; 	   // Downlink GBR (bit/s) ---> 20 Mbps
+  qos.gbrUl = 5000000;	 	  // Uplink GBR ---> 5 Mbps
+  qos.mbrDl = 20000000;		 // Downlink MBR
+  qos.mbrUl = 5000000; 		// Uplink MBR,
+  EpsBearer bearer(q, qos);
+  lteHelper->ActivateDataRadioBearer(_ueDevs, bearer);
+*/
 
   //ConfigureNetwork();
   _ipv4Mask = Ipv4Mask("255.0.0.0");
@@ -233,8 +251,6 @@ void Scenario::ConfigureProtocol()
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting(remoteHost->GetObject<Ipv4>());
   remoteHostStaticRouting->AddNetworkRouteTo(Ipv4Address("7.0.0.0"), _ipv4Mask, 1);
 
-
-
   NS_LOG_INFO("> Assigning IP Addresses:");
   _ueIpInterfaces = epcHelper->AssignUeIpv4Address(NetDeviceContainer(_ueDevs));
 
@@ -242,7 +258,6 @@ void Scenario::ConfigureProtocol()
   for (uint32_t i = 0; i < _drones.GetN(); i++)
   {
     Ptr<Node> ueNode = _drones.Get(i);
-
     Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting(ueNode->GetObject<Ipv4>());
     ueStaticRouting->SetDefaultRoute(epcHelper->GetUeDefaultGatewayAddress(), 1);
 
@@ -250,25 +265,6 @@ void Scenario::ConfigureProtocol()
     auto address = _ueIpInterfaces.GetAddress(i);
     NS_LOG_INFO("[Node " << netDev_id << "] assigned address: " << address);
   }
-
-  lteHelper->Attach(_ueDevs);
-
-  // 0 is localhost, hence 1 is the only device added (the remote host)
-  //Ipv4Address remoteHostAddress = _hostIpInterfaces.GetAddress(1);
-
-  //ConfigureRlc();
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
-  GbrQosInformation qos;
-  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
-  //qos.gbrUl = 132;
-  //qos.mbrDl = qos.gbrDl;
-  //qos.mbrUl = qos.gbrUl;
-  qos.gbrDl = 20000000; 	   // Downlink GBR (bit/s) ---> 20 Mbps
-  qos.gbrUl = 5000000;	 	  // Uplink GBR ---> 5 Mbps
-  qos.mbrDl = 20000000;		 // Downlink MBR
-  qos.mbrUl = 5000000; 		// Uplink MBR,
-  EpsBearer bearer(q, qos);
-  lteHelper->ActivateDataRadioBearer(_ueDevs, bearer);
 
   lteHelper->EnableTraces();
 }
@@ -366,6 +362,68 @@ void Scenario::ConfigureNetwork()
 }
 
 
+void Scenario::ConfigureMobility()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  //ConfigureMobilityZsps();
+  //ConfigureMobilityDrones();
+
+  MobilityHelper mobilityHost;
+  Ptr<ListPositionAllocator> positionHost = CreateObject<ListPositionAllocator>();
+  positionHost->Add(Vector(0, 0, 0));
+  mobilityHost.SetPositionAllocator(positionHost);
+  mobilityHost.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobilityHost.Install(_hosts);
+
+  MobilityHelper mobilityAntennas;
+  Ptr<ListPositionAllocator> positionAntennas = CreateObject<ListPositionAllocator>();
+  positionAntennas->Add(Vector(0, 0, 0));
+  mobilityAntennas.SetPositionAllocator(positionAntennas);
+  mobilityAntennas.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobilityAntennas.Install(_antennas);
+
+  MobilityHelper mobilityDrones;
+  Ptr<ListPositionAllocator> positionDrones = CreateObject<ListPositionAllocator>();
+  positionDrones->Add(Vector(-10, 10, 0));
+  positionDrones->Add(Vector(10, 10, 0));
+  mobilityDrones.SetPositionAllocator(positionDrones);
+  mobilityDrones.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobilityDrones.Install(_drones);
+}
+
+void Scenario::ConfigureMobilityDrones()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  MobilityHelper mobilityDrones;
+
+  for (uint32_t i = 0; i < _drones.GetN(); i++)
+  {
+    mobilityDrones.SetMobilityModel ("ns3::ConstantAccelerationDroneMobilityModel",
+        "Acceleration", DoubleValue (CONFIGURATOR->GetDroneAcceleration (i)),
+        "MaxSpeed", DoubleValue (CONFIGURATOR->GetDroneMaxSpeed (i)),
+        "FlightPlan", FlightPlanValue (CONFIGURATOR->GetDroneFlightPlan (i)),
+        "CurveStep", DoubleValue (CONFIGURATOR->GetCurveStep ()));
+
+    mobilityDrones.Install(_drones.Get(i));
+  }
+}
+
+void Scenario::ConfigureMobilityZsps()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  MobilityHelper mobilityZsps;
+  auto positionAllocatorZsps = CreateObject<ListPositionAllocator>();
+
+  CONFIGURATOR->GetZspsPosition(positionAllocatorZsps);
+
+  mobilityZsps.SetPositionAllocator(positionAllocatorZsps);
+  mobilityZsps.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobilityZsps.Install(_antennas);
+  mobilityZsps.Install(_hosts);
+}
+
+
 void Scenario::ConfigureApplication()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -418,7 +476,7 @@ void Scenario::ConfigureApplicationHosts()
 
 int main(int argc, char **argv)
 {
-  ns3::LogComponentEnable("Scenario", ns3::LOG_LEVEL_ALL);
+  //ns3::LogComponentEnable("Scenario", ns3::LOG_LEVEL_ALL);
 
   ns3::Scenario scenario(argc, argv);
 
