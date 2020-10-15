@@ -12,16 +12,16 @@ git clone                                \
   ns-3-29
 
 git clone                                \
-  --branch=ns-3.31                       \
+  --branch=ns-3.32                       \
   --depth=1                              \
   https://gitlab.com/nsnam/ns-3-dev.git/ \
-  ns-3-31
+  ns-3-32
 
 cd ns-3-29/src
 ln -s ../../drone drone
 ln -s ../../report report
-cd ../../ns-3-31/src
+cd ../../ns-3-32/src
 ln -s ../../drone drone
 ln -s ../../report report
 cd ../../
-ln -s ns-3-31 ns3
+ln -s ns-3-32 ns3

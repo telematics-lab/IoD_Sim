@@ -5,7 +5,7 @@ system-level simulator for the IoD ([Internet of
 Drones](https://uwspace.uwaterloo.ca/bitstream/handle/10012/12663/07423671.pdf?sequence=1&isAllowed=y)).
 
 Developed on top of the well-known [ns-3](https://www.nsnam.org/) (Network
-Simulator 3), it implements the key networking elements (drones, network acces
+Simulator 3), it implements the key networking elements (drones, network access
 points, and Zone Service Provider), a standard-compliant communication stack
 based on the IEEE 802.11 technology, and scenarios with various mobility
 models.
