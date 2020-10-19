@@ -22,6 +22,8 @@
         "$gcc"
       ]
     },
+
+
     {
       "label": "run allen",
       "type": "shell",
@@ -85,6 +87,8 @@
       },
       "group": "test"
     },
+
+
     {
       "label": "run debug",
       "type": "shell",
@@ -97,12 +101,14 @@
     {
       "label": "run simulation with args",
       "type": "shell",
-      "command": "./waf --run ${input:scenario} --command-template=\"%s ${input:opt_configFile} ${input:opt_args}\"",
+      "command": "./waf --run ${input:scenario} ${input:opt_args} --command-template=\"%s ${input:opt_scenArgs}\" ${input:opt_nextCmd}",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
       "group": "test"
     },
+
+
     {
       "label": "docs",
       "type": "shell",
@@ -194,6 +200,8 @@
       }
     }
   ],
+
+
   "inputs": [
     {
       "id": "cores",
@@ -213,6 +221,8 @@
       "description": "Duration of this simulation, in seconds",
       "default": "10"
     },
+
+
     {
       "id": "scenario",
       "type": "promptString",
@@ -220,17 +230,25 @@
       "default": "lte-scenario-basic"
     },
     {
-      "id": "opt_configFile",
-      "type": "promptString",
-      "description": "Optional path to configuration file for this scenario",
-      "default": "--config=./src/drone/config/lte-basic.json"
-    },
-    {
       "id": "opt_args",
       "type": "promptString",
       "description": "Optional arguments to pass to waf command",
       "default": ""
     },
+    {
+      "id": "opt_scenArgs",
+      "type": "promptString",
+      "description": "Optional arguments to pass to the scenario script",
+      "default": ""
+    },
+    {
+      "id": "opt_nextCmd",
+      "type": "promptString",
+      "description": "Optional next command (piping, output redirection, etc...)",
+      "default": "> ../results/${fileBasenameNoExtension}-`date +%y%m%d-%H%M`.log 2>&1"
+    },
+
+
     {
       "id": "configFileDaVinci",
       "type": "promptString",
