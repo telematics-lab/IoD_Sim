@@ -14,3 +14,10 @@ __pycache__
 
 # Ignore random files
 *.save
+
+# Containers
+.devcontainer
+container
+
+# Spurious files
+*BAD*
