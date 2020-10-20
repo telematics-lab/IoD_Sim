@@ -33,6 +33,8 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 int main (int argc, char *argv[])
 {
   LogComponentEnable ("Scenario", LOG_LEVEL_ALL);
+  LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
+  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
 
   CommandLine cmd;
   std::string configFile;
@@ -54,7 +56,7 @@ int main (int argc, char *argv[])
   staticNodeMobility.Install (enbNodes);
   staticNodeMobility.Install (ueNodes);
 
-  Ptr<EpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
+  Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
 
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
@@ -71,35 +73,53 @@ int main (int argc, char *argv[])
   NetDeviceContainer p2pDevs = p2ph.Install (pgw, host);
 
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase ("127.1.1.0", "255.255.255.0");
+  ipv4.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer hostsIpInterfaces = ipv4.Assign (p2pDevs);
-  //Ipv4Address hostIp = hostsIpInterfaces.GetAddress (1); // 0 is localhost
+  Ipv4Address hostIp = hostsIpInterfaces.GetAddress (1); // 0 is localhost
+
+  Ipv4StaticRoutingHelper ipv4RoutingH;
+  Ptr<Ipv4StaticRouting> hostStaticRoute = ipv4RoutingH.GetStaticRouting (host->GetObject<Ipv4> ());
+  hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
 
   NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueDevices = lteHelper->InstallUeDevice (ueNodes);
-  lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  ipv4.SetBase ("127.1.2.0", "255.255.255.0");
+  //ipv4.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer lteDevs = epcHelper->AssignUeIpv4Address (ueDevices);
 
-  // CREATE ROUTING
+  for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
+    {
+      Ptr<Ipv4StaticRouting> ueStaticRoute = ipv4RoutingH.GetStaticRouting (ueNodes.Get (i)->GetObject<Ipv4> ());
+      ueStaticRoute->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+    }
 
-  EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
-  lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
-/*
-  Ptr<DroneClient> clientApps = CreateObject<DroneClient> ();
-  clientApps.Start (Seconds (1.0));
-  clientApps.Stop (Seconds (9.0))
-  clientApps.install (ueNodes.Get (0));
+  lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  ApplicationContainer serverApps = CreateObject<DroneServer> ();
-  serverApps.Start (Seconds (0.0));
+  //EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
+  //lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
+
+  UdpEchoServerHelper echoServer (9);
+  ApplicationContainer serverApps = echoServer.Install (hostNodes.Get (0));
+  serverApps.Start (Seconds (1.0));
   serverApps.Stop (Seconds (10.0));
-  serverApps.install(ueNodes.Get(1));
+
+  UdpEchoClientHelper echoClient (hostIp, 9);
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+
+  ApplicationContainer clientApps = echoClient.Install (ueNodes);
+  //clientApps.Start (Seconds (2.0));
+  clientApps.Stop (Seconds (10.0));
+  ueNodes.Get (0)->GetApplication (0)->SetStartTime (Seconds (2.0));
+  ueNodes.Get (1)->GetApplication (0)->SetStartTime (Seconds (4.0));
+
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
   Simulator::Destroy ();
-*/
+
   return 0;
 }
