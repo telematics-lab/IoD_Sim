@@ -21,33 +21,44 @@
 #include <ns3/mobility-module.h>
 #include <ns3/lte-module.h>
 #include <ns3/point-to-point-module.h>
+#include <ns3/config-store-module.h>
 
 using namespace ns3;
 
 int main (int argc, char *argv[])
 {
-  Ptr<LteHelper> lteHelper = CreateObject<LteHelper>();
+  LogComponentEnable ("ConfigStore", LOG_LEVEL_ALL);
+
+  CommandLine cmd;
+  std::string dummy;
+  cmd.AddValue ("config", "config file for IoD_Sim", dummy);
+  cmd.Parse (argc, argv);
+  ConfigStore inputConfig;
+  inputConfig.ConfigureDefaults ();
+  //cmd.Parse (argc, argv);
+
+  Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 
   NodeContainer enbNodes, ueNodes;
-  enbNodes.Create(1);
-  ueNodes.Create(2);
+  enbNodes.Create (1);
+  ueNodes.Create (2);
 
   MobilityHelper staticNodeMobility;
-  staticNodeMobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  staticNodeMobility.Install(enbNodes);
-  staticNodeMobility.Install(ueNodes);
+  staticNodeMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  staticNodeMobility.Install (enbNodes);
+  staticNodeMobility.Install (ueNodes);
 
-  NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice(enbNodes);
-  NetDeviceContainer ueDevices = lteHelper->InstallUeDevice(ueNodes);
+  NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer ueDevices = lteHelper->InstallUeDevice (ueNodes);
 
-  lteHelper->Attach(ueDevices, enbDevices.Get(0));
+  lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  EpsBearer dataRadioBearer(EpsBearer::GBR_CONV_VIDEO);
-  lteHelper->ActivateDataRadioBearer(ueDevices, dataRadioBearer);
+  EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
+  lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
 
-  Simulator::Stop(Seconds(0.5));
-  Simulator::Run();
-  Simulator::Destroy();
+  Simulator::Stop (Seconds (0.5));
+  Simulator::Run ();
+  Simulator::Destroy ();
 
   return 0;
 }
