@@ -140,7 +140,7 @@ Scenario::ConfigurePhy ()
   // The helpers used below will help us putting together the wifi NICs we want
   //wifi.EnableLogComponents();  // Turn on all Wifi logging
 
-  m_wifi.SetStandard (WIFI_PHY_STANDARD_80211n_2_4GHZ);
+  m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
 
   // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
   m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);

@@ -53,9 +53,9 @@
     ],
     "logComponents": [
         "ReportSimulation",
-        "Scenario",
         "DroneServer",
         "DroneClient",
+        "Scenario",
         "SimulationDuration"
     ]
 }

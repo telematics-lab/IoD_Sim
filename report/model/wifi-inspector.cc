@@ -47,7 +47,7 @@ WifiInspector::GetWifiStandard () const
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  const auto standard = m_phy->GetStandard ();
+  const auto standard = m_phy->GetPhyStandard ();
 
   switch (standard)
     {
@@ -62,8 +62,7 @@ WifiInspector::GetWifiStandard () const
         return "802.11n";
       case WIFI_PHY_STANDARD_80211ac:
         return "802.11ac";
-      case WIFI_PHY_STANDARD_80211ax_2_4GHZ:
-      case WIFI_PHY_STANDARD_80211ax_5GHZ:
+      case WIFI_PHY_STANDARD_80211ax:
         return "802.11ax";
       default:
         return "UNSUPPORTED";
