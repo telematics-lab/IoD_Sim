@@ -1,5 +1,6 @@
 # Ignore upstream repository
 ns-3*
+ns3
 
 # Ignore third-party builds
 third_party/*
