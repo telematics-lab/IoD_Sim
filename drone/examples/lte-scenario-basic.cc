@@ -33,8 +33,8 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 int main (int argc, char *argv[])
 {
   LogComponentEnable ("Scenario", LOG_LEVEL_ALL);
-  LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
+  LogComponentEnable ("DroneServer", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneClient", LOG_LEVEL_ALL);
 
   CommandLine cmd;
   std::string configFile;
@@ -48,7 +48,7 @@ int main (int argc, char *argv[])
 
   NodeContainer enbNodes, ueNodes, hostNodes;
   enbNodes.Create (1);
-  ueNodes.Create (2);
+  ueNodes.Create (3);
   hostNodes.Create (1);
 
   MobilityHelper staticNodeMobility;
@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
   NetDeviceContainer ueDevices = lteHelper->InstallUeDevice (ueNodes);
 
   //ipv4.SetBase ("2.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer lteDevs = epcHelper->AssignUeIpv4Address (ueDevices);
+  Ipv4InterfaceContainer lteDevsIfaces = epcHelper->AssignUeIpv4Address (ueDevices);
 
   for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
     {
@@ -98,6 +98,10 @@ int main (int argc, char *argv[])
 
   //EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
   //lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
+
+/*
+  //LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
+  //LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
 
   UdpEchoServerHelper echoServer (9);
   ApplicationContainer serverApps = echoServer.Install (hostNodes.Get (0));
@@ -114,8 +118,34 @@ int main (int argc, char *argv[])
   clientApps.Stop (Seconds (10.0));
   ueNodes.Get (0)->GetApplication (0)->SetStartTime (Seconds (2.0));
   ueNodes.Get (1)->GetApplication (0)->SetStartTime (Seconds (4.0));
+  ueNodes.Get (2)->GetApplication (0)->SetStartTime (Seconds (7.0));
+*/
+
+  NS_LOG_INFO("> Creating applications for host.");
+  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
+      "Ipv4Address", Ipv4AddressValue(hostIp),
+      "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
+  server->SetStartTime(Seconds(0));
+  host->AddApplication(server);
+
+  NS_LOG_INFO("> Creating applications for drones.");
+  for (uint32_t i = 0; i < ueNodes.GetN(); ++i)
+  {
+      Ptr<Node> node = ueNodes.Get(i);
+      NS_LOG_INFO("> Creating applications for drones #" << i << ".");
+      Ptr<DroneClient> client = CreateObjectWithAttributes<DroneClient>(
+          "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
+          "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
+      client->SetStartTime(Seconds(1 + i));
+      node->AddApplication(client);
+  }
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  //AsciiTraceHelper ascii;
+  //ascii.CreateFileStream("../results/ascii_out.txt");
+  //lteHelper->EnableTraces();
+  p2ph.EnableAscii("../results/prefix", p2pDevs.Get(0));
+  p2ph.EnablePcap("../results/pcap", p2pDevs.Get(0));
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
