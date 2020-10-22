@@ -25,6 +25,8 @@
 #include <ns3/applications-module.h>
 #include <ns3/drone-client.h>
 #include <ns3/drone-server.h>
+#include <ns3/drone-list.h>
+#include <ns3/zsp-list.h>
 
 using namespace ns3;
 
@@ -50,6 +52,11 @@ int main (int argc, char *argv[])
   enbNodes.Create (1);
   ueNodes.Create (3);
   hostNodes.Create (1);
+
+  for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
+      DroneList::Add (ueNodes.Get (i));
+  for (uint32_t i = 0; i < hostNodes.GetN (); ++i)
+      ZspList::Add (hostNodes.Get (i));
 
   MobilityHelper staticNodeMobility;
   staticNodeMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -78,8 +85,9 @@ int main (int argc, char *argv[])
   Ipv4Address hostIp = hostsIpInterfaces.GetAddress (1); // 0 is localhost
 
   Ipv4StaticRoutingHelper ipv4RoutingH;
+  internet.SetRoutingHelper(ipv4RoutingH);
   Ptr<Ipv4StaticRouting> hostStaticRoute = ipv4RoutingH.GetStaticRouting (host->GetObject<Ipv4> ());
-  hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
 
   NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice (enbNodes);
@@ -121,31 +129,40 @@ int main (int argc, char *argv[])
   ueNodes.Get (2)->GetApplication (0)->SetStartTime (Seconds (7.0));
 */
 
+  // Randomize start time for applications
+  Ptr<UniformRandomVariable> startTimeSeconds = CreateObject<UniformRandomVariable> ();
+  startTimeSeconds->SetAttribute ("Min", DoubleValue (0));
+  startTimeSeconds->SetAttribute ("Max", DoubleValue (1));
+
   NS_LOG_INFO("> Creating applications for host.");
   Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
       "Ipv4Address", Ipv4AddressValue(hostIp),
       "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-  server->SetStartTime(Seconds(0));
+  server->SetStartTime(Seconds (0));
   host->AddApplication(server);
 
-  NS_LOG_INFO("> Creating applications for drones.");
+  //NS_LOG_INFO("> Creating applications for drones.");
   for (uint32_t i = 0; i < ueNodes.GetN(); ++i)
-  {
+    {
+
       Ptr<Node> node = ueNodes.Get(i);
-      NS_LOG_INFO("> Creating applications for drones #" << i << ".");
+      NS_LOG_INFO("> Creating applications for drone #" << i << ".");
       Ptr<DroneClient> client = CreateObjectWithAttributes<DroneClient>(
           "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
           "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-      client->SetStartTime(Seconds(1 + i));
+      client->SetStartTime(Seconds (1 + startTimeSeconds->GetValue ()));
       node->AddApplication(client);
-  }
+    }
 
-  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  //ipv4RoutingH.PopulateRoutingTables ();
   //AsciiTraceHelper ascii;
   //ascii.CreateFileStream("../results/ascii_out.txt");
   //lteHelper->EnableTraces();
-  p2ph.EnableAscii("../results/prefix", p2pDevs.Get(0));
-  p2ph.EnablePcap("../results/pcap", p2pDevs.Get(0));
+  p2ph.EnableAscii("prefix", p2pDevs.Get(0));
+  p2ph.EnablePcap("pcap", p2pDevs.Get(0), true);
+  internet.EnablePcapIpv4("internet", ueNodes.Get(0));
+
+  //lteHelper->EnableTraces();
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
