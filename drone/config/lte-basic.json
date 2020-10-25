@@ -1,6 +1,5 @@
 {
     "logOnFile": true,
-    "phyMode": "DsssRate1Mbps",
     "duration": 10.0,
     "drones": [
         {
@@ -46,9 +45,15 @@
             ]
         }
     ],
-    "ZSPs": [
+    "antennas": [
         {
             "position": [10.0, 10.0, 0.0]
+        }
+    ],
+    "remotes": [
+        {
+            "applicationStartTime": 0.0,
+            "applicationStopTime": 10.0
         }
     ],
     "logComponents": [
