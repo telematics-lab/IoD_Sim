@@ -537,10 +537,11 @@ ScenarioConfigurationHelper::GetRemotesN () const
   return m_config["remotes"].Size ();
 }
 
+const double
 ScenarioConfigurationHelper::GetRemoteApplicationStartTime (uint32_t i) const
 {
   const auto remotes = m_config["remotes"].GetArray ();
-  const auto remote  = zsps[i].GetObject ();
+  const auto remote  = remotes[i].GetObject ();
 
   if (remote.HasMember ("applicationStartTime") && remote["applicationStartTime"].IsDouble ())
     return remote["applicationStartTime"].GetDouble ();
@@ -552,7 +553,7 @@ const double
 ScenarioConfigurationHelper::GetRemoteApplicationStopTime (uint32_t i) const
 {
   const auto remotes = m_config["remotes"].GetArray ();
-  const auto remote  = zsps[i].GetObject ();
+  const auto remote  = remotes[i].GetObject ();
 
   if (remote.HasMember ("applicationStopTime") && remote["applicationStopTime"].IsDouble ())
     return remote["applicationStopTime"].GetDouble ();
