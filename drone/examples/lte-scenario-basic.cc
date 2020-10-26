@@ -98,10 +98,10 @@ int main (int argc, char *argv[])
   //lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
 
 
-  NS_LOG_INFO("> Creating applications for host.");
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
+  NS_LOG_INFO("> Creating applications for host.");
   UdpEchoServerHelper echoServer (9);
-  ApplicationContainer serverApps = echoServer.Install (hostNodes.Get (0));
+  ApplicationContainer serverApps = echoServer.Install (hostNodes);
   serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
   serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
   /*
@@ -113,20 +113,19 @@ int main (int argc, char *argv[])
   host->AddApplication(server);
   */
 
+  LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
   NS_LOG_INFO("> Creating applications for drones.");
+  UdpEchoClientHelper echoClient (hostIp, 9);
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  ApplicationContainer clientApps = echoClient.Install (ueNodes);
   for (uint32_t i = 0; i < ueNodes.GetN(); ++i)
   {
-      Ptr<Node> node = ueNodes.Get(i);
-      NS_LOG_INFO("> Creating applications for drones #" << i << ".");
-      LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-      UdpEchoClientHelper echoClient (hostIp, 9);
-      echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
-      echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
-      echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-      ApplicationContainer clientApps = echoClient.Install (ueNodes);
-      clientApps.Start (Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
-      clientApps.Stop (Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
+      clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
+      clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
       /*
+      Ptr<Node> node = ueNodes.Get(i);
       Ptr<DroneClient> client = CreateObjectWithAttributes<DroneClient>(
           "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
           "Ipv4SubnetMask", Ipv4MaskValue("0.0.0.0"));
@@ -140,12 +139,12 @@ int main (int argc, char *argv[])
   //AsciiTraceHelper ascii;
   //ascii.CreateFileStream("../results/ascii_out.txt");
   //lteHelper->EnableTraces();
-  /* FIX THIS
+
   std::stringstream path;
-  path << CONFIGURATOR->GetResultsPath ();
-  p2ph.EnableAscii(path << "p2p", p2pDevs.Get(0));
-  p2ph.EnablePcap(path << "p2p", p2pDevs.Get(0));
-  */
+  path << CONFIGURATOR->GetResultsPath () << "p2p";
+  p2ph.EnableAscii(path.str(), p2pDevs.Get(0));
+  p2ph.EnablePcap(path.str(), p2pDevs.Get(0));
+
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
