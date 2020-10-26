@@ -163,8 +163,8 @@ ScenarioConfigurationHelper::GetThreeLogDistancePropagationLossModelAttributes (
 const std::string
 ScenarioConfigurationHelper::GetPhyMode () const
 {
-  NS_ASSERT (m_config.HasMember ("phyMode"));
-  NS_ASSERT_MSG (m_config["phyMode"].IsString (),
+  NS_ASSERT_MSG (m_config.HasMember ("phyMode")
+                 && m_config["phyMode"].IsString (),
                  "Please define phyMode in configuration file.");
 
   return m_config["phyMode"].GetString ();
@@ -179,6 +179,44 @@ ScenarioConfigurationHelper::GetDronesN () const
                  "Please define at least one drone in configuration file.");
 
   return m_config["drones"].Size ();
+}
+
+const std::string
+ScenarioConfigurationHelper::GetDronesMobilityModel () const
+{
+  NS_ASSERT_MSG (m_config.HasMember ("dronesMobilityModel")
+                 && m_config["dronesMobilityModel"].IsString (),
+                 "Please define dronesMobilityModel in configuration file.");
+
+  return m_config["dronesMobilityModel"].GetString ();
+}
+
+void
+ScenarioConfigurationHelper::GetDronesPosition (Ptr<ListPositionAllocator> allocator) const
+{
+  for (auto drone = m_config["drones"].Begin (); drone != m_config["drones"].End (); drone++)
+    {
+      NS_ASSERT_MSG (GetDronesMobilityModel () == "ns3::ConstantPositionMobilityModel",
+                     "Drones position parameter can be used only when dronesMobilityModel is ns3::ConstantPositionMobilityModel");
+      NS_ASSERT_MSG (drone->IsObject (),
+                     "Each drone must be a JSON object.");
+      NS_ASSERT_MSG (drone->HasMember ("position"),
+                     "One or more drones do not have defined position.");
+
+      NS_ASSERT_MSG ((*drone)["position"].IsArray ()
+                     && (*drone)["position"].Size () == 3
+                     && (*drone)["position"][0].IsDouble ()
+                     && (*drone)["position"][1].IsDouble ()
+                     && (*drone)["position"][2].IsDouble (),
+                     "Please check that each drone position is an array of 3 doubles.");
+
+      Vector v ((*drone)["position"][0].GetDouble (),
+                (*drone)["position"][1].GetDouble (),
+                (*drone)["position"][2].GetDouble ());
+
+      NS_LOG_LOGIC ("Allocating a drone in space at " << v);
+      allocator->Add (v);
+    }
 }
 
 const float
@@ -441,7 +479,12 @@ ScenarioConfigurationHelper::InitializeLogging (const bool &onFile)
   NS_LOG_INFO ("####");
 
   NS_LOG_LOGIC ("Number of drones: " << GetDronesN ());
-  NS_LOG_LOGIC ("Number of ZSPs: "   << GetZspsN ());
+  if (m_config.HasMember ("zsps"))
+    NS_LOG_LOGIC ("Number of ZSPs: "   << GetZspsN ());
+  if (m_config.HasMember ("antennas"))
+    NS_LOG_LOGIC ("Number of antennas: "   << GetAntennasN ());
+  if (m_config.HasMember ("remotes"))
+    NS_LOG_LOGIC ("Number of remotes: "   << GetRemotesN ());
   NS_LOG_LOGIC ("Duration: "         << GetDuration () << "s");
 }
 
@@ -501,8 +544,6 @@ ScenarioConfigurationHelper::GetAntennasN () const
 void
 ScenarioConfigurationHelper::GetAntennasPosition (Ptr<ListPositionAllocator> allocator) const
 {
-  // checks for antenna array were already made in ::ConfGetNumAntennas.
-  // Let's skip them.
   for (auto i = m_config["antennas"].Begin (); i != m_config["antennas"].End (); i++)
     {
       NS_ASSERT_MSG (i->IsObject (),

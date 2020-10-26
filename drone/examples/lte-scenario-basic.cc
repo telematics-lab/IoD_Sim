@@ -25,6 +25,7 @@
 #include <ns3/applications-module.h>
 #include <ns3/drone-client.h>
 #include <ns3/drone-server.h>
+#include <ns3/scenario-configuration-helper.h>
 
 using namespace ns3;
 
@@ -32,30 +33,27 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 int main (int argc, char *argv[])
 {
-  LogComponentEnable ("Scenario", LOG_LEVEL_ALL);
-  LogComponentEnable ("DroneServer", LOG_LEVEL_ALL);
-  LogComponentEnable ("DroneClient", LOG_LEVEL_ALL);
-
-  CommandLine cmd;
-  std::string configFile;
-  cmd.AddValue ("config", "config file for IoD_Sim", configFile);
-  cmd.Parse (argc, argv);
-  ConfigStore inputConfig;
-  inputConfig.ConfigureDefaults ();
-  cmd.Parse (argc, argv);
-
-  Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
+  CONFIGURATOR->Initialize(argc, argv, "LTE_BASIC_SCENARIO");
 
   NodeContainer enbNodes, ueNodes, hostNodes;
-  enbNodes.Create (1);
-  ueNodes.Create (3);
-  hostNodes.Create (1);
+  enbNodes.Create (CONFIGURATOR->GetAntennasN ());
+  ueNodes.Create (CONFIGURATOR->GetDronesN ());
+  hostNodes.Create (CONFIGURATOR->GetRemotesN ());
 
-  MobilityHelper staticNodeMobility;
-  staticNodeMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  staticNodeMobility.Install (enbNodes);
-  staticNodeMobility.Install (ueNodes);
+  MobilityHelper dronesMobility, antennasMobility;
+  Ptr<ListPositionAllocator> antennasPosition, dronesPosition;
+  dronesMobility.SetMobilityModel (CONFIGURATOR->GetDronesMobilityModel ());
+  dronesPosition = CreateObject<ListPositionAllocator> ();
+  CONFIGURATOR->GetDronesPosition(dronesPosition);
+  dronesMobility.SetPositionAllocator (dronesPosition);
+  dronesMobility.Install (ueNodes);
+  antennasMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  antennasPosition = CreateObject<ListPositionAllocator> ();
+  CONFIGURATOR->GetAntennasPosition(antennasPosition);
+  antennasMobility.SetPositionAllocator (antennasPosition);
+  antennasMobility.Install (enbNodes);
 
+  Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
 
@@ -99,53 +97,55 @@ int main (int argc, char *argv[])
   //EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
   //lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
 
-/*
-  //LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  //LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
-
-  UdpEchoServerHelper echoServer (9);
-  ApplicationContainer serverApps = echoServer.Install (hostNodes.Get (0));
-  serverApps.Start (Seconds (1.0));
-  serverApps.Stop (Seconds (10.0));
-
-  UdpEchoClientHelper echoClient (hostIp, 9);
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-
-  ApplicationContainer clientApps = echoClient.Install (ueNodes);
-  //clientApps.Start (Seconds (2.0));
-  clientApps.Stop (Seconds (10.0));
-  ueNodes.Get (0)->GetApplication (0)->SetStartTime (Seconds (2.0));
-  ueNodes.Get (1)->GetApplication (0)->SetStartTime (Seconds (4.0));
-  ueNodes.Get (2)->GetApplication (0)->SetStartTime (Seconds (7.0));
-*/
 
   NS_LOG_INFO("> Creating applications for host.");
+  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
+  UdpEchoServerHelper echoServer (9);
+  ApplicationContainer serverApps = echoServer.Install (hostNodes.Get (0));
+  serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
+  serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
+  /*
   Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
       "Ipv4Address", Ipv4AddressValue(hostIp),
-      "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-  server->SetStartTime(Seconds(0));
+      "Ipv4SubnetMask", Ipv4MaskValue("0.0.0.0"));
+  server->SetStartTime(Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
+  server->SetStopTime(Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
   host->AddApplication(server);
+  */
 
   NS_LOG_INFO("> Creating applications for drones.");
   for (uint32_t i = 0; i < ueNodes.GetN(); ++i)
   {
       Ptr<Node> node = ueNodes.Get(i);
       NS_LOG_INFO("> Creating applications for drones #" << i << ".");
+      LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
+      UdpEchoClientHelper echoClient (hostIp, 9);
+      echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
+      echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
+      echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+      ApplicationContainer clientApps = echoClient.Install (ueNodes);
+      clientApps.Start (Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
+      clientApps.Stop (Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
+      /*
       Ptr<DroneClient> client = CreateObjectWithAttributes<DroneClient>(
           "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
-          "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-      client->SetStartTime(Seconds(1 + i));
+          "Ipv4SubnetMask", Ipv4MaskValue("0.0.0.0"));
+      client->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
+      client->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
       node->AddApplication(client);
+      */
   }
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   //AsciiTraceHelper ascii;
   //ascii.CreateFileStream("../results/ascii_out.txt");
   //lteHelper->EnableTraces();
-  p2ph.EnableAscii("../results/prefix", p2pDevs.Get(0));
-  p2ph.EnablePcap("../results/pcap", p2pDevs.Get(0));
+  /* FIX THIS
+  std::stringstream path;
+  path << CONFIGURATOR->GetResultsPath ();
+  p2ph.EnableAscii(path << "p2p", p2pDevs.Get(0));
+  p2ph.EnablePcap(path << "p2p", p2pDevs.Get(0));
+  */
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();

@@ -81,6 +81,16 @@ public:
    */
   const uint32_t GetDronesN () const;
   /**
+   * \return a string identifying the mobility model for the drones.
+   */
+  const std::string GetDronesMobilityModel () const;
+  /**
+   * \brief allocate the position of the drones (if dronesMobilityModel is
+   *        set to "ns3::ConstantPositionMobilityModel")
+   * \param allocator the allocator to be filled with drones positions.
+   */
+  void GetDronesPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
    * \return the step of the curve to be generated.
    */
   const float GetCurveStep () const;
@@ -99,7 +109,10 @@ public:
    * \return the maximum speed of the drone with index i.
    */
   const double GetDroneMaxSpeed (uint32_t i) const;
-
+  /**
+   * \param i the drone index number.
+   * \return the speed coefficients in a specific `SpeedCoefficients` class object
+   */
   const SpeedCoefficients GetDroneSpeedCoefficients (uint32_t i) const;
   /**
    * \param i the drone index number.
