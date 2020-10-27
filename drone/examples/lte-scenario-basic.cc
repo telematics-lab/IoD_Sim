@@ -44,12 +44,12 @@ int main (int argc, char *argv[])
   Ptr<ListPositionAllocator> antennasPosition, dronesPosition;
   dronesMobility.SetMobilityModel (CONFIGURATOR->GetDronesMobilityModel ());
   dronesPosition = CreateObject<ListPositionAllocator> ();
-  CONFIGURATOR->GetDronesPosition(dronesPosition);
+  CONFIGURATOR->GetDronesPosition (dronesPosition);
   dronesMobility.SetPositionAllocator (dronesPosition);
   dronesMobility.Install (ueNodes);
   antennasMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   antennasPosition = CreateObject<ListPositionAllocator> ();
-  CONFIGURATOR->GetAntennasPosition(antennasPosition);
+  CONFIGURATOR->GetAntennasPosition (antennasPosition);
   antennasMobility.SetPositionAllocator (antennasPosition);
   antennasMobility.Install (enbNodes);
 
@@ -78,13 +78,12 @@ int main (int argc, char *argv[])
   Ipv4StaticRoutingHelper ipv4RoutingH;
   internet.SetRoutingHelper(ipv4RoutingH);
   Ptr<Ipv4StaticRouting> hostStaticRoute = ipv4RoutingH.GetStaticRouting (host->GetObject<Ipv4> ());
-  hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
 
   NetDeviceContainer enbDevices = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueDevices = lteHelper->InstallUeDevice (ueNodes);
 
-  //ipv4.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer lteDevsIfaces = epcHelper->AssignUeIpv4Address (ueDevices);
 
   for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
@@ -95,24 +94,12 @@ int main (int argc, char *argv[])
 
   lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  //EpsBearer dataRadioBearer (EpsBearer::GBR_CONV_VIDEO);
-  //lteHelper->ActivateDataRadioBearer (ueDevices, dataRadioBearer);
-
-
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
   NS_LOG_INFO("> Creating applications for host.");
   UdpEchoServerHelper echoServer (9);
   ApplicationContainer serverApps = echoServer.Install (hostNodes);
   serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
   serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
-  /*
-  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
-      "Ipv4Address", Ipv4AddressValue(hostIp),
-      "Ipv4SubnetMask", Ipv4MaskValue("0.0.0.0"));
-  server->SetStartTime(Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
-  server->SetStopTime(Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
-  host->AddApplication(server);
-  */
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
   NS_LOG_INFO("> Creating applications for drones.");
@@ -125,27 +112,20 @@ int main (int argc, char *argv[])
   {
       clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
       clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
-      /*
-      Ptr<Node> node = ueNodes.Get(i);
-      Ptr<DroneClient> client = CreateObjectWithAttributes<DroneClient>(
-          "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
-          "Ipv4SubnetMask", Ipv4MaskValue("0.0.0.0"));
-      client->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
-      client->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
-      node->AddApplication(client);
-      */
   }
 
-  //ipv4RoutingH.PopulateRoutingTables ();
-  //AsciiTraceHelper ascii;
-  //ascii.CreateFileStream("../results/ascii_out.txt");
-  //lteHelper->EnableTraces();
+  std::stringstream p2pPath, ipPath;
+  std::string path = CONFIGURATOR->GetResultsPath ();
 
-  std::stringstream path;
-  path << CONFIGURATOR->GetResultsPath () << "p2p";
-  p2ph.EnableAscii(path.str(), p2pDevs.Get(0));
-  p2ph.EnablePcap(path.str(), p2pDevs.Get(0));
+  p2pPath << path << "p2p";
+  ipPath << path << "ip";
 
+  p2ph.EnableAscii (p2pPath.str (), p2pDevs.Get (0));
+  p2ph.EnablePcap (p2pPath.str (), p2pDevs.Get (0));
+
+  internet.EnablePcapIpv4All (ipPath.str ());
+
+  NS_LOG_DEBUG (lteDevsIfaces.GetAddress(0));
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
