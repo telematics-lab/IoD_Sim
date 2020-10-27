@@ -81,7 +81,7 @@
     {
       "label": "run lte-scenario-basic",
       "type": "shell",
-      "command": "./waf --cwd=../results/ --run \"lte-scenario-basic --config=${input:configFileLteBasic}\"",
+      "command": "./waf --run \"lte-scenario-basic --config=${input:configFileLteBasic}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -92,7 +92,7 @@
     {
       "label": "run debug",
       "type": "shell",
-      "command": "./waf --cwd=../results/ --run \"${input:scenario} --config=${input:configFileLteBasic}\" --gdb",
+      "command": "./waf --run \"${input:scenario} --config=${input:configFileLteBasic}\" --gdb",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
