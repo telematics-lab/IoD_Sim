@@ -26,6 +26,7 @@
 #include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
+#include <ns3/system-path.h>
 
 namespace ns3 {
 
@@ -40,7 +41,7 @@ ScenarioConfigurationHelper::Initialize (int argc,
   auto in_time_t = std::chrono::system_clock::to_time_t(now);
   std::stringstream dateTime;
 
-  dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d.%H-%M-%S");
+  dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d-%H-%M-%S");
 
   m_dateTime = dateTime.str ();
   m_name = name;
@@ -70,13 +71,15 @@ ScenarioConfigurationHelper::GetCurrentDateTime () const
 const std::string
 ScenarioConfigurationHelper::GetResultsPath () const
 {
-  std::stringstream ss;
+  std::stringstream path;
 
-  ss << "../results/"
-     << m_name << "-"
-     << m_dateTime;
+  path << "../results/" << m_name << "-" << m_dateTime;
 
-  return ss.str ();
+  SystemPath::MakeDirectories (path.str ());
+
+  path << "/";
+
+  return path.str ();
 }
 
 const std::string
@@ -84,7 +87,7 @@ ScenarioConfigurationHelper::GetLoggingFilePath () const
 {
   std::stringstream ss;
 
-  ss << GetResultsPath () << ".log";
+  ss << GetResultsPath () << GetName () << ".log";
 
   return ss.str ();
 }

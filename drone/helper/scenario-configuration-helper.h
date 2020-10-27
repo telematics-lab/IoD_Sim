@@ -61,7 +61,9 @@ public:
    */
   const std::string GetCurrentDateTime () const;
   /**
-   * \return A preconfigured path to place scenario data files
+   * \brief Gets the preconfigured path from the configuration file, then makes a new
+   *        folder at <path>/<scenario_name>-<datetime> where to place files
+   * \return The full path of the folder where to put result files
    */
   const std::string GetResultsPath () const;
   /**
