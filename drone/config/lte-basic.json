@@ -1,61 +1,40 @@
 {
-    "logOnFile": true,
-    "phyMode": "DsssRate1Mbps",
     "duration": 10.0,
+
+    "dronesMobilityModel": "ns3::ConstantPositionMobilityModel",
     "drones": [
         {
-            "acceleration": 1.0,
-            "maxSpeed": 30.0,
             "applicationStartTime": 1.0,
             "applicationStopTime": 9.0,
-            "trajectory": [
-                {
-                    "position": [0.0, 0.0, 0.0],
-                    "interest": 0,
-                    "restTime": 3.0
-                },
-                {
-                    "position": [1.0, 10.0, 0.0],
-                    "interest": 1
-                },
-                {
-                    "position": [100.0, 10.0, 0.0],
-                    "interest": 0
-                }
-            ]
+            "position": [100.0, 10.0, 0.0]
         },
         {
-            "acceleration": 2.0,
-            "maxSpeed": 15.0,
-            "applicationStartTime": 1.0,
+            "applicationStartTime": 1.2,
             "applicationStopTime": 9.0,
-            "trajectory": [
-                {
-                    "position": [100.0, 10.0, 0.0],
-                    "interest": 0,
-                    "restTime": 3.0
-                },
-                {
-                    "position": [50.0, 50.0, 0.0],
-                    "interest": 1
-                },
-                {
-                    "position": [0.0, 1.0, 0.0],
-                    "interest": 0
-                }
-            ]
+            "position": [50.0, 50.0, 0.0]
         }
     ],
-    "ZSPs": [
+
+    "antennas": [
         {
             "position": [10.0, 10.0, 0.0]
         }
     ],
+
+    "remotes": [
+        {
+            "applicationStartTime": 0.0,
+            "applicationStopTime": 10.0
+        }
+    ],
+
+    "logOnFile": true,
     "logComponents": [
         "ReportSimulation",
         "DroneServer",
         "DroneClient",
         "Scenario",
-        "SimulationDuration"
+        "SimulationDuration",
+        "ScenarioConfigurationHelper"
     ]
 }
