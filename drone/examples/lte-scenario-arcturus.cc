@@ -17,6 +17,9 @@
  */
 
 #include <ns3/core-module.h>
+#include <ns3/applications-module.h>
+#include <ns3/drone-server.h>
+#include <ns3/drone-client.h>
 #include <ns3/scenario-configuration-helper.h>
 
 namespace ns3
@@ -35,6 +38,8 @@ public:
   Scenario& SetAntennasNumber(int num);
   Scenario& SetAntennasPosition(Ptr<PositionAllocator> pos);
   Scenario& SetRemotesNumber(int num);
+  Scenario& SetDronesApplication(ApplicationContainer apps);
+  Scenario& SetRemotesApplication(ApplicationContainer apps);
 
 };
 
@@ -52,12 +57,30 @@ int main (int argc, char **argv)
   Ptr<ListPositionAllocator> antennasPositions = CreateObject<ListPositionAllocator>();
   CONFIGURATOR->GetAntennasPosition(antennasPositions);
 
+  ApplicationContainer clientApps;
+  for (uint32_t i = 0; i < CONFIGURATOR->GetDronesN(); ++i)
+  {
+    Ptr<Application> clientApp = CreateObject<DroneClient>();
+    clientApp->SetStartTime(Seconds(CONFIGURATOR->GetDroneApplicationStartTime(i)));
+    clientApp->SetStopTime(Seconds(CONFIGURATOR->GetDroneApplicationStopTime(i)));
+    clientApps.Add(clientApp);
+  }
+
+  ApplicationContainer serverApps;
+  Ptr<Application> serverApp = CreateObject<DroneServer>();
+  serverApp->SetStartTime(Seconds(CONFIGURATOR->GetRemoteApplicationStartTime(0)));
+  serverApp->SetStopTime(Seconds(CONFIGURATOR->GetRemoteApplicationStopTime(0)));
+  serverApps.Add(serverApp);
+
+
   scenario.Initialize(argc, argv, "LteScenarioArcturus")
           .SetDronesNumber(CONFIGURATOR->GetDronesN())
           .SetDronesPosition(dronesPositions)
           .SetAntennasNumber(CONFIGURATOR->GetAntennasN())
           .SetAntennasPosition(antennasPositions)
           .SetRemotesNumber(CONFIGURATOR->GetRemotesN())
+          .SetDronesApplication(clientApps)
+          .SetRemotesApplication(serverApps);
 
 
   return 0;
