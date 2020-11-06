@@ -23,8 +23,8 @@
 #include <ns3/point-to-point-module.h>
 #include <ns3/config-store-module.h>
 #include <ns3/applications-module.h>
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
+//#include <ns3/drone-client.h>
+//#include <ns3/drone-server.h>
 #include <ns3/scenario-configuration-helper.h>
 
 using namespace ns3;
@@ -113,6 +113,24 @@ int main (int argc, char *argv[])
       clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
       clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
   }
+
+/*
+  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
+        "Ipv4Address", Ipv4AddressValue(hostIp),
+        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
+    hostNodes.Get(0)->AddApplication(server);
+
+  for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
+  {
+    auto client = CreateObjectWithAttributes<DroneClient>(
+        "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
+        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
+        "DestinationIpv4Address", Ipv4AddressValue(hostIp));
+    client->SetStartTime(Seconds(1 + i));
+
+    ueNodes.Get(i)->AddApplication(client);
+  }
+*/
 
   std::stringstream p2pPath, ipPath;
   std::string path = CONFIGURATOR->GetResultsPath ();
