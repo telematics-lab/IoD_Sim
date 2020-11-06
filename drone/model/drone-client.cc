@@ -45,6 +45,10 @@ DroneClient::GetTypeId ()
                    Ipv4MaskValue (),
                    MakeIpv4MaskAccessor (&DroneClient::m_subnetMask),
                    MakeIpv4MaskChecker ())
+    .AddAttribute ("DestinationIpv4Address", "IPv4 Address of the destination device",
+                   Ipv4AddressValue (Ipv4Address::GetBroadcast ()),
+                   MakeIpv4AddressAccessor (&DroneClient::m_destAddr),
+                   MakeIpv4AddressChecker ())
     .AddAttribute ("Port", "Destination application port.",
                    UintegerValue (80),
                    MakeUintegerAccessor (&DroneClient::m_destPort),
@@ -66,7 +70,7 @@ DroneClient::DroneClient ()
   NS_LOG_FUNCTION_NOARGS ();
 
   m_state = CLOSED;
-  m_destAddr = Ipv4Address::GetBroadcast ();
+  //m_destAddr = Ipv4Address::GetBroadcast ();
   m_sequenceNumber = 0;
 }
 
@@ -128,7 +132,7 @@ DroneClient::StartApplication ()
                                             this,
                                             NEW,
                                             m_socket,
-                                            Ipv4Address::GetBroadcast ());
+                                            m_destAddr);
   }
 }
 
