@@ -22,8 +22,6 @@
 #include <ns3/drone-client.h>
 #include <ns3/scenario-configuration-helper.h>
 
-#define CFG ScenarioConfigurationHelper::Get()
-
 namespace ns3
 {
 
@@ -35,8 +33,6 @@ public:
   Scenario();
   ~Scenario();
   Scenario& Initialize(int argc, char **argv, std::string name);
-  Scenario& SetDuration(Time duration);
-  Scenario& SetCommunicationProtocol(std::string protocol);
   Scenario& SetDronesNumber(int num);
   Scenario& SetDronesPosition(Ptr<PositionAllocator> pos);
   Scenario& SetAntennasNumber(int num);
@@ -44,7 +40,6 @@ public:
   Scenario& SetRemotesNumber(int num);
   Scenario& SetDronesApplication(ApplicationContainer apps);
   Scenario& SetRemotesApplication(ApplicationContainer apps);
-  void Run();
 
 };
 
@@ -57,38 +52,35 @@ int main (int argc, char **argv)
   Scenario scenario;
 
   Ptr<ListPositionAllocator> dronesPositions = CreateObject<ListPositionAllocator>();
-  CFG->GetDronesPosition(dronesPositions);
+  CONFIGURATOR->GetDronesPosition(dronesPositions);
 
   Ptr<ListPositionAllocator> antennasPositions = CreateObject<ListPositionAllocator>();
-  CFG->GetAntennasPosition(antennasPositions);
+  CONFIGURATOR->GetAntennasPosition(antennasPositions);
 
-  ApplicationContainer droneApps;
-  for (uint32_t i = 0; i < CFG->GetDronesN(); ++i)
+  ApplicationContainer clientApps;
+  for (uint32_t i = 0; i < CONFIGURATOR->GetDronesN(); ++i)
   {
     Ptr<Application> clientApp = CreateObject<DroneClient>();
-    clientApp->SetStartTime(Seconds(CFG->GetDroneApplicationStartTime(i)));
-    clientApp->SetStopTime(Seconds(CFG->GetDroneApplicationStopTime(i)));
-    droneApps.Add(clientApp);
+    clientApp->SetStartTime(Seconds(CONFIGURATOR->GetDroneApplicationStartTime(i)));
+    clientApp->SetStopTime(Seconds(CONFIGURATOR->GetDroneApplicationStopTime(i)));
+    clientApps.Add(clientApp);
   }
 
-  ApplicationContainer remoteApps;
+  ApplicationContainer serverApps;
   Ptr<Application> serverApp = CreateObject<DroneServer>();
-  serverApp->SetStartTime(Seconds(CFG->GetRemoteApplicationStartTime(0)));
-  serverApp->SetStopTime(Seconds(CFG->GetRemoteApplicationStopTime(0)));
-  remoteApps.Add(serverApp);
+  serverApp->SetStartTime(Seconds(CONFIGURATOR->GetRemoteApplicationStartTime(0)));
+  serverApp->SetStopTime(Seconds(CONFIGURATOR->GetRemoteApplicationStopTime(0)));
+  serverApps.Add(serverApp);
 
 
   scenario.Initialize(argc, argv, "LteScenarioArcturus")
-          .SetDuration(Seconds(10))
-          .SetCommunicationProtocol("LTE+EPC") // don't know how to name them yet
-          .SetDronesNumber(CFG->GetDronesN())
+          .SetDronesNumber(CONFIGURATOR->GetDronesN())
           .SetDronesPosition(dronesPositions)
-          .SetAntennasNumber(CFG->GetAntennasN())
+          .SetAntennasNumber(CONFIGURATOR->GetAntennasN())
           .SetAntennasPosition(antennasPositions)
-          .SetRemotesNumber(CFG->GetRemotesN())
-          .SetDronesApplication(droneApps)
-          .SetRemotesApplication(remoteApps);
-          .Run();
+          .SetRemotesNumber(CONFIGURATOR->GetRemotesN())
+          .SetDronesApplication(clientApps)
+          .SetRemotesApplication(serverApps);
 
 
   return 0;
