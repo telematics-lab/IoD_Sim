@@ -27,6 +27,7 @@ def build(bld):
         'model/curve-point.cc',
         'model/zsp-list.cc',
         'helper/scenario-configuration-helper.cc',
+        #'helper/drone-scenario-helper.cc',
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -54,6 +55,7 @@ def build(bld):
         'model/curve-point.h',
         'model/zsp-list.h',
         'helper/scenario-configuration-helper.h',
+        #'helper/drone-scenario-helper.h',
         ]
 
     if bld.env.ENABLE_EXAMPLES:
