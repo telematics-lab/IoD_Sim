@@ -26,6 +26,7 @@ def build(bld):
         'model/curve.cc',
         'model/curve-point.cc',
         'model/zsp-list.cc',
+        'model/component-manager.cc',
         'helper/scenario-configuration-helper.cc',
         #'helper/drone-scenario-helper.cc',
         ]
@@ -54,6 +55,7 @@ def build(bld):
         'model/curve.h',
         'model/curve-point.h',
         'model/zsp-list.h',
+        'model/component-manager.h',
         'helper/scenario-configuration-helper.h',
         #'helper/drone-scenario-helper.h',
         ]
