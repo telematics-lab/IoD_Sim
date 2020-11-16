@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -29,35 +29,47 @@
 #include <ns3/net-device-container.h>
 #include <ns3/application-container.h>
 
+#include <ns3/core-module.h>
+#include <ns3/mobility-module.h>
+#include <ns3/lte-module.h>
+#include <ns3/internet-module.h>
+#include <ns3/applications-module.h>
+
 #define DSH DroneScenarioHelper
 
 namespace ns3
 {
 
-NS_LOG_COMPONENT_DEFINE ("DroneScenarioHelper");
-
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
-  static DroneScenarioHelper Create(int argc, char **argv, const std::string name);
-  ScenarioConfigurationHelper& GetConfigurator();
+  DroneScenarioHelper& Create(int argc, char **argv, const std::string name);
+  ScenarioConfigurationHelper* GetConfigurator();
 
   ~DroneScenarioHelper();
   DSH& SetDronesNumber(int num);
   DSH& SetDronesPosition(Ptr<PositionAllocator> pos);
+  DSH& SetDronesApplication(Ptr<ApplicationContainer> apps);
   DSH& SetAntennasNumber(int num);
   DSH& SetAntennasPosition(Ptr<PositionAllocator> pos);
   DSH& SetRemotesNumber(int num);
-  DSH& SetDronesApplication(ApplicationContainer apps);
-  DSH& SetRemotesApplication(ApplicationContainer apps);
+  DSH& SetRemotesApplication(Ptr<ApplicationContainer> apps);
+
+  Ipv4InterfaceContainer GetDronesIpv4Interfaces();
+  Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
+  Ipv4Address GetDroneIpv4Address(int id);
+  Ipv4Address GetRemoteIpv4Address(int id);
 
 private:
+  Ipv4InterfaceContainer GetIpv4Interfaces(NetDeviceContainer& dev);
+  Ipv4Address GetIpv4Address(NetDeviceContainer& dev, int id);
+  void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
+  void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps);
   void Initialize(int argc, char **argv, const std::string name);
-  void ComponentDefine(std::string def1);
-  void ComponentRequire(std::string rq1, std::string rq2 = NULL, std::string rq3 = NULL);
+
 
   std::vector<std::string> m_components;
-
+  ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;
   ApplicationContainer m_droneApps, m_remoteApps;
