@@ -25,8 +25,10 @@
 #include <ns3/singleton.h>
 
 
-/// Use this as the only interface for ComponentManager to register a component at the end of a method before returning.
-#define NS_OBJECT_REGISTER_COMPONENT() ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, __FUNCTION__)
+/// Use this as the only interface for ComponentManager to register a component with a custom name at the end of a method before returning.
+#define NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, comp_name)
+/// Use this as the only interface for ComponentManager to register a component with the name of the method at the end of it before returning.
+#define NS_OBJECT_REGISTER_COMPONENT() NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
 #define NS_OBJECT_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
 
@@ -45,11 +47,11 @@ public:
   /**
    * \brief Adds the caller function to the set of components of the
    *        proprietary object.
-   *        Use with `NS_OBJECT_REGISTER_COMPONENT()`
+   *        Use with `NS_OBJECT_REGISTER_COMPONENT()` or `NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("component_name")`
    * \param object The pointer to the caller object. The component will be added to this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
    * \param comp The component name to register.
-   *             The macro uses builtin `__FUNCTION__` for that
+   *             The macro without name uses builtin `__FUNCTION__` for that
    */
   void RegisterComponent(uintptr_t object, std::string comp);
 
