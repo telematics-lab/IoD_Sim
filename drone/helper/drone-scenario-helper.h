@@ -20,9 +20,8 @@
 #define DRONE_SCENARIO_HELPER_H
 
 #include <string>
-#include <vector>
 
-#include <scenario-configuration-helper.h>
+#include "scenario-configuration-helper.h"
 #include <ns3/singleton.h>
 #include <ns3/position-allocator.h>
 #include <ns3/node-container.h>
@@ -48,10 +47,10 @@ public:
 
   ~DroneScenarioHelper();
   DSH& SetDronesNumber(int num);
-  DSH& SetDronesPosition(Ptr<PositionAllocator> pos);
+  DSH& SetDronesMobilityFromConfig();
   DSH& SetDronesApplication(Ptr<ApplicationContainer> apps);
   DSH& SetAntennasNumber(int num);
-  DSH& SetAntennasPosition(Ptr<PositionAllocator> pos);
+  DSH& SetAntennasPositionFromConfig();
   DSH& SetRemotesNumber(int num);
   DSH& SetRemotesApplication(Ptr<ApplicationContainer> apps);
 
@@ -63,12 +62,10 @@ public:
 private:
   Ipv4InterfaceContainer GetIpv4Interfaces(NetDeviceContainer& dev);
   Ipv4Address GetIpv4Address(NetDeviceContainer& dev, int id);
-  void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
+  //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps);
   void Initialize(int argc, char **argv, const std::string name);
 
-
-  std::vector<std::string> m_components;
   ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;

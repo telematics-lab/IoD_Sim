@@ -17,8 +17,8 @@
  */
 
 
-#include <drone-scenario-helper.h>
-#include <scenario-configuration-helper.h>
+#include "drone-scenario-helper.h"
+#include "scenario-configuration-helper.h"
 #include <ns3/component-manager.h>
 
 //#define CONFIGURATOR ScenarioConfigurationHelper::Get()
@@ -32,7 +32,7 @@ NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 DroneScenarioHelper&
 DroneScenarioHelper::Create(int argc, char **argv, const std::string name)
 {
-  NS_LOG_FUNCTION(argc << " " << argv << " " << name);
+  NS_LOG_FUNCTION(argc << argv << name);
   Initialize(argc, argv, name);
 
   return *this;
@@ -41,11 +41,9 @@ DroneScenarioHelper::Create(int argc, char **argv, const std::string name)
 void
 DroneScenarioHelper::Initialize(int argc, char **argv, const std::string name)
 {
-  NS_LOG_FUNCTION(argc << " " << argv << " " << name);
+  NS_LOG_FUNCTION(argc << argv << name);
   m_configurator = ScenarioConfigurationHelper::Get();
   m_configurator->Initialize(argc, argv, name);
-
-  m_components = std::vector<std::string>();
 
   NS_OBJECT_REGISTER_COMPONENT();
 }
@@ -65,70 +63,134 @@ DroneScenarioHelper::GetConfigurator()
 }
 
 
+
 DroneScenarioHelper&
 DroneScenarioHelper::SetDronesNumber(int num)
 {
   NS_LOG_FUNCTION(num);
   NS_OBJECT_REQUIRE_COMPONENT("Initialize");
-  // function code here
+
+  m_droneNodes.Create(num);
+
   NS_OBJECT_REGISTER_COMPONENT();
   return *this;
 }
 
-DSH&
-DSH::SetDronesPosition(Ptr<PositionAllocator> pos)
-{
-  NS_LOG_FUNCTION("PositionAllocator pointer: " << pos);
-  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
-  // function code here
-  NS_OBJECT_REGISTER_COMPONENT();
-  return *this;
-}
-
-DSH&
-DSH::SetDronesApplication(Ptr<ApplicationContainer> apps)
-{
-  NS_LOG_FUNCTION("ApplicationContainer pointer: " << apps);
-  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
-  // function code here
-  NS_OBJECT_REGISTER_COMPONENT();
-  return *this;
-}
-
-DSH&
-DSH::SetAntennasNumber(int num)
+DroneScenarioHelper&
+DroneScenarioHelper::SetAntennasNumber(int num)
 {
   NS_LOG_FUNCTION(num);
   NS_OBJECT_REQUIRE_COMPONENT("Initialize");
-  // function code here
+
+  m_antennaNodes.Create(num);
+
   NS_OBJECT_REGISTER_COMPONENT();
   return *this;
 }
 
-DSH&
-DSH::SetAntennasPosition(Ptr<PositionAllocator> pos)
+DroneScenarioHelper&
+DroneScenarioHelper::SetRemotesNumber(int num)
 {
-  NS_LOG_FUNCTION("PositionAllocator pointer: " << pos);
+  NS_LOG_FUNCTION(num);
+  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
+
+  m_remoteNodes.Create(num);
+
+  NS_OBJECT_REGISTER_COMPONENT();
+  return *this;
+}
+
+
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetDronesMobilityFromConfig()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
+
+  std::string mobilityModel = m_configurator->GetDronesMobilityModel();
+
+  NS_ASSERT_MSG(
+      mobilityModel == "ns3::ParametricSpeedDroneMobilityModel" ||
+      mobilityModel == "ns3::ConstantAccelerationDroneMobilityModel" ||
+      mobilityModel == "ns3::ConstantPositionMobilityModel",
+      "No mobility model exists with name '" << mobilityModel << "'. Please check configuration file.");
+
+  MobilityHelper mobility;
+
+  if (mobilityModel == "ns3::ConstantPositionMobilityModel")
+  {
+    Ptr<PositionAllocator> position;
+    m_configurator->GetDronesPosition(position);
+    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    mobility.SetPositionAllocator(position);
+    mobility.Install(m_droneNodes);
+  }
+  else
+  {
+    for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+    {
+      if (mobilityModel == "ns3::ParametricSpeedDroneMobilityModel")
+      {
+        mobility.SetMobilityModel(mobilityModel,
+                                  "SpeedCoefficients", SpeedCoefficientsValue(m_configurator->GetDroneSpeedCoefficients (i)),
+                                  "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
+                                  "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
+      }
+      if (mobilityModel == "ns3::ConstantAccelerationDroneMobilityModel")
+      {
+        mobility.SetMobilityModel(mobilityModel,
+                                  "Acceleration", DoubleValue (m_configurator->GetDroneAcceleration (i)),
+                                  "MaxSpeed", DoubleValue (m_configurator->GetDroneMaxSpeed (i)),
+                                  "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
+                                  "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
+      }
+
+      mobility.Install (m_droneNodes.Get (i));
+    }
+  }
+
+  NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("SetDronesMobility");
+  return *this;
+}
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetAntennasPositionFromConfig()
+{
+  NS_LOG_FUNCTION_NOARGS();
   NS_OBJECT_REQUIRE_COMPONENT("SetAntennasNumber");
+
+  Ptr<PositionAllocator> position;
+  m_configurator->GetAntennasPosition(position);
+  MobilityHelper mobility;
+  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  mobility.SetPositionAllocator(position);
+  mobility.Install(m_antennaNodes);
+
+  NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("SetAntennasPosition");
+  return *this;
+}
+
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
+{
+  NS_LOG_FUNCTION(apps);
+  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
   // function code here
   NS_OBJECT_REGISTER_COMPONENT();
   return *this;
 }
 
-DSH&
-DSH::SetRemotesNumber(int num)
-{
-  NS_LOG_FUNCTION(num);
-  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
-  // function code here
-  NS_OBJECT_REGISTER_COMPONENT();
-  return *this;
-}
 
-DSH&
-DSH::SetDronesApplication(Ptr<ApplicationContainer> apps)
+
+
+
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 {
-  NS_LOG_FUNCTION("ApplicationContainer pointer: " << apps);
+  NS_LOG_FUNCTION(apps);
   NS_OBJECT_REQUIRE_COMPONENT("SetRemotesNumber");
   // function code here
   NS_OBJECT_REGISTER_COMPONENT();
