@@ -41,6 +41,21 @@ This project is a module of the ns-3 software. To be able to compile, develop,
 and use it, please [build](docs/) or
 [read](https://telematics.poliba.it/iod-sim) the documentation.
 
+## Quick Start on Linux
+Be sure you satisfy [ns-3 dependencies](https://www.nsnam.org/wiki/Installation) and you have `rapidjson-dev` software package installed.
+
+```bash
+$ git submodule init # clone dependent modules, like ns-3
+# link IoD Sim and ns-3
+$ for i in {drone,report}; do ln -s ../../$i ns3/src/$i; done
+$ ls -l ns3/src/{drone,report}  # check symlinks are OK
+$ pushd ns3/
+$ ./waf configure --enable-examples
+$ ./waf build -j4
+$ popd
+```
+
+If you use Visual Studio Code, most of these commands are already provided as Tasks.
 
 ## License
 
