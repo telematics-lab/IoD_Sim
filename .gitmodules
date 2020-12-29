@@ -1,0 +1,3 @@
+[submodule "ns3"]
+	path = ns3
+	url = git@gitlab.com:nsnam/ns-3-dev.git
