@@ -3,15 +3,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/ns3/build/**",
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/ns3/build/ns3/**",
                 "/usr/include/libxml2/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "gcc-x64",
             "compileCommands": "${workspaceFolder}/ns3/build/compile_commands.json"
         }
     ],
