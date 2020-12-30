@@ -24,6 +24,7 @@
 #include <ns3/lte-module.h>
 #include <ns3/config-store.h>
 #include <ns3/buildings-helper.h>
+#include <ns3/mobility-building-info.h>
 
 #include <cerrno>
 #include <cstdio>
@@ -104,9 +105,6 @@ int main (int argc, char *argv[])
   mobilityZsps.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityZsps.Install (enbNodes);
   BuildingsHelper::Install (enbNodes);
-
-  //Finalize the building and mobility model configuration
-  BuildingsHelper::MakeMobilityModelConsistent ();
 
   //using the Proportional Fair (PF) scheduler
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
