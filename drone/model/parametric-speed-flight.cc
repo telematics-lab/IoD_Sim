@@ -247,7 +247,7 @@ ParametricSpeedFlight::FindTime () const
   FDF.fdf = &QuadraticFdf;
   FDF.params = &params;
 
-  T = gsl_root_fdfsolver_newton;
+  T = gsl_root_fdfsolver_steffenson;
   s = gsl_root_fdfsolver_alloc (T);
   gsl_root_fdfsolver_set (s, &FDF, x);
 
@@ -258,6 +258,9 @@ ParametricSpeedFlight::FindTime () const
     {
       iter++;
       status = gsl_root_fdfsolver_iterate (s);
+      if (status != GSL_SUCCESS)
+        NS_LOG_ERROR ("GSL Encountered and error when applying the Newton-Raphson method. Error code: " << status);
+
       x0 = x;
       x = gsl_root_fdfsolver_root (s);
       status = gsl_root_test_delta (x, x0, 0, 1e-3);
