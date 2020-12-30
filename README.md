@@ -45,7 +45,7 @@ and use it, please [build](docs/) or
 Be sure you satisfy [ns-3 dependencies](https://www.nsnam.org/wiki/Installation) and you have `rapidjson-dev` software package installed.
 
 ```bash
-$ git submodule init # clone dependent modules, like ns-3
+$ git submodule update --init # clone dependent modules, like ns-3
 # link IoD Sim and ns-3
 $ for i in {drone,report}; do ln -s ../../$i ns3/src/$i; done
 $ ls -l ns3/src/{drone,report}  # check symlinks are OK
