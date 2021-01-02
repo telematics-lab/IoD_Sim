@@ -30,7 +30,7 @@
 /// Use this as the only interface for ComponentManager to register a component with the name of the method at the end of it before returning.
 #define NS_COMPMAN_REGISTER_COMPONENT() NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
 /// Use this as the only interface for ComponentManager to check if a component has been registered
-#define NS_COMPMAN_CHECK_COMPONENT(param) ComponentManager::Get()->CheckCompoenent((uintptr_t)(void*)this, param)
+#define NS_COMPMAN_CHECK_COMPONENT(param) ComponentManager::Get()->CheckComponent((uintptr_t)(void*)this, param)
 /// Use this as the only interface for ComponentManager to check if the calling method has been registered
 #define NS_COMPMAN_CHECK_THIS_COMPONENT() NS_COMPMAN_CHECK_COMPONENT(__FUNCTION__)
 ///Use this as the only interface for ComponentManager to check for multiple component within a range (extremes included)
