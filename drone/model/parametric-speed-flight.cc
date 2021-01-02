@@ -111,7 +111,7 @@ ParametricSpeedFlight::UpdateSpeed (const double &t) const
   const uint32_t order = m_speedParams.size ();
 
   for (uint32_t i = 0; i < order; i++)
-    speed += m_speedParams[i] * std::pow (t, order - 1 - i);
+    speed += m_speedParams[i] * std::pow (t, order - i - 1);
 
   m_currentSpeed = speed;
 }
@@ -120,15 +120,11 @@ void
 ParametricSpeedFlight::UpdateDistance (const double &t) const
 {
   // analytic polynomial integration
-  const uint32_t order = m_speedParams.size ();
-  std::vector<double> coeffs = m_speedParams;
   double distance;
+  const uint32_t order = m_speedParams.size ();
 
   for (uint32_t i = 0; i < order; i++)
-    {
-      coeffs[i] /= (order - i + 1);
-      distance += coeffs[i] * std::pow (t, order - i + 1);
-    }
+    distance += m_speedParams[i] * (order - i) * std::pow (t, order - i);
 
   m_currentDistance = distance;
 }
@@ -184,7 +180,7 @@ Quadratic (double x, void *params)
 {
   std::vector<double> coeffs = ((PrivFuncParams *) params)->GetCoeffs ();
   uint32_t order = coeffs.size () - 1;
-  double y;
+  double y = 0;
 
   for (uint32_t i = 0; i < coeffs.size (); i++)
     y += coeffs[i] * std::pow (x, order - i);
@@ -197,7 +193,7 @@ QuadraticDeriv (double x, void *params)
 {
   std::vector<double> coeffs = ((PrivFuncParams *) params)->GetCoeffsDeriv ();
   uint32_t order = coeffs.size () - 1;
-  double y;
+  double y = 0;
 
   for (uint32_t i = 0; i < coeffs.size (); i++)
     y += coeffs[i] * std::pow (x, order - i);
@@ -258,6 +254,8 @@ ParametricSpeedFlight::FindTime () const
     {
       iter++;
       status = gsl_root_fdfsolver_iterate (s);
+      if (status != GSL_SUCCESS)
+        NS_LOG_ERROR ("GSL Encountered and error when applying the Newton-Raphson method. Error code: " << status);
       x0 = x;
       x = gsl_root_fdfsolver_root (s);
       status = gsl_root_test_delta (x, x0, 0, 1e-3);
