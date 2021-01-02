@@ -73,6 +73,40 @@ ComponentManager::CheckComponent(uintptr_t object, std::string comp)
   return true;
 }
 
+bool
+ComponentManager::CheckMultiComponent(uintptr_t object, std::string comp, uint32_t start, uint32_t stop)
+{
+  NS_LOG_FUNCTION(object << comp << start << stop);
+
+  if (m_components.find(object) == m_components.end())
+  {
+    NS_LOG_INFO("Object " << object << " has never registered a component");
+    return false;
+  }
+
+  std::unordered_set<std::string> *components = &m_components[object];
+
+  bool all_found = true;
+
+  // need to optimize this
+  for (uint32_t i=start; i<=stop; ++i)
+  {
+    std::string multi_comp = comp + std::to_string(i);
+    if (components->find(multi_comp) == components->end())
+    {
+      NS_LOG_INFO("Object " << object << " has no '" << multi_comp << "' component registered");
+      all_found = false;
+    }
+  }
+
+  if (all_found)
+  {
+    NS_LOG_INFO("Object " << object << " has registered all '" << comp << "' from " << start << " to " << stop);
+    return true;
+  }
+  return false;
+}
+
 void
 ComponentManager::RequireComponent(uintptr_t object, std::string caller, std::string comp)
 {

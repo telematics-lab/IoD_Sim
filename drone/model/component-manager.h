@@ -33,9 +33,12 @@
 #define NS_OBJECT_CHECK_COMPONENT(param) ComponentManager::Get()->CheckCompoenent((uintptr_t)(void*)this, param)
 /// Use this as the only interface for ComponentManager to check if the calling method has been registered
 #define NS_OBJECT_CHECK_THIS_COMPONENT() NS_OBJECT_CHECK_COMPONENT(__FUNCTION__)
+///Use this as the only interface for ComponentManager to check for multiple component within a range (extremes included)
+#define NS_OBJECT_CHECK_MULTI_COMPONENT_RANGE(param, start, stop) ComponentManager::Get()->CheckMultiComponent((uintptr_t)(void*)this, param, start, stop)
+/// Use this as the only interface for ComponentManager to check for multiple component with same name (range 0 to num-1)
+#define NS_OBJECT_CHECK_MULTI_COMPONENT(param, num) NS_OBJECT_CHECK_MULTI_COMPONENT_RANGE(param, 0, num-1)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
 #define NS_OBJECT_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
-
 namespace ns3
 {
 
@@ -68,6 +71,17 @@ public:
    *             The macro without name uses builtin `__FUNCTION__` for that
    */
   bool CheckComponent(uintptr_t object, std::string comp);
+
+  /**
+   * \brief Returns `true` if all the components exist between the registered components else `false`.
+   *        Use with `NS_OBJECT_CHECK_MUKTI_COMPONENT("component_name", number)`
+   * \param object The pointer to the caller object. The components will be searched in this object's set.
+   *               The macro uses `(uintptr_t)(void*)this` for that.
+   * \param comp The component base name to check.
+   * \param start The starting number for the range of multi components to check (included)
+   * \param stop The ending number for the range of multi components to check (included)
+   */
+  bool CheckMultiComponent(uintptr_t object, std::string comp, uint32_t start, uint32_t stop);
 
   /**
    * \brief Asks for a method of the same object to be called before the caller method.
