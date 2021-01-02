@@ -29,6 +29,10 @@
 #define NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, comp_name)
 /// Use this as the only interface for ComponentManager to register a component with the name of the method at the end of it before returning.
 #define NS_OBJECT_REGISTER_COMPONENT() NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
+/// Use this as the only interface for ComponentManager to check if a component has been registered
+#define NS_OBJECT_CHECK_COMPONENT(param) ComponentManager::Get()->CheckCompoenent((uintptr_t)(void*)this, param)
+/// Use this as the only interface for ComponentManager to check if the calling method has been registered
+#define NS_OBJECT_CHECK_THIS_COMPONENT() NS_OBJECT_CHECK_COMPONENT(__FUNCTION__)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
 #define NS_OBJECT_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
 
@@ -54,6 +58,16 @@ public:
    *             The macro without name uses builtin `__FUNCTION__` for that
    */
   void RegisterComponent(uintptr_t object, std::string comp);
+
+  /**
+   * \brief Returns `true` if the component exists between the registered components else `false`.
+   *        Use with `NS_OBJECT_CHECK_COMPONENT("component_name")`
+   * \param object The pointer to the caller object. The component will be searched in this object's set.
+   *               The macro uses `(uintptr_t)(void*)this` for that.
+   * \param comp The component name to check.
+   *             The macro without name uses builtin `__FUNCTION__` for that
+   */
+  bool CheckComponent(uintptr_t object, std::string comp);
 
   /**
    * \brief Asks for a method of the same object to be called before the caller method.

@@ -50,6 +50,29 @@ ComponentManager::RegisterComponent(uintptr_t object, std::string comp)
   NS_LOG_INFO("Component '" << comp << "' registered.");
 }
 
+bool
+ComponentManager::CheckComponent(uintptr_t object, std::string comp)
+{
+  NS_LOG_FUNCTION(object << comp);
+
+  if (m_components.find(object) == m_components.end())
+  {
+    NS_LOG_INFO("Object " << object << " has never registered a component");
+    return false;
+  }
+
+  std::unordered_set<std::string> *components = &m_components[object];
+
+  if (components->find(comp) == components->end())
+  {
+    NS_LOG_INFO("Object " << object << " has no '" << comp << "' component registered");
+    return false;
+  }
+
+  NS_LOG_INFO("Object " << object << " has registered the '" << comp << "' component");
+  return true;
+}
+
 void
 ComponentManager::RequireComponent(uintptr_t object, std::string caller, std::string comp)
 {
