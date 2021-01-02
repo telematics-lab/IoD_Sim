@@ -26,19 +26,19 @@
 
 
 /// Use this as the only interface for ComponentManager to register a component with a custom name at the end of a method before returning.
-#define NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, comp_name)
+#define NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, comp_name)
 /// Use this as the only interface for ComponentManager to register a component with the name of the method at the end of it before returning.
-#define NS_OBJECT_REGISTER_COMPONENT() NS_OBJECT_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
+#define NS_COMPMAN_REGISTER_COMPONENT() NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
 /// Use this as the only interface for ComponentManager to check if a component has been registered
-#define NS_OBJECT_CHECK_COMPONENT(param) ComponentManager::Get()->CheckCompoenent((uintptr_t)(void*)this, param)
+#define NS_COMPMAN_CHECK_COMPONENT(param) ComponentManager::Get()->CheckCompoenent((uintptr_t)(void*)this, param)
 /// Use this as the only interface for ComponentManager to check if the calling method has been registered
-#define NS_OBJECT_CHECK_THIS_COMPONENT() NS_OBJECT_CHECK_COMPONENT(__FUNCTION__)
+#define NS_COMPMAN_CHECK_THIS_COMPONENT() NS_COMPMAN_CHECK_COMPONENT(__FUNCTION__)
 ///Use this as the only interface for ComponentManager to check for multiple component within a range (extremes included)
-#define NS_OBJECT_CHECK_MULTI_COMPONENT_RANGE(param, start, stop) ComponentManager::Get()->CheckMultiComponent((uintptr_t)(void*)this, param, start, stop)
+#define NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, start, stop) ComponentManager::Get()->CheckMultiComponent((uintptr_t)(void*)this, param, start, stop)
 /// Use this as the only interface for ComponentManager to check for multiple component with same name (range 0 to num-1)
-#define NS_OBJECT_CHECK_MULTI_COMPONENT(param, num) NS_OBJECT_CHECK_MULTI_COMPONENT_RANGE(param, 0, num-1)
+#define NS_COMPMAN_CHECK_MULTI_COMPONENT(param, num) NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, 0, num-1)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
-#define NS_OBJECT_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
+#define NS_COMPMAN_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
 namespace ns3
 {
 
@@ -54,7 +54,7 @@ public:
   /**
    * \brief Adds the caller function to the set of components of the
    *        proprietary object.
-   *        Use with `NS_OBJECT_REGISTER_COMPONENT()` or `NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("component_name")`
+   *        Use with `NS_COMPMAN_REGISTER_COMPONENT()` or `NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("component_name")`
    * \param object The pointer to the caller object. The component will be added to this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
    * \param comp The component name to register.
@@ -64,7 +64,7 @@ public:
 
   /**
    * \brief Returns `true` if the component exists between the registered components else `false`.
-   *        Use with `NS_OBJECT_CHECK_COMPONENT("component_name")`
+   *        Use with `NS_COMPMAN_CHECK_COMPONENT("component_name")`
    * \param object The pointer to the caller object. The component will be searched in this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
    * \param comp The component name to check.
@@ -74,7 +74,7 @@ public:
 
   /**
    * \brief Returns `true` if all the components exist between the registered components else `false`.
-   *        Use with `NS_OBJECT_CHECK_MUKTI_COMPONENT("component_name", number)`
+   *        Use with `NS_COMPMAN_CHECK_MUKTI_COMPONENT("component_name", number)`
    * \param object The pointer to the caller object. The components will be searched in this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
    * \param comp The component base name to check.
@@ -86,7 +86,7 @@ public:
   /**
    * \brief Asks for a method of the same object to be called before the caller method.
    *        If it's not been called stops the program.
-   *        Use with `NS_OBJECT_REGISTER_COMPONENT("RequiredMethodName")`
+   *        Use with `NS_COMPMAN_REGISTER_COMPONENT("RequiredMethodName")`
    * \param object The pointer to the caller object. The component will be searched inside this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
    * \param caller The name of the caller function that is requiring the component.
