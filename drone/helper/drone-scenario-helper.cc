@@ -45,7 +45,7 @@ DroneScenarioHelper::Initialize(int argc, char **argv, const std::string name)
   m_configurator = ScenarioConfigurationHelper::Get();
   m_configurator->Initialize(argc, argv, name);
 
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_COMPMAN_REGISTER_COMPONENT();
 }
 
 DroneScenarioHelper::~DroneScenarioHelper()
@@ -58,7 +58,7 @@ ScenarioConfigurationHelper*
 DroneScenarioHelper::GetConfigurator()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
   return ScenarioConfigurationHelper::Get();
 }
 
@@ -68,11 +68,11 @@ DroneScenarioHelper&
 DroneScenarioHelper::SetDronesNumber(int num)
 {
   NS_LOG_FUNCTION(num);
-  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   m_droneNodes.Create(num);
 
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_COMPMAN_REGISTER_COMPONENT();
   return *this;
 }
 
@@ -80,11 +80,11 @@ DroneScenarioHelper&
 DroneScenarioHelper::SetAntennasNumber(int num)
 {
   NS_LOG_FUNCTION(num);
-  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   m_antennaNodes.Create(num);
 
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_COMPMAN_REGISTER_COMPONENT();
   return *this;
 }
 
@@ -92,11 +92,11 @@ DroneScenarioHelper&
 DroneScenarioHelper::SetRemotesNumber(int num)
 {
   NS_LOG_FUNCTION(num);
-  NS_OBJECT_REQUIRE_COMPONENT("Initialize");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   m_remoteNodes.Create(num);
 
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_COMPMAN_REGISTER_COMPONENT();
   return *this;
 }
 
@@ -106,7 +106,7 @@ DroneScenarioHelper&
 DroneScenarioHelper::SetDronesMobilityFromConfig()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
 
   std::string mobilityModel = m_configurator->GetDronesMobilityModel();
 
@@ -150,7 +150,7 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
     }
   }
 
-  NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("SetDronesMobility");
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesMobility");
   return *this;
 }
 
@@ -158,7 +158,7 @@ DroneScenarioHelper&
 DroneScenarioHelper::SetAntennasPositionFromConfig()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_OBJECT_REQUIRE_COMPONENT("SetAntennasNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasNumber");
 
   Ptr<PositionAllocator> position;
   m_configurator->GetAntennasPosition(position);
@@ -167,35 +167,82 @@ DroneScenarioHelper::SetAntennasPositionFromConfig()
   mobility.SetPositionAllocator(position);
   mobility.Install(m_antennaNodes);
 
-  NS_OBJECT_REGISTER_COMPONENT_WITH_NAME("SetAntennasPosition");
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetAntennasPosition");
   return *this;
 }
 
 
 DroneScenarioHelper&
-DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
+DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
 {
-  NS_LOG_FUNCTION(apps);
-  NS_OBJECT_REQUIRE_COMPONENT("SetDronesNumber");
-  // function code here
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_LOG_FUNCTION(app);
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
+
+  m_droneNodes.Get(id)->AddApplication(app);
+
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDroneApplication" + std::to_string(id));
+
+  if (!NS_COMPMAN_CHECK_COMPONENT("SetDronesApplication") &&
+      NS_COMPMAN_CHECK_MULTI_COMPONENT("SetDroneApplication", m_droneNodes.GetN()))
+  {
+    NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
+  }
+
   return *this;
 }
-
-
-
-
-
 
 DroneScenarioHelper&
 DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(apps);
-  NS_OBJECT_REQUIRE_COMPONENT("SetRemotesNumber");
-  // function code here
-  NS_OBJECT_REGISTER_COMPONENT();
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
+
+  for (uint32_t i=0; i<apps->GetN(); ++i)
+  {
+    m_droneNodes.Get(i)->AddApplication(apps->Get(i));
+  }
+
+  NS_COMPMAN_REGISTER_COMPONENT();
   return *this;
 }
+
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
+{
+  NS_LOG_FUNCTION(app);
+  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
+
+  m_remoteNodes.Get(id)->AddApplication(app);
+
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemoteApplication" + std::to_string(id));
+
+  if (!NS_COMPMAN_CHECK_COMPONENT("SetRemotesApplication") &&
+      NS_COMPMAN_CHECK_MULTI_COMPONENT("SetRemoteApplication", m_remoteNodes.GetN()))
+  {
+    NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
+  }
+
+  return *this;
+}
+
+DroneScenarioHelper&
+DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
+{
+  NS_LOG_FUNCTION(apps);
+  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
+
+  for (uint32_t i=0; i<apps->GetN(); ++i)
+  {
+    m_remoteNodes.Get(i)->AddApplication(apps->Get(i));
+  }
+
+  NS_COMPMAN_REGISTER_COMPONENT();
+  return *this;
+}
+
+
+
 
 
 

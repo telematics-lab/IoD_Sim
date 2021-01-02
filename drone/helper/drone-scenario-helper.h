@@ -48,10 +48,12 @@ public:
   ~DroneScenarioHelper();
   DSH& SetDronesNumber(int num);
   DSH& SetDronesMobilityFromConfig();
+  DSH& SetDroneApplication(uint32_t id, Ptr<Application> apps);
   DSH& SetDronesApplication(Ptr<ApplicationContainer> apps);
   DSH& SetAntennasNumber(int num);
   DSH& SetAntennasPositionFromConfig();
   DSH& SetRemotesNumber(int num);
+  DSH& SetRemoteApplication(uint32_t id, Ptr<Application> apps);
   DSH& SetRemotesApplication(Ptr<ApplicationContainer> apps);
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
