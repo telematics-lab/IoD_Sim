@@ -31,6 +31,8 @@
 #include <ns3/core-module.h>
 #include <ns3/mobility-module.h>
 #include <ns3/lte-module.h>
+#include <ns3/point-to-point-module.h>
+#include <ns3/csma-module.h>
 #include <ns3/internet-module.h>
 #include <ns3/applications-module.h>
 
@@ -42,36 +44,45 @@ namespace ns3
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
-  DroneScenarioHelper& Create(int argc, char **argv, const std::string name);
+  DroneScenarioHelper& Create(uint32_t argc, char **argv, const std::string name);
   ScenarioConfigurationHelper* GetConfigurator();
 
   ~DroneScenarioHelper();
-  DSH& SetDronesNumber(int num);
+  DSH& SetDronesNumber(uint32_t num);
   DSH& SetDronesMobilityFromConfig();
-  DSH& SetDroneApplication(uint32_t id, Ptr<Application> apps);
+  DSH& SetDroneApplication(uint32_t  id, Ptr<Application> apps);
   DSH& SetDronesApplication(Ptr<ApplicationContainer> apps);
-  DSH& SetAntennasNumber(int num);
+  DSH& SetAntennasNumber(uint32_t num);
   DSH& SetAntennasPositionFromConfig();
-  DSH& SetRemotesNumber(int num);
-  DSH& SetRemoteApplication(uint32_t id, Ptr<Application> apps);
+  DSH& SetRemotesNumber(uint32_t num);
+  DSH& SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
   DSH& SetRemotesApplication(Ptr<ApplicationContainer> apps);
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
-  Ipv4Address GetDroneIpv4Address(int id);
-  Ipv4Address GetRemoteIpv4Address(int id);
+  Ipv4Address GetDroneIpv4Address(uint32_t id);
+  Ipv4Address GetRemoteIpv4Address(uint32_t id);
+
+  DSH& CreateLteEpc();
+  DSH& CreateRemotesToEpcNetwork();
+  DSH& CreateDronesToAntennasNetwork();
+  DSH& CreateIpv4Routing();
 
 private:
-  Ipv4InterfaceContainer GetIpv4Interfaces(NetDeviceContainer& dev);
-  Ipv4Address GetIpv4Address(NetDeviceContainer& dev, int id);
+  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& devs, uint32_t id);
   //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
+  void SetNumber(NodeContainer& nodes, uint32_t  num);
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps);
-  void Initialize(int argc, char **argv, const std::string name);
+  void SetApplication(NodeContainer& nodes, uint32_t  id, Ptr<Application> app);
+  void Initialize(uint32_t argc, char **argv, const std::string name);
 
   ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
-  NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;
+  NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs, m_p2pDevs;
   ApplicationContainer m_droneApps, m_remoteApps;
+  Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4, m_p2pIpv4;
+  Ptr<LteHelper> m_lteHelper;
+  Ptr<PointToPointEpcHelper> m_epcHelper;
 
 };
 
