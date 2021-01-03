@@ -124,7 +124,7 @@ ParametricSpeedFlight::UpdateDistance (const double &t) const
   const uint32_t order = m_speedParams.size ();
   
   for (uint32_t i = 0; i < order; i++)
-      distance += m_speedParams[i] * (order - i) * std::pow (t, order - i);
+      distance += m_speedParams[i] / (order - i) * std::pow (t, order - i);
 
   m_currentDistance = distance;
 }
