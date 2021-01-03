@@ -69,7 +69,7 @@ public:
   DSH& CreateIpv4Routing();
 
 private:
-  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& devs, uint32_t id);
+  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
   //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
   void SetNumber(NodeContainer& nodes, uint32_t  num);
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps);
