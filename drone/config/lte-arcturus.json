@@ -1,0 +1,40 @@
+{
+    "duration": 10.0,
+
+    "dronesMobilityModel": "ns3::ConstantPositionMobilityModel",
+    "drones": [
+        {
+            "applicationStartTime": 1.0,
+            "applicationStopTime": 9.0,
+            "position": [100.0, 10.0, 0.0]
+        },
+        {
+            "applicationStartTime": 1.2,
+            "applicationStopTime": 9.0,
+            "position": [50.0, 50.0, 0.0]
+        }
+    ],
+
+    "antennas": [
+        {
+            "position": [10.0, 10.0, 0.0]
+        }
+    ],
+
+    "remotes": [
+        {
+            "applicationStartTime": 0.0,
+            "applicationStopTime": 10.0
+        }
+    ],
+
+    "logOnFile": true,
+    "logComponents": [
+        "ReportSimulation",
+        "DroneServer",
+        "DroneClient",
+        "Scenario",
+        "SimulationDuration",
+        "ScenarioConfigurationHelper"
+    ]
+}

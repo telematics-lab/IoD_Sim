@@ -87,6 +87,15 @@
       },
       "group": "test"
     },
+    {
+      "label": "run lte-scenario-arcturus",
+      "type": "shell",
+      "command": "./waf --run \"lte-scenario-arcturus --config=${input:configFileLteArcturus}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
 
 
     {
@@ -266,6 +275,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/lte-basic.json"
+    },
+    {
+      "id": "configFileLteArcturus",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-arcturus.json"
     }
   ]
 }
