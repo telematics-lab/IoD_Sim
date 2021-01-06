@@ -155,7 +155,7 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
 
   if (mobilityModel == "ns3::ConstantPositionMobilityModel")
   {
-    Ptr<ListPositionAllocator> position;
+    Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
     m_configurator->GetDronesPosition(position);
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     mobility.SetPositionAllocator(position);
@@ -195,7 +195,7 @@ DroneScenarioHelper::SetAntennasPositionFromConfig()
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasNumber");
 
-  Ptr<ListPositionAllocator> position;
+  Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
   m_configurator->GetAntennasPosition(position);
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
