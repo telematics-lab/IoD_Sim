@@ -446,5 +446,36 @@ DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
   return this;
 }
 
+DroneScenarioHelper*
+DroneScenarioHelper::UseTestUdpEchoApplications()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("CreateIpv4Routing");
+
+  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
+  UdpEchoServerHelper echoServer (9);
+  ApplicationContainer serverApps = echoServer.Install (m_remoteNodes);
+  serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
+  serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
+
+  LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
+  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  ApplicationContainer clientApps = echoClient.Install (m_droneNodes);
+  for (uint32_t i = 0; i < m_droneNodes.GetN(); ++i)
+  {
+      clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
+      clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
+  }
+
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
+  return this;
+}
+
 
 } // namespace ns3

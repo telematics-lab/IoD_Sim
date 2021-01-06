@@ -64,6 +64,7 @@ public:
   DSH* SetRemotesNumber(uint32_t num);
   DSH* SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
   DSH* SetRemotesApplication(Ptr<ApplicationContainer> apps);
+  DSH* UseTestUdpEchoApplications();
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
