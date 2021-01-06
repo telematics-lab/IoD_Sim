@@ -35,6 +35,7 @@
         "DroneClient",
         "Scenario",
         "SimulationDuration",
-        "ScenarioConfigurationHelper"
+        "ScenarioConfigurationHelper",
+        "DroneScenarioHelper"
     ]
 }

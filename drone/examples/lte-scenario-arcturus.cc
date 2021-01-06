@@ -24,7 +24,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("LteScenarioArcturus");
+NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 int main (int argc, char **argv)
 {
@@ -42,7 +42,10 @@ int main (int argc, char **argv)
           ->CreateDronesToAntennasNetwork()
           ->CreateIpv4Routing();
 
-  Ptr<ApplicationContainer> clientApps = CreateObject<ApplicationContainer>();
+  NS_LOG_DEBUG("Drone1 IP: " << scenario->GetDroneIpv4Address(0));
+  NS_LOG_DEBUG("Drone2 IP: " << scenario->GetDroneIpv4Address(1));
+  NS_LOG_DEBUG("Remote1 IP: " << scenario->GetRemoteIpv4Address(0));
+
   for (uint32_t i = 0; i < CFG->GetDronesN(); ++i)
   {
     Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
@@ -52,7 +55,7 @@ int main (int argc, char **argv)
         "DestinationIpv4Address", Ipv4AddressValue(scenario->GetRemoteIpv4Address(0)));
     clientApp->SetStartTime(Seconds(CFG->GetDroneApplicationStartTime(i)));
     clientApp->SetStopTime(Seconds(CFG->GetDroneApplicationStopTime(i)));
-    clientApps->Add(clientApp);
+    scenario->SetDroneApplication(i, clientApp);
   }
 
   Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer>(
@@ -60,9 +63,7 @@ int main (int argc, char **argv)
       "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
   serverApp->SetStartTime(Seconds(CFG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CFG->GetRemoteApplicationStopTime(0)));
-
-  scenario->SetDronesApplication(clientApps)
-          ->SetRemoteApplication(0, serverApp);
+  scenario->SetRemoteApplication(0, serverApp);
 
   scenario->SetSimulationParameters(Seconds(10.0))
           ->Run();
