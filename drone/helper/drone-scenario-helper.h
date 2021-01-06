@@ -50,13 +50,13 @@ public:
   ~DroneScenarioHelper();
   DSH& SetDronesNumber(uint32_t num);
   DSH& SetDronesMobilityFromConfig();
-  DSH& SetDroneApplication(uint32_t  id, Ptr<Application> apps);
-  DSH& SetDronesApplication(Ptr<ApplicationContainer> apps);
+  DSH& SetDroneApplication(uint32_t id, Ptr<Application>& apps);
+  DSH& SetDronesApplication(Ptr<ApplicationContainer>& apps);
   DSH& SetAntennasNumber(uint32_t num);
   DSH& SetAntennasPositionFromConfig();
   DSH& SetRemotesNumber(uint32_t num);
-  DSH& SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
-  DSH& SetRemotesApplication(Ptr<ApplicationContainer> apps);
+  DSH& SetRemoteApplication(uint32_t  id, Ptr<Application>& apps);
+  DSH& SetRemotesApplication(Ptr<ApplicationContainer>& apps);
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
@@ -69,12 +69,12 @@ public:
   DSH& CreateIpv4Routing();
 
 private:
+  void Initialize(uint32_t argc, char **argv, const std::string name);
+  void SetNumber(NodeContainer& nodes, uint32_t  num);
   Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
   //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
-  void SetNumber(NodeContainer& nodes, uint32_t  num);
-  void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps);
-  void SetApplication(NodeContainer& nodes, uint32_t  id, Ptr<Application> app);
-  void Initialize(uint32_t argc, char **argv, const std::string name);
+  void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps);
+  void SetApplication(NodeContainer& nodes, uint32_t  id, Ptr<Application>& app);
 
   ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;

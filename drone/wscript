@@ -7,7 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('drone', ['core', 'network', 'applications', 'mobility', 'report'])
+    module = bld.create_ns3_module('drone', ['core', 'network', 'applications', 'mobility', 'report', 'lte'])
     module.source = [
         'model/constant-acceleration-drone-mobility-model.cc',
         'model/constant-acceleration-param.cc',
@@ -28,7 +28,7 @@ def build(bld):
         'model/zsp-list.cc',
         'model/component-manager.cc',
         'helper/scenario-configuration-helper.cc',
-        #'helper/drone-scenario-helper.cc',
+        'helper/drone-scenario-helper.cc',
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -57,7 +57,7 @@ def build(bld):
         'model/zsp-list.h',
         'model/component-manager.h',
         'helper/scenario-configuration-helper.h',
-        #'helper/drone-scenario-helper.h',
+        'helper/drone-scenario-helper.h',
         ]
 
     if bld.env.ENABLE_EXAMPLES:

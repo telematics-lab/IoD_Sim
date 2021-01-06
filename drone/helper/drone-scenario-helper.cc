@@ -127,7 +127,7 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
 
   if (mobilityModel == "ns3::ConstantPositionMobilityModel")
   {
-    Ptr<PositionAllocator> position;
+    Ptr<ListPositionAllocator> position;
     m_configurator->GetDronesPosition(position);
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     mobility.SetPositionAllocator(position);
@@ -167,7 +167,7 @@ DroneScenarioHelper::SetAntennasPositionFromConfig()
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasNumber");
 
-  Ptr<PositionAllocator> position;
+  Ptr<ListPositionAllocator> position;
   m_configurator->GetAntennasPosition(position);
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -315,10 +315,9 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 }
 
 
-
 // private
 void
-DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer> apps)
+DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps)
 {
   for (uint32_t i=0; i<apps->GetN(); ++i)
     nodes.Get(i)->AddApplication(apps->Get(i));
@@ -326,13 +325,13 @@ DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContai
 
 // private
 void
-DroneScenarioHelper::SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application>& app)
 {
   nodes.Get(id)->AddApplication(app);
 }
 
 DroneScenarioHelper&
-DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application>& app)
 {
   NS_LOG_FUNCTION(id << app);
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
@@ -352,9 +351,9 @@ DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
 }
 
 DroneScenarioHelper&
-DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
+DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer>& apps)
 {
-  NS_LOG_FUNCTION(apps);
+  NS_LOG_FUNCTION(&apps);
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
   if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
     NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
@@ -366,7 +365,7 @@ DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 }
 
 DroneScenarioHelper&
-DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application>& app)
 {
   NS_LOG_FUNCTION(id << app);
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
@@ -385,9 +384,9 @@ DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
 }
 
 DroneScenarioHelper&
-DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
+DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer>& apps)
 {
-  NS_LOG_FUNCTION(apps);
+  NS_LOG_FUNCTION(&apps);
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
   if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
     NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
@@ -397,8 +396,6 @@ DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
   NS_COMPMAN_REGISTER_COMPONENT();
   return *this;
 }
-
-
 
 
 } // namespace ns3
