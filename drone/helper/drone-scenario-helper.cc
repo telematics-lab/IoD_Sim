@@ -62,6 +62,34 @@ DroneScenarioHelper::GetConfigurator()
   return ScenarioConfigurationHelper::Get();
 }
 
+DroneScenarioHelper*
+DroneScenarioHelper::SetSimulationParameters(ns3::Time duration)
+{
+  NS_LOG_FUNCTION(duration);
+  NS_COMPMAN_REQUIRE_COMPONENT("Create");
+
+  Simulator::Stop(duration);
+
+  return this;
+}
+
+void
+DroneScenarioHelper::Run()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_REQUIRE_COMPONENT("SetSimulationParameters");
+  NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
+  NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
+  NS_COMPMAN_REQUIRE_COMPONENT("CreateIpv4Routing");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesApplication");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesApplication");
+
+  Simulator::Run();
+
+  NS_COMPMAN_REGISTER_COMPONENT();
+  return;
+}
+
 
 
 // private
@@ -316,6 +344,7 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 
 
 // private
+// why should I pass apps by reference?
 void
 DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps)
 {
@@ -325,13 +354,13 @@ DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContai
 
 // private
 void
-DroneScenarioHelper::SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application>& app)
+DroneScenarioHelper::SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app)
 {
   nodes.Get(id)->AddApplication(app);
 }
 
 DroneScenarioHelper*
-DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application>& app)
+DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(id << app);
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
@@ -351,7 +380,7 @@ DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application>& app)
 }
 
 DroneScenarioHelper*
-DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer>& apps)
+DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
@@ -365,7 +394,7 @@ DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer>& apps)
 }
 
 DroneScenarioHelper*
-DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application>& app)
+DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(id << app);
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
@@ -384,7 +413,7 @@ DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application>& app)
 }
 
 DroneScenarioHelper*
-DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer>& apps)
+DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
