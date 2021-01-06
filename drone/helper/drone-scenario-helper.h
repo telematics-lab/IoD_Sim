@@ -55,7 +55,6 @@ public:
 
   void Run();
 
-  ~DroneScenarioHelper();
   DSH* SetDronesNumber(uint32_t num);
   DSH* SetDronesMobilityFromConfig();
   DSH* SetDroneApplication(uint32_t id, Ptr<Application> apps);

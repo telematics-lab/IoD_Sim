@@ -29,16 +29,6 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 
-DroneScenarioHelper*
-DroneScenarioHelper::Create(uint32_t argc, char **argv, const std::string name)
-{
-  NS_LOG_FUNCTION(argc << argv << name);
-  this->Initialize(argc, argv, name);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
-}
-
 // private
 void
 DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string name)
@@ -48,10 +38,14 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string na
   m_configurator->Initialize(argc, argv, name);
 }
 
-DroneScenarioHelper::~DroneScenarioHelper()
+DroneScenarioHelper*
+DroneScenarioHelper::Create(uint32_t argc, char **argv, const std::string name)
 {
-  NS_LOG_FUNCTION_NOARGS();
-  Simulator::Destroy();
+  NS_LOG_FUNCTION(argc << argv << name);
+  this->Initialize(argc, argv, name);
+
+  NS_COMPMAN_REGISTER_COMPONENT();
+  return this;
 }
 
 ScenarioConfigurationHelper*
@@ -70,6 +64,7 @@ DroneScenarioHelper::SetSimulationParameters(ns3::Time duration)
 
   Simulator::Stop(duration);
 
+  NS_COMPMAN_REGISTER_COMPONENT();
   return this;
 }
 
@@ -85,6 +80,7 @@ DroneScenarioHelper::Run()
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesApplication");
 
   Simulator::Run();
+  Simulator::Destroy();
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return;
@@ -284,16 +280,40 @@ DroneScenarioHelper::CreateIpv4Routing()
   NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
 
-  Ipv4AddressHelper ipv4Helper;
-  ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
-  m_p2pIpv4 = ipv4Helper.Assign(m_p2pDevs);
+  InternetStackHelper internetHelper;
+  internetHelper.Install(m_droneNodes);
+  internetHelper.Install(m_remoteNodes);
 
-  ipv4Helper.SetBase ("2.0.0.0", "255.0.0.0");
+  Ipv4AddressHelper ipv4Helper;
+
+  ipv4Helper.SetBase ("200.0.0.0", "255.0.0.0");
   m_remoteIpv4 = ipv4Helper.Assign(m_remoteDevs);
 
+  ipv4Helper.SetBase ("100.0.0.0", "255.0.0.0");
+  m_p2pIpv4 = ipv4Helper.Assign(m_p2pDevs);
+
+  // assigning address 7.0.0.0/8
   m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
 
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  Ipv4StaticRoutingHelper routingHelper;
+  internetHelper.SetRoutingHelper(routingHelper);
+
+  // add to each remote a route to the PGW
+  Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+  for (uint32_t i=0; i<m_remoteNodes.GetN(); ++i)
+  {
+    Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(i)->GetObject<Ipv4>());
+    remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
+  }
+
+  // assign to each drone the default route to the SGW
+  for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)
+  {
+    Ptr<Ipv4StaticRouting> dronesStaticRoute = routingHelper.GetStaticRouting(m_droneNodes.Get(i)->GetObject<Ipv4>());
+    dronesStaticRoute->SetDefaultRoute(m_epcHelper->GetUeDefaultGatewayAddress(), 1);
+  }
+
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return this;
