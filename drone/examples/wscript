@@ -57,10 +57,8 @@ def build(bld):
                                   'core'])
     obj.source = 'lte-scenario-basic.cc'
 
-'''
     obj = bld.create_ns3_program('lte-scenario-arcturus',
                                  ['lte', 'drone', 'wifi',
                                   'internet', 'mobility', 'applications',
                                   'core'])
     obj.source = 'lte-scenario-arcturus.cc'
-'''

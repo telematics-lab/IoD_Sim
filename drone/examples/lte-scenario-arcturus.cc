@@ -28,40 +28,44 @@ NS_LOG_COMPONENT_DEFINE ("LteScenarioArcturus");
 
 int main (int argc, char **argv)
 {
-  auto scenario = DroneScenarioHelper::Create(argc, argv, "LTE Scenario - Arcturus");
-  auto CFG = scenario.GetConfigurator();
+  auto scenario = DroneScenarioHelper::Get();
+  scenario->Create(argc, argv, "LTE Scenario - Arcturus");
+  auto CFG = scenario->GetConfigurator();
 
-  Ptr<ListPositionAllocator> dronesPositions = CreateObject<ListPositionAllocator>();
-  CFG->GetDronesPosition(dronesPositions);
+  scenario->SetDronesNumber(CFG->GetDronesN())
+          ->SetDronesMobilityFromConfig()
+          ->SetAntennasNumber(CFG->GetAntennasN())
+          ->SetAntennasPositionFromConfig()
+          ->SetRemotesNumber(CFG->GetRemotesN())
+          ->CreateLteEpc()
+          ->CreateRemotesToEpcNetwork()
+          ->CreateDronesToAntennasNetwork()
+          ->CreateIpv4Routing();
 
-  Ptr<ListPositionAllocator> antennasPositions = CreateObject<ListPositionAllocator>();
-  CFG->GetAntennasPosition(antennasPositions);
-
-  ApplicationContainer clientApps;
+  Ptr<ApplicationContainer> clientApps = CreateObject<ApplicationContainer>();
   for (uint32_t i = 0; i < CFG->GetDronesN(); ++i)
   {
-    Ptr<Application> clientApp = CreateObject<DroneClient>();
+    Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
+        "Ipv4Address", Ipv4AddressValue(scenario->GetDroneIpv4Address(i)),
+        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
+        "Duration", DoubleValue(CFG->GetDuration()),
+        "DestinationIpv4Address", Ipv4AddressValue(scenario->GetRemoteIpv4Address(0)));
     clientApp->SetStartTime(Seconds(CFG->GetDroneApplicationStartTime(i)));
     clientApp->SetStopTime(Seconds(CFG->GetDroneApplicationStopTime(i)));
-    clientApps.Add(clientApp);
+    clientApps->Add(clientApp);
   }
 
-  ApplicationContainer serverApps;
-  Ptr<Application> serverApp = CreateObject<DroneServer>();
+  Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer>(
+      "Ipv4Address", Ipv4AddressValue(scenario->GetRemoteIpv4Address(0)),
+      "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
   serverApp->SetStartTime(Seconds(CFG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CFG->GetRemoteApplicationStopTime(0)));
-  serverApps.Add(serverApp);
 
+  scenario->SetDronesApplication(clientApps)
+          ->SetRemoteApplication(0, serverApp);
 
-  scenario.SetDronesNumber(CFG->GetDronesN())
-          .SetDronesPosition(dronesPositions)
-          .SetAntennasNumber(CFG->GetAntennasN())
-          .SetAntennasPosition(antennasPositions)
-          .SetRemotesNumber(CFG->GetRemotesN())
-          .SetDronesApplication(clientApps)
-          .SetRemotesApplication(serverApps);
-
-  scenario.Run();
+  scenario->SetSimulationParameters(Seconds(10.0))
+          ->Run();
 
 
   return 0;
