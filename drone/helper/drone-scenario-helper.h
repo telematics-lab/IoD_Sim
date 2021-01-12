@@ -42,16 +42,14 @@ namespace ns3
 {
 
 const std::string _mobilityModels[] = {
-  "ns3::ConstantPositionMobilityModel",
-  "ns3::RandomWaypointsMobilityModel",
-  "ns3::ConstantAccelerationDroneMobilityModel",
-  "ns3::ParametricSpeedDroneMobilityModel",
+  "ns3::ConstantPositionMobilityModel",             // CONSTANT_POSITION
+  "ns3::ConstantAccelerationDroneMobilityModel",    // CONSTANT_ACCELERATION
+  "ns3::ParametricSpeedDroneMobilityModel",         // PARAMETRIC_SPEED
 };
 
 enum _MobilityModelName
 {
   CONSTANT_POSITION,
-  RANDOM_WAYPOINTS,
   CONSTANT_ACCELERATION,
   PARAMETRIC_SPEED,
   ENUM_SIZE // Keep this element last, it would be the size of the enum
