@@ -141,44 +141,54 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
 
   std::string mobilityModel = m_configurator->GetDronesMobilityModel();
 
-  NS_ASSERT_MSG(
-      mobilityModel == "ns3::ParametricSpeedDroneMobilityModel" ||
-      mobilityModel == "ns3::ConstantAccelerationDroneMobilityModel" ||
-      mobilityModel == "ns3::ConstantPositionMobilityModel",
+  bool found = false;
+  uint32_t mobilityModelValue = 0;
+  while (mobilityModelValue < _MobilityModelName::ENUM_SIZE)
+  {
+    if (mobilityModel == _mobilityModels[mobilityModelValue]) break;
+    ++mobilityModelValue;
+  }
+
+  NS_ASSERT_MSG(mobilityModelValue < _MobilityModelName::ENUM_SIZE,
       "No mobility model exists with name '" << mobilityModel << "'. Please check configuration file.");
 
   MobilityHelper mobility;
 
-  if (mobilityModel == "ns3::ConstantPositionMobilityModel")
+  switch (mobilityModelValue)
   {
-    Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
-    m_configurator->GetDronesPosition(position);
-    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    mobility.SetPositionAllocator(position);
-    mobility.Install(m_droneNodes);
-  }
-  else
-  {
-    for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+    case CONSTANT_POSITION:
     {
-      if (mobilityModel == "ns3::ParametricSpeedDroneMobilityModel")
-      {
-        mobility.SetMobilityModel(mobilityModel,
-                                  "SpeedCoefficients", SpeedCoefficientsValue(m_configurator->GetDroneSpeedCoefficients (i)),
-                                  "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
-                                  "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
-      }
-      if (mobilityModel == "ns3::ConstantAccelerationDroneMobilityModel")
-      {
-        mobility.SetMobilityModel(mobilityModel,
-                                  "Acceleration", DoubleValue (m_configurator->GetDroneAcceleration (i)),
-                                  "MaxSpeed", DoubleValue (m_configurator->GetDroneMaxSpeed (i)),
-                                  "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
-                                  "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
-      }
+      Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
+      m_configurator->GetDronesPosition(position);
+      mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+      mobility.SetPositionAllocator(position);
+      mobility.Install(m_droneNodes);
+    } break;
 
-      mobility.Install (m_droneNodes.Get (i));
-    }
+    case PARAMETRIC_SPEED:
+    {
+      for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+      {
+        mobility.SetMobilityModel(mobilityModel,
+            "SpeedCoefficients", SpeedCoefficientsValue(m_configurator->GetDroneSpeedCoefficients (i)),
+            "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
+            "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
+        mobility.Install (m_droneNodes.Get (i));
+      }
+    } break;
+
+    case CONSTANT_ACCELERATION:
+    {
+      for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+      {
+        mobility.SetMobilityModel(mobilityModel,
+            "Acceleration", DoubleValue (m_configurator->GetDroneAcceleration (i)),
+            "MaxSpeed", DoubleValue (m_configurator->GetDroneMaxSpeed (i)),
+            "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
+            "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
+        mobility.Install (m_droneNodes.Get (i));
+      }
+    } break;
   }
 
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesMobility");

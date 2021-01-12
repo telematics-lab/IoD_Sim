@@ -41,12 +41,28 @@
 namespace ns3
 {
 
+const std::string _mobilityModels[] = {
+  "ns3::ConstantPositionMobilityModel",
+  "ns3::RandomWaypointsMobilityModel",
+  "ns3::ConstantAccelerationDroneMobilityModel",
+  "ns3::ParametricSpeedDroneMobilityModel",
+};
+
+enum _MobilityModelName
+{
+  CONSTANT_POSITION,
+  RANDOM_WAYPOINTS,
+  CONSTANT_ACCELERATION,
+  PARAMETRIC_SPEED,
+  ENUM_SIZE // Keep this element last, it would be the size of the enum
+};
+
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
   ScenarioConfigurationHelper* GetConfigurator();
   DroneScenarioHelper* Create(uint32_t argc, char **argv, const std::string name);
-  DroneScenarioHelper* SetSimulationParameters(ns3::Time duration);
+  DroneScenarioHelper* SetSimulationParameters(Time duration);
   // SetSimulationParametersFromConfig
   // EnablePcap
   // EnablePcapAll
@@ -77,7 +93,7 @@ public:
   DSH* CreateIpv4Routing();
 
 private:
-  void Initialize(uint32_t argc, char **argv, const std::string name);
+  void Initialize(uint32_t argc, char **argv, const ::std::string name);
   void SetNumber(NodeContainer& nodes, uint32_t  num);
   Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
   //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
