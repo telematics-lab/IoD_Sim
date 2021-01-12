@@ -141,7 +141,6 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
 
   std::string mobilityModel = m_configurator->GetDronesMobilityModel();
 
-  bool found = false;
   uint32_t mobilityModelValue = 0;
   while (mobilityModelValue < _MobilityModelName::ENUM_SIZE)
   {
