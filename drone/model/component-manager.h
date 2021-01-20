@@ -39,6 +39,11 @@
 #define NS_COMPMAN_CHECK_MULTI_COMPONENT(param, num) NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, 0, num-1)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
 #define NS_COMPMAN_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
+/// Use this as the only interface for ComponentManager to exclude a component at the beginning of a method.
+#define NS_COMPMAN_EXCLUDE_COMPONENT(param) ComponentManager::Get()->ExcludeComponent((uintptr_t)(void*)this, __FUNCTION__, param)
+/// Use this as the only interface for ComponentManager to avoid a component to be repeated (at the beginning of a method) if it is going to be registered.
+#define NS_COMPMAN_MAKE_UNIQUE() NS_COMPMAN_EXCLUDE_COMPONENT(__FUNCTION__)
+
 namespace ns3
 {
 
@@ -85,7 +90,7 @@ public:
 
   /**
    * \brief Asks for a method of the same object to be called before the caller method.
-   *        If it's not been called stops the program.
+   *        If it's not been called stops the program. (Inverse of `ExcludeComponent`)
    *        Use with `NS_COMPMAN_REGISTER_COMPONENT("RequiredMethodName")`
    * \param object The pointer to the caller object. The component will be searched inside this object's set.
    *               The macro uses `(uintptr_t)(void*)this` for that.
@@ -95,6 +100,18 @@ public:
    *             This should be explicitly passed even inside the macro.
    */
   void RequireComponent(uintptr_t object, std::string caller, std::string comp);
+
+  /**
+   * \brief Asks for a method of the same object to NOT be called before the caller method.
+   *        If it's been called already stops the program. (Inverse of `RequireComponent`)
+   * \param object The pointer to the caller object. The component will be searched inside this object's set.
+   *               The macro uses `(uintptr_t)(void*)this` for that.
+   * \param caller The name of the caller function that is excluding the component.
+   *               The macro uses builtin `__FUNCTION__` for that.
+   * \param comp The component name to search.
+   *             This should be explicitly passed even inside the macro.
+   */
+   void ExcludeComponent(uintptr_t object, std::string caller, std::string comp);
 
 private:
   std::unordered_map<uintptr_t, std::unordered_set<std::string>> m_components;
