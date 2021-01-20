@@ -131,6 +131,18 @@ DroneScenarioHelper::SetRemotesNumber(uint32_t num)
   return this;
 }
 
+DroneScenarioHelper*
+DroneScenarioHelper::SetNodesNumberFromConfig()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  this->SetDronesNumber(m_configurator->GetDronesN());
+  this->SetAntennasNumber(m_configurator->GetAntennasN());
+  this->SetRemotesNumber(m_configurator->GetRemotesN());
+
+  return this;
+}
+
 
 
 DroneScenarioHelper*
@@ -219,14 +231,29 @@ DroneScenarioHelper::CreateLteEpc()
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
-  // Makes the LTE Helper to manage LTE connections
+  // Using Carrier Aggregation
+  Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (true));
+  Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
+  Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
+  //
+  Config::SetDefault("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue(true));
+  Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(true));
+  Config::SetDefault("ns3::LteHelper::UseIdealRrc", BooleanValue(true));
+  Config::SetDefault("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue(true));
+
+  ConfigStore config;
+  config.ConfigureDefaults();
+
   m_lteHelper = CreateObject<LteHelper> ();
-  // Makes the Evolved Packet Core that manages the connections
-  // between UEs, eNBs and the internet network
-  // EPC mainly provides the PGW to where remotes connect to the LTE network
-  // And the SGW and MME to where eNBs (and so UEs) connect.
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
+
+  m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
+
+  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair Scheduler
+  // m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin Scheduler
+  m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
+  m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return this;
@@ -269,14 +296,33 @@ DroneScenarioHelper::CreateDronesToAntennasNetwork()
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesMobility");
   NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasPosition");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateLteEpc");
+  NS_COMPMAN_REQUIRE_COMPONENT("InstallInternetStack");
+
+  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
 
   m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
+  if (m_antennaNodes.GetN() > 1)
+    m_lteHelper->AddX2Interface(m_antennaNodes);
   m_droneDevs = m_lteHelper->InstallUeDevice(m_droneNodes);
 
-  /* Try to connect all the drones to each antenna
+  // Try to connect each drone to each antenna (?)
   for (uint32_t i=0; i<m_antennaDevs.GetN(); ++i)
     m_lteHelper->Attach(m_droneDevs, m_antennaDevs.Get(i));
-  */
+
+  NS_COMPMAN_REGISTER_COMPONENT();
+  return this;
+}
+
+DroneScenarioHelper*
+DroneScenarioHelper::InstallInternetStack()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
+
+  m_internetHelper.Install(m_droneNodes);
+  m_internetHelper.Install(m_remoteNodes);
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return this;
@@ -288,24 +334,21 @@ DroneScenarioHelper::CreateIpv4Routing()
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
-
-  InternetStackHelper internetHelper;
-  internetHelper.Install(m_droneNodes);
-  internetHelper.Install(m_remoteNodes);
+  NS_COMPMAN_REQUIRE_COMPONENT("InstallInternetStack");
 
   Ipv4AddressHelper ipv4Helper;
 
-  ipv4Helper.SetBase ("200.0.0.0", "255.0.0.0");
+  ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
   m_remoteIpv4 = ipv4Helper.Assign(m_remoteDevs);
 
-  ipv4Helper.SetBase ("100.0.0.0", "255.0.0.0");
-  m_p2pIpv4 = ipv4Helper.Assign(m_p2pDevs);
+  //ipv4Helper.SetBase ("100.0.0.0", "255.0.0.0");
+  //m_p2pIpv4 = ipv4Helper.Assign(m_p2pDevs);
 
   // assigning address 7.0.0.0/8
   m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
 
   Ipv4StaticRoutingHelper routingHelper;
-  internetHelper.SetRoutingHelper(routingHelper);
+  m_internetHelper.SetRoutingHelper(routingHelper);
 
   // add to each remote a route to the PGW
   Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
@@ -321,6 +364,22 @@ DroneScenarioHelper::CreateIpv4Routing()
     Ptr<Ipv4StaticRouting> dronesStaticRoute = routingHelper.GetStaticRouting(m_droneNodes.Get(i)->GetObject<Ipv4>());
     dronesStaticRoute->SetDefaultRoute(m_epcHelper->GetUeDefaultGatewayAddress(), 1);
   }
+
+/*
+  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
+  GbrQosInformation qos;
+  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
+  //qos.gbrUl = 132;
+  //qos.mbrDl = qos.gbrDl;
+  //qos.mbrUl = qos.gbrUl;
+  qos.gbrDl = 20000000; 	   // Downlink GBR (bit/s) ---> 20 Mbps
+  qos.gbrUl = 5000000;	 	  // Uplink GBR ---> 5 Mbps
+  qos.mbrDl = 20000000;		 // Downlink MBR
+  qos.mbrUl = 5000000; 		// Uplink MBR,
+  EpsBearer bearer(q, qos);
+  m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
+*/
+
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
@@ -373,7 +432,7 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 
 
 // private
-// why should I pass apps by reference?
+// why should I pass pointers to apps container by reference?
 void
 DroneScenarioHelper::SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps)
 {
@@ -466,8 +525,8 @@ DroneScenarioHelper::UseTestUdpEchoApplications()
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
   UdpEchoServerHelper echoServer (9);
   ApplicationContainer serverApps = echoServer.Install (m_remoteNodes);
-  serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
-  serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
+  serverApps.Start (Seconds (m_configurator->GetRemoteApplicationStartTime (0)));
+  serverApps.Stop (Seconds (m_configurator->GetRemoteApplicationStopTime (0)));
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
   UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
@@ -477,8 +536,8 @@ DroneScenarioHelper::UseTestUdpEchoApplications()
   ApplicationContainer clientApps = echoClient.Install (m_droneNodes);
   for (uint32_t i = 0; i < m_droneNodes.GetN(); ++i)
   {
-      clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
-      clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
+    clientApps.Get (i)->SetStartTime(Seconds (m_configurator->GetDroneApplicationStartTime (i)));
+    clientApps.Get (i)->SetStopTime(Seconds (m_configurator->GetDroneApplicationStopTime (i)));
   }
 
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");

@@ -35,6 +35,7 @@
 #include <ns3/csma-module.h>
 #include <ns3/internet-module.h>
 #include <ns3/applications-module.h>
+#include <ns3/config-store-module.h>
 
 #define DSH DroneScenarioHelper
 
@@ -69,6 +70,7 @@ public:
 
   void Run();
 
+  DSH* SetNodesNumberFromConfig();
   DSH* SetDronesNumber(uint32_t num);
   DSH* SetDronesMobilityFromConfig();
   DSH* SetDroneApplication(uint32_t id, Ptr<Application> apps);
@@ -79,6 +81,7 @@ public:
   DSH* SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
   DSH* SetRemotesApplication(Ptr<ApplicationContainer> apps);
   DSH* UseTestUdpEchoApplications();
+  DSH* InstallInternetStack();
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
@@ -105,6 +108,7 @@ private:
   Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4, m_p2pIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
+  InternetStackHelper m_internetHelper;
 
 };
 
