@@ -32,11 +32,10 @@ int main (int argc, char **argv)
   scenario->Create(argc, argv, "LTE Scenario - Arcturus");
   auto CFG = scenario->GetConfigurator();
 
-  scenario->SetDronesNumber(CFG->GetDronesN())
+  scenario->SetNodesNumberFromConfig()
           ->SetDronesMobilityFromConfig()
-          ->SetAntennasNumber(CFG->GetAntennasN())
           ->SetAntennasPositionFromConfig()
-          ->SetRemotesNumber(CFG->GetRemotesN())
+          ->InstallInternetStack()
           ->CreateLteEpc()
           ->CreateRemotesToEpcNetwork()
           ->CreateDronesToAntennasNetwork()
@@ -46,7 +45,7 @@ int main (int argc, char **argv)
   NS_LOG_DEBUG("Drone2 IP: " << scenario->GetDroneIpv4Address(1));
   NS_LOG_DEBUG("Remote1 IP: " << scenario->GetRemoteIpv4Address(0));
 
-/*
+
   for (uint32_t i = 0; i < CFG->GetDronesN(); ++i)
   {
     Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
@@ -65,8 +64,9 @@ int main (int argc, char **argv)
   serverApp->SetStartTime(Seconds(CFG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CFG->GetRemoteApplicationStopTime(0)));
   scenario->SetRemoteApplication(0, serverApp);
-*/
-  scenario->UseTestUdpEchoApplications();
+
+
+  //scenario->UseTestUdpEchoApplications();
 
   scenario->SetSimulationParameters(Seconds(10.0))
           ->Run();
