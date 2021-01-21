@@ -42,6 +42,8 @@ DroneScenarioHelper*
 DroneScenarioHelper::Create(uint32_t argc, char **argv, const std::string name)
 {
   NS_LOG_FUNCTION(argc << argv << name);
+  NS_COMPMAN_ENSURE_UNIQUE();
+
   this->Initialize(argc, argv, name);
 
   NS_COMPMAN_REGISTER_COMPONENT();
@@ -60,6 +62,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetSimulationParameters(ns3::Time duration)
 {
   NS_LOG_FUNCTION(duration);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
   Simulator::Stop(duration);
@@ -72,6 +75,7 @@ void
 DroneScenarioHelper::Run()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetSimulationParameters");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
@@ -99,6 +103,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetDronesNumber(uint32_t num)
 {
   NS_LOG_FUNCTION(num);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
   this->SetNumber(m_droneNodes, num);
@@ -111,6 +116,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetAntennasNumber(uint32_t num)
 {
   NS_LOG_FUNCTION(num);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
   this->SetNumber(m_antennaNodes, num);
@@ -123,6 +129,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetRemotesNumber(uint32_t num)
 {
   NS_LOG_FUNCTION(num);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
   this->SetNumber(m_remoteNodes, num);
@@ -149,6 +156,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetDronesMobilityFromConfig()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
 
   std::string mobilityModel = m_configurator->GetDronesMobilityModel();
@@ -210,6 +218,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetAntennasPositionFromConfig()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasNumber");
 
   Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
@@ -229,6 +238,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::CreateLteEpc()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
   // Using Carrier Aggregation
@@ -263,6 +273,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::CreateRemotesToEpcNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateLteEpc");
 
@@ -293,6 +304,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::CreateDronesToAntennasNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesMobility");
   NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasPosition");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateLteEpc");
@@ -318,6 +330,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::InstallInternetStack()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
 
@@ -332,6 +345,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::CreateIpv4Routing()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
   NS_COMPMAN_REQUIRE_COMPONENT("InstallInternetStack");
@@ -471,6 +485,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
   if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
     NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
@@ -504,6 +519,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
   if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
     NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
@@ -518,6 +534,7 @@ DroneScenarioHelper*
 DroneScenarioHelper::UseTestUdpEchoApplications()
 {
   NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
   NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
   NS_COMPMAN_REQUIRE_COMPONENT("CreateIpv4Routing");
