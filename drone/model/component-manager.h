@@ -42,7 +42,7 @@
 /// Use this as the only interface for ComponentManager to exclude a component at the beginning of a method.
 #define NS_COMPMAN_EXCLUDE_COMPONENT(param) ComponentManager::Get()->ExcludeComponent((uintptr_t)(void*)this, __FUNCTION__, param)
 /// Use this as the only interface for ComponentManager to avoid a component to be repeated (at the beginning of a method) if it is going to be registered.
-#define NS_COMPMAN_MAKE_UNIQUE() NS_COMPMAN_EXCLUDE_COMPONENT(__FUNCTION__)
+#define NS_COMPMAN_ENSURE_UNIQUE() NS_COMPMAN_EXCLUDE_COMPONENT(__FUNCTION__)
 
 namespace ns3
 {
