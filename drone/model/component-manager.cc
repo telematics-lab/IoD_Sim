@@ -136,14 +136,14 @@ ComponentManager::ExcludeComponent(uintptr_t object, std::string caller, std::st
 
   std::unordered_set<std::string> *components = &m_components[object];
 
-  bool found = components->find(comp) != components->end();
+  bool notFound = components->find(comp) == components->end();
 
   if (caller != comp)
-    NS_ASSERT_MSG(found,
+    NS_ASSERT_MSG(notFound,
       "For the object " << object << " the component '" << caller
             << "' cannot be called if '" << comp << "' has already been used!");
   else
-    NS_ASSERT_MSG(found,
+    NS_ASSERT_MSG(notFound,
       "For the object " << object << " the component '" << caller << "' can be called only once!");
 }
 
