@@ -260,8 +260,8 @@ DroneScenarioHelper::CreateLteEpc()
 
   m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
 
-  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair Scheduler
-  // m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin Scheduler
+  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
+  // m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
   m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
@@ -284,6 +284,7 @@ DroneScenarioHelper::CreateRemotesToEpcNetwork()
   p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   m_p2pDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
 
+  /* JUST LIMIT AT 1 REMOTE WHILE DEBUGGING
   if (m_remoteNodes.GetN() > 1)
   {
     // if more than 1 remote is used, connect them via LAN. Only the first
@@ -294,7 +295,9 @@ DroneScenarioHelper::CreateRemotesToEpcNetwork()
     m_remoteDevs = csmaHelper.Install (m_remoteNodes);
   }
   else
+  */
     m_remoteDevs.Add(m_p2pDevs.Get(1));
+
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return this;
