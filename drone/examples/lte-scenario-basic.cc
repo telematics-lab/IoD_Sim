@@ -23,8 +23,8 @@
 #include <ns3/point-to-point-module.h>
 #include <ns3/config-store-module.h>
 #include <ns3/applications-module.h>
-//#include <ns3/drone-client.h>
-//#include <ns3/drone-server.h>
+#include <ns3/drone-client.h>
+#include <ns3/drone-server.h>
 #include <ns3/scenario-configuration-helper.h>
 
 using namespace ns3;
@@ -94,27 +94,6 @@ int main (int argc, char *argv[])
 
   lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
-  NS_LOG_INFO("> Creating applications for host.");
-  UdpEchoServerHelper echoServer (9);
-  ApplicationContainer serverApps = echoServer.Install (hostNodes);
-  serverApps.Start (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0)));
-  serverApps.Stop (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0)));
-
-  LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  NS_LOG_INFO("> Creating applications for drones.");
-  UdpEchoClientHelper echoClient (hostIp, 9);
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-  ApplicationContainer clientApps = echoClient.Install (ueNodes);
-  for (uint32_t i = 0; i < ueNodes.GetN(); ++i)
-  {
-      clientApps.Get (i)->SetStartTime(Seconds (CONFIGURATOR->GetDroneApplicationStartTime (i)));
-      clientApps.Get (i)->SetStopTime(Seconds (CONFIGURATOR->GetDroneApplicationStopTime (i)));
-  }
-
-/*
   Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
         "Ipv4Address", Ipv4AddressValue(hostIp),
         "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
@@ -130,7 +109,6 @@ int main (int argc, char *argv[])
 
     ueNodes.Get(i)->AddApplication(client);
   }
-*/
 
   std::stringstream p2pPath, ipPath;
   std::string path = CONFIGURATOR->GetResultsPath ();
