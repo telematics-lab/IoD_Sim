@@ -605,4 +605,43 @@ ScenarioConfigurationHelper::GetRemoteApplicationStopTime (uint32_t i) const
     return GetDuration ();
 }
 
+const std::string
+ScenarioConfigurationHelper::GetProtocol() const
+{
+  NS_ASSERT_MSG (m_config.HasMember ("protocol")
+                 && m_config["protocol"].IsString (),
+                 "Please define protocol in configuration file.");
+
+  const auto protocol = m_config["protocol"].GetString ();
+
+  NS_ASSERT_MSG (protocol == "wifi" || protocol == "lte",
+                 "Unknown or unsupported protocol named '" << protocol << "'.");
+
+  return protocol;
+}
+
+const std::vector<std::pair<std::string, std::string>>
+ScenarioConfigurationHelper::GetProtocolSettings() const
+{
+  std::vector<std::pair<std::string, std::string>> settings;
+
+  if (m_config.HasMember ("protocolSettings"))
+    {
+      NS_ASSERT (m_config["protocolSettings"].IsArray ());
+
+      NS_ASSERT_MSG (m_config["protocolSettings"].Size () % 2 == 0,
+                     "Check protocolSettings: elements in list are not an even number, something is missing.");
+
+      for (auto i = m_config["protocolSettings"].Begin (); i != m_config["protocolSettings"].End (); i += 2)
+        {
+          NS_ASSERT ((*i).IsString ());
+          NS_ASSERT ((*(i+1)).IsString());
+
+          settings.push_back ({(*i).GetString (), (*(i+1)).GetString ()});
+        }
+    }
+
+  return settings;
+}
+
 } // namespace ns3

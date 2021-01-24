@@ -191,6 +191,15 @@ public:
    */
   const double GetRemoteApplicationStopTime (uint32_t i) const;
 
+  /**
+   * \return a string defining the protocol used (at the moment only wifi and lte are supported)
+   */
+  const std::string GetProtocol() const;
+  /**
+   * \brief Returns a vector with all the configuration strings for the protocol
+   * \return a vector of pairs containing the key and the value extracted from config
+   */
+  const std::vector<std::pair<std::string, std::string>> GetProtocolSettings() const;
 
   /**
    * \brief default destructor
