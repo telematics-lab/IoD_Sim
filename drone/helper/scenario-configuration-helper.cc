@@ -612,12 +612,7 @@ ScenarioConfigurationHelper::GetProtocol() const
                  && m_config["protocol"].IsString (),
                  "Please define protocol in configuration file.");
 
-  const auto protocol = m_config["protocol"].GetString ();
-
-  NS_ASSERT_MSG (protocol == "wifi" || protocol == "lte",
-                 "Unknown or unsupported protocol named '" << protocol << "'.");
-
-  return protocol;
+  return m_config["protocol"].GetString ();
 }
 
 const std::vector<std::pair<std::string, std::string>>
