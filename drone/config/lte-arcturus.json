@@ -1,4 +1,18 @@
 {
+    "protocol": "lte",
+    "protocolSettings": [
+        "ns3::LteHelper::UseCa", "true",
+        "ns3::LteHelper::NumberOfComponentCarriers", "2",
+        "ns3::LteHelper::EnbComponentCarrierManager", "ns3::RrComponentCarrierManager",
+        "ns3::LteSpectrumPhy::CtrlErrorModelEnabled", "true",
+        "ns3::LteSpectrumPhy::DataErrorModelEnabled", "true",
+        "ns3::LteHelper::UseIdealRrc", "true",
+        "ns3::LteHelper::UsePdschForCqiGeneration", "true",
+        "ns3::LteHelper::PathlossModel", "ns3::Cost231PropagationLossModel",
+        "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/HarqEnabled", "true",
+        "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/CqiTimerThreshold", "1000"
+    ],
     "duration": 10.0,
 
     "dronesMobilityModel": "ns3::ConstantPositionMobilityModel",
