@@ -37,8 +37,6 @@
 #include <ns3/applications-module.h>
 #include <ns3/config-store-module.h>
 
-#define DSH DroneScenarioHelper
-
 namespace ns3
 {
 
@@ -77,6 +75,11 @@ public:
   Ipv4Address GetDroneIpv4Address(uint32_t id);
   Ipv4Address GetRemoteIpv4Address(uint32_t id);
 
+  void SetDroneApplication(uint32_t id, Ptr<Application> apps);
+  void SetDronesApplication(Ptr<ApplicationContainer> apps);
+  void SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
+  void SetRemotesApplication(Ptr<ApplicationContainer> apps);
+
 
 private:
 
@@ -96,10 +99,6 @@ private:
 
 
 
-  void SetDroneApplication(uint32_t id, Ptr<Application> apps);
-  void SetDronesApplication(Ptr<ApplicationContainer> apps);
-  void SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
-  void SetRemotesApplication(Ptr<ApplicationContainer> apps);
   void UseTestUdpEchoApplications();
   void InstallInternetStack();
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
