@@ -29,46 +29,33 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 
-// private
 void
 DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string name)
 {
   NS_LOG_FUNCTION(argc << argv << name);
-  m_configurator = ScenarioConfigurationHelper::Get();
-  m_configurator->Initialize(argc, argv, name);
-}
-
-DroneScenarioHelper*
-DroneScenarioHelper::Create(uint32_t argc, char **argv, const std::string name)
-{
-  NS_LOG_FUNCTION(argc << argv << name);
   NS_COMPMAN_ENSURE_UNIQUE();
 
-  this->Initialize(argc, argv, name);
+  m_configurator = ScenarioConfigurationHelper::Get();
+  m_configurator->Initialize(argc, argv, name);
+
+  this->SetSimulationParameters(Seconds(m_configurator->GetDuration()));
+
+  m_protocol = m_configurator->GetProtocol();
+
+  this->SetNodesNumber();
+
+  this->SetMobilityModels();
+
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
 }
 
 ScenarioConfigurationHelper*
 DroneScenarioHelper::GetConfigurator()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
   return ScenarioConfigurationHelper::Get();
-}
-
-DroneScenarioHelper*
-DroneScenarioHelper::SetSimulationParameters(ns3::Time duration)
-{
-  NS_LOG_FUNCTION(duration);
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
-
-  Simulator::Stop(duration);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
 }
 
 void
@@ -76,88 +63,51 @@ DroneScenarioHelper::Run()
 {
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("SetSimulationParameters");
-  NS_COMPMAN_REQUIRE_COMPONENT("CreateRemotesToEpcNetwork");
-  NS_COMPMAN_REQUIRE_COMPONENT("CreateDronesToAntennasNetwork");
-  NS_COMPMAN_REQUIRE_COMPONENT("CreateIpv4Routing");
-  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesApplication");
-  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesApplication");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   Simulator::Run();
   Simulator::Destroy();
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return;
 }
 
 
 
 // private
+
 void
-DroneScenarioHelper::SetNumber(NodeContainer& nodes, uint32_t num)
+DroneScenarioHelper::SetSimulationParameters(Time duration)
 {
-  nodes.Create(num);
+  NS_LOG_FUNCTION(duration);
+
+  Simulator::Stop(duration);
 }
 
-DroneScenarioHelper*
-DroneScenarioHelper::SetDronesNumber(uint32_t num)
-{
-  NS_LOG_FUNCTION(num);
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
-
-  this->SetNumber(m_droneNodes, num);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
-}
-
-DroneScenarioHelper*
-DroneScenarioHelper::SetAntennasNumber(uint32_t num)
-{
-  NS_LOG_FUNCTION(num);
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
-
-  this->SetNumber(m_antennaNodes, num);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
-}
-
-DroneScenarioHelper*
-DroneScenarioHelper::SetRemotesNumber(uint32_t num)
-{
-  NS_LOG_FUNCTION(num);
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
-
-  this->SetNumber(m_remoteNodes, num);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
-}
-
-DroneScenarioHelper*
-DroneScenarioHelper::SetNodesNumberFromConfig()
+void
+DroneScenarioHelper::SetNodesNumber()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  this->SetDronesNumber(m_configurator->GetDronesN());
-  this->SetAntennasNumber(m_configurator->GetAntennasN());
-  this->SetRemotesNumber(m_configurator->GetRemotesN());
-
-  return this;
+  m_droneNodes.Create(m_configurator->GetDronesN());
+  if (m_protocol == "lte") m_antennaNodes.Create(m_configurator->GetAntennasN());
+  if (m_protocol == "wifi") m_zspNodes.Create(m_configurator->GetZspsN());
+  m_remoteNodes.Create(m_configurator->GetRemotesN());
 }
 
-
-
-DroneScenarioHelper*
-DroneScenarioHelper::SetDronesMobilityFromConfig()
+void
+DroneScenarioHelper::SetMobilityModels()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("SetDronesNumber");
+
+  this->SetDronesMobility();
+  if (m_protocol == "lte") this->SetAntennasPosition();
+  if (m_protocol == "wifi") this->SetZspsMobility();
+}
+
+void
+DroneScenarioHelper::SetDronesMobility()
+{
+  NS_LOG_FUNCTION_NOARGS();
 
   std::string mobilityModel = m_configurator->GetDronesMobilityModel();
 
@@ -209,17 +159,12 @@ DroneScenarioHelper::SetDronesMobilityFromConfig()
       }
     } break;
   }
-
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesMobility");
-  return this;
 }
 
-DroneScenarioHelper*
-DroneScenarioHelper::SetAntennasPositionFromConfig()
+void
+DroneScenarioHelper::SetAntennasPosition()
 {
   NS_LOG_FUNCTION_NOARGS();
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("SetAntennasNumber");
 
   Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
   m_configurator->GetAntennasPosition(position);
@@ -227,19 +172,23 @@ DroneScenarioHelper::SetAntennasPositionFromConfig()
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(position);
   mobility.Install(m_antennaNodes);
+}
 
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetAntennasPosition");
-  return this;
+void
+DroneScenarioHelper::SetZspsMobility()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  // TODO
 }
 
 
-
-DroneScenarioHelper*
+void
 DroneScenarioHelper::CreateLteEpc()
 {
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Create");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   // Using Carrier Aggregation
   Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (true));
@@ -266,10 +215,10 @@ DroneScenarioHelper::CreateLteEpc()
   m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::CreateRemotesToEpcNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -300,10 +249,10 @@ DroneScenarioHelper::CreateRemotesToEpcNetwork()
 
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::CreateDronesToAntennasNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -326,10 +275,10 @@ DroneScenarioHelper::CreateDronesToAntennasNetwork()
     m_lteHelper->Attach(m_droneDevs, m_antennaDevs.Get(i));
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::InstallInternetStack()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -341,10 +290,10 @@ DroneScenarioHelper::InstallInternetStack()
   m_internetHelper.Install(m_remoteNodes);
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::CreateIpv4Routing()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -401,7 +350,7 @@ DroneScenarioHelper::CreateIpv4Routing()
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
 Ipv4InterfaceContainer
@@ -464,7 +413,7 @@ DroneScenarioHelper::SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Appli
   nodes.Get(id)->AddApplication(app);
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(id << app);
@@ -481,10 +430,10 @@ DroneScenarioHelper::SetDroneApplication(uint32_t id, Ptr<Application> app)
     if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
       NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
   }
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
@@ -496,10 +445,10 @@ DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
   this->SetApplications(m_droneNodes, apps);
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(id << app);
@@ -515,10 +464,10 @@ DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
     if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
       NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
   }
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
 {
   NS_LOG_FUNCTION(&apps);
@@ -530,10 +479,10 @@ DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
   this->SetApplications(m_remoteNodes, apps);
 
   NS_COMPMAN_REGISTER_COMPONENT();
-  return this;
+
 }
 
-DroneScenarioHelper*
+void
 DroneScenarioHelper::UseTestUdpEchoApplications()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -562,7 +511,7 @@ DroneScenarioHelper::UseTestUdpEchoApplications()
 
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
-  return this;
+
 }
 
 

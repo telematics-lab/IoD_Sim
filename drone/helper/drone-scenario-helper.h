@@ -53,59 +53,65 @@ enum _MobilityModelName
   CONSTANT_POSITION,
   CONSTANT_ACCELERATION,
   PARAMETRIC_SPEED,
-  ENUM_SIZE // Keep this element last, it would be the size of the enum
+  ENUM_SIZE // Keep last, size of the enum
+};
+
+enum _Entity
+{
+  DRONE,
+  REMOTE,
+  ANTENNA,
+  ZSP
 };
 
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
   ScenarioConfigurationHelper* GetConfigurator();
-  DroneScenarioHelper* Create(uint32_t argc, char **argv, const std::string name);
-  DroneScenarioHelper* SetSimulationParameters(Time duration);
-  // SetSimulationParametersFromConfig
-  // EnablePcap
-  // EnablePcapAll
-  // EnableAsciiTracing
-  // EnableAsciiTracingAll
+  void Initialize(uint32_t argc, char **argv, const std::string name);
 
   void Run();
-
-  DSH* SetNodesNumberFromConfig();
-  DSH* SetDronesNumber(uint32_t num);
-  DSH* SetDronesMobilityFromConfig();
-  DSH* SetDroneApplication(uint32_t id, Ptr<Application> apps);
-  DSH* SetDronesApplication(Ptr<ApplicationContainer> apps);
-  DSH* SetAntennasNumber(uint32_t num);
-  DSH* SetAntennasPositionFromConfig();
-  DSH* SetRemotesNumber(uint32_t num);
-  DSH* SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
-  DSH* SetRemotesApplication(Ptr<ApplicationContainer> apps);
-  DSH* UseTestUdpEchoApplications();
-  DSH* InstallInternetStack();
 
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
   Ipv4Address GetDroneIpv4Address(uint32_t id);
   Ipv4Address GetRemoteIpv4Address(uint32_t id);
 
-  DSH* CreateLteEpc();
-  DSH* CreateRemotesToEpcNetwork();
-  DSH* CreateDronesToAntennasNetwork();
-  DSH* CreateIpv4Routing();
 
 private:
-  void Initialize(uint32_t argc, char **argv, const ::std::string name);
-  void SetNumber(NodeContainer& nodes, uint32_t  num);
-  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
-  //void SetPosition(NodeContainer& nodes, Ptr<PositionAllocator> pos);
+
+  void SetSimulationParameters(Time duration);
+  void SetNodesNumber();
+  void SetMobilityModels();
+  void SetDronesMobility();
+  void SetAntennasPosition();
+  void SetZspsMobility();
+
+
+
+  void CreateLteEpc();
+  void CreateRemotesToEpcNetwork();
+  void CreateDronesToAntennasNetwork();
+  void CreateIpv4Routing();
+
+
+
+  void SetDroneApplication(uint32_t id, Ptr<Application> apps);
+  void SetDronesApplication(Ptr<ApplicationContainer> apps);
+  void SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
+  void SetRemotesApplication(Ptr<ApplicationContainer> apps);
+  void UseTestUdpEchoApplications();
+  void InstallInternetStack();
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t  id, Ptr<Application> app);
+  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
 
+  std::string m_protocol;
   ScenarioConfigurationHelper *m_configurator;
-  NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
-  NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs, m_p2pDevs;
-  ApplicationContainer m_droneApps, m_remoteApps;
-  Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4, m_p2pIpv4;
+  NodeContainer m_droneNodes, m_antennaNodes, m_zspNodes, m_remoteNodes;
+  NetDeviceContainer m_droneDevs, m_antennaDevs, m_zspDevs, m_remoteDevs, m_p2pDevs;
+  ApplicationContainer m_droneApps, m_zspApps, m_remoteApps;
+  Ipv4InterfaceContainer m_droneIpv4, m_zspIpv4, m_remoteIpv4, m_p2pIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   InternetStackHelper m_internetHelper;
