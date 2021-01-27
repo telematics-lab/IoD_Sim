@@ -616,7 +616,7 @@ ScenarioConfigurationHelper::GetProtocol() const
 }
 
 const std::vector<std::pair<std::string, std::string>>
-ScenarioConfigurationHelper::GetProtocolSettings() const
+ScenarioConfigurationHelper::GetProtocolGlobalSettings() const
 {
   std::vector<std::pair<std::string, std::string>> settings;
 
@@ -632,6 +632,32 @@ ScenarioConfigurationHelper::GetProtocolSettings() const
           NS_ASSERT ((*i).IsString ());
           NS_ASSERT ((*(i+1)).IsString());
 
+          if ((*i).GetString ()[0] == '/') continue;
+          settings.push_back ({(*i).GetString (), (*(i+1)).GetString ()});
+        }
+    }
+
+  return settings;
+}
+
+const std::vector<std::pair<std::string, std::string>>
+ScenarioConfigurationHelper::GetProtocolDeviceSettings() const
+{
+  std::vector<std::pair<std::string, std::string>> settings;
+
+  if (m_config.HasMember ("protocolSettings"))
+    {
+      NS_ASSERT (m_config["protocolSettings"].IsArray ());
+
+      NS_ASSERT_MSG (m_config["protocolSettings"].Size () % 2 == 0,
+                     "Check protocolSettings: elements in list are not an even number, something is missing.");
+
+      for (auto i = m_config["protocolSettings"].Begin (); i != m_config["protocolSettings"].End (); i += 2)
+        {
+          NS_ASSERT ((*i).IsString ());
+          NS_ASSERT ((*(i+1)).IsString());
+
+          if ((*i).GetString ()[0] != '/') continue;
           settings.push_back ({(*i).GetString (), (*(i+1)).GetString ()});
         }
     }

@@ -196,10 +196,17 @@ public:
    */
   const std::string GetProtocol() const;
   /**
-   * \brief Returns a vector with all the configuration strings for the protocol
+   * \brief Returns a vector with all the global configuration strings for the protocol.
+   *        Use with Config::SetDefault(pair.first, pair.second) before creating the network.
    * \return a vector of pairs containing the key and the value extracted from config
    */
-  const std::vector<std::pair<std::string, std::string>> GetProtocolSettings() const;
+  const std::vector<std::pair<std::string, std::string>> GetProtocolGlobalSettings() const;
+  /**
+   * \brief Returns a vector with all the device configuration strings for the protocol.
+   *        Use with Config::Set(pair.first, pair.second) after creating the devices.
+   * \return a vector of pairs containing the key and the value extracted from config
+   */
+  const std::vector<std::pair<std::string, std::string>> GetProtocolDeviceSettings() const;
 
   /**
    * \brief default destructor
