@@ -241,7 +241,6 @@ DroneScenarioHelper::CreateLteEpc()
   NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Create");
 
-/*
   // Using Carrier Aggregation
   Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (true));
   Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
@@ -252,21 +251,6 @@ DroneScenarioHelper::CreateLteEpc()
   Config::SetDefault("ns3::LteHelper::UseIdealRrc", BooleanValue(true));
   Config::SetDefault("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue(true));
 
-*/
-
-// CHECK IF EVERYTHING IS ACTUALLY WORKING
-  auto settings = m_configurator->GetProtocolSettings();
-  std::vector<std::pair<std::string, std::string>> postSettings;
-  for (auto c : settings)
-  {
-    if (c.first[0] == '/')
-    {
-      postSettings.push_back(c);
-      continue;
-    }
-    Config::SetDefault(c.first, StringValue(c.second));
-  }
-
   ConfigStore config;
   config.ConfigureDefaults();
 
@@ -274,17 +258,12 @@ DroneScenarioHelper::CreateLteEpc()
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
-  for (auto c : postSettings)
-  {
-    Config::Set(c.first, StringValue(c.second));
-  }
+  m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
 
-  //m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
-
-  //m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
-  // m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
-  //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
-  //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
+  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
+  //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
+  m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
+  m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
   NS_COMPMAN_REGISTER_COMPONENT();
   return this;
