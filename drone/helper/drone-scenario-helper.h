@@ -65,6 +65,7 @@ enum _Entity
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
+
   ScenarioConfigurationHelper* GetConfigurator();
   void Initialize(uint32_t argc, char **argv, const std::string name);
 
@@ -77,19 +78,23 @@ public:
 
   void SetDroneApplication(uint32_t id, Ptr<Application> apps);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
+  void SetZspApplication(uint32_t  id, Ptr<Application> apps);
+  void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
   void SetRemotesApplication(Ptr<ApplicationContainer> apps);
 
 
-private:
+protected:
 
+  uint32_t MobilityToEnum(std::string mobilityModel);
   void SetSimulationParameters(Time duration);
   void SetNodesNumber();
   void SetMobilityModels();
   void SetDronesMobility();
   void SetAntennasPosition();
-  void SetZspsMobility();
-
+  void SetZspsPosition();
+  void LoadProtocolGlobalSettings();
+  void LoadProtocolDeviceSettings();
 
 
   void CreateLteEpc();
