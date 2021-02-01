@@ -78,9 +78,9 @@ public:
 
   void SetDroneApplication(uint32_t id, Ptr<Application> apps);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
-  void SetZspApplication(uint32_t  id, Ptr<Application> apps);
+  void SetZspApplication(uint32_t id, Ptr<Application> apps);
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
-  void SetRemoteApplication(uint32_t  id, Ptr<Application> apps);
+  void SetRemoteApplication(uint32_t id, Ptr<Application> apps);
   void SetRemotesApplication(Ptr<ApplicationContainer> apps);
 
 
@@ -95,19 +95,18 @@ protected:
   void SetZspsPosition();
   void LoadProtocolGlobalSettings();
   void LoadProtocolDeviceSettings();
-
-
-  void CreateLteEpc();
-  void CreateRemotesToEpcNetwork();
-  void CreateDronesToAntennasNetwork();
-  void CreateIpv4Routing();
+  void InstallInternetStack();
+  void SetupNetworkProtocol();
+  void SetupLte();
+  void SetupWifi();
+  void SetupLteIpv4Routing();
+  void SetupWifiIpv4Routing();
 
 
 
   void UseTestUdpEchoApplications();
-  void InstallInternetStack();
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
-  void SetApplication(NodeContainer& nodes, uint32_t  id, Ptr<Application> app);
+  void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
   Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
 
   std::string m_protocol;

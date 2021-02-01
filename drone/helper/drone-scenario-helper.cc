@@ -46,7 +46,11 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string na
 
   this->SetMobilityModels();
 
+  this->InstallInternetStack();
+
   this->LoadProtocolGlobalSettings();
+
+  this->SetupNetworkProtocol();
 
   this->LoadProtocolDeviceSettings();
 
@@ -208,6 +212,9 @@ DroneScenarioHelper::LoadProtocolGlobalSettings()
   {
     Config::SetDefault(s.first, StringValue(s.second));
   }
+
+  ConfigStore config;
+  config.ConfigureDefaults();
 }
 
 void
@@ -222,48 +229,55 @@ DroneScenarioHelper::LoadProtocolDeviceSettings()
 }
 
 void
-DroneScenarioHelper::CreateLteEpc()
+DroneScenarioHelper::InstallInternetStack()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  // Using Carrier Aggregation
-  Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (true));
-  Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
-  Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
-  //
-  Config::SetDefault("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue(true));
-  Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(true));
-  Config::SetDefault("ns3::LteHelper::UseIdealRrc", BooleanValue(true));
-  Config::SetDefault("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue(true));
+  m_internetHelper.Install(m_droneNodes);
+  if (m_protocol == "lte") m_internetHelper.Install(m_remoteNodes);
+  if (m_protocol == "wifi") m_internetHelper.Install(m_zspNodes);
+}
 
-  ConfigStore config;
-  config.ConfigureDefaults();
+void
+DroneScenarioHelper::SetupNetworkProtocol()
+{
+  NS_LOG_FUNCTION_NOARGS();
+
+  if (m_protocol == "lte")
+  {
+    this->SetupLte();
+    this->SetupLteIpv4Routing();
+  }
+  if (m_protocol == "wifi")
+  {
+    this->SetupWifi();
+    this->SetupWifiIpv4Routing();
+  }
+}
+
+void
+DroneScenarioHelper::SetupLte()
+{
+  NS_LOG_FUNCTION_NOARGS();
 
   m_lteHelper = CreateObject<LteHelper> ();
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
-  m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
+  //m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
 
-  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
+  //m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
   //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
-  m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
-  m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
-}
+  //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
+  //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-void
-DroneScenarioHelper::CreateRemotesToEpcNetwork()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  // The first remote node is connected to the PGW with a point to point link
   PointToPointHelper p2pHelper;
   p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   m_p2pDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
 
-  /* JUST LIMIT AT 1 REMOTE WHILE DEBUGGING
+/* JUST LIMIT AT 1 REMOTE WHILE DEBUGGING
   if (m_remoteNodes.GetN() > 1)
   {
     // if more than 1 remote is used, connect them via LAN. Only the first
@@ -274,17 +288,8 @@ DroneScenarioHelper::CreateRemotesToEpcNetwork()
     m_remoteDevs = csmaHelper.Install (m_remoteNodes);
   }
   else
-  */
+*/
     m_remoteDevs.Add(m_p2pDevs.Get(1));
-}
-
-void
-DroneScenarioHelper::CreateDronesToAntennasNetwork()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
-  m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
 
   m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
   if (m_antennaNodes.GetN() > 1)
@@ -297,16 +302,7 @@ DroneScenarioHelper::CreateDronesToAntennasNetwork()
 }
 
 void
-DroneScenarioHelper::InstallInternetStack()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  m_internetHelper.Install(m_droneNodes);
-  m_internetHelper.Install(m_remoteNodes);
-}
-
-void
-DroneScenarioHelper::CreateIpv4Routing()
+DroneScenarioHelper::SetupLteIpv4Routing()
 {
   NS_LOG_FUNCTION_NOARGS();
 
@@ -356,6 +352,18 @@ DroneScenarioHelper::CreateIpv4Routing()
 
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+}
+
+void
+DroneScenarioHelper::SetupWifi()
+{
+  // TODO
+}
+
+void
+DroneScenarioHelper::SetupWifiIpv4Routing()
+{
+  // TODO
 }
 
 Ipv4InterfaceContainer
