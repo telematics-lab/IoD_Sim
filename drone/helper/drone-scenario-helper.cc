@@ -296,9 +296,8 @@ DroneScenarioHelper::SetupLte()
     m_lteHelper->AddX2Interface(m_antennaNodes);
   m_droneDevs = m_lteHelper->InstallUeDevice(m_droneNodes);
 
-  // Try to connect each drone to each antenna (?)
-  for (uint32_t i=0; i<m_antennaDevs.GetN(); ++i)
-    m_lteHelper->Attach(m_droneDevs, m_antennaDevs.Get(i));
+  // attach each drone ue to the antenna with the strongest signal
+  m_lteHelper->Attach(m_droneDevs);
 }
 
 void

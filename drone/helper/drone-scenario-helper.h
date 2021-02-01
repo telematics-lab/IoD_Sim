@@ -36,6 +36,7 @@
 #include <ns3/internet-module.h>
 #include <ns3/applications-module.h>
 #include <ns3/config-store-module.h>
+#include <ns3/buildings-module.h>
 
 namespace ns3
 {
@@ -82,6 +83,7 @@ public:
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(uint32_t id, Ptr<Application> apps);
   void SetRemotesApplication(Ptr<ApplicationContainer> apps);
+  void UseTestUdpEchoApplications();
 
 
 protected:
@@ -91,6 +93,7 @@ protected:
   void SetNodesNumber();
   void SetMobilityModels();
   void SetDronesMobility();
+  void CreateBuildings();
   void SetAntennasPosition();
   void SetZspsPosition();
   void LoadProtocolGlobalSettings();
@@ -104,7 +107,6 @@ protected:
 
 
 
-  void UseTestUdpEchoApplications();
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
   Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);

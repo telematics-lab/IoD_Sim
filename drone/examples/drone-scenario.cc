@@ -32,11 +32,12 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 int main (int argc, char **argv)
 {
   DSH->Initialize(argc, argv, "Drone Scenario");
+  DSH->UseTestUdpEchoApplications();
 
   NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
   NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
   NS_LOG_DEBUG("Remote1 IP: " << DSH->GetRemoteIpv4Address(0));
-
+/*
   for (uint32_t i = 0; i < CONFIG->GetDronesN(); ++i)
   {
     Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
@@ -55,6 +56,7 @@ int main (int argc, char **argv)
   serverApp->SetStartTime(Seconds(CONFIG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
   DSH->SetRemoteApplication(0, serverApp);
+*/
 
   DSH->Run();
 
