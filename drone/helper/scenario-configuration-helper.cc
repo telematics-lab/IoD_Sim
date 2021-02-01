@@ -665,4 +665,70 @@ ScenarioConfigurationHelper::GetProtocolDeviceSettings() const
   return settings;
 }
 
+const std::vector<Ptr<Building>>
+ScenarioConfigurationHelper::GetBuildings () const
+{
+  std::vector<Ptr<Building>> buildings;
+
+  NS_ASSERT_MSG (m_config.HasMember ("buildings"),
+                 "No building has been defined, check the configuration file.");
+  NS_ASSERT_MSG (m_config["buildings"].IsArray (),
+                 "'buildings' needs to be an array of objects, check the configuration file.");
+
+  auto arr = m_config["buildings"].GetArray ();
+
+  for (auto b = arr.Begin (); b != arr.End (); ++b)
+  {
+    Ptr<Building> building = CreateObject<Building> ();
+
+    NS_ASSERT_MSG (b->HasMember ("boundaries") && (*b)["boundaries"].IsArray () && (*b)["boundaries"].Size () == 6,
+                   "'boundaries' must be defined as an array of 6 doubles for each building.");
+    auto bounds = (*b)["boundaries"].GetArray ();
+    for (uint8_t i = 0; i < 6; ++i) { NS_ASSERT_MSG (bounds[i].IsDouble (), "'boundaries' elements must be doubles."); }
+    building->SetBoundaries (Box (bounds[0].GetDouble (), bounds[1].GetDouble (),
+                                  bounds[2].GetDouble (), bounds[3].GetDouble (),
+                                  bounds[4].GetDouble (), bounds[5].GetDouble ()));
+
+    if (b->HasMember("type"))
+    {
+      auto type = std::string ((*b)["type"].GetString ());
+      NS_ASSERT_MSG (type == "residential" || type == "office" || type == "commercial",
+                     "Unknown type of building: '" << type << "'.");
+      if (type == "residential") building->SetBuildingType (Building::Residential);
+      if (type == "office") building->SetBuildingType (Building::Office);
+      if (type == "commercial") building->SetBuildingType (Building::Commercial);
+    }
+
+    if (b->HasMember("walls"))
+    {
+      auto walls = std::string ((*b)["walls"].GetString ());
+      NS_ASSERT_MSG (walls == "wood" || walls == "concreteWithWindows" || walls == "concreteWithoutWindows" || walls == "stoneBlocks",
+                     "Unknown type of walls for a building: '" << walls << "'.");
+      if (walls == "wood") building->SetExtWallsType (Building::Wood);
+      if (walls == "concreteWithWindows") building->SetExtWallsType (Building::ConcreteWithWindows);
+      if (walls == "concreteWithoutWindows") building->SetExtWallsType (Building::ConcreteWithoutWindows);
+      if (walls == "stoneBlocks") building->SetExtWallsType (Building::StoneBlocks);
+    }
+
+    if (b->HasMember("floors"))
+    {
+      NS_ASSERT_MSG ((*b)["floors"].IsInt (), "'floors' must be an integer.");
+      building->SetNFloors ((*b)["floors"].GetInt ());
+    }
+
+    if (b->HasMember("rooms"))
+    {
+      auto rooms = (*b)["rooms"].GetArray ();
+      NS_ASSERT_MSG (rooms.Size () == 2 && rooms[0].IsInt () && rooms[1].IsInt (),
+                     "'rooms' needs to be an array of 2 integers.");
+      building->SetNRoomsX (rooms[0].GetInt ());
+      building->SetNRoomsY (rooms[1].GetInt ());
+    }
+
+    buildings.push_back(building);
+  }
+
+  return buildings;
+}
+
 } // namespace ns3

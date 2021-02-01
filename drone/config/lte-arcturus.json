@@ -1,15 +1,16 @@
 {
     "protocol": "lte",
     "protocolSettings": [
+        "ns3::LteSpectrumPhy::CtrlErrorModelEnabled", "true",
+        "ns3::LteSpectrumPhy::DataErrorModelEnabled", "true",
         "ns3::LteHelper::UseCa", "true",
         "ns3::LteHelper::NumberOfComponentCarriers", "2",
         "ns3::LteHelper::EnbComponentCarrierManager", "ns3::RrComponentCarrierManager",
-        "ns3::LteSpectrumPhy::CtrlErrorModelEnabled", "true",
-        "ns3::LteSpectrumPhy::DataErrorModelEnabled", "true",
         "ns3::LteHelper::UseIdealRrc", "true",
         "ns3::LteHelper::UsePdschForCqiGeneration", "true",
         "ns3::LteHelper::PathlossModel", "ns3::Cost231PropagationLossModel",
         "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm",
         "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/HarqEnabled", "true",
         "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/CqiTimerThreshold", "1000"
     ],
@@ -39,6 +40,16 @@
         {
             "applicationStartTime": 0.0,
             "applicationStopTime": 10.0
+        }
+    ],
+
+    "buildings": [
+        {
+            "type": "residential",
+            "walls": "concreteWithWindows",
+            "boundaries": [0.0, 10.0, 0.0, 10.0, 0.0, 30.0],
+            "floors": 4,
+            "rooms": [3, 2]
         }
     ],
 

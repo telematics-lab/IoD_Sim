@@ -28,6 +28,7 @@
 #include <ns3/flight-plan.h>
 #include <ns3/speed-coefficients.h>
 #include <ns3/singleton.h>
+#include <ns3/building.h>
 
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 
@@ -207,6 +208,11 @@ public:
    * \return a vector of pairs containing the key and the value extracted from config
    */
   const std::vector<std::pair<std::string, std::string>> GetProtocolDeviceSettings() const;
+
+  /**
+   * \return a vector of Ptr<Building> created with the attributes in config
+   */
+  const std::vector<Ptr<Building>> GetBuildings() const;
 
   /**
    * \brief default destructor
