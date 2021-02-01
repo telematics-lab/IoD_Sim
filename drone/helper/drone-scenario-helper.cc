@@ -463,7 +463,7 @@ void
 DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(id << app);
-  NS_COMPMAN_REQUIRE_COMPONENT("SetRemotesNumber");
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   this->SetApplication(m_remoteNodes, id, app);
 
