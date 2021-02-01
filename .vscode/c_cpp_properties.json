@@ -11,8 +11,7 @@
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64",
-            "compileCommands": "${workspaceFolder}/ns3/build/compile_commands.json"
+            "compileCommands": "/home/michezio/IoD_Sim/ns-3-32/build/compile_commands.json"
         }
     ],
     "version": 4

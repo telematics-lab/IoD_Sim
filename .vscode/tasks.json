@@ -88,9 +88,9 @@
       "group": "test"
     },
     {
-      "label": "run lte-scenario-arcturus",
+      "label": "run drone-scenario",
       "type": "shell",
-      "command": "./waf --run \"lte-scenario-arcturus --config=${input:configFileLteArcturus}\"",
+      "command": "./waf --run \"drone-scenario --config=${input:configFileDroneScenario}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -101,7 +101,7 @@
     {
       "label": "run debug",
       "type": "shell",
-      "command": "./waf --run \"${input:scenario} --config=${input:configFileLteBasic}\" --gdb",
+      "command": "./waf --run \"${input:scenario} --config=${input:configFileDebug}\" --gdb",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -236,7 +236,7 @@
       "id": "scenario",
       "type": "promptString",
       "description": "Name of the scenario to run",
-      "default": "lte-scenario-basic"
+      "default": "drone-scenario"
     },
     {
       "id": "opt_args",
@@ -277,7 +277,13 @@
       "default": "./src/drone/config/lte-basic.json"
     },
     {
-      "id": "configFileLteArcturus",
+      "id": "configFileDroneScenario",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-arcturus.json"
+    },
+    {
+      "id": "configFileDebug",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/lte-arcturus.json"
