@@ -15,7 +15,10 @@
         "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
         "ns3::PfFfMacScheduler::HarqEnabled", "true",
         "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
-        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm"
+        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm",
+        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
+        "ns3::PointToPointNetDevice::Mtu", "1500",
+        "ns3::PointToPointChannel::Delay", "10ms"
     ],
     "duration": 10.0,
 

@@ -55,14 +55,6 @@ enum _MobilityModelName
   ENUM_SIZE // Keep last, size of the enum
 };
 
-enum _Entity
-{
-  DRONE,
-  REMOTE,
-  ANTENNA,
-  ZSP
-};
-
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
@@ -75,14 +67,13 @@ public:
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
   Ipv4Address GetDroneIpv4Address(uint32_t id);
-  Ipv4Address GetRemoteIpv4Address(uint32_t id);
+  Ipv4Address GetRemoteIpv4Address();
 
-  void SetDroneApplication(uint32_t id, Ptr<Application> apps);
+  void SetDroneApplication(uint32_t id, Ptr<Application> app);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
-  void SetZspApplication(uint32_t id, Ptr<Application> apps);
+  void SetZspApplication(uint32_t id, Ptr<Application> app);
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
-  void SetRemoteApplication(uint32_t id, Ptr<Application> apps);
-  void SetRemotesApplication(Ptr<ApplicationContainer> apps);
+  void SetRemoteApplication(Ptr<Application> app);
   void UseTestUdpEchoApplications();
 
 
@@ -114,9 +105,9 @@ protected:
   std::string m_protocol;
   ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_zspNodes, m_remoteNodes;
-  NetDeviceContainer m_droneDevs, m_antennaDevs, m_zspDevs, m_remoteDevs, m_p2pDevs;
+  NetDeviceContainer m_droneDevs, m_antennaDevs, m_zspDevs, m_remoteDevs;
   ApplicationContainer m_droneApps, m_zspApps, m_remoteApps;
-  Ipv4InterfaceContainer m_droneIpv4, m_zspIpv4, m_remoteIpv4, m_p2pIpv4;
+  Ipv4InterfaceContainer m_droneIpv4, m_zspIpv4, m_remoteIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   InternetStackHelper m_internetHelper;

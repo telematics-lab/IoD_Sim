@@ -32,45 +32,30 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 int main (int argc, char **argv)
 {
   DSH->Initialize(argc, argv, "Drone Scenario");
-  DSH->UseTestUdpEchoApplications();
+  //DSH->UseTestUdpEchoApplications();
 
   NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
   NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
-  NS_LOG_DEBUG("Remote1 IP: " << DSH->GetRemoteIpv4Address(0));
-/*
+  NS_LOG_DEBUG("Remote1 IP: " << DSH->GetRemoteIpv4Address());
+
   for (uint32_t i = 0; i < CONFIG->GetDronesN(); ++i)
   {
     Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
         "Ipv4Address", Ipv4AddressValue(DSH->GetDroneIpv4Address(i)),
         "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
         "Duration", DoubleValue(CONFIG->GetDuration()),
-        "DestinationIpv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)));
+        "DestinationIpv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address()));
     clientApp->SetStartTime(Seconds(CONFIG->GetDroneApplicationStartTime(i)));
     clientApp->SetStopTime(Seconds(CONFIG->GetDroneApplicationStopTime(i)));
     DSH->SetDroneApplication(i, clientApp);
   }
 
   Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer>(
-      "Ipv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)),
+      "Ipv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address()),
       "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
   serverApp->SetStartTime(Seconds(CONFIG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
-  DSH->SetRemoteApplication(0, serverApp);
-*/
-
-  Ptr<RadioEnvironmentMapHelper> remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-  remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/3"));
-  remHelper->SetAttribute ("OutputFile", StringValue ("../results/rem.out"));
-  remHelper->SetAttribute ("XMin", DoubleValue (-100.0));
-  remHelper->SetAttribute ("XMax", DoubleValue (100.0));
-  remHelper->SetAttribute ("XRes", UintegerValue (100));
-  remHelper->SetAttribute ("YMin", DoubleValue (-100.0));
-  remHelper->SetAttribute ("YMax", DoubleValue (100.0));
-  remHelper->SetAttribute ("YRes", UintegerValue (75));
-  remHelper->SetAttribute ("Z", DoubleValue (10));
-  remHelper->SetAttribute ("UseDataChannel", BooleanValue (true));
-  //remHelper->SetAttribute ("RbId", IntegerValue (10));
-  remHelper->Install ();
+  DSH->SetRemoteApplication(serverApp);
 
   DSH->Run();
 

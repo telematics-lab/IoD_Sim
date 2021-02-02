@@ -60,7 +60,6 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string na
 ScenarioConfigurationHelper*
 DroneScenarioHelper::GetConfigurator()
 {
-  NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
   return ScenarioConfigurationHelper::Get();
 }
@@ -98,7 +97,7 @@ DroneScenarioHelper::SetNodesNumber()
   m_droneNodes.Create(m_configurator->GetDronesN());
   if (m_protocol == "lte") m_antennaNodes.Create(m_configurator->GetAntennasN());
   if (m_protocol == "wifi") m_zspNodes.Create(m_configurator->GetZspsN());
-  m_remoteNodes.Create(m_configurator->GetRemotesN());
+  m_remoteNodes.Create(1);
 }
 
 void
@@ -114,7 +113,6 @@ DroneScenarioHelper::SetMobilityModels()
 uint32_t
 DroneScenarioHelper::MobilityToEnum(std::string mobilityModel)
 {
-  NS_LOG_FUNCTION_NOARGS();
   uint32_t mobilityModelValue = 0;
   while (mobilityModelValue < _MobilityModelName::ENUM_SIZE)
   {
@@ -269,31 +267,16 @@ DroneScenarioHelper::SetupLte()
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
   //m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
-
   //m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
   //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
   //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
   PointToPointHelper p2pHelper;
-  p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  m_p2pDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
-
-/* JUST LIMIT AT 1 REMOTE WHILE DEBUGGING
-  if (m_remoteNodes.GetN() > 1)
-  {
-    // if more than 1 remote is used, connect them via LAN. Only the first
-    // of them will be connected to the PGW with a point to point link.
-    CsmaHelper csmaHelper;
-    csmaHelper.SetChannelAttribute ("DataRate", StringValue ("100Mbps"));
-    csmaHelper.SetChannelAttribute ("Delay", TimeValue (NanoSeconds (6560)));
-    m_remoteDevs = csmaHelper.Install (m_remoteNodes);
-  }
-  else
-*/
-    m_remoteDevs.Add(m_p2pDevs.Get(1));
+  //p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  //p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  m_remoteDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
 
   m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
   if (m_antennaNodes.GetN() > 1)
@@ -314,9 +297,6 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
   m_remoteIpv4 = ipv4Helper.Assign(m_remoteDevs);
 
-  //ipv4Helper.SetBase ("100.0.0.0", "255.0.0.0");
-  //m_p2pIpv4 = ipv4Helper.Assign(m_p2pDevs);
-
   // assigning address 7.0.0.0/8
   m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
 
@@ -324,12 +304,9 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   m_internetHelper.SetRoutingHelper(routingHelper);
 
   // add to each remote a route to the PGW
-  Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-  for (uint32_t i=0; i<m_remoteNodes.GetN(); ++i)
-  {
-    Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(i)->GetObject<Ipv4>());
-    remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
-  }
+  //Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+  Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(0)->GetObject<Ipv4>());
+    remoteStaticRoute->AddNetworkRouteTo(Ipv4Address ("7.0.0.0"), Ipv4Mask("255.0.0.0"), 1);
 
   // assign to each drone the default route to the SGW
   for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)
@@ -372,7 +349,6 @@ DroneScenarioHelper::SetupWifiIpv4Routing()
 Ipv4InterfaceContainer
 DroneScenarioHelper::GetDronesIpv4Interfaces()
 {
-  NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   return m_droneIpv4;
@@ -381,7 +357,6 @@ DroneScenarioHelper::GetDronesIpv4Interfaces()
 Ipv4InterfaceContainer
 DroneScenarioHelper::GetRemotesIpv4Interfaces()
 {
-  NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   return m_remoteIpv4;
@@ -397,19 +372,17 @@ DroneScenarioHelper::GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id)
 Ipv4Address
 DroneScenarioHelper::GetDroneIpv4Address(uint32_t id)
 {
-  NS_LOG_FUNCTION(id);
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
   return this->GetIpv4Address(m_droneIpv4, id);
 }
 
 Ipv4Address
-DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
+DroneScenarioHelper::GetRemoteIpv4Address()
 {
-  NS_LOG_FUNCTION(id);
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
-  return this->GetIpv4Address(m_remoteIpv4, id);
+  return this->GetIpv4Address(m_remoteIpv4, 1);
 }
 
 
@@ -463,12 +436,12 @@ DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 }
 
 void
-DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetRemoteApplication(Ptr<Application> app)
 {
-  NS_LOG_FUNCTION(id << app);
+  NS_LOG_FUNCTION(app);
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
-  this->SetApplication(m_remoteNodes, id, app);
+  this->SetApplication(m_remoteNodes, 0, app);
 
 /*
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemoteApplication" + std::to_string(id));
@@ -480,18 +453,6 @@ DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
       NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
   }
 */
-}
-
-void
-DroneScenarioHelper::SetRemotesApplication(Ptr<ApplicationContainer> apps)
-{
-  NS_LOG_FUNCTION(&apps);
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-  NS_COMPMAN_ENSURE_UNIQUE();
-
-  this->SetApplications(m_remoteNodes, apps);
-
-  NS_COMPMAN_REGISTER_COMPONENT();
 }
 
 void
@@ -517,7 +478,7 @@ DroneScenarioHelper::UseTestUdpEchoApplications()
   }
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
+  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
