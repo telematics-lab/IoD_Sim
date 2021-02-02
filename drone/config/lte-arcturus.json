@@ -8,11 +8,11 @@
         "ns3::LteHelper::EnbComponentCarrierManager", "ns3::RrComponentCarrierManager",
         "ns3::LteHelper::UseIdealRrc", "true",
         "ns3::LteHelper::UsePdschForCqiGeneration", "true",
-        "ns3::LteHelper::PathlossModel", "ns3::Cost231PropagationLossModel",
+        "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
         "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
-        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm",
-        "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/HarqEnabled", "true",
-        "/NodeList/*/DeviceList/*/ComponentCarrierMap/PfFfMacScheduler/CqiTimerThreshold", "1000"
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
+        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm"
     ],
     "duration": 10.0,
 
@@ -21,18 +21,18 @@
         {
             "applicationStartTime": 1.0,
             "applicationStopTime": 9.0,
-            "position": [100.0, 10.0, 0.0]
+            "position": [100.0, 10.0, 10.0]
         },
         {
             "applicationStartTime": 1.2,
             "applicationStopTime": 9.0,
-            "position": [50.0, 50.0, 0.0]
+            "position": [50.0, 50.0, 10.0]
         }
     ],
 
     "antennas": [
         {
-            "position": [10.0, 10.0, 0.0]
+            "position": [10.0, 10.0, 50.0]
         }
     ],
 

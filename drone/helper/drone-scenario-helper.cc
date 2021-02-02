@@ -247,12 +247,16 @@ DroneScenarioHelper::SetupNetworkProtocol()
   {
     this->SetupLte();
     this->SetupLteIpv4Routing();
+    BuildingsHelper::Install (m_antennaNodes);
   }
   if (m_protocol == "wifi")
   {
     this->SetupWifi();
     this->SetupWifiIpv4Routing();
+    BuildingsHelper::Install (m_zspNodes);
   }
+
+  BuildingsHelper::Install (m_droneNodes);
 }
 
 void
