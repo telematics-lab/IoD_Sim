@@ -435,6 +435,7 @@ ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
   char configFileBuffer [configFileBufferSize];
 
   CommandLine cmd;
+  cmd.AddValue ("name", "Name of the scenario", m_name);
   cmd.AddValue ("config", "Configuration file path", configFilePath);
   cmd.Parse (argc, argv);
 
