@@ -30,9 +30,9 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 
 void
-DroneScenarioHelper::Initialize(uint32_t argc, char **argv, const std::string name)
+DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*="DroneScenario"*/)
 {
-  NS_LOG_FUNCTION(argc << argv << name);
+  NS_LOG_FUNCTION(argc << argv);
   NS_COMPMAN_ENSURE_UNIQUE();
 
   m_configurator = ScenarioConfigurationHelper::Get();
@@ -75,6 +75,19 @@ DroneScenarioHelper::Run()
   Simulator::Destroy();
 
   NS_COMPMAN_REGISTER_COMPONENT();
+}
+
+uint32_t
+DroneScenarioHelper::GetRemoteId()
+{
+  return m_remoteNodes.Get(0)->GetId();
+}
+
+uint32_t
+DroneScenarioHelper::GetAntennaId(uint32_t num)
+{
+  NS_ASSERT_MSG(num < m_antennaNodes.GetN(), "Antenna index out of bound");
+  return m_antennaNodes.Get(num)->GetId();
 }
 
 
@@ -141,7 +154,7 @@ DroneScenarioHelper::SetDronesMobility()
     {
       Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
       m_configurator->GetDronesPosition(position);
-      mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+      mobility.SetMobilityModel(mobilityModel);
       mobility.SetPositionAllocator(position);
       mobility.Install(m_droneNodes);
     } break;
@@ -304,9 +317,9 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   m_internetHelper.SetRoutingHelper(routingHelper);
 
   // add to each remote a route to the PGW
-  //Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+  Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
   Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(0)->GetObject<Ipv4>());
-    remoteStaticRoute->AddNetworkRouteTo(Ipv4Address ("7.0.0.0"), Ipv4Mask("255.0.0.0"), 1);
+    remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
 
   // assign to each drone the default route to the SGW
   for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)

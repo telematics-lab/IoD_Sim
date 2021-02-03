@@ -60,7 +60,8 @@ class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 public:
 
   ScenarioConfigurationHelper* GetConfigurator();
-  void Initialize(uint32_t argc, char **argv, const std::string name);
+  void Initialize(uint32_t argc, char **argv);
+  void Initialize(uint32_t argc, char **argv, std::string name=NULL);
 
   void Run();
 
@@ -75,7 +76,8 @@ public:
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(Ptr<Application> app);
   void UseTestUdpEchoApplications();
-
+  uint32_t GetRemoteId();
+  uint32_t GetAntennaId(uint32_t num);
 
 protected:
 

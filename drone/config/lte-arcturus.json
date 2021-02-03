@@ -15,7 +15,7 @@
         "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
         "ns3::PfFfMacScheduler::HarqEnabled", "true",
         "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
-        "ns3::LteHelper::HandoverAlgorithm", "ns3::A2A4RsrqHandoverAlgorithm",
+
         "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
         "ns3::PointToPointNetDevice::Mtu", "1500",
         "ns3::PointToPointChannel::Delay", "10ms"
@@ -27,18 +27,18 @@
         {
             "applicationStartTime": 1.0,
             "applicationStopTime": 9.0,
-            "position": [100.0, 10.0, 10.0]
+            "position": [100.0, 0.0, 10.0]
         },
         {
             "applicationStartTime": 1.2,
             "applicationStopTime": 9.0,
-            "position": [50.0, 50.0, 10.0]
+            "position": [0.0, 50.0, 10.0]
         }
     ],
 
     "antennas": [
         {
-            "position": [10.0, 10.0, 50.0]
+            "position": [0.0, 0.0, 50.0]
         }
     ],
 
@@ -53,20 +53,20 @@
         {
             "type": "residential",
             "walls": "concreteWithWindows",
-            "boundaries": [0.0, 10.0, 0.0, 10.0, 0.0, 30.0],
-            "floors": 4,
-            "rooms": [3, 2]
+            "boundaries": [10.0, 30.0, 10.0, 30.0, 0.0, 50.0],
+            "floors": 12,
+            "rooms": [2, 2]
         }
     ],
 
     "logOnFile": true,
     "logComponents": [
+        "Scenario",
+        "DroneScenarioHelper",
+        "ScenarioConfigurationHelper",
         "ReportSimulation",
         "DroneServer",
         "DroneClient",
-        "Scenario",
-        "SimulationDuration",
-        "ScenarioConfigurationHelper",
-        "DroneScenarioHelper"
+        "SimulationDuration"
     ]
 }
