@@ -90,7 +90,7 @@
     {
       "label": "run drone-scenario",
       "type": "shell",
-      "command": "./waf --run \"drone-scenario --config=${input:configFileDroneScenario}\"",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -281,6 +281,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/lte-arcturus.json"
+    },
+    {
+      "id": "nameDroneScenario",
+      "type": "promptString",
+      "description": "Name of the scenario",
+      "default": "DRONE_SCENARIO"
     },
     {
       "id": "configFileDebug",
