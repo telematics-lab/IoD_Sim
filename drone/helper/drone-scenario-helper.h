@@ -108,7 +108,6 @@ protected:
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   InternetStackHelper m_internetHelper;
-
 };
 
 } // namespace ns3

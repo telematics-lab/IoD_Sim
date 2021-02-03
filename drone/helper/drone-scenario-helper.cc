@@ -46,8 +46,6 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
 
   this->SetMobilityModels();
 
-  this->InstallInternetStack();
-
   this->LoadProtocolGlobalSettings();
 
   this->SetupNetworkProtocol();
@@ -240,16 +238,6 @@ DroneScenarioHelper::LoadProtocolDeviceSettings()
 }
 
 void
-DroneScenarioHelper::InstallInternetStack()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  m_internetHelper.Install(m_droneNodes);
-  if (m_protocol == "lte") m_internetHelper.Install(m_remoteNodes);
-  if (m_protocol == "wifi") m_internetHelper.Install(m_zspNodes);
-}
-
-void
 DroneScenarioHelper::SetupNetworkProtocol()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -272,6 +260,9 @@ void
 DroneScenarioHelper::SetupLte()
 {
   NS_LOG_FUNCTION_NOARGS();
+
+  m_internetHelper.Install(m_droneNodes);
+  m_internetHelper.Install(m_remoteNodes);
 
   m_lteHelper = CreateObject<LteHelper> ();
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
