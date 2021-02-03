@@ -319,7 +319,8 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   // add to each remote a route to the PGW
   Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
   Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(0)->GetObject<Ipv4>());
-    remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
+  remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
+  remoteStaticRoute->SetDefaultRoute(pgwAddress, 1);
 
   // assign to each drone the default route to the SGW
   for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)

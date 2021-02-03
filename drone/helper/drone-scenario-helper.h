@@ -60,8 +60,7 @@ class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 public:
 
   ScenarioConfigurationHelper* GetConfigurator();
-  void Initialize(uint32_t argc, char **argv);
-  void Initialize(uint32_t argc, char **argv, std::string name=NULL);
+  void Initialize(uint32_t argc, char **argv, std::string name="DroneScenario");
 
   void Run();
 

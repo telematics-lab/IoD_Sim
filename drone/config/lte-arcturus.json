@@ -1,13 +1,6 @@
 {
     "protocol": "lte",
     "protocolSettings": [
-        "ns3::LteSpectrumPhy::CtrlErrorModelEnabled", "true",
-        "ns3::LteSpectrumPhy::DataErrorModelEnabled", "true",
-        "ns3::LteHelper::UseCa", "true",
-        "ns3::LteHelper::NumberOfComponentCarriers", "2",
-        "ns3::LteHelper::EnbComponentCarrierManager", "ns3::RrComponentCarrierManager",
-        "ns3::LteHelper::UseIdealRrc", "true",
-        "ns3::LteHelper::UsePdschForCqiGeneration", "true",
         "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
         "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
         "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
