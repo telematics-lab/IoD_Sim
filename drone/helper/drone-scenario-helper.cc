@@ -257,13 +257,11 @@ DroneScenarioHelper::SetupNetworkProtocol()
   if (m_protocol == "lte")
   {
     this->SetupLte();
-    this->SetupLteIpv4Routing();
     BuildingsHelper::Install (m_antennaNodes);
   }
   if (m_protocol == "wifi")
   {
     this->SetupWifi();
-    this->SetupWifiIpv4Routing();
     BuildingsHelper::Install (m_zspNodes);
   }
 
@@ -291,27 +289,11 @@ DroneScenarioHelper::SetupLte()
   //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   m_remoteDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
 
-  m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
-  if (m_antennaNodes.GetN() > 1)
-    m_lteHelper->AddX2Interface(m_antennaNodes);
-  m_droneDevs = m_lteHelper->InstallUeDevice(m_droneNodes);
-
-  // attach each drone ue to the antenna with the strongest signal
-  m_lteHelper->Attach(m_droneDevs);
-}
-
-void
-DroneScenarioHelper::SetupLteIpv4Routing()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
   Ipv4AddressHelper ipv4Helper;
 
   ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
   m_remoteIpv4 = ipv4Helper.Assign(m_remoteDevs);
 
-  // assigning address 7.0.0.0/8
-  m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
 
   Ipv4StaticRoutingHelper routingHelper;
   m_internetHelper.SetRoutingHelper(routingHelper);
@@ -320,7 +302,14 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
   Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(0)->GetObject<Ipv4>());
   remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
-  remoteStaticRoute->SetDefaultRoute(pgwAddress, 1);
+
+  m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
+  if (m_antennaNodes.GetN() > 1)
+    m_lteHelper->AddX2Interface(m_antennaNodes);
+  m_droneDevs = m_lteHelper->InstallUeDevice(m_droneNodes);
+
+  // assigning address 7.0.0.0/8
+  m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
 
   // assign to each drone the default route to the SGW
   for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)
@@ -344,8 +333,8 @@ DroneScenarioHelper::SetupLteIpv4Routing()
   m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
 */
 
-
-  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  // attach each drone ue to the antenna with the strongest signal
+  m_lteHelper->Attach(m_droneDevs);
 }
 
 void
@@ -354,11 +343,6 @@ DroneScenarioHelper::SetupWifi()
   // TODO
 }
 
-void
-DroneScenarioHelper::SetupWifiIpv4Routing()
-{
-  // TODO
-}
 
 Ipv4InterfaceContainer
 DroneScenarioHelper::GetDronesIpv4Interfaces()

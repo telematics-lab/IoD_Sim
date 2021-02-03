@@ -94,10 +94,6 @@ protected:
   void SetupNetworkProtocol();
   void SetupLte();
   void SetupWifi();
-  void SetupLteIpv4Routing();
-  void SetupWifiIpv4Routing();
-
-
 
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
