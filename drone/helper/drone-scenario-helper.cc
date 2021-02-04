@@ -72,18 +72,27 @@ DroneScenarioHelper::Run()
   Simulator::Run();
   Simulator::Destroy();
 
+  if (NS_COMPMAN_CHECK_COMPONENT("LteTraces"))
+  {
+    // move lte trace files located in root folder to the appropriate results folder
+    system(("mv Dl* " + m_configurator->GetResultsPath()).c_str());
+    system(("mv Ul* " + m_configurator->GetResultsPath()).c_str());
+  }
+
   NS_COMPMAN_REGISTER_COMPONENT();
 }
 
 uint32_t
 DroneScenarioHelper::GetRemoteId()
 {
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
   return m_remoteNodes.Get(0)->GetId();
 }
 
 uint32_t
 DroneScenarioHelper::GetAntennaId(uint32_t num)
 {
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
   NS_ASSERT_MSG(num < m_antennaNodes.GetN(), "Antenna index out of bound");
   return m_antennaNodes.Get(num)->GetId();
 }
@@ -274,11 +283,10 @@ DroneScenarioHelper::SetupLte()
   //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
 
-  PointToPointHelper p2pHelper;
   //p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   //p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  m_remoteDevs = p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
+  m_remoteDevs = m_p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
 
   Ipv4AddressHelper ipv4Helper;
 
@@ -481,6 +489,35 @@ DroneScenarioHelper::UseTestUdpEchoApplications()
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
 }
+
+
+void
+DroneScenarioHelper::EnableTracesAll()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_ENSURE_UNIQUE();
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  AsciiTraceHelper ascii;
+
+  std::string p2pPath, ipPath;
+  std::string path = m_configurator->GetResultsPath();
+
+  p2pPath = path + "REMOTE";
+  ipPath = path + "IP";
+
+  m_p2pHelper.EnableAsciiAll(ascii.CreateFileStream(p2pPath));
+  m_p2pHelper.EnablePcapAll(p2pPath);
+
+  m_internetHelper.EnableAsciiIpv4All(ascii.CreateFileStream(ipPath));
+  m_internetHelper.EnablePcapIpv4All(ipPath);
+
+  m_lteHelper->EnableTraces();
+
+  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("LteTraces");
+}
+
+
 
 
 } // namespace ns3

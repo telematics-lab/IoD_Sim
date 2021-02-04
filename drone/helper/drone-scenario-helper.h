@@ -75,6 +75,8 @@ public:
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(Ptr<Application> app);
   void UseTestUdpEchoApplications();
+  void EnableTracesAll();
+  void EnableTrace(uint32_t id, std::string prefix);
   uint32_t GetRemoteId();
   uint32_t GetAntennaId(uint32_t num);
 
@@ -107,6 +109,7 @@ protected:
   Ipv4InterfaceContainer m_droneIpv4, m_zspIpv4, m_remoteIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
+  PointToPointHelper m_p2pHelper;
   InternetStackHelper m_internetHelper;
 };
 
