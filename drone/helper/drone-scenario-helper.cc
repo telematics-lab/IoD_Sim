@@ -453,7 +453,7 @@ DroneScenarioHelper::SetRemoteApplication(Ptr<Application> app)
 }
 
 void
-DroneScenarioHelper::UseTestUdpEchoApplications()
+DroneScenarioHelper::UseUdpEchoApplications()
 {
   NS_LOG_FUNCTION_NOARGS();
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");

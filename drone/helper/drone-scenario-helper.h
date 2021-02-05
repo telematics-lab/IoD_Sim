@@ -74,7 +74,7 @@ public:
   void SetZspApplication(uint32_t id, Ptr<Application> app);
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(Ptr<Application> app);
-  void UseTestUdpEchoApplications();
+  void UseUdpEchoApplications();
   void EnableTracesAll();
   void EnableTrace(uint32_t id, std::string prefix);
   uint32_t GetRemoteId();

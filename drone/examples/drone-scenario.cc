@@ -32,7 +32,7 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 int main (int argc, char **argv)
 {
   DSH->Initialize(argc, argv);
-  //DSH->UseTestUdpEchoApplications();
+  //DSH->UseUdpEchoApplications();
 
   NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
   NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
