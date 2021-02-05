@@ -38,9 +38,9 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
   m_configurator = ScenarioConfigurationHelper::Get();
   m_configurator->Initialize(argc, argv, name);
 
-  this->SetSimulationParameters(Seconds(m_configurator->GetDuration()));
-
   m_protocol = m_configurator->GetProtocol();
+
+  this->SetSimulationParameters();
 
   this->SetNodesNumber();
 
@@ -102,11 +102,11 @@ DroneScenarioHelper::GetAntennaId(uint32_t num)
 // private
 
 void
-DroneScenarioHelper::SetSimulationParameters(Time duration)
+DroneScenarioHelper::SetSimulationParameters()
 {
-  NS_LOG_FUNCTION(duration);
+  NS_LOG_FUNCTION_NOARGS();
 
-  Simulator::Stop(duration);
+  Simulator::Stop(Seconds(m_configurator->GetDuration()));
 }
 
 void
