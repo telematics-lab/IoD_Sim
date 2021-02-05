@@ -48,7 +48,7 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
 
   this->LoadProtocolGlobalSettings();
 
-  this->SetupNetworkProtocol();
+  this->SetupNetwork();
 
   this->LoadProtocolDeviceSettings();
 
@@ -247,7 +247,7 @@ DroneScenarioHelper::LoadProtocolDeviceSettings()
 }
 
 void
-DroneScenarioHelper::SetupNetworkProtocol()
+DroneScenarioHelper::SetupNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
 

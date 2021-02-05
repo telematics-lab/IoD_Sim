@@ -93,7 +93,7 @@ protected:
   void LoadProtocolGlobalSettings();
   void LoadProtocolDeviceSettings();
   void InstallInternetStack();
-  void SetupNetworkProtocol();
+  void SetupNetwork();
   void SetupLte();
   void SetupWifi();
 
