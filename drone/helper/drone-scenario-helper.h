@@ -85,14 +85,14 @@ protected:
   uint32_t MobilityToEnum(std::string mobilityModel);
   void SetNodesNumber();
   void SetMobilityModels();
+  void SetupNetwork();
+  void LoadProtocolGlobalSettings();
+  void LoadProtocolDeviceSettings();
+
   void SetDronesMobility();
   void CreateBuildings();
   void SetAntennasPosition();
   void SetZspsPosition();
-  void LoadProtocolGlobalSettings();
-  void LoadProtocolDeviceSettings();
-  void InstallInternetStack();
-  void SetupNetwork();
   void SetupLte();
 
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
@@ -109,6 +109,7 @@ protected:
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
   InternetStackHelper m_internetHelper;
+  std::vector<Ptr<Building>> m_buildings;
 };
 
 } // namespace ns3

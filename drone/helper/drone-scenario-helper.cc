@@ -240,6 +240,8 @@ DroneScenarioHelper::SetupNetwork()
 {
   NS_LOG_FUNCTION_NOARGS();
 
+  m_buildings = m_configurator->GetBuildings();
+
   if (m_protocol == "lte")
   {
     this->SetupLte();
