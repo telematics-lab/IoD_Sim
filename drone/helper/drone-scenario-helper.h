@@ -67,17 +67,17 @@ public:
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
   Ipv4Address GetDroneIpv4Address(uint32_t id);
-  Ipv4Address GetRemoteIpv4Address();
+  Ipv4Address GetRemoteIpv4Address(uint32_t id);
 
   void SetDroneApplication(uint32_t id, Ptr<Application> app);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
   void SetZspApplication(uint32_t id, Ptr<Application> app);
   void SetZspsApplication(Ptr<ApplicationContainer> apps);
-  void SetRemoteApplication(Ptr<Application> app);
+  void SetRemoteApplication(uint32_t id, Ptr<Application> app);
   void UseUdpEchoApplications();
   void EnableTracesAll();
-  void EnableTrace(uint32_t id, std::string prefix);
-  uint32_t GetRemoteId();
+  //void EnableTrace(uint32_t id, std::string prefix);
+  uint32_t GetRemoteId(uint32_t num);
   uint32_t GetAntennaId(uint32_t num);
 
 protected:
@@ -94,7 +94,6 @@ protected:
   void InstallInternetStack();
   void SetupNetwork();
   void SetupLte();
-  void SetupWifi();
 
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);

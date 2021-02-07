@@ -36,7 +36,7 @@ int main (int argc, char **argv)
 
   NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
   NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
-  NS_LOG_DEBUG("Remote IP: " << DSH->GetRemoteIpv4Address());
+  NS_LOG_DEBUG("Remote IP: " << DSH->GetRemoteIpv4Address(0));
 
 
   for (uint32_t i = 0; i < CONFIG->GetDronesN(); ++i)
@@ -45,18 +45,18 @@ int main (int argc, char **argv)
         "Ipv4Address", Ipv4AddressValue(DSH->GetDroneIpv4Address(i)),
         "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
         "Duration", DoubleValue(CONFIG->GetDuration()),
-        "DestinationIpv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address()));
+        "DestinationIpv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)));
     clientApp->SetStartTime(Seconds(CONFIG->GetDroneApplicationStartTime(i)));
     clientApp->SetStopTime(Seconds(CONFIG->GetDroneApplicationStopTime(i)));
     DSH->SetDroneApplication(i, clientApp);
   }
 
   Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer>(
-      "Ipv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address()),
+      "Ipv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)),
       "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
   serverApp->SetStartTime(Seconds(CONFIG->GetRemoteApplicationStartTime(0)));
   serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
-  DSH->SetRemoteApplication(serverApp);
+  DSH->SetRemoteApplication(0, serverApp);
 
   DSH->EnableTracesAll();
 

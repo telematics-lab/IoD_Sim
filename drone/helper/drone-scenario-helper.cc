@@ -40,8 +40,6 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
 
   m_protocol = m_configurator->GetProtocol();
 
-  this->SetSimulationParameters();
-
   this->SetNodesNumber();
 
   this->SetMobilityModels();
@@ -84,10 +82,10 @@ DroneScenarioHelper::Run()
 }
 
 uint32_t
-DroneScenarioHelper::GetRemoteId()
+DroneScenarioHelper::GetRemoteId(uint32_t num)
 {
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-  return m_remoteNodes.Get(0)->GetId();
+  return m_remoteNodes.Get(num)->GetId();
 }
 
 uint32_t
@@ -108,7 +106,7 @@ DroneScenarioHelper::SetNodesNumber()
   m_droneNodes.Create(m_configurator->GetDronesN());
   if (m_protocol == "lte") m_antennaNodes.Create(m_configurator->GetAntennasN());
   if (m_protocol == "wifi") m_zspNodes.Create(m_configurator->GetZspsN());
-  m_remoteNodes.Create(1);
+  m_remoteNodes.Create(m_configurator->GetRemotesN());
 }
 
 void
@@ -247,11 +245,6 @@ DroneScenarioHelper::SetupNetwork()
     this->SetupLte();
     BuildingsHelper::Install (m_antennaNodes);
   }
-  if (m_protocol == "wifi")
-  {
-    this->SetupWifi();
-    BuildingsHelper::Install (m_zspNodes);
-  }
 
   BuildingsHelper::Install (m_droneNodes);
 }
@@ -327,12 +320,6 @@ DroneScenarioHelper::SetupLte()
   m_lteHelper->Attach(m_droneDevs);
 }
 
-void
-DroneScenarioHelper::SetupWifi()
-{
-  // TODO
-}
-
 
 Ipv4InterfaceContainer
 DroneScenarioHelper::GetDronesIpv4Interfaces()
@@ -366,11 +353,12 @@ DroneScenarioHelper::GetDroneIpv4Address(uint32_t id)
 }
 
 Ipv4Address
-DroneScenarioHelper::GetRemoteIpv4Address()
+DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 {
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
-  return this->GetIpv4Address(m_remoteIpv4, 1);
+  // add 1 since index 0 is the PGW (for LTE with EPC network)
+  return this->GetIpv4Address(m_remoteIpv4, id + 1);
 }
 
 
@@ -424,12 +412,12 @@ DroneScenarioHelper::SetDronesApplication(Ptr<ApplicationContainer> apps)
 }
 
 void
-DroneScenarioHelper::SetRemoteApplication(Ptr<Application> app)
+DroneScenarioHelper::SetRemoteApplication(uint32_t id, Ptr<Application> app)
 {
   NS_LOG_FUNCTION(app);
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
-  this->SetApplication(m_remoteNodes, 0, app);
+  this->SetApplication(m_remoteNodes, id, app);
 
 /*
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemoteApplication" + std::to_string(id));
@@ -466,7 +454,7 @@ DroneScenarioHelper::UseUdpEchoApplications()
   }
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(), 9);
+  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
