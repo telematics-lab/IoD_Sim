@@ -86,8 +86,8 @@ protected:
   void SetNodesNumber();
   void SetMobilityModels();
   void SetupNetwork();
-  void LoadProtocolGlobalSettings();
-  void LoadProtocolDeviceSettings();
+  void LoadGlobalSettings();
+  void LoadIndividualSettings();
 
   void SetDronesMobility();
   void CreateBuildings();

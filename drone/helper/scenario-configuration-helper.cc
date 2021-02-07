@@ -611,24 +611,24 @@ ScenarioConfigurationHelper::GetProtocol() const
 {
   NS_ASSERT_MSG (m_config.HasMember ("protocol")
                  && m_config["protocol"].IsString (),
-                 "Please define protocol in configuration file.");
+                 "No protocol is defined in configuration file.");
 
   return m_config["protocol"].GetString ();
 }
 
 const std::vector<std::pair<std::string, std::string>>
-ScenarioConfigurationHelper::GetProtocolGlobalSettings() const
+ScenarioConfigurationHelper::GetGlobalSettings() const
 {
   std::vector<std::pair<std::string, std::string>> settings;
 
-  if (m_config.HasMember ("protocolSettings"))
+  if (m_config.HasMember ("settings"))
     {
-      NS_ASSERT (m_config["protocolSettings"].IsArray ());
+      NS_ASSERT (m_config["settings"].IsArray ());
 
-      NS_ASSERT_MSG (m_config["protocolSettings"].Size () % 2 == 0,
-                     "Check protocolSettings: elements in list are not an even number, something is missing.");
+      NS_ASSERT_MSG (m_config["settings"].Size () % 2 == 0,
+                     "Check \"settings\": elements in list are not an even number, something is missing.");
 
-      for (auto i = m_config["protocolSettings"].Begin (); i != m_config["protocolSettings"].End (); i += 2)
+      for (auto i = m_config["settings"].Begin (); i != m_config["settings"].End (); i += 2)
         {
           NS_ASSERT ((*i).IsString ());
           NS_ASSERT ((*(i+1)).IsString());
@@ -642,18 +642,18 @@ ScenarioConfigurationHelper::GetProtocolGlobalSettings() const
 }
 
 const std::vector<std::pair<std::string, std::string>>
-ScenarioConfigurationHelper::GetProtocolDeviceSettings() const
+ScenarioConfigurationHelper::GetIndividualSettings() const
 {
   std::vector<std::pair<std::string, std::string>> settings;
 
-  if (m_config.HasMember ("protocolSettings"))
+  if (m_config.HasMember ("settings"))
     {
-      NS_ASSERT (m_config["protocolSettings"].IsArray ());
+      NS_ASSERT (m_config["settings"].IsArray ());
 
-      NS_ASSERT_MSG (m_config["protocolSettings"].Size () % 2 == 0,
-                     "Check protocolSettings: elements in list are not an even number, something is missing.");
+      NS_ASSERT_MSG (m_config["settings"].Size () % 2 == 0,
+                     "Check \"settings\": elements in list are not an even number, something is missing.");
 
-      for (auto i = m_config["protocolSettings"].Begin (); i != m_config["protocolSettings"].End (); i += 2)
+      for (auto i = m_config["settings"].Begin (); i != m_config["settings"].End (); i += 2)
         {
           NS_ASSERT ((*i).IsString ());
           NS_ASSERT ((*(i+1)).IsString());

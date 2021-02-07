@@ -1,6 +1,6 @@
 {
     "protocol": "lte",
-    "protocolSettings": [
+    "settings": [
         "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
         "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
         "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",

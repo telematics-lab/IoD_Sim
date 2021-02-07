@@ -40,15 +40,15 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
 
   m_protocol = m_configurator->GetProtocol();
 
+  this->LoadGlobalSettings();
+
   this->SetNodesNumber();
 
   this->SetMobilityModels();
 
-  this->LoadProtocolGlobalSettings();
-
   this->SetupNetwork();
 
-  this->LoadProtocolDeviceSettings();
+  this->LoadIndividualSettings();
 
   NS_COMPMAN_REGISTER_COMPONENT();
 }
@@ -211,10 +211,10 @@ DroneScenarioHelper::SetZspsPosition()
 
 
 void
-DroneScenarioHelper::LoadProtocolGlobalSettings()
+DroneScenarioHelper::LoadGlobalSettings()
 {
   NS_LOG_FUNCTION_NOARGS();
-  auto settings = m_configurator->GetProtocolGlobalSettings();
+  auto settings = m_configurator->GetGlobalSettings();
   for (auto s : settings)
   {
     Config::SetDefault(s.first, StringValue(s.second));
@@ -225,10 +225,10 @@ DroneScenarioHelper::LoadProtocolGlobalSettings()
 }
 
 void
-DroneScenarioHelper::LoadProtocolDeviceSettings()
+DroneScenarioHelper::LoadIndividualSettings()
 {
   NS_LOG_FUNCTION_NOARGS();
-  auto settings = m_configurator->GetProtocolDeviceSettings();
+  auto settings = m_configurator->GetIndividualSettings();
   for (auto s : settings)
   {
     Config::Set(s.first, StringValue(s.second));

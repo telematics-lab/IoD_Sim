@@ -197,17 +197,17 @@ public:
    */
   const std::string GetProtocol() const;
   /**
-   * \brief Returns a vector with all the global configuration strings for the protocol.
-   *        Use with Config::SetDefault(pair.first, pair.second) before creating the network.
+   * \brief Returns a vector with all the global configuration strings for scenario.
+   *        Use with Config::SetDefault(pair.first, pair.second) at the beginning of the script.
    * \return a vector of pairs containing the key and the value extracted from config
    */
-  const std::vector<std::pair<std::string, std::string>> GetProtocolGlobalSettings() const;
+  const std::vector<std::pair<std::string, std::string>> GetGlobalSettings() const;
   /**
-   * \brief Returns a vector with all the device configuration strings for the protocol.
-   *        Use with Config::Set(pair.first, pair.second) after creating the devices.
+   * \brief Returns a vector with all the per-object individual settings.
+   *        Use with Config::Set(pair.first, pair.second) after creating all the object before simulation start.
    * \return a vector of pairs containing the key and the value extracted from config
    */
-  const std::vector<std::pair<std::string, std::string>> GetProtocolDeviceSettings() const;
+  const std::vector<std::pair<std::string, std::string>> GetIndividualSettings() const;
 
   /**
    * \return a vector of Ptr<Building> created with the attributes in config
