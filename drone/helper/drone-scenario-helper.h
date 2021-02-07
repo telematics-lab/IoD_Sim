@@ -83,7 +83,6 @@ public:
 protected:
 
   uint32_t MobilityToEnum(std::string mobilityModel);
-  void SetSimulationParameters();
   void SetNodesNumber();
   void SetMobilityModels();
   void SetDronesMobility();

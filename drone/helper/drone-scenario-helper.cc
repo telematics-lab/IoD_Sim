@@ -69,6 +69,7 @@ DroneScenarioHelper::Run()
   NS_COMPMAN_ENSURE_UNIQUE();
   NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
 
+  Simulator::Stop(Seconds(m_configurator->GetDuration()));
   Simulator::Run();
   Simulator::Destroy();
 
@@ -98,16 +99,6 @@ DroneScenarioHelper::GetAntennaId(uint32_t num)
 }
 
 
-
-// private
-
-void
-DroneScenarioHelper::SetSimulationParameters()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  Simulator::Stop(Seconds(m_configurator->GetDuration()));
-}
 
 void
 DroneScenarioHelper::SetNodesNumber()
