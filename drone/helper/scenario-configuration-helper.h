@@ -88,6 +88,16 @@ public:
    */
   const std::string GetDronesMobilityModel () const;
   /**
+   * \param n the index of the drone in the list
+   * \return a string identifying the mobility model of the n-th drone
+   */
+  const std::string GetDroneMobilityModel (uint32_t n) const;
+  /**
+   * \param n the index of the drone in the list
+   * \return a ns3::Vector with the coordinates of the position of the n-th drone
+   */
+  const Vector GetDronePosition (uint32_t n) const;
+  /**
    * \brief allocate the position of the drones (if dronesMobilityModel is
    *        set to "ns3::ConstantPositionMobilityModel")
    * \param allocator the allocator to be filled with drones positions.

@@ -197,26 +197,12 @@ ScenarioConfigurationHelper::GetDronesMobilityModel () const
 void
 ScenarioConfigurationHelper::GetDronesPosition (Ptr<ListPositionAllocator> allocator) const
 {
-  for (auto drone = m_config["drones"].Begin (); drone != m_config["drones"].End (); drone++)
+  NS_ASSERT_MSG (GetDronesMobilityModel () == "ns3::ConstantPositionMobilityModel",
+                  "Drones position parameter can be used only when dronesMobilityModel is ns3::ConstantPositionMobilityModel");
+
+  for (uint32_t i = 0; i < m_config["drones"].GetArray ().Size (); ++i)
     {
-      NS_ASSERT_MSG (GetDronesMobilityModel () == "ns3::ConstantPositionMobilityModel",
-                     "Drones position parameter can be used only when dronesMobilityModel is ns3::ConstantPositionMobilityModel");
-      NS_ASSERT_MSG (drone->IsObject (),
-                     "Each drone must be a JSON object.");
-      NS_ASSERT_MSG (drone->HasMember ("position"),
-                     "One or more drones do not have defined position.");
-
-      NS_ASSERT_MSG ((*drone)["position"].IsArray ()
-                     && (*drone)["position"].Size () == 3
-                     && (*drone)["position"][0].IsDouble ()
-                     && (*drone)["position"][1].IsDouble ()
-                     && (*drone)["position"][2].IsDouble (),
-                     "Please check that each drone position is an array of 3 doubles.");
-
-      Vector v ((*drone)["position"][0].GetDouble (),
-                (*drone)["position"][1].GetDouble (),
-                (*drone)["position"][2].GetDouble ());
-
+      Vector v = GetDronePosition (i);
       NS_LOG_LOGIC ("Allocating a drone in space at " << v);
       allocator->Add (v);
     }
@@ -730,6 +716,44 @@ ScenarioConfigurationHelper::GetBuildings () const
   }
 
   return buildings;
+}
+
+const std::string
+ScenarioConfigurationHelper::GetDroneMobilityModel (uint32_t n) const
+{
+  const auto drones = m_config["drones"].GetArray ();
+  const auto drone  = drones[n].GetObject ();
+
+  if (drone.HasMember ("mobilityModel") && drone["mobilityModel"].IsString ())
+    return drone["mobilityModel"].GetString ();
+  return "";
+}
+
+const Vector
+ScenarioConfigurationHelper::GetDronePosition (uint32_t n) const
+{
+  const auto drones = m_config["drones"].GetArray ();
+  const auto drone = drones[n].GetObject ();
+
+  NS_ASSERT_MSG (GetDroneMobilityModel (n) == "ns3::ConstantPositionMobilityModel" ||
+                 GetDronesMobilityModel () == "ns3::ConstantPositionMobilityModel",
+                  "Drone position parameter can be used only when the mobility model is ns3::ConstantPositionMobilityModel");
+
+  NS_ASSERT_MSG (drone.HasMember ("position"),
+                  "Drone #" << n << " does not have a position defined.");
+
+  NS_ASSERT_MSG (drone["position"].IsArray ()
+                  && drone["position"].Size () == 3
+                  && drone["position"][0].IsDouble ()
+                  && drone["position"][1].IsDouble ()
+                  && drone["position"][2].IsDouble (),
+                  "Please check that drone #" << n << " position is an array of 3 doubles.");
+
+  Vector v (drone["position"][0].GetDouble (),
+            drone["position"][1].GetDouble (),
+            drone["position"][2].GetDouble ());
+
+  return v;
 }
 
 } // namespace ns3

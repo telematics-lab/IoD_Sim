@@ -137,45 +137,47 @@ DroneScenarioHelper::SetDronesMobility()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  std::string mobilityModel = m_configurator->GetDronesMobilityModel();
+  std::string globalMobilityModel = m_configurator->GetDronesMobilityModel();
 
-  MobilityHelper mobility;
-
-  switch (this->MobilityToEnum(mobilityModel))
+  for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
   {
-    case CONSTANT_POSITION:
-    {
-      Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
-      m_configurator->GetDronesPosition(position);
-      mobility.SetMobilityModel(mobilityModel);
-      mobility.SetPositionAllocator(position);
-      mobility.Install(m_droneNodes);
-    } break;
+    MobilityHelper mobility;
 
-    case PARAMETRIC_SPEED:
+    std::string mobilityModel = globalMobilityModel;
+    if (globalMobilityModel == "mixed")
+      mobilityModel = m_configurator->GetDroneMobilityModel(i);
+
+    switch (this->MobilityToEnum(mobilityModel))
     {
-      for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+      case CONSTANT_POSITION:
+      {
+        mobility.SetMobilityModel(mobilityModel);
+        mobility.Install(m_droneNodes.Get(i));
+        m_droneNodes.Get(i)->GetObject<MobilityModel>()->SetPosition(m_configurator->GetDronePosition(i));
+      } break;
+
+      case PARAMETRIC_SPEED:
       {
         mobility.SetMobilityModel(mobilityModel,
             "SpeedCoefficients", SpeedCoefficientsValue(m_configurator->GetDroneSpeedCoefficients (i)),
             "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
             "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
         mobility.Install (m_droneNodes.Get (i));
-      }
-    } break;
+      } break;
 
-    case CONSTANT_ACCELERATION:
-    {
-      for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+      case CONSTANT_ACCELERATION:
       {
-        mobility.SetMobilityModel(mobilityModel,
-            "Acceleration", DoubleValue (m_configurator->GetDroneAcceleration (i)),
-            "MaxSpeed", DoubleValue (m_configurator->GetDroneMaxSpeed (i)),
-            "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
-            "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
-        mobility.Install (m_droneNodes.Get (i));
-      }
-    } break;
+        for (uint32_t i = 0; i < m_droneNodes.GetN (); i++)
+        {
+          mobility.SetMobilityModel(mobilityModel,
+              "Acceleration", DoubleValue (m_configurator->GetDroneAcceleration (i)),
+              "MaxSpeed", DoubleValue (m_configurator->GetDroneMaxSpeed (i)),
+              "FlightPlan", FlightPlanValue (m_configurator->GetDroneFlightPlan (i)),
+              "CurveStep", DoubleValue (m_configurator->GetCurveStep ()));
+          mobility.Install (m_droneNodes.Get (i));
+        }
+      } break;
+    }
   }
 }
 

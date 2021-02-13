@@ -15,17 +15,35 @@
     ],
     "duration": 10.0,
 
-    "dronesMobilityModel": "ns3::ConstantPositionMobilityModel",
+    "dronesMobilityModel": "mixed",
     "drones": [
         {
             "applicationStartTime": 1.0,
             "applicationStopTime": 9.0,
+            "mobilityModel": "ns3::ConstantPositionMobilityModel",
             "position": [100.0, 0.0, 10.0]
         },
         {
             "applicationStartTime": 1.2,
             "applicationStopTime": 9.0,
-            "position": [0.0, 50.0, 10.0]
+            "mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
+            "speedCoefficients": [1.0, 0.0],
+            "trajectory": [
+                {
+                    "position": [0.0, 0.0, 10.0],
+                    "interest": 0,
+                    "restTime": 3.0
+                },
+                {
+                    "position": [10.0, 10.0, 100.0],
+                    "interest": 1
+                },
+                {
+                    "position": [20.0, 0.0, 20.0],
+                    "interest": 0,
+                    "restTime": 3.0
+                }
+            ]
         }
     ],
 
