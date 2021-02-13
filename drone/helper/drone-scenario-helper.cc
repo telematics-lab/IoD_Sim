@@ -18,7 +18,6 @@
 
 
 #include "drone-scenario-helper.h"
-#include "scenario-configuration-helper.h"
 #include <ns3/component-manager.h>
 
 //#define CONFIGURATOR ScenarioConfigurationHelper::Get()
@@ -104,8 +103,7 @@ DroneScenarioHelper::SetNodesNumber()
   NS_LOG_FUNCTION_NOARGS();
 
   m_droneNodes.Create(m_configurator->GetDronesN());
-  if (m_protocol == "lte") m_antennaNodes.Create(m_configurator->GetAntennasN());
-  if (m_protocol == "wifi") m_zspNodes.Create(m_configurator->GetZspsN());
+  m_antennaNodes.Create(m_configurator->GetAntennasN());
   m_remoteNodes.Create(m_configurator->GetRemotesN());
 }
 
@@ -115,8 +113,7 @@ DroneScenarioHelper::SetMobilityModels()
   NS_LOG_FUNCTION_NOARGS();
 
   this->SetDronesMobility();
-  if (m_protocol == "lte") this->SetAntennasPosition();
-  if (m_protocol == "wifi") this->SetZspsPosition();
+  this->SetAntennasPosition();
 }
 
 uint32_t
@@ -195,20 +192,6 @@ DroneScenarioHelper::SetAntennasPosition()
   mobility.Install(m_antennaNodes);
 }
 
-void
-DroneScenarioHelper::SetZspsPosition()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  Ptr<ListPositionAllocator> position = CreateObject<ListPositionAllocator>();
-  m_configurator->GetZspsPosition(position);
-  MobilityHelper mobility;
-  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobility.SetPositionAllocator(position);
-  mobility.Install(m_zspNodes);
-}
-
-
 
 void
 DroneScenarioHelper::LoadGlobalSettings()
@@ -233,93 +216,6 @@ DroneScenarioHelper::LoadIndividualSettings()
   {
     Config::Set(s.first, StringValue(s.second));
   }
-}
-
-void
-DroneScenarioHelper::SetupNetwork()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  m_buildings = m_configurator->GetBuildings();
-
-  if (m_protocol == "lte")
-  {
-    this->SetupLte();
-    BuildingsHelper::Install (m_antennaNodes);
-  }
-
-  BuildingsHelper::Install (m_droneNodes);
-}
-
-void
-DroneScenarioHelper::SetupLte()
-{
-  NS_LOG_FUNCTION_NOARGS();
-
-  m_internetHelper.Install(m_droneNodes);
-  m_internetHelper.Install(m_remoteNodes);
-
-  m_lteHelper = CreateObject<LteHelper> ();
-  m_epcHelper = CreateObject<PointToPointEpcHelper> ();
-  m_lteHelper->SetEpcHelper (m_epcHelper);
-
-  //m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
-  //m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
-  //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
-  //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
-  //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
-
-  //p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  //p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  m_remoteDevs = m_p2pHelper.Install(m_epcHelper->GetPgwNode(), m_remoteNodes.Get(0));
-
-  Ipv4AddressHelper ipv4Helper;
-
-  ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
-  m_remoteIpv4 = ipv4Helper.Assign(m_remoteDevs);
-
-
-  Ipv4StaticRoutingHelper routingHelper;
-  m_internetHelper.SetRoutingHelper(routingHelper);
-
-  // add to each remote a route to the PGW
-  Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-  Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_remoteNodes.Get(0)->GetObject<Ipv4>());
-  remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
-
-  m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
-  if (m_antennaNodes.GetN() > 1)
-    m_lteHelper->AddX2Interface(m_antennaNodes);
-  m_droneDevs = m_lteHelper->InstallUeDevice(m_droneNodes);
-
-  // assigning address 7.0.0.0/8
-  m_droneIpv4 = m_epcHelper->AssignUeIpv4Address(m_droneDevs);
-
-  // assign to each drone the default route to the SGW
-  for (uint32_t i=0; i<m_droneNodes.GetN(); ++i)
-  {
-    Ptr<Ipv4StaticRouting> dronesStaticRoute = routingHelper.GetStaticRouting(m_droneNodes.Get(i)->GetObject<Ipv4>());
-    dronesStaticRoute->SetDefaultRoute(m_epcHelper->GetUeDefaultGatewayAddress(), 1);
-  }
-
-/*
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
-  GbrQosInformation qos;
-  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
-  //qos.gbrUl = 132;
-  //qos.mbrDl = qos.gbrDl;
-  //qos.mbrUl = qos.gbrUl;
-  qos.gbrDl = 20000000; 	   // Downlink GBR (bit/s) ---> 20 Mbps
-  qos.gbrUl = 5000000;	 	  // Uplink GBR ---> 5 Mbps
-  qos.mbrDl = 20000000;		 // Downlink MBR
-  qos.mbrUl = 5000000; 		// Uplink MBR,
-  EpsBearer bearer(q, qos);
-  m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
-*/
-
-  // attach each drone ue to the antenna with the strongest signal
-  m_lteHelper->Attach(m_droneDevs);
 }
 
 
@@ -442,18 +338,11 @@ DroneScenarioHelper::UseUdpEchoApplications()
 
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
   UdpEchoServerHelper echoServer (9);
-  if (m_protocol == "lte")
-  {
-    ApplicationContainer serverApps = echoServer.Install (m_remoteNodes);
-    serverApps.Start (Seconds (m_configurator->GetRemoteApplicationStartTime (0)));
-    serverApps.Stop (Seconds (m_configurator->GetRemoteApplicationStopTime (0)));
-  }
-  if (m_protocol == "wifi")
-  {
-    ApplicationContainer serverApps = echoServer.Install (m_zspNodes);
-    serverApps.Start (Seconds (m_configurator->GetZspApplicationStartTime (0)));
-    serverApps.Stop (Seconds (m_configurator->GetZspApplicationStopTime (0)));
-  }
+
+  ApplicationContainer serverApps = echoServer.Install (m_remoteNodes);
+  serverApps.Start (Seconds (m_configurator->GetRemoteApplicationStartTime (0)));
+  serverApps.Stop (Seconds (m_configurator->GetRemoteApplicationStopTime (0)));
+
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
   UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
@@ -470,35 +359,6 @@ DroneScenarioHelper::UseUdpEchoApplications()
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
   NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
 }
-
-
-void
-DroneScenarioHelper::EnableTracesAll()
-{
-  NS_LOG_FUNCTION_NOARGS();
-  NS_COMPMAN_ENSURE_UNIQUE();
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-
-  AsciiTraceHelper ascii;
-
-  std::string p2pPath, ipPath;
-  std::string path = m_configurator->GetResultsPath();
-
-  p2pPath = path + "REMOTE";
-  ipPath = path + "IP";
-
-  m_p2pHelper.EnableAsciiAll(ascii.CreateFileStream(p2pPath));
-  m_p2pHelper.EnablePcapAll(p2pPath);
-
-  m_internetHelper.EnableAsciiIpv4All(ascii.CreateFileStream(ipPath));
-  m_internetHelper.EnablePcapIpv4All(ipPath);
-
-  m_lteHelper->EnableTraces();
-
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("LteTraces");
-}
-
-
 
 
 } // namespace ns3

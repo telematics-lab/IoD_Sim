@@ -20,9 +20,9 @@
 #include <ns3/applications-module.h>
 #include <ns3/drone-server.h>
 #include <ns3/drone-client.h>
-#include <ns3/drone-scenario-helper.h>
+#include <ns3/lte-drone-scenario-helper.h>
 
-#define DSH DroneScenarioHelper::Get()
+#define DSH LteDroneScenarioHelper::Get()
 #define CONFIG DSH->GetConfigurator()
 
 using namespace ns3;

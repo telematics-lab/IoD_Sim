@@ -55,10 +55,12 @@ enum _MobilityModelName
   ENUM_SIZE // Keep last, size of the enum
 };
 
-class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
+class DroneScenarioHelper
 {
 public:
 
+  DroneScenarioHelper() {};
+  ~DroneScenarioHelper() {};
   ScenarioConfigurationHelper* GetConfigurator();
   void Initialize(uint32_t argc, char **argv, std::string name="DroneScenario");
 
@@ -71,11 +73,9 @@ public:
 
   void SetDroneApplication(uint32_t id, Ptr<Application> app);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
-  void SetZspApplication(uint32_t id, Ptr<Application> app);
-  void SetZspsApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(uint32_t id, Ptr<Application> app);
   void UseUdpEchoApplications();
-  void EnableTracesAll();
+  virtual void EnableTracesAll() = 0; // Implement in derived class
   //void EnableTrace(uint32_t id, std::string prefix);
   uint32_t GetRemoteId(uint32_t num);
   uint32_t GetAntennaId(uint32_t num);
@@ -85,15 +85,12 @@ protected:
   uint32_t MobilityToEnum(std::string mobilityModel);
   void SetNodesNumber();
   void SetMobilityModels();
-  void SetupNetwork();
+  virtual void SetupNetwork() = 0; // Implement in derived class
   void LoadGlobalSettings();
   void LoadIndividualSettings();
 
   void SetDronesMobility();
-  void CreateBuildings();
   void SetAntennasPosition();
-  void SetZspsPosition();
-  void SetupLte();
 
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
@@ -101,10 +98,10 @@ protected:
 
   std::string m_protocol;
   ScenarioConfigurationHelper *m_configurator;
-  NodeContainer m_droneNodes, m_antennaNodes, m_zspNodes, m_remoteNodes;
-  NetDeviceContainer m_droneDevs, m_antennaDevs, m_zspDevs, m_remoteDevs;
-  ApplicationContainer m_droneApps, m_zspApps, m_remoteApps;
-  Ipv4InterfaceContainer m_droneIpv4, m_zspIpv4, m_remoteIpv4;
+  NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
+  NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;
+  ApplicationContainer m_droneApps, m_remoteApps;
+  Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
