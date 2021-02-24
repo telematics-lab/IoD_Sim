@@ -6,7 +6,6 @@
                 "${workspaceFolder}/ns3/build/**",
                 "/usr/include/libxml2/**"
             ],
-            "defines": [],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++17",

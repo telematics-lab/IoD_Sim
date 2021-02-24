@@ -395,6 +395,45 @@ ScenarioConfigurationHelper::GetZspApplicationStopTime (uint32_t i) const
     return GetDuration ();
 }
 
+const uint32_t
+ScenarioConfigurationHelper::GetEnbsN () const
+{
+  NS_ASSERT (m_config.HasMember ("ENBs"));
+  NS_ASSERT (m_config["ENBs"].IsArray ());
+  NS_ASSERT_MSG (m_config["ENBs"].Size () > 0,
+                 "Please define at least one ENB in configuration file.");
+
+  return m_config["ENBs"].Size ();
+}
+
+void
+ScenarioConfigurationHelper::GetEnbsPosition (Ptr<ListPositionAllocator> allocator) const
+{
+  // checks for ZSP array were already made in ::ConfGetNumZsps.
+  // Let's skip them.
+  for (auto i = m_config["ENBs"].Begin (); i != m_config["ENBs"].End (); i++)
+    {
+      NS_ASSERT_MSG (i->IsObject (),
+                     "Each ENB must be a JSON object.");
+      NS_ASSERT_MSG (i->HasMember ("position"),
+                     "One or more ENBs do not have defined position.");
+
+      NS_ASSERT_MSG ((*i)["position"].IsArray ()
+                     && (*i)["position"].Size () == 3
+                     && (*i)["position"][0].IsDouble ()
+                     && (*i)["position"][1].IsDouble ()
+                     && (*i)["position"][2].IsDouble (),
+                     "Please check that each ENB position is an array of 3 doubles.");
+
+      Vector v ((*i)["position"][0].GetDouble (),
+                (*i)["position"][1].GetDouble (),
+                (*i)["position"][2].GetDouble ());
+
+      NS_LOG_LOGIC ("Allocating a ENB in space at " << v);
+      allocator->Add (v);
+    }
+}
+
 void
 ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
 {

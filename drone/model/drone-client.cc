@@ -274,6 +274,7 @@ DroneClient::ReceivePacket (const Ptr<Socket> socket) const
 
               m_state = CONNECTED;
 
+              // TODO: make this number parametric, so it is possible to decide the burst intensity of DroneClient messages
               for (double i = 1.0; i < m_duration; i += 1.0)
                 {
                   Simulator::ScheduleWithContext (GetNode ()->GetId (),

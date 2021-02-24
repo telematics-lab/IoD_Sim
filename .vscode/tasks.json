@@ -32,9 +32,27 @@
       "group": "test"
     },
     {
+      "label": "run allen (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen-hybrid-lte-wifi --numDrones=${input:numDrones}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run babbage",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-babbage --numDrones=${input:numDrones} --duration=${input:duration}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run babbage (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-babbage-hybrid-lte-wifi --numDrones=${input:numDrones} --duration=${input:duration}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -50,9 +68,36 @@
       "group": "test"
     },
     {
+      "label": "run davinci (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci-hybrid-lte-wifi --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run easley",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-easley --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run easley (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-easley-hybrid-lte-wifi --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run IoD Sim",
+      "type": "shell",
+      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },

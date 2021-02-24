@@ -160,6 +160,16 @@ public:
    * \return the instant, in seconds, indicating the end of the application.
    */
   const double GetZspApplicationStopTime (uint32_t i) const;
+  /**
+   * \return the number of ENBs to be simulated.
+   */
+  const uint32_t GetEnbsN () const;
+  /**
+   * \brief allocate the position of the ENBs
+   *
+   * \param allocator the allocator to be filled with ENBs positions.
+   */
+  void GetEnbsPosition (Ptr<ListPositionAllocator> allocator) const;
 
   /**
    * \brief default destructor

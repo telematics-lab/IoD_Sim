@@ -7,5 +7,10 @@
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
     "editor.tabSize": 2,
-    "workbench.tree.indent": 5
+    "workbench.tree.indent": 5,
+    "files.associations": {
+        "array": "cpp",
+        "hash_map": "cpp",
+        "string_view": "cpp"
+    }
 }
