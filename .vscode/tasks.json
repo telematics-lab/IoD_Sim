@@ -13,7 +13,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "./waf build -j${input:cores}",
+      "command": "./waf build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -168,12 +168,6 @@
     }
   ],
   "inputs": [
-    {
-      "id": "cores",
-      "type": "promptString",
-      "description": "Number of cores to use during build",
-      "default": "1"
-    },
     {
       "id": "numDrones",
       "type": "promptString",
