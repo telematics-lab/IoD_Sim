@@ -26,10 +26,27 @@
 #include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
+#include <ns3/phy-layer-configuration-helper.h>
 
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE_MASK ("ScenarioConfigurationHelper", LOG_PREFIX_ALL);
+
+void
+ScenarioConfigurationHelper::Initialize (int argc,
+                                         char **argv)
+{
+  auto now = std::chrono::system_clock::now ();
+  auto in_time_t = std::chrono::system_clock::to_time_t(now);
+  std::stringstream dateTime;
+
+  dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d.%H-%M-%S");
+
+  m_dateTime = dateTime.str ();
+
+  InitializeConfiguration (argc, argv);
+  InitializeLogging (GetLogOnFile ());
+}
 
 void
 ScenarioConfigurationHelper::Initialize (int argc,
@@ -56,8 +73,16 @@ ScenarioConfigurationHelper::~ScenarioConfigurationHelper ()
 }
 
 const std::string
-ScenarioConfigurationHelper::GetName () const
+ScenarioConfigurationHelper::GetName ()
 {
+  if (m_name.empty()) {
+    NS_ASSERT (m_config.HasMember ("name"));
+    NS_ASSERT_MSG (m_config["name"].IsString(),
+                   "Please define scenario name in configuration file.");
+
+    m_name = m_config["name"].GetString();
+  }
+
   return m_name;
 }
 
@@ -68,25 +93,77 @@ ScenarioConfigurationHelper::GetCurrentDateTime () const
 }
 
 const std::string
-ScenarioConfigurationHelper::GetResultsPath () const
+ScenarioConfigurationHelper::GetResultsPath ()
 {
   std::stringstream ss;
 
   ss << "../results/"
-     << m_name << "-"
+     << GetName() << "-"
      << m_dateTime;
 
   return ss.str ();
 }
 
 const std::string
-ScenarioConfigurationHelper::GetLoggingFilePath () const
+ScenarioConfigurationHelper::GetLoggingFilePath ()
 {
   std::stringstream ss;
 
   ss << GetResultsPath () << ".log";
 
   return ss.str ();
+}
+
+const std::vector<std::pair<std::string, std::string>>
+ScenarioConfigurationHelper::GetStaticConfig ()
+{
+  if (m_staticConfig.empty ())
+    {
+      NS_ASSERT (m_config.HasMember ("staticNs3Config"));
+      NS_ASSERT_MSG (m_config["staticNs3Config"].IsArray (),
+                     "Please define staticNs3Config in configuration file.");
+
+      std::vector<std::pair<std::string, std::string>> staticConfigsDecoded = {};
+      const auto staticConfigsArr = m_config["staticNs3Config"].GetArray ();
+      for (auto& sc : staticConfigsArr)
+        {
+          NS_ASSERT_MSG (sc.IsObject (),
+                        "A static config definition is invalid.");
+
+          const auto obj = sc.GetObject ();
+          NS_ASSERT (obj.HasMember ("parameter"));
+          NS_ASSERT (obj["parameter"].IsString ());
+          NS_ASSERT (obj.HasMember ("value"));
+          NS_ASSERT (obj["value"].IsString ());
+
+          staticConfigsDecoded.push_back({
+            obj["parameter"].GetString (),
+            obj["value"].GetString ()
+          });
+        }
+
+      m_staticConfig = staticConfigsDecoded;
+    }
+
+  return m_staticConfig;
+}
+
+const std::vector<Ptr<PhyLayerConfiguration>>
+ScenarioConfigurationHelper::GetPhyLayers ()
+{
+  NS_ASSERT (m_config.HasMember ("phyLayer"));
+  NS_ASSERT_MSG (m_config["phyLayer"].IsArray (),
+                 "Please define phyLayer in your JSON configuration.");
+
+  const auto arr = m_config["phyLayer"].GetArray ();
+  std::vector<Ptr<PhyLayerConfiguration>> phyConfs;
+  for(auto& el : arr)
+    {
+      auto conf = PhyLayerConfigurationHelper::GetConfiguration (el);
+      phyConfs.emplace_back (conf);
+    }
+
+  return phyConfs;
 }
 
 const std::string

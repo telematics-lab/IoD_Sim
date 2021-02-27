@@ -11,6 +11,11 @@
     "files.associations": {
         "array": "cpp",
         "hash_map": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "bitset": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "unordered_map": "cpp"
     }
 }

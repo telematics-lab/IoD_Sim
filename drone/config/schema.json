@@ -1,0 +1,106 @@
+{
+  "name": "String",
+  "resultsPath": "String",
+  "logOnFile": true,
+  "duration": 300.0,
+  "staticNs3Config": [
+    {
+      "referenceObject": "String",
+      "parameter": "String",
+      "value": "String"
+    }
+  ],
+  "phyLayer": [
+    {
+      "type": "String|wifi",
+      "standard": "String",
+      "rxGain": "Double",
+      "mode": "String",
+      "channel": {
+        "propagationDelayModel": "Model",
+        "propagationLossModel": "Model"
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "String|wifi",
+      "ssid": "String",
+      "remoteStationManager": "Model"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "String|ipv4",
+      "address": "String",
+      "mask": "String"
+    }
+  ],
+  "drones": [
+    {
+      "netDevices": [
+        {
+          "type": "String|wifi",
+          "macLayer": "Model",
+          "networkLayer": {
+            "type": "String|ipv4"
+          }
+        }
+      ],
+      "mobilityModel": "Model",
+      "applications": [
+        {
+          "model": "Model",
+          "startTime": "Double",
+          "stopTime": "Double"
+        }
+      ],
+      "trajectory": [
+        {
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "interest": 0,
+          "restTime": 3.0
+        },
+        {
+          "position": [
+            10.0,
+            10.0,
+            0.0
+          ],
+          "interest": 1
+        },
+        {
+          "position": [
+            20.0,
+            0.0,
+            0.0
+          ],
+          "interest": 0,
+          "restTime": 3.0
+        }
+      ]
+    }
+  ],
+  "ZSPs": [
+    {
+      "position": [
+        10.0,
+        10.0,
+        0.0
+      ]
+    }
+  ],
+  "logComponents": [
+    "Curve",
+    "ParametricSpeedFlight",
+    "Planner",
+    "ParametricSpeedDroneMobilityModel",
+    "DroneServer",
+    "DroneClient",
+    "ScenarioConfigurationHelper"
+  ]
+}
