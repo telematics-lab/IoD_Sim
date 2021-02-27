@@ -168,7 +168,6 @@ Scenario::ConfigurePhy ()
   m_wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (phyMode),
                                   "ControlMode", StringValue (phyMode));
 
-  m_wifiPhy = YansWifiPhyHelper::Default ();
   m_wifiPhy.Set ("RxGain", DoubleValue (0));
   m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 

@@ -113,7 +113,7 @@ private:
   const char *m_ifaceNetMask;
 };
 
-NS_LOG_COMPONENT_DEFINE ("Scenario DaVinci");
+NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 Scenario::Scenario (int argc, char **argv) : m_ifaceNetMask{"255.0.0.0"}
 {
@@ -160,8 +160,6 @@ Scenario::ConfigurePhy ()
   Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (phyMode));
 
   m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
-
-  m_wifiPhy = YansWifiPhyHelper::Default ();
 
   m_wifiPhy.Set ("RxGain", DoubleValue (0));
   m_wifiPhy.Set ("TxGain", DoubleValue (0));

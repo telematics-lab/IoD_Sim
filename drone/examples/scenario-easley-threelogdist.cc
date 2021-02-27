@@ -125,7 +125,6 @@ Scenario::ConfigurePhy ()
   const std::string phyMode = CONFIGURATOR->GetPhyMode ();
   YansWifiChannelHelper wifiChannel;
   AsciiTraceHelper ascii;
-  m_wifiPhy = YansWifiPhyHelper::Default ();
 
   // disable fragmentation for frames below 2200 bytes
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold",

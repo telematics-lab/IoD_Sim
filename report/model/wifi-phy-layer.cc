@@ -122,7 +122,7 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
 
   for (auto& sig : m_rssi)
     {
-      std::ostringstream bSig, bTx, bTime;
+      std::ostringstream bSig, bTx, bTime, bStaId;
 
       rc = xmlTextWriterStartElement (h,
                                       BAD_CAST "rssi");
@@ -145,6 +145,11 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
                                         BAD_CAST "value",
                                         BAD_CAST bSig.str ().c_str ());
       NS_ASSERT (rc >= 0);
+
+      bStaId << std::get<3>(sig);
+      rc = xmlTextWriterWriteAttribute (h,
+                                        BAD_CAST "staId",
+                                        BAD_CAST bStaId.str ().c_str ());
 
       rc = xmlTextWriterEndElement (h);
       NS_ASSERT (rc >= 0);
@@ -187,7 +192,8 @@ WifiPhyLayer::DoMonitorRssi (std::string x,
                              uint16_t channelFreqMhz,
                              WifiTxVector txVector,
                              MpduInfo aMpdu,
-                             SignalNoiseDbm signalNoise)
+                             SignalNoiseDbm signalNoise,
+                             uint16_t staId)
 {
   NS_LOG_FUNCTION_NOARGS ();
   WifiMacHeader wifiMacHeader;
@@ -199,7 +205,7 @@ WifiPhyLayer::DoMonitorRssi (std::string x,
   if (!wifiMacHeader.IsData ())  // Look up DATA frames only
     return;
 
-  m_rssi.push_back({ Simulator::Now(), wifiMacHeader.GetAddr2 (), signalNoise.signal });
+  m_rssi.push_back({ Simulator::Now(), wifiMacHeader.GetAddr2 (), signalNoise.signal, staId });
 }
 
 } // namespace ns3

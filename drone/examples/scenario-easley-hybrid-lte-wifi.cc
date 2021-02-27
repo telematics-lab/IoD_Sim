@@ -146,8 +146,6 @@ Scenario::ConfigurePhy ()
 
   m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
 
-  m_wifiPhy = YansWifiPhyHelper::Default ();
-
   m_wifiPhy.Set ("RxGain", DoubleValue (0));
   m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
