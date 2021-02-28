@@ -2,7 +2,7 @@
 
 [IoD_Sim](https://telematics.poliba.it/iod-sim) is an open source and
 system-level simulator for the IoD ([Internet of
-Drones](https://uwspace.uwaterloo.ca/bitstream/handle/10012/12663/07423671.pdf?sequence=1&isAllowed=y)).
+Drones](https://ieeexplore.ieee.org/document/7423671)).
 
 Developed on top of the well-known [ns-3](https://www.nsnam.org/) (Network
 Simulator 3), it implements the key networking elements (drones, network acces
