@@ -1,0 +1,59 @@
+From 86814cbf7c5f3e22660df281c50c6bd18e4894e0 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni@grieco.dev>
+Date: Sun, 28 Feb 2021 17:21:56 +0100
+Subject: [PATCH] Integrate ns-3 with IoD Sim
+
+---
+ src/drone                          | 1 +
+ src/report                         | 1 +
+ src/wifi/helper/wifi-helper.h      | 2 ++
+ src/wifi/helper/yans-wifi-helper.h | 2 ++
+ 4 files changed, 6 insertions(+)
+ create mode 120000 src/drone
+ create mode 120000 src/report
+
+diff --git a/src/drone b/src/drone
+new file mode 120000
+index 000000000..2b76d29a4
+--- /dev/null
++++ b/src/drone
+@@ -0,0 +1 @@
++../../drone
+\ No newline at end of file
+diff --git a/src/report b/src/report
+new file mode 120000
+index 000000000..4bc142358
+--- /dev/null
++++ b/src/report
+@@ -0,0 +1 @@
++../../report
+\ No newline at end of file
+diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
+index b15888e2f..d8f7cf1b1 100644
+--- a/src/wifi/helper/wifi-helper.h
++++ b/src/wifi/helper/wifi-helper.h
+@@ -326,6 +326,8 @@ private:
+ class WifiHelper
+ {
+ public:
++
++  friend class WifiMacFactoryHelper;
+   virtual ~WifiHelper ();
+ 
+   /**
+diff --git a/src/wifi/helper/yans-wifi-helper.h b/src/wifi/helper/yans-wifi-helper.h
+index 61193c80b..5d4324bc7 100644
+--- a/src/wifi/helper/yans-wifi-helper.h
++++ b/src/wifi/helper/yans-wifi-helper.h
+@@ -36,6 +36,8 @@ namespace ns3 {
+ class YansWifiChannelHelper
+ {
+ public:
++  friend class WifiPhyFactoryHelper;
++
+   /**
+    * Create a channel helper without any parameter set. The user must set
+    * them all to be able to call Create later.
+-- 
+2.25.1
+
