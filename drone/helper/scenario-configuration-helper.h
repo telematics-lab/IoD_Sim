@@ -26,6 +26,7 @@
 #include <ns3/position-allocator.h>
 #include <ns3/log.h>
 #include <ns3/flight-plan.h>
+#include <ns3/mac-layer-configuration.h>
 #include <ns3/phy-layer-configuration.h>
 #include <ns3/speed-coefficients.h>
 #include <ns3/singleton.h>
@@ -103,6 +104,13 @@ public:
    * \return The list of PHY Layers to be defined for this simulation.
    */
   const std::vector<Ptr<PhyLayerConfiguration>> GetPhyLayers ();
+
+  /**
+   * \brief Retrieve the list of MAC Layers defined for this simulation.
+   *
+   * \return The list of MAC Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<MacLayerConfiguration>> GetMacLayers ();
 
   /**
    * \return the phy mode for WiFi communications.

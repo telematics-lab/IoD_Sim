@@ -15,31 +15,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef MODEL_CONFIGURATION_H
-#define MODEL_CONFIGURATION_H
-
-#include <string>
-#include <vector>
-
-#include <ns3/attribute.h>
+#include "mac-layer-configuration.h"
 
 namespace ns3 {
 
-class ModelConfiguration
+MacLayerConfiguration::MacLayerConfiguration (std::string type) :
+  m_type {type}
 {
-public:
-  ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
-  ~ModelConfiguration ();
 
-  const std::string GetName () const;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+}
 
-private:
-  const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
-};
+MacLayerConfiguration::~MacLayerConfiguration ()
+{
+
+}
+
+const std::string
+MacLayerConfiguration::GetType () const
+{
+  return m_type;
+}
 
 } // namespace ns3
-
-#endif /* MODEL_CONFIGURATION_H */

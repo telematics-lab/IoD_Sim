@@ -15,31 +15,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef MODEL_CONFIGURATION_H
-#define MODEL_CONFIGURATION_H
+#include "wifi-mac-layer-configuration.h"
 
-#include <string>
-#include <vector>
-
-#include <ns3/attribute.h>
+#include <ns3/abort.h>
 
 namespace ns3 {
 
-class ModelConfiguration
+WifiMacLayerConfiguration::WifiMacLayerConfiguration(std::string macType,
+                                                     std::string ssid,
+                                                     ModelConfiguration remoteStationManagerConfiguration) :
+  MacLayerConfiguration {macType},
+  m_ssid {ssid},
+  m_remoteStationManagerConfiguration {remoteStationManagerConfiguration}
 {
-public:
-  ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
-  ~ModelConfiguration ();
 
-  const std::string GetName () const;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+}
 
-private:
-  const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
-};
+WifiMacLayerConfiguration::~WifiMacLayerConfiguration()
+{
+
+}
+
+const std::string
+WifiMacLayerConfiguration::GetSsid () const
+{
+  return m_ssid;
+}
+
+const ModelConfiguration
+WifiMacLayerConfiguration::GetRemoteStationManagerConfiguration () const
+{
+  return m_remoteStationManagerConfiguration;
+}
 
 } // namespace ns3
-
-#endif /* MODEL_CONFIGURATION_H */

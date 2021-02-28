@@ -20,12 +20,14 @@
 
 #include <string>
 
+#include <ns3/object.h>
+
 namespace ns3 {
 
 /**
  * \brief Helper to recognize and configure the PHY Layer of a Scenario
  */
-class PhyLayerConfiguration
+class PhyLayerConfiguration : public Object
 {
 public:
   PhyLayerConfiguration (std::string type);

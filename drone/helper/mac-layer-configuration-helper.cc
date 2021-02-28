@@ -15,75 +15,54 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "phy-layer-configuration-helper.h"
+#include "mac-layer-configuration-helper.h"
 
 #include <ns3/assert.h>
 #include <ns3/double.h>
 #include <ns3/fatal-error.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
-#include <ns3/wifi-phy-layer-configuration.h>
+#include <ns3/wifi-mac-layer-configuration.h>
 
 namespace ns3 {
 
-Ptr<PhyLayerConfiguration>
-PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLayer)
+Ptr<MacLayerConfiguration>
+MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLayer)
 {
-  NS_ASSERT_MSG (jsonPhyLayer.IsObject (),
-                 "PHY Layer definition must be an object, got " << jsonPhyLayer.GetType ());
-  NS_ASSERT_MSG (jsonPhyLayer.HasMember ("type"),
-                 "PHY Layer definition must have 'type' property.");
-  NS_ASSERT_MSG (jsonPhyLayer["type"].IsString (),
-                 "PHY Layer 'type' property must be a string.");
+  NS_ASSERT_MSG (jsonMacLayer.IsObject (),
+                 "MAC Layer definition must be an object, got " << jsonMacLayer.GetType ());
+  NS_ASSERT_MSG (jsonMacLayer.HasMember ("type"),
+                 "MAC Layer definition must have 'type' property.");
+  NS_ASSERT_MSG (jsonMacLayer["type"].IsString (),
+                 "MAC Layer 'type' property must be a string.");
 
-  const std::string phyType = jsonPhyLayer["type"].GetString ();
-  if (phyType.compare("wifi") == 0) {
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
-                   "PHY Layer definition must have 'standard' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["standard"].IsString (),
-                   "PHY Layer 'standard' property must be a string.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("rxGain"),
-                 "PHY Layer definition must have 'rxGain' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
-                 "PHY Layer 'rxGain' property must be a double.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("mode"),
-                 "PHY Layer definition must have 'mode' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["mode"].IsString (),
-                 "PHY Layer 'mode' property must be a string.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
-                 "PHY Layer definition must have 'channel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
-                 "PHY Layer 'mode' property must be an object.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationDelayModel"),
-                 "PHY Layer channel definition must have 'propagationDelayModel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationDelayModel"].IsObject (),
-                 "PHY Layer channel 'propagationDelayModel' must be an object");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
-                 "PHY Layer channel definition must have 'propagationLossModel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
-                 "PHY Layer channel 'propagationLossModel' must be an object");
+  const std::string macType = jsonMacLayer["type"].GetString ();
+  if (macType.compare("wifi") == 0) {
+    NS_ASSERT_MSG (jsonMacLayer.HasMember ("ssid"),
+                   "MAC Layer definition must have 'ssid' property.");
+    NS_ASSERT_MSG (jsonMacLayer["ssid"].IsString (),
+                   "MAC Layer 'ssid' property must be a string.");
+    NS_ASSERT_MSG (jsonMacLayer["remoteStationManager"].IsObject (),
+                 "MAC Layer 'remoteStationManager' property must be an object.");
 
-    const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
-    const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
+    const auto remoteStationManagerConfiguration = DecodeModelConfiguration (jsonMacLayer["remoteStationManager"]);
 
-    return Create<WifiPhyLayerConfiguration> (jsonPhyLayer["type"].GetString (),
-                                              jsonPhyLayer["standard"].GetString (),
-                                              jsonPhyLayer["rxGain"].GetDouble (),
-                                              jsonPhyLayer["mode"].GetString (),
-                                              propagationDelayModel,
-                                              propagationLossModel);
+    return Create<WifiMacLayerConfiguration> (jsonMacLayer["type"].GetString (),
+                                              jsonMacLayer["ssid"].GetString (),
+                                              remoteStationManagerConfiguration);
   } else {
-    NS_FATAL_ERROR ("PHY Layer of Type " << phyType << " is not supported!");
+    NS_FATAL_ERROR ("MAC Layer of Type " << macType << " is not supported!");
   }
 }
 
-PhyLayerConfigurationHelper::PhyLayerConfigurationHelper ()
+MacLayerConfigurationHelper::MacLayerConfigurationHelper ()
 {
 
 }
 
+// TODO same code with PhyLayerConfigurationHelper!
 const ModelConfiguration
-PhyLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
+MacLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
 {
   NS_ASSERT_MSG (jsonModel.HasMember ("name"),
                  "Model configuration must have 'name' property.");

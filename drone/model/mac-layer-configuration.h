@@ -15,31 +15,33 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef MODEL_CONFIGURATION_H
-#define MODEL_CONFIGURATION_H
+#ifndef MAC_LAYER_CONFIGURATION_H
+#define MAC_LAYER_CONFIGURATION_H
 
 #include <string>
-#include <vector>
 
-#include <ns3/attribute.h>
+#include <ns3/object.h>
 
 namespace ns3 {
 
-class ModelConfiguration
+/**
+ * \brief Helper to recognize and configure the MAC Layer of a Scenario
+ */
+class MacLayerConfiguration : public Object
 {
 public:
-  ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
-  ~ModelConfiguration ();
+  MacLayerConfiguration (std::string type);
+  virtual ~MacLayerConfiguration ();
 
-  const std::string GetName () const;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+  /**
+   * \brief Retrieve the type of the decoded MAC Layer
+   */
+  virtual const std::string GetType () const;
 
 private:
-  const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
+  const std::string m_type; /// MAC Layer type
 };
 
-} // namespace ns3
+} // ns3 namespace
 
-#endif /* MODEL_CONFIGURATION_H */
+#endif /* MAC_LAYER_CONFIGURATION_H */

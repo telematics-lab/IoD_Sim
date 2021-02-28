@@ -15,31 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef MODEL_CONFIGURATION_H
-#define MODEL_CONFIGURATION_H
+#ifndef MAC_LAYER_CONFIGURATION_HELPER_H
+#define MAC_LAYER_CONFIGURATION_HELPER_H
 
-#include <string>
-#include <vector>
+#include <ns3/model-configuration.h>
+#include <ns3/mac-layer-configuration.h>
 
-#include <ns3/attribute.h>
+#include <rapidjson/document.h>
 
 namespace ns3 {
 
-class ModelConfiguration
+class MacLayerConfigurationHelper
 {
 public:
-  ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
-  ~ModelConfiguration ();
-
-  const std::string GetName () const;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+  static Ptr<MacLayerConfiguration> GetConfiguration (const rapidjson::Value& jsonMacLayer);
 
 private:
-  const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
+  MacLayerConfigurationHelper();
+  static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value& jsonModel);
 };
 
 } // namespace ns3
 
-#endif /* MODEL_CONFIGURATION_H */
+#endif /* MAC_LAYER_CONFIGURATION_HELPER_H */

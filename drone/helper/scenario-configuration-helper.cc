@@ -25,6 +25,7 @@
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
+#include <ns3/mac-layer-configuration-helper.h>
 #include <ns3/object-factory.h>
 #include <ns3/phy-layer-configuration-helper.h>
 
@@ -132,9 +133,11 @@ ScenarioConfigurationHelper::GetStaticConfig ()
 
           const auto obj = sc.GetObject ();
           NS_ASSERT (obj.HasMember ("parameter"));
-          NS_ASSERT (obj["parameter"].IsString ());
+          NS_ASSERT_MSG (obj["parameter"].IsString (),
+                         "'parameter' is required in staticNs3Config definition.");
           NS_ASSERT (obj.HasMember ("value"));
-          NS_ASSERT (obj["value"].IsString ());
+          NS_ASSERT_MSG (obj["value"].IsString (),
+                         "'value' is required in staticNs3Config definiton.");
 
           staticConfigsDecoded.push_back({
             obj["parameter"].GetString (),
@@ -164,6 +167,24 @@ ScenarioConfigurationHelper::GetPhyLayers ()
     }
 
   return phyConfs;
+}
+
+const std::vector<Ptr<MacLayerConfiguration>>
+ScenarioConfigurationHelper::GetMacLayers ()
+{
+  NS_ASSERT (m_config.HasMember ("macLayer"));
+  NS_ASSERT_MSG (m_config["macLayer"].IsArray (),
+                 "Please define macLayer in your JSON configuration.");
+
+  const auto arr = m_config["macLayer"].GetArray ();
+  std::vector<Ptr<MacLayerConfiguration>> macConfs;
+  for(auto& el : arr)
+    {
+      auto conf = MacLayerConfigurationHelper::GetConfiguration (el);
+      macConfs.emplace_back (conf);
+    }
+
+  return macConfs;
 }
 
 const std::string

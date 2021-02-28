@@ -28,8 +28,14 @@ def build(bld):
         'model/zsp-list.cc',
         'model/phy-layer-configuration.cc',
         'model/wifi-phy-layer-configuration.cc',
+        'model/mac-layer-configuration.cc',
+        'model/wifi-mac-layer-configuration.cc',
         'model/model-configuration.cc',
-        'helper/scenario-configuration-helper.cc'
+        'helper/scenario-configuration-helper.cc',
+        'helper/phy-layer-configuration-helper.cc',
+        'helper/mac-layer-configuration-helper.cc',
+        'helper/wifi-mac-factory-helper.cc',
+        'helper/wifi-phy-factory-helper.cc'
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -58,8 +64,14 @@ def build(bld):
         'model/zsp-list.h',
         'model/phy-layer-configuration.h',
         'model/wifi-phy-layer-configuration.h',
+        'model/mac-layer-configuration.h',
+        'model/wifi-mac-layer-configuration.h',
         'model/model-configuration.h',
-        'helper/scenario-configuration-helper.h'
+        'helper/scenario-configuration-helper.h',
+        'helper/phy-layer-configuration-helper.h',
+        'helper/mac-layer-configuration-helper.h',
+        'helper/wifi-mac-factory-helper.h',
+        'helper/wifi-phy-factory-helper.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

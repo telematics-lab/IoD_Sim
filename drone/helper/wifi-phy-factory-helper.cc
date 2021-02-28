@@ -15,33 +15,39 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "model-configuration.h"
+#include "wifi-phy-factory-helper.h"
 
 namespace ns3 {
 
-ModelConfiguration::ModelConfiguration (const std::string name,
-                                        const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes) :
-  m_name {name},
-  m_attributes {attributes}
+void
+WifiPhyFactoryHelper::SetPropagationDelay (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf)
 {
+  ObjectFactory factory;
 
+  factory.SetTypeId (modelConf.GetName ());
+  for (auto& attr : modelConf.GetAttributes ()) {
+    factory.Set (attr.first, *attr.second);
+  }
+
+  channelHelper.m_propagationDelay = factory;
 }
 
-ModelConfiguration::~ModelConfiguration ()
+void
+WifiPhyFactoryHelper::AddPropagationLoss (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf)
 {
+  ObjectFactory factory;
 
+  factory.SetTypeId (modelConf.GetName ());
+  for (auto& attr : modelConf.GetAttributes ()) {
+    factory.Set (attr.first, *attr.second);
+  }
+
+  channelHelper.m_propagationLoss.push_back (factory);
 }
 
-const std::string
-ModelConfiguration::GetName () const
+WifiPhyFactoryHelper::WifiPhyFactoryHelper ()
 {
-  return m_name;
-}
 
-const std::vector<std::pair<std::string, Ptr<AttributeValue>>>
-ModelConfiguration::GetAttributes () const
-{
-  return m_attributes;
 }
 
 } // namespace ns3

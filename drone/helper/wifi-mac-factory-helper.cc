@@ -15,31 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef MODEL_CONFIGURATION_H
-#define MODEL_CONFIGURATION_H
-
-#include <string>
-#include <vector>
-
-#include <ns3/attribute.h>
+#include "wifi-mac-factory-helper.h"
 
 namespace ns3 {
 
-class ModelConfiguration
+void
+WifiMacFactoryHelper::SetRemoteStationManager (WifiHelper& helper, const ModelConfiguration& modelConf)
 {
-public:
-  ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
-  ~ModelConfiguration ();
+  ObjectFactory factory;
 
-  const std::string GetName () const;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+  factory.SetTypeId (modelConf.GetName ());
+  for (auto& attr : modelConf.GetAttributes ()) {
+    factory.Set (attr.first, *attr.second);
+  }
 
-private:
-  const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
-};
+  helper.m_stationManager = factory;
+}
+
+WifiMacFactoryHelper::WifiMacFactoryHelper ()
+{
+
+}
 
 } // namespace ns3
-
-#endif /* MODEL_CONFIGURATION_H */

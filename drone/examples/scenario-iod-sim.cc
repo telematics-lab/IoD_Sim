@@ -51,6 +51,9 @@
 #include <ns3/proto-point.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/speed-coefficients.h>
+#include <ns3/wifi-mac-factory-helper.h>
+#include <ns3/wifi-mac-layer-configuration.h>
+#include <ns3/wifi-phy-factory-helper.h>
 #include <ns3/wifi-phy-layer-configuration.h>
 #include <ns3/zsp-list.h>
 
@@ -109,10 +112,10 @@ Scenario::Scenario (int argc, char **argv) :
   ApplyStaticConfig ();
   ConfigurePhy ();
   ConfigureMac ();
-  ConfigureMobility ();
-  ConfigureNetwork ();
-  ConfigureApplication ();
-  ConfigureSimulator ();
+  // ConfigureMobility ();
+  // ConfigureNetwork ();
+  // ConfigureApplication ();
+  // ConfigureSimulator ();
 }
 
 Scenario::~Scenario ()
@@ -137,28 +140,24 @@ Scenario::ConfigurePhy ()
   const auto phyLayerConfs = CONFIGURATOR->GetPhyLayers ();
 
   for (auto& phyLayerConf : phyLayerConfs) {
-    if (phyLayerConf->GetType ().compare("wifi")) {
-      const Ptr<WifiPhyLayerConfiguration> wifiConf = phyLayerConf;
-
+    if (phyLayerConf->GetType ().compare("wifi") == 0) {
       YansWifiChannelHelper wifiChannel;
-      AsciiTraceHelper ascii;
-
-      // The helpers used below will help us putting together the wifi NICs we want
-      //wifi.EnableLogComponents();  // Turn on all Wifi logging
+      const auto wifiConf = StaticCast<WifiPhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
 
       m_wifi.SetStandard (wifiConf->GetStandard ());
 
-      m_wifiPhy = YansWifiPhyHelper::Default ();
       // This is one parameter that matters when using FixedRssLossModel
       // set it to zero; otherwise, gain will be added
       m_wifiPhy.Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
       // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
       m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
-      wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-      wifiChannel.AddPropagationLoss  ("ns3::FriisPropagationLossModel",
-                                      "Frequency", DoubleValue (2.4e9)); // carrier
-      m_wifiPhy.SetChannel (wifiChannel.Create());
+      WifiPhyFactoryHelper::SetPropagationDelay (wifiChannel, wifiConf->GetChannelPropagationDelayModel ());
+      WifiPhyFactoryHelper::AddPropagationLoss (wifiChannel, wifiConf->GetChannelPropagationLossModel ());
+
+      m_wifiPhy.SetChannel (wifiChannel.Create ());
+    } else {
+      NS_FATAL_ERROR ("Unsupported PHY Layer Type: " << phyLayerConf->GetType ());
     }
   }
 }
@@ -168,28 +167,34 @@ Scenario::ConfigureMac ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  const std::string phyMode = CONFIGURATOR->GetPhyMode ();
+  const auto macLayerConfs = CONFIGURATOR->GetMacLayers ();
 
-  WifiMacHelper wifiMac;
-  Ssid ssid = Ssid ("wifi-default");  // const ?
+  for (auto& macLayerConf : macLayerConfs) {
+    if (macLayerConf->GetType ().compare ("wifi") == 0) {
+      WifiMacHelper wifiMac;
+      const auto wifiConf = StaticCast<WifiMacLayerConfiguration, MacLayerConfiguration> (macLayerConf);
+      Ssid ssid = Ssid (wifiConf->GetSsid ());
 
-  m_wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                  "DataMode", StringValue (phyMode),
-                                  "ControlMode", StringValue (phyMode));
+      WifiMacFactoryHelper::SetRemoteStationManager (m_wifi, wifiConf->GetRemoteStationManagerConfiguration ());
 
-  // setup sta => drones
-  wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid));
+      // TODO L8R
+      // setup sta => drones
+      // wifiMac.SetType ("ns3::StaWifiMac",
+      //                 "Ssid", SsidValue (ssid));
 
-  NetDeviceContainer dronesDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_drones);
-  m_netDevices.Add (dronesDevices);
+      // NetDeviceContainer dronesDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_drones);
+      // m_netDevices.Add (dronesDevices);
 
-  // setup ap => ZSPs
-  wifiMac.SetType ("ns3::ApWifiMac",
-                   "Ssid", SsidValue (ssid));
+      // // setup ap => ZSPs
+      // wifiMac.SetType ("ns3::ApWifiMac",
+      //                 "Ssid", SsidValue (ssid));
 
-  NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
-  m_netDevices.Add (zspsDevices);
+      // NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
+      // m_netDevices.Add (zspsDevices);
+    } else {
+      NS_FATAL_ERROR ("Unsupported MAC Layer Type: " << macLayerConf->GetType ());
+    }
+  }
 }
 
 void
@@ -337,7 +342,7 @@ Scenario::operator() ()
   Simulator::Run ();
 
   // Report Module needs the simulator context alive to introspect it
-  Report::Get ()->Save ();
+  //Report::Get ()->Save ();
 
   Simulator::Destroy ();
 
