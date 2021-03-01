@@ -26,6 +26,7 @@
 #include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/mac-layer-configuration-helper.h>
+#include <ns3/network-layer-configuration-helper.h>
 #include <ns3/object-factory.h>
 #include <ns3/phy-layer-configuration-helper.h>
 
@@ -152,7 +153,7 @@ ScenarioConfigurationHelper::GetStaticConfig ()
 }
 
 const std::vector<Ptr<PhyLayerConfiguration>>
-ScenarioConfigurationHelper::GetPhyLayers ()
+ScenarioConfigurationHelper::GetPhyLayers () const
 {
   NS_ASSERT (m_config.HasMember ("phyLayer"));
   NS_ASSERT_MSG (m_config["phyLayer"].IsArray (),
@@ -170,7 +171,7 @@ ScenarioConfigurationHelper::GetPhyLayers ()
 }
 
 const std::vector<Ptr<MacLayerConfiguration>>
-ScenarioConfigurationHelper::GetMacLayers ()
+ScenarioConfigurationHelper::GetMacLayers ()const
 {
   NS_ASSERT (m_config.HasMember ("macLayer"));
   NS_ASSERT_MSG (m_config["macLayer"].IsArray (),
@@ -185,6 +186,43 @@ ScenarioConfigurationHelper::GetMacLayers ()
     }
 
   return macConfs;
+}
+
+const std::vector<Ptr<NetworkLayerConfiguration>>
+ScenarioConfigurationHelper::GetNetworkLayers () const
+{
+  NS_ASSERT (m_config.HasMember ("networkLayer"));
+  NS_ASSERT_MSG (m_config["networkLayer"].IsArray (),
+                 "Please define networkLayer in your JSON configuration.");
+
+  const auto arr = m_config["networkLayer"].GetArray ();
+  std::vector<Ptr<NetworkLayerConfiguration>> netConfs;
+  for(auto& el : arr)
+    {
+      auto conf = NetworkLayerConfigurationHelper::GetConfiguration (el);
+      netConfs.emplace_back (conf);
+    }
+
+  return netConfs;
+}
+
+const std::vector<Ptr<DroneConfiguration>>
+ScenarioConfigurationHelper::GetDronesConfiguration () const
+{
+  NS_ASSERT (m_config.HasMember ("drones"));
+  NS_ASSERT_MSG (m_config["drones"].IsArray (),
+                 "Please define drones in your JSON configuration.");
+
+  const auto arr m_config["drones"].GetArray ();
+  std::vector<Ptr<DroneConfiguration>> dronesConf;
+
+  for (auto& el : arr)
+    {
+      auto conf = DroneConfigurationHelper::GetConfiguration(el);
+      dronesConf.push_back (conf);
+    }
+
+  return dronesConf;
 }
 
 const std::string

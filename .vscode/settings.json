@@ -16,6 +16,11 @@
         "deque": "cpp",
         "string": "cpp",
         "vector": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "*.tcc": "cpp",
+        "random": "cpp",
+        "numeric": "cpp",
+        "ratio": "cpp",
+        "utility": "cpp"
     }
 }

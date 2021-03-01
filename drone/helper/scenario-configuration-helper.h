@@ -27,6 +27,7 @@
 #include <ns3/log.h>
 #include <ns3/flight-plan.h>
 #include <ns3/mac-layer-configuration.h>
+#include <ns3/network-layer-configuration.h>
 #include <ns3/phy-layer-configuration.h>
 #include <ns3/speed-coefficients.h>
 #include <ns3/singleton.h>
@@ -103,14 +104,28 @@ public:
    *
    * \return The list of PHY Layers to be defined for this simulation.
    */
-  const std::vector<Ptr<PhyLayerConfiguration>> GetPhyLayers ();
+  const std::vector<Ptr<PhyLayerConfiguration>> GetPhyLayers () const;
 
   /**
    * \brief Retrieve the list of MAC Layers defined for this simulation.
    *
    * \return The list of MAC Layers to be defined for this simulation.
    */
-  const std::vector<Ptr<MacLayerConfiguration>> GetMacLayers ();
+  const std::vector<Ptr<MacLayerConfiguration>> GetMacLayers () const;
+
+  /**
+   * \brief Retrieve the list of Network Layers defined for this simulation.
+   *
+   * \return The list of Network Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<NetworkLayerConfiguration>> GetNetworkLayers () const;
+
+  /**
+   * \brief Retrieve the list of Drones defined for this simulation.
+   *
+   * \return The list of Network Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<DroneConfiguration>> GetDronesConfiguration () const;
 
   /**
    * \return the phy mode for WiFi communications.

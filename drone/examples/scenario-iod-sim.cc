@@ -55,9 +55,19 @@
 #include <ns3/wifi-mac-layer-configuration.h>
 #include <ns3/wifi-phy-factory-helper.h>
 #include <ns3/wifi-phy-layer-configuration.h>
+#include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/zsp-list.h>
+#include <ns3/wifi-phy-simulation-helper.h>
+#include <ns3/wifi-mac-simulation-helper.h>
+#include <ns3/ipv4-simulation-helper.h>
 
 namespace ns3 {
+
+constexpr int N_LAYERS = 4;
+constexpr int PHY_LAYER = 0;
+constexpr int MAC_LAYER = 1;
+constexpr int NET_LAYER = 2;
+constexpr int APP_LAYER = 3;
 
 class Scenario
 {
@@ -73,10 +83,13 @@ private:
   void ApplyStaticConfig ();
   void ConfigurePhy ();
   void ConfigureMac ();
+  void ConfigureNetwork ();
+
+  void ConfigureDrones ();
+
   void ConfigureMobility ();
   void ConfigureMobilityDrones ();
   void ConfigureMobilityZsps ();
-  void ConfigureNetwork ();
   void ConfigureApplication ();
   void ConfigureApplicationDrones ();
   void ConfigureApplicationZsps ();
@@ -86,16 +99,14 @@ private:
   NodeContainer m_zsps;
   NetDeviceContainer m_netDevices;
 
-  WifiHelper m_wifi;
-  YansWifiPhyHelper m_wifiPhy;
   Ipv4InterfaceContainer m_ifaceIps;
-  const char *m_ifaceNetMask;
+
+  std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
 };
 
 NS_LOG_COMPONENT_DEFINE ("Scenario");
 
-Scenario::Scenario (int argc, char **argv) :
-  m_ifaceNetMask {"255.0.0.0"}
+Scenario::Scenario (int argc, char **argv)
 {
   CONFIGURATOR->Initialize (argc, argv);
 
@@ -112,8 +123,8 @@ Scenario::Scenario (int argc, char **argv) :
   ApplyStaticConfig ();
   ConfigurePhy ();
   ConfigureMac ();
+  ConfigureNetwork ();
   // ConfigureMobility ();
-  // ConfigureNetwork ();
   // ConfigureApplication ();
   // ConfigureSimulator ();
 }
@@ -143,19 +154,22 @@ Scenario::ConfigurePhy ()
     if (phyLayerConf->GetType ().compare("wifi") == 0) {
       YansWifiChannelHelper wifiChannel;
       const auto wifiConf = StaticCast<WifiPhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
+      const auto wifiSim = CreateObject<WifiPhySimulationHelper> ();
 
-      m_wifi.SetStandard (wifiConf->GetStandard ());
+      wifiSim->GetWifiHelper ().SetStandard (wifiConf->GetStandard ());
 
       // This is one parameter that matters when using FixedRssLossModel
       // set it to zero; otherwise, gain will be added
-      m_wifiPhy.Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
+      wifiSim->GetWifiPhyHelper ().Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
       // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
-      m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
+      wifiSim->GetWifiPhyHelper ().SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
       WifiPhyFactoryHelper::SetPropagationDelay (wifiChannel, wifiConf->GetChannelPropagationDelayModel ());
       WifiPhyFactoryHelper::AddPropagationLoss (wifiChannel, wifiConf->GetChannelPropagationLossModel ());
 
-      m_wifiPhy.SetChannel (wifiChannel.Create ());
+      wifiSim->GetWifiPhyHelper ().SetChannel (wifiChannel.Create ());
+
+      m_protocolStacks[PHY_LAYER].push_back (wifiSim);
     } else {
       NS_FATAL_ERROR ("Unsupported PHY Layer Type: " << phyLayerConf->GetType ());
     }
@@ -169,13 +183,18 @@ Scenario::ConfigureMac ()
 
   const auto macLayerConfs = CONFIGURATOR->GetMacLayers ();
 
+  size_t i = 0;
   for (auto& macLayerConf : macLayerConfs) {
     if (macLayerConf->GetType ().compare ("wifi") == 0) {
-      WifiMacHelper wifiMac;
+      const auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][i]);
+      const auto wifiMac = CreateObject<WifiMacSimulationHelper> ();
       const auto wifiConf = StaticCast<WifiMacLayerConfiguration, MacLayerConfiguration> (macLayerConf);
       Ssid ssid = Ssid (wifiConf->GetSsid ());
 
-      WifiMacFactoryHelper::SetRemoteStationManager (m_wifi, wifiConf->GetRemoteStationManagerConfiguration ());
+      WifiMacFactoryHelper::SetRemoteStationManager (wifiPhy->GetWifiHelper (),
+                                                     wifiConf->GetRemoteStationManagerConfiguration ());
+
+      m_protocolStacks[MAC_LAYER].push_back (wifiMac);
 
       // TODO L8R
       // setup sta => drones
@@ -194,7 +213,50 @@ Scenario::ConfigureMac ()
     } else {
       NS_FATAL_ERROR ("Unsupported MAC Layer Type: " << macLayerConf->GetType ());
     }
+
+    i++;
   }
+}
+
+void
+Scenario::ConfigureNetwork ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  const auto layerConfs = CONFIGURATOR->GetNetworkLayers ();
+  for (auto& layerConf : layerConfs) {
+    if (layerConf->GetType ().compare("ipv4") == 0) {
+      const auto ipv4Conf = StaticCast<Ipv4NetworkLayerConfiguration, NetworkLayerConfiguration> (layerConf);
+      const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> ();
+
+      ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
+                                         Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
+
+      m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
+    } else {
+      NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf ->GetType ());
+    }
+  }
+
+
+  // internet.Install (m_drones);
+  // internet.Install (m_zsps);
+
+  // NS_LOG_INFO ("> Assigning IP Addresses.");
+  // ipv4.SetBase ("10.0.0.0", m_ifaceNetMask);
+  // m_ifaceIps = ipv4.Assign (m_netDevices);
+
+  // for (uint i = 0; i < m_netDevices.GetN(); i++)
+  //   NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
+  //               << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
+}
+
+void
+Scenario::ConfigureDrones ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+
 }
 
 void
@@ -237,26 +299,6 @@ Scenario::ConfigureMobilityZsps ()
   mobilityZsps.SetPositionAllocator (positionAllocatorZsps);
   mobilityZsps.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityZsps.Install (m_zsps);
-}
-
-void
-Scenario::ConfigureNetwork ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  InternetStackHelper internet;
-  Ipv4AddressHelper ipv4;
-
-  internet.Install (m_drones);
-  internet.Install (m_zsps);
-
-  NS_LOG_INFO ("> Assigning IP Addresses.");
-  ipv4.SetBase ("10.0.0.0", m_ifaceNetMask);
-  m_ifaceIps = ipv4.Assign (m_netDevices);
-
-  for (uint i = 0; i < m_netDevices.GetN(); i++)
-    NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
-                << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
 }
 
 void
