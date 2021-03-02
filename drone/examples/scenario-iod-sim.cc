@@ -86,8 +86,7 @@ private:
   void ConfigureMac ();
   void ConfigureNetwork ();
 
-  void ConfigureDrones ();
-  void ConfigureZsps ();
+  void ConfigureEntities (const std::string& entityKey, NodeContainer& nodes);
 
   void ConfigureMobility ();
   void ConfigureMobilityDrones ();
@@ -126,6 +125,8 @@ Scenario::Scenario (int argc, char **argv)
   ConfigurePhy ();
   ConfigureMac ();
   ConfigureNetwork ();
+  ConfigureEntities ("drones", m_drones);
+  ConfigureEntities ("ZSPs", m_zsps);
   // ConfigureMobility ();
   // ConfigureApplication ();
   // ConfigureSimulator ();
@@ -227,68 +228,46 @@ Scenario::ConfigureNetwork ()
 }
 
 void
-Scenario::ConfigureDrones ()
+Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  size_t droneId = 0;
-  const auto droneConfs = CONFIGURATOR->GetEntitiesConfiguration ("drones");
-  for (auto& droneConf : droneConfs) {
+  size_t entityId = 0;
+  const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration (entityKey);
 
+  for (auto& entityConf : entityConfs) {
     size_t deviceId = 0;
-    for (auto& droneNetDev : droneConf->GetNetDevices ()) {
-      if (droneNetDev->GetType ().compare("wifi")) {
+
+    for (auto& entityNetDev : entityConf->GetNetDevices ()) {
+      if (entityNetDev->GetType ().compare("wifi")) {
         auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][deviceId]);
         auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][deviceId]);
         auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][deviceId]);
 
         // TODO: helper?
-        wifiMac->GetMacHelper ().SetType (droneNetDev->GetMacLayer ().GetName (),
-                                          droneNetDev->GetMacLayer ().GetAttributes ()[0].first,
-                                          *droneNetDev->GetMacLayer ().GetAttributes ()[0].second);
+        wifiMac->GetMacHelper ().SetType (entityNetDev->GetMacLayer ().GetName (),
+                                          entityNetDev->GetMacLayer ().GetAttributes ()[0].first,
+                                          *entityNetDev->GetMacLayer ().GetAttributes ()[0].second);
 
         NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ().Install (wifiPhy->GetWifiPhyHelper (),
                                                                              wifiMac->GetMacHelper (),
-                                                                             m_drones.Get(droneId));
+                                                                             nodes.Get(entityId));
 
-        //const auto networkLayerId = droneNetDev->GetNetworkLayerId ();
-        netLayer->GetInternetHelper ().Install (m_drones.Get(droneId));
+        //const auto networkLayerId = entityNetDev->GetNetworkLayerId ();
+        netLayer->GetInternetHelper ().Install (nodes.Get(entityId));
         netLayer->GetIpv4Helper ().Assign (devContainer);
       } else {
-        NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << droneNetDev->GetType ());
+        NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
       }
 
       deviceId++;
     }
 
-    droneId++;
+    entityId++;
   }
 }
 
-void
-Scenario::ConfigureZsps ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  const auto zspConfs = CONFIGURATOR->GetEntitiesConfiguration ("ZSPs");
-
-  // setup ap => ZSPs
-  // wifiMac.SetType ("ns3::ApWifiMac",
-  //                 "Ssid", SsidValue (ssid));
-
-  // NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
-  // m_netDevices.Add (zspsDevices);
-
-  // internet.Install (m_zsps);
-
-  // NS_LOG_INFO ("> Assigning IP Addresses.");
-  // m_ifaceIps = ipv4.Assign (m_netDevices);
-
-  // for (uint i = 0; i < m_netDevices.GetN(); i++)
-  //   NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
-  //               << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
-}
-
+/*
 void
 Scenario::ConfigureMobility ()
 {
@@ -379,6 +358,7 @@ Scenario::ConfigureApplicationZsps ()
   server->SetStartTime (Seconds (CONFIGURATOR->GetZspApplicationStartTime (0)));
   server->SetStopTime (Seconds (CONFIGURATOR->GetZspApplicationStopTime (0)));
 }
+*/
 
 void
 Scenario::ConfigureSimulator ()
@@ -388,12 +368,12 @@ Scenario::ConfigureSimulator ()
                     pcapLog;
   AsciiTraceHelper  ascii;
 
-  phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy.log";
-  pcapLog << CONFIGURATOR->GetResultsPath () << "-host";
+  //phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy.log";
+  //pcapLog << CONFIGURATOR->GetResultsPath () << "-host";
 
   // Enable Tracing
-  m_wifiPhy.EnableAsciiAll (ascii.CreateFileStream (phyTraceLog.str ()));
-  m_wifiPhy.EnablePcap (pcapLog.str (), m_netDevices);
+  //m_wifiPhy.EnableAsciiAll (ascii.CreateFileStream (phyTraceLog.str ()));
+  //m_wifiPhy.EnablePcap (pcapLog.str (), m_netDevices);
 
   // Enable Report
   Report::Get ()->Initialize (CONFIGURATOR->GetName (),
