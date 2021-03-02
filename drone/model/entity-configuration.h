@@ -15,8 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef DRONE_CONFIGURATION_H
-#define DRONE_CONFIGURATION_H
+#ifndef ENTITY_CONFIGURATION_H
+#define ENTITY_CONFIGURATION_H
 
 #include <ns3/object.h>
 
@@ -27,20 +27,22 @@
 namespace ns3 {
 
 /**
- * \brief Describe the configuration of a drone to be simulated.
+ * \brief Describe the configuration of a generic entity to be simulated.
  */
-class DroneConfiguration : public Object
+class EntityConfiguration : public Object
 {
   public:
-    DroneConfiguration ();
-    ~DroneConfiguration ();
+    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                         ModelConfiguration m_mobility,
+                         std::vector<Ptr<ApplicationConfiguration>> m_applications);
+    ~EntityConfiguration ();
 
-  const std::vector<Ptr<NetDeviceConfiguration>>& GetNetDevices ();
-  const ModelConfiguration& GetMobilityModel ();
-  const std::vector<Ptr<ApplicationConfiguration>> GetApplications ();
+  const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices () const;
+  const ModelConfiguration& GetMobilityModel () const;
+  const std::vector<Ptr<ApplicationConfiguration>>& GetApplications () const;
 
 private:
-  std::vector<Ptr<NetDeviceConfiguration>> m_netDevices;
+  std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
   ModelConfiguration m_mobility;
   std::vector<Ptr<ApplicationConfiguration>> m_applications;
 };
@@ -48,4 +50,4 @@ private:
 } // namespace ns3
 
 
-#endif /* DRONE_CONFIGURATION_H */
+#endif /* ENTITY_CONFIGURATION_H */

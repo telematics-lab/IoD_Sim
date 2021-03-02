@@ -26,17 +26,19 @@ namespace ns3 {
 class NetdeviceConfiguration : public Object
 {
 public:
-  NetdeviceConfiguration ();
+  NetdeviceConfiguration (const std::string type,
+                          const ModelConfiguration macLayer,
+                          const uint32_t networkLayerId);
   ~NetdeviceConfiguration ();
 
   const std::string GetType () const;
-  const ModelConfiguration GetMacLayer ();
-  const uint32_t GetNetworkLayerId ();
+  const ModelConfiguration GetMacLayer () const;
+  const uint32_t GetNetworkLayerId () const;
 
 private:
-  std::string m_type;
-  ModelConfiguration m_macLayer;
-  uint32_t m_networkLayerId;
+  const std::string m_type;
+  const ModelConfiguration m_macLayer;
+  const uint32_t m_networkLayerId;
 };
 
 } // namespace ns3

@@ -15,19 +15,41 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "drone-configuration.h"
+#include "entity-configuration.h"
 
 namespace ns3 {
 
-DroneConfiguration::DroneConfiguration ()
+EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                          ModelConfiguration mobility,
+                                          std::vector<Ptr<ApplicationConfiguration>> applications) :
+  m_netDevices {netDevices},
+  m_mobility {mobility},
+  m_applications {applications}
 {
 
 }
 
-DroneConfiguration::~DroneConfiguration ()
+EntityConfiguration::~EntityConfiguration ()
 {
 
 }
 
+const std::vector<Ptr<NetdeviceConfiguration>>&
+EntityConfiguration::GetNetDevices () const
+{
+  return m_netDevices;
+}
+
+const ModelConfiguration&
+EntityConfiguration::GetMobilityModel () const
+{
+  return m_mobility;
+}
+
+const std::vector<Ptr<ApplicationConfiguration>>&
+EntityConfiguration::GetApplications () const
+{
+  return m_applications;
+}
 
 } // namespace ns3

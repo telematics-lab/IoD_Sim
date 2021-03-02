@@ -15,12 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+// Standard Library
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <chrono>
 #include <vector>
-
+// NS3 Core Components
 #include <ns3/assert.h>
 #include <ns3/command-line.h>
 #include <ns3/config.h>
@@ -41,25 +42,25 @@
 #include <ns3/wifi-helper.h>
 #include <ns3/wifi-mac-helper.h>
 #include <ns3/yans-wifi-helper.h>
-
+// IoD Sim Report Module
 #include <ns3/report.h>
-
+// IoD Sim Components
 #include <ns3/drone-client.h>
 #include <ns3/drone-list.h>
 #include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
-#include <ns3/proto-point.h>
+#include <ns3/ipv4-simulation-helper.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/speed-coefficients.h>
+#include <ns3/proto-point.h>
 #include <ns3/wifi-mac-factory-helper.h>
 #include <ns3/wifi-mac-layer-configuration.h>
+#include <ns3/wifi-mac-simulation-helper.h>
 #include <ns3/wifi-phy-factory-helper.h>
 #include <ns3/wifi-phy-layer-configuration.h>
+#include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/zsp-list.h>
-#include <ns3/wifi-phy-simulation-helper.h>
-#include <ns3/wifi-mac-simulation-helper.h>
-#include <ns3/ipv4-simulation-helper.h>
 
 namespace ns3 {
 
@@ -86,6 +87,7 @@ private:
   void ConfigureNetwork ();
 
   void ConfigureDrones ();
+  void ConfigureZsps ();
 
   void ConfigureMobility ();
   void ConfigureMobilityDrones ();
@@ -195,21 +197,6 @@ Scenario::ConfigureMac ()
                                                      wifiConf->GetRemoteStationManagerConfiguration ());
 
       m_protocolStacks[MAC_LAYER].push_back (wifiMac);
-
-      // TODO L8R
-      // setup sta => drones
-      // wifiMac.SetType ("ns3::StaWifiMac",
-      //                 "Ssid", SsidValue (ssid));
-
-      // NetDeviceContainer dronesDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_drones);
-      // m_netDevices.Add (dronesDevices);
-
-      // // setup ap => ZSPs
-      // wifiMac.SetType ("ns3::ApWifiMac",
-      //                 "Ssid", SsidValue (ssid));
-
-      // NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
-      // m_netDevices.Add (zspsDevices);
     } else {
       NS_FATAL_ERROR ("Unsupported MAC Layer Type: " << macLayerConf->GetType ());
     }
@@ -234,21 +221,9 @@ Scenario::ConfigureNetwork ()
 
       m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
     } else {
-      NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf ->GetType ());
+      NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf->GetType ());
     }
   }
-
-
-  // internet.Install (m_drones);
-  // internet.Install (m_zsps);
-
-  // NS_LOG_INFO ("> Assigning IP Addresses.");
-  // ipv4.SetBase ("10.0.0.0", m_ifaceNetMask);
-  // m_ifaceIps = ipv4.Assign (m_netDevices);
-
-  // for (uint i = 0; i < m_netDevices.GetN(); i++)
-  //   NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
-  //               << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
 }
 
 void
@@ -256,7 +231,62 @@ Scenario::ConfigureDrones ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
+  size_t droneId = 0;
+  const auto droneConfs = CONFIGURATOR->GetEntitiesConfiguration ("drones");
+  for (auto& droneConf : droneConfs) {
 
+    size_t deviceId = 0;
+    for (auto& droneNetDev : droneConf->GetNetDevices ()) {
+      if (droneNetDev->GetType ().compare("wifi")) {
+        auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][deviceId]);
+        auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][deviceId]);
+        auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][deviceId]);
+
+        // TODO: helper?
+        wifiMac->GetMacHelper ().SetType (droneNetDev->GetMacLayer ().GetName (),
+                                          droneNetDev->GetMacLayer ().GetAttributes ()[0].first,
+                                          *droneNetDev->GetMacLayer ().GetAttributes ()[0].second);
+
+        NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ().Install (wifiPhy->GetWifiPhyHelper (),
+                                                                             wifiMac->GetMacHelper (),
+                                                                             m_drones.Get(droneId));
+
+        //const auto networkLayerId = droneNetDev->GetNetworkLayerId ();
+        netLayer->GetInternetHelper ().Install (m_drones.Get(droneId));
+        netLayer->GetIpv4Helper ().Assign (devContainer);
+      } else {
+        NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << droneNetDev->GetType ());
+      }
+
+      deviceId++;
+    }
+
+    droneId++;
+  }
+}
+
+void
+Scenario::ConfigureZsps ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  const auto zspConfs = CONFIGURATOR->GetEntitiesConfiguration ("ZSPs");
+
+  // setup ap => ZSPs
+  // wifiMac.SetType ("ns3::ApWifiMac",
+  //                 "Ssid", SsidValue (ssid));
+
+  // NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
+  // m_netDevices.Add (zspsDevices);
+
+  // internet.Install (m_zsps);
+
+  // NS_LOG_INFO ("> Assigning IP Addresses.");
+  // m_ifaceIps = ipv4.Assign (m_netDevices);
+
+  // for (uint i = 0; i < m_netDevices.GetN(); i++)
+  //   NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
+  //               << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
 }
 
 void

@@ -32,6 +32,8 @@
 #include <ns3/speed-coefficients.h>
 #include <ns3/singleton.h>
 
+#include <ns3/entity-configuration-helper.h>
+
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 
 namespace ns3 {
@@ -121,11 +123,11 @@ public:
   const std::vector<Ptr<NetworkLayerConfiguration>> GetNetworkLayers () const;
 
   /**
-   * \brief Retrieve the list of Drones defined for this simulation.
+   * \brief Retrieve the list of generic enetities to be defined for this simulation.
    *
    * \return The list of Network Layers to be defined for this simulation.
    */
-  const std::vector<Ptr<DroneConfiguration>> GetDronesConfiguration () const;
+  const std::vector<Ptr<EntityConfiguration>> GetEntitiesConfiguration (const std::string& entityKey) const;
 
   /**
    * \return the phy mode for WiFi communications.

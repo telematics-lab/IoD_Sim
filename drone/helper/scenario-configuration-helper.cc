@@ -206,23 +206,24 @@ ScenarioConfigurationHelper::GetNetworkLayers () const
   return netConfs;
 }
 
-const std::vector<Ptr<DroneConfiguration>>
-ScenarioConfigurationHelper::GetDronesConfiguration () const
+const std::vector<Ptr<EntityConfiguration>>
+ScenarioConfigurationHelper::GetEntitiesConfiguration (const std::string& entityKey) const
 {
-  NS_ASSERT (m_config.HasMember ("drones"));
-  NS_ASSERT_MSG (m_config["drones"].IsArray (),
+  const char* entityKeyCStr = entityKey.c_str ();
+  NS_ASSERT (m_config.HasMember (entityKeyCStr));
+  NS_ASSERT_MSG (m_config[entityKeyCStr].IsArray (),
                  "Please define drones in your JSON configuration.");
 
-  const auto arr m_config["drones"].GetArray ();
-  std::vector<Ptr<DroneConfiguration>> dronesConf;
+  const auto arr = m_config[entityKeyCStr].GetArray ();
+  std::vector<Ptr<EntityConfiguration>> entityConf;
 
   for (auto& el : arr)
     {
-      auto conf = DroneConfigurationHelper::GetConfiguration(el);
-      dronesConf.push_back (conf);
+      auto conf = EntityConfigurationHelper::GetConfiguration(el);
+      entityConf.push_back (conf);
     }
 
-  return dronesConf;
+  return entityConf;
 }
 
 const std::string

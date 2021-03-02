@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
 #ifndef APPLICATION_CONFIGURATION_H
 #define APPLICATION_CONFIGURATION_H
 
@@ -27,19 +26,20 @@ namespace ns3 {
 
 class ApplicationConfiguration : public Object
 {
-  public:
-    ApplicationConfiguration ();
-    ~ApplicationConfiguration ();
+public:
+  ApplicationConfiguration (const std::string type,
+                            const double startTime,
+                            const double stopTime);
+  ~ApplicationConfiguration ();
 
-    const std::string GetType () const;
-    const double GetStartTime () const;
-    const double GetStopTime () const;
+  const std::string GetType () const;
+  const double GetStartTime () const;
+  const double GetStopTime () const;
 
-  private:
-    std::string m_type;
-    double m_startTime;
-    double m_stopTime;
-
+private:
+  const std::string m_type;
+  const double m_startTime;
+  const double m_stopTime;
 };
 
 } // namespace ns3
