@@ -43,25 +43,25 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
     NS_ASSERT_MSG (jsonPhyLayer["standard"].IsString (),
                    "PHY Layer 'standard' property must be a string.");
     NS_ASSERT_MSG (jsonPhyLayer.HasMember ("rxGain"),
-                 "PHY Layer definition must have 'rxGain' property.");
+                   "PHY Layer definition must have 'rxGain' property.");
     NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
-                 "PHY Layer 'rxGain' property must be a double.");
+                   "PHY Layer 'rxGain' property must be a double.");
     NS_ASSERT_MSG (jsonPhyLayer.HasMember ("mode"),
-                 "PHY Layer definition must have 'mode' property.");
+                   "PHY Layer definition must have 'mode' property.");
     NS_ASSERT_MSG (jsonPhyLayer["mode"].IsString (),
-                 "PHY Layer 'mode' property must be a string.");
+                   "PHY Layer 'mode' property must be a string.");
     NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
-                 "PHY Layer definition must have 'channel' property.");
+                   "PHY Layer definition must have 'channel' property.");
     NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
-                 "PHY Layer 'mode' property must be an object.");
+                   "PHY Layer 'mode' property must be an object.");
     NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationDelayModel"),
-                 "PHY Layer channel definition must have 'propagationDelayModel' property.");
+                   "PHY Layer channel definition must have 'propagationDelayModel' property.");
     NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationDelayModel"].IsObject (),
-                 "PHY Layer channel 'propagationDelayModel' must be an object");
+                   "PHY Layer channel 'propagationDelayModel' must be an object");
     NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
-                 "PHY Layer channel definition must have 'propagationLossModel' property.");
+                   "PHY Layer channel definition must have 'propagationLossModel' property.");
     NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
-                 "PHY Layer channel 'propagationLossModel' must be an object");
+                   "PHY Layer channel 'propagationLossModel' must be an object");
 
     const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
     const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);

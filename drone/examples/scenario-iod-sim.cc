@@ -50,6 +50,7 @@
 #include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
 #include <ns3/ipv4-simulation-helper.h>
+#include <ns3/mobility-factory-helper.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/speed-coefficients.h>
 #include <ns3/proto-point.h>
@@ -87,6 +88,11 @@ private:
   void ConfigureNetwork ();
 
   void ConfigureEntities (const std::string& entityKey, NodeContainer& nodes);
+  void ConfigureEntityApplications (const std::string& entityKey,
+                                    const uint32_t& entityId,
+                                    const uint32_t& deviceId,
+                                    const Ipv4Address& deviceAddress,
+                                    const Ptr<EntityConfiguration>& conf);
 
   void ConfigureMobility ();
   void ConfigureMobilityDrones ();
@@ -127,9 +133,6 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureNetwork ();
   ConfigureEntities ("drones", m_drones);
   ConfigureEntities ("ZSPs", m_zsps);
-  // ConfigureMobility ();
-  // ConfigureApplication ();
-  // ConfigureSimulator ();
 }
 
 Scenario::~Scenario ()
@@ -255,7 +258,19 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 
         //const auto networkLayerId = entityNetDev->GetNetworkLayerId ();
         netLayer->GetInternetHelper ().Install (nodes.Get(entityId));
-        netLayer->GetIpv4Helper ().Assign (devContainer);
+        auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
+
+        // Configure Entity Mobility
+        const auto mobilityType = entityConf->GetMobilityModel ().GetName ();
+        MobilityHelper mobility;
+        MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
+        if (entityKey.compare ("drones") == 0)
+          mobility.Install (m_drones.Get (entityId));
+        else
+          mobility.Install (m_zsps.Get (entityId));
+
+        ConfigureEntityApplications (entityKey, entityId, deviceId, assignedIPs.GetAddress (deviceId, 0), entityConf);
+
       } else {
         NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
       }
@@ -267,16 +282,47 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
   }
 }
 
-/*
 void
-Scenario::ConfigureMobility ()
+Scenario::ConfigureEntityApplications (const std::string& entityKey,
+                                       const uint32_t& entityId,
+                                       const uint32_t& deviceId,
+                                       const Ipv4Address& deviceAddress,
+                                       const Ptr<EntityConfiguration>& conf)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  for (auto& appConf : conf->GetApplications ()) {
+    const auto appType = appConf->GetType ();
+    if (appType.compare("ns3::DroneClient")) {
+      const auto ipMask = StaticCast<Ipv4NetworkLayerConfiguration, Object> (m_protocolStacks[NET_LAYER][deviceId])->GetMask ();
+      auto app = CreateObjectWithAttributes<DroneClient>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                         "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
+                                                         "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+      app->SetStartTime (Seconds (appConf->GetStartTime ()));
+      app->SetStopTime (Seconds (appConf->GetStopTime ()));
 
-  ConfigureMobilityDrones ();
-  ConfigureMobilityZsps ();
+      if (entityKey.compare("drones"))
+        m_drones.Get (entityId)->AddApplication (app);
+      else
+        m_zsps.Get (entityId)->AddApplication (app);
+
+    } else if (appType.compare("ns3::DroneServer")) {
+      const auto ipMask = StaticCast<Ipv4NetworkLayerConfiguration, Object> (m_protocolStacks[NET_LAYER][deviceId])->GetMask ();
+      auto app = CreateObjectWithAttributes<DroneServer>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                         "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
+      app->SetStartTime (Seconds (appConf->GetStartTime ()));
+      app->SetStopTime (Seconds (appConf->GetStopTime ()));
+
+      if (entityKey.compare("drones"))
+        m_drones.Get (entityId)->AddApplication (app);
+      else
+        m_zsps.Get (entityId)->AddApplication (app);
+
+    } else {
+      NS_FATAL_ERROR ("Unsupported Application Type: " << appType);
+    }
+  }
 }
 
+/*
 void
 Scenario::ConfigureMobilityDrones ()
 {
@@ -310,54 +356,6 @@ Scenario::ConfigureMobilityZsps ()
   mobilityZsps.Install (m_zsps);
 }
 
-void
-Scenario::ConfigureApplication ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  ConfigureApplicationDrones ();
-  ConfigureApplicationZsps ();
-}
-
-void
-Scenario::ConfigureApplicationDrones ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  for (uint32_t i = 0; i < m_drones.GetN (); i++)
-    {
-      auto client = CreateObjectWithAttributes<DroneClient>
-        ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (i)),
-         "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask),
-         "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
-
-      double droneAppStartTime = CONFIGURATOR->GetDroneApplicationStartTime (i);
-      double droneAppStopTime = CONFIGURATOR->GetDroneApplicationStopTime (i);
-
-      NS_LOG_LOGIC ("[Node " << i << "] will operate in time interval from "
-                    << droneAppStartTime << " to "
-                    << droneAppStopTime << "s.");
-
-      m_drones.Get (i)->AddApplication (client);
-      client->SetStartTime (Seconds (droneAppStartTime));
-      client->SetStopTime (Seconds (droneAppStopTime));
-    }
-}
-
-void
-Scenario::ConfigureApplicationZsps ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  auto server = CreateObjectWithAttributes<DroneServer>
-    ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
-     "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
-
-  m_zsps.Get (0)->AddApplication (server);
-
-  server->SetStartTime (Seconds (CONFIGURATOR->GetZspApplicationStartTime (0)));
-  server->SetStopTime (Seconds (CONFIGURATOR->GetZspApplicationStopTime (0)));
-}
 */
 
 void

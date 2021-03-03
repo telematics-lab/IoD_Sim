@@ -19,6 +19,7 @@
 
 #include <ns3/double.h>
 #include <ns3/string.h>
+#include <ns3/vector.h>
 
 namespace ns3 {
 
@@ -145,6 +146,17 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
       }
       break;
     case rapidjson::Type::kArrayType:
+      {
+        const auto arr = el["value"].GetArray ();
+
+        if (arr.Size () == 3 && arr[0].IsDouble ()) {
+          const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
+          attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
+        } else {
+          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
+        }
+      }
+      break;
     case rapidjson::Type::kFalseType:
     case rapidjson::Type::kTrueType:
     case rapidjson::Type::kNullType:
