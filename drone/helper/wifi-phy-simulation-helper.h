@@ -30,8 +30,8 @@ public:
   WifiPhySimulationHelper ();
   ~WifiPhySimulationHelper ();
 
-  WifiHelper& GetWifiHelper ();
-  YansWifiPhyHelper& GetWifiPhyHelper ();
+  WifiHelper* GetWifiHelper ();
+  YansWifiPhyHelper* GetWifiPhyHelper ();
 
 private:
   WifiHelper m_wifi;

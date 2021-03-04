@@ -19,7 +19,8 @@
 
 namespace ns3 {
 
-Ipv4SimulationHelper::Ipv4SimulationHelper ()
+Ipv4SimulationHelper::Ipv4SimulationHelper (const std::string mask) :
+  m_mask {mask}
 {
 
 }
@@ -45,6 +46,12 @@ Ipv4AddressHelper&
 Ipv4SimulationHelper::GetIpv4Helper ()
 {
   return m_ipv4Helper;
+}
+
+const std::string&
+Ipv4SimulationHelper::GetMask ()
+{
+  return m_mask;
 }
 
 } // namespace ns3

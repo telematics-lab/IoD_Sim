@@ -123,6 +123,30 @@
       ],
       "preLaunchTask": "build (local)",
       "miDebuggerPath": "/usr/bin/gdb"
-    }
+    },
+    {
+      "name": "IoD Sim",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug",
+      "args": ["--config=./src/drone/config/general_purpose.json"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/ns3/",
+      "environment": [{
+        "name": "LD_LIBRARY_PATH",
+        "value": "${env:LD_LIBRARY_PATH}:${workspaceFolder}/ns3/build/lib/"
+      }],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
   ]
 }

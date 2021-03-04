@@ -18,8 +18,13 @@
 #include "entity-configuration-helper.h"
 
 #include <ns3/double.h>
+#include <ns3/integer.h>
+#include <ns3/object-factory.h>
 #include <ns3/string.h>
 #include <ns3/vector.h>
+
+#include <ns3/flight-plan.h>
+#include <ns3/speed-coefficients.h>
 
 namespace ns3 {
 
@@ -90,10 +95,10 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
 const ModelConfiguration
 EntityConfigurationHelper::DecodeMobilityConfiguration (const rapidjson::Value& json)
 {
-  NS_ASSERT_MSG (json["mobilityModel"].IsObject (),
+  NS_ASSERT_MSG (json.IsObject (),
                  "Entity mobility model configuration must be an object.");
 
-  return DecodeModelConfiguration (json["mobilityModel"]);
+  return DecodeModelConfiguration (json);
 }
 
 // TODO merge with other helpers
@@ -151,9 +156,37 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
 
         if (arr.Size () == 3 && arr[0].IsDouble ()) {
           const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
+
           attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
+        } else if (attrName.compare("SpeedCoefficients") == 0 && arr[0].IsDouble ()) {
+          std::vector<double> coeffs;
+
+          for (auto& c : arr) {
+            coeffs.push_back (c.GetDouble ());
+          }
+          attrValue = attrInfo.checker->CreateValidValue (SpeedCoefficientsValue (coeffs));
+        } else if (attrName.compare("FlightPlan") == 0 && arr[0].IsObject ()) {
+          FlightPlan fp {};
+
+          for (auto& p : arr) {
+            NS_ASSERT_MSG (p.IsObject () &&
+                           p.HasMember ("position") &&
+                           p["position"].IsArray () &&
+                           p["position"][0].IsDouble () &&
+                           p.HasMember ("interest") &&
+                           p["interest"].IsUint (),
+                           "FlightPlan contains invalid points.");
+
+            const Vector3D position { p["position"][0].GetDouble (), p["position"][1].GetDouble (), p["position"][2].GetDouble () };
+            const double restTime = (p.HasMember ("restTime") && p["restTime"].IsDouble ()) ? p["restTime"].GetDouble () : 0;
+            fp.Add (CreateObjectWithAttributes<ProtoPoint> ("Position", VectorValue (position),
+                                                            "Interest", IntegerValue (p["interest"].GetUint ()),
+                                                            "RestTime", TimeValue (Seconds (restTime))));
+          }
+
+          attrValue = attrInfo.checker->CreateValidValue (FlightPlanValue (fp));
         } else {
-          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
+          NS_FATAL_ERROR ("Unsupported attribute value type of " << attrName);
         }
       }
       break;

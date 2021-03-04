@@ -28,17 +28,19 @@ namespace ns3 {
 class Ipv4SimulationHelper : public Object
 {
 public:
-  Ipv4SimulationHelper ();
+  Ipv4SimulationHelper (const std::string mask);
   ~Ipv4SimulationHelper ();
 
   Ipv4InterfaceContainer& GetIpv4Interfaces ();
   InternetStackHelper& GetInternetHelper ();
   Ipv4AddressHelper& GetIpv4Helper ();
+  const std::string& GetMask();
 
 private:
   Ipv4InterfaceContainer m_ifacesIps;
   InternetStackHelper m_internetHelper;
   Ipv4AddressHelper m_ipv4Helper;
+  const std::string m_mask;
 };
 
 } // namespace ns3

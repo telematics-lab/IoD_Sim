@@ -19,7 +19,9 @@
 
 namespace ns3 {
 
-WifiPhySimulationHelper::WifiPhySimulationHelper ()
+WifiPhySimulationHelper::WifiPhySimulationHelper () :
+  m_wifi {},
+  m_wifiPhy {}
 {
 
 }
@@ -29,16 +31,16 @@ WifiPhySimulationHelper::~WifiPhySimulationHelper ()
 
 }
 
-WifiHelper&
+WifiHelper*
 WifiPhySimulationHelper::GetWifiHelper ()
 {
-  return m_wifi;
+  return &m_wifi;
 }
 
-YansWifiPhyHelper&
+YansWifiPhyHelper*
 WifiPhySimulationHelper::GetWifiPhyHelper ()
 {
-  return m_wifiPhy;
+  return &m_wifiPhy;
 }
 
 } // namespace ns3
