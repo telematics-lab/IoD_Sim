@@ -88,18 +88,24 @@ private:
   void ConfigureNetwork ();
 
   void ConfigureEntities (const std::string& entityKey, NodeContainer& nodes);
+  void ConfigureEntityMobility (const std::string& entityKey,
+                                Ptr<EntityConfiguration> entityConf,
+                                const uint32_t entityId);
+  NetDeviceContainer ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
+                                               Ptr<Node> entityNode,
+                                               const uint32_t entityId,
+                                               const uint32_t deviceId,
+                                               const uint32_t netId);
+  Ipv4Address ConfigureEntityIpv4Network (Ptr<Node> entityNode,
+                                          NetDeviceContainer devContainer,
+                                          const uint32_t deviceId,
+                                          const uint32_t netId);
   void ConfigureEntityApplications (const std::string& entityKey,
                                     const uint32_t& entityId,
                                     const uint32_t& deviceId,
+                                    const uint32_t& netId,
                                     const Ipv4Address& deviceAddress,
                                     const Ptr<EntityConfiguration>& conf);
-
-  void ConfigureMobility ();
-  void ConfigureMobilityDrones ();
-  void ConfigureMobilityZsps ();
-  void ConfigureApplication ();
-  void ConfigureApplicationDrones ();
-  void ConfigureApplicationZsps ();
   void ConfigureSimulator ();
 
   NodeContainer m_drones;
@@ -130,6 +136,7 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureNetwork ();
   ConfigureEntities ("drones", m_drones);
   ConfigureEntities ("ZSPs", m_zsps);
+  ConfigureSimulator ();
 }
 
 Scenario::~Scenario ()
@@ -173,18 +180,6 @@ Scenario::ConfigurePhy ()
       WifiPhyFactoryHelper::AddPropagationLoss (wifiChannel, wifiConf->GetChannelPropagationLossModel ());
 
       wifiPhy->SetChannel (wifiChannel.Create ());
-
-      // Configure Results Export
-      std::stringstream phyTraceLog,
-                        pcapLog;
-      AsciiTraceHelper  ascii;
-
-      phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy-" << phyId << ".log";
-      pcapLog << CONFIGURATOR->GetResultsPath () << "-phy- " << phyId << " -host";
-
-      // Enable Tracing
-      wifiPhy->EnableAsciiAll (ascii.CreateFileStream (phyTraceLog.str ()));
-      //wifiPhy->EnablePcap (pcapLog.str (), m_netDevices);
 
       m_protocolStacks[PHY_LAYER].push_back (wifiSim);
     } else {
@@ -248,41 +243,20 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  size_t entityId = 0;
   const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration (entityKey);
+  size_t entityId = 0;
 
   for (auto& entityConf : entityConfs) {
     size_t deviceId = 0;
 
     for (auto& entityNetDev : entityConf->GetNetDevices ()) {
       if (entityNetDev->GetType ().compare("wifi") == 0) {
-        auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][deviceId]);
-        auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][deviceId]);
-        auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][deviceId]);
-
-        // TODO: helper?
-        wifiMac->GetMacHelper ().SetType (entityNetDev->GetMacLayer ().GetName (),
-                                          entityNetDev->GetMacLayer ().GetAttributes ()[0].first,
-                                          *entityNetDev->GetMacLayer ().GetAttributes ()[0].second);
-
-        NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ()->Install (*wifiPhy->GetWifiPhyHelper (),
-                                                                              wifiMac->GetMacHelper (),
-                                                                              nodes.Get (entityId));
-
-        //const auto networkLayerId = entityNetDev->GetNetworkLayerId ();
-        netLayer->GetInternetHelper ().Install (nodes.Get(entityId));
-        auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
-
-        // Configure Entity Mobility
-        const auto mobilityType = entityConf->GetMobilityModel ().GetName ();
-        MobilityHelper mobility;
-        MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
-        if (entityKey.compare ("drones") == 0)
-          mobility.Install (m_drones.Get (entityId));
-        else
-          mobility.Install (m_zsps.Get (entityId));
-
-        ConfigureEntityApplications (entityKey, entityId, deviceId, assignedIPs.GetAddress (deviceId, 0), entityConf);
+        const auto netId = entityNetDev->GetNetworkLayerId ();
+        auto entityNode = nodes.Get (entityId);
+        auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
+        auto assignedIpv4 = ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
+        ConfigureEntityMobility (entityKey, entityConf, entityId);
+        ConfigureEntityApplications (entityKey, entityId, deviceId, netId, assignedIpv4, entityConf);
 
       } else {
         NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
@@ -295,10 +269,75 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
   }
 }
 
+NetDeviceContainer
+Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
+                                    Ptr<Node> entityNode,
+                                    const uint32_t entityId,
+                                    const uint32_t deviceId,
+                                    const uint32_t netId)
+{
+  auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
+  auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][netId]);
+
+  wifiMac->GetMacHelper ().SetType (entityNetDev->GetMacLayer ().GetName (),
+                                    entityNetDev->GetMacLayer ().GetAttributes ()[0].first,
+                                    *entityNetDev->GetMacLayer ().GetAttributes ()[0].second);
+
+  NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ()->Install (*wifiPhy->GetWifiPhyHelper (),
+                                                                        wifiMac->GetMacHelper (),
+                                                                        entityNode);
+
+  // Configure WiFi PHY Logging
+  std::stringstream phyTraceLog;
+  std::stringstream pcapLog;
+  AsciiTraceHelper  ascii;
+
+  // Configure WiFi TXT PHY Logging
+  phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy-" << netId << "-host-" << entityId << "-" << deviceId << ".log";
+  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityId, deviceId);
+
+  // Configure WiFi PCAP Logging
+  pcapLog << CONFIGURATOR->GetResultsPath () << "-phy-" << netId << "-host";
+  wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityId, deviceId);
+
+  return devContainer;
+}
+
+Ipv4Address
+Scenario::ConfigureEntityIpv4Network (Ptr<Node> entityNode,
+                                      NetDeviceContainer devContainer,
+                                      const uint32_t deviceId,
+                                      const uint32_t netId)
+{
+  auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
+
+  netLayer->GetInternetHelper ().Install (entityNode);
+  auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
+
+  return assignedIPs.GetAddress (deviceId, 0);
+}
+
+void
+Scenario::ConfigureEntityMobility (const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId)
+{
+  // Configure Entity Mobility
+  const auto mobilityType = entityConf->GetMobilityModel ().GetName ();
+  MobilityHelper mobility;
+  MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
+
+  if (entityKey.compare ("drones") == 0)
+    mobility.Install (m_drones.Get (entityId));
+  else if (entityKey.compare ("ZSPs") == 0)
+    mobility.Install (m_zsps.Get (entityId));
+}
+
 void
 Scenario::ConfigureEntityApplications (const std::string& entityKey,
                                        const uint32_t& entityId,
                                        const uint32_t& deviceId,
+                                       const uint32_t& netId,
                                        const Ipv4Address& deviceAddress,
                                        const Ptr<EntityConfiguration>& conf)
 {
@@ -307,7 +346,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
   for (auto& appConf : conf->GetApplications ()) {
     const auto appType = appConf->GetType ();
     if (appType.compare("ns3::DroneClient") == 0) {
-      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][deviceId]);
+      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
       const auto ipMask = ipv4Conf->GetMask ();
       auto app = CreateObjectWithAttributes<DroneClient>("Ipv4Address", Ipv4AddressValue (deviceAddress),
                                                          "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
@@ -322,7 +361,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
       app->SetStopTime (Seconds (appConf->GetStopTime ()));
 
     } else if (appType.compare("ns3::DroneServer") == 0) {
-      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][deviceId]);
+      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
       const auto ipMask = ipv4Conf->GetMask ();
       auto app = CreateObjectWithAttributes<DroneServer>("Ipv4Address", Ipv4AddressValue (deviceAddress),
                                                          "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
@@ -365,7 +404,7 @@ Scenario::operator() ()
   Simulator::Run ();
 
   // Report Module needs the simulator context alive to introspect it
-  //Report::Get ()->Save ();
+  Report::Get ()->Save ();
 
   Simulator::Destroy ();
 
