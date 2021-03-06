@@ -16,51 +16,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 // Standard Library
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <chrono>
+//#include <chrono>
 #include <vector>
 // NS3 Core Components
-#include <ns3/assert.h>
-#include <ns3/command-line.h>
 #include <ns3/config.h>
-#include <ns3/double.h>
-#include <ns3/internet-stack-helper.h>
-#include <ns3/ipv4-address-helper.h>
-#include <ns3/ipv4-interface-container.h>
 #include <ns3/log.h>
 #include <ns3/mobility-helper.h>
 #include <ns3/object-factory.h>
-#include <ns3/object-vector.h>
 #include <ns3/net-device-container.h>
-#include <ns3/position-allocator.h>
 #include <ns3/ptr.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
-#include <ns3/vector.h>
-#include <ns3/wifi-helper.h>
-#include <ns3/wifi-mac-helper.h>
-#include <ns3/yans-wifi-helper.h>
 // IoD Sim Report Module
 #include <ns3/report.h>
 // IoD Sim Components
 #include <ns3/drone-client.h>
 #include <ns3/drone-list.h>
 #include <ns3/drone-server.h>
-#include <ns3/flight-plan.h>
+#include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/ipv4-simulation-helper.h>
 #include <ns3/mobility-factory-helper.h>
 #include <ns3/scenario-configuration-helper.h>
-#include <ns3/speed-coefficients.h>
-#include <ns3/proto-point.h>
 #include <ns3/wifi-mac-factory-helper.h>
 #include <ns3/wifi-mac-layer-configuration.h>
 #include <ns3/wifi-mac-simulation-helper.h>
 #include <ns3/wifi-phy-factory-helper.h>
 #include <ns3/wifi-phy-layer-configuration.h>
 #include <ns3/wifi-phy-simulation-helper.h>
-#include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/zsp-list.h>
 
 namespace ns3 {
@@ -74,7 +56,7 @@ constexpr int APP_LAYER = 3;
 class Scenario
 {
 public:
-  using ms = std::chrono::duration<float, std::milli>;
+  // using ms = std::chrono::duration<float, std::milli>;
 
   Scenario (int argc, char **argv);
   virtual ~Scenario ();
@@ -398,8 +380,8 @@ Scenario::operator() ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  std::chrono::high_resolution_clock timer;
-  auto start = timer.now ();
+  // std::chrono::high_resolution_clock timer;
+  // auto start = timer.now ();
 
   Simulator::Run ();
 
@@ -408,9 +390,9 @@ Scenario::operator() ()
 
   Simulator::Destroy ();
 
-  auto stop = timer.now ();
-  auto deltaTime = std::chrono::duration_cast<ms> (stop - start).count ();
-  NS_LOG_INFO ("Simulation terminated. Took " << deltaTime << "ms.");
+  // auto stop = timer.now ();
+  // auto deltaTime = std::chrono::duration_cast<ms> (stop - start).count ();
+  // NS_LOG_INFO ("Simulation terminated. Took " << deltaTime << "ms.");
 }
 
 } // namespace ns3
