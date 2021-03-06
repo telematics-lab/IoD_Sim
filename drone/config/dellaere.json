@@ -1,7 +1,7 @@
 {
     "logOnFile": true,
     "phyMode": "Ofdm54Mbps",
-    "duration": 300.0,
+    "duration": 300,
 
     "drones": [
         {

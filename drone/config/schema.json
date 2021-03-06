@@ -2,7 +2,7 @@
   "name": "String",
   "resultsPath": "String",
   "logOnFile": true,
-  "duration": 300.0,
+  "duration": 300,
   "staticNs3Config": [
     {
       "referenceObject": "String",

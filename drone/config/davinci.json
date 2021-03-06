@@ -1,7 +1,7 @@
 {
     "logOnFile": true,
     "phyMode": "DsssRate1Mbps",
-    "duration": 100.0,
+    "duration": 100,
     "drones": [
         {
             "acceleration": 1.0,

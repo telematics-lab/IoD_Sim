@@ -299,7 +299,7 @@ const double
 ScenarioConfigurationHelper::GetDuration () const
 {
   NS_ASSERT (m_config.HasMember ("duration"));
-  NS_ASSERT_MSG (m_config["duration"].IsDouble (),
+  NS_ASSERT_MSG (m_config["duration"].IsUint (),
                  "Please define duration in configuration file.");
 
   return m_config["duration"].GetDouble ();
