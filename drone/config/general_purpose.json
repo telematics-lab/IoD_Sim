@@ -4,15 +4,15 @@
     "logOnFile": true,
     "duration": 300,
     "staticNs3Config": [{
-            "parameter": "ns3::WifiRemoteStationManager::FragmentationThreshold",
+            "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
         },
         {
-            "parameter": "ns3::WifiRemoteStationManager::RtsCtsThreshold",
+            "name": "ns3::WifiRemoteStationManager::RtsCtsThreshold",
             "value": "2200"
         },
         {
-            "parameter": "ns3::WifiRemoteStationManager::NonUnicastMode",
+            "name": "ns3::WifiRemoteStationManager::NonUnicastMode",
             "value": "DsssRate1Mbps"
         }
     ],
