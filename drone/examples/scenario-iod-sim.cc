@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 // Standard Library
-//#include <chrono>
 #include <vector>
 // NS3 Core Components
 #include <ns3/config.h>
@@ -25,6 +24,7 @@
 #include <ns3/object-factory.h>
 #include <ns3/net-device-container.h>
 #include <ns3/ptr.h>
+#include <ns3/show-progress.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
 // IoD Sim Report Module
@@ -52,12 +52,11 @@ constexpr int PHY_LAYER = 0;
 constexpr int MAC_LAYER = 1;
 constexpr int NET_LAYER = 2;
 constexpr int APP_LAYER = 3;
+constexpr int PROGRESS_REFRESH_INTERVAL_SECONDS = 1;
 
 class Scenario
 {
 public:
-  // using ms = std::chrono::duration<float, std::milli>;
-
   Scenario (int argc, char **argv);
   virtual ~Scenario ();
 
@@ -68,7 +67,6 @@ private:
   void ConfigurePhy ();
   void ConfigureMac ();
   void ConfigureNetwork ();
-
   void ConfigureEntities (const std::string& entityKey, NodeContainer& nodes);
   void ConfigureEntityMobility (const std::string& entityKey,
                                 Ptr<EntityConfiguration> entityConf,
@@ -380,19 +378,12 @@ Scenario::operator() ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  // std::chrono::high_resolution_clock timer;
-  // auto start = timer.now ();
+  ShowProgress progress {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
   Simulator::Run ();
-
   // Report Module needs the simulator context alive to introspect it
   Report::Get ()->Save ();
-
   Simulator::Destroy ();
-
-  // auto stop = timer.now ();
-  // auto deltaTime = std::chrono::duration_cast<ms> (stop - start).count ();
-  // NS_LOG_INFO ("Simulation terminated. Took " << deltaTime << "ms.");
 }
 
 } // namespace ns3

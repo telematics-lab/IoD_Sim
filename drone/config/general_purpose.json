@@ -2,7 +2,7 @@
     "name": "IoD Sim",
     "resultsPath": "../results",
     "logOnFile": true,
-    "duration": 10.0,
+    "duration": 300.0,
     "staticNs3Config": [{
             "parameter": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
