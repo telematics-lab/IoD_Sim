@@ -122,6 +122,13 @@
       "group": "test"
     },
     {
+      "label": "Cleanup results directory",
+      "type": "shell",
+      "command": "rm ./results/*",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
       "label": "docs",
       "type": "shell",
       "command": "make html",

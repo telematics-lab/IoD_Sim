@@ -221,7 +221,7 @@ Scenario::ConfigureNetwork ()
 void
 Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (entityKey);
 
   const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration (entityKey);
   size_t entityId = 0;
@@ -256,6 +256,8 @@ Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
                                     const uint32_t deviceId,
                                     const uint32_t netId)
 {
+  NS_LOG_FUNCTION (entityNetDev << entityNode << entityId << deviceId << netId);
+
   auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
   auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][netId]);
 
@@ -289,6 +291,8 @@ Scenario::ConfigureEntityIpv4Network (Ptr<Node> entityNode,
                                       const uint32_t deviceId,
                                       const uint32_t netId)
 {
+  NS_LOG_FUNCTION (entityNode << deviceId << netId);
+
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
 
   netLayer->GetInternetHelper ().Install (entityNode);
@@ -302,9 +306,10 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
                                    Ptr<EntityConfiguration> entityConf,
                                    const uint32_t entityId)
 {
-  // Configure Entity Mobility
-  const auto mobilityType = entityConf->GetMobilityModel ().GetName ();
+  NS_LOG_FUNCTION (entityKey << entityConf << entityId);
+
   MobilityHelper mobility;
+  const auto mobilityType = entityConf->GetMobilityModel ().GetName (); // Configure Entity Mobility
   MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
 
   if (entityKey.compare ("drones") == 0)
@@ -321,7 +326,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
                                        const Ipv4Address& deviceAddress,
                                        const Ptr<EntityConfiguration>& conf)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << deviceAddress << conf);
 
   for (auto& appConf : conf->GetApplications ()) {
     const auto appType = appConf->GetType ();
