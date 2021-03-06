@@ -133,15 +133,15 @@ ScenarioConfigurationHelper::GetStaticConfig ()
                         "A static config definition is invalid.");
 
           const auto obj = sc.GetObject ();
-          NS_ASSERT (obj.HasMember ("parameter"));
-          NS_ASSERT_MSG (obj["parameter"].IsString (),
-                         "'parameter' is required in staticNs3Config definition.");
+          NS_ASSERT (obj.HasMember ("name"));
+          NS_ASSERT_MSG (obj["name"].IsString (),
+                         "'name' is required in staticNs3Config definition.");
           NS_ASSERT (obj.HasMember ("value"));
           NS_ASSERT_MSG (obj["value"].IsString (),
                          "'value' is required in staticNs3Config definiton.");
 
           staticConfigsDecoded.push_back({
-            obj["parameter"].GetString (),
+            obj["name"].GetString (),
             obj["value"].GetString ()
           });
         }
