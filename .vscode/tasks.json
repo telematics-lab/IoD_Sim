@@ -8,7 +8,8 @@
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
-      "group": "build"
+      "group": "build",
+      "problemMatcher": []
     },
     {
       "label": "build",
@@ -21,6 +22,32 @@
       "problemMatcher": [
         "$gcc"
       ]
+    },
+    {
+      "label": "Cleanup results directory",
+      "type": "shell",
+      "command": "rm ./results/*",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Cleanup Build",
+      "type": "shell",
+      "command": "./waf clean",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "run IoD Sim",
+      "type": "shell",
+      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
     },
     {
       "label": "run allen",
@@ -95,15 +122,6 @@
       "group": "test"
     },
     {
-      "label": "run IoD Sim",
-      "type": "shell",
-      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
-      "options": {
-        "cwd": "${workspaceFolder}/ns3"
-      },
-      "group": "test"
-    },
-    {
       "label": "run LTE LENA CostVelocity",
       "type": "shell",
       "command": "./waf --run \"lte-lena-costvelocity\"",
@@ -120,13 +138,6 @@
         "cwd": "${workspaceFolder}/ns3"
       },
       "group": "test"
-    },
-    {
-      "label": "Cleanup results directory",
-      "type": "shell",
-      "command": "rm ./results/*",
-      "group": "none",
-      "problemMatcher": []
     },
     {
       "label": "docs",
@@ -203,20 +214,6 @@
       "dependsOn": [
         "docs (venv)"
       ]
-    },
-    {
-      "type": "shell",
-      "label": "g++ build active file",
-      "command": "/usr/bin/g++",
-      "args": [
-        "-g",
-        "${file}",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
-      ],
-      "options": {
-        "cwd": "/usr/bin"
-      }
     }
   ],
   "inputs": [

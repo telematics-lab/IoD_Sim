@@ -75,7 +75,7 @@ def build(bld):
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
                                   'internet'])
-    obj.source = 'scenario-iod-sim.cc'
+    obj.source = 'iod-sim.cc'
 
     # lte-lena-simple-davinci shouldn't have wifi as dependency,
     # but for some reason there are weak references to it.
