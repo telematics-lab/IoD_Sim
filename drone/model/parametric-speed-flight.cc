@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -122,7 +122,7 @@ ParametricSpeedFlight::UpdateDistance (const double &t) const
   // analytic polynomial integration
   double distance;
   const uint32_t order = m_speedParams.size ();
-  
+
   for (uint32_t i = 0; i < order; i++)
       distance += m_speedParams[i] / (order - i) * std::pow (t, order - i);
 
