@@ -218,6 +218,10 @@ public:
    * \param allocator the allocator to be filled with ENBs positions.
    */
   void GetEnbsPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
+   * \brief Check if dry run is wanted.
+   */
+  const bool IsDryRun () const;
 
   /**
    * \brief default destructor

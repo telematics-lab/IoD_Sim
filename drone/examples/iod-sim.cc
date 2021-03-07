@@ -384,6 +384,10 @@ Scenario::operator() ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
+  if (CONFIGURATOR->IsDryRun ()) {
+    return;
+  }
+
   ShowProgress progress {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
   Simulator::Run ();

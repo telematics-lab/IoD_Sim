@@ -581,6 +581,19 @@ ScenarioConfigurationHelper::GetEnbsPosition (Ptr<ListPositionAllocator> allocat
     }
 }
 
+const bool
+ScenarioConfigurationHelper::IsDryRun () const
+{
+  // This is an optional parameter, so no asserts!
+  if (m_config.HasMember ("dryRun")) {
+    NS_ASSERT_MSG (m_config["dryRun"].IsBool (), "'dryRun' flag must be boolean type.");
+
+    return m_config["dryRun"].GetBool ();
+  } else {
+    return false;
+  }
+}
+
 void
 ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
 {
