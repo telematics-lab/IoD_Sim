@@ -157,8 +157,8 @@
         "ConstantAccelerationFlight",
         "Planner",
         "ConstantAccelerationDroneMobilityModel",
-        "DroneServer",
-        "DroneClient",
+        "DroneServerApplication",
+        "DroneClientApplication",
         "ScenarioConfigurationHelper"
     ]
 }

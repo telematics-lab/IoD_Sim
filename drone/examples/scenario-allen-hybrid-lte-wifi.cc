@@ -54,8 +54,8 @@
 #include "ns3/flow-monitor-module.h"
 #include <ns3/flow-monitor-helper.h>
 
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
+#include <ns3/drone-client-application.h>
+#include <ns3/drone-server-application.h>
 #include <ns3/zsp-list.h>
 #include <ns3/drone-list.h>
 #include <ns3/flight-plan.h>
@@ -120,8 +120,8 @@ Scenario::Scenario (int argc, char **argv) : m_ifaceNetMask{"255.0.0.0"}
   numDrones = 2;
 
   LogComponentEnable ("Scenario Allen", LOG_LEVEL_ALL);
-  LogComponentEnable ("DroneServer", LOG_LEVEL_ALL);
-  LogComponentEnable ("DroneClient", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneServerApplication", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneClientApplication", LOG_LEVEL_ALL);
 
   std::ofstream out ("../results/dronesim-allen.log");
   std::clog.rdbuf (out.rdbuf ());
@@ -311,7 +311,7 @@ Scenario::ConfigureApplicationDrones ()
 
   for (auto drone = m_drones.Begin (); drone != m_drones.End (); drone++)
     {
-      auto client = CreateObjectWithAttributes<DroneClient> (
+      auto client = CreateObjectWithAttributes<DroneClientApplication> (
           "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress ((*drone)->GetId ())),
           "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
       (*drone)->AddApplication (client);
@@ -324,7 +324,7 @@ void
 Scenario::ConfigureApplicationZsps ()
 {
 
-  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer> (
+  Ptr<DroneServerApplication> server = CreateObjectWithAttributes<DroneServerApplication> (
       "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
       "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
   m_zsps.Get (0)->AddApplication (server);

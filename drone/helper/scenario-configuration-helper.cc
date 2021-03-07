@@ -137,12 +137,22 @@ ScenarioConfigurationHelper::GetStaticConfig ()
           NS_ASSERT_MSG (obj["name"].IsString (),
                          "'name' is required in staticNs3Config definition.");
           NS_ASSERT (obj.HasMember ("value"));
-          NS_ASSERT_MSG (obj["value"].IsString (),
+          NS_ASSERT_MSG (obj["value"].IsString () || obj["value"].IsNumber (),
                          "'value' is required in staticNs3Config definiton.");
+
+
+          std::stringstream value;
+          if (obj["value"].IsDouble ()) {
+            value << obj["value"].GetDouble ();
+          } else if (obj["value"].IsInt ()) {
+            value << obj["value"].GetInt ();
+          } else if (obj["value"].IsString ()) {
+            value << obj["value"].GetString ();
+          }
 
           staticConfigsDecoded.push_back({
             obj["name"].GetString (),
-            obj["value"].GetString ()
+            value.str ()
           });
         }
 

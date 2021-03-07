@@ -30,9 +30,9 @@
 // IoD Sim Report Module
 #include <ns3/report.h>
 // IoD Sim Components
-#include <ns3/drone-client.h>
+#include <ns3/drone-client-application.h>
 #include <ns3/drone-list.h>
-#include <ns3/drone-server.h>
+#include <ns3/drone-server-application.h>
 #include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/ipv4-simulation-helper.h>
 #include <ns3/mobility-factory-helper.h>
@@ -328,39 +328,40 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
 {
   NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << deviceAddress << conf);
 
-  for (auto& appConf : conf->GetApplications ()) {
-    const auto appType = appConf->GetType ();
-    if (appType.compare("ns3::DroneClient") == 0) {
+  for (auto appConf : conf->GetApplications ()) {
+    const auto appName = appConf.GetName ();
+    if (appName.compare("ns3::DroneClientApplication") == 0) {
       auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
       const auto ipMask = ipv4Conf->GetMask ();
-      auto app = CreateObjectWithAttributes<DroneClient>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                         "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
-                                                         "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+      auto app = CreateObjectWithAttributes<DroneClientApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                                    "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
+                                                                    "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
       if (entityKey.compare("drones") == 0)
         m_drones.Get (entityId)->AddApplication (app);
       else if (entityKey.compare("ZSPs") == 0)
         m_zsps.Get (entityId)->AddApplication (app);
 
-      app->SetStartTime (Seconds (appConf->GetStartTime ()));
-      app->SetStopTime (Seconds (appConf->GetStopTime ()));
-
-    } else if (appType.compare("ns3::DroneServer") == 0) {
+      for (auto attr : appConf.GetAttributes ()) {
+        app->SetAttribute (attr.first, *attr.second);
+      }
+    } else if (appName.compare("ns3::DroneServerApplication") == 0) {
       auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
       const auto ipMask = ipv4Conf->GetMask ();
-      auto app = CreateObjectWithAttributes<DroneServer>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                         "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
+      auto app = CreateObjectWithAttributes<DroneServerApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                                    "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
 
       if (entityKey.compare("drones") == 0)
         m_drones.Get (entityId)->AddApplication (app);
       else if (entityKey.compare("ZSPs") == 0)
         m_zsps.Get (entityId)->AddApplication (app);
 
-      app->SetStartTime (Seconds (appConf->GetStartTime ()));
-      app->SetStopTime (Seconds (appConf->GetStopTime ()));
+      for (auto attr : appConf.GetAttributes ()) {
+        app->SetAttribute (attr.first, *attr.second);
+      }
 
     } else {
-      NS_FATAL_ERROR ("Unsupported Application Type: " << appType);
+      NS_FATAL_ERROR ("Unsupported Application Type: " << appName);
     }
   }
 }

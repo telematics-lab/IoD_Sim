@@ -21,7 +21,6 @@
 
 #include <ns3/application.h>
 #include <ns3/config.h>
-#include <ns3/drone-server.h>
 #include <ns3/integer.h>
 #include <ns3/ipv4-l3-protocol.h>
 #include <ns3/log.h>

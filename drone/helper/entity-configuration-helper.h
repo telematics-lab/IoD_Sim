@@ -20,7 +20,6 @@
 
 #include <ns3/entity-configuration.h>
 #include <ns3/netdevice-configuration.h>
-#include <ns3/application-configuration.h>
 
 #include <rapidjson/document.h>
 
@@ -36,7 +35,7 @@ private:
 
   static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations (const rapidjson::Value& json);
   static const ModelConfiguration DecodeMobilityConfiguration (const rapidjson::Value& json);
-  static const std::vector<Ptr<ApplicationConfiguration>> DecodeApplicationConfigurations (const rapidjson::Value& json);
+  static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
   static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value &json);
 };
 

@@ -54,8 +54,8 @@
 #include "ns3/flow-monitor-module.h"
 #include <ns3/flow-monitor-helper.h>
 
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
+#include <ns3/drone-client-application.h>
+#include <ns3/drone-server-application.h>
 #include <ns3/zsp-list.h>
 #include <ns3/drone-list.h>
 #include <ns3/flight-plan.h>
@@ -312,7 +312,7 @@ Scenario::ConfigureApplicationDrones ()
 
   for (uint32_t i = 0; i < m_drones.GetN (); i++)
     {
-      auto client = CreateObjectWithAttributes<DroneClient> (
+      auto client = CreateObjectWithAttributes<DroneClientApplication> (
           "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (i)), "Ipv4SubnetMask",
           Ipv4MaskValue (m_ifaceNetMask), "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
@@ -332,7 +332,7 @@ void
 Scenario::ConfigureApplicationZsps ()
 {
 
-  auto server = CreateObjectWithAttributes<DroneServer> (
+  auto server = CreateObjectWithAttributes<DroneServerApplication> (
       "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
       "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
 

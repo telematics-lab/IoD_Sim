@@ -101,6 +101,23 @@ EntityConfigurationHelper::DecodeMobilityConfiguration (const rapidjson::Value& 
   return DecodeModelConfiguration (json);
 }
 
+const std::vector<ModelConfiguration>
+EntityConfigurationHelper::DecodeApplicationConfigurations (const rapidjson::Value& json)
+{
+  NS_ASSERT_MSG (json.IsArray (),
+                 "Entity configuration 'applications' property must be an array.");
+
+  std::vector<ModelConfiguration> confs;
+  for (auto& appl : json.GetArray ()){
+    NS_ASSERT_MSG (appl.IsObject (),
+                   "Application model configuration must be an object.");
+
+    confs.push_back (DecodeModelConfiguration(appl));
+  }
+
+  return confs;
+}
+
 // TODO merge with other helpers
 const ModelConfiguration
 EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
@@ -115,6 +132,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                   "Model configuration 'attributes' property must be an array.");
 
   const std::string modelName = jsonModel["name"].GetString ();
+
   TypeId modelTid = TypeId::LookupByName (modelName);
   auto jsonAttributes = jsonModel["attributes"].GetArray ();
   std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
@@ -146,8 +164,22 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
       break;
     case rapidjson::Type::kNumberType:
       {
-        const auto attrValueDouble = el["value"].GetDouble ();
-        attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
+        if (el["value"].IsInt ()) {
+          const int attrValueInt = el["value"].GetInt ();
+
+          attrValue = attrInfo.checker->CreateValidValue (IntegerValue (attrValueInt));
+
+        } else if (el["value"].IsDouble ()) {
+          const double attrValueDouble = el["value"].GetDouble ();
+
+          if (attrInfo.checker->Check (DoubleValue (attrValueDouble))) {
+            attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
+          } else if (attrInfo.checker->Check (TimeValue ( Seconds (attrValueDouble)))) {
+            attrValue = attrInfo.checker->CreateValidValue (TimeValue ( Seconds (attrValueDouble)));
+          } else {
+            NS_FATAL_ERROR ("Cannot read attribute " << attrName << " for model " << modelName);
+          }
+        }
       }
       break;
     case rapidjson::Type::kArrayType:
@@ -158,7 +190,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
           const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
 
           attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
-        } else if (attrName.compare("SpeedCoefficients") == 0 && arr[0].IsDouble ()) {
+        } else if (attrName.compare("SpeedCoefficients") == 0 && arr[0].IsNumber ()) {
           std::vector<double> coeffs;
 
           for (auto& c : arr) {
@@ -203,37 +235,6 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
   }
 
   return ModelConfiguration(modelName, attributes);
-}
-
-const std::vector<Ptr<ApplicationConfiguration>>
-EntityConfigurationHelper::DecodeApplicationConfigurations (const rapidjson::Value& json)
-{
-  NS_ASSERT_MSG (json.IsArray (),
-                 "Entity configuration 'applications' property must be an array.");
-
-  std::vector<Ptr<ApplicationConfiguration>> confs;
-  for (auto& appl : json.GetArray ()){
-    NS_ASSERT_MSG (appl.HasMember ("type"),
-                   "Application configuration must have 'type' property.");
-    NS_ASSERT_MSG (appl["type"].IsString (),
-                   "Application configuration 'type' property must be a string.");
-    NS_ASSERT_MSG (appl.HasMember ("startTime"),
-                   "Application configuration must have 'startTime' property.");
-    NS_ASSERT_MSG (appl["startTime"].IsDouble (),
-                   "Application configuration 'startTime' property must be a double.");
-    NS_ASSERT_MSG (appl.HasMember ("stopTime"),
-                   "Application configuration must have 'stopTime' property.");
-    NS_ASSERT_MSG (appl["stopTime"].IsDouble (),
-                   "Application configuration 'stopTime' property must be a double.");
-
-    const std::string appType = appl["type"].GetString ();
-    const double appStartTime = appl["startTime"].GetDouble ();
-    const double appStopTime = appl["stopTime"].GetDouble ();
-
-    confs.push_back (CreateObject<ApplicationConfiguration> (appType, appStartTime, appStopTime));
-  }
-
-  return confs;
 }
 
 } // namespace ns3

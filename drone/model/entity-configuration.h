@@ -20,7 +20,6 @@
 
 #include <ns3/object.h>
 
-#include "application-configuration.h"
 #include "model-configuration.h"
 #include "netdevice-configuration.h"
 
@@ -34,17 +33,17 @@ class EntityConfiguration : public Object
   public:
     EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
                          ModelConfiguration m_mobility,
-                         std::vector<Ptr<ApplicationConfiguration>> m_applications);
+                         std::vector<ModelConfiguration> m_applications);
     ~EntityConfiguration ();
 
   const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices () const;
   const ModelConfiguration& GetMobilityModel () const;
-  const std::vector<Ptr<ApplicationConfiguration>>& GetApplications () const;
+  const std::vector<ModelConfiguration>& GetApplications () const;
 
 private:
   std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
   ModelConfiguration m_mobility;
-  std::vector<Ptr<ApplicationConfiguration>> m_applications;
+  std::vector<ModelConfiguration> m_applications;
 };
 
 } // namespace ns3

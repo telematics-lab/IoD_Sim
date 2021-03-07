@@ -99,9 +99,17 @@
                 ]
             },
             "applications": [{
-                "type": "ns3::DroneClient",
-                "startTime": 1.0,
-                "stopTime": 299.0
+                "name": "ns3::DroneClientApplication",
+                "attributes": [
+                    {
+                        "name": "StartTime",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "StopTime",
+                        "value": 299.0
+                    }
+                ]
             }]
         },
         {
@@ -147,9 +155,17 @@
                 ]
             },
             "applications": [{
-                "type": "ns3::DroneClient",
-                "startTime": 1.0,
-                "stopTime": 299.0
+                "name": "ns3::DroneClientApplication",
+                "attributes": [
+                    {
+                        "name": "StartTime",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "StopTime",
+                        "value": 299.0
+                    }
+                ]
             }]
         }
     ],
@@ -173,9 +189,17 @@
             }]
         },
         "applications": [{
-            "type": "ns3::DroneServer",
-            "startTime": 1.0,
-            "stopTime": 299.0
+            "name": "ns3::DroneServerApplication",
+            "attributes": [
+                {
+                    "name": "StartTime",
+                    "value": 1.0
+                },
+                {
+                    "name": "StopTime",
+                    "value": 299.0
+                }
+            ]
         }]
     }],
     "logComponents": [
@@ -183,8 +207,8 @@
         "ParametricSpeedFlight",
         "Planner",
         "ParametricSpeedDroneMobilityModel",
-        "DroneServer",
-        "DroneClient",
+        "DroneServerApplication",
+        "DroneClientApplication",
         "ScenarioConfigurationHelper"
     ]
 }

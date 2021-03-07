@@ -47,8 +47,8 @@
         "ParametricSpeedFlight",
         "Planner",
         "ParametricSpeedDroneMobilityModel",
-        "DroneServer",
-        "DroneClient",
+        "DroneServerApplication",
+        "DroneClientApplication",
         "ScenarioConfigurationHelper"
     ]
 }

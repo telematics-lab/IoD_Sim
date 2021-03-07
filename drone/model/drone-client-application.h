@@ -15,8 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef DRONE_CLIENT_H
-#define DRONE_CLIENT_H
+#ifndef DRONE_CLIENT_APPLICATION_H
+#define DRONE_CLIENT_APPLICATION_H
 
 #include <ns3/application.h>
 #include <ns3/socket.h>
@@ -68,7 +68,7 @@ ToString (Intent i)
  * Application to be installed on each drone that wants to participate in the
  * IoD inter-network using a simple JSON via UDP with ACK protocol.
  */
-class DroneClient : public Application
+class DroneClientApplication : public Application
 {
 public:
   /**
@@ -79,11 +79,11 @@ public:
   /**
    * \brief default constructor
    */
-  DroneClient ();
+  DroneClientApplication ();
   /**
    * \brief default destructor
    */
-  virtual ~DroneClient ();
+  virtual ~DroneClientApplication ();
 
 protected:
   /**
@@ -149,4 +149,4 @@ private:
 
 } // namespace ns3
 
-#endif /* DRONE_CLIENT_H */
+#endif /* DRONE_CLIENT_APPLICATION_H */
