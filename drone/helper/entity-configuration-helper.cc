@@ -150,7 +150,8 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
     const std::string attrName = el["name"].GetString();
     TypeId::AttributeInformation attrInfo = {};
 
-    NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
+    NS_ASSERT_MSG (modelTid.LookupAttributeByName (attrName, &attrInfo),
+                   "Attribute '" << attrName << "' for model '" << modelName << "' does not exist.");
 
     const auto attrValueType = el["value"].GetType ();
     Ptr<AttributeValue> attrValue;

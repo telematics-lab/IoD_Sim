@@ -78,11 +78,13 @@ const std::string
 ScenarioConfigurationHelper::GetName ()
 {
   if (m_name.empty()) {
-    NS_ASSERT (m_config.HasMember ("name"));
+    NS_ASSERT_MSG (m_config.HasMember ("name"),
+                   "Please define scenario 'name' in configuration file.");
     NS_ASSERT_MSG (m_config["name"].IsString(),
-                   "Please define scenario name in configuration file.");
+                   "Scenario 'name' must be a String.");
 
     m_name = m_config["name"].GetString();
+    NS_ASSERT_MSG (!m_name.empty(), "Scenario 'name' must be non empty.");
   }
 
   return m_name;
@@ -97,9 +99,14 @@ ScenarioConfigurationHelper::GetCurrentDateTime () const
 const std::string
 ScenarioConfigurationHelper::GetResultsPath ()
 {
+  NS_ASSERT_MSG (m_config.HasMember ("resultsPath"),
+                 "Please define 'resultsPath' in configuration file.");
+  NS_ASSERT_MSG (m_config["resultsPath"].IsString (),
+                 "'resultsPath' must be a string.");
+
   std::stringstream ss;
 
-  ss << "../results/"
+  ss << m_config["resultsPath"].GetString ()
      << GetName() << "-"
      << m_dateTime;
 
@@ -121,9 +128,10 @@ ScenarioConfigurationHelper::GetStaticConfig ()
 {
   if (m_staticConfig.empty ())
     {
-      NS_ASSERT (m_config.HasMember ("staticNs3Config"));
+      NS_ASSERT_MSG (m_config.HasMember ("staticNs3Config"),
+                     "Please define 'staticNs3Config' in configuration file.");
       NS_ASSERT_MSG (m_config["staticNs3Config"].IsArray (),
-                     "Please define staticNs3Config in configuration file.");
+                     "'staticNs3Config' property must be an array.");
 
       std::vector<std::pair<std::string, std::string>> staticConfigsDecoded = {};
       const auto staticConfigsArr = m_config["staticNs3Config"].GetArray ();
@@ -133,12 +141,14 @@ ScenarioConfigurationHelper::GetStaticConfig ()
                         "A static config definition is invalid.");
 
           const auto obj = sc.GetObject ();
-          NS_ASSERT (obj.HasMember ("name"));
-          NS_ASSERT_MSG (obj["name"].IsString (),
+          NS_ASSERT_MSG (obj.HasMember ("name"),
                          "'name' is required in staticNs3Config definition.");
-          NS_ASSERT (obj.HasMember ("value"));
-          NS_ASSERT_MSG (obj["value"].IsString () || obj["value"].IsNumber (),
+          NS_ASSERT_MSG (obj["name"].IsString (),
+                         "'name' property must be a string in staticNs3Config definition.");
+          NS_ASSERT_MSG (obj.HasMember ("value"),
                          "'value' is required in staticNs3Config definiton.");
+          NS_ASSERT_MSG (obj["value"].IsString () || obj["value"].IsNumber (),
+                         "'value' property must be a string or a number in staticNs3Config definition.");
 
 
           std::stringstream value;
@@ -165,9 +175,10 @@ ScenarioConfigurationHelper::GetStaticConfig ()
 const std::vector<Ptr<PhyLayerConfiguration>>
 ScenarioConfigurationHelper::GetPhyLayers () const
 {
-  NS_ASSERT (m_config.HasMember ("phyLayer"));
-  NS_ASSERT_MSG (m_config["phyLayer"].IsArray (),
+  NS_ASSERT_MSG (m_config.HasMember ("phyLayer"),
                  "Please define phyLayer in your JSON configuration.");
+  NS_ASSERT_MSG (m_config["phyLayer"].IsArray (),
+                 "'phyLayer' property must be an array.");
 
   const auto arr = m_config["phyLayer"].GetArray ();
   std::vector<Ptr<PhyLayerConfiguration>> phyConfs;
@@ -183,9 +194,10 @@ ScenarioConfigurationHelper::GetPhyLayers () const
 const std::vector<Ptr<MacLayerConfiguration>>
 ScenarioConfigurationHelper::GetMacLayers ()const
 {
-  NS_ASSERT (m_config.HasMember ("macLayer"));
-  NS_ASSERT_MSG (m_config["macLayer"].IsArray (),
+  NS_ASSERT_MSG (m_config.HasMember ("macLayer"),
                  "Please define macLayer in your JSON configuration.");
+  NS_ASSERT_MSG (m_config["macLayer"].IsArray (),
+                 "'macLayer' property must be an array.");
 
   const auto arr = m_config["macLayer"].GetArray ();
   std::vector<Ptr<MacLayerConfiguration>> macConfs;
@@ -201,9 +213,10 @@ ScenarioConfigurationHelper::GetMacLayers ()const
 const std::vector<Ptr<NetworkLayerConfiguration>>
 ScenarioConfigurationHelper::GetNetworkLayers () const
 {
-  NS_ASSERT (m_config.HasMember ("networkLayer"));
+  NS_ASSERT_MSG (m_config.HasMember ("networkLayer"),
+                 "Please define 'networkLayer' in your JSON configuration.");
   NS_ASSERT_MSG (m_config["networkLayer"].IsArray (),
-                 "Please define networkLayer in your JSON configuration.");
+                 "'networkLayer' property must be an array.");
 
   const auto arr = m_config["networkLayer"].GetArray ();
   std::vector<Ptr<NetworkLayerConfiguration>> netConfs;
@@ -220,9 +233,10 @@ const std::vector<Ptr<EntityConfiguration>>
 ScenarioConfigurationHelper::GetEntitiesConfiguration (const std::string& entityKey) const
 {
   const char* entityKeyCStr = entityKey.c_str ();
-  NS_ASSERT (m_config.HasMember (entityKeyCStr));
+  NS_ASSERT_MSG (m_config.HasMember (entityKeyCStr),
+                 "Please define " << entityKey << " in your JSON configuration.");
   NS_ASSERT_MSG (m_config[entityKeyCStr].IsArray (),
-                 "Please define drones in your JSON configuration.");
+                 "JSON property '" << entityKey << "' must be an array.");
 
   const auto arr = m_config[entityKeyCStr].GetArray ();
   std::vector<Ptr<EntityConfiguration>> entityConf;
@@ -308,9 +322,10 @@ ScenarioConfigurationHelper::GetPhyMode () const
 const double
 ScenarioConfigurationHelper::GetDuration () const
 {
-  NS_ASSERT (m_config.HasMember ("duration"));
+  NS_ASSERT_MSG (m_config.HasMember ("duration"),
+                 "Please define 'duration' in configuration file.");
   NS_ASSERT_MSG (m_config["duration"].IsUint (),
-                 "Please define duration in configuration file.");
+                 "'duration' property must be a positive integer expressing scenario duration in seconds.");
 
   return m_config["duration"].GetDouble ();
 }
@@ -332,8 +347,10 @@ ScenarioConfigurationHelper::GetCurveStep () const
 const uint32_t
 ScenarioConfigurationHelper::GetDronesN () const
 {
-  NS_ASSERT (m_config.HasMember ("drones"));
-  NS_ASSERT (m_config["drones"].IsArray ());
+  NS_ASSERT_MSG (m_config.HasMember ("drones"),
+                 "Please define 'drones' in your JSON configuration.");
+  NS_ASSERT_MSG (m_config["drones"].IsArray (),
+                 "JSON property 'drones' must be an array.");
   NS_ASSERT_MSG (m_config["drones"].Size () > 0,
                  "Please define at least one drone in configuration file.");
 
@@ -666,7 +683,8 @@ ScenarioConfigurationHelper::GetLogOnFile () const
   // this is an optional parameter. Default to false if not specified.
   if (m_config.HasMember ("logOnFile"))
     {
-      NS_ASSERT (m_config["logOnFile"].IsBool ());
+      NS_ASSERT_MSG (m_config["logOnFile"].IsBool (),
+                     "'logOnFile' property must be boolean.");
 
       return m_config["logOnFile"].GetBool ();
     }
@@ -681,13 +699,15 @@ ScenarioConfigurationHelper::EnableLogComponents () const
 {
   if (m_config.HasMember ("logComponents"))
     {
-      NS_ASSERT (m_config["logComponents"].IsArray ());
+      NS_ASSERT_MSG (m_config["logComponents"].IsArray (),
+                     "'logComponents' property must be an array.");
 
       for (auto i = m_config["logComponents"].Begin ();
            i != m_config["logComponents"].End ();
            i++)
         {
-          NS_ASSERT ((*i).IsString ());
+          NS_ASSERT_MSG ((*i).IsString (),
+                         "'logComponents' elements must be strings.");
 
           LogComponentEnable ((*i).GetString (), LOG_LEVEL_ALL);
         }
