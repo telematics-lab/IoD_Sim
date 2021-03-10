@@ -13,7 +13,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "./waf build -j${input:cores}",
+      "command": "./waf build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -34,9 +34,27 @@
       "group": "test"
     },
     {
+      "label": "run allen (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen-hybrid-lte-wifi --numDrones=${input:numDrones}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run babbage",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-babbage --numDrones=${input:numDrones} --duration=${input:duration}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run babbage (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-babbage-hybrid-lte-wifi --numDrones=${input:numDrones} --duration=${input:duration}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -52,9 +70,36 @@
       "group": "test"
     },
     {
+      "label": "run davinci (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci-hybrid-lte-wifi --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run easley",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-easley --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run easley (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-easley-hybrid-lte-wifi --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run IoD Sim",
+      "type": "shell",
+      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -70,9 +115,9 @@
       "group": "test"
     },
     {
-      "label": "run lte-lena-simple-davinci",
+      "label": "run LTE LENA Simple DaVinci",
       "type": "shell",
-      "command": "./waf --run \"lte-lena-simple-davinci --config=${input:configFileDaVinci}\"",
+      "command": "./waf --run \"lte-lena-simple-davinci --config=${input:configFileLte}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -213,12 +258,6 @@
 
   "inputs": [
     {
-      "id": "cores",
-      "type": "promptString",
-      "description": "Number of cores to use during build",
-      "default": "1"
-    },
-    {
       "id": "numDrones",
       "type": "promptString",
       "description": "Number of drones to simulate",
@@ -263,6 +302,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/davinci.json"
+    },
+    {
+      "id": "configFileLte",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-scenario.json"
     },
     {
       "id": "configFileEasley",

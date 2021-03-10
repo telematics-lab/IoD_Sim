@@ -57,8 +57,7 @@ WifiInspector::GetWifiStandard () const
         return "802.11b";
       case WIFI_PHY_STANDARD_80211g:
         return "802.11g";
-      case WIFI_PHY_STANDARD_80211n_2_4GHZ:
-      case WIFI_PHY_STANDARD_80211n_5GHZ:
+      case WIFI_PHY_STANDARD_80211n:
         return "802.11n";
       case WIFI_PHY_STANDARD_80211ac:
         return "802.11ac";

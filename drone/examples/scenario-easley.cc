@@ -140,7 +140,6 @@ Scenario::ConfigurePhy ()
 
   m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
 
-  m_wifiPhy = YansWifiPhyHelper::Default ();
   // This is one parameter that matters when using FixedRssLossModel
   // set it to zero; otherwise, gain will be added
   m_wifiPhy.Set ("RxGain", DoubleValue (0));
