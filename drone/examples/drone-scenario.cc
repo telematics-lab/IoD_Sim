@@ -34,9 +34,9 @@ int main (int argc, char **argv)
   DSH->Initialize(argc, argv);
   //DSH->UseUdpEchoApplications();
 
-  NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
-  NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
-  NS_LOG_DEBUG("Remote IP: " << DSH->GetRemoteIpv4Address(0));
+  //NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
+  //NS_LOG_DEBUG("Drone2 IP: " << DSH->GetDroneIpv4Address(1));
+  //NS_LOG_DEBUG("Remote IP: " << DSH->GetRemoteIpv4Address(0));
 
 
   for (uint32_t i = 0; i < CONFIG->GetDronesN(); ++i)

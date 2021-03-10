@@ -5,7 +5,7 @@
 ####
 
 git clone                           \
-  --branch=ns-3.29                  \
+  --branch=ns-3.33                  \
   --depth=1                         \
   git@gitlab.com:nsnam/ns-3-dev.git \
   ns3

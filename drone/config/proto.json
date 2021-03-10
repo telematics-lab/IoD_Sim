@@ -1,0 +1,113 @@
+{
+  "globalSettings": [
+    "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0"
+  ],
+
+  "networks": [
+    {
+      "name": "lte_net0",
+      "protocol": "lte",
+      "settings": [
+        "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
+        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
+        "ns3::PointToPointNetDevice::Mtu", "1500",
+        "ns3::PointToPointChannel::Delay", "10ms"
+      ]
+    },
+    {
+      "name": "lte_net1",
+      "protocol": "lte",
+      "settings": [
+        "ns3::LteHelper::Scheduler", "ns3::RrFfMacScheduler",
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
+        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
+        "ns3::PointToPointNetDevice::Mtu", "1500",
+        "ns3::PointToPointChannel::Delay", "10ms"
+      ]
+    }
+  ],
+
+  "antennas": [
+    {
+      "position": [0.0, 0.0, 50.0],
+      "networks": ["lte_net0", "lte_net1"]
+    },
+    {
+      "position": [0.0, 10.0, 50.0],
+      "networks": [0]
+    }
+  ],
+
+  "drones": [
+    {
+      "name": "drone1",
+      "mobilityModel": "ns3::ConstantPositionMobilityModel",
+      "position": [100.0, 0.0, 10.0],
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": [
+        {
+          "network": 0,
+          "ipv4": "10.0.0.1"
+        },
+        {
+          "network": "lte_net1",
+          "ipv4": "20.0.0.1"
+        }
+      ]
+    },
+    {
+      "name": "drone2",
+      "mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
+      "speedCoefficients": [1.0, 0.0],
+      "trajectory": [
+          {
+              "position": [0.0, 0.0, 10.0],
+              "interest": 0,
+              "restTime": 3.0
+          },
+          {
+              "position": [10.0, 10.0, 100.0],
+              "interest": 1
+          },
+          {
+              "position": [20.0, 0.0, 20.0],
+              "interest": 0,
+              "restTime": 3.0
+          }
+      ],
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": [
+        {
+          "network": "lte_net0",
+          "ipv4": "10.0.0.2"
+        },
+        {
+          "network": 1,
+          "ipv4": "20.0.0.2"
+        }
+      ]
+    }
+  ],
+
+  "remotes": [
+    {
+      "name": "remote1",
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": [
+        {
+          "network": "lte_net0",
+          "ipv4": "100.0.0.1"
+        }
+      ]
+    }
+  ]
+}
