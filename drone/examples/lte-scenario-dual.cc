@@ -26,6 +26,7 @@
 #include <ns3/applications-module.h>
 #include <ns3/drone-client.h>
 #include <ns3/drone-server.h>
+#include <ns3/config-store-module.h>
 
 using namespace ns3;
 
@@ -33,11 +34,14 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 int main (int argc, char *argv[])
 {
-  NodeContainer enbNodes, ueNodes, hostNodes, router;
+  LogComponentEnable("PointToPointEpcHelper", LOG_LEVEL_ALL);
+  LogComponentEnable("NoBackhaulEpcHelper", LOG_LEVEL_ALL);
+
+  NodeContainer enbNodes, ueNodes, hostNodes;
   enbNodes.Create (2);
   ueNodes.Create (3);
   hostNodes.Create (1);
-  router.Create(1);
+  Ptr<Node> router = CreateObject<Node> ();
 
   MobilityHelper dronesMobility;
   dronesMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -57,11 +61,28 @@ int main (int argc, char *argv[])
     enbNodes.Get(i)->GetObject<MobilityModel>()->SetPosition(Vector(0, i*100-50, 40));
   }
 
+  Config::SetDefault("ns3::NoBackhaulEpcHelper::UePgwAddressBase", StringValue("100.0.0.0"));
+  ConfigStore config;
+  config.ConfigureDefaults();
+
   Ptr<LteHelper> lteHelper1 = CreateObject<LteHelper> ();
+  /*
+  Ptr<PointToPointEpcHelper> epcHelper1 = CreateObjectWithAttributes<PointToPointEpcHelper> (
+      "UePgwAddressBase", Ipv4AddressValue("100.0.0.0"),
+      "UePgwAddressMask", Ipv4MaskValue("255.255.255.0"));
+  */
   Ptr<PointToPointEpcHelper> epcHelper1 = CreateObject<PointToPointEpcHelper> ();
   lteHelper1->SetEpcHelper (epcHelper1);
 
+  Config::SetDefault("ns3::NoBackhaulEpcHelper::UePgwAddressBase", StringValue("200.0.0.0"));
+  config.ConfigureDefaults();
+
   Ptr<LteHelper> lteHelper2 = CreateObject<LteHelper> ();
+  /*
+  Ptr<PointToPointEpcHelper> epcHelper2 = CreateObjectWithAttributes<PointToPointEpcHelper> (
+      "UePgwAddressBase", Ipv4AddressValue("200.0.0.0"),
+      "UePgwAddressMask", Ipv4MaskValue("255.255.255.0"));
+  */
   Ptr<PointToPointEpcHelper> epcHelper2 = CreateObject<PointToPointEpcHelper> ();
   lteHelper2->SetEpcHelper (epcHelper2);
 
@@ -74,9 +95,9 @@ int main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  NetDeviceContainer p2pDevs1 = p2ph.Install (epcHelper1->GetPgwNode (), router.Get(0));
-  NetDeviceContainer p2pDevs2 = p2ph.Install (epcHelper1->GetPgwNode (), router.Get(0));
-  NetDeviceContainer p2pDevsHost = p2ph.Install (hostNodes.Get(0), router.Get(0));
+  NetDeviceContainer p2pDevs1 = p2ph.Install (epcHelper1->GetPgwNode (), router);
+  NetDeviceContainer p2pDevs2 = p2ph.Install (epcHelper1->GetPgwNode (), router);
+  NetDeviceContainer p2pDevsHost = p2ph.Install (hostNodes.Get(0), router);
 
   Ipv4AddressHelper ipv4;
   ipv4.SetBase ("10.10.10.0", "255.255.255.0");
@@ -109,6 +130,7 @@ int main (int argc, char *argv[])
   NetDeviceContainer enbDevices1 = lteHelper1->InstallEnbDevice (enbNodes1);
   NetDeviceContainer ueDevices1 = lteHelper1->InstallUeDevice (ueNodes1);
 
+
   Ipv4InterfaceContainer lteDevsIfaces1 = epcHelper1->AssignUeIpv4Address (ueDevices1);
 
   /*
@@ -125,6 +147,7 @@ int main (int argc, char *argv[])
 
   NetDeviceContainer enbDevices2 = lteHelper2->InstallEnbDevice (enbNodes2);
   NetDeviceContainer ueDevices2 = lteHelper2->InstallUeDevice (ueNodes2);
+
 
   Ipv4InterfaceContainer lteDevsIfaces2 = epcHelper2->AssignUeIpv4Address (ueDevices2);
 
