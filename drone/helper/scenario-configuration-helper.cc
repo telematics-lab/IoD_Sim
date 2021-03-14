@@ -493,8 +493,10 @@ ScenarioConfigurationHelper::GetDroneApplicationStopTime (uint32_t i) const
 const uint32_t
 ScenarioConfigurationHelper::GetZspsN () const
 {
-  NS_ASSERT (m_config.HasMember ("ZSPs"));
-  NS_ASSERT (m_config["ZSPs"].IsArray ());
+  NS_ASSERT_MSG (m_config.HasMember ("ZSPs"),
+                 "A list of 'ZSPs' must be present in the configuration file.");
+  NS_ASSERT_MSG (m_config["ZSPs"].IsArray (),
+                 "'ZSPs' property in the configuration file must be an array.");
   NS_ASSERT_MSG (m_config["ZSPs"].Size () > 0,
                  "Please define at least one ZSP in configuration file.");
 
