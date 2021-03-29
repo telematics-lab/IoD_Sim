@@ -10,20 +10,8 @@
     {
       "name": "lte_net0",
       "protocol": "lte",
-      "settings": [
+      "attributes": [
         "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
-        "ns3::PfFfMacScheduler::HarqEnabled", "true",
-        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
-        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
-        "ns3::PointToPointNetDevice::Mtu", "1500",
-        "ns3::PointToPointChannel::Delay", "10ms"
-      ]
-    },
-    {
-      "name": "lte_net1",
-      "protocol": "lte",
-      "settings": [
-        "ns3::LteHelper::Scheduler", "ns3::RrFfMacScheduler",
         "ns3::PfFfMacScheduler::HarqEnabled", "true",
         "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
         "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
@@ -37,15 +25,16 @@
     {
       "name": "antenna_0",
       "position": [0.0, 0.0, 50.0],
-      "networks": ["lte_net0", "lte_net1"]
+      "interfaces": ["lte_net0"]
     },
     {
       "name": "antenna_1",
       "position": [0.0, 10.0, 50.0],
-      "networks": [0]
+      "interfaces": [0]
     }
   ],
 
+  "dronesMobilityModel": "mixed",
   "drones": [
     {
       "name": "drone1",
@@ -53,16 +42,7 @@
       "position": [100.0, 0.0, 10.0],
       "applicationStartTime": 1.0,
       "applicationStopTime": 9.0,
-      "interfaces": [
-        {
-          "network": 0,
-          "ipv4": "10.0.0.1"
-        },
-        {
-          "network": "lte_net1",
-          "ipv4": "20.0.0.1"
-        }
-      ]
+      "interfaces": [0]
     },
     {
       "name": "drone2",
@@ -86,16 +66,7 @@
       ],
       "applicationStartTime": 1.0,
       "applicationStopTime": 9.0,
-      "interfaces": [
-        {
-          "network": "lte_net0",
-          "ipv4": "10.0.0.2"
-        },
-        {
-          "network": 1,
-          "ipv4": "20.0.0.2"
-        }
-      ]
+      "interfaces": ["lte_net0"]
     }
   ],
 
@@ -104,12 +75,31 @@
       "name": "remote1",
       "applicationStartTime": 1.0,
       "applicationStopTime": 9.0,
-      "interfaces": [
-        {
-          "network": "lte_net0",
-          "ipv4": "100.0.0.1"
-        }
-      ]
+      "interfaces": ["lte_net0"]
     }
+  ],
+
+  "buildings": [
+    {
+        "type": "residential",
+        "walls": "concreteWithWindows",
+        "boundaries": [10.0, 30.0, 10.0, 30.0, 0.0, 50.0],
+        "floors": 12,
+        "rooms": [2, 2]
+    }
+  ],
+
+  "duration": 10.0,
+  "logOnFile": true,
+  "logComponents": [
+    "Curve",
+    "ParametricSpeedFlight",
+    "Planner",
+    "ParametricSpeedDroneMobilityModel",
+    "DroneServer",
+    "DroneClient",
+    "ScenarioConfigurationHelper",
+    "DroneScenarioHelper",
+    "DroneNetwork"
   ]
 }

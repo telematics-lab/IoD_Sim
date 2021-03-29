@@ -37,8 +37,6 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
   m_configurator = ScenarioConfigurationHelper::Get();
   m_configurator->Initialize(argc, argv, name);
 
-  m_protocol = m_configurator->GetProtocol();
-
   this->LoadGlobalSettings();
 
   this->CreateNodes();
@@ -246,12 +244,17 @@ DroneScenarioHelper::SetupNetworks()
   for (uint32_t i = 0; i < m_networks.GetN(); i++)
   {
     Ptr<DroneNetwork> droneNetwork = m_networks.Get(i);
+    NS_LOG_LOGIC("DRONE NET: "<<droneNetwork->GetName() << droneNetwork->GetProtocol());
     std::string netName = droneNetwork->GetName();
     for (uint32_t id : m_configurator->GetDronesInNetwork(netName))
       droneNetwork->AttachDrone(m_droneNodes.Get(id));
     for (uint32_t id : m_configurator->GetAntennasInNetwork(netName))
       droneNetwork->AttachAntenna(m_antennaNodes.Get(id));
+    droneNetwork->ConnectToBackbone(m_backbone);
+    droneNetwork->Generate();
   }
+
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
 
 }
@@ -259,7 +262,7 @@ DroneScenarioHelper::SetupNetworks()
 Ipv4Address
 DroneScenarioHelper::GetIpv4Address(Ptr<Node> node)
 {
-  return node->GetObject<Ipv4>()->GetAddress(0, 1).GetLocal();
+  return node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
 }
 
 Ipv4Address

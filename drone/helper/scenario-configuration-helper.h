@@ -214,10 +214,6 @@ public:
   const double GetRemoteApplicationStopTime (uint32_t i) const;
 
   /**
-   * \return a string defining the protocol used (at the moment only wifi and lte are supported)
-   */
-  const std::string GetProtocol() const;
-  /**
    * \brief Returns a vector with all the global configuration strings for scenario.
    *        Use with Config::SetDefault(pair.first, pair.second) at the beginning of the script.
    * \return a vector of pairs containing the key and the value extracted from config
@@ -240,14 +236,14 @@ public:
    * \param index the index of the element to which retrieve the name
    * \return the name associated to the object at the index in the field
    */
-  std::string GetObjectName(std::string field, uint32_t index) const;
+  std::string GetObjectName(const char* field, uint32_t index) const;
 
   /**
    * \param field the name of the field to search into
    * \param name the name of the element to which retrieve the index
    * \return the index of the object of given name
    */
-  uint32_t GetObjectIndex(std::string field, std::string name) const;
+  uint32_t GetObjectIndex(const char* field, std::string name) const;
 
 
 //  NETWORKS SPECIFIC CONFIGURATORS

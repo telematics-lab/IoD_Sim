@@ -97,7 +97,6 @@ protected:
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
 
 
-  std::string m_protocol;
   ScenarioConfigurationHelper *m_configurator;
   Ptr<Node> m_backbone;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;

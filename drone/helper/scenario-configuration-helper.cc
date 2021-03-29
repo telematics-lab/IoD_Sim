@@ -631,19 +631,11 @@ ScenarioConfigurationHelper::GetRemoteApplicationStopTime (uint32_t i) const
     return GetDuration ();
 }
 
-const std::string
-ScenarioConfigurationHelper::GetProtocol() const
-{
-  NS_ASSERT_MSG (m_config.HasMember ("protocol")
-                 && m_config["protocol"].IsString (),
-                 "No protocol is defined in configuration file.");
-
-  return m_config["protocol"].GetString ();
-}
-
 const std::vector<std::pair<std::string, std::string>>
 ScenarioConfigurationHelper::GetGlobalSettings() const
 {
+  NS_LOG_FUNCTION_NOARGS();
+
   std::vector<std::pair<std::string, std::string>> settings;
 
   if (m_config.HasMember ("settings"))
@@ -669,6 +661,8 @@ ScenarioConfigurationHelper::GetGlobalSettings() const
 const std::vector<std::pair<std::string, std::string>>
 ScenarioConfigurationHelper::GetIndividualSettings() const
 {
+  NS_LOG_FUNCTION_NOARGS();
+
   std::vector<std::pair<std::string, std::string>> settings;
 
   if (m_config.HasMember ("settings"))
@@ -694,6 +688,8 @@ ScenarioConfigurationHelper::GetIndividualSettings() const
 const std::vector<Ptr<Building>>
 ScenarioConfigurationHelper::GetBuildings () const
 {
+  NS_LOG_FUNCTION_NOARGS();
+
   std::vector<Ptr<Building>> buildings;
 
   NS_ASSERT_MSG (m_config.HasMember ("buildings"),
@@ -798,6 +794,8 @@ ScenarioConfigurationHelper::GetDronePosition (uint32_t n) const
 DroneNetworkContainer
 ScenarioConfigurationHelper::GetNetworks() const
 {
+  NS_LOG_FUNCTION_NOARGS();
+
   NS_ASSERT_MSG (m_config.HasMember ("networks"),
                  "The key \"networks\" is not defined in the configuration file.");
 
@@ -817,16 +815,14 @@ ScenarioConfigurationHelper::GetNetworks() const
 
       Ptr<DroneNetwork> droneNetwork;
 
+      std::string name = (*net)["name"].GetString();
       std::string protocol = (*net)["protocol"].GetString();
       if (protocol == "lte")
        {
-         auto network = LteDroneNetwork();
-         droneNetwork = Ptr<LteDroneNetwork>(&network);
+         droneNetwork = CreateObject<LteDroneNetwork>(name);
        }
-      //else if (protocol == "wifi") droneNetwork = WifiDroneNetwork();
+       //else if (protocol == "wifi") droneNetwork = WifiDroneNetwork();
       else NS_LOG_ERROR ("Unknown protocol name \"" << protocol << "\"");
-
-      std::string name = (*net)["name"].GetString();
 
       std::vector<std::pair<std::string, std::string>> attributes;
       NS_ASSERT ((*net)["attributes"].IsArray ());
@@ -843,7 +839,9 @@ ScenarioConfigurationHelper::GetNetworks() const
           attributes.push_back ({(*i).GetString (), (*(i+1)).GetString ()});
         }
 
-      droneNetwork->SetName(name);
+
+
+      //droneNetwork.SetName(name);
       droneNetwork->SetAttributes(attributes);
       container.Add(droneNetwork);
     }
@@ -852,22 +850,23 @@ ScenarioConfigurationHelper::GetNetworks() const
 }
 
 std::string
-ScenarioConfigurationHelper::GetObjectName(std::string field, uint32_t index) const
+ScenarioConfigurationHelper::GetObjectName(const char* field, uint32_t index) const
 {
-  return m_config[field.c_str()].GetArray()[index].GetObject()["name"].GetString();
+  NS_ASSERT (index < m_config[field].GetArray().Size());
+  return m_config[field].GetArray()[index].GetObject()["name"].GetString();
 }
 
 uint32_t
-ScenarioConfigurationHelper::GetObjectIndex(std::string field, std::string name) const
+ScenarioConfigurationHelper::GetObjectIndex(const char* field, std::string name) const
 {
-  auto array = m_config[field.c_str()].GetArray();
+  auto array = m_config[field].GetArray();
   for (uint32_t i = 0; i < array.Size(); i++)
   {
     std::string objName = array[i].GetObject()["name"].GetString();
     if (objName == name)
       return i;
   }
-  NS_LOG_ERROR("No element found with name \"" << name << "\" in field \"" << field << "\".");
+  //NS_LOG_ERROR("No element found with name \"" << name << "\" in field \"" << field << "\".");
   return array.Size();
 }
 
@@ -877,10 +876,10 @@ ScenarioConfigurationHelper::GetDroneNetworks(uint32_t id) const
   const auto drones = m_config["drones"].GetArray ();
   const auto drone = drones[id].GetObject ();
 
-  NS_ASSERT_MSG (drone.HasMember("networks"),
-                  "The drone " << id << " has no key \"networks\".");
+  NS_ASSERT_MSG (drone.HasMember("interfaces"),
+                  "The drone " << id << " has no key \"interfaces\".");
 
-  const auto nets = drone["networks"].GetArray();
+  const auto nets = drone["interfaces"].GetArray();
 
   std::vector<uint32_t> droneNetworks;
 
@@ -906,10 +905,10 @@ ScenarioConfigurationHelper::GetAntennaNetworks(uint32_t id) const
   const auto antennas = m_config["antennas"].GetArray ();
   const auto antenna = antennas[id].GetObject ();
 
-  NS_ASSERT_MSG (antenna.HasMember("networks"),
-                  "The antenna " << id << " has no key \"networks\".");
+  NS_ASSERT_MSG (antenna.HasMember("interfaces"),
+                  "The antenna " << id << " has no key \"interfaces\".");
 
-  const auto nets = antenna["networks"].GetArray();
+  const auto nets = antenna["interfaces"].GetArray();
 
   std::vector<uint32_t> antennaNetworks;
 
@@ -936,7 +935,7 @@ ScenarioConfigurationHelper::GetDronesInNetwork(uint32_t id) const
   auto drones = m_config["drones"].GetArray();
   for (uint32_t i = 0; i < drones.Size(); i++)
   {
-    auto nets = drones[i].GetObject()["networks"].GetArray();
+    auto nets = drones[i].GetObject()["interfaces"].GetArray();
     for (auto el = nets.Begin(); el != nets.End(); el++)
     {
       if ( (el->IsInt() && el->GetUint() == id) ||
@@ -960,7 +959,7 @@ ScenarioConfigurationHelper::GetAntennasInNetwork(uint32_t id) const
   auto antennas = m_config["antennas"].GetArray();
   for (uint32_t i = 0; i < antennas.Size(); i++)
   {
-    auto nets = antennas[i].GetObject()["networks"].GetArray();
+    auto nets = antennas[i].GetObject()["interfaces"].GetArray();
     for (auto el = nets.Begin(); el != nets.End(); el++)
     {
       if ( (el->IsInt() && el->GetUint() == id) ||

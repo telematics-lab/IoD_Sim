@@ -35,43 +35,46 @@ namespace ns3
 {
 
 // make a derivate class of Object
-class DroneNetwork : public SimpleRefCount<DroneNetwork>
+class DroneNetwork : public Object
 {
 public:
+  DroneNetwork() {}
+  ~DroneNetwork() {}
+  void DoDispose() {}
+  void DoInitialize() {}
   std::string GetName();
-  std::string GetType();
-  DroneNetwork SetName(std::string name);
-  DroneNetwork SetAttributes(const std::vector<std::pair<std::string, std::string>>& attributes);
+  std::string GetProtocol();
+  void SetAttributes(const std::vector<std::pair<std::string, std::string>>& attributes);
   NodeContainer& GetDroneNodes();
   NodeContainer& GetAntennaNodes();
   NetDeviceContainer& GetDroneNetDevices();
   NetDeviceContainer& GetAntennaNetDevices();
-  DroneNetwork AttachDrone(Ptr<Node> node);
-  DroneNetwork AttachDrones(NodeContainer& nodes);
-  DroneNetwork AttachAntenna(Ptr<Node> node);
-  DroneNetwork AttachAntennas(NodeContainer& antennas);
-  DroneNetwork ConnectToBackbone(Ptr<Node> backbone);
-  DroneNetwork Generate();
-  DroneNetwork EnableTraces();
+  void AttachDrone(Ptr<Node> node);
+  void AttachDrones(NodeContainer& nodes);
+  void AttachAntenna(Ptr<Node> node);
+  void AttachAntennas(NodeContainer& antennas);
+  void ConnectToBackbone(Ptr<Node> backbone);
+  virtual void Generate() {}
+  virtual void EnableTraces() {}
 protected:
   std::vector<std::pair<std::string, std::string>> m_attributes;
   Ptr<Node> m_backbone;
   NodeContainer m_droneNodes, m_antennaNodes;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_backboneDevs;
   std::string m_name;
-  std::string m_type;
+  std::string m_protocol;
 };
 
 
 class LteDroneNetwork : public DroneNetwork
 {
 public:
-  LteDroneNetwork() { m_type = "lte"; }
+  LteDroneNetwork(std::string name) { m_name = name; m_protocol = "lte"; }
   //~LteDroneNetwork();
 
 
-  LteDroneNetwork Generate();
-  LteDroneNetwork EnableTraces();
+  void Generate();
+  void EnableTraces();
 
 private:
   InternetStackHelper m_internetHelper;
@@ -86,7 +89,7 @@ private:
 class WifiDroneNetwork : public DroneNetwork
 {
 public:
-  WifiDroneNetwork() { m_type = "wifi"; };
+  WifiDroneNetwork() { m_protocol = "wifi"; };
   ~WifiDroneNetwork();
   WifiDroneNetwork SetName(std::string name);
   WifiDroneNetwork AttachNodes(NodeContainer nodes);
@@ -99,8 +102,8 @@ public:
 class DroneNetworkContainer
 {
 public:
-  //DroneNetworkContainer();
-  //~DroneNetworkContainer();
+  DroneNetworkContainer() {}
+  ~DroneNetworkContainer() {}
   typedef std::vector<Ptr<DroneNetwork>>::const_iterator Iterator;
   Iterator Begin(void) const;
   Iterator End(void) const;

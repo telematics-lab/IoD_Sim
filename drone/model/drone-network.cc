@@ -37,9 +37,9 @@ DroneNetwork::GetName()
 }
 
 std::string
-DroneNetwork::GetType()
+DroneNetwork::GetProtocol()
 {
-  return m_type;
+  return m_protocol;
 }
 
 NodeContainer&
@@ -66,59 +66,54 @@ DroneNetwork::GetAntennaNetDevices()
   return m_antennaDevs;
 }
 
-DroneNetwork
+void
 DroneNetwork::SetAttributes(const std::vector<std::pair<std::string, std::string>>& attributes)
 {
   m_attributes = attributes;
-  return *this;
 }
 
-DroneNetwork
+/*
+void
 DroneNetwork::SetName(std::string name)
 {
   m_name = name;
-  return *this;
 }
+*/
 
-DroneNetwork
+void
 DroneNetwork::AttachDrone(Ptr<Node> node)
 {
   m_droneNodes.Add(node);
-  return *this;
 }
 
-DroneNetwork
+void
 DroneNetwork::AttachDrones(NodeContainer& drones)
 {
   m_droneNodes.Add(drones);
-  return *this;
 }
 
-DroneNetwork
+void
 DroneNetwork::AttachAntenna(Ptr<Node> node)
 {
   m_antennaNodes.Add(node);
-  return *this;
 }
 
-DroneNetwork
+void
 DroneNetwork::AttachAntennas(NodeContainer& antennas)
 {
   m_antennaNodes.Add(antennas);
-  return *this;
 }
 
-DroneNetwork
+void
 DroneNetwork::ConnectToBackbone(Ptr<Node> backbone)
 {
   m_backbone = backbone;
-  return *this;
 }
 
 
 /* LTE DRONE NETWORK */
 
-LteDroneNetwork
+void
 LteDroneNetwork::Generate()
 {
   NS_LOG_FUNCTION_NOARGS();
@@ -203,10 +198,9 @@ LteDroneNetwork::Generate()
 
   BuildingsHelper::Install (m_antennaNodes);
   BuildingsHelper::Install (m_droneNodes);
-  return *this;
 }
 
-LteDroneNetwork
+void
 LteDroneNetwork::EnableTraces()
 {
   AsciiTraceHelper ascii;
@@ -224,8 +218,6 @@ LteDroneNetwork::EnableTraces()
   m_internetHelper.EnablePcapIpv4All(ipPath);
 
   m_lteHelper->EnableTraces();
-
-  return *this;
 }
 
 
