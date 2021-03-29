@@ -795,4 +795,186 @@ ScenarioConfigurationHelper::GetDronePosition (uint32_t n) const
   return v;
 }
 
+DroneNetworkContainer
+ScenarioConfigurationHelper::GetNetworks() const
+{
+  NS_ASSERT_MSG (m_config.HasMember ("networks"),
+                 "The key \"networks\" is not defined in the configuration file.");
+
+  NS_ASSERT_MSG (m_config["networks"].IsArray(),
+                 "The value of \"networks\" should be an array of objects.");
+
+  const auto networks = m_config["networks"].GetArray();
+
+  DroneNetworkContainer container;
+
+  for (auto net = networks.Begin (); net != networks.End (); ++net)
+    {
+      NS_ASSERT_MSG ((*net).IsObject(),
+                     "One or more elements in the \"networks\" array is not a valid JSON object.");
+      NS_ASSERT_MSG ((*net).HasMember ("name") && (*net).HasMember ("protocol") && (*net).HasMember ("attributes"),
+                     "One or more field missing in an object of the \"networks\" array.");
+
+      Ptr<DroneNetwork> droneNetwork;
+
+      std::string protocol = (*net)["protocol"].GetString();
+      if (protocol == "lte")
+       {
+         auto network = LteDroneNetwork();
+         droneNetwork = Ptr<LteDroneNetwork>(&network);
+       }
+      //else if (protocol == "wifi") droneNetwork = WifiDroneNetwork();
+      else NS_LOG_ERROR ("Unknown protocol name \"" << protocol << "\"");
+
+      std::string name = (*net)["name"].GetString();
+
+      std::vector<std::pair<std::string, std::string>> attributes;
+      NS_ASSERT ((*net)["attributes"].IsArray ());
+
+      NS_ASSERT_MSG ((*net)["attributes"].Size () % 2 == 0,
+                    "Check \"attributes\": elements in list are not an even number, something is missing.");
+
+      for (auto i = (*net)["attributes"].Begin (); i != (*net)["attributes"].End (); i += 2)
+        {
+          NS_ASSERT ((*i).IsString ());
+          NS_ASSERT ((*(i+1)).IsString());
+
+          if ((*i).GetString ()[0] == '/') continue;
+          attributes.push_back ({(*i).GetString (), (*(i+1)).GetString ()});
+        }
+
+      droneNetwork->SetName(name);
+      droneNetwork->SetAttributes(attributes);
+      container.Add(droneNetwork);
+    }
+
+  return container;
+}
+
+std::string
+ScenarioConfigurationHelper::GetObjectName(std::string field, uint32_t index) const
+{
+  return m_config[field.c_str()].GetArray()[index].GetObject()["name"].GetString();
+}
+
+uint32_t
+ScenarioConfigurationHelper::GetObjectIndex(std::string field, std::string name) const
+{
+  auto array = m_config[field.c_str()].GetArray();
+  for (uint32_t i = 0; i < array.Size(); i++)
+  {
+    std::string objName = array[i].GetObject()["name"].GetString();
+    if (objName == name)
+      return i;
+  }
+  NS_LOG_ERROR("No element found with name \"" << name << "\" in field \"" << field << "\".");
+  return array.Size();
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDroneNetworks(uint32_t id) const
+{
+  const auto drones = m_config["drones"].GetArray ();
+  const auto drone = drones[id].GetObject ();
+
+  NS_ASSERT_MSG (drone.HasMember("networks"),
+                  "The drone " << id << " has no key \"networks\".");
+
+  const auto nets = drone["networks"].GetArray();
+
+  std::vector<uint32_t> droneNetworks;
+
+  for (auto net = nets.Begin(); net != nets.End(); net++)
+  {
+    if (net->IsInt()) droneNetworks.push_back(net->GetUint());
+    else if (net->IsString()) droneNetworks.push_back(GetObjectIndex("networks", net->GetString()));
+    else NS_LOG_ERROR("A network in array is neither a string nor an integer.");
+  }
+
+  return droneNetworks;
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDroneNetworks(std::string name) const
+{
+  return GetDroneNetworks(GetObjectIndex("drones", name));
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennaNetworks(uint32_t id) const
+{
+  const auto antennas = m_config["antennas"].GetArray ();
+  const auto antenna = antennas[id].GetObject ();
+
+  NS_ASSERT_MSG (antenna.HasMember("networks"),
+                  "The antenna " << id << " has no key \"networks\".");
+
+  const auto nets = antenna["networks"].GetArray();
+
+  std::vector<uint32_t> antennaNetworks;
+
+  for (auto net = nets.Begin(); net != nets.End(); net++)
+  {
+    if (net->IsInt()) antennaNetworks.push_back(net->GetUint());
+    else if (net->IsString()) antennaNetworks.push_back(GetObjectIndex("networks", net->GetString()));
+    else NS_LOG_ERROR("A network in array is neither a string nor an integer.");
+  }
+
+  return antennaNetworks;
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennaNetworks(std::string name) const
+{
+  return GetAntennaNetworks(GetObjectIndex("antennas", name));
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDronesInNetwork(uint32_t id) const
+{
+  std::vector<uint32_t> dronesInNet;
+  auto drones = m_config["drones"].GetArray();
+  for (uint32_t i = 0; i < drones.Size(); i++)
+  {
+    auto nets = drones[i].GetObject()["networks"].GetArray();
+    for (auto el = nets.Begin(); el != nets.End(); el++)
+    {
+      if ( (el->IsInt() && el->GetUint() == id) ||
+           (el->IsString() && GetObjectIndex("networks", el->GetString()) == id) )
+        dronesInNet.push_back(i);
+    }
+  }
+  return dronesInNet;
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDronesInNetwork(std::string net_name) const
+{
+  return GetDronesInNetwork(GetObjectIndex("networks", net_name));
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennasInNetwork(uint32_t id) const
+{
+  std::vector<uint32_t> antennasInNet;
+  auto antennas = m_config["antennas"].GetArray();
+  for (uint32_t i = 0; i < antennas.Size(); i++)
+  {
+    auto nets = antennas[i].GetObject()["networks"].GetArray();
+    for (auto el = nets.Begin(); el != nets.End(); el++)
+    {
+      if ( (el->IsInt() && el->GetUint() == id) ||
+           (el->IsString() && GetObjectIndex("networks", el->GetString()) == id) )
+        antennasInNet.push_back(i);
+    }
+  }
+  return antennasInNet;
+}
+
+std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennasInNetwork(std::string net_name) const
+{
+  return GetAntennasInNetwork(GetObjectIndex("networks", net_name));
+}
+
 } // namespace ns3

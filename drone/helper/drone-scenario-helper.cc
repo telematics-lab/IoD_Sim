@@ -41,11 +41,11 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
 
   this->LoadGlobalSettings();
 
-  this->SetNodesNumber();
+  this->CreateNodes();
 
   this->SetMobilityModels();
 
-  this->SetupNetwork();
+  this->SetupNetworks();
 
   this->LoadIndividualSettings();
 
@@ -98,10 +98,11 @@ DroneScenarioHelper::GetAntennaId(uint32_t num)
 
 
 void
-DroneScenarioHelper::SetNodesNumber()
+DroneScenarioHelper::CreateNodes()
 {
   NS_LOG_FUNCTION_NOARGS();
 
+  m_backbone = CreateObject<Node>();
   m_droneNodes.Create(m_configurator->GetDronesN());
   m_antennaNodes.Create(m_configurator->GetAntennasN());
   m_remoteNodes.Create(m_configurator->GetRemotesN());
@@ -220,7 +221,65 @@ DroneScenarioHelper::LoadIndividualSettings()
   }
 }
 
+void
+DroneScenarioHelper::SetupNetworks()
+{
+  NS_LOG_FUNCTION_NOARGS();
 
+  m_internetHelper.Install(m_backbone);
+
+  PointToPointHelper p2pH;
+  Ipv4AddressHelper ipv4H;
+  m_globalIpv4AddressBase = 100 << 24; // 100.0.0.0
+  for (auto remote = m_remoteNodes.Begin(); remote != m_remoteNodes.End(); remote++)
+  {
+    m_internetHelper.Install(*remote);
+    ipv4H.SetBase(Ipv4Address(m_globalIpv4AddressBase), Ipv4Mask("255.0.0.0"));
+    m_globalIpv4AddressBase += 1 << 24;
+    NetDeviceContainer devs = p2pH.Install(m_backbone, *remote);
+    ipv4H.Assign(devs);
+    m_remoteDevs.Add(devs);
+  }
+
+  m_networks = m_configurator->GetNetworks();
+
+  for (uint32_t i = 0; i < m_networks.GetN(); i++)
+  {
+    Ptr<DroneNetwork> droneNetwork = m_networks.Get(i);
+    std::string netName = droneNetwork->GetName();
+    for (uint32_t id : m_configurator->GetDronesInNetwork(netName))
+      droneNetwork->AttachDrone(m_droneNodes.Get(id));
+    for (uint32_t id : m_configurator->GetAntennasInNetwork(netName))
+      droneNetwork->AttachAntenna(m_antennaNodes.Get(id));
+  }
+
+
+}
+
+Ipv4Address
+DroneScenarioHelper::GetIpv4Address(Ptr<Node> node)
+{
+  return node->GetObject<Ipv4>()->GetAddress(0, 1).GetLocal();
+}
+
+Ipv4Address
+DroneScenarioHelper::GetDroneIpv4Address(uint32_t id)
+{
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  return this->GetIpv4Address(m_droneNodes.Get(id));
+}
+
+Ipv4Address
+DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
+{
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  // add 1 since index 0 is the PGW (for LTE with EPC network)
+  return this->GetIpv4Address(m_remoteNodes.Get(id));
+}
+
+/*
 Ipv4InterfaceContainer
 DroneScenarioHelper::GetDronesIpv4Interfaces()
 {
@@ -260,6 +319,7 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
   // add 1 since index 0 is the PGW (for LTE with EPC network)
   return this->GetIpv4Address(m_remoteIpv4, id + 1);
 }
+*/
 
 
 // private
@@ -341,13 +401,16 @@ DroneScenarioHelper::UseUdpEchoApplications()
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
   UdpEchoServerHelper echoServer (9);
 
-  ApplicationContainer serverApps = echoServer.Install (m_remoteNodes);
+  // Installing the server application only on the first remote.
+  ApplicationContainer serverApps = echoServer.Install (m_remoteNodes.Get(0));
   serverApps.Start (Seconds (m_configurator->GetRemoteApplicationStartTime (0)));
   serverApps.Stop (Seconds (m_configurator->GetRemoteApplicationStopTime (0)));
 
 
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  UdpEchoClientHelper echoClient (this->GetRemoteIpv4Address(0), 9);
+
+  // using the IP of the first remote only as target.
+  UdpEchoClientHelper echoClient (GetIpv4Address(m_remoteNodes.Get(0)), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));

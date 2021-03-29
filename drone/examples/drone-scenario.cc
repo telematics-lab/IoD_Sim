@@ -22,7 +22,7 @@
 #include <ns3/drone-client.h>
 #include <ns3/lte-drone-scenario-helper.h>
 
-#define DSH LteDroneScenarioHelper::Get()
+#define DSH DroneScenarioHelper::Get()
 #define CONFIG DSH->GetConfigurator()
 
 using namespace ns3;
@@ -58,7 +58,7 @@ int main (int argc, char **argv)
   serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
   DSH->SetRemoteApplication(0, serverApp);
 
-  DSH->EnableTracesAll();
+  //DSH->EnableTracesAll();
 
   DSH->Run();
 

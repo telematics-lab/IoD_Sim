@@ -35,10 +35,12 @@
 
   "antennas": [
     {
+      "name": "antenna_0",
       "position": [0.0, 0.0, 50.0],
       "networks": ["lte_net0", "lte_net1"]
     },
     {
+      "name": "antenna_1",
       "position": [0.0, 10.0, 50.0],
       "networks": [0]
     }

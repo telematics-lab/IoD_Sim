@@ -21,7 +21,8 @@
 
 #include <string>
 
-#include "scenario-configuration-helper.h"
+#include <ns3/scenario-configuration-helper.h>
+#include <ns3/drone-network.h>
 #include <ns3/singleton.h>
 #include <ns3/position-allocator.h>
 #include <ns3/node-container.h>
@@ -55,37 +56,37 @@ enum _MobilityModelName
   ENUM_SIZE // Keep last, size of the enum
 };
 
-class DroneScenarioHelper
+class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
-
-  DroneScenarioHelper() {};
-  ~DroneScenarioHelper() {};
   ScenarioConfigurationHelper* GetConfigurator();
   void Initialize(uint32_t argc, char **argv, std::string name="DroneScenario");
 
   void Run();
 
+/*
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
   Ipv4InterfaceContainer GetRemotesIpv4Interfaces();
-  Ipv4Address GetDroneIpv4Address(uint32_t id);
-  Ipv4Address GetRemoteIpv4Address(uint32_t id);
+  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
+*/
 
   void SetDroneApplication(uint32_t id, Ptr<Application> app);
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(uint32_t id, Ptr<Application> app);
   void UseUdpEchoApplications();
-  virtual void EnableTracesAll() = 0; // Implement in derived class
   //void EnableTrace(uint32_t id, std::string prefix);
   uint32_t GetRemoteId(uint32_t num);
   uint32_t GetAntennaId(uint32_t num);
+  Ipv4Address GetIpv4Address(Ptr<Node> node);
+  Ipv4Address GetDroneIpv4Address(uint32_t id);
+  Ipv4Address GetRemoteIpv4Address(uint32_t id);
 
 protected:
 
   uint32_t MobilityToEnum(std::string mobilityModel);
-  void SetNodesNumber();
+  void CreateNodes();
   void SetMobilityModels();
-  virtual void SetupNetwork() = 0; // Implement in derived class
+  void SetupNetworks();
   void LoadGlobalSettings();
   void LoadIndividualSettings();
 
@@ -94,19 +95,22 @@ protected:
 
   void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
   void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
-  Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
+
 
   std::string m_protocol;
   ScenarioConfigurationHelper *m_configurator;
+  Ptr<Node> m_backbone;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;
   ApplicationContainer m_droneApps, m_remoteApps;
-  Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4;
+  //Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
   InternetStackHelper m_internetHelper;
   std::vector<Ptr<Building>> m_buildings;
+  DroneNetworkContainer m_networks;
+  uint32_t m_globalIpv4AddressBase;
 };
 
 } // namespace ns3
