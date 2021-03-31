@@ -53,14 +53,16 @@ public:
   void AttachDrones(NodeContainer& nodes);
   void AttachAntenna(Ptr<Node> node);
   void AttachAntennas(NodeContainer& antennas);
-  void ConnectToBackbone(Ptr<Node> backbone);
+  void SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H);
+  void ConnectToBackbone(NodeContainer& backbone);
   virtual void Generate() {}
   virtual void EnableTraces() {}
 protected:
   std::vector<std::pair<std::string, std::string>> m_attributes;
-  Ptr<Node> m_backbone;
   NodeContainer m_droneNodes, m_antennaNodes;
+  NodeContainer* m_backbone;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_backboneDevs;
+  Ipv4AddressHelper* m_ipv4H;
   std::string m_name;
   std::string m_protocol;
 };
@@ -82,6 +84,7 @@ private:
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
   std::vector<Ptr<Building>> m_buildings;
+  Ptr<Node> m_proxyNode;
 };
 
 /* TO BE IMPLEMENTED
@@ -102,9 +105,9 @@ public:
 class DroneNetworkContainer
 {
 public:
+  typedef std::vector<Ptr<DroneNetwork>>::const_iterator Iterator;
   DroneNetworkContainer() {}
   ~DroneNetworkContainer() {}
-  typedef std::vector<Ptr<DroneNetwork>>::const_iterator Iterator;
   Iterator Begin(void) const;
   Iterator End(void) const;
   void Add(Ptr<DroneNetwork> element);

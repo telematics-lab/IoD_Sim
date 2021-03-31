@@ -46,25 +46,9 @@
     },
     {
       "name": "drone2",
-      "mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
-      "speedCoefficients": [1.0, 0.0],
-      "trajectory": [
-          {
-              "position": [0.0, 0.0, 10.0],
-              "interest": 0,
-              "restTime": 3.0
-          },
-          {
-              "position": [10.0, 10.0, 100.0],
-              "interest": 1
-          },
-          {
-              "position": [20.0, 0.0, 20.0],
-              "interest": 0,
-              "restTime": 3.0
-          }
-      ],
-      "applicationStartTime": 1.0,
+      "mobilityModel": "ns3::ConstantPositionMobilityModel",
+      "position": [50.0, 0.0, 50.0],
+      "applicationStartTime": 1.1,
       "applicationStopTime": 9.0,
       "interfaces": ["lte_net0"]
     }
@@ -73,9 +57,13 @@
   "remotes": [
     {
       "name": "remote1",
-      "applicationStartTime": 1.0,
-      "applicationStopTime": 9.0,
-      "interfaces": ["lte_net0"]
+      "applicationStartTime": 0.5,
+      "applicationStopTime": 9.5
+    },
+    {
+      "name": "remote2",
+      "applicationStartTime": 0.5,
+      "applicationStopTime": 9.5
     }
   ],
 
@@ -90,12 +78,8 @@
   ],
 
   "duration": 10.0,
-  "logOnFile": true,
+  "logOnFile": false,
   "logComponents": [
-    "Curve",
-    "ParametricSpeedFlight",
-    "Planner",
-    "ParametricSpeedDroneMobilityModel",
     "DroneServer",
     "DroneClient",
     "ScenarioConfigurationHelper",

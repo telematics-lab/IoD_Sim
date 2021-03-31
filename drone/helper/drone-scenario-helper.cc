@@ -100,7 +100,6 @@ DroneScenarioHelper::CreateNodes()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  m_backbone = CreateObject<Node>();
   m_droneNodes.Create(m_configurator->GetDronesN());
   m_antennaNodes.Create(m_configurator->GetAntennasN());
   m_remoteNodes.Create(m_configurator->GetRemotesN());
@@ -224,20 +223,14 @@ DroneScenarioHelper::SetupNetworks()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  m_internetHelper.Install(m_backbone);
-
-  PointToPointHelper p2pH;
   Ipv4AddressHelper ipv4H;
-  m_globalIpv4AddressBase = 100 << 24; // 100.0.0.0
-  for (auto remote = m_remoteNodes.Begin(); remote != m_remoteNodes.End(); remote++)
-  {
-    m_internetHelper.Install(*remote);
-    ipv4H.SetBase(Ipv4Address(m_globalIpv4AddressBase), Ipv4Mask("255.0.0.0"));
-    m_globalIpv4AddressBase += 1 << 24;
-    NetDeviceContainer devs = p2pH.Install(m_backbone, *remote);
-    ipv4H.Assign(devs);
-    m_remoteDevs.Add(devs);
-  }
+
+  m_backbone.Add(m_remoteNodes);
+
+  OlsrHelper olsr;
+  m_internetHelper.SetRoutingHelper (olsr);
+  m_internetHelper.Install (m_backbone);
+  m_internetHelper.Reset ();
 
   m_networks = m_configurator->GetNetworks();
 
@@ -250,13 +243,29 @@ DroneScenarioHelper::SetupNetworks()
       droneNetwork->AttachDrone(m_droneNodes.Get(id));
     for (uint32_t id : m_configurator->GetAntennasInNetwork(netName))
       droneNetwork->AttachAntenna(m_antennaNodes.Get(id));
+    droneNetwork->SetIpv4AddressHelper(ipv4H);
     droneNetwork->ConnectToBackbone(m_backbone);
     droneNetwork->Generate();
+    droneNetwork->EnableTraces();
+  }
+
+   CsmaHelper csma;
+   csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
+   csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
+   NetDeviceContainer backboneDevs = csma.Install (m_backbone);
+
+  ipv4H.SetBase(Ipv4Address("100.1.0.0"), Ipv4Mask("255.255.0.0"));
+  ipv4H.Assign(backboneDevs);
+
+  for (uint32_t i = 0; i < m_backbone.GetN(); i++)
+  {
+    //Ptr<Ipv4> ipv4 = m_backbone.Get(i)->GetObject<Ipv4> ();
+    //Ptr<Ipv4RoutingProtocol> ipv4Routing = olsr.Create (m_backbone.Get(i));
+    //ipv4->SetRoutingProtocol (ipv4Routing);
+    NS_LOG_LOGIC("BackBone Interface " << i << ": " << m_backbone.Get(i)->GetObject<Ipv4>()->GetAddress(1, 0));
   }
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-
-
 }
 
 Ipv4Address

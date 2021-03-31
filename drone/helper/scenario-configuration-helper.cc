@@ -692,8 +692,9 @@ ScenarioConfigurationHelper::GetBuildings () const
 
   std::vector<Ptr<Building>> buildings;
 
-  NS_ASSERT_MSG (m_config.HasMember ("buildings"),
-                 "No building has been defined, check the configuration file.");
+  if (m_config.HasMember ("buildings") == false)
+    return buildings;
+
   NS_ASSERT_MSG (m_config["buildings"].IsArray (),
                  "'buildings' needs to be an array of objects, check the configuration file.");
 

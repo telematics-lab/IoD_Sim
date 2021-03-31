@@ -105,9 +105,15 @@ DroneNetwork::AttachAntennas(NodeContainer& antennas)
 }
 
 void
-DroneNetwork::ConnectToBackbone(Ptr<Node> backbone)
+DroneNetwork::SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H)
 {
-  m_backbone = backbone;
+  m_ipv4H = &ipv4H;
+}
+
+void
+DroneNetwork::ConnectToBackbone(NodeContainer& backbone)
+{
+  m_backbone = &backbone;
 }
 
 
@@ -144,21 +150,22 @@ LteDroneNetwork::Generate()
   //p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   //p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  m_backboneDevs = m_p2pHelper.Install(m_epcHelper->GetPgwNode(), m_backbone);
+  //m_backboneDevs = m_p2pHelper.Install(m_backbone, m_epcHelper->GetPgwNode());
 
-  Ipv4AddressHelper ipv4Helper;
-
-  ipv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer m_remoteIpv4 = ipv4Helper.Assign(m_backboneDevs);
-
+  //m_ipv4H.NewNetwork();
+  //Ipv4InterfaceContainer backboneIpv4 = m_ipv4H.Assign(m_backboneDevs);
 
   Ipv4StaticRoutingHelper routingHelper;
   m_internetHelper.SetRoutingHelper(routingHelper);
 
-  // add to each remote a route to the PGW
+  /*
   Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
   Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_backbone->GetObject<Ipv4>());
   remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
+  */
+
+  //Ptr<Ipv4StaticRouting> backboneStaticRoute = routingHelper.GetStaticRouting(m_epcHelper->GetPgwNode()->GetObject<Ipv4>());
+  //backboneStaticRoute->AddNetworkRouteTo(backboneIpv4.GetAddress(0), Ipv4Mask("255.255.0.0"), 1);
 
   m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
   if (m_antennaNodes.GetN() > 1)
@@ -189,10 +196,13 @@ LteDroneNetwork::Generate()
   qos.mbrUl = 5000000; 		// Uplink MBR,
   EpsBearer bearer(q, qos);
   m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
+
 */
 
   // attach each drone ue to the antenna with the strongest signal
   m_lteHelper->Attach(m_droneDevs);
+
+  m_backbone->Add(m_epcHelper->GetPgwNode());
 
   m_buildings = m_configurator->GetBuildings();
 
@@ -252,6 +262,18 @@ uint32_t
 DroneNetworkContainer::GetN() const
 {
   return m_droneNetworks.size();
+}
+
+DroneNetworkContainer::Iterator
+DroneNetworkContainer::Begin() const
+{
+  return m_droneNetworks.begin();
+}
+
+DroneNetworkContainer::Iterator
+DroneNetworkContainer::End() const
+{
+  return m_droneNetworks.end();
 }
 
 

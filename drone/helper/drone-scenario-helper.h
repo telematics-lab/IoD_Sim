@@ -38,6 +38,7 @@
 #include <ns3/applications-module.h>
 #include <ns3/config-store-module.h>
 #include <ns3/buildings-module.h>
+#include <ns3/olsr-helper.h>
 
 namespace ns3
 {
@@ -98,8 +99,7 @@ protected:
 
 
   ScenarioConfigurationHelper *m_configurator;
-  Ptr<Node> m_backbone;
-  NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes;
+  NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes, m_backbone;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_remoteDevs;
   ApplicationContainer m_droneApps, m_remoteApps;
   //Ipv4InterfaceContainer m_droneIpv4, m_remoteIpv4;
