@@ -58,6 +58,8 @@ int main (int argc, char **argv)
   serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
   DSH->SetRemoteApplication(0, serverApp);
 
+  DSH->EnableTraces(0);
+
   //DSH->EnableTracesAll();
 
   DSH->Run();

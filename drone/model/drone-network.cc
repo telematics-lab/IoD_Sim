@@ -111,9 +111,9 @@ DroneNetwork::SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H)
 }
 
 void
-DroneNetwork::ConnectToBackbone(NodeContainer& backbone)
+DroneNetwork::ConnectToBackbone(Ptr<Node> backboneProxy)
 {
-  m_backbone = &backbone;
+  m_backboneProxy = backboneProxy;
 }
 
 
@@ -146,14 +146,6 @@ LteDroneNetwork::Generate()
   //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
   //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
   //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
-
-  //p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  //p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  //p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  //m_backboneDevs = m_p2pHelper.Install(m_backbone, m_epcHelper->GetPgwNode());
-
-  //m_ipv4H.NewNetwork();
-  //Ipv4InterfaceContainer backboneIpv4 = m_ipv4H.Assign(m_backboneDevs);
 
   Ipv4StaticRoutingHelper routingHelper;
   m_internetHelper.SetRoutingHelper(routingHelper);
@@ -202,7 +194,16 @@ LteDroneNetwork::Generate()
   // attach each drone ue to the antenna with the strongest signal
   m_lteHelper->Attach(m_droneDevs);
 
-  m_backbone->Add(m_epcHelper->GetPgwNode());
+  //m_p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  //m_p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  //m_p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  m_backboneDevs = m_p2pHelper.Install(m_epcHelper->GetPgwNode(), m_backboneProxy);
+  m_ipv4H->NewNetwork();
+  m_ipv4H->Assign(m_backboneDevs);
+
+  Ipv4Address proxyAddress = m_backboneProxy->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+  Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_epcHelper->GetPgwNode()->GetObject<Ipv4>());
+  remoteStaticRoute->AddNetworkRouteTo(proxyAddress, Ipv4Mask("255.255.0.0"), 1);
 
   m_buildings = m_configurator->GetBuildings();
 

@@ -75,7 +75,9 @@ public:
   void SetDronesApplication(Ptr<ApplicationContainer> apps);
   void SetRemoteApplication(uint32_t id, Ptr<Application> app);
   void UseUdpEchoApplications();
-  //void EnableTrace(uint32_t id, std::string prefix);
+  void EnableTraces(uint32_t net_id);
+  void EnableTraces(std::string net_name);
+  void EnableTracesAll();
   uint32_t GetRemoteId(uint32_t num);
   uint32_t GetAntennaId(uint32_t num);
   Ipv4Address GetIpv4Address(Ptr<Node> node);

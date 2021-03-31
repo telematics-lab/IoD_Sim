@@ -31,7 +31,7 @@ NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 void
 DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*="DroneScenario"*/)
 {
-  NS_LOG_FUNCTION(argc << argv);
+  NS_LOG_FUNCTION(argc << argv << name);
   NS_COMPMAN_ENSURE_UNIQUE();
 
   m_configurator = ScenarioConfigurationHelper::Get();
@@ -48,6 +48,36 @@ DroneScenarioHelper::Initialize(uint32_t argc, char **argv, std::string name /*=
   this->LoadIndividualSettings();
 
   NS_COMPMAN_REGISTER_COMPONENT();
+}
+
+void
+DroneScenarioHelper::EnableTraces(uint32_t net_id)
+{
+  NS_LOG_FUNCTION(net_id);
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  m_networks.Get(net_id)->EnableTraces();
+}
+
+void
+DroneScenarioHelper::EnableTraces(std::string net_name)
+{
+  NS_LOG_FUNCTION(net_name);
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  m_networks.Get(net_name)->EnableTraces();
+}
+
+void
+DroneScenarioHelper::EnableTracesAll()
+{
+  NS_LOG_FUNCTION_NOARGS();
+  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
+
+  for (auto net = m_networks.Begin(); net != m_networks.End(); net++)
+  {
+    (*net)->EnableTraces();
+  }
 }
 
 ScenarioConfigurationHelper*
@@ -223,8 +253,12 @@ DroneScenarioHelper::SetupNetworks()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  Ipv4AddressHelper ipv4H;
+  m_networks = m_configurator->GetNetworks();
 
+  Ipv4AddressHelper ipv4H;
+  ipv4H.SetBase("100.1.0.0", "255.255.0.0");
+
+  m_backbone.Create(m_networks.GetN());
   m_backbone.Add(m_remoteNodes);
 
   OlsrHelper olsr;
@@ -232,40 +266,35 @@ DroneScenarioHelper::SetupNetworks()
   m_internetHelper.Install (m_backbone);
   m_internetHelper.Reset ();
 
-  m_networks = m_configurator->GetNetworks();
+  CsmaHelper csma;
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
+  csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
+  NetDeviceContainer backboneDevs = csma.Install (m_backbone);
+
+  ipv4H.SetBase(Ipv4Address("250.1.0.0"), Ipv4Mask("255.255.0.0"));
+  ipv4H.Assign(backboneDevs);
+
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   for (uint32_t i = 0; i < m_networks.GetN(); i++)
   {
     Ptr<DroneNetwork> droneNetwork = m_networks.Get(i);
-    NS_LOG_LOGIC("DRONE NET: "<<droneNetwork->GetName() << droneNetwork->GetProtocol());
     std::string netName = droneNetwork->GetName();
     for (uint32_t id : m_configurator->GetDronesInNetwork(netName))
       droneNetwork->AttachDrone(m_droneNodes.Get(id));
     for (uint32_t id : m_configurator->GetAntennasInNetwork(netName))
       droneNetwork->AttachAntenna(m_antennaNodes.Get(id));
     droneNetwork->SetIpv4AddressHelper(ipv4H);
-    droneNetwork->ConnectToBackbone(m_backbone);
+
+    droneNetwork->ConnectToBackbone(m_backbone.Get(i));
     droneNetwork->Generate();
-    droneNetwork->EnableTraces();
   }
-
-   CsmaHelper csma;
-   csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
-   csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
-   NetDeviceContainer backboneDevs = csma.Install (m_backbone);
-
-  ipv4H.SetBase(Ipv4Address("100.1.0.0"), Ipv4Mask("255.255.0.0"));
-  ipv4H.Assign(backboneDevs);
 
   for (uint32_t i = 0; i < m_backbone.GetN(); i++)
   {
-    //Ptr<Ipv4> ipv4 = m_backbone.Get(i)->GetObject<Ipv4> ();
-    //Ptr<Ipv4RoutingProtocol> ipv4Routing = olsr.Create (m_backbone.Get(i));
-    //ipv4->SetRoutingProtocol (ipv4Routing);
     NS_LOG_LOGIC("BackBone Interface " << i << ": " << m_backbone.Get(i)->GetObject<Ipv4>()->GetAddress(1, 0));
   }
 
-  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 }
 
 Ipv4Address

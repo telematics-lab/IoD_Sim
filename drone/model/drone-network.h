@@ -54,13 +54,13 @@ public:
   void AttachAntenna(Ptr<Node> node);
   void AttachAntennas(NodeContainer& antennas);
   void SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H);
-  void ConnectToBackbone(NodeContainer& backbone);
+  void ConnectToBackbone(Ptr<Node> backboneProxy);
   virtual void Generate() {}
   virtual void EnableTraces() {}
 protected:
   std::vector<std::pair<std::string, std::string>> m_attributes;
   NodeContainer m_droneNodes, m_antennaNodes;
-  NodeContainer* m_backbone;
+  Ptr<Node> m_backboneProxy;
   NetDeviceContainer m_droneDevs, m_antennaDevs, m_backboneDevs;
   Ipv4AddressHelper* m_ipv4H;
   std::string m_name;

@@ -59,11 +59,6 @@
       "name": "remote1",
       "applicationStartTime": 0.5,
       "applicationStopTime": 9.5
-    },
-    {
-      "name": "remote2",
-      "applicationStartTime": 0.5,
-      "applicationStopTime": 9.5
     }
   ],
 
