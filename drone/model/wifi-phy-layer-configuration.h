@@ -52,10 +52,25 @@ public:
   /** Default destructor */
   ~WifiPhyLayerConfiguration ();
 
+  /**
+   * \return The configured WiFi Standard.
+   */
   const enum WifiStandard GetStandard ();
+  /**
+   * \return The configured Antenna Rx Gain.
+   */
   const double GetRxGain ();
+  /**
+   * \return The configured WiFi PHY mode.
+   */
   const std::string GetMode ();
+  /**
+   * \return The Propagation Delay Model configuration.
+   */
   const ModelConfiguration GetChannelPropagationDelayModel ();
+  /**
+   * \return The Propagation Loss Model configuration.
+   */
   const ModelConfiguration GetChannelPropagationLossModel ();
 
 private:
