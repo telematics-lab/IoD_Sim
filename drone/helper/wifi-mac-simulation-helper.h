@@ -23,12 +23,20 @@
 
 namespace ns3 {
 
+/**
+ * A data class to store information about a WiFi MAC layer configuration for a simulation.
+ */
 class WifiMacSimulationHelper : public Object
 {
 public:
+  /** Default constructor */
   WifiMacSimulationHelper ();
+  /** Default destructor */
   ~WifiMacSimulationHelper ();
 
+  /**
+   * \return The WiFi MAC Helper used to configure this layer.
+   */
   WifiMacHelper& GetMacHelper ();
 
 private:

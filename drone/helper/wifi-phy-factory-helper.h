@@ -23,9 +23,25 @@
 
 namespace ns3 {
 
+/**
+ * Helper to enhance ns-3 WifiPhyHelper functionalities with additional
+ * features, without modifying objects external to IoD_Sim.
+ */
 class WifiPhyFactoryHelper {
 public:
+  /**
+   * Set the propagation delay model to be used from a ModelConfiguration data class.
+   *
+   * \param channelHelper The YansWifiChannelHelper instance.
+   * \param modelConf The configuration data class that defines the propagation delay model to be used.
+   */
   static void SetPropagationDelay (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf);
+  /**
+   * Set the propagation loss model to be used from a ModelConfiguration data class.
+   *
+   * \param channelHelper The YansWifiChannelHelper instance.
+   * \param modelConf The configuration data class that defines the propagation loss model to be used.
+   */
   static void AddPropagationLoss (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf);
 
 private:

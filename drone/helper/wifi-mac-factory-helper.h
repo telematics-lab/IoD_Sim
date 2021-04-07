@@ -23,8 +23,18 @@
 
 namespace ns3 {
 
+/**
+ * Helper to enhance ns-3 WifiHelper functionalities with additional
+ * features, without modifying objects external to IoD_Sim.
+ */
 class WifiMacFactoryHelper {
 public:
+  /**
+   * Set the wifi model to be used from a ModelConfiguration data class.
+   *
+   * \param helper The WifiHelper instance.
+   * \param modelConf The configuration data class that defines the WiFi model to be used and its configuration.
+   */
   static void SetRemoteStationManager (WifiHelper& helper, const ModelConfiguration& modelConf);
 
 private:

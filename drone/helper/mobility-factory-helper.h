@@ -23,8 +23,18 @@
 
 namespace ns3 {
 
+/**
+ * Helper to enhance ns-3 MobilityHelper functionalities with additional
+ * features, without modifying objects external to IoD_Sim.
+ */
 class MobilityFactoryHelper {
 public:
+  /**
+   * Set the mobility model to be used from a ModelConfiguration data class.
+   *
+   * \param helper The MobilityHelper instance.
+   * \param modelConf The configuration data class that defines the mobility model to be used and its configuration.
+   */
   static void SetMobilityModel (MobilityHelper& helper, const ModelConfiguration& modelConf);
 
 private:

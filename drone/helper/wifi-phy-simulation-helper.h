@@ -24,13 +24,24 @@
 
 namespace ns3 {
 
+/**
+ * A data class to store information about a WiFi PHY layer configuration for a simulation.
+ */
 class WifiPhySimulationHelper : public Object
 {
 public:
+  /** Default constructor */
   WifiPhySimulationHelper ();
+  /** Default destructor */
   ~WifiPhySimulationHelper ();
 
+  /**
+   * \return The WiFi Helper used to configure this layer.
+   */
   WifiHelper* GetWifiHelper ();
+  /**
+   * \return The YANS WiFi PHY Helper used to configure this layer.
+   */
   YansWifiPhyHelper* GetWifiPhyHelper ();
 
 private:

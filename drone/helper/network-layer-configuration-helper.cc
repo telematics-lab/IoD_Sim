@@ -37,22 +37,25 @@ NetworkLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
                  "Network Layer 'type' property must be a string.");
 
   const std::string type = json["type"].GetString ();
-  if (type.compare("ipv4") == 0) {
-    NS_ASSERT_MSG (json.HasMember ("address"),
-                   "Network Layer definition must have 'address' property.");
-    NS_ASSERT_MSG (json["address"].IsString (),
-                   "Network Layer 'address' property must be a string.");
-    NS_ASSERT_MSG (json.HasMember ("mask"),
-                   "Network Layer definition must have 'mask' property.");
-    NS_ASSERT_MSG (json["mask"].IsString (),
-                   "Network Layer 'mask' property must be a string.");
+  if (type.compare("ipv4") == 0)
+    {
+      NS_ASSERT_MSG (json.HasMember ("address"),
+                    "Network Layer definition must have 'address' property.");
+      NS_ASSERT_MSG (json["address"].IsString (),
+                    "Network Layer 'address' property must be a string.");
+      NS_ASSERT_MSG (json.HasMember ("mask"),
+                    "Network Layer definition must have 'mask' property.");
+      NS_ASSERT_MSG (json["mask"].IsString (),
+                    "Network Layer 'mask' property must be a string.");
 
-    return Create<Ipv4NetworkLayerConfiguration> (json["type"].GetString (),
-                                                  json["address"].GetString (),
-                                                  json["mask"].GetString ());
-  } else {
-    NS_FATAL_ERROR ("Network Layer of Type " << type << " is not supported!");
-  }
+      return Create<Ipv4NetworkLayerConfiguration> (json["type"].GetString (),
+                                                    json["address"].GetString (),
+                                                    json["mask"].GetString ());
+    }
+  else
+    {
+      NS_FATAL_ERROR ("Network Layer of Type " << type << " is not supported!");
+    }
 }
 
 NetworkLayerConfigurationHelper::NetworkLayerConfigurationHelper ()

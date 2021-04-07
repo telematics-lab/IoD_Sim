@@ -25,9 +25,18 @@
 
 namespace ns3 {
 
+/**
+ * Helper to decode a MAC Layer from a JSON configuration file.
+ */
 class MacLayerConfigurationHelper
 {
 public:
+  /**
+   * Parse a MAC Layer configuration from a given JSON tree and map it on a MacLayerConfiguration data class.
+   *
+   * \param jsonMacLayer The JSON tree to parse.
+   * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed data.
+   */
   static Ptr<MacLayerConfiguration> GetConfiguration (const rapidjson::Value& jsonMacLayer);
 
 private:

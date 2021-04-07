@@ -25,9 +25,21 @@
 
 namespace ns3 {
 
+/**
+ * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the following properties:
+ *   - Its network device(s)
+ *   - Its associated mobility model
+ *   - Its application(s)
+ */
 class EntityConfigurationHelper
 {
 public:
+  /**
+   * Parse an entity configuration from a given JSON tree and map it on an EntityConfiguration data class.
+   *
+   * \param json The JSON tree to parse.
+   * \return The configuration as a pointer to EntityConfiguration to easily retrieve parsed data.
+   */
   static Ptr<EntityConfiguration> GetConfiguration (const rapidjson::Value& json);
 
 private:

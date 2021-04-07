@@ -22,6 +22,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
+
 #include <ns3/wifi-mac-layer-configuration.h>
 
 namespace ns3 {
@@ -37,22 +38,25 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
                  "MAC Layer 'type' property must be a string.");
 
   const std::string macType = jsonMacLayer["type"].GetString ();
-  if (macType.compare("wifi") == 0) {
-    NS_ASSERT_MSG (jsonMacLayer.HasMember ("ssid"),
-                   "MAC Layer definition must have 'ssid' property.");
-    NS_ASSERT_MSG (jsonMacLayer["ssid"].IsString (),
-                   "MAC Layer 'ssid' property must be a string.");
-    NS_ASSERT_MSG (jsonMacLayer["remoteStationManager"].IsObject (),
-                 "MAC Layer 'remoteStationManager' property must be an object.");
+  if (macType.compare("wifi") == 0)
+    {
+      NS_ASSERT_MSG (jsonMacLayer.HasMember ("ssid"),
+                    "MAC Layer definition must have 'ssid' property.");
+      NS_ASSERT_MSG (jsonMacLayer["ssid"].IsString (),
+                    "MAC Layer 'ssid' property must be a string.");
+      NS_ASSERT_MSG (jsonMacLayer["remoteStationManager"].IsObject (),
+                  "MAC Layer 'remoteStationManager' property must be an object.");
 
-    const auto remoteStationManagerConfiguration = DecodeModelConfiguration (jsonMacLayer["remoteStationManager"]);
+      const auto remoteStationManagerConfiguration = DecodeModelConfiguration (jsonMacLayer["remoteStationManager"]);
 
-    return Create<WifiMacLayerConfiguration> (jsonMacLayer["type"].GetString (),
-                                              jsonMacLayer["ssid"].GetString (),
-                                              remoteStationManagerConfiguration);
-  } else {
-    NS_FATAL_ERROR ("MAC Layer of Type " << macType << " is not supported!");
-  }
+      return Create<WifiMacLayerConfiguration> (jsonMacLayer["type"].GetString (),
+                                                jsonMacLayer["ssid"].GetString (),
+                                                remoteStationManagerConfiguration);
+    }
+  else
+    {
+      NS_FATAL_ERROR ("MAC Layer of Type " << macType << " is not supported!");
+    }
 }
 
 MacLayerConfigurationHelper::MacLayerConfigurationHelper ()
@@ -78,49 +82,50 @@ MacLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& j
   auto jsonAttributes = jsonModel["attributes"].GetArray ();
   std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
 
-  for (auto& el : jsonAttributes) {
-    NS_ASSERT_MSG (el.IsObject (),
-                   "Attribute model definition must be an object, got " << el.GetType ());
-    NS_ASSERT_MSG (el.HasMember ("name"),
-                   "Attribute model must have 'name' property.");
-    NS_ASSERT_MSG (el["name"].IsString (),
-                   "Attribute model name must be a string.");
-    NS_ASSERT_MSG (el.HasMember ("value"),
-                   "Attribute model must have 'value' property.");
-
-    const std::string attrName = el["name"].GetString();
-    TypeId::AttributeInformation attrInfo = {};
-
-    NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
-
-    const auto attrValueType = el["value"].GetType ();
-    Ptr<AttributeValue> attrValue;
-    switch (attrValueType)
+  for (auto& el : jsonAttributes)
     {
-    case rapidjson::Type::kStringType:
-      {
-        const auto attrValueString = el["value"].GetString ();
-        attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
-      }
-      break;
-    case rapidjson::Type::kNumberType:
-      {
-        const auto attrValueDouble = el["value"].GetDouble ();
-        attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
-      }
-      break;
-    case rapidjson::Type::kArrayType:
-    case rapidjson::Type::kFalseType:
-    case rapidjson::Type::kTrueType:
-    case rapidjson::Type::kNullType:
-    case rapidjson::Type::kObjectType:
-    default:
-      NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
-      break;
-    }
+      NS_ASSERT_MSG (el.IsObject (),
+                    "Attribute model definition must be an object, got " << el.GetType ());
+      NS_ASSERT_MSG (el.HasMember ("name"),
+                    "Attribute model must have 'name' property.");
+      NS_ASSERT_MSG (el["name"].IsString (),
+                    "Attribute model name must be a string.");
+      NS_ASSERT_MSG (el.HasMember ("value"),
+                    "Attribute model must have 'value' property.");
 
-    attributes.emplace_back(std::make_pair(attrName, attrValue));
-  }
+      const std::string attrName = el["name"].GetString();
+      TypeId::AttributeInformation attrInfo = {};
+
+      NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
+
+      const auto attrValueType = el["value"].GetType ();
+      Ptr<AttributeValue> attrValue;
+      switch (attrValueType)
+        {
+        case rapidjson::Type::kStringType:
+          {
+            const auto attrValueString = el["value"].GetString ();
+            attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
+          }
+          break;
+        case rapidjson::Type::kNumberType:
+          {
+            const auto attrValueDouble = el["value"].GetDouble ();
+            attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
+          }
+          break;
+        case rapidjson::Type::kArrayType:
+        case rapidjson::Type::kFalseType:
+        case rapidjson::Type::kTrueType:
+        case rapidjson::Type::kNullType:
+        case rapidjson::Type::kObjectType:
+        default:
+          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
+          break;
+        }
+
+      attributes.emplace_back(std::make_pair(attrName, attrValue));
+    }
 
   return ModelConfiguration(modelName, attributes);
 }

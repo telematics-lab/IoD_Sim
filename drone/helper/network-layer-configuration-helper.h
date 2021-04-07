@@ -24,9 +24,18 @@
 
 namespace ns3 {
 
+/**
+ * Helper to decode a Network Layer from a JSON configuration file.
+ */
 class NetworkLayerConfigurationHelper
 {
 public:
+  /**
+   * Parse a Network configuration from a given JSON tree and map it on a NetworkLayerConfiguration data class.
+   *
+   * \param json The JSON tree to parse.
+   * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve parsed data.
+   */
   static Ptr<NetworkLayerConfiguration> GetConfiguration (const rapidjson::Value& json);
 
 private:

@@ -24,18 +24,18 @@ MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConf
 {
   helper.m_mobility.SetTypeId (modelConf.GetName ());
 
-  if (modelConf.GetName ().compare("ns3::ConstantPositionMobilityModel") == 0) {
-    auto positionAllocator = CreateObject<ListPositionAllocator> ();
-
-    Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes ()[0].second)->Get();
-    positionAllocator->Add (initialPosition);
-
-    helper.SetPositionAllocator (positionAllocator);
-  } else {
-    for (auto& attr : modelConf.GetAttributes ()) {
-      helper.m_mobility.Set (attr.first, *attr.second);
+  if (modelConf.GetName ().compare("ns3::ConstantPositionMobilityModel") == 0)
+    {
+      auto positionAllocator = CreateObject<ListPositionAllocator> ();
+      Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes ()[0].second)->Get();
+      positionAllocator->Add (initialPosition);
+      helper.SetPositionAllocator (positionAllocator);
     }
-  }
+  else
+    {
+      for (auto& attr : modelConf.GetAttributes ())
+        helper.m_mobility.Set (attr.first, *attr.second);
+    }
 }
 
 MobilityFactoryHelper::MobilityFactoryHelper ()

@@ -25,14 +25,14 @@
 #include <rapidjson/document.h>
 #include <ns3/position-allocator.h>
 #include <ns3/log.h>
+#include <ns3/singleton.h>
+
+#include <ns3/entity-configuration-helper.h>
 #include <ns3/flight-plan.h>
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/network-layer-configuration.h>
 #include <ns3/phy-layer-configuration.h>
 #include <ns3/speed-coefficients.h>
-#include <ns3/singleton.h>
-
-#include <ns3/entity-configuration-helper.h>
 
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 

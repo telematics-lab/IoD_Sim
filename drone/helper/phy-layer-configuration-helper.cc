@@ -22,6 +22,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
+
 #include <ns3/wifi-phy-layer-configuration.h>
 
 namespace ns3 {
@@ -37,44 +38,47 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
                  "PHY Layer 'type' property must be a string.");
 
   const std::string phyType = jsonPhyLayer["type"].GetString ();
-  if (phyType.compare("wifi") == 0) {
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
-                   "PHY Layer definition must have 'standard' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["standard"].IsString (),
-                   "PHY Layer 'standard' property must be a string.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("rxGain"),
-                   "PHY Layer definition must have 'rxGain' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
-                   "PHY Layer 'rxGain' property must be a double.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("mode"),
-                   "PHY Layer definition must have 'mode' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["mode"].IsString (),
-                   "PHY Layer 'mode' property must be a string.");
-    NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
-                   "PHY Layer definition must have 'channel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
-                   "PHY Layer 'mode' property must be an object.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationDelayModel"),
-                   "PHY Layer channel definition must have 'propagationDelayModel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationDelayModel"].IsObject (),
-                   "PHY Layer channel 'propagationDelayModel' must be an object");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
-                   "PHY Layer channel definition must have 'propagationLossModel' property.");
-    NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
-                   "PHY Layer channel 'propagationLossModel' must be an object");
+  if (phyType.compare("wifi") == 0)
+    {
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
+                    "PHY Layer definition must have 'standard' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["standard"].IsString (),
+                    "PHY Layer 'standard' property must be a string.");
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("rxGain"),
+                    "PHY Layer definition must have 'rxGain' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
+                    "PHY Layer 'rxGain' property must be a double.");
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("mode"),
+                    "PHY Layer definition must have 'mode' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["mode"].IsString (),
+                    "PHY Layer 'mode' property must be a string.");
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
+                    "PHY Layer definition must have 'channel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
+                    "PHY Layer 'mode' property must be an object.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationDelayModel"),
+                    "PHY Layer channel definition must have 'propagationDelayModel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationDelayModel"].IsObject (),
+                    "PHY Layer channel 'propagationDelayModel' must be an object");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
+                    "PHY Layer channel definition must have 'propagationLossModel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
+                    "PHY Layer channel 'propagationLossModel' must be an object");
 
-    const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
-    const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
+      const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
+      const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
 
-    return Create<WifiPhyLayerConfiguration> (jsonPhyLayer["type"].GetString (),
-                                              jsonPhyLayer["standard"].GetString (),
-                                              jsonPhyLayer["rxGain"].GetDouble (),
-                                              jsonPhyLayer["mode"].GetString (),
-                                              propagationDelayModel,
-                                              propagationLossModel);
-  } else {
-    NS_FATAL_ERROR ("PHY Layer of Type " << phyType << " is not supported!");
-  }
+      return Create<WifiPhyLayerConfiguration> (jsonPhyLayer["type"].GetString (),
+                                                jsonPhyLayer["standard"].GetString (),
+                                                jsonPhyLayer["rxGain"].GetDouble (),
+                                                jsonPhyLayer["mode"].GetString (),
+                                                propagationDelayModel,
+                                                propagationLossModel);
+    }
+  else
+    {
+      NS_FATAL_ERROR ("PHY Layer of Type " << phyType << " is not supported!");
+    }
 }
 
 PhyLayerConfigurationHelper::PhyLayerConfigurationHelper ()
@@ -99,49 +103,50 @@ PhyLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& j
   auto jsonAttributes = jsonModel["attributes"].GetArray ();
   std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
 
-  for (auto& el : jsonAttributes) {
-    NS_ASSERT_MSG (el.IsObject (),
-                   "Attribute model definition must be an object, got " << el.GetType ());
-    NS_ASSERT_MSG (el.HasMember ("name"),
-                   "Attribute model must have 'name' property.");
-    NS_ASSERT_MSG (el["name"].IsString (),
-                   "Attribute model name must be a string.");
-    NS_ASSERT_MSG (el.HasMember ("value"),
-                   "Attribute model must have 'value' property.");
-
-    const std::string attrName = el["name"].GetString();
-    TypeId::AttributeInformation attrInfo = {};
-
-    NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
-
-    const auto attrValueType = el["value"].GetType ();
-    Ptr<AttributeValue> attrValue;
-    switch (attrValueType)
+  for (auto& el : jsonAttributes)
     {
-    case rapidjson::Type::kStringType:
-      {
-        const auto attrValueString = el["value"].GetString ();
-        attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
-      }
-      break;
-    case rapidjson::Type::kNumberType:
-      {
-        const auto attrValueDouble = el["value"].GetDouble ();
-        attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
-      }
-      break;
-    case rapidjson::Type::kArrayType:
-    case rapidjson::Type::kFalseType:
-    case rapidjson::Type::kTrueType:
-    case rapidjson::Type::kNullType:
-    case rapidjson::Type::kObjectType:
-    default:
-      NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
-      break;
-    }
+      NS_ASSERT_MSG (el.IsObject (),
+                    "Attribute model definition must be an object, got " << el.GetType ());
+      NS_ASSERT_MSG (el.HasMember ("name"),
+                    "Attribute model must have 'name' property.");
+      NS_ASSERT_MSG (el["name"].IsString (),
+                    "Attribute model name must be a string.");
+      NS_ASSERT_MSG (el.HasMember ("value"),
+                    "Attribute model must have 'value' property.");
 
-    attributes.emplace_back(std::make_pair(attrName, attrValue));
-  }
+      const std::string attrName = el["name"].GetString();
+      TypeId::AttributeInformation attrInfo = {};
+
+      NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
+
+      const auto attrValueType = el["value"].GetType ();
+      Ptr<AttributeValue> attrValue;
+      switch (attrValueType)
+        {
+        case rapidjson::Type::kStringType:
+          {
+            const auto attrValueString = el["value"].GetString ();
+            attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
+          }
+          break;
+        case rapidjson::Type::kNumberType:
+          {
+            const auto attrValueDouble = el["value"].GetDouble ();
+            attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
+          }
+          break;
+        case rapidjson::Type::kArrayType:
+        case rapidjson::Type::kFalseType:
+        case rapidjson::Type::kTrueType:
+        case rapidjson::Type::kNullType:
+        case rapidjson::Type::kObjectType:
+        default:
+          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
+          break;
+        }
+
+      attributes.emplace_back(std::make_pair(attrName, attrValue));
+    }
 
   return ModelConfiguration(modelName, attributes);
 }
