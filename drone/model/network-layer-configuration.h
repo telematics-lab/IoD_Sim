@@ -25,16 +25,23 @@
 namespace ns3 {
 
 /**
- * \brief Helper to recognize and configure the Network Layer of a Scenario
+ * Data class to store information about the Network Layer of a Scenario.
+ * This is a base class, you should derive a specialized child to better describe the Network Layer.
  */
 class NetworkLayerConfiguration : public Object
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param type The type of the Network Layer to be configured.
+   */
   NetworkLayerConfiguration (std::string type);
+  /** Default destructor */
   virtual ~NetworkLayerConfiguration ();
 
   /**
-   * \brief Retrieve the type of the decoded Network Layer
+   * \return The type of the decoded Network Layer
    */
   virtual const std::string GetType () const;
 

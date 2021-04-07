@@ -24,15 +24,32 @@
 
 namespace ns3 {
 
+/**
+ * A data class to store configuration information related to the set up of an IPv4 Network Layer.
+ */
 class Ipv4NetworkLayerConfiguration : public NetworkLayerConfiguration
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param type The type of network layer configuration. It must be "ipv4".
+   * \param address The network address.
+   * \param mask The network mask.
+   */
   Ipv4NetworkLayerConfiguration (std::string type,
                                  std::string address,
                                  std::string mask);
+  /** Default destructor */
   ~Ipv4NetworkLayerConfiguration ();
 
+  /**
+   * \return The configured network address.
+   */
   const std::string GetAddress () const;
+  /**
+   * \return The configured network mask.
+   */
   const std::string GetMask () const;
 
 private:

@@ -25,15 +25,32 @@
 
 namespace ns3 {
 
+/**
+ * Data class to store information about the WiFi MAC Layer of a Scenario.
+ */
 class WifiMacLayerConfiguration : public MacLayerConfiguration
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param macType The type of the MAC Layer to be configured. It should be "wifi".
+   * \param ssid The name of the ssid to configure the BSS.
+   * \param remoteStationManagerConfiguration The configuration of the Remote Station Manager to set up the BSS.
+   */
   WifiMacLayerConfiguration (std::string macType,
                              std::string ssid,
                              ModelConfiguration remoteStationManagerConfiguration);
+  /** Default destructor */
   ~WifiMacLayerConfiguration ();
 
+  /**
+   * \return The configured SSID.
+   */
   const std::string GetSsid () const;
+  /**
+   * \return The Remote Station Manager model configuration.
+   */
   const ModelConfiguration GetRemoteStationManagerConfiguration () const;
 
 private:

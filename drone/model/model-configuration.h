@@ -25,14 +25,30 @@
 
 namespace ns3 {
 
+/**
+ * Data class to recognize and configure a TypeId that is registered on ns-3.
+ */
 class ModelConfiguration
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param name The name of the ns-3 model. It must be a valid and registered TypeId Model.
+   * \param attributes The list of attributes that configures the chosen model.
+   */
   ModelConfiguration (const std::string name,
                       const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
+  /** Default destructor */
   ~ModelConfiguration ();
 
+  /**
+   * \return The model name.
+   */
   const std::string GetName () const;
+  /**
+   * \return The list of attributes as a std::pair of attribute name and its configured value.
+   */
   const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
 
 private:

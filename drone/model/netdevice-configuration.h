@@ -23,16 +23,37 @@
 
 namespace ns3 {
 
+/**
+ * Data class to recnognize and configure a Network Device for an entity to be simulated.
+ */
 class NetdeviceConfiguration : public Object
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param type The type of the network device (e.g., "wifi" to use the underlying WiFi Protocol Stack).
+   * \param macLayer The configuration of the MAC Layer to be simulated for this network device.
+   * \param networkLayerId The identifier for the Network Layer that has been defined for this simulation.
+   *                       It must be compatible with the given type and macLayer.
+   */
   NetdeviceConfiguration (const std::string type,
                           const ModelConfiguration macLayer,
                           const uint32_t networkLayerId);
+  /** Default destructor */
   ~NetdeviceConfiguration ();
 
+  /**
+   * \return The type of the Network Device
+   */
   const std::string GetType () const;
+  /**
+   * \return The MAC Layer configuration.
+   */
   const ModelConfiguration GetMacLayer () const;
+  /**
+   * \return The reference network layer identifier.
+   */
   const uint32_t GetNetworkLayerId () const;
 
 private:

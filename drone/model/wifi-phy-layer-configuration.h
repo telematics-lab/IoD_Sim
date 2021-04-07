@@ -27,15 +27,29 @@
 
 namespace ns3 {
 
+/**
+ * Data class to store information about the WiFi PHY Layer of a Scenario.
+ */
 class WifiPhyLayerConfiguration : public PhyLayerConfiguration
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param phyType The type of the PHY Layer to be configured. It should be "wifi".
+   * \param standard The reference WiFi Standard.
+   * \param rxGain The receiver antenna gain in dBm.
+   * \param mode The mode of WiFi PHY according to YANS.
+   * \param channelPropagationDelayModel The Propagation Delay Model to be used for this Layer.
+   * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
+   */
   WifiPhyLayerConfiguration (std::string phyType,
                              std::string standard,
                              double rxGain,
                              std::string mode,
                              ModelConfiguration channelPropagationDelayModel,
                              ModelConfiguration channelPropagationLossModel);
+  /** Default destructor */
   ~WifiPhyLayerConfiguration ();
 
   const enum WifiStandard GetStandard ();

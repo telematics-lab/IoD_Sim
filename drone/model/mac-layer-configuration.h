@@ -25,16 +25,23 @@
 namespace ns3 {
 
 /**
- * \brief Helper to recognize and configure the MAC Layer of a Scenario
+ * Data class to store information about the MAC Layer of a Scenario.
+ * This is a base class, you should derive a specialized child to better describe the MAC Layer.
  */
 class MacLayerConfiguration : public Object
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param type The type of the MAC Layer Configuration.
+   */
   MacLayerConfiguration (std::string type);
+  /** Default destructor */
   virtual ~MacLayerConfiguration ();
 
   /**
-   * \brief Retrieve the type of the decoded MAC Layer
+   * \return The type of the decoded MAC Layer.
    */
   virtual const std::string GetType () const;
 

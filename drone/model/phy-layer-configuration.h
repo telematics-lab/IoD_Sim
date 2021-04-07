@@ -25,16 +25,23 @@
 namespace ns3 {
 
 /**
- * \brief Helper to recognize and configure the PHY Layer of a Scenario
+ * Data class to store information about the PHY Layer of a Scenario.
+ * This is a base class, you should derive a specialized child to better describe the PHY Layer.
  */
 class PhyLayerConfiguration : public Object
 {
 public:
+  /**
+   * Create a new object instance.
+   *
+   * \param type The type of the PHY Layer to be configured.
+   */
   PhyLayerConfiguration (std::string type);
+  /** Default destructor */
   virtual ~PhyLayerConfiguration ();
 
   /**
-   * \brief Retrieve the type of the decoded PHY Layer
+   * \brief The type of the decoded PHY Layer
    */
   virtual const std::string GetType () const;
 
