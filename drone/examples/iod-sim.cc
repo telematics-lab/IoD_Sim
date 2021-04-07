@@ -141,33 +141,37 @@ Scenario::ConfigurePhy ()
   const auto phyLayerConfs = CONFIGURATOR->GetPhyLayers ();
 
   size_t phyId = 0;
-  for (auto& phyLayerConf : phyLayerConfs) {
-    if (phyLayerConf->GetType ().compare("wifi") == 0) {
-      YansWifiChannelHelper wifiChannel;
-      const auto wifiConf = StaticCast<WifiPhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
-      const auto wifiSim = CreateObject<WifiPhySimulationHelper> ();
-      YansWifiPhyHelper* wifiPhy = wifiSim->GetWifiPhyHelper ();
+  for (auto& phyLayerConf : phyLayerConfs)
+    {
+      if (phyLayerConf->GetType ().compare("wifi") == 0)
+        {
+          YansWifiChannelHelper wifiChannel;
+          const auto wifiConf = StaticCast<WifiPhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
+          const auto wifiSim = CreateObject<WifiPhySimulationHelper> ();
+          YansWifiPhyHelper* wifiPhy = wifiSim->GetWifiPhyHelper ();
 
-      wifiSim->GetWifiHelper ()->SetStandard (wifiConf->GetStandard ());
+          wifiSim->GetWifiHelper ()->SetStandard (wifiConf->GetStandard ());
 
-      // This is one parameter that matters when using FixedRssLossModel
-      // set it to zero; otherwise, gain will be added
-      wifiPhy->Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
-      // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
-      wifiPhy->SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
+          // This is one parameter that matters when using FixedRssLossModel
+          // set it to zero; otherwise, gain will be added
+          wifiPhy->Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
+          // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
+          wifiPhy->SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
-      WifiPhyFactoryHelper::SetPropagationDelay (wifiChannel, wifiConf->GetChannelPropagationDelayModel ());
-      WifiPhyFactoryHelper::AddPropagationLoss (wifiChannel, wifiConf->GetChannelPropagationLossModel ());
+          WifiPhyFactoryHelper::SetPropagationDelay (wifiChannel, wifiConf->GetChannelPropagationDelayModel ());
+          WifiPhyFactoryHelper::AddPropagationLoss (wifiChannel, wifiConf->GetChannelPropagationLossModel ());
 
-      wifiPhy->SetChannel (wifiChannel.Create ());
+          wifiPhy->SetChannel (wifiChannel.Create ());
 
-      m_protocolStacks[PHY_LAYER].push_back (wifiSim);
-    } else {
-      NS_FATAL_ERROR ("Unsupported PHY Layer Type: " << phyLayerConf->GetType ());
+          m_protocolStacks[PHY_LAYER].push_back (wifiSim);
+        }
+      else
+        {
+          NS_FATAL_ERROR ("Unsupported PHY Layer Type: " << phyLayerConf->GetType ());
+        }
+
+      phyId++;
     }
-
-    phyId++;
-  }
 }
 
 void
@@ -178,23 +182,27 @@ Scenario::ConfigureMac ()
   const auto macLayerConfs = CONFIGURATOR->GetMacLayers ();
 
   size_t i = 0;
-  for (auto& macLayerConf : macLayerConfs) {
-    if (macLayerConf->GetType ().compare ("wifi") == 0) {
-      const auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][i]);
-      const auto wifiMac = CreateObject<WifiMacSimulationHelper> ();
-      const auto wifiConf = StaticCast<WifiMacLayerConfiguration, MacLayerConfiguration> (macLayerConf);
-      Ssid ssid = Ssid (wifiConf->GetSsid ());
+  for (auto& macLayerConf : macLayerConfs)
+    {
+      if (macLayerConf->GetType ().compare ("wifi") == 0)
+        {
+          const auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][i]);
+          const auto wifiMac = CreateObject<WifiMacSimulationHelper> ();
+          const auto wifiConf = StaticCast<WifiMacLayerConfiguration, MacLayerConfiguration> (macLayerConf);
+          Ssid ssid = Ssid (wifiConf->GetSsid ());
 
-      WifiMacFactoryHelper::SetRemoteStationManager (*(wifiPhy->GetWifiHelper ()),
-                                                     wifiConf->GetRemoteStationManagerConfiguration ());
+          WifiMacFactoryHelper::SetRemoteStationManager (*(wifiPhy->GetWifiHelper ()),
+                                                        wifiConf->GetRemoteStationManagerConfiguration ());
 
-      m_protocolStacks[MAC_LAYER].push_back (wifiMac);
-    } else {
-      NS_FATAL_ERROR ("Unsupported MAC Layer Type: " << macLayerConf->GetType ());
+          m_protocolStacks[MAC_LAYER].push_back (wifiMac);
+        }
+      else
+        {
+          NS_FATAL_ERROR ("Unsupported MAC Layer Type: " << macLayerConf->GetType ());
+        }
+
+      i++;
     }
-
-    i++;
-  }
 }
 
 void
@@ -203,19 +211,23 @@ Scenario::ConfigureNetwork ()
   NS_LOG_FUNCTION_NOARGS ();
 
   const auto layerConfs = CONFIGURATOR->GetNetworkLayers ();
-  for (auto& layerConf : layerConfs) {
-    if (layerConf->GetType ().compare("ipv4") == 0) {
-      const auto ipv4Conf = StaticCast<Ipv4NetworkLayerConfiguration, NetworkLayerConfiguration> (layerConf);
-      const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask ());
+  for (auto& layerConf : layerConfs)
+    {
+      if (layerConf->GetType ().compare("ipv4") == 0)
+        {
+          const auto ipv4Conf = StaticCast<Ipv4NetworkLayerConfiguration, NetworkLayerConfiguration> (layerConf);
+          const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask ());
 
-      ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
-                                         Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
+          ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
+                                            Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
 
-      m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
-    } else {
-      NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf->GetType ());
+          m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
+        }
+      else
+        {
+          NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf->GetType ());
+        }
     }
-  }
 }
 
 void
@@ -229,21 +241,24 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
   for (auto& entityConf : entityConfs) {
     size_t deviceId = 0;
 
-    for (auto& entityNetDev : entityConf->GetNetDevices ()) {
-      if (entityNetDev->GetType ().compare("wifi") == 0) {
-        const auto netId = entityNetDev->GetNetworkLayerId ();
-        auto entityNode = nodes.Get (entityId);
-        auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
-        auto assignedIpv4 = ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
-        ConfigureEntityMobility (entityKey, entityConf, entityId);
-        ConfigureEntityApplications (entityKey, entityId, deviceId, netId, assignedIpv4, entityConf);
+    for (auto& entityNetDev : entityConf->GetNetDevices ())
+      {
+        if (entityNetDev->GetType ().compare("wifi") == 0)
+          {
+            const auto netId = entityNetDev->GetNetworkLayerId ();
+            auto entityNode = nodes.Get (entityId);
+            auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
+            auto assignedIpv4 = ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
+            ConfigureEntityMobility (entityKey, entityConf, entityId);
+            ConfigureEntityApplications (entityKey, entityId, deviceId, netId, assignedIpv4, entityConf);
+          }
+        else
+          {
+            NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
+          }
 
-      } else {
-        NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
+        deviceId++;
       }
-
-      deviceId++;
-    }
 
     entityId++;
   }
@@ -328,42 +343,46 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
 {
   NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << deviceAddress << conf);
 
-  for (auto appConf : conf->GetApplications ()) {
-    const auto appName = appConf.GetName ();
-    if (appName.compare("ns3::DroneClientApplication") == 0) {
-      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
-      const auto ipMask = ipv4Conf->GetMask ();
-      auto app = CreateObjectWithAttributes<DroneClientApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                                    "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
-                                                                    "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+  for (auto appConf : conf->GetApplications ())
+    {
+      const auto appName = appConf.GetName ();
+      if (appName.compare("ns3::DroneClientApplication") == 0)
+        {
+          auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
+          const auto ipMask = ipv4Conf->GetMask ();
+          auto app = CreateObjectWithAttributes<DroneClientApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                                        "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
+                                                                        "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
-      if (entityKey.compare("drones") == 0)
-        m_drones.Get (entityId)->AddApplication (app);
-      else if (entityKey.compare("ZSPs") == 0)
-        m_zsps.Get (entityId)->AddApplication (app);
+          if (entityKey.compare("drones") == 0)
+            m_drones.Get (entityId)->AddApplication (app);
+          else if (entityKey.compare("ZSPs") == 0)
+            m_zsps.Get (entityId)->AddApplication (app);
 
-      for (auto attr : appConf.GetAttributes ()) {
-        app->SetAttribute (attr.first, *attr.second);
-      }
-    } else if (appName.compare("ns3::DroneServerApplication") == 0) {
-      auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
-      const auto ipMask = ipv4Conf->GetMask ();
-      auto app = CreateObjectWithAttributes<DroneServerApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                                    "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
+          for (auto attr : appConf.GetAttributes ()) {
+            app->SetAttribute (attr.first, *attr.second);
+          }
+        }
+      else if (appName.compare("ns3::DroneServerApplication") == 0)
+        {
+          auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
+          const auto ipMask = ipv4Conf->GetMask ();
+          auto app = CreateObjectWithAttributes<DroneServerApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
+                                                                        "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
 
-      if (entityKey.compare("drones") == 0)
-        m_drones.Get (entityId)->AddApplication (app);
-      else if (entityKey.compare("ZSPs") == 0)
-        m_zsps.Get (entityId)->AddApplication (app);
+          if (entityKey.compare("drones") == 0)
+            m_drones.Get (entityId)->AddApplication (app);
+          else if (entityKey.compare("ZSPs") == 0)
+            m_zsps.Get (entityId)->AddApplication (app);
 
-      for (auto attr : appConf.GetAttributes ()) {
-        app->SetAttribute (attr.first, *attr.second);
-      }
-
-    } else {
-      NS_FATAL_ERROR ("Unsupported Application Type: " << appName);
+          for (auto attr : appConf.GetAttributes ())
+              app->SetAttribute (attr.first, *attr.second);
+        }
+      else
+        {
+          NS_FATAL_ERROR ("Unsupported Application Type: " << appName);
+        }
     }
-  }
 }
 
 void
@@ -384,9 +403,8 @@ Scenario::operator() ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  if (CONFIGURATOR->IsDryRun ()) {
+  if (CONFIGURATOR->IsDryRun ())
     return;
-  }
 
   ShowProgress progress {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
