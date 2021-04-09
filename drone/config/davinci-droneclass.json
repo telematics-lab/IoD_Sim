@@ -59,5 +59,6 @@
         "LiIonEnergySource",
         "EnergySource",
         "DroneEnergyModel"
-    ]
+    ],
+    "resultsPath": "../results/"
 }

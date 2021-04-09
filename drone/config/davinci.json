@@ -55,5 +55,6 @@
         "ReportSimulation",
         "Scenario",
         "SimulationDuration"
-    ]
+    ],
+    "resultsPath": "../results/"
 }
