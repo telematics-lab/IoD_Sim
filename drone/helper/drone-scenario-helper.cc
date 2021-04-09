@@ -98,11 +98,19 @@ DroneScenarioHelper::Run()
   Simulator::Run();
   Simulator::Destroy();
 
-  if (NS_COMPMAN_CHECK_COMPONENT("LteTraces"))
+  /*
+  Since ns3::LteHelper generates its traces in the root folder of ns3 by default
+  and there's no way to change that, here if it finds any "lte" type network the
+  helper manually moves them to the current result folder using "mv" with a system call.
+  */
+  for (auto i = m_networks.Begin(); i != m_networks.End(); i++)
   {
-    // move lte trace files located in root folder to the appropriate results folder
-    system(("mv Dl* " + m_configurator->GetResultsPath()).c_str());
-    system(("mv Ul* " + m_configurator->GetResultsPath()).c_str());
+    if ((*i)->GetProtocol() == "lte")
+    {
+      system(("mv Dl* " + m_configurator->GetResultsPath()).c_str());
+      system(("mv Ul* " + m_configurator->GetResultsPath()).c_str());
+      break;
+    }
   }
 
   NS_COMPMAN_REGISTER_COMPONENT();
@@ -261,10 +269,7 @@ DroneScenarioHelper::SetupNetworks()
   m_backbone.Create(m_networks.GetN());
   m_backbone.Add(m_remoteNodes);
 
-  OlsrHelper olsr;
-  m_internetHelper.SetRoutingHelper (olsr);
   m_internetHelper.Install (m_backbone);
-  m_internetHelper.Reset ();
 
   CsmaHelper csma;
   csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
