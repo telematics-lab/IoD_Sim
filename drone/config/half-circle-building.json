@@ -21,7 +21,7 @@
   "antennas": [
     {
       "name": "antenna_0",
-      "position": [1000.0, 0.0, 0.0],
+      "position": [0.0, 0.0, 0.0],
       "interfaces": ["lte_net0"]
     }
   ],
@@ -31,7 +31,7 @@
     {
       "name": "drone1",
       "mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
-            "speedCoefficients": [50.0],
+            "speedCoefficients": [100.0],
             "trajectory": [
                 {
                   "position": [200.000, 0.000, 10.0],
