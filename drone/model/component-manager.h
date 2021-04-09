@@ -26,23 +26,23 @@
 
 
 /// Use this as the only interface for ComponentManager to register a component with a custom name at the end of a method before returning.
-#define NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get()->RegisterComponent((uintptr_t)(void*)this, comp_name)
+#define NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(comp_name) ComponentManager::Get ()->RegisterComponent ((uintptr_t)(void*)this, comp_name)
 /// Use this as the only interface for ComponentManager to register a component with the name of the method at the end of it before returning.
-#define NS_COMPMAN_REGISTER_COMPONENT() NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME(__FUNCTION__)
+#define NS_COMPMAN_REGISTER_COMPONENT() NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME (__FUNCTION__)
 /// Use this as the only interface for ComponentManager to check if a component has been registered
-#define NS_COMPMAN_CHECK_COMPONENT(param) ComponentManager::Get()->CheckComponent((uintptr_t)(void*)this, param)
+#define NS_COMPMAN_CHECK_COMPONENT(param) ComponentManager::Get ()->CheckComponent ((uintptr_t)(void*)this, param)
 /// Use this as the only interface for ComponentManager to check if the calling method has been registered
-#define NS_COMPMAN_CHECK_THIS_COMPONENT() NS_COMPMAN_CHECK_COMPONENT(__FUNCTION__)
+#define NS_COMPMAN_CHECK_THIS_COMPONENT() NS_COMPMAN_CHECK_COMPONENT (__FUNCTION__)
 ///Use this as the only interface for ComponentManager to check for multiple component within a range (extremes included)
-#define NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, start, stop) ComponentManager::Get()->CheckMultiComponent((uintptr_t)(void*)this, param, start, stop)
+#define NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, start, stop) ComponentManager::Get ()->CheckMultiComponent ((uintptr_t)(void*)this, param, start, stop)
 /// Use this as the only interface for ComponentManager to check for multiple component with same name (range 0 to num-1)
-#define NS_COMPMAN_CHECK_MULTI_COMPONENT(param, num) NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE(param, 0, num-1)
+#define NS_COMPMAN_CHECK_MULTI_COMPONENT(param, num) NS_COMPMAN_CHECK_MULTI_COMPONENT_RANGE (param, 0, num - 1)
 /// Use this as the only interface for ComponentManager to require a component at the beginning of a method.
-#define NS_COMPMAN_REQUIRE_COMPONENT(param) ComponentManager::Get()->RequireComponent((uintptr_t)(void*)this, __FUNCTION__, param)
+#define NS_COMPMAN_REQUIRE_COMPONENT(param) ComponentManager::Get ()->RequireComponent ((uintptr_t)(void*)this, __FUNCTION__, param)
 /// Use this as the only interface for ComponentManager to exclude a component at the beginning of a method.
-#define NS_COMPMAN_EXCLUDE_COMPONENT(param) ComponentManager::Get()->ExcludeComponent((uintptr_t)(void*)this, __FUNCTION__, param)
+#define NS_COMPMAN_EXCLUDE_COMPONENT(param) ComponentManager::Get ()->ExcludeComponent ((uintptr_t)(void*)this, __FUNCTION__, param)
 /// Use this as the only interface for ComponentManager to avoid a component to be repeated (at the beginning of a method) if it is going to be registered.
-#define NS_COMPMAN_ENSURE_UNIQUE() NS_COMPMAN_EXCLUDE_COMPONENT(__FUNCTION__)
+#define NS_COMPMAN_ENSURE_UNIQUE() NS_COMPMAN_EXCLUDE_COMPONENT (__FUNCTION__)
 
 namespace ns3
 {
@@ -65,7 +65,7 @@ public:
    * \param comp The component name to register.
    *             The macro without name uses builtin `__FUNCTION__` for that
    */
-  void RegisterComponent(uintptr_t object, std::string comp);
+  void RegisterComponent (uintptr_t object, std::string comp);
 
   /**
    * \brief Returns `true` if the component exists between the registered components else `false`.
@@ -75,7 +75,7 @@ public:
    * \param comp The component name to check.
    *             The macro without name uses builtin `__FUNCTION__` for that
    */
-  bool CheckComponent(uintptr_t object, std::string comp);
+  bool CheckComponent (uintptr_t object, std::string comp);
 
   /**
    * \brief Returns `true` if all the components exist between the registered components else `false`.
@@ -86,7 +86,7 @@ public:
    * \param start The starting number for the range of multi components to check (included)
    * \param stop The ending number for the range of multi components to check (included)
    */
-  bool CheckMultiComponent(uintptr_t object, std::string comp, uint32_t start, uint32_t stop);
+  bool CheckMultiComponent (uintptr_t object, std::string comp, uint32_t start, uint32_t stop);
 
   /**
    * \brief Asks for a method of the same object to be called before the caller method.
@@ -99,7 +99,7 @@ public:
    * \param comp The component name to search.
    *             This should be explicitly passed even inside the macro.
    */
-  void RequireComponent(uintptr_t object, std::string caller, std::string comp);
+  void RequireComponent (uintptr_t object, std::string caller, std::string comp);
 
   /**
    * \brief Asks for a method of the same object to NOT be called before the caller method.
@@ -111,10 +111,10 @@ public:
    * \param comp The component name to search.
    *             This should be explicitly passed even inside the macro.
    */
-   void ExcludeComponent(uintptr_t object, std::string caller, std::string comp);
+  void ExcludeComponent (uintptr_t object, std::string caller, std::string comp);
 
 private:
-  std::unordered_map<uintptr_t, std::unordered_set<std::string>> m_components;
+  std::unordered_map<uintptr_t, std::unordered_set<std::string> > m_components;
 };
 
 } // namespace ns3

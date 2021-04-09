@@ -29,122 +29,128 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE ("ComponentManager");
 
 void
-ComponentManager::RegisterComponent(uintptr_t object, std::string comp)
+ComponentManager::RegisterComponent (uintptr_t object, std::string comp)
 {
-  NS_LOG_FUNCTION(object << comp);
+  NS_LOG_FUNCTION (object << comp);
 
-  if (m_components.find(object) == m_components.end())
-  {
-    NS_LOG_LOGIC("Object " << object << " not found, creating new map key.");
-    m_components.emplace(object, std::unordered_set<std::string>());
-  }
+  if (m_components.find (object) == m_components.end ())
+    {
+      NS_LOG_LOGIC ("Object " << object << " not found, creating new map key.");
+      m_components.emplace (object, std::unordered_set<std::string>());
+    }
 
   std::unordered_set<std::string> *components = &m_components[object];
 
-  NS_ASSERT_MSG(
-      components->find(comp) == components->end(),
-      "The component '" << comp << "' has already been registered!");
+  NS_ASSERT_MSG (
+    components->find (comp) == components->end (),
+    "The component '" << comp << "' has already been registered!");
 
 
-  components->insert(comp);
-  NS_LOG_INFO("Component '" << comp << "' registered.");
+  components->insert (comp);
+  NS_LOG_INFO ("Component '" << comp << "' registered.");
 }
 
 bool
-ComponentManager::CheckComponent(uintptr_t object, std::string comp)
+ComponentManager::CheckComponent (uintptr_t object, std::string comp)
 {
-  NS_LOG_FUNCTION(object << comp);
+  NS_LOG_FUNCTION (object << comp);
 
-  if (m_components.find(object) == m_components.end())
-  {
-    NS_LOG_INFO("Object " << object << " has never registered a component");
-    return false;
-  }
+  if (m_components.find (object) == m_components.end ())
+    {
+      NS_LOG_INFO ("Object " << object << " has never registered a component");
+      return false;
+    }
 
   std::unordered_set<std::string> *components = &m_components[object];
 
-  if (components->find(comp) == components->end())
-  {
-    NS_LOG_INFO("Object " << object << " has no '" << comp << "' component registered");
-    return false;
-  }
+  if (components->find (comp) == components->end ())
+    {
+      NS_LOG_INFO ("Object " << object << " has no '" << comp << "' component registered");
+      return false;
+    }
 
-  NS_LOG_INFO("Object " << object << " has registered the '" << comp << "' component");
+  NS_LOG_INFO ("Object " << object << " has registered the '" << comp << "' component");
   return true;
 }
 
 bool
-ComponentManager::CheckMultiComponent(uintptr_t object, std::string comp, uint32_t start, uint32_t stop)
+ComponentManager::CheckMultiComponent (uintptr_t object, std::string comp, uint32_t start, uint32_t stop)
 {
-  NS_LOG_FUNCTION(object << comp << start << stop);
+  NS_LOG_FUNCTION (object << comp << start << stop);
 
-  if (m_components.find(object) == m_components.end())
-  {
-    NS_LOG_INFO("Object " << object << " has never registered a component");
-    return false;
-  }
+  if (m_components.find (object) == m_components.end ())
+    {
+      NS_LOG_INFO ("Object " << object << " has never registered a component");
+      return false;
+    }
 
   std::unordered_set<std::string> *components = &m_components[object];
 
   bool all_found = true;
 
   // need to optimize this
-  for (uint32_t i=start; i<=stop; ++i)
-  {
-    std::string multi_comp = comp + std::to_string(i);
-    if (components->find(multi_comp) == components->end())
+  for (uint32_t i = start; i <= stop; ++i)
     {
-      NS_LOG_INFO("Object " << object << " has no '" << multi_comp << "' component registered");
-      all_found = false;
+      std::string multi_comp = comp + std::to_string (i);
+      if (components->find (multi_comp) == components->end ())
+        {
+          NS_LOG_INFO ("Object " << object << " has no '" << multi_comp << "' component registered");
+          all_found = false;
+        }
     }
-  }
 
   if (all_found)
-  {
-    NS_LOG_INFO("Object " << object << " has registered all '" << comp << "' from " << start << " to " << stop);
-    return true;
-  }
+    {
+      NS_LOG_INFO ("Object " << object << " has registered all '" << comp << "' from " << start << " to " << stop);
+      return true;
+    }
   return false;
 }
 
 void
-ComponentManager::RequireComponent(uintptr_t object, std::string caller, std::string comp)
+ComponentManager::RequireComponent (uintptr_t object, std::string caller, std::string comp)
 {
-  NS_LOG_FUNCTION(object << caller << comp);
+  NS_LOG_FUNCTION (object << caller << comp);
 
-  NS_ASSERT_MSG(
-      m_components.find(object) != m_components.end(),
-      "No component has been registered for object " << object
-      << " but the component '" << comp << "' is required before '" << caller << "' can be used!");
+  NS_ASSERT_MSG (
+    m_components.find (object) != m_components.end (),
+    "No component has been registered for object " << object
+                                                   << " but the component '" << comp << "' is required before '" << caller << "' can be used!");
 
   std::unordered_set<std::string> *components = &m_components[object];
 
-  NS_ASSERT_MSG(
-      components->find(comp) != components->end(),
-      "For the object " << object << " the component '" << comp
-      << "' is required before '" << caller << "' can be used!");
-  NS_LOG_INFO("Component '" << comp << "' is present");
+  NS_ASSERT_MSG (
+    components->find (comp) != components->end (),
+    "For the object " << object << " the component '" << comp
+                      << "' is required before '" << caller << "' can be used!");
+  NS_LOG_INFO ("Component '" << comp << "' is present");
 }
 
 void
-ComponentManager::ExcludeComponent(uintptr_t object, std::string caller, std::string comp)
+ComponentManager::ExcludeComponent (uintptr_t object, std::string caller, std::string comp)
 {
-  NS_LOG_FUNCTION(object << caller << comp);
+  NS_LOG_FUNCTION (object << caller << comp);
 
-  if (m_components.find(object) == m_components.end())
-    return;
+  if (m_components.find (object) == m_components.end ())
+    {
+      return;
+    }
 
   std::unordered_set<std::string> *components = &m_components[object];
 
-  bool notFound = components->find(comp) == components->end();
+  bool notFound = components->find (comp) == components->end ();
 
   if (caller != comp)
-    NS_ASSERT_MSG(notFound,
-      "For the object " << object << " the component '" << caller
-            << "' cannot be called if '" << comp << "' has already been used!");
+    {
+      NS_ASSERT_MSG (notFound,
+                     "For the object " << object << " the component '" << caller
+                                       << "' cannot be called if '" << comp << "' has already been used!");
+    }
   else
-    NS_ASSERT_MSG(notFound,
-      "For the object " << object << " the component '" << caller << "' can be called only once!");
+    {
+      NS_ASSERT_MSG (notFound,
+                     "For the object " << object << " the component '" << caller << "' can be called only once!");
+    }
 }
 
 } // namespace ns3

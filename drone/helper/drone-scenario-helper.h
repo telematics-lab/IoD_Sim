@@ -60,10 +60,10 @@ enum _MobilityModelName
 class DroneScenarioHelper : public Singleton<DroneScenarioHelper>
 {
 public:
-  ScenarioConfigurationHelper* GetConfigurator();
-  void Initialize(uint32_t argc, char **argv, std::string name="DroneScenario");
+  ScenarioConfigurationHelper* GetConfigurator ();
+  void Initialize (uint32_t argc, char **argv, std::string name = "DroneScenario");
 
-  void Run();
+  void Run ();
 
 /*
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
@@ -71,33 +71,33 @@ public:
   Ipv4Address GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id);
 */
 
-  void SetDroneApplication(uint32_t id, Ptr<Application> app);
-  void SetDronesApplication(Ptr<ApplicationContainer> apps);
-  void SetRemoteApplication(uint32_t id, Ptr<Application> app);
-  void UseUdpEchoApplications();
-  void EnableTraces(uint32_t net_id);
-  void EnableTraces(std::string net_name);
-  void EnableTracesAll();
-  uint32_t GetRemoteId(uint32_t num);
-  uint32_t GetAntennaId(uint32_t num);
-  Ipv4Address GetIpv4Address(Ptr<Node> node);
-  Ipv4Address GetDroneIpv4Address(uint32_t id);
-  Ipv4Address GetRemoteIpv4Address(uint32_t id);
+  void SetDroneApplication (uint32_t id, Ptr<Application> app);
+  void SetDronesApplication (Ptr<ApplicationContainer> apps);
+  void SetRemoteApplication (uint32_t id, Ptr<Application> app);
+  void UseUdpEchoApplications ();
+  void EnableTraces (uint32_t net_id);
+  void EnableTraces (std::string net_name);
+  void EnableTracesAll ();
+  uint32_t GetRemoteId (uint32_t num);
+  uint32_t GetAntennaId (uint32_t num);
+  Ipv4Address GetIpv4Address (Ptr<Node> node);
+  Ipv4Address GetDroneIpv4Address (uint32_t id);
+  Ipv4Address GetRemoteIpv4Address (uint32_t id);
 
 protected:
 
-  uint32_t MobilityToEnum(std::string mobilityModel);
-  void CreateNodes();
-  void SetMobilityModels();
-  void SetupNetworks();
-  void LoadGlobalSettings();
-  void LoadIndividualSettings();
+  uint32_t MobilityToEnum (std::string mobilityModel);
+  void CreateNodes ();
+  void SetMobilityModels ();
+  void SetupNetworks ();
+  void LoadGlobalSettings ();
+  void LoadIndividualSettings ();
 
-  void SetDronesMobility();
-  void SetAntennasPosition();
+  void SetDronesMobility ();
+  void SetAntennasPosition ();
 
-  void SetApplications(NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
-  void SetApplication(NodeContainer& nodes, uint32_t id, Ptr<Application> app);
+  void SetApplications (NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
+  void SetApplication (NodeContainer& nodes, uint32_t id, Ptr<Application> app);
 
 
   ScenarioConfigurationHelper *m_configurator;
@@ -109,7 +109,7 @@ protected:
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
   InternetStackHelper m_internetHelper;
-  std::vector<Ptr<Building>> m_buildings;
+  std::vector<Ptr<Building> > m_buildings;
   DroneNetworkContainer m_networks;
   uint32_t m_globalIpv4AddressBase;
 };

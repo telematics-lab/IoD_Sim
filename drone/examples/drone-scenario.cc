@@ -22,8 +22,8 @@
 #include <ns3/drone-client.h>
 #include <ns3/lte-drone-scenario-helper.h>
 
-#define DSH DroneScenarioHelper::Get()
-#define CONFIG DSH->GetConfigurator()
+#define DSH DroneScenarioHelper::Get ()
+#define CONFIG DSH->GetConfigurator ()
 
 using namespace ns3;
 
@@ -31,7 +31,7 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 int main (int argc, char **argv)
 {
-  DSH->Initialize(argc, argv);
+  DSH->Initialize (argc, argv);
   //DSH->UseUdpEchoApplications();
 
   //NS_LOG_DEBUG("Drone1 IP: " << DSH->GetDroneIpv4Address(0));
@@ -39,30 +39,30 @@ int main (int argc, char **argv)
   //NS_LOG_DEBUG("Remote IP: " << DSH->GetRemoteIpv4Address(0));
 
 
-  for (uint32_t i = 0; i < CONFIG->GetDronesN(); ++i)
-  {
-    Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient>(
-        "Ipv4Address", Ipv4AddressValue(DSH->GetDroneIpv4Address(i)),
-        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
-        "Duration", DoubleValue(CONFIG->GetDuration()),
-        "DestinationIpv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)));
-    clientApp->SetStartTime(Seconds(CONFIG->GetDroneApplicationStartTime(i)));
-    clientApp->SetStopTime(Seconds(CONFIG->GetDroneApplicationStopTime(i)));
-    DSH->SetDroneApplication(i, clientApp);
-  }
+  for (uint32_t i = 0; i < CONFIG->GetDronesN (); ++i)
+    {
+      Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient> (
+        "Ipv4Address", Ipv4AddressValue (DSH->GetDroneIpv4Address (i)),
+        "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"),
+        "Duration", DoubleValue (CONFIG->GetDuration ()),
+        "DestinationIpv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0)));
+      clientApp->SetStartTime (Seconds (CONFIG->GetDroneApplicationStartTime (i)));
+      clientApp->SetStopTime (Seconds (CONFIG->GetDroneApplicationStopTime (i)));
+      DSH->SetDroneApplication (i, clientApp);
+    }
 
-  Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer>(
-      "Ipv4Address", Ipv4AddressValue(DSH->GetRemoteIpv4Address(0)),
-      "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-  serverApp->SetStartTime(Seconds(CONFIG->GetRemoteApplicationStartTime(0)));
-  serverApp->SetStopTime(Seconds(CONFIG->GetRemoteApplicationStopTime(0)));
-  DSH->SetRemoteApplication(0, serverApp);
+  Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer> (
+    "Ipv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0)),
+    "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"));
+  serverApp->SetStartTime (Seconds (CONFIG->GetRemoteApplicationStartTime (0)));
+  serverApp->SetStopTime (Seconds (CONFIG->GetRemoteApplicationStopTime (0)));
+  DSH->SetRemoteApplication (0, serverApp);
 
-  DSH->EnableTraces(0);
+  DSH->EnableTraces (0);
 
   //DSH->EnableTracesAll();
 
-  DSH->Run();
+  DSH->Run ();
 
   return 0;
 }

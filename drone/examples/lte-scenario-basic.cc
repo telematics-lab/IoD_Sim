@@ -33,7 +33,7 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 
 int main (int argc, char *argv[])
 {
-  CONFIGURATOR->Initialize(argc, argv, "LTE_BASIC_SCENARIO");
+  CONFIGURATOR->Initialize (argc, argv, "LTE_BASIC_SCENARIO");
 
   NodeContainer enbNodes, ueNodes, hostNodes;
   enbNodes.Create (CONFIGURATOR->GetAntennasN ());
@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
   Ipv4Address hostIp = hostsIpInterfaces.GetAddress (1); // 0 is localhost
 
   Ipv4StaticRoutingHelper ipv4RoutingH;
-  internet.SetRoutingHelper(ipv4RoutingH);
+  internet.SetRoutingHelper (ipv4RoutingH);
   Ptr<Ipv4StaticRouting> hostStaticRoute = ipv4RoutingH.GetStaticRouting (host->GetObject<Ipv4> ());
   hostStaticRoute->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
@@ -94,21 +94,21 @@ int main (int argc, char *argv[])
 
   lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
-        "Ipv4Address", Ipv4AddressValue(hostIp),
-        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"));
-    hostNodes.Get(0)->AddApplication(server);
+  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer> (
+    "Ipv4Address", Ipv4AddressValue (hostIp),
+    "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"));
+  hostNodes.Get (0)->AddApplication (server);
 
   for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
-  {
-    auto client = CreateObjectWithAttributes<DroneClient>(
-        "Ipv4Address", Ipv4AddressValue(lteDevsIfaces.GetAddress(i)),
-        "Ipv4SubnetMask", Ipv4MaskValue("255.0.0.0"),
-        "DestinationIpv4Address", Ipv4AddressValue(hostIp));
-    client->SetStartTime(Seconds(1 + i));
+    {
+      auto client = CreateObjectWithAttributes<DroneClient> (
+        "Ipv4Address", Ipv4AddressValue (lteDevsIfaces.GetAddress (i)),
+        "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"),
+        "DestinationIpv4Address", Ipv4AddressValue (hostIp));
+      client->SetStartTime (Seconds (1 + i));
 
-    ueNodes.Get(i)->AddApplication(client);
-  }
+      ueNodes.Get (i)->AddApplication (client);
+    }
 
   std::stringstream p2pPath, ipPath;
   std::string path = CONFIGURATOR->GetResultsPath ();
@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
 
   internet.EnablePcapIpv4All (ipPath.str ());
 
-  NS_LOG_DEBUG (lteDevsIfaces.GetAddress(0));
+  NS_LOG_DEBUG (lteDevsIfaces.GetAddress (0));
 
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();

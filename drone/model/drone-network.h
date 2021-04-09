@@ -38,27 +38,37 @@ namespace ns3
 class DroneNetwork : public Object
 {
 public:
-  DroneNetwork() {}
-  ~DroneNetwork() {}
-  void DoDispose() {}
-  void DoInitialize() {}
-  std::string GetName();
-  std::string GetProtocol();
-  void SetAttributes(const std::vector<std::pair<std::string, std::string>>& attributes);
-  NodeContainer& GetDroneNodes();
-  NodeContainer& GetAntennaNodes();
-  NetDeviceContainer& GetDroneNetDevices();
-  NetDeviceContainer& GetAntennaNetDevices();
-  void AttachDrone(Ptr<Node> node);
-  void AttachDrones(NodeContainer& nodes);
-  void AttachAntenna(Ptr<Node> node);
-  void AttachAntennas(NodeContainer& antennas);
-  void SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H);
-  virtual Ptr<Node> GetGateway() { return 0; }
-  virtual void Generate() {}
-  virtual void EnableTraces() {}
+  DroneNetwork ()
+  {}
+  ~DroneNetwork ()
+  {}
+  void DoDispose ()
+  {}
+  void DoInitialize ()
+  {}
+  std::string GetName ();
+  std::string GetProtocol ();
+  void SetAttributes (const std::vector<std::pair<std::string, std::string> >& attributes);
+  NodeContainer& GetDroneNodes ();
+  NodeContainer& GetAntennaNodes ();
+  NetDeviceContainer& GetDroneNetDevices ();
+  NetDeviceContainer& GetAntennaNetDevices ();
+  void AttachDrone (Ptr<Node> node);
+  void AttachDrones (NodeContainer& nodes);
+  void AttachAntenna (Ptr<Node> node);
+  void AttachAntennas (NodeContainer& antennas);
+  void SetIpv4AddressHelper (Ipv4AddressHelper& ipv4H);
+  virtual Ptr<Node> GetGateway ()
+  {
+    return 0;
+  }
+  virtual void Generate ()
+  {}
+  virtual void EnableTraces ()
+  {}
+
 protected:
-  std::vector<std::pair<std::string, std::string>> m_attributes;
+  std::vector<std::pair<std::string, std::string> > m_attributes;
   NodeContainer m_droneNodes, m_antennaNodes;
   NetDeviceContainer m_droneDevs, m_antennaDevs;
   Ipv4AddressHelper* m_ipv4H;
@@ -70,20 +80,24 @@ protected:
 class LteDroneNetwork : public DroneNetwork
 {
 public:
-  LteDroneNetwork(std::string name) { m_name = name; m_protocol = "lte"; }
+  LteDroneNetwork (std::string name)
+  {
+    m_name = name;
+    m_protocol = "lte";
+  }
   //~LteDroneNetwork();
 
 
-  void Generate();
-  void EnableTraces();
-  Ptr<Node> GetGateway();
+  void Generate ();
+  void EnableTraces ();
+  Ptr<Node> GetGateway ();
 
 private:
   InternetStackHelper m_internetHelper;
   Ptr<LteHelper> m_lteHelper;
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
-  std::vector<Ptr<Building>> m_buildings;
+  std::vector<Ptr<Building> > m_buildings;
   //Ptr<Node> m_proxyNode;
 };
 
@@ -105,19 +119,20 @@ public:
 class DroneNetworkContainer
 {
 public:
-  typedef std::vector<Ptr<DroneNetwork>>::const_iterator Iterator;
-  DroneNetworkContainer() {}
-  ~DroneNetworkContainer() {}
-  Iterator Begin(void) const;
-  Iterator End(void) const;
-  void Add(Ptr<DroneNetwork> element);
-  uint32_t GetN(void) const;
-  Ptr<DroneNetwork> Get(uint32_t index) const;
-  Ptr<DroneNetwork> Get(std::string name) const;
-
+  typedef std::vector<Ptr<DroneNetwork> >::const_iterator Iterator;
+  DroneNetworkContainer ()
+  {}
+  ~DroneNetworkContainer ()
+  {}
+  Iterator Begin (void) const;
+  Iterator End (void) const;
+  void Add (Ptr<DroneNetwork> element);
+  uint32_t GetN (void) const;
+  Ptr<DroneNetwork> Get (uint32_t index) const;
+  Ptr<DroneNetwork> Get (std::string name) const;
 
 private:
-  std::vector<Ptr<DroneNetwork>> m_droneNetworks;
+  std::vector<Ptr<DroneNetwork> > m_droneNetworks;
 };
 
 } // namespace ns3

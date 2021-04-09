@@ -3,7 +3,10 @@
     "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
     "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
     "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
-    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0"
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0",
+
+    "ns3::CsmaChannel::DataRate", "5000000",
+    "ns3::CsmaChannel::Delay", "2ms"
   ],
 
   "networks": [
@@ -76,7 +79,7 @@
   ],
 
   "duration": 10.0,
-  "logOnFile": false,
+  "logOnFile": true,
   "logComponents": [
     "DroneServer",
     "DroneClient",

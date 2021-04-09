@@ -153,7 +153,7 @@ public:
   /**
    * \return the phy parameters
    */
-  const std::vector<std::pair<std::string, float>> GetThreeLogDistancePropagationLossModelAttributes () const;
+  const std::vector<std::pair<std::string, float> > GetThreeLogDistancePropagationLossModelAttributes () const;
 
   /**
    * \return the number of ZSPs to be simulated.
@@ -191,7 +191,7 @@ public:
   /**
    * \return the number of antennas to be simulated.
    */
-  const uint32_t GetAntennasN() const;
+  const uint32_t GetAntennasN () const;
   /**
    * \brief allocate the position of the antennas
    * \param allocator the allocator to be filled with antennas positions
@@ -201,11 +201,11 @@ public:
   /**
    * \return the number of remote hosts to be simulated.
    */
-  const uint32_t GetRemotesN() const;
-    /**
-   * \param i the remote index number.
-   * \return the instant, in seconds, indicating the start of the application.
-   */
+  const uint32_t GetRemotesN () const;
+  /**
+ * \param i the remote index number.
+ * \return the instant, in seconds, indicating the start of the application.
+ */
   const double GetRemoteApplicationStartTime (uint32_t i) const;
   /**
    * \param i the remote index number.
@@ -218,32 +218,32 @@ public:
    *        Use with Config::SetDefault(pair.first, pair.second) at the beginning of the script.
    * \return a vector of pairs containing the key and the value extracted from config
    */
-  const std::vector<std::pair<std::string, std::string>> GetGlobalSettings() const;
+  const std::vector<std::pair<std::string, std::string> > GetGlobalSettings () const;
   /**
    * \brief Returns a vector with all the per-object individual settings.
    *        Use with Config::Set(pair.first, pair.second) after creating all the object before simulation start.
    * \return a vector of pairs containing the key and the value extracted from config
    */
-  const std::vector<std::pair<std::string, std::string>> GetIndividualSettings() const;
+  const std::vector<std::pair<std::string, std::string> > GetIndividualSettings () const;
 
   /**
    * \return a vector of Ptr<Building> created with the attributes in config
    */
-  const std::vector<Ptr<Building>> GetBuildings() const;
+  const std::vector<Ptr<Building> > GetBuildings () const;
 
   /**
    * \param field the name of the field to search into
    * \param index the index of the element to which retrieve the name
    * \return the name associated to the object at the index in the field
    */
-  std::string GetObjectName(const char* field, uint32_t index) const;
+  std::string GetObjectName (const char* field, uint32_t index) const;
 
   /**
    * \param field the name of the field to search into
    * \param name the name of the element to which retrieve the index
    * \return the index of the object of given name
    */
-  uint32_t GetObjectIndex(const char* field, std::string name) const;
+  uint32_t GetObjectIndex (const char* field, std::string name) const;
 
 
 //  NETWORKS SPECIFIC CONFIGURATORS
@@ -251,39 +251,39 @@ public:
   /**
    * \return a container of Ptr<DroneNetwork> already configured with attributes and name, but not generated.
    */
-  DroneNetworkContainer GetNetworks() const;
+  DroneNetworkContainer GetNetworks () const;
 
   /**
    * \param id the index of the drone to query
    * \param name the name of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
-  std::vector<uint32_t> GetDroneNetworks(uint32_t id) const;
-  std::vector<uint32_t> GetDroneNetworks(std::string name) const;
+  std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
+  std::vector<uint32_t> GetDroneNetworks (std::string name) const;
 
   /**
    * \param id the index of the antenna to query
    * \param name the name of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
-  std::vector<uint32_t> GetAntennaNetworks(uint32_t id) const;
-  std::vector<uint32_t> GetAntennaNetworks(std::string name) const;
+  std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
+  std::vector<uint32_t> GetAntennaNetworks (std::string name) const;
 
   /**
    * \param id the index of the network
    * \param name the name of the network
    * \return a list of id of all the drones connected to a network
    */
-  std::vector<uint32_t> GetDronesInNetwork(uint32_t id) const;
-  std::vector<uint32_t> GetDronesInNetwork(std::string net_name) const;
+  std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
+  std::vector<uint32_t> GetDronesInNetwork (std::string net_name) const;
 
   /**
    * \param id the index of the network
    * \param name the name of the network
    * \return a list of id of all the antennas connected to a network
    */
-  std::vector<uint32_t> GetAntennasInNetwork(uint32_t id) const;
-  std::vector<uint32_t> GetAntennasInNetwork(std::string net_name) const;
+  std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
+  std::vector<uint32_t> GetAntennasInNetwork (std::string net_name) const;
 
   /**
    * \brief default destructor
