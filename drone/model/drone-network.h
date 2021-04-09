@@ -54,14 +54,13 @@ public:
   void AttachAntenna(Ptr<Node> node);
   void AttachAntennas(NodeContainer& antennas);
   void SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H);
-  void ConnectToBackbone(Ptr<Node> backboneProxy);
+  virtual Ptr<Node> GetGateway() { return 0; }
   virtual void Generate() {}
   virtual void EnableTraces() {}
 protected:
   std::vector<std::pair<std::string, std::string>> m_attributes;
   NodeContainer m_droneNodes, m_antennaNodes;
-  Ptr<Node> m_backboneProxy;
-  NetDeviceContainer m_droneDevs, m_antennaDevs, m_backboneDevs;
+  NetDeviceContainer m_droneDevs, m_antennaDevs;
   Ipv4AddressHelper* m_ipv4H;
   std::string m_name;
   std::string m_protocol;
@@ -77,6 +76,7 @@ public:
 
   void Generate();
   void EnableTraces();
+  Ptr<Node> GetGateway();
 
 private:
   InternetStackHelper m_internetHelper;
@@ -84,7 +84,7 @@ private:
   Ptr<PointToPointEpcHelper> m_epcHelper;
   PointToPointHelper m_p2pHelper;
   std::vector<Ptr<Building>> m_buildings;
-  Ptr<Node> m_proxyNode;
+  //Ptr<Node> m_proxyNode;
 };
 
 /* TO BE IMPLEMENTED

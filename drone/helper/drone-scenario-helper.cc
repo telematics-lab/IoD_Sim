@@ -264,22 +264,11 @@ DroneScenarioHelper::SetupNetworks()
   m_networks = m_configurator->GetNetworks();
 
   Ipv4AddressHelper ipv4H;
-  ipv4H.SetBase("100.1.0.0", "255.255.0.0");
+  ipv4H.SetBase("100.0.0.0", "255.0.0.0");
 
-  m_backbone.Create(m_networks.GetN());
   m_backbone.Add(m_remoteNodes);
 
   m_internetHelper.Install (m_backbone);
-
-  CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
-  csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
-  NetDeviceContainer backboneDevs = csma.Install (m_backbone);
-
-  ipv4H.SetBase(Ipv4Address("250.1.0.0"), Ipv4Mask("255.255.0.0"));
-  ipv4H.Assign(backboneDevs);
-
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   for (uint32_t i = 0; i < m_networks.GetN(); i++)
   {
@@ -291,15 +280,39 @@ DroneScenarioHelper::SetupNetworks()
       droneNetwork->AttachAntenna(m_antennaNodes.Get(id));
     droneNetwork->SetIpv4AddressHelper(ipv4H);
 
-    droneNetwork->ConnectToBackbone(m_backbone.Get(i));
     droneNetwork->Generate();
+    m_backbone.Add(droneNetwork->GetGateway());
   }
 
-  for (uint32_t i = 0; i < m_backbone.GetN(); i++)
+  CsmaHelper csma;
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
+  csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
+  NetDeviceContainer backboneDevs = csma.Install (m_backbone);
+
+  ipv4H.SetBase(Ipv4Address("200.0.0.0"), Ipv4Mask("255.0.0.0"));
+  ipv4H.Assign(backboneDevs);
+
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+
+  Ipv4StaticRoutingHelper routingHelper;
+  m_internetHelper.SetRoutingHelper(routingHelper);
+  for (uint32_t i = 0; i < m_remoteNodes.GetN(); i++)
   {
-    NS_LOG_LOGIC("BackBone Interface " << i << ": " << m_backbone.Get(i)->GetObject<Ipv4>()->GetAddress(1, 0));
-  }
+    Ptr<Node> remoteNode = m_backbone.Get(i);
+    for (uint32_t j = m_remoteNodes.GetN(); j < m_backbone.GetN(); j++)
+    {
+      Ptr<Node> netGwNode = m_backbone.Get(j);
+      uint32_t netGwBackboneDevIndex = netGwNode->GetNDevices() - 1;
+      Ipv4Address netGwBackboneIpv4 = netGwNode->GetObject<Ipv4>()->GetAddress(netGwBackboneDevIndex, 0).GetLocal();
+      Ipv4Address netGwProprietaryIpv4 = netGwNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
 
+      NS_LOG_LOGIC("Setting-up static route: REMOTE " << i << " (" << remoteNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal() <<
+        ") -> NETWORK " << j - m_remoteNodes.GetN() << " (" << netGwBackboneIpv4 << " -> " << netGwProprietaryIpv4 << ")");
+
+      Ptr<Ipv4StaticRouting> staticRouteRem = routingHelper.GetStaticRouting(remoteNode->GetObject<Ipv4>());
+      staticRouteRem->AddNetworkRouteTo(netGwProprietaryIpv4, Ipv4Mask("255.0.0.0"), netGwBackboneIpv4, 1);
+    }
+  }
 }
 
 Ipv4Address

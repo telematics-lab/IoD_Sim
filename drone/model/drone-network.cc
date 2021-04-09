@@ -110,14 +110,15 @@ DroneNetwork::SetIpv4AddressHelper(Ipv4AddressHelper& ipv4H)
   m_ipv4H = &ipv4H;
 }
 
-void
-DroneNetwork::ConnectToBackbone(Ptr<Node> backboneProxy)
-{
-  m_backboneProxy = backboneProxy;
-}
 
 
 /* LTE DRONE NETWORK */
+
+Ptr<Node>
+LteDroneNetwork::GetGateway()
+{
+  return m_epcHelper->GetPgwNode();
+}
 
 void
 LteDroneNetwork::Generate()
@@ -141,23 +142,8 @@ LteDroneNetwork::Generate()
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
-  //m_lteHelper->SetAttribute("PathlossModel", StringValue("ns3::Cost231PropagationLossModel"));
-  //m_lteHelper->SetSchedulerType("ns3::PfFfMacScheduler"); // Proportional Fair (FemtoForumAPI) Scheduler
-  //m_lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler"); // Round Robin (FemtoForumAPI) Scheduler
-  //m_lteHelper->SetSchedulerAttribute("HarqEnabled", BooleanValue(true));
-  //m_lteHelper->SetSchedulerAttribute("CqiTimerThreshold", UintegerValue(1000));
-
   Ipv4StaticRoutingHelper routingHelper;
   m_internetHelper.SetRoutingHelper(routingHelper);
-
-  /*
-  Ipv4Address pgwAddress = m_epcHelper->GetPgwNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-  Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_backbone->GetObject<Ipv4>());
-  remoteStaticRoute->AddNetworkRouteTo(pgwAddress, Ipv4Mask("255.0.0.0"), 1);
-  */
-
-  //Ptr<Ipv4StaticRouting> backboneStaticRoute = routingHelper.GetStaticRouting(m_epcHelper->GetPgwNode()->GetObject<Ipv4>());
-  //backboneStaticRoute->AddNetworkRouteTo(backboneIpv4.GetAddress(0), Ipv4Mask("255.255.0.0"), 1);
 
   m_antennaDevs = m_lteHelper->InstallEnbDevice(m_antennaNodes);
   if (m_antennaNodes.GetN() > 1)
@@ -193,17 +179,6 @@ LteDroneNetwork::Generate()
 
   // attach each drone ue to the antenna with the strongest signal
   m_lteHelper->Attach(m_droneDevs);
-
-  //m_p2pHelper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  //m_p2pHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  //m_p2pHelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
-  m_backboneDevs = m_p2pHelper.Install(m_epcHelper->GetPgwNode(), m_backboneProxy);
-  m_ipv4H->NewNetwork();
-  m_ipv4H->Assign(m_backboneDevs);
-
-  Ipv4Address proxyAddress = m_backboneProxy->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-  Ptr<Ipv4StaticRouting> remoteStaticRoute = routingHelper.GetStaticRouting(m_epcHelper->GetPgwNode()->GetObject<Ipv4>());
-  remoteStaticRoute->AddNetworkRouteTo(proxyAddress, Ipv4Mask("255.255.0.0"), 1);
 
   m_buildings = m_configurator->GetBuildings();
 
