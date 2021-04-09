@@ -45,7 +45,14 @@ def build(bld):
         'model/speed-coefficients.cc',
         'model/wifi-mac-layer-configuration.cc',
         'model/wifi-phy-layer-configuration.cc',
-        'model/zsp-list.cc'
+        'model/zsp-list.cc',
+        'model/drone.cc',
+        'model/drone-container.cc',
+        'model/drone-energy-model.cc',
+        'helper/drone-energy-model-helper.cc',
+        'model/drone-peripheral.cc',
+        'model/input-peripheral.cc',
+        'model/storage-peripheral.cc'
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -91,7 +98,14 @@ def build(bld):
         'model/speed-coefficients.h',
         'model/wifi-mac-layer-configuration.h',
         'model/wifi-phy-layer-configuration.h',
-        'model/zsp-list.h'
+        'model/zsp-list.h',
+        'model/drone.h',
+        'model/drone-container.h',
+        'model/drone-energy-model.h',
+        'helper/drone-energy-model-helper.h',
+        'model/drone-peripheral.h',
+        'model/input-peripheral.h',
+        'model/storage-peripheral.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

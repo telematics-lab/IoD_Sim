@@ -24,6 +24,24 @@
       ]
     },
     {
+      "label": "run allen (droneclass)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen-droneclass --numDrones=1\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run davinci (droneclass)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci-droneclass --config=${input:configFileDaVinciDroneclass}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "Cleanup results directory",
       "type": "shell",
       "command": "rm ./results/*",
@@ -234,6 +252,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/davinci.json"
+    },
+    {
+      "id": "configFileDaVinciDroneclass",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/davinci-droneclass.json"
     },
     {
       "id": "configFileLte",
