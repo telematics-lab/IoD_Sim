@@ -72,7 +72,7 @@ public:
 */
 
   void SetDroneApplication (uint32_t id, Ptr<Application> app);
-  void SetDronesApplication (Ptr<ApplicationContainer> apps);
+  void SetDronesApplication (ApplicationContainer apps);
   void SetRemoteApplication (uint32_t id, Ptr<Application> app);
   void UseUdpEchoApplications ();
   void EnableTraces (uint32_t net_id);
@@ -96,8 +96,8 @@ protected:
   void SetDronesMobility ();
   void SetAntennasPosition ();
 
-  void SetApplications (NodeContainer& nodes, Ptr<ApplicationContainer>& apps); // why should I pass apps by reference?
-  void SetApplication (NodeContainer& nodes, uint32_t id, Ptr<Application> app);
+  void SetApplications (NodeContainer nodes, ApplicationContainer apps);
+  void SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app);
 
 
   ScenarioConfigurationHelper *m_configurator;

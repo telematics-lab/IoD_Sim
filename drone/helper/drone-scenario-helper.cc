@@ -393,17 +393,17 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 // private
 // why should I pass pointers to apps container by reference?
 void
-DroneScenarioHelper::SetApplications (NodeContainer& nodes, Ptr<ApplicationContainer>& apps)
+DroneScenarioHelper::SetApplications (NodeContainer nodes, ApplicationContainer apps)
 {
-  for (uint32_t i = 0; i < apps->GetN (); ++i)
+  for (uint32_t i = 0; i < apps.GetN (); ++i)
     {
-      nodes.Get (i)->AddApplication (apps->Get (i));
+      nodes.Get (i)->AddApplication (apps.Get (i));
     }
 }
 
 // private
 void
-DroneScenarioHelper::SetApplication (NodeContainer& nodes, uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app)
 {
   nodes.Get (id)->AddApplication (app);
 }
@@ -430,7 +430,7 @@ DroneScenarioHelper::SetDroneApplication (uint32_t id, Ptr<Application> app)
 }
 
 void
-DroneScenarioHelper::SetDronesApplication (Ptr<ApplicationContainer> apps)
+DroneScenarioHelper::SetDronesApplication (ApplicationContainer apps)
 {
   NS_LOG_FUNCTION (&apps);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
