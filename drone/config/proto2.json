@@ -20,22 +20,74 @@
         "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
         "ns3::PointToPointNetDevice::Mtu", "1500",
         "ns3::PointToPointChannel::Delay", "10ms"
+      ],
+      "antennas": [
+        {
+          "name": "antenna_0",
+          "position": [0.0, 0.0, 50.0]
+        },
+        {
+          "name": "antenna_1",
+          "position": [0.0, 10.0, 50.0]
+        }
+      ]
+    },
+    {
+      "name": "wifi",
+      "protocol": "wifi",
+      "phyLayer": [
+        {
+          "type": "wifi",
+          "standard": "802.11n-2.4GHz",
+          "rxGain": 0.0,
+          "mode": "DsssRate1Mbps",
+          "channel": {
+              "propagationDelayModel": {
+                  "name": "ns3::ConstantSpeedPropagationDelayModel",
+                  "attributes": []
+              },
+              "propagationLossModel": {
+                  "name": "ns3::FriisPropagationLossModel",
+                  "attributes": [
+                    {
+                      "name": "Frequency",
+                      "value": 2.4e9
+                    }
+                  ]
+              }
+          }
+        }
+      ],
+      "macLayer": [
+        {
+          "type": "wifi",
+          "ssid": "wifi-default",
+          "remoteStationManager": {
+              "name": "ns3::ConstantRateWifiManager",
+              "attributes": [
+                  {
+                      "name": "DataMode",
+                      "value": "DsssRate1Mbps"
+                  },
+                  {
+                      "name": "ControlMode",
+                      "value": "DsssRate1Mbps"
+                  }
+              ]
+          }
+        }
+      ],
+      "networkLayer": [
+        {
+          "type": "ipv4",
+          "address": "10.0.0.0",
+          "mask": "255.255.255.0"
+        }
       ]
     }
   ],
 
-  "antennas": [
-    {
-      "name": "antenna_0",
-      "position": [0.0, 0.0, 50.0],
-      "interfaces": ["lte_net0"]
-    },
-    {
-      "name": "antenna_1",
-      "position": [0.0, 10.0, 50.0],
-      "interfaces": [0]
-    }
-  ],
+
 
   "dronesMobilityModel": "mixed",
   "drones": [
@@ -45,7 +97,13 @@
       "position": [100.0, 0.0, 10.0],
       "applicationStartTime": 1.0,
       "applicationStopTime": 9.0,
-      "interfaces": [0]
+      "interfaces": [
+        0,
+        {
+          "network": "wifi",
+          "type": "sta"
+        }
+      ]
     },
     {
       "name": "drone2",
@@ -53,7 +111,15 @@
       "position": [50.0, 0.0, 50.0],
       "applicationStartTime": 1.1,
       "applicationStopTime": 9.0,
-      "interfaces": ["lte_net0"]
+      "interfaces": [
+        {
+          "network": "lte_net0"
+        },
+        {
+          "network": "wifi",
+          "type": "ap"
+        }
+      ]
     }
   ],
 
