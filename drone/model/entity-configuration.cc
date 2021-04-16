@@ -29,6 +29,22 @@ EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration
 
 }
 
+EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                          ModelConfiguration mobility,
+                                          std::vector<ModelConfiguration> applications,
+                                          ModelConfiguration mechanics,
+                                          ModelConfiguration battery,
+                                          std::vector<ModelConfiguration> peripherals) :
+  m_netDevices {netDevices},
+  m_mobility {mobility},
+  m_applications {applications},
+  m_mechanics {mechanics},
+  m_battery {battery},
+  m_peripherals {peripherals}
+{
+
+}
+
 EntityConfiguration::~EntityConfiguration ()
 {
 
@@ -50,6 +66,24 @@ const std::vector<ModelConfiguration>&
 EntityConfiguration::GetApplications () const
 {
   return m_applications;
+}
+
+const ModelConfiguration&
+EntityConfiguration::GetMechanics () const
+{
+  return m_mechanics;
+}
+
+const ModelConfiguration&
+EntityConfiguration::GetBattery () const
+{
+  return m_battery;
+}
+
+const std::vector<ModelConfiguration>&
+EntityConfiguration::GetPeripherals () const
+{
+  return m_peripherals;
 }
 
 } // namespace ns3

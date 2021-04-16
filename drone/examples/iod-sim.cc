@@ -31,8 +31,13 @@
 #include <ns3/report.h>
 // IoD Sim Components
 #include <ns3/drone-client-application.h>
+#include <ns3/drone-container.h>
+#include <ns3/drone-energy-model-helper.h>
 #include <ns3/drone-list.h>
+#include <ns3/drone-peripheral.h>
 #include <ns3/drone-server-application.h>
+#include <ns3/energy-source.h>
+#include <ns3/input-peripheral.h>
 #include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/ipv4-simulation-helper.h>
 #include <ns3/mobility-factory-helper.h>
@@ -71,6 +76,12 @@ private:
   void ConfigureEntityMobility (const std::string& entityKey,
                                 Ptr<EntityConfiguration> entityConf,
                                 const uint32_t entityId);
+  void ConfigureEntityMechanics (const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId);
+  Ptr<EnergySource> ConfigureEntityBattery (const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId);
   NetDeviceContainer ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
                                                Ptr<Node> entityNode,
                                                const uint32_t entityId,
@@ -86,9 +97,12 @@ private:
                                     const uint32_t& netId,
                                     const Ipv4Address& deviceAddress,
                                     const Ptr<EntityConfiguration>& conf);
+  void ConfigureEntityPeripherals (const std::string& entityKey,
+                                    const Ptr<EntityConfiguration>& conf,
+                                    const uint32_t& entityId);
   void ConfigureSimulator ();
 
-  NodeContainer m_drones;
+  DroneContainer m_drones;
   NodeContainer m_zsps;
 
   std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
@@ -251,6 +265,15 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
             auto assignedIpv4 = ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
             ConfigureEntityMobility (entityKey, entityConf, entityId);
             ConfigureEntityApplications (entityKey, entityId, deviceId, netId, assignedIpv4, entityConf);
+            if (entityKey.compare("drones") == 0)
+            {
+              ConfigureEntityMechanics(entityKey, entityConf, entityId);
+              auto energySource = ConfigureEntityBattery(entityKey, entityConf, entityId);
+              /// Installing Energy Model on Drone
+              DroneEnergyModelHelper energyModel;
+              energyModel.Install(m_drones.Get(entityId), energySource);
+              ConfigureEntityPeripherals(entityKey, entityConf, entityId);
+            }
           }
         else
           {
@@ -383,6 +406,54 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
           NS_FATAL_ERROR ("Unsupported Application Type: " << appName);
         }
     }
+}
+
+void
+Scenario::ConfigureEntityMechanics(const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId)
+{
+  NS_LOG_FUNCTION_NOARGS();
+  const auto mechanics = entityConf->GetMechanics();
+  for (auto attr : mechanics.GetAttributes ())
+      m_drones.Get(entityId)->SetAttribute (attr.first, *attr.second);
+}
+
+Ptr<EnergySource>
+Scenario::ConfigureEntityBattery(const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId)
+{
+  NS_LOG_FUNCTION_NOARGS();
+  const auto battery = entityConf->GetBattery();
+  ObjectFactory batteryFactory;
+  batteryFactory.SetTypeId(entityConf->GetBattery().GetName());
+
+  for (auto attr : battery.GetAttributes ())
+      batteryFactory.Set(attr.first, *attr.second);
+  auto mountedBattery = batteryFactory.Create<EnergySource>();
+
+  mountedBattery->SetNode(m_drones.Get(entityId));
+  m_drones.Get(entityId)->AggregateObject(mountedBattery);
+  return mountedBattery;
+}
+
+void
+Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
+                                    const Ptr<EntityConfiguration>& conf,
+                                    const uint32_t& entityId)
+{
+  NS_LOG_FUNCTION (entityKey << entityId << conf);
+  std::vector<Ptr<DronePeripheral>> peripherals;
+  auto dronePeripheralsContainer = m_drones.Get(entityId)->getPeripherals();
+  for (auto perConf : conf->GetPeripherals ())
+    {
+      dronePeripheralsContainer->Add(perConf.GetName());
+      for (auto attr : perConf.GetAttributes ())
+          dronePeripheralsContainer->Set(attr.first, *attr.second);
+      dronePeripheralsContainer->Create();
+    }
+  dronePeripheralsContainer->InstallAll(m_drones.Get(entityId));
 }
 
 void

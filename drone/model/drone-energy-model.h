@@ -99,9 +99,8 @@ public:
   /**
    * \brief Notifies the low battery threshold being crossed.
    *
-   * This method logs the time at which the remaining energy in a LiIonEnergySource
-   * crosses the LiIonEnergyLowBatteryThreshold, set through the InitializeDrone method
-   * in DroneContainer.
+   * This method logs the time at which the remaining energy in the EnergySource
+   * crosses the low battery threshold.
    */
   virtual void HandleEnergyDepletion (void);
 
@@ -139,6 +138,7 @@ private:
    * \returns Current draw of the drone and its peripherals in Ampere.
    */
   double DoGetCurrentA (void) const;
+
   Ptr<EnergySource> m_source;
   Ptr<Drone> m_drone;
   TracedValue<double> m_totalEnergyConsumption;

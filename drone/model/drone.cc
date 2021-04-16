@@ -33,139 +33,104 @@
 
 namespace ns3 {
 
-  NS_LOG_COMPONENT_DEFINE ("Drone");
+NS_LOG_COMPONENT_DEFINE ("Drone");
 
-  NS_OBJECT_ENSURE_REGISTERED (Drone);
+NS_OBJECT_ENSURE_REGISTERED (Drone);
 
-  TypeId
-  Drone::GetTypeId (void)
-  {
-    static TypeId tid = TypeId ("ns3::Drone")
-      .SetParent<Node> ()
-      .SetGroupName("Network")
-      .AddConstructor<Drone> ()
-      .AddAttribute ("Mass", "The mass of this Drone.",
-                    DoubleValue (0),
-                    MakeDoubleAccessor (&Drone::setMass,
-                                        &Drone::getMass),
-                    MakeDoubleChecker<double> ())
-      .AddAttribute ("RotorDiskArea", "The area of the rotor disk of this Drone.",
-                    DoubleValue (0),
-                    MakeDoubleAccessor (&Drone::setArea,
-                                        &Drone::getArea),
-                    MakeDoubleChecker<double> ())
-      .AddAttribute ("AirDensity", "The density of the air.",
-                    DoubleValue (0),
-                    MakeDoubleAccessor (&Drone::getAirDensity,
-                                        &Drone::setAirDensity),
-                    MakeDoubleChecker<double> ())
-      .AddAttribute ("DragCoefficient", "Drag Coefficient relative to this Drone.",
-                    DoubleValue (0),
-                    MakeDoubleAccessor (&Drone::getDragCoefficient,
-                                        &Drone::setDragCoefficient),
-                    MakeDoubleChecker<double> ())
+TypeId
+Drone::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::Drone")
+    .SetParent<Node> ()
+    .SetGroupName("Network")
+    .AddConstructor<Drone> ()
+    .AddAttribute ("Mass", "The mass of this Drone.",
+                  DoubleValue (0),
+                  MakeDoubleAccessor (&Drone::setMass,
+                                      &Drone::getMass),
+                  MakeDoubleChecker<double> ())
+    .AddAttribute ("RotorDiskArea", "The area of the rotor disk of this Drone.",
+                  DoubleValue (0),
+                  MakeDoubleAccessor (&Drone::setArea,
+                                      &Drone::getArea),
+                  MakeDoubleChecker<double> ())
+    .AddAttribute ("DragCoefficient", "Drag Coefficient relative to this Drone.",
+                  DoubleValue (0),
+                  MakeDoubleAccessor (&Drone::getDragCoefficient,
+                                      &Drone::setDragCoefficient),
+                  MakeDoubleChecker<double> ())
 
-    ;
-    return tid;
-  }
+  ;
+  return tid;
+}
 
-  Drone::Drone()
-  {
-  }
+Drone::Drone()
+{
+}
 
-  void
-  Drone::DoDispose ()
-  {
-    NS_LOG_FUNCTION (this);
-    for (std::vector<Ptr<DronePeripheral> >::iterator i = m_peripherals.begin (); i != m_peripherals.end (); i++)
-      {
-        Ptr<DronePeripheral> peripheral = *i;
-        peripheral->Dispose ();
-        *i = 0;
-      }
-    m_peripherals.clear ();
-    Node::DoDispose ();
-  }
+void
+Drone::DoDispose ()
+{
+  NS_LOG_FUNCTION (this);
+  Node::DoDispose ();
+}
 
-  void
-  Drone::DoInitialize (void)
-  {
-    NS_LOG_FUNCTION (this);
-    Node::DoInitialize ();
-  }
+void
+Drone::DoInitialize (void)
+{
+  NS_LOG_FUNCTION (this);
+  m_peripheralContainer = CreateObject<DronePeripheralContainer>();
+  Node::DoInitialize ();
+}
 
-  void
-  Drone::AddPeripheral (Ptr<DronePeripheral> peripheral)
-  {
-    NS_LOG_FUNCTION(this << peripheral);
-    m_peripherals.push_back(peripheral);
-  }
+Ptr<DronePeripheralContainer>
+Drone::getPeripherals ()
+{
+  NS_LOG_FUNCTION(this);
+  return m_peripheralContainer;
+}
 
-  void
-  Drone::setMass(double mass)
-  {
-    m_mass = mass;
-    m_weightForce = m_mass*GRAVITY;
-  }
+void
+Drone::setMass(double mass)
+{
+  m_mass = mass;
+  m_weightForce = m_mass*GRAVITY;
+}
 
-  void
-  Drone::setArea(double area)
-  {
-    m_diskArea = area;
-  }
+void
+Drone::setArea(double area)
+{
+  m_diskArea = area;
+}
 
-  void
-  Drone::setAirDensity(double rho)
-  {
-    m_airDensity = rho;
-  }
+void
+Drone::setDragCoefficient(double coefficient)
+{
+  m_dragCoefficient = coefficient;
+}
 
-  void
-  Drone::setDragCoefficient(double coefficient)
-  {
-    m_dragCoefficient = coefficient;
-  }
+double
+Drone::getMass() const
+{
+  return m_mass;
+}
 
-  double
-  Drone::getMass() const
-  {
-    return m_mass;
-  }
+double
+Drone::getWeight() const
+{
+  return m_weightForce;
+}
 
-  double
-  Drone::getWeight() const
-  {
-    return m_weightForce;
-  }
+double
+Drone::getArea() const
+{
+  return m_diskArea;
+}
 
-  double
-  Drone::getArea() const
-  {
-    return m_diskArea;
-  }
-
-  double
-  Drone::getAirDensity() const
-  {
-    return m_airDensity;
-  }
-
-  double
-  Drone::getDragCoefficient() const
-  {
-    return m_dragCoefficient;
-  }
-
-  Drone::PeripheralsIterator
-  Drone::PeripheralsBegin (void) const
-  {
-    return m_peripherals.begin ();
-  }
-
-  Drone::PeripheralsIterator
-  Drone::PeripheralsEnd (void) const
-  {
-    return m_peripherals.end ();
-  }
+double
+Drone::getDragCoefficient() const
+{
+  return m_dragCoefficient;
+}
 
 } // namespace ns3

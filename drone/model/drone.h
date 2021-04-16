@@ -25,11 +25,11 @@
 #include <ns3/callback.h>
 #include <ns3/ptr.h>
 #include <ns3/net-device.h>
-#include "drone-peripheral.h"
+#include "drone-peripheral-container.h"
 
 namespace ns3 {
 
-class DronePeripheral;
+class DronePeripheralContainer;
 
 /**
  * \ingroup network
@@ -41,29 +41,13 @@ class DronePeripheral;
 class Drone: public Node
 {
 public:
+
   /**
    * \brief Get the type ID.
    *
    * \returns the object TypeId
    */
   static TypeId GetTypeId (void);
-
-  /// Drone peripherals iterator
-  typedef std::vector<Ptr<DronePeripheral> >::const_iterator PeripheralsIterator;
-
-  /**
-   * \brief Get an iterator which refers to the first DronePeripheral mounted.
-   *
-   * \returns an iterator which refers to the first DronePeripheral.
-   */
-  PeripheralsIterator PeripheralsBegin (void) const;
-
-  /**
-   * \brief Get an iterator which indicates past-the-last DronePeripheral mounted.
-   *
-   * \returns an iterator which indicates an ending condition for a loop.
-   */
-  PeripheralsIterator PeripheralsEnd (void) const;
 
   Drone();
 
@@ -80,13 +64,6 @@ public:
    * \param area Area of the rotor disk.
    */
   void setArea(double area);
-
-  /**
-   * \brief Sets the density of the air.
-   *
-   * \param rho Air Density.
-   */
-  void setAirDensity(double rho);
 
   /**
    * \brief Sets the drag coefficient.
@@ -117,13 +94,6 @@ public:
   double getArea() const;
 
   /**
-   * \brief Returns the density of the air.
-   *
-   * \returns Air Density.
-   */
-  double getAirDensity() const;
-
-  /**
    * \brief Returns the drag coefficient.
    *
    * \returns Drag coefficient.
@@ -131,11 +101,11 @@ public:
   double getDragCoefficient() const;
 
   /**
-   * \brief Mounts a peripheral on the drone.
+   * \brief Returns the peripheral container of the drone.
    *
-   * \param peripheral Pointer to a DronePeripheral.
+   * \returns peripheral Pointer to a DronePeripheralContainer.
    */
-  void AddPeripheral(Ptr<DronePeripheral> peripheral);
+  Ptr<DronePeripheralContainer> getPeripherals();
 
 protected:
   virtual void DoDispose (void);
@@ -147,7 +117,7 @@ private:
   double m_weightForce;                            //!< Weight force, equals to m*g
   double m_airDensity;                             //!< Air density
   double m_dragCoefficient;                        //!< Drag Coefficient
-  std::vector<Ptr<DronePeripheral>> m_peripherals; //!< DronePeripheral smart pointers
+  Ptr<DronePeripheralContainer> m_peripheralContainer;
 };
 
 } //namespace ns3

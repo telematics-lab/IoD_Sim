@@ -30,6 +30,7 @@ namespace ns3 {
  *   - Its network device(s)
  *   - Its associated mobility model
  *   - Its application(s)
+ *   - Its mechanical properties
  */
 class EntityConfigurationHelper
 {
@@ -48,6 +49,9 @@ private:
   static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations (const rapidjson::Value& json);
   static const ModelConfiguration DecodeMobilityConfiguration (const rapidjson::Value& json);
   static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
+  static const ModelConfiguration DecodeMechanicsConfiguration (const rapidjson::Value& json);
+  static const ModelConfiguration DecodeBatteryConfiguration (const rapidjson::Value& json);
+  static const std::vector<ModelConfiguration> DecodePeripheralConfigurations(const rapidjson::Value& json);
   static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value &json);
 };
 

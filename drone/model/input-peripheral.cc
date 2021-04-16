@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <ns3/integer.h>
+#include <ns3/boolean.h>
 #include <ns3/simulator.h>
 #include "input-peripheral.h"
 
@@ -40,6 +41,10 @@ InputPeripheral::GetTypeId()
                   TimeValue (Seconds(1.0)),
                   MakeTimeAccessor (&InputPeripheral::m_acquisitionTimeInterval),
                   MakeTimeChecker ())
+    .AddAttribute("HasStorage", "Acquired data are offloaded to the StoragePeripheral",
+                  BooleanValue (false),
+                  MakeBooleanAccessor (&InputPeripheral::m_hasStorage),
+                  MakeBooleanChecker())
     ;
   return tid;
 }
@@ -72,8 +77,11 @@ void
 InputPeripheral::Install(Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
 {
   SetDrone(drone);
-  SetStorage(storage);
-  AcquireData();
+  if (storage != NULL)
+  {
+    SetStorage(storage);
+    AcquireData();
+  }
 }
 
 void

@@ -30,8 +30,7 @@ class Drone;
 /**
  * \brief Base class describing a general-purpose peripheral mounted on a drone.
  *
- * Every peripheral must be installed on a drone.
- * Besides, it is characterized by a constant power consumption.
+ * A peripheral is characterized by a constant power consumption.
  */
 class DronePeripheral : public Object
 {

@@ -55,13 +55,15 @@ public:
    *
    * \param storage Pointer to a StoragePeripheral.
    *
-   * StoragePeripheral is needed to store the data acquired by every InputPeripheral.
    * Input and storage peripherals have to be on the same drone.
    */
   void SetStorage(Ptr<StoragePeripheral> storage);
 
   /**
-   * \brief Installs the InputPeripheral and its StoragePeripheral on a Drone.
+   * \brief Installs an InputPeripheral on a Drone and links it to the StoragePeripheral.
+   *
+   * This method must be called if the InputPeripheral has the Attribute "HasStorage"
+   * set to true.
    *
    * \param storage Pointer to a StoragePeripheral.
    * \param drone Pointer to a Drone.
@@ -75,6 +77,7 @@ protected:
 private:
 Time m_acquisitionTimeInterval;
 double m_dataRate;
+bool m_hasStorage;
 EventId m_dataAcquisitionEvent;
 Ptr<StoragePeripheral> m_storage;
 

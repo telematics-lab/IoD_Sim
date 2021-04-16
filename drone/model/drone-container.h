@@ -72,17 +72,6 @@ public:
    */
   Ptr<Drone> Get (uint32_t i) const;
 
-  /**
-   * \brief Initializes a Ptr<Drone> stored in this container.
-   *
-   * Creates the pointer to a LiIonEnergySource and installs it on the given Drone.
-   * Moreover, creates a DroneEnergyModelHelper to install a DroneEnergyModel on the given Drone
-   * and to link it to the newly created LiIonEnergySource.
-   *
-   * \param drone Pointer to a drone to initialize.
-   */
-  void InitializeDrone(Ptr<Drone> drone);
-
 private:
   std::vector<Ptr<Drone> > m_drones; //!< Drones smart pointers
 };

@@ -39,6 +39,9 @@ public:
    */
   ModelConfiguration (const std::string name,
                       const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
+
+  ModelConfiguration (){}
+
   /** Default destructor */
   ~ModelConfiguration ();
 

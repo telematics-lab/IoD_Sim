@@ -62,7 +62,6 @@ DronePeripheral::SetDrone(Ptr<Drone> drone)
   NS_LOG_FUNCTION (this << drone);
   NS_ASSERT (drone != NULL);
   m_drone = drone;
-  m_drone -> AddPeripheral(this);
 }
 
 Ptr<Drone>

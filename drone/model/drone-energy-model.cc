@@ -19,6 +19,8 @@
 #include <ns3/simulator.h>
 #include <ns3/mobility-model.h>
 
+#define AIR_DENSITY 1.225
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DroneEnergyModel");
@@ -45,6 +47,7 @@ DroneEnergyModel::DroneEnergyModel ()
 void
 DroneEnergyModel::SetEnergySource(Ptr<EnergySource> source)
 {
+  NS_LOG_FUNCTION (this << source);
   m_source = source;
 }
 
@@ -79,7 +82,7 @@ double
 DroneEnergyModel::GetPeripheralsPowerConsumption(void) const
 {
   double peripheralsPowerConsumption = 0;
-  for (auto i = m_drone->PeripheralsBegin(); i != m_drone->PeripheralsEnd(); i++)
+  for (auto i = m_drone->getPeripherals()->Begin(); i != m_drone->getPeripherals()->End(); i++)
     {
       peripheralsPowerConsumption+= (*i)->GetPowerConsumption();
     }
@@ -93,9 +96,9 @@ DroneEnergyModel::GetPower() const
   Ptr<Drone> drone = GetDrone();
   Ptr<Object> obj = StaticCast<Object, Drone>(drone);
   Vector velocity = obj->GetObject<MobilityModel>()->GetVelocity();
-  double Phover = sqrt(drone->getWeight()/(2*drone->getAirDensity()*drone->getArea()));
-  double Plevel = ((pow(drone->getWeight(), 2))/(sqrt(2)*drone->getAirDensity()*drone->getArea())) * (1/sqrt(pow(velocity.x, 2) + pow(velocity.y, 2) + sqrt(pow(sqrt(pow(velocity.x,2) + pow(velocity.y, 2)),4)+(4*pow(Phover,4)))));
-  double Pdrag = (1/8)*drone->getDragCoefficient()*drone->getAirDensity()*drone->getArea()*pow(sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)),3);
+  double Phover = sqrt(drone->getWeight()/(2*AIR_DENSITY*drone->getArea()));
+  double Plevel = ((pow(drone->getWeight(), 2))/(sqrt(2)*AIR_DENSITY*drone->getArea())) * (1/sqrt(pow(velocity.x, 2) + pow(velocity.y, 2) + sqrt(pow(sqrt(pow(velocity.x,2) + pow(velocity.y, 2)),4)+(4*pow(Phover,4)))));
+  double Pdrag = (1/8)*drone->getDragCoefficient()*AIR_DENSITY*drone->getArea()*pow(sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)),3);
   double Pvertical = drone->getWeight()*velocity.z;
   double PowerConsumption = Plevel + Pdrag + Pvertical;
   return PowerConsumption;
