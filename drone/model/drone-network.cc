@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -71,14 +71,6 @@ DroneNetwork::SetAttributes (const std::vector<std::pair<std::string, std::strin
   m_attributes = attributes;
 }
 
-/*
-void
-DroneNetwork::SetName(std::string name)
-{
-  m_name = name;
-}
-*/
-
 void
 DroneNetwork::AttachDrone (Ptr<Node> node)
 {
@@ -111,6 +103,8 @@ DroneNetwork::SetIpv4AddressHelper (Ipv4AddressHelper& ipv4H)
 
 
 
+
+
 /* LTE DRONE NETWORK */
 
 Ptr<Node>
@@ -135,7 +129,6 @@ LteDroneNetwork::Generate ()
   config.ConfigureDefaults ();
 
   m_internetHelper.Install (m_droneNodes);
-  //m_internetHelper.Install(m_backbone);
 
   m_lteHelper = CreateObject<LteHelper> ();
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -203,6 +196,9 @@ LteDroneNetwork::EnableTraces ()
 }
 
 
+
+
+
 // DRONE NETWORK CONTAINER
 
 void
@@ -249,8 +245,5 @@ DroneNetworkContainer::End () const
 {
   return m_droneNetworks.end ();
 }
-
-
-
 
 } // namespace ns3
