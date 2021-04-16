@@ -178,6 +178,8 @@ LteDroneNetwork::Generate ()
 void
 LteDroneNetwork::EnableTraces ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
+
   AsciiTraceHelper ascii;
 
   std::string p2pPath, ipPath;
@@ -216,6 +218,8 @@ DroneNetworkContainer::Get (uint32_t index) const
 Ptr<DroneNetwork>
 DroneNetworkContainer::Get (std::string name) const
 {
+  NS_LOG_FUNCTION (name);
+
   for (uint32_t i = 0; i < m_droneNetworks.size (); i++)
     {
       auto droneNet = m_droneNetworks[i];

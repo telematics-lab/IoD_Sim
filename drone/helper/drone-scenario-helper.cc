@@ -155,6 +155,8 @@ DroneScenarioHelper::SetMobilityModels ()
 uint32_t
 DroneScenarioHelper::MobilityToEnum (std::string mobilityModel)
 {
+  NS_LOG_FUNCTION (mobilityModel);
+
   uint32_t mobilityModelValue = 0;
   while (mobilityModelValue < _MobilityModelName::ENUM_SIZE)
     {
