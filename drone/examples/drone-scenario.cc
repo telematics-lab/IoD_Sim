@@ -42,17 +42,17 @@ int main (int argc, char **argv)
   for (uint32_t i = 0; i < CONFIG->GetDronesN (); ++i)
     {
       Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient> (
-        "Ipv4Address", Ipv4AddressValue (DSH->GetDroneIpv4Address (i)),
+        "Ipv4Address", Ipv4AddressValue (DSH->GetDroneIpv4Address (i, 1)),
         "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"),
         "Duration", DoubleValue (CONFIG->GetDuration ()),
-        "DestinationIpv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0)));
+        "DestinationIpv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0, 1)));
       clientApp->SetStartTime (Seconds (CONFIG->GetDroneApplicationStartTime (i)));
       clientApp->SetStopTime (Seconds (CONFIG->GetDroneApplicationStopTime (i)));
       DSH->SetDroneApplication (i, clientApp);
     }
 
   Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer> (
-    "Ipv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0)),
+    "Ipv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0, 1)),
     "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"));
   serverApp->SetStartTime (Seconds (CONFIG->GetRemoteApplicationStartTime (0)));
   serverApp->SetStopTime (Seconds (CONFIG->GetRemoteApplicationStopTime (0)));

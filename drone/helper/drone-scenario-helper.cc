@@ -322,29 +322,34 @@ DroneScenarioHelper::SetupNetworks ()
           staticRouteRem->AddNetworkRouteTo (netGwProprietaryIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
         }
     }
+
+  m_buildings = m_configurator->GetBuildings ();
+
+  BuildingsHelper::Install (m_antennaNodes);
+  BuildingsHelper::Install (m_droneNodes);
 }
 
 Ipv4Address
-DroneScenarioHelper::GetIpv4Address (Ptr<Node> node)
+DroneScenarioHelper::GetIpv4Address (Ptr<Node> node, uint32_t index)
 {
-  return node->GetObject<Ipv4>()->GetAddress (1, 0).GetLocal ();
+  return node->GetObject<Ipv4>()->GetAddress (index, 0).GetLocal ();
 }
 
 Ipv4Address
-DroneScenarioHelper::GetDroneIpv4Address (uint32_t id)
+DroneScenarioHelper::GetDroneIpv4Address (uint32_t id, uint32_t index)
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
-  return this->GetIpv4Address (m_droneNodes.Get (id));
+  return this->GetIpv4Address (m_droneNodes.Get (id), index);
 }
 
 Ipv4Address
-DroneScenarioHelper::GetRemoteIpv4Address (uint32_t id)
+DroneScenarioHelper::GetRemoteIpv4Address (uint32_t id, uint32_t index)
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   // add 1 since index 0 is the PGW (for LTE with EPC network)
-  return this->GetIpv4Address (m_remoteNodes.Get (id));
+  return this->GetIpv4Address (m_remoteNodes.Get (id), index);
 }
 
 /*
@@ -480,7 +485,7 @@ DroneScenarioHelper::UseUdpEchoApplications ()
   LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
 
   // using the IP of the first remote only as target.
-  UdpEchoClientHelper echoClient (GetIpv4Address (m_remoteNodes.Get (0)), 9);
+  UdpEchoClientHelper echoClient (GetIpv4Address (m_remoteNodes.Get (0), 1), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));

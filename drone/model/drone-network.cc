@@ -21,7 +21,6 @@
 #include <ns3/config-store-module.h>
 #include <ns3/ipv4-static-routing-helper.h>
 #include <ns3/internet-stack-helper.h>
-#include <ns3/buildings-helper.h>
 #include <ns3/trace-helper.h>
 #include <ns3/scenario-configuration-helper.h>
 
@@ -125,7 +124,7 @@ LteDroneNetwork::Generate ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  auto m_configurator = ScenarioConfigurationHelper::Get ();
+  //auto m_configurator = ScenarioConfigurationHelper::Get ();
 
   for (auto s : m_attributes)
     {
@@ -181,11 +180,6 @@ LteDroneNetwork::Generate ()
 
   // attach each drone ue to the antenna with the strongest signal
   m_lteHelper->Attach (m_droneDevs);
-
-  m_buildings = m_configurator->GetBuildings ();
-
-  BuildingsHelper::Install (m_antennaNodes);
-  BuildingsHelper::Install (m_droneNodes);
 }
 
 void
