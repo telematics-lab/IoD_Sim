@@ -137,9 +137,8 @@ Scenario::ConfigurePhy ()
   // The helpers used below will help us putting together the wifi NICs we want
   // wifi.EnableLogComponents();  // Turn on all Wifi logging
 
-  m_wifi.SetStandard (WIFI_PHY_STANDARD_80211n_2_4GHZ);
+  m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
 
-  m_wifiPhy = YansWifiPhyHelper::Default ();
   // This is one parameter that matters when using FixedRssLossModel
   // set it to zero; otherwise, gain will be added
   m_wifiPhy.Set ("RxGain", DoubleValue (0));

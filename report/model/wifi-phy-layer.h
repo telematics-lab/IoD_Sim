@@ -77,13 +77,14 @@ private:
                       uint16_t channelFreqMhz,
                       WifiTxVector txVector,
                       MpduInfo aMpdu,
-                      SignalNoiseDbm signalNoise);
+                      SignalNoiseDbm signalNoise,
+                      uint16_t staId);
 
   uint32_t m_droneReference;            /// ID of the drone
   uint32_t m_netdevReference;           /// ID of the network device
 
   /// RSSI history of the device
-  std::vector<std::tuple<Time, Mac48Address, double>> m_rssi;
+  std::vector<std::tuple<Time, Mac48Address, double, uint16_t>> m_rssi;
 
   double m_frequency;                   /// the carrier frequency set
   std::string m_standard;               /// the wifi standard used

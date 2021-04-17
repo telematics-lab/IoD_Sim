@@ -125,7 +125,6 @@ Scenario::ConfigurePhy ()
   const std::string phyMode = CONFIGURATOR->GetPhyMode ();
   YansWifiChannelHelper wifiChannel;
   AsciiTraceHelper ascii;
-  m_wifiPhy = YansWifiPhyHelper::Default ();
 
   // disable fragmentation for frames below 2200 bytes
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold",
@@ -140,7 +139,7 @@ Scenario::ConfigurePhy ()
   // The helpers used below will help us putting together the wifi NICs we want
   //wifi.EnableLogComponents();  // Turn on all Wifi logging
 
-  m_wifi.SetStandard (WIFI_PHY_STANDARD_80211n_2_4GHZ);
+  m_wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
 
   // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
   m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);

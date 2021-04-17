@@ -1,0 +1,154 @@
+{
+  "globalSettings": [
+    "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0"
+  ],
+
+  "networks": [
+    {
+      "name": "lte_net0",
+      "protocol": "lte",
+      "attributes": [
+        "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000"
+      ]
+    }
+  ],
+
+  "antennas": [
+    {
+      "name": "antenna_0",
+      "position": [0.0, 0.0, 0.0],
+      "interfaces": ["lte_net0"]
+    }
+  ],
+
+  "dronesMobilityModel": "mixed",
+  "drones": [
+    {
+      "name": "drone1",
+      "mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
+            "speedCoefficients": [100.0],
+            "trajectory": [
+                {
+                  "position": [200.000, 0.000, 10.0],
+                  "interest": 0
+                },
+                {
+                  "position": [190.211, 61.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [161.803, 117.557, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [117.557, 161.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [61.803, 190.211, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [0.000, 200.000, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-61.803, 190.211, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-117.557, 161.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-161.803, 117.557, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-190.211, 61.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-200.000, 0.000, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-190.211, -61.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-161.803, -117.557, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-117.557, -161.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-61.803, -190.211, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [-0.000, -200.000, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [61.803, -190.211, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [117.557, -161.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [161.803, -117.557, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [190.211, -61.803, 10.0],
+                  "interest": 1
+                },
+                {
+                  "position": [200.000, 0.000, 10.0],
+                  "interest": 1
+                }
+            ],
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": ["lte_net0"]
+    }
+  ],
+
+  "remotes": [
+    {
+      "name": "remote1",
+      "applicationStartTime": 0.5,
+      "applicationStopTime": 9.5
+    }
+  ],
+
+  "buildings": [
+    {
+        "type": "residential",
+        "walls": "concreteWithWindows",
+        "boundaries": [50.0, 70.0, -15.0, 15.0, 0.0, 50.0],
+        "floors": 12,
+        "rooms": [2, 2]
+    }
+  ],
+
+  "duration": 10.0,
+  "logOnFile": true,
+  "logComponents": [
+    "DroneServer",
+    "DroneClient",
+    "ScenarioConfigurationHelper",
+    "DroneScenarioHelper",
+    "DroneNetwork"
+  ]
+}

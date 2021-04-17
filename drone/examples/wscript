@@ -5,11 +5,23 @@ def build(bld):
                                   'internet', 'report'])
     obj.source = 'scenario-allen.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-allen-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet', 'report'])
+    obj.source = 'scenario-allen-hybrid-lte-wifi.cc'
+
     obj = bld.create_ns3_program('drone-scenario-babbage',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
                                   'internet'])
     obj.source = 'scenario-babbage.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-babbage-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet'])
+    obj.source = 'scenario-babbage-hybrid-lte-wifi.cc'
 
     obj = bld.create_ns3_program('drone-scenario-davinci',
                                  ['drone', 'core', 'network',
@@ -17,11 +29,23 @@ def build(bld):
                                   'internet'])
     obj.source = 'scenario-davinci.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-davinci-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet'])
+    obj.source = 'scenario-davinci-hybrid-lte-wifi.cc'
+
     obj = bld.create_ns3_program('drone-scenario-davinci-threelogdist',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
                                   'internet'])
     obj.source = 'scenario-davinci-threelogdist.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-davinci-threelogdist-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet'])
+    obj.source = 'scenario-davinci-threelogdist-hybrid-lte-wifi.cc'
 
     obj = bld.create_ns3_program('drone-scenario-easley',
                                  ['drone', 'core', 'network',
@@ -29,12 +53,23 @@ def build(bld):
                                   'internet'])
     obj.source = 'scenario-easley.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-easley-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet'])
+    obj.source = 'scenario-easley-hybrid-lte-wifi.cc'
+
     obj = bld.create_ns3_program('drone-scenario-easley-threelogdist',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
                                   'internet'])
     obj.source = 'scenario-easley-threelogdist.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-easley-threelogdist-hybrid-lte-wifi',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi', 'lte',
+                                  'internet'])
+    obj.source = 'scenario-easley-threelogdist-hybrid-lte-wifi.cc'
     # lte-lena-simple-davinci shouldn't have wifi as dependency,
     # but for some reason there are weak references to it.
     obj = bld.create_ns3_program('lte-lena-simple-davinci',
@@ -49,3 +84,17 @@ def build(bld):
     obj = bld.create_ns3_program('lte-lena-simple-RWMM',
                                  ['lte'])
     obj.source = 'lte-lena-simple-RWMM.cc'
+
+
+    obj = bld.create_ns3_program('lte-scenario-basic',
+                                 ['lte', 'drone', 'wifi',
+                                  'internet', 'mobility', 'applications',
+                                  'core'])
+    obj.source = 'lte-scenario-basic.cc'
+
+
+    obj = bld.create_ns3_program('drone-scenario',
+                                 ['lte', 'drone', 'wifi',
+                                  'internet', 'mobility', 'applications',
+                                  'core'])
+    obj.source = 'drone-scenario.cc'

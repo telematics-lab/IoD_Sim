@@ -24,6 +24,7 @@
 #include <ns3/lte-module.h>
 #include <ns3/config-store.h>
 #include <ns3/buildings-helper.h>
+#include <ns3/mobility-building-info.h>
 
 #include <cerrno>
 #include <cstdio>
@@ -58,11 +59,12 @@ int main (int argc, char *argv[])
   cmd.AddValue ("config", "Configuration file path", configFilePath);
   cmd.Parse (argc, argv);
 
-  /*Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (true));
-  Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (true));
-  Config::SetDefault ("ns3::LteHelper::UseIdealRrc", BooleanValue (true));
-  Config::SetDefault ("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue (true));*/
-
+  /*
+    Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (true));
+    Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (true));
+    Config::SetDefault ("ns3::LteHelper::UseIdealRrc", BooleanValue (true));
+    Config::SetDefault ("ns3::LteHelper::UsePdschForCqiGeneration", BooleanValue (true));
+  */
 
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults ();
@@ -82,35 +84,32 @@ int main (int argc, char *argv[])
   // Install Mobility Model
   MobilityHelper mobility;
 
-   for (uint32_t i = 0; i < ueNodes.GetN (); i++)
-     {
-       mobility.SetMobilityModel ("ns3::ConstantAccelerationDroneMobilityModel",
-                                  "Acceleration", DoubleValue (CONFIGURATOR->GetDroneAcceleration (i)),
-                                  "MaxSpeed", DoubleValue (CONFIGURATOR->GetDroneMaxSpeed (i)),
-                                  "FlightPlan", FlightPlanValue (CONFIGURATOR->GetDroneFlightPlan (i)),
-                                  "CurveStep", DoubleValue (CONFIGURATOR->GetCurveStep ()));
+  for (uint32_t i = 0; i < ueNodes.GetN (); i++)
+    {
+      mobility.SetMobilityModel ("ns3::ConstantAccelerationDroneMobilityModel",
+                                 "Acceleration", DoubleValue (CONFIGURATOR->GetDroneAcceleration (i)),
+                                 "MaxSpeed", DoubleValue (CONFIGURATOR->GetDroneMaxSpeed (i)),
+                                 "FlightPlan", FlightPlanValue (CONFIGURATOR->GetDroneFlightPlan (i)),
+                                 "CurveStep", DoubleValue (CONFIGURATOR->GetCurveStep ()));
 
-       mobility.Install (ueNodes.Get (i));
-       BuildingsHelper::Install (ueNodes.Get (i));
-     }
+      mobility.Install (ueNodes.Get (i));
+      BuildingsHelper::Install (ueNodes.Get (i));
+    }
 
-   MobilityHelper mobilityZsps;
-   auto positionAllocatorZsps = CreateObject<ListPositionAllocator> ();
+  MobilityHelper mobilityZsps;
+  auto positionAllocatorZsps = CreateObject<ListPositionAllocator> ();
 
-   CONFIGURATOR->GetZspsPosition (positionAllocatorZsps);
+  CONFIGURATOR->GetZspsPosition (positionAllocatorZsps);
 
-   mobilityZsps.SetPositionAllocator (positionAllocatorZsps);
-   mobilityZsps.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-   mobilityZsps.Install (enbNodes);
-   BuildingsHelper::Install (enbNodes);
+  mobilityZsps.SetPositionAllocator (positionAllocatorZsps);
+  mobilityZsps.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobilityZsps.Install (enbNodes);
+  BuildingsHelper::Install (enbNodes);
 
- //Finalize the building and mobility model configuration
-   BuildingsHelper::MakeMobilityModelConsistent ();
-
- //using the Proportional Fair (PF) scheduler
-   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
-   lteHelper->SetSchedulerAttribute ("HarqEnabled",  BooleanValue (true));
- //lteHelper->SetSchedulerAttribute ("CqiTimerThreshold", UintegerValue (1000));
+  //using the Proportional Fair (PF) scheduler
+  lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
+  lteHelper->SetSchedulerAttribute ("HarqEnabled",  BooleanValue (true));
+  //lteHelper->SetSchedulerAttribute ("CqiTimerThreshold", UintegerValue (1000));
 
   // Create Devices and install them in the Nodes (eNB and UE)
   NetDeviceContainer enbDevs;
@@ -149,7 +148,7 @@ int main (int argc, char *argv[])
   Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
   rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (0.04)));
   rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (1.0)));
-//The time interval duration for RLC KPIs
+  //The time interval duration for RLC KPIs
 
   std::chrono::high_resolution_clock timer;
   auto start = timer.now();

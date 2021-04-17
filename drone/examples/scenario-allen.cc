@@ -99,15 +99,6 @@ using ms = std::chrono::duration<float, std::milli>;
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
 
-void MonitorRxCallback (Ptr< const Packet > packet,
-                        uint16_t channelFreqMhz,
-                        WifiTxVector txVector,
-                        MpduInfo aMpdu,
-                        SignalNoiseDbm signalNoise)
-{
-    std::cout << "Packet " << packet->GetUid() << " received with RSSI: " << signalNoise.signal << " dBm" << std::endl;
-}
-
 void DroneClientTxCallback  (Ptr<const Packet> p)
 {
     std::cout << "DroneClient: Packet sent!" << std::endl;
@@ -196,9 +187,8 @@ int main(int argc, char** argv) {
     if (verboseMode)
         wifi.EnableLogComponents();  // Turn on all Wifi logging
 
-    wifi.SetStandard(WIFI_PHY_STANDARD_80211n_2_4GHZ);
+    wifi.SetStandard(WIFI_STANDARD_80211n_2_4GHZ);
 
-    wifiPhy = YansWifiPhyHelper::Default();
     // This is one parameter that matters when using FixedRssLossModel
     // set it to zero; otherwise, gain will be added
     wifiPhy.Set("RxGain", DoubleValue(0));
@@ -306,8 +296,6 @@ int main(int argc, char** argv) {
     /*
      * Simulation Configuration.
      */
-    //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/MonitorSnifferRx",
-    //                              MakeCallback(&MonitorRxCallback));
     Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::DroneClient/Tx",
                                   MakeCallback(&DroneClientTxCallback));
 

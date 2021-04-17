@@ -13,7 +13,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "./waf build -j${input:cores}",
+      "command": "./waf build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -22,10 +22,21 @@
         "$gcc"
       ]
     },
+
+
     {
       "label": "run allen",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-allen --numDrones=${input:numDrones}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run allen (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen-hybrid-lte-wifi --numDrones=${input:numDrones}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -41,9 +52,27 @@
       "group": "test"
     },
     {
+      "label": "run babbage (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-babbage-hybrid-lte-wifi --numDrones=${input:numDrones} --duration=${input:duration}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run davinci",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-davinci --config=${input:configFileDaVinci}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run davinci (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci-hybrid-lte-wifi --config=${input:configFileDaVinci}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -59,6 +88,24 @@
       "group": "test"
     },
     {
+      "label": "run easley (hybrid LTE+WiFi)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-easley-hybrid-lte-wifi --config=${input:configFileEasley}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run IoD Sim",
+      "type": "shell",
+      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "run LTE LENA CostVelocity",
       "type": "shell",
       "command": "./waf --run \"lte-lena-costvelocity\"",
@@ -67,6 +114,55 @@
       },
       "group": "test"
     },
+    {
+      "label": "run LTE LENA Simple DaVinci",
+      "type": "shell",
+      "command": "./waf --run \"lte-lena-simple-davinci --config=${input:configFileLte}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run lte-scenario-basic",
+      "type": "shell",
+      "command": "./waf --run \"lte-scenario-basic --config=${input:configFileLteBasic}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run drone-scenario",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+
+
+    {
+      "label": "run debug",
+      "type": "shell",
+      "command": "./waf --run \"${input:scenario} --config=${input:configFileDebug}\" --gdb",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run simulation with args",
+      "type": "shell",
+      "command": "./waf --run ${input:scenario} ${input:opt_args} --command-template=\"%s ${input:opt_scenArgs}\" ${input:opt_nextCmd}",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+
+
     {
       "label": "docs",
       "type": "shell",
@@ -158,13 +254,9 @@
       }
     }
   ],
+
+
   "inputs": [
-    {
-      "id": "cores",
-      "type": "promptString",
-      "description": "Number of cores to use during build",
-      "default": "1"
-    },
     {
       "id": "numDrones",
       "type": "promptString",
@@ -177,6 +269,34 @@
       "description": "Duration of this simulation, in seconds",
       "default": "10"
     },
+
+
+    {
+      "id": "scenario",
+      "type": "promptString",
+      "description": "Name of the scenario to run",
+      "default": "drone-scenario"
+    },
+    {
+      "id": "opt_args",
+      "type": "promptString",
+      "description": "Optional arguments to pass to waf command",
+      "default": "--cwd=../results/"
+    },
+    {
+      "id": "opt_scenArgs",
+      "type": "promptString",
+      "description": "Optional arguments to pass to the scenario script",
+      "default": ""
+    },
+    {
+      "id": "opt_nextCmd",
+      "type": "promptString",
+      "description": "Optional next command (piping, output redirection, etc...)",
+      "default": "> ../results/`date +%y%m%d-%H%M`.out 2>&1"
+    },
+
+
     {
       "id": "configFileDaVinci",
       "type": "promptString",
@@ -184,10 +304,40 @@
       "default": "./src/drone/config/davinci.json"
     },
     {
+      "id": "configFileLte",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-scenario.json"
+    },
+    {
       "id": "configFileEasley",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/easley.json"
+    },
+    {
+      "id": "configFileLteBasic",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-basic.json"
+    },
+    {
+      "id": "configFileDroneScenario",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/proto.json"
+    },
+    {
+      "id": "nameDroneScenario",
+      "type": "promptString",
+      "description": "Name of the scenario",
+      "default": "DRONE_SCENARIO"
+    },
+    {
+      "id": "configFileDebug",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/proto.json"
     }
   ]
 }

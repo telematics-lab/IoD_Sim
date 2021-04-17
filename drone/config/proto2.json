@@ -1,0 +1,157 @@
+{
+  "globalSettings": [
+    "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0",
+
+    "ns3::CsmaChannel::DataRate", "5000000",
+    "ns3::CsmaChannel::Delay", "2ms"
+  ],
+
+  "networks": [
+    {
+      "name": "lte_net0",
+      "protocol": "lte",
+      "attributes": [
+        "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
+        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
+        "ns3::PointToPointNetDevice::Mtu", "1500",
+        "ns3::PointToPointChannel::Delay", "10ms"
+      ],
+      "antennas": [
+        {
+          "name": "antenna_0",
+          "position": [0.0, 0.0, 50.0]
+        },
+        {
+          "name": "antenna_1",
+          "position": [0.0, 10.0, 50.0]
+        }
+      ]
+    },
+    {
+      "name": "wifi",
+      "protocol": "wifi",
+      "phyLayer": [
+        {
+          "type": "wifi",
+          "standard": "802.11n-2.4GHz",
+          "rxGain": 0.0,
+          "mode": "DsssRate1Mbps",
+          "channel": {
+              "propagationDelayModel": {
+                  "name": "ns3::ConstantSpeedPropagationDelayModel",
+                  "attributes": []
+              },
+              "propagationLossModel": {
+                  "name": "ns3::FriisPropagationLossModel",
+                  "attributes": [
+                    {
+                      "name": "Frequency",
+                      "value": 2.4e9
+                    }
+                  ]
+              }
+          }
+        }
+      ],
+      "macLayer": [
+        {
+          "type": "wifi",
+          "ssid": "wifi-default",
+          "remoteStationManager": {
+              "name": "ns3::ConstantRateWifiManager",
+              "attributes": [
+                  {
+                      "name": "DataMode",
+                      "value": "DsssRate1Mbps"
+                  },
+                  {
+                      "name": "ControlMode",
+                      "value": "DsssRate1Mbps"
+                  }
+              ]
+          }
+        }
+      ],
+      "networkLayer": [
+        {
+          "type": "ipv4",
+          "address": "10.0.0.0",
+          "mask": "255.255.255.0"
+        }
+      ]
+    }
+  ],
+
+
+
+  "dronesMobilityModel": "mixed",
+  "drones": [
+    {
+      "name": "drone1",
+      "mobilityModel": "ns3::ConstantPositionMobilityModel",
+      "position": [100.0, 0.0, 10.0],
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": [
+        0,
+        {
+          "network": "wifi",
+          "type": "sta"
+        }
+      ]
+    },
+    {
+      "name": "drone2",
+      "mobilityModel": "ns3::ConstantPositionMobilityModel",
+      "position": [50.0, 0.0, 50.0],
+      "applicationStartTime": 1.1,
+      "applicationStopTime": 9.0,
+      "interfaces": [
+        {
+          "network": "lte_net0"
+        },
+        {
+          "network": "wifi",
+          "type": "ap"
+        }
+      ]
+    }
+  ],
+
+  "remotes": [
+    {
+      "name": "remote1",
+      "applicationStartTime": 0.5,
+      "applicationStopTime": 9.5
+    },
+    {
+      "name": "remote2"
+    }
+  ],
+
+  "buildings": [
+    {
+        "type": "residential",
+        "walls": "concreteWithWindows",
+        "boundaries": [10.0, 30.0, 10.0, 30.0, 0.0, 50.0],
+        "floors": 12,
+        "rooms": [2, 2]
+    }
+  ],
+
+  "duration": 10.0,
+  "logOnFile": false,
+  "logComponents": [
+    "Scenario",
+    "DroneServer",
+    "DroneClient",
+    "ScenarioConfigurationHelper",
+    "DroneScenarioHelper",
+    "DroneNetwork"
+  ]
+}
