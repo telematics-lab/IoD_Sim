@@ -325,7 +325,7 @@
       "id": "configFileDroneScenario",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/lte-arcturus.json"
+      "default": "./src/drone/config/proto.json"
     },
     {
       "id": "nameDroneScenario",
@@ -337,7 +337,7 @@
       "id": "configFileDebug",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/lte-arcturus.json"
+      "default": "./src/drone/config/proto.json"
     }
   ]
 }
