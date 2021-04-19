@@ -232,6 +232,11 @@ private:
    */
   void SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app);
 
+  /**
+   * \brief configures and generater the LTE Radio Environment Map if enabled
+   */
+  void GenerateRadioMap ();
+
 
   ScenarioConfigurationHelper *m_configurator;
   NodeContainer m_droneNodes, m_antennaNodes, m_remoteNodes, m_backbone;

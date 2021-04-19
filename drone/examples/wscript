@@ -76,16 +76,6 @@ def build(bld):
                                  ['lte', 'drone', 'wifi'])
     obj.source = 'lte-lena-simple-davinci.cc'
 
-    # The following scenarios are strictly dependent on LTE only
-    obj = bld.create_ns3_program('lte-lena-costvelocity',
-                                 ['lte'])
-    obj.source = 'lte-lena-costvelocity.cc'
-
-    obj = bld.create_ns3_program('lte-lena-simple-RWMM',
-                                 ['lte'])
-    obj.source = 'lte-lena-simple-RWMM.cc'
-
-
     obj = bld.create_ns3_program('lte-scenario-basic',
                                  ['lte', 'drone', 'wifi',
                                   'internet', 'mobility', 'applications',
@@ -98,3 +88,14 @@ def build(bld):
                                   'internet', 'mobility', 'applications',
                                   'core'])
     obj.source = 'drone-scenario.cc'
+
+'''
+    # The following scenarios are strictly dependent on LTE only
+    obj = bld.create_ns3_program('lte-lena-costvelocity',
+                                 ['lte'])
+    obj.source = 'lte-lena-costvelocity.cc'
+
+    obj = bld.create_ns3_program('lte-lena-simple-RWMM',
+                                 ['lte'])
+    obj.source = 'lte-lena-simple-RWMM.cc'
+'''

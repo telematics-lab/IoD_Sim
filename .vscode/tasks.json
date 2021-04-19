@@ -135,7 +135,7 @@
     {
       "label": "run drone-scenario",
       "type": "shell",
-      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario}\"",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario} --radioMap=${input:radioMapDroneScenario}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -332,6 +332,12 @@
       "type": "promptString",
       "description": "Name of the scenario",
       "default": "DRONE_SCENARIO"
+    },
+    {
+      "id": "radioMapDroneScenario",
+      "type": "promptString",
+      "description": "Generate the Radio Environment Map",
+      "default": "false"
     },
     {
       "id": "configFileDebug",

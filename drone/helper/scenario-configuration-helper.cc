@@ -478,6 +478,7 @@ ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
   CommandLine cmd;
   cmd.AddValue ("name", "Name of the scenario", m_name);
   cmd.AddValue ("config", "Configuration file path", configFilePath);
+  cmd.AddValue ("radioMap", "Enables the generation of the EnvironmentRadioMap", m_radioMap);
   cmd.Parse (argc, argv);
 
   if (configFilePath.empty ())
@@ -1076,5 +1077,34 @@ ScenarioConfigurationHelper::GetAntennasInNetwork (std::string net_name) const
 {
   return GetAntennasInNetwork (GetObjectIndex ("networks", net_name));
 }
+
+
+const bool
+ScenarioConfigurationHelper::RadioMap () const
+{
+  return m_radioMap;
+}
+
+const std::vector<std::pair<std::string, std::string> >
+ScenarioConfigurationHelper::GetRadioMapParameters () const
+{
+  std::vector<std::pair<std::string, std::string> > parameters;
+  NS_ASSERT_MSG (m_config.HasMember("radioMapParameters"),
+      "'radioMapParameters' key is not present in the configuration file.");
+
+  NS_ASSERT_MSG (m_config["radioMapParameters"].IsArray () && m_config["radioMapParameters"].Size () % 2 == 0,
+                  "Check 'radioMapParameters': should be an array of even number elements.");
+
+  for (auto i = m_config["radioMapParameters"].Begin (); i != m_config["radioMapParameters"].End (); i += 2)
+    {
+      NS_ASSERT ((*i).IsString ());
+      NS_ASSERT ((*(i + 1)).IsString ());
+
+      parameters.push_back ({(*i).GetString (), (*(i + 1)).GetString ()});
+    }
+
+  return parameters;
+}
+
 
 } // namespace ns3

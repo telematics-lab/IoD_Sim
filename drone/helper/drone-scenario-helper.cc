@@ -53,6 +53,8 @@ DroneScenarioHelper::Initialize (uint32_t argc, char **argv, std::string name /*
 void
 DroneScenarioHelper::EnableTraces (uint32_t net_id)
 {
+  if (m_configurator->RadioMap()) return;
+
   NS_LOG_FUNCTION (net_id);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
@@ -62,6 +64,8 @@ DroneScenarioHelper::EnableTraces (uint32_t net_id)
 void
 DroneScenarioHelper::EnableTraces (std::string net_name)
 {
+  if (m_configurator->RadioMap()) return;
+
   NS_LOG_FUNCTION (net_name);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
@@ -71,6 +75,8 @@ DroneScenarioHelper::EnableTraces (std::string net_name)
 void
 DroneScenarioHelper::EnableTracesAll ()
 {
+  if (m_configurator->RadioMap()) return;
+
   NS_LOG_FUNCTION_NOARGS ();
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
@@ -94,7 +100,24 @@ DroneScenarioHelper::Run ()
   NS_COMPMAN_ENSURE_UNIQUE ();
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
-  Simulator::Stop (Seconds (m_configurator->GetDuration ()));
+  bool anyLte = false;
+  for (auto i = m_networks.Begin (); i != m_networks.End (); i++)
+    {
+      anyLte = (*i)->GetProtocol () == "lte";
+      if (anyLte) break;
+    }
+
+  if (m_configurator->RadioMap ())
+    {
+      NS_ASSERT_MSG (anyLte,
+          "Environment Radio Map can be generated only if an LTE network is present. Aborting simulation.");
+      NS_LOG_INFO ("Generating Environment Radio Map, simulation will not run.");
+      this->GenerateRadioMap ();
+    }
+  else
+    {
+      Simulator::Stop (Seconds (m_configurator->GetDuration ()));
+    }
   Simulator::Run ();
   Simulator::Destroy ();
 
@@ -103,14 +126,10 @@ DroneScenarioHelper::Run ()
   and there's no way to change that, here if it finds any "lte" type network the
   helper manually moves them to the current result folder using "mv" with a system call.
   */
-  for (auto i = m_networks.Begin (); i != m_networks.End (); i++)
+  if (anyLte && !m_configurator->RadioMap ())
     {
-      if ((*i)->GetProtocol () == "lte")
-        {
-          system (("mv Dl* " + m_configurator->GetResultsPath ()).c_str ());
-          system (("mv Ul* " + m_configurator->GetResultsPath ()).c_str ());
-          break;
-        }
+      system (("mv Dl* " + m_configurator->GetResultsPath ()).c_str ());
+      system (("mv Ul* " + m_configurator->GetResultsPath ()).c_str ());
     }
 
   NS_COMPMAN_REGISTER_COMPONENT ();
@@ -330,6 +349,31 @@ DroneScenarioHelper::SetupNetworks ()
   BuildingsHelper::Install (m_antennaNodes);
   BuildingsHelper::Install (m_droneNodes);
 }
+
+
+void
+DroneScenarioHelper::GenerateRadioMap ()
+{
+    Ptr<RadioEnvironmentMapHelper> remHelper;
+    remHelper = CreateObject<RadioEnvironmentMapHelper> ();
+    // setting default values
+    remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath() + m_configurator->GetName() + ".rem"));
+    remHelper->SetAttribute ("XMin", DoubleValue (-100));
+    remHelper->SetAttribute ("XMax", DoubleValue (100));
+    remHelper->SetAttribute ("YMin", DoubleValue (-100));
+    remHelper->SetAttribute ("YMax", DoubleValue (100));
+    remHelper->SetAttribute ("Z", DoubleValue (10));
+    remHelper->SetAttribute ("UseDataChannel", BooleanValue (true));
+
+    auto parameters = m_configurator->GetRadioMapParameters ();
+    for (auto par : parameters)
+      {
+        remHelper->SetAttribute (par.first, StringValue (par.second));
+      }
+
+    remHelper->Install ();
+}
+
 
 Ipv4Address
 DroneScenarioHelper::GetIpv4Address (Ptr<Node> node, uint32_t index)

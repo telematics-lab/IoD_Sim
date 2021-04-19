@@ -189,6 +189,16 @@ public:
 //  LTE SPECIFIC CONFIGURATORS
 
   /**
+   * \return true if the generation of the Radio Environment Map is required
+   */
+  const bool RadioMap () const;
+
+  /**
+   * \return a list of parameters for the Radio Environment Map generator
+   */
+  const std::vector<std::pair<std::string, std::string> > GetRadioMapParameters () const;
+
+  /**
    * \return the number of antennas to be simulated.
    */
   const uint32_t GetAntennasN () const;
@@ -338,6 +348,7 @@ private:
   std::ofstream m_out;          /// output stream for clog
   std::string m_name;           /// name of the simulation
   std::string m_dateTime;       /// cache for the current datetime
+  bool m_radioMap;              /// a flag for radio map generation
 };
 
 } // namespace ns3

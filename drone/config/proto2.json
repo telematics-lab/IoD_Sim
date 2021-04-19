@@ -20,16 +20,6 @@
         "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
         "ns3::PointToPointNetDevice::Mtu", "1500",
         "ns3::PointToPointChannel::Delay", "10ms"
-      ],
-      "antennas": [
-        {
-          "name": "antenna_0",
-          "position": [0.0, 0.0, 50.0]
-        },
-        {
-          "name": "antenna_1",
-          "position": [0.0, 10.0, 50.0]
-        }
       ]
     },
     {
@@ -87,7 +77,18 @@
     }
   ],
 
-
+  "antennas": [
+    {
+      "name": "antenna_0",
+      "position": [0.0, -100.0, 50.0],
+      "networks": "lte_net0"
+    },
+    {
+      "name": "antenna_1",
+      "position": [0.0, 100.0, 50.0],
+      "networks": "lte_net0"
+    }
+  ],
 
   "dronesMobilityModel": "mixed",
   "drones": [

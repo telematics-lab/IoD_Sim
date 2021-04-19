@@ -1,12 +1,18 @@
 {
   "globalSettings": [
     "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
-    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "6.0",
-    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "8.0",
-    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "5.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "1.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "1.5",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "0.0",
+    "ns3::BuildingsPropagationLossModel::::Los2NlosThr", "1e6",
 
     "ns3::CsmaChannel::DataRate", "5000000",
     "ns3::CsmaChannel::Delay", "2ms"
+  ],
+
+  "radioMapParameters": [
+    "YMax", "300",
+    "ChannelPath", "/ChannelList/2"
   ],
 
   "networks": [
@@ -32,7 +38,7 @@
     },
     {
       "name": "antenna_1",
-      "position": [0.0, 10.0, 50.0],
+      "position": [0.0, 100.0, 50.0],
       "interfaces": [0]
     }
   ],
@@ -79,8 +85,9 @@
   ],
 
   "duration": 10.0,
-  "logOnFile": false,
+  "logOnFile": true,
   "logComponents": [
+    "RadioEnvironmentMapHelper",
     "Scenario",
     "DroneServer",
     "DroneClient",

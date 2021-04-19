@@ -155,24 +155,17 @@ LteDroneNetwork::Generate ()
       dronesStaticRoute->SetDefaultRoute (m_epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
-/*
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
+  // attach each drone ue to the antenna with the strongest signal
+  m_lteHelper->Attach (m_droneDevs);
+
+  enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
   GbrQosInformation qos;
-  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
-  //qos.gbrUl = 132;
-  //qos.mbrDl = qos.gbrDl;
-  //qos.mbrUl = qos.gbrUl;
   qos.gbrDl = 20000000;            // Downlink GBR (bit/s) ---> 20 Mbps
   qos.gbrUl = 5000000;	          // Uplink GBR ---> 5 Mbps
   qos.mbrDl = 20000000;		 // Downlink MBR
   qos.mbrUl = 5000000;          // Uplink MBR,
   EpsBearer bearer(q, qos);
   m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
-
-*/
-
-  // attach each drone ue to the antenna with the strongest signal
-  m_lteHelper->Attach (m_droneDevs);
 }
 
 void
