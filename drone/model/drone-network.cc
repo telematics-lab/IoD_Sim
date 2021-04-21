@@ -29,38 +29,38 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneNetwork", LOG_PREFIX_ALL);
 
-std::string
-DroneNetwork::GetName ()
+const std::string&
+DroneNetwork::GetName () const
 {
   return m_name;
 }
 
-std::string
-DroneNetwork::GetProtocol ()
+const std::string&
+DroneNetwork::GetProtocol () const
 {
   return m_protocol;
 }
 
-NodeContainer&
-DroneNetwork::GetDroneNodes ()
+NodeContainer
+DroneNetwork::GetDroneNodes () const
 {
   return m_droneNodes;
 }
 
-NodeContainer&
-DroneNetwork::GetAntennaNodes ()
+NodeContainer
+DroneNetwork::GetAntennaNodes () const
 {
   return m_antennaNodes;
 }
 
-NetDeviceContainer&
-DroneNetwork::GetDroneNetDevices ()
+NetDeviceContainer
+DroneNetwork::GetDroneNetDevices () const
 {
   return m_droneDevs;
 }
 
-NetDeviceContainer&
-DroneNetwork::GetAntennaNetDevices ()
+NetDeviceContainer
+DroneNetwork::GetAntennaNetDevices () const
 {
   return m_antennaDevs;
 }

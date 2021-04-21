@@ -246,14 +246,14 @@ public:
    * \param index the index of the element to which retrieve the name
    * \return the name associated to the object at the index in the field
    */
-  std::string GetObjectName (const char* field, uint32_t index) const;
+  const std::string GetObjectName (const char* field, uint32_t index) const;
 
   /**
    * \param field the name of the field to search into
    * \param name the name of the element to which retrieve the index
    * \return the index of the object of given name
    */
-  uint32_t GetObjectIndex (const char* field, std::string name) const;
+  const uint32_t GetObjectIndex (const char* field, const std::string& name) const;
 
 
 //  NETWORKS SPECIFIC CONFIGURATORS
@@ -267,45 +267,45 @@ public:
    * \param id the index of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
-  std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
+  const std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
    /**
    * \param name the name of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
-  std::vector<uint32_t> GetDroneNetworks (std::string name) const;
+  const std::vector<uint32_t> GetDroneNetworks (const std::string& name) const;
 
   /**
    * \param id the index of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
-  std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
+  const std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
    /**
    * \param name the name of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
-  std::vector<uint32_t> GetAntennaNetworks (std::string name) const;
+  const std::vector<uint32_t> GetAntennaNetworks (const std::string& name) const;
 
   /**
    * \param id the index of the network
    * \return a list of id of all the drones connected to a network
    */
-  std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
+  const std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
     /**
    * \param net_name the name of the network
    * \return a list of id of all the drones connected to a network
    */
-  std::vector<uint32_t> GetDronesInNetwork (std::string net_name) const;
+  const std::vector<uint32_t> GetDronesInNetwork (const std::string& net_name) const;
 
   /**
    * \param id the index of the network
    * \return a list of id of all the antennas connected to a network
    */
-  std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
+  const std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
    /**
    * \param net_name the name of the network
    * \return a list of id of all the antennas connected to a network
    */
-  std::vector<uint32_t> GetAntennasInNetwork (std::string net_name) const;
+  const std::vector<uint32_t> GetAntennasInNetwork (const std::string& net_name) const;
 
   /**
    * \brief default destructor

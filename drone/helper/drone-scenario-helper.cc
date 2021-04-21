@@ -29,7 +29,7 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneScenarioHelper", LOG_PREFIX_ALL);
 
 void
-DroneScenarioHelper::Initialize (uint32_t argc, char **argv, std::string name /*="DroneScenario"*/)
+DroneScenarioHelper::Initialize (uint32_t argc, char **argv, const std::string& name /*="DroneScenario"*/)
 {
   NS_LOG_FUNCTION (argc << argv << name);
   NS_COMPMAN_ENSURE_UNIQUE ();
@@ -51,7 +51,7 @@ DroneScenarioHelper::Initialize (uint32_t argc, char **argv, std::string name /*
 }
 
 void
-DroneScenarioHelper::EnableTraces (uint32_t net_id)
+DroneScenarioHelper::EnableTraces (uint32_t net_id) const
 {
   if (m_configurator->RadioMap()) return;
 
@@ -62,7 +62,7 @@ DroneScenarioHelper::EnableTraces (uint32_t net_id)
 }
 
 void
-DroneScenarioHelper::EnableTraces (std::string net_name)
+DroneScenarioHelper::EnableTraces (const std::string& net_name) const
 {
   if (m_configurator->RadioMap()) return;
 
@@ -73,7 +73,7 @@ DroneScenarioHelper::EnableTraces (std::string net_name)
 }
 
 void
-DroneScenarioHelper::EnableTracesAll ()
+DroneScenarioHelper::EnableTracesAll () const
 {
   if (m_configurator->RadioMap()) return;
 
@@ -87,14 +87,14 @@ DroneScenarioHelper::EnableTracesAll ()
 }
 
 ScenarioConfigurationHelper*
-DroneScenarioHelper::GetConfigurator ()
+DroneScenarioHelper::GetConfigurator () const
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   return ScenarioConfigurationHelper::Get ();
 }
 
 void
-DroneScenarioHelper::Run ()
+DroneScenarioHelper::Run () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_COMPMAN_ENSURE_UNIQUE ();
@@ -136,14 +136,14 @@ DroneScenarioHelper::Run ()
 }
 
 uint32_t
-DroneScenarioHelper::GetRemoteId (uint32_t num)
+DroneScenarioHelper::GetRemoteId (uint32_t num) const
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   return m_remoteNodes.Get (num)->GetId ();
 }
 
 uint32_t
-DroneScenarioHelper::GetAntennaId (uint32_t num)
+DroneScenarioHelper::GetAntennaId (uint32_t num) const
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   NS_ASSERT_MSG (num < m_antennaNodes.GetN (), "Antenna index out of bound");
@@ -163,7 +163,7 @@ DroneScenarioHelper::CreateNodes ()
 }
 
 void
-DroneScenarioHelper::SetMobilityModels ()
+DroneScenarioHelper::SetMobilityModels () const
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -172,7 +172,7 @@ DroneScenarioHelper::SetMobilityModels ()
 }
 
 uint32_t
-DroneScenarioHelper::MobilityToEnum (std::string mobilityModel)
+DroneScenarioHelper::MobilityToEnum (const std::string& mobilityModel) const
 {
   NS_LOG_FUNCTION (mobilityModel);
 
@@ -193,7 +193,7 @@ DroneScenarioHelper::MobilityToEnum (std::string mobilityModel)
 }
 
 void
-DroneScenarioHelper::SetDronesMobility ()
+DroneScenarioHelper::SetDronesMobility () const
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -244,7 +244,7 @@ DroneScenarioHelper::SetDronesMobility ()
 }
 
 void
-DroneScenarioHelper::SetAntennasPosition ()
+DroneScenarioHelper::SetAntennasPosition () const
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -258,7 +258,7 @@ DroneScenarioHelper::SetAntennasPosition ()
 
 
 void
-DroneScenarioHelper::LoadGlobalSettings ()
+DroneScenarioHelper::LoadGlobalSettings () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   auto settings = m_configurator->GetGlobalSettings ();
@@ -272,7 +272,7 @@ DroneScenarioHelper::LoadGlobalSettings ()
 }
 
 void
-DroneScenarioHelper::LoadIndividualSettings ()
+DroneScenarioHelper::LoadIndividualSettings () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   auto settings = m_configurator->GetIndividualSettings ();
@@ -352,7 +352,7 @@ DroneScenarioHelper::SetupNetworks ()
 
 
 void
-DroneScenarioHelper::GenerateRadioMap ()
+DroneScenarioHelper::GenerateRadioMap () const
 {
     Ptr<RadioEnvironmentMapHelper> remHelper;
     remHelper = CreateObject<RadioEnvironmentMapHelper> ();
@@ -376,13 +376,13 @@ DroneScenarioHelper::GenerateRadioMap ()
 
 
 Ipv4Address
-DroneScenarioHelper::GetIpv4Address (Ptr<Node> node, uint32_t index)
+DroneScenarioHelper::GetIpv4Address (Ptr<Node> node, uint32_t index) const
 {
   return node->GetObject<Ipv4>()->GetAddress (index, 0).GetLocal ();
 }
 
 Ipv4Address
-DroneScenarioHelper::GetDroneIpv4Address (uint32_t id, uint32_t index)
+DroneScenarioHelper::GetDroneIpv4Address (uint32_t id, uint32_t index) const
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
@@ -390,7 +390,7 @@ DroneScenarioHelper::GetDroneIpv4Address (uint32_t id, uint32_t index)
 }
 
 Ipv4Address
-DroneScenarioHelper::GetRemoteIpv4Address (uint32_t id, uint32_t index)
+DroneScenarioHelper::GetRemoteIpv4Address (uint32_t id, uint32_t index) const
 {
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
@@ -444,7 +444,7 @@ DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
 // private
 // why should I pass pointers to apps container by reference?
 void
-DroneScenarioHelper::SetApplications (NodeContainer nodes, ApplicationContainer apps)
+DroneScenarioHelper::SetApplications (NodeContainer nodes, ApplicationContainer apps) const
 {
   for (uint32_t i = 0; i < apps.GetN (); ++i)
     {
@@ -454,13 +454,13 @@ DroneScenarioHelper::SetApplications (NodeContainer nodes, ApplicationContainer 
 
 // private
 void
-DroneScenarioHelper::SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app) const
 {
   nodes.Get (id)->AddApplication (app);
 }
 
 void
-DroneScenarioHelper::SetDroneApplication (uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetDroneApplication (uint32_t id, Ptr<Application> app) const
 {
   NS_LOG_FUNCTION (id << app);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
@@ -481,7 +481,7 @@ DroneScenarioHelper::SetDroneApplication (uint32_t id, Ptr<Application> app)
 }
 
 void
-DroneScenarioHelper::SetDronesApplication (ApplicationContainer apps)
+DroneScenarioHelper::SetDronesApplication (ApplicationContainer apps) const
 {
   NS_LOG_FUNCTION (&apps);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
@@ -493,7 +493,7 @@ DroneScenarioHelper::SetDronesApplication (ApplicationContainer apps)
 }
 
 void
-DroneScenarioHelper::SetRemoteApplication (uint32_t id, Ptr<Application> app)
+DroneScenarioHelper::SetRemoteApplication (uint32_t id, Ptr<Application> app) const
 {
   NS_LOG_FUNCTION (app);
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
@@ -513,7 +513,7 @@ DroneScenarioHelper::SetRemoteApplication (uint32_t id, Ptr<Application> app)
 }
 
 void
-DroneScenarioHelper::UseUdpEchoApplications ()
+DroneScenarioHelper::UseUdpEchoApplications () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");

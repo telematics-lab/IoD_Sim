@@ -927,15 +927,15 @@ ScenarioConfigurationHelper::GetNetworks () const
   return container;
 }
 
-std::string
+const std::string
 ScenarioConfigurationHelper::GetObjectName (const char* field, uint32_t index) const
 {
   NS_ASSERT (index < m_config[field].GetArray ().Size ());
   return m_config[field].GetArray ()[index].GetObject ()["name"].GetString ();
 }
 
-uint32_t
-ScenarioConfigurationHelper::GetObjectIndex (const char* field, std::string name) const
+const uint32_t
+ScenarioConfigurationHelper::GetObjectIndex (const char* field, const std::string& name) const
 {
   auto array = m_config[field].GetArray ();
   for (uint32_t i = 0; i < array.Size (); i++)
@@ -950,7 +950,7 @@ ScenarioConfigurationHelper::GetObjectIndex (const char* field, std::string name
   return array.Size ();
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetDroneNetworks (uint32_t id) const
 {
   const auto drones = m_config["drones"].GetArray ();
@@ -982,13 +982,13 @@ ScenarioConfigurationHelper::GetDroneNetworks (uint32_t id) const
   return droneNetworks;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetDroneNetworks (std::string name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDroneNetworks (const std::string& name) const
 {
   return GetDroneNetworks (GetObjectIndex ("drones", name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetAntennaNetworks (uint32_t id) const
 {
   const auto antennas = m_config["antennas"].GetArray ();
@@ -1020,13 +1020,13 @@ ScenarioConfigurationHelper::GetAntennaNetworks (uint32_t id) const
   return antennaNetworks;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetAntennaNetworks (std::string name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennaNetworks (const std::string& name) const
 {
   return GetAntennaNetworks (GetObjectIndex ("antennas", name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetDronesInNetwork (uint32_t id) const
 {
   std::vector<uint32_t> dronesInNet;
@@ -1046,13 +1046,13 @@ ScenarioConfigurationHelper::GetDronesInNetwork (uint32_t id) const
   return dronesInNet;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetDronesInNetwork (std::string net_name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDronesInNetwork (const std::string& net_name) const
 {
   return GetDronesInNetwork (GetObjectIndex ("networks", net_name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetAntennasInNetwork (uint32_t id) const
 {
   std::vector<uint32_t> antennasInNet;
@@ -1072,8 +1072,8 @@ ScenarioConfigurationHelper::GetAntennasInNetwork (uint32_t id) const
   return antennasInNet;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetAntennasInNetwork (std::string net_name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennasInNetwork (const std::string& net_name) const
 {
   return GetAntennasInNetwork (GetObjectIndex ("networks", net_name));
 }
