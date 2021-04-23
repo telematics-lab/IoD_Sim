@@ -176,6 +176,13 @@ DroneScenarioHelper::MobilityToEnum (const std::string& mobilityModel) const
 {
   NS_LOG_FUNCTION (mobilityModel);
 
+  /*
+  this function uses the _mobilityModels array to check if a mobilityModel
+  ha been implemented and convert it and returns the index of where it
+  is defined in the array. These indexes will be checked agaist values in the
+  _mobilityModelName enum to call the appropriate procedure of the switch case
+  when calling SetDronesMobility()
+  */
   uint32_t mobilityModelValue = 0;
   while (mobilityModelValue < _MobilityModelName::ENUM_SIZE)
     {
@@ -289,41 +296,59 @@ DroneScenarioHelper::SetupNetworks ()
 
   m_networks = m_configurator->GetNetworks ();
 
+  /*
+  set the base IP address for the first network
+  all the network using this Ipv4AddressHelper will use a new base
+  address incrementing by one the base address used by the previous net
+  to avoid address collisions
+  */
   Ipv4AddressHelper ipv4H;
   ipv4H.SetBase ("100.0.0.0", "255.0.0.0");
 
+  // install the internet helper on all the internet nodes in the scenario
+  m_internetHelper.Install (m_remoteNodes);
+  m_internetHelper.Install (m_droneNodes);
+
+  // add the remotes to the backbone
   m_backbone.Add (m_remoteNodes);
 
-  m_internetHelper.Install (m_backbone);
-
+  // generate all the networks in the scenario
   for (uint32_t i = 0; i < m_networks.GetN (); i++)
     {
       Ptr<DroneNetwork> droneNetwork = m_networks.Get (i);
       std::string netName = droneNetwork->GetName ();
+      // get all the drones in this network
       for (uint32_t id : m_configurator->GetDronesInNetwork (netName))
         {
           droneNetwork->AttachDrone (m_droneNodes.Get (id));
         }
+      // get all the antennas in this network
       for (uint32_t id : m_configurator->GetAntennasInNetwork (netName))
         {
           droneNetwork->AttachAntenna (m_antennaNodes.Get (id));
         }
+
+      // pass the Ipv4AddressHelper to the network
       droneNetwork->SetIpv4AddressHelper (ipv4H);
 
+      // generate the network and add its gateway to the backbone
       droneNetwork->Generate ();
       m_backbone.Add (droneNetwork->GetGateway ());
     }
 
+  // setup a CSMA LAN between all the remotes and network gateways in the backbone
   CsmaHelper csma;
   //csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
   //csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
   NetDeviceContainer backboneDevs = csma.Install (m_backbone);
 
+  // set a new address base for the backbone
   ipv4H.SetBase (Ipv4Address ("200.0.0.0"), Ipv4Mask ("255.0.0.0"));
   ipv4H.Assign (backboneDevs);
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
+  // create static routes between each remote node to each network gateway
   Ipv4StaticRoutingHelper routingHelper;
   m_internetHelper.SetRoutingHelper (routingHelper);
   for (uint32_t i = 0; i < m_remoteNodes.GetN (); i++)
@@ -333,17 +358,26 @@ DroneScenarioHelper::SetupNetworks ()
         {
           Ptr<Node> netGwNode = m_backbone.Get (j);
           uint32_t netGwBackboneDevIndex = netGwNode->GetNDevices () - 1;
+
+          // since network gateway have at least 2 ipv4 addresses (one in the network and the other for the backbone)
+          // we should create a route to the internal ip using the backbone ip as next hop
           Ipv4Address netGwBackboneIpv4 = netGwNode->GetObject<Ipv4>()->GetAddress (netGwBackboneDevIndex, 0).GetLocal ();
-          Ipv4Address netGwProprietaryIpv4 = netGwNode->GetObject<Ipv4>()->GetAddress (1, 0).GetLocal ();
+          Ipv4Address netGwInternalIpv4 = netGwNode->GetObject<Ipv4>()->GetAddress (1, 0).GetLocal ();
 
           NS_LOG_LOGIC ("Setting-up static route: REMOTE " << i << " (" << remoteNode->GetObject<Ipv4>()->GetAddress (1, 0).GetLocal () <<
-                        ") -> NETWORK " << j - m_remoteNodes.GetN () << " (" << netGwBackboneIpv4 << " -> " << netGwProprietaryIpv4 << ")");
+                        ") -> NETWORK " << j - m_remoteNodes.GetN () << " (" << netGwBackboneIpv4 << " -> " << netGwInternalIpv4 << ")");
 
           Ptr<Ipv4StaticRouting> staticRouteRem = routingHelper.GetStaticRouting (remoteNode->GetObject<Ipv4>());
-          staticRouteRem->AddNetworkRouteTo (netGwProprietaryIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
+          staticRouteRem->AddNetworkRouteTo (netGwInternalIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
         }
     }
 
+  /*
+  install the building helper to each antenna and drone of the scenario.
+  m_building is actually not used, once the building have been created there
+  is no need to store them in a container since the BuildingHelper has a global
+  reference to all of them already
+  */
   m_buildings = m_configurator->GetBuildings ();
 
   BuildingsHelper::Install (m_antennaNodes);

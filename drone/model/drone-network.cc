@@ -120,6 +120,7 @@ LteDroneNetwork::Generate ()
 
   //auto m_configurator = ScenarioConfigurationHelper::Get ();
 
+  // setting up default values before generating the network
   for (auto s : m_attributes)
     {
       Config::SetDefault (s.first, StringValue (s.second));
@@ -128,15 +129,15 @@ LteDroneNetwork::Generate ()
   ConfigStore config;
   config.ConfigureDefaults ();
 
-  m_internetHelper.Install (m_droneNodes);
+  //m_internetHelper.Install (m_droneNodes);
 
+  // create the LteHelper and assign the EpcHelper to it
   m_lteHelper = CreateObject<LteHelper> ();
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
-  Ipv4StaticRoutingHelper routingHelper;
-  m_internetHelper.SetRoutingHelper (routingHelper);
-
+  // installing eNB devices and UE devices
+  // if more than one eNB create X2 interfaces between them for auto handover
   m_antennaDevs = m_lteHelper->InstallEnbDevice (m_antennaNodes);
   if (m_antennaNodes.GetN () > 1)
     {
@@ -144,10 +145,15 @@ LteDroneNetwork::Generate ()
     }
   m_droneDevs = m_lteHelper->InstallUeDevice (m_droneNodes);
 
-  // assigning address 7.0.0.0/8
+  // assigning address 7.0.0.0/8 to UE devices
+  // unfortunately this is hardwired into EpcHelper implementation
   Ipv4InterfaceContainer m_droneIpv4;
   m_droneIpv4 = m_epcHelper->AssignUeIpv4Address (m_droneDevs);
 
+  // create a static route for each UE to the SGW/PGW in order to communicate
+  // with the internet
+  Ipv4StaticRoutingHelper routingHelper;
+  m_internetHelper.SetRoutingHelper (routingHelper);
   // assign to each drone the default route to the SGW
   for (uint32_t i = 0; i < m_droneNodes.GetN (); ++i)
     {
@@ -155,15 +161,16 @@ LteDroneNetwork::Generate ()
       dronesStaticRoute->SetDefaultRoute (m_epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
-  // attach each drone ue to the antenna with the strongest signal
+  // auto attach each drone UE to the eNB with the strongest signal
   m_lteHelper->Attach (m_droneDevs);
 
+  // activate a dedicated bearer for video trasmission on all the UEs
   enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
   GbrQosInformation qos;
-  qos.gbrDl = 20000000;            // Downlink GBR (bit/s) ---> 20 Mbps
-  qos.gbrUl = 5000000;	          // Uplink GBR ---> 5 Mbps
-  qos.mbrDl = 20000000;		 // Downlink MBR
-  qos.mbrUl = 5000000;          // Uplink MBR,
+  qos.gbrDl = 20000000;  // Downlink GBR (bit/s): 20 Mbps
+  qos.gbrUl = 5000000;  // Uplink GBR: 5 Mbps
+  qos.mbrDl = 20000000;  // Downlink MBR: 20 Mbps
+  qos.mbrUl = 5000000;  // Uplink MBR: 5 Mbps
   EpsBearer bearer(q, qos);
   m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
 }
