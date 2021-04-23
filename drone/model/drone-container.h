@@ -26,11 +26,11 @@ namespace ns3 {
 /**
  * \brief Keeps track of a set of drones pointers.
  */
-class DroneContainer: public NodeContainer
+class DroneContainer : public NodeContainer
 {
 public:
   /// Drone container iterator
-  typedef std::vector<Ptr<Drone> >::const_iterator Iterator;
+  typedef std::vector<Ptr<Drone>>::const_iterator Iterator;
 
   /**
    * \brief Create n drones and append pointers to them to the end of this
@@ -73,7 +73,7 @@ public:
   Ptr<Drone> Get (uint32_t i) const;
 
 private:
-  std::vector<Ptr<Drone> > m_drones; //!< Drones smart pointers
+  std::vector<Ptr<Drone>> m_drones; //!< Drones smart pointers
 };
 
 } // namespace ns3

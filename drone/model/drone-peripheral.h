@@ -40,40 +40,39 @@ public:
    *
    * \returns the object TypeId
    */
-  static TypeId GetTypeId(void);
+  static TypeId GetTypeId (void);
 
-  DronePeripheral();
+  DronePeripheral ();
 
   /**
    * \brief Sets the pointer of the drone.
    *
    * \param drone Pointer of the drone.
    */
-  void SetDrone(Ptr<Drone> drone);
+  void SetDrone (Ptr<Drone> drone);
 
   /**
    * \brief Returns the pointer of the drone.
    *
    * \returns Pointer of the drone.
    */
-  Ptr<Drone> GetDrone(void);
+  Ptr<Drone> GetDrone (void);
 
   /**
    * \brief Returns the power consumption of the peripheral.
    *
    * \returns Power consumption in Watt.
    */
-  double GetPowerConsumption(void);
+  double GetPowerConsumption (void);
 
 protected:
   virtual void DoDispose (void);
   virtual void DoInitialize (void);
 
 private:
-  Ptr<Drone> m_drone;         //!< Pointer to the drone.
-  double m_powerConsumption;  //!< Constant power consumption in Watt.
+  Ptr<Drone> m_drone; //!< Pointer to the drone.
+  double m_powerConsumption; //!< Constant power consumption in Watt.
 };
-
 
 } // namespace ns3
 

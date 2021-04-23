@@ -30,7 +30,7 @@ namespace ns3 {
  *
  * \brief Defines the power consumption of a drone together with its attached peripherals.
  */
-class DroneEnergyModel: public DeviceEnergyModel
+class DroneEnergyModel : public DeviceEnergyModel
 {
 public:
   /**
@@ -40,9 +40,9 @@ public:
    */
   static TypeId GetTypeId (void);
 
-  DroneEnergyModel();
+  DroneEnergyModel ();
 
-  ~DroneEnergyModel()
+  ~DroneEnergyModel ()
   {
   }
 
@@ -51,7 +51,7 @@ public:
    *
    * \param source Pointer to energy source installed on drone.
    */
-  virtual void SetEnergySource(Ptr<EnergySource> source);
+  virtual void SetEnergySource (Ptr<EnergySource> source);
 
   /**
    * \brief Sets the pointer of the drone.
@@ -72,9 +72,12 @@ public:
    *
    * Not implemented.
    *
-   * \returns Total energy consumption of the device.
+   * \returns Total energy consumption of the device. (Not implemented!)
    */
-  virtual double GetTotalEnergyConsumption (void) const;
+  virtual double GetTotalEnergyConsumption (void) const
+  {
+    return 0;
+  }
 
   /**
    * \brief Calculates the mechanical power consumption of the drone.
@@ -87,14 +90,14 @@ public:
    *
    * \returns Mechanical power consumption in Watt.
    */
-  double GetPower(void) const;
+  double GetPower (void) const;
 
   /**
    * \brief Calculates the power consumption of the drone peripherals.
    *
    * \returns Peripherals power consumption in Watt.
    */
-  double GetPeripheralsPowerConsumption(void) const;
+  double GetPeripheralsPowerConsumption (void) const;
 
   /**
    * \brief Notifies the low battery threshold being crossed.
@@ -109,7 +112,8 @@ public:
    *
    * Not implemented
    */
-  virtual void ChangeState (int newState)
+  virtual void
+  ChangeState (int newState)
   {
   }
 
@@ -118,7 +122,8 @@ public:
    *
    * Not implemented
    */
-  virtual void HandleEnergyRecharged (void)
+  virtual void
+  HandleEnergyRecharged (void)
   {
   }
 
@@ -127,7 +132,8 @@ public:
    *
    * Not implemented
    */
-  virtual void HandleEnergyChanged (void)
+  virtual void
+  HandleEnergyChanged (void)
   {
   }
 

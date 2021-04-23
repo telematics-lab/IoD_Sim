@@ -29,10 +29,10 @@ DroneContainer::Create (uint32_t n)
 {
   for (uint32_t i = 0; i < n; i++)
     {
-      auto drone = CreateObject<Drone>();
+      auto drone = CreateObject<Drone> ();
       m_drones.push_back (drone);
-      auto nativenode = StaticCast<Node, Drone>(drone);
-      NodeContainer::Add(nativenode);
+      auto nativenode = StaticCast<Node, Drone> (drone);
+      NodeContainer::Add (nativenode);
     }
 }
 

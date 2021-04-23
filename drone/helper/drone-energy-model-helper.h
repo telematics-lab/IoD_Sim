@@ -27,10 +27,10 @@ namespace ns3 {
  * \ingroup energy
  * \brief Helper to install an energy model onto a drone and link it to an energy source.
  */
-class DroneEnergyModelHelper: public DeviceEnergyModelHelper
+class DroneEnergyModelHelper : public DeviceEnergyModelHelper
 {
 public:
-  DroneEnergyModelHelper();
+  DroneEnergyModelHelper ();
 
   /**
    * \param name Name of attribute to set.
@@ -49,7 +49,6 @@ public:
    * Drone.
    */
   Ptr<DeviceEnergyModel> Install (Ptr<Drone> drone, Ptr<EnergySource> source);
-
 
 private:
   Ptr<DeviceEnergyModel> DoInstall (Ptr<NetDevice> device, Ptr<EnergySource> source) const;

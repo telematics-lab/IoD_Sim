@@ -24,21 +24,21 @@ NS_LOG_COMPONENT_DEFINE ("DronePeripheral");
 NS_OBJECT_ENSURE_REGISTERED (DronePeripheral);
 
 TypeId
-DronePeripheral::GetTypeId()
+DronePeripheral::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::DronePeripheral")
-    .SetParent<Object> ()
-    .SetGroupName ("Peripheral")
-    .AddConstructor<DronePeripheral> ()
-    .AddAttribute("PowerConsumption", "The power consumption of the peripheral in J/s",
-                  DoubleValue (0),
-                  MakeDoubleAccessor (&DronePeripheral::m_powerConsumption),
-                  MakeDoubleChecker<double> ())
-  ;
+          .SetParent<Object> ()
+          .SetGroupName ("Peripheral")
+          .AddConstructor<DronePeripheral> ()
+          .AddAttribute ("PowerConsumption", "The power consumption of the peripheral in J/s",
+                         DoubleValue (0),
+                         MakeDoubleAccessor (&DronePeripheral::m_powerConsumption),
+                         MakeDoubleChecker<double> ())
+          ;
   return tid;
 }
 
-DronePeripheral::DronePeripheral()
+DronePeripheral::DronePeripheral ()
 {
 }
 
@@ -57,7 +57,7 @@ DronePeripheral::DoInitialize (void)
 }
 
 void
-DronePeripheral::SetDrone(Ptr<Drone> drone)
+DronePeripheral::SetDrone (Ptr<Drone> drone)
 {
   NS_LOG_FUNCTION (this << drone);
   NS_ASSERT (drone != NULL);
@@ -65,15 +65,15 @@ DronePeripheral::SetDrone(Ptr<Drone> drone)
 }
 
 Ptr<Drone>
-DronePeripheral::GetDrone(void)
+DronePeripheral::GetDrone (void)
 {
   return m_drone;
 }
 
 double
-DronePeripheral::GetPowerConsumption(void)
+DronePeripheral::GetPowerConsumption (void)
 {
-  NS_LOG_FUNCTION(this);
+  NS_LOG_FUNCTION (this);
   return m_powerConsumption;
 }
 

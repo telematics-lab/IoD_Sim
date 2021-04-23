@@ -20,32 +20,32 @@
 
 namespace ns3 {
 
-DroneEnergyModelHelper::DroneEnergyModelHelper()
+DroneEnergyModelHelper::DroneEnergyModelHelper ()
 {
-  m_droneEnergyModel.SetTypeId("ns3::DroneEnergyModel");
+  m_droneEnergyModel.SetTypeId ("ns3::DroneEnergyModel");
 }
 
 void
 DroneEnergyModelHelper::Set (std::string name, const AttributeValue &v)
 {
- m_droneEnergyModel.Set(name, v);
+  m_droneEnergyModel.Set (name, v);
 }
 
 Ptr<DeviceEnergyModel>
 DroneEnergyModelHelper::Install (Ptr<Drone> drone, Ptr<EnergySource> source)
 {
-  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
-  model -> SetDrone(drone);
-  model -> SetEnergySource(source);
-  source -> AppendDeviceEnergyModel (model);
-  source -> SetNode(drone);
+  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel> ();
+  model->SetDrone (drone);
+  model->SetEnergySource (source);
+  source->AppendDeviceEnergyModel (model);
+  source->SetNode (drone);
   return model;
 }
 
 Ptr<DeviceEnergyModel>
 DroneEnergyModelHelper::DoInstall (Ptr<NetDevice> device, Ptr<EnergySource> source) const
 {
-  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
+  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel> ();
   return model;
 }
 

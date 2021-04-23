@@ -71,7 +71,6 @@
  *  - Spontaneous crash of WifiPhy
  *  - No scalability for AP (it was not a goal)
  */
-
 #include <ns3/core-module.h>
 #include <ns3/internet-stack-helper.h>
 #include <ns3/ipv4-address-helper.h>
@@ -97,257 +96,218 @@
 using namespace ns3;
 using ms = std::chrono::duration<float, std::milli>;
 
-NS_LOG_COMPONENT_DEFINE("Scenario");
+NS_LOG_COMPONENT_DEFINE ("Scenario");
 
-void DroneClientApplicationTxCallback  (Ptr<const Packet> p)
+void
+DroneClientApplicationTxCallback (Ptr<const Packet> p)
 {
-    std::cout << "DroneClientApplication: Packet sent!" << std::endl;
+  std::cout << "DroneClientApplication: Packet sent!" << std::endl;
 }
 
-/*
- * Organizzazione dei primi 4 layer con scambio messaggi in broadcast.
+/**
+ * Organize the first 4 layers of the protocol stack with broadcast messages.
  */
+int
+main (int argc, char **argv)
+{
+  // Constant properties
+  const bool verboseMode = false;
+  const std::string phyMode = "DsssRate1Mbps";
+  const int32_t rss = -80; // dBm
+  const Time interPacketInterval = Seconds (1.0);
+  uint32_t numDrones = 2;
 
-int main(int argc, char** argv) {
-    /*
-     * Constant properties
-     */
-    const bool verboseMode = false;
-    const std::string phyMode = "DsssRate1Mbps";
-    const int32_t rss = -80;  // dBm
-    const Time interPacketInterval = Seconds(1.0);
-    uint32_t numDrones = 2;
+  CommandLine cmd;
+  cmd.AddValue ("numDrones", "Number of drones to simulate.", numDrones);
+  cmd.Parse (argc, argv);
 
+  // Logging configuration
+  LogComponentEnable ("Scenario", LOG_LEVEL_ALL);
+  LogComponentEnable ("Drone", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneServerApplication", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneClientApplication", LOG_LEVEL_ALL);
+  LogComponentEnable ("LiIonEnergySource", LOG_LEVEL_ALL);
+  LogComponentEnable ("EnergySource", LOG_LEVEL_ALL);
+  LogComponentEnable ("DroneEnergyModel", LOG_LEVEL_ALL);
+  LogComponentEnable ("InputPeripheral", LOG_LEVEL_ALL);
+  LogComponentEnable ("StoragePeripheral", LOG_LEVEL_ALL);
 
-    CommandLine cmd;
-    cmd.AddValue("numDrones", "Number of drones to simulate.", numDrones);
-    cmd.Parse(argc, argv);
+  // redirect stdout to log file
+  std::ofstream out ("../results/dronesim-allen.log");
+  std::clog.rdbuf (out.rdbuf ());
 
+  NS_LOG_INFO ("###################");
+  NS_LOG_INFO ("# Dronesim        #");
+  NS_LOG_INFO ("# Scenario: Allen #");
+  NS_LOG_INFO ("###################");
 
+  // Static configuration of the scenario.
+  // disable fragmentation for frames below 2200 bytes
+  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold",
+                      StringValue ("2200"));
+  // turn off RTS/CTS for frames below 2200 bytes
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
+  // Fix non-unicast data rate to be the same as that of unicast
+  Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (phyMode));
 
-    /*
-     * Logging configuration
-     */
-    LogComponentEnable("Scenario", LOG_LEVEL_ALL);
-    LogComponentEnable("Drone", LOG_LEVEL_ALL);
-    LogComponentEnable("DroneServerApplication", LOG_LEVEL_ALL);
-    LogComponentEnable("DroneClientApplication", LOG_LEVEL_ALL);
-    LogComponentEnable("LiIonEnergySource", LOG_LEVEL_ALL);
-    LogComponentEnable("EnergySource", LOG_LEVEL_ALL);
-    LogComponentEnable("DroneEnergyModel", LOG_LEVEL_ALL);
-    LogComponentEnable("InputPeripheral", LOG_LEVEL_ALL);
-    LogComponentEnable("StoragePeripheral", LOG_LEVEL_ALL);
+  // Drones configuration.
+  DroneContainer nodes;
+  NodeContainer ap;
+  NetDeviceContainer devices;
 
-    // redirect stdout to log file
-    std::ofstream out("../results/dronesim-allen.log");
-    std::clog.rdbuf(out.rdbuf());
+  nodes.Create (numDrones);
+  NS_LOG_INFO ("DroneContainer Added.");
+  ap.Create (1);
 
-    NS_LOG_INFO("###################");
-    NS_LOG_INFO("# Dronesim        #");
-    NS_LOG_INFO("# Scenario: Allen #");
-    NS_LOG_INFO("###################");
-
-
-
-    /*
-     * Static configuration of the scenario.
-     */
-    // disable fragmentation for frames below 2200 bytes
-    Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("2200"));
-    // turn off RTS/CTS for frames below 2200 bytes
-    Config::SetDefault("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue("2200"));
-    // Fix non-unicast data rate to be the same as that of unicast
-    Config::SetDefault("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue(phyMode));
-
-
-
-    /*
-     * Drones configuration.
-     */
-    DroneContainer nodes;
-    NodeContainer ap;
-    NetDeviceContainer devices;
-
-    nodes.Create(numDrones);
-    NS_LOG_INFO("DroneContainer Added.");
-    ap.Create(1);
-
-    // Register created Drones and ZSPs in /DroneList/ and /ZspList/ respectively
-    for (auto drone = nodes.Begin (); drone != nodes.End (); drone++){
-        DroneList::Add (*drone);
-        NS_LOG_INFO("Drone Added.");
+  // Register created Drones and ZSPs in /DroneList/ and /ZspList/ respectively
+  for (auto drone = nodes.Begin (); drone != nodes.End (); drone++)
+    {
+      DroneList::Add (*drone);
+      NS_LOG_INFO ("Drone Added.");
     }
 
-    for (auto zsp = ap.Begin (); zsp != ap.End (); zsp++)
-        ZspList::Add (*zsp);
+  for (auto zsp = ap.Begin (); zsp != ap.End (); zsp++)
+    ZspList::Add (*zsp);
 
-    for (uint j = 0; j < nodes.GetN(); j++) {
-        NS_LOG_INFO("[Node " << nodes.Get(j)->GetId() << "] Exists ");
+  for (uint j = 0; j < nodes.GetN (); j++)
+    NS_LOG_INFO ("[Node " << nodes.Get (j)->GetId () << "] Exists ");
+
+  NS_LOG_INFO ("> Simulating " << numDrones << " drones.");
+
+  // PHY Layer
+  WifiHelper wifi;
+  YansWifiPhyHelper wifiPhy;
+  YansWifiChannelHelper wifiChannel;
+
+  // The below set of helpers will help us to put together the wifi NICs we want
+  if (verboseMode)
+    wifi.EnableLogComponents (); // Turn on all Wifi logging
+
+  wifi.SetStandard (WIFI_STANDARD_80211n_2_4GHZ);
+
+  // This is one parameter that matters when using FixedRssLossModel
+  // set it to zero; otherwise, gain will be added
+  wifiPhy.Set ("RxGain", DoubleValue (0));
+  // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
+  wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
+
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  // The below FixedRssLossModel will cause the rss to be fixed regardless
+  // of the distance between the two stations, and the transmit power
+  wifiChannel.AddPropagationLoss ("ns3::FixedRssLossModel", "Rss", DoubleValue (rss));
+  wifiPhy.SetChannel (wifiChannel.Create ());
+
+  // MAC Layer Configuration.
+  // Add a mac and disable rate control
+  WifiMacHelper wifiMac;
+
+  wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (phyMode),
+                                "ControlMode", StringValue (phyMode));
+
+  // Setup the rest of the mac
+  Ssid ssid = Ssid ("wifi-default");
+  // setup sta.
+  wifiMac.SetType ("ns3::StaWifiMac", "Ssid", SsidValue (ssid));
+  NetDeviceContainer staDevice = wifi.Install (wifiPhy, wifiMac, nodes);
+  devices = staDevice;
+  // setup ap.
+  wifiMac.SetType ("ns3::ApWifiMac", "Ssid", SsidValue (ssid));
+  NetDeviceContainer apDevices = wifi.Install (wifiPhy, wifiMac, ap);
+  devices.Add (apDevices);
+
+  // WiFi Mobility Configuration.
+  MobilityHelper mobility;
+
+  // Note that with FixedRssLossModel, the positions below are not
+  // used for received signal strength.
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (1.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (-1.0, 0.0, 0.0));
+  mobility.SetPositionAllocator (positionAlloc);
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobility.Install ((NodeContainer) nodes);
+
+  positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (5.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (-5.0, 0.0, 0.0));
+  mobility.SetPositionAllocator (positionAlloc);
+  mobility.Install (ap);
+
+  // Network Layer configuration.
+  InternetStackHelper internet;
+  Ipv4AddressHelper ipv4;
+  const char *subnetMask = "255.0.0.0";
+
+  internet.Install (nodes);
+  internet.Install (ap);
+
+  NS_LOG_INFO ("> Assigning IP Addresses.");
+  ipv4.SetBase ("10.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer i = ipv4.Assign (devices);
+
+  for (uint j = 0; j < devices.GetN (); j++)
+    {
+      NS_LOG_INFO ("[Node " << devices.Get (j)->GetNode ()->GetId () << "] assigned address "
+                            << i.GetAddress (j, 0));
     }
 
-    NS_LOG_INFO("> Simulating " << numDrones << " drones.");
+  // Transport Layer Configuration.
+  NS_LOG_INFO ("> Creating applications for nodes.");
+  for (auto node = nodes.Begin (); node != nodes.End (); node++)
+    {
+      auto client = CreateObjectWithAttributes<DroneClientApplication> (
+          "Ipv4Address", Ipv4AddressValue (i.GetAddress ((*node)->GetId ())), "Ipv4SubnetMask",
+          Ipv4MaskValue (subnetMask));
+      (*node)->AddApplication (client);
 
-
-
-    /*
-     * PHY Layer
-     */
-    WifiHelper wifi;
-    YansWifiPhyHelper wifiPhy;
-    YansWifiChannelHelper wifiChannel;
-
-    // The below set of helpers will help us to put together the wifi NICs we want
-    if (verboseMode)
-        wifi.EnableLogComponents();  // Turn on all Wifi logging
-
-    wifi.SetStandard(WIFI_STANDARD_80211n_2_4GHZ);
-
-    // This is one parameter that matters when using FixedRssLossModel
-    // set it to zero; otherwise, gain will be added
-    wifiPhy.Set("RxGain", DoubleValue(0));
-    // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
-    wifiPhy.SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
-
-    wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-    // The below FixedRssLossModel will cause the rss to be fixed regardless
-    // of the distance between the two stations, and the transmit power
-    wifiChannel.AddPropagationLoss("ns3::FixedRssLossModel", "Rss", DoubleValue(rss));
-    wifiPhy.SetChannel(wifiChannel.Create());
-
-
-
-    /*
-     * MAC Layer Configuration.
-     */
-    // Add a mac and disable rate control
-    WifiMacHelper wifiMac;
-
-    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
-                                 "DataMode", StringValue(phyMode),
-                                 "ControlMode", StringValue(phyMode));
-
-    // Setup the rest of the mac
-    Ssid ssid = Ssid("wifi-default");
-    // setup sta.
-    wifiMac.SetType("ns3::StaWifiMac",
-                    "Ssid", SsidValue(ssid));
-    NetDeviceContainer staDevice = wifi.Install(wifiPhy, wifiMac, nodes);
-    devices = staDevice;
-    // setup ap.
-    wifiMac.SetType("ns3::ApWifiMac",
-                    "Ssid", SsidValue(ssid));
-    NetDeviceContainer apDevices = wifi.Install(wifiPhy, wifiMac, ap);
-    devices.Add(apDevices);
-
-
-
-    /*
-     * WiFi Mobility Configuration.
-     */
-    MobilityHelper mobility;
-
-    // Note that with FixedRssLossModel, the positions below are not
-    // used for received signal strength.
-    Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
-    positionAlloc->Add(Vector(1.0, 0.0, 0.0));
-    positionAlloc->Add(Vector(-1.0, 0.0, 0.0));
-    mobility.SetPositionAllocator(positionAlloc);
-    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    mobility.Install((NodeContainer) nodes);
-
-    positionAlloc = CreateObject<ListPositionAllocator>();
-    positionAlloc->Add(Vector(5.0, 0.0, 0.0));
-    positionAlloc->Add(Vector(-5.0, 0.0, 0.0));
-    mobility.SetPositionAllocator(positionAlloc);
-    mobility.Install(ap);
-
-
-
-    /*
-     * Network Layer configuration.
-     */
-    InternetStackHelper internet;
-    Ipv4AddressHelper ipv4;
-    const char *subnetMask = "255.0.0.0";
-
-    internet.Install(nodes);
-    internet.Install(ap);
-
-    NS_LOG_INFO("> Assigning IP Addresses.");
-    ipv4.SetBase("10.0.0.0", "255.0.0.0");
-    Ipv4InterfaceContainer i = ipv4.Assign(devices);
-
-    for (uint j = 0; j < devices.GetN(); j++) {
-        NS_LOG_INFO("[Node " << devices.Get(j)->GetNode()->GetId()
-                    << "] assigned address " << i.GetAddress(j, 0));
+      client->SetStartTime (Seconds (1));
     }
 
+  Ptr<DroneServerApplication> server = CreateObjectWithAttributes<DroneServerApplication> (
+      "Ipv4Address", Ipv4AddressValue (i.GetAddress (i.GetN () - 1)),
+      "Ipv4SubnetMask", Ipv4MaskValue (subnetMask));
+  ap.Get (0)->AddApplication (server);
+  server->SetStartTime (Seconds (0));
 
+  // Simulation Configuration.
+  Config::ConnectWithoutContext ("/NodeList/*/ApplicationList/*/$ns3::DroneClientApplication/Tx",
+                                 MakeCallback (&DroneClientApplicationTxCallback));
 
-    /*
-     * Transport Layer Configuration.
-     */
-    NS_LOG_INFO("> Creating applications for nodes.");
-    for (auto node = nodes.Begin(); node != nodes.End(); node++) {
-        auto client = CreateObjectWithAttributes<DroneClientApplication>(
-            "Ipv4Address", Ipv4AddressValue(i.GetAddress((*node)->GetId ())),
-            "Ipv4SubnetMask", Ipv4MaskValue(subnetMask));
-        (*node)->AddApplication(client);
+  // Tracing
+  wifiPhy.EnablePcap ("../results/dronesim", devices);
+  
+  AsciiTraceHelper ascii;
+  wifiPhy.EnableAsciiAll (ascii.CreateFileStream ("../results/PHY_comms.log"));
 
-        client->SetStartTime(Seconds(1));
-    }
+  NS_LOG_INFO ("> Starting Simulation.");
+  std::chrono::high_resolution_clock timer;
+  auto start = timer.now ();
+  auto in_time_t = std::chrono::system_clock::to_time_t (start);
+  std::ostringstream dateTime;
 
-    Ptr<DroneServerApplication> server = CreateObjectWithAttributes<DroneServerApplication>(
-        "Ipv4Address", Ipv4AddressValue(i.GetAddress(i.GetN() - 1)),
-        "Ipv4SubnetMask", Ipv4MaskValue(subnetMask));
-    ap.Get(0)->AddApplication(server);
+  dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d.%H-%M-%S");
 
-    server->SetStartTime(Seconds(0));
+  std::ostringstream resultsPath;
+  resultsPath << "../results/allen-" << dateTime.str ();
 
+  // Enable Report
+  Report::Get ()->Initialize ("allen", dateTime.str (), resultsPath.str ());
 
-    /*
-     * Simulation Configuration.
-     */
-    Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::DroneClientApplication/Tx",
-                                  MakeCallback(&DroneClientApplicationTxCallback));
+  Simulator::Stop (Seconds (120.0));
 
-    // Tracing
-    wifiPhy.EnablePcap("../results/dronesim", devices);
+  Simulator::Run ();
 
-    AsciiTraceHelper ascii;
-    wifiPhy.EnableAsciiAll(ascii.CreateFileStream("../results/PHY_comms.log"));
+  // Report Module needs the simulator context alive to introspect it
+  Report::Get ()->Save ();
 
-    NS_LOG_INFO("> Starting Simulation.");
-    std::chrono::high_resolution_clock timer;
-    auto start = timer.now();
-    auto in_time_t = std::chrono::system_clock::to_time_t(start);
-    std::ostringstream dateTime;
+  Simulator::Destroy ();
 
-    dateTime << std::put_time (std::localtime (&in_time_t), "%Y-%m-%d.%H-%M-%S");
+  auto stop = timer.now ();
+  auto deltaTime = std::chrono::duration_cast<ms> (stop - start).count ();
 
-    std::ostringstream resultsPath;
-    resultsPath << "../results/allen-" << dateTime.str ();
+  server.~Ptr (); // destruction of this object happens very late. Let's force it.
+  NS_LOG_INFO ("> Simulation terminated. Took " << deltaTime << "ms.");
 
-    // Enable Report
-    Report::Get ()->Initialize ("allen",
-                                dateTime.str (),
-                                resultsPath.str ());
-
-    Simulator::Stop(Seconds(120.0));
-
-    Simulator::Run();
-
-    // Report Module needs the simulator context alive to introspect it
-    Report::Get ()->Save ();
-
-    Simulator::Destroy();
-
-    auto stop = timer.now();
-    auto deltaTime = std::chrono::duration_cast<ms>(stop - start).count();
-
-    server.~Ptr(); // destruction of this object happens very late. Let's force it.
-    NS_LOG_INFO("> Simulation terminated. Took " << deltaTime << "ms.");
-
-    std::clog.rdbuf(std::cout.rdbuf());
-    out.close();
+  std::clog.rdbuf (std::cout.rdbuf ());
+  out.close ();
 }

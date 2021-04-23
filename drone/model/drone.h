@@ -38,10 +38,9 @@ class DronePeripheralContainer;
  * The Drone is characterized by a set of mechanical properties and
  * a set of peripherals that are attached to it.
  */
-class Drone: public Node
+class Drone : public Node
 {
 public:
-
   /**
    * \brief Get the type ID.
    *
@@ -49,74 +48,74 @@ public:
    */
   static TypeId GetTypeId (void);
 
-  Drone();
+  Drone ();
 
   /**
    * \brief Sets the mass of the drone.
    *
    * \param mass Mass of the drone.
    */
-  void setMass(double mass);
+  void setMass (double mass);
 
   /**
    * \brief Sets the area of the rotor disk.
    *
    * \param area Area of the rotor disk.
    */
-  void setArea(double area);
+  void setArea (double area);
 
   /**
    * \brief Sets the drag coefficient.
    *
    * \param coefficient Drag coefficient.
    */
-  void setDragCoefficient(double coefficient);
+  void setDragCoefficient (double coefficient);
 
   /**
    * \brief Returns the mass of the drone.
    *
    * \returns Mass of the drone.
    */
-  double getMass() const;
+  double getMass () const;
 
   /**
    * \brief Returns the weight force applied to the drone.
    *
    * \returns Weight force.
    */
-  double getWeight() const;
+  double getWeight () const;
 
   /**
    * \brief Returns the area of the rotor disk.
    *
    * \returns Area of the rotor disk.
    */
-  double getArea() const;
+  double getArea () const;
 
   /**
    * \brief Returns the drag coefficient.
    *
    * \returns Drag coefficient.
    */
-  double getDragCoefficient() const;
+  double getDragCoefficient () const;
 
   /**
    * \brief Returns the peripheral container of the drone.
    *
    * \returns peripheral Pointer to a DronePeripheralContainer.
    */
-  Ptr<DronePeripheralContainer> getPeripherals();
+  Ptr<DronePeripheralContainer> getPeripherals ();
 
 protected:
   virtual void DoDispose (void);
   virtual void DoInitialize (void);
 
 private:
-  double m_mass;                                   //!< Mass of the drone
-  double m_diskArea;                               //!< Area of the rotor disk
-  double m_weightForce;                            //!< Weight force, equals to m*g
-  double m_airDensity;                             //!< Air density
-  double m_dragCoefficient;                        //!< Drag Coefficient
+  double m_mass; //!< Mass of the drone
+  double m_diskArea; //!< Area of the rotor disk
+  double m_weightForce; //!< Weight force, equals to m*g
+  double m_airDensity; //!< Air density
+  double m_dragCoefficient; //!< Drag Coefficient
   Ptr<DronePeripheralContainer> m_peripheralContainer;
 };
 

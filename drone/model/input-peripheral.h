@@ -30,7 +30,7 @@ namespace ns3 {
  * acquisition data rate.
  * It must be linked to a StoragePeripheral to store the gathered data.
  */
-class InputPeripheral: public DronePeripheral
+class InputPeripheral : public DronePeripheral
 {
 public:
   /**
@@ -38,9 +38,9 @@ public:
    *
    * \returns the object TypeId
    */
-  static TypeId GetTypeId(void);
+  static TypeId GetTypeId (void);
 
-  InputPeripheral();
+  InputPeripheral ();
 
   /**
    * \brief Simulates the data acquisition.
@@ -48,7 +48,7 @@ public:
    * This methods schedules every m_acquisitionTimeInterval an event that allocates
    * m_dataRate * m_acquisitionTimeInterval bits to the linked StoragePeripheral.
    */
-  void AcquireData(void);
+  void AcquireData (void);
 
   /**
    * \brief Sets the pointer to a StoragePeripheral.
@@ -57,7 +57,7 @@ public:
    *
    * Input and storage peripherals have to be on the same drone.
    */
-  void SetStorage(Ptr<StoragePeripheral> storage);
+  void SetStorage (Ptr<StoragePeripheral> storage);
 
   /**
    * \brief Installs an InputPeripheral on a Drone and links it to the StoragePeripheral.
@@ -71,16 +71,15 @@ public:
   void Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone);
 
 protected:
-  void DoInitialize(void);
-  void DoDispose(void);
+  void DoInitialize (void);
+  void DoDispose (void);
 
 private:
-Time m_acquisitionTimeInterval;
-double m_dataRate;
-bool m_hasStorage;
-EventId m_dataAcquisitionEvent;
-Ptr<StoragePeripheral> m_storage;
-
+  Time m_acquisitionTimeInterval;
+  double m_dataRate;
+  bool m_hasStorage;
+  EventId m_dataAcquisitionEvent;
+  Ptr<StoragePeripheral> m_storage;
 };
 
 } // namespace ns3

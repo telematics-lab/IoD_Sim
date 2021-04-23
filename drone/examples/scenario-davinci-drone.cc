@@ -89,8 +89,7 @@ private:
 
 NS_LOG_COMPONENT_DEFINE ("Scenario");
 
-Scenario::Scenario (int argc, char **argv) :
-  m_ifaceNetMask {"255.0.0.0"}
+Scenario::Scenario (int argc, char **argv) : m_ifaceNetMask{"255.0.0.0"}
 {
   CONFIGURATOR->Initialize (argc, argv, "davinci");
 
@@ -129,8 +128,7 @@ Scenario::ConfigurePhy ()
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold",
                       StringValue ("2200"));
   // turn off RTS/CTS for frames below 2200 bytes
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold",
-                      StringValue ("2200"));
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
   // Fix non-unicast data rate to be the same as that of unicast
   //Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
   //                    StringValue (phyMode));
@@ -147,9 +145,9 @@ Scenario::ConfigurePhy ()
   m_wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss  ("ns3::FriisPropagationLossModel",
-                                   "Frequency", DoubleValue (2.4e9)); // carrier
-  m_wifiPhy.SetChannel (wifiChannel.Create());
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel",
+                                  "Frequency", DoubleValue (2.4e9)); // carrier
+  m_wifiPhy.SetChannel (wifiChannel.Create ());
 }
 
 void
@@ -160,22 +158,20 @@ Scenario::ConfigureMac ()
   const std::string phyMode = CONFIGURATOR->GetPhyMode ();
 
   WifiMacHelper wifiMac;
-  Ssid ssid = Ssid ("wifi-default");  // const ?
+  Ssid ssid = Ssid ("wifi-default"); // const ?
 
   m_wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                   "DataMode", StringValue (phyMode),
                                   "ControlMode", StringValue (phyMode));
 
   // setup sta => drones
-  wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid));
+  wifiMac.SetType ("ns3::StaWifiMac", "Ssid", SsidValue (ssid));
 
   NetDeviceContainer dronesDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_drones);
   m_netDevices.Add (dronesDevices);
 
   // setup ap => ZSPs
-  wifiMac.SetType ("ns3::ApWifiMac",
-                   "Ssid", SsidValue (ssid));
+  wifiMac.SetType ("ns3::ApWifiMac", "Ssid", SsidValue (ssid));
 
   NetDeviceContainer zspsDevices = m_wifi.Install (m_wifiPhy, wifiMac, m_zsps);
   m_netDevices.Add (zspsDevices);
@@ -239,9 +235,9 @@ Scenario::ConfigureNetwork ()
   ipv4.SetBase ("10.0.0.0", m_ifaceNetMask);
   m_ifaceIps = ipv4.Assign (m_netDevices);
 
-  for (uint i = 0; i < m_netDevices.GetN(); i++)
-    NS_LOG_INFO("[Node " << m_netDevices.Get (i)->GetNode ()->GetId ()
-                << "] assigned address " << m_ifaceIps.GetAddress (i, 0));
+  for (uint i = 0; i < m_netDevices.GetN (); i++)
+    NS_LOG_INFO ("[Node " << m_netDevices.Get (i)->GetNode ()->GetId () << "] assigned address "
+                          << m_ifaceIps.GetAddress (i, 0));
 }
 
 void
@@ -260,17 +256,16 @@ Scenario::ConfigureApplicationDrones ()
 
   for (uint32_t i = 0; i < m_drones.GetN (); i++)
     {
-      auto client = CreateObjectWithAttributes<DroneClientApplication>
-        ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress(i)),
-         "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask),
-         "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+      auto client = CreateObjectWithAttributes<DroneClientApplication> (
+          "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (i)),
+          "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask),
+          "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
       double droneAppStartTime = CONFIGURATOR->GetDroneApplicationStartTime (i);
       double droneAppStopTime = CONFIGURATOR->GetDroneApplicationStopTime (i);
 
-      NS_LOG_LOGIC ("[Node " << i << "] will operate in time interval from "
-                    << droneAppStartTime << " to "
-                    << droneAppStopTime << "s.");
+      NS_LOG_LOGIC ("[Node " << i << "] will operate in time interval from " << droneAppStartTime
+                             << " to " << droneAppStopTime << "s.");
 
       m_drones.Get (i)->AddApplication (client);
       client->SetStartTime (Seconds (droneAppStartTime));
@@ -283,9 +278,9 @@ Scenario::ConfigureApplicationZsps ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  auto server = CreateObjectWithAttributes<DroneServerApplication>
-    ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
-     "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
+  auto server = CreateObjectWithAttributes<DroneServerApplication> (
+      "Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
+      "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
 
   m_zsps.Get (0)->AddApplication (server);
 
@@ -297,9 +292,8 @@ void
 Scenario::ConfigureSimulator ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-  std::stringstream phyTraceLog,
-                    pcapLog;
-  AsciiTraceHelper  ascii;
+  std::stringstream phyTraceLog, pcapLog;
+  AsciiTraceHelper ascii;
 
   phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy.log";
   pcapLog << CONFIGURATOR->GetResultsPath () << "-host";
@@ -309,8 +303,7 @@ Scenario::ConfigureSimulator ()
   m_wifiPhy.EnablePcap (pcapLog.str (), m_netDevices);
 
   // Enable Report
-  Report::Get ()->Initialize ("davinci",
-                              CONFIGURATOR->GetCurrentDateTime (),
+  Report::Get ()->Initialize ("davinci", CONFIGURATOR->GetCurrentDateTime (),
                               CONFIGURATOR->GetResultsPath ());
 
   Simulator::Stop (Seconds (CONFIGURATOR->GetDuration ()));
@@ -342,7 +335,7 @@ int
 main (int argc, char **argv)
 {
   ns3::Scenario s (argc, argv);
-  s ();  // run the scenario as soon as it is ready
+  s (); // run the scenario as soon as it is ready
 
   return 0;
 }

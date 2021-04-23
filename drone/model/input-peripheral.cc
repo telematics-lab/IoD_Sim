@@ -27,73 +27,79 @@ NS_LOG_COMPONENT_DEFINE ("InputPeripheral");
 NS_OBJECT_ENSURE_REGISTERED (InputPeripheral);
 
 TypeId
-InputPeripheral::GetTypeId()
+InputPeripheral::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::InputPeripheral")
-    .SetParent<DronePeripheral> ()
-    .SetGroupName ("Peripheral")
-    .AddConstructor<InputPeripheral> ()
-    .AddAttribute("DataRate", "The acquisition data rate of the peripheral in bit",
-                  DoubleValue (0),
-                  MakeDoubleAccessor (&InputPeripheral::m_dataRate),
-                  MakeDoubleChecker<double> (0))
-    .AddAttribute("DataAcquisitionTimeInterval", "The time interval occurring between any data acquisition",
-                  TimeValue (Seconds(1.0)),
-                  MakeTimeAccessor (&InputPeripheral::m_acquisitionTimeInterval),
-                  MakeTimeChecker ())
-    .AddAttribute("HasStorage", "Acquired data are offloaded to the StoragePeripheral",
-                  BooleanValue (false),
-                  MakeBooleanAccessor (&InputPeripheral::m_hasStorage),
-                  MakeBooleanChecker())
-    ;
+          .SetParent<DronePeripheral> ()
+          .SetGroupName ("Peripheral")
+          .AddConstructor<InputPeripheral> ()
+          .AddAttribute ("DataRate", "The acquisition data rate of the peripheral in bit",
+                         DoubleValue (0),
+                         MakeDoubleAccessor (&InputPeripheral::m_dataRate),
+                         MakeDoubleChecker<double> (0))
+          .AddAttribute ("DataAcquisitionTimeInterval", "The time interval occurring between any data acquisition",
+                         TimeValue (Seconds (1.0)),
+                         MakeTimeAccessor (&InputPeripheral::m_acquisitionTimeInterval),
+                         MakeTimeChecker ())
+          .AddAttribute ("HasStorage", "Acquired data are offloaded to the StoragePeripheral",
+                         BooleanValue (false),
+                         MakeBooleanAccessor (&InputPeripheral::m_hasStorage),
+                         MakeBooleanChecker ())
+          ;
   return tid;
 }
 
-InputPeripheral::InputPeripheral()
+InputPeripheral::InputPeripheral ()
 {
 }
 
 void
-InputPeripheral::DoInitialize(void)
+InputPeripheral::DoInitialize (void)
 {
-  DronePeripheral::DoInitialize();
+  DronePeripheral::DoInitialize ();
 }
 
 void
-InputPeripheral::DoDispose(void)
+InputPeripheral::DoDispose (void)
 {
-  DronePeripheral::DoDispose();
+  DronePeripheral::DoDispose ();
 }
 
 void
-InputPeripheral::SetStorage(Ptr<StoragePeripheral> storage)
+InputPeripheral::SetStorage (Ptr<StoragePeripheral> storage)
 {
   NS_ASSERT (storage != NULL);
-  NS_ASSERT(storage->GetDrone() == this->GetDrone());
+  NS_ASSERT (storage->GetDrone () == this->GetDrone ());
   m_storage = storage;
 }
 
 void
-InputPeripheral::Install(Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
+InputPeripheral::Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
 {
-  SetDrone(drone);
+  SetDrone (drone);
   if (storage != NULL)
-  {
-    SetStorage(storage);
-    AcquireData();
-  }
+    {
+      SetStorage (storage);
+      AcquireData ();
+    }
 }
 
 void
-InputPeripheral::AcquireData(void)
+InputPeripheral::AcquireData (void)
 {
-  if (Simulator::IsFinished ()) return;
-  m_dataAcquisitionEvent.Cancel();
-  if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds())
+  if (Simulator::IsFinished ())
+    return;
+
+  m_dataAcquisitionEvent.Cancel ();
+
+  if (Simulator::Now ().GetMilliSeconds () >= m_acquisitionTimeInterval.GetMilliSeconds ())
     {
-      m_storage->Alloc(m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds()/1000, StoragePeripheral::bit);
+      m_storage->Alloc (m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds () / 1000,
+                        StoragePeripheral::bit);
     }
-  m_dataAcquisitionEvent = Simulator::Schedule(m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
+
+  m_dataAcquisitionEvent =
+      Simulator::Schedule (m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
 }
 
 } // namespace ns3

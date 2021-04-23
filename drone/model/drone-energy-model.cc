@@ -31,10 +31,9 @@ TypeId
 DroneEnergyModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::DroneEnergyModel")
-    .SetParent<DeviceEnergyModel> ()
-    .SetGroupName ("Energy")
-    .AddConstructor<DroneEnergyModel> ()
-  ;
+                          .SetParent<DeviceEnergyModel> ()
+                          .SetGroupName ("Energy")
+                          .AddConstructor<DroneEnergyModel> ();
   return tid;
 }
 
@@ -45,7 +44,7 @@ DroneEnergyModel::DroneEnergyModel ()
 }
 
 void
-DroneEnergyModel::SetEnergySource(Ptr<EnergySource> source)
+DroneEnergyModel::SetEnergySource (Ptr<EnergySource> source)
 {
   NS_LOG_FUNCTION (this << source);
   m_source = source;
@@ -65,51 +64,55 @@ DroneEnergyModel::GetDrone () const
   return m_drone;
 }
 
-double
-DroneEnergyModel::GetTotalEnergyConsumption (void) const
-{
-  return 0;
-}
-
 void
-DroneEnergyModel::HandleEnergyDepletion()
+DroneEnergyModel::HandleEnergyDepletion ()
 {
-  Time time = Simulator::Now();
-  NS_LOG_DEBUG("DroneEnergyModel:LowBatteryThreshold on Drone #"<< GetDrone()->GetId() <<" crossed at "<< time.GetSeconds() << " seconds.");
+  Time time = Simulator::Now ();
+  NS_LOG_DEBUG ("DroneEnergyModel:LowBatteryThreshold on Drone #"
+                << GetDrone ()->GetId () << " crossed at " << time.GetSeconds () << " seconds.");
 }
 
 double
-DroneEnergyModel::GetPeripheralsPowerConsumption(void) const
+DroneEnergyModel::GetPeripheralsPowerConsumption (void) const
 {
   double peripheralsPowerConsumption = 0;
-  for (auto i = m_drone->getPeripherals()->Begin(); i != m_drone->getPeripherals()->End(); i++)
+
+  for (auto i = m_drone->getPeripherals ()->Begin (); i != m_drone->getPeripherals ()->End (); i++)
     {
-      peripheralsPowerConsumption+= (*i)->GetPowerConsumption();
+      peripheralsPowerConsumption += (*i)->GetPowerConsumption ();
     }
-  NS_LOG_DEBUG("DroneEnergyModel:Peripherals Power Consumption on Drone #"<< GetDrone()->GetId() << ": "<<peripheralsPowerConsumption<<" W");
+
+  NS_LOG_DEBUG ("DroneEnergyModel:Peripherals Power Consumption on Drone #"
+                << GetDrone ()->GetId () << ": " << peripheralsPowerConsumption << " W");
   return peripheralsPowerConsumption;
 }
 
 double
-DroneEnergyModel::GetPower() const
+DroneEnergyModel::GetPower () const
 {
-  Ptr<Drone> drone = GetDrone();
-  Ptr<Object> obj = StaticCast<Object, Drone>(drone);
-  Vector velocity = obj->GetObject<MobilityModel>()->GetVelocity();
-  double Phover = sqrt(drone->getWeight()/(2*AIR_DENSITY*drone->getArea()));
-  double Plevel = ((pow(drone->getWeight(), 2))/(sqrt(2)*AIR_DENSITY*drone->getArea())) * (1/sqrt(pow(velocity.x, 2) + pow(velocity.y, 2) + sqrt(pow(sqrt(pow(velocity.x,2) + pow(velocity.y, 2)),4)+(4*pow(Phover,4)))));
-  double Pdrag = (1/8)*drone->getDragCoefficient()*AIR_DENSITY*drone->getArea()*pow(sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)),3);
-  double Pvertical = drone->getWeight()*velocity.z;
+  Ptr<Drone> drone = GetDrone ();
+  Ptr<Object> obj = StaticCast<Object, Drone> (drone);
+  Vector velocity = obj->GetObject<MobilityModel> ()->GetVelocity ();
+  double Phover = sqrt (drone->getWeight () / (2 * AIR_DENSITY * drone->getArea ()));
+  double Plevel = ((pow (drone->getWeight (), 2)) / (sqrt (2) * AIR_DENSITY * drone->getArea ())) *
+                  (1 / sqrt (pow (velocity.x, 2) + pow (velocity.y, 2) +
+                             sqrt (pow (sqrt (pow (velocity.x, 2) + pow (velocity.y, 2)), 4) +
+                                   (4 * pow (Phover, 4)))));
+  double Pdrag = (1 / 8) * drone->getDragCoefficient () * AIR_DENSITY * drone->getArea () *
+                 pow (sqrt (pow (velocity.x, 2) + pow (velocity.y, 2)), 3);
+  double Pvertical = drone->getWeight () * velocity.z;
   double PowerConsumption = Plevel + Pdrag + Pvertical;
+
   return PowerConsumption;
 }
 
 double
 DroneEnergyModel::DoGetCurrentA (void) const
 {
-  double PowerConsumption = GetPower() + GetPeripheralsPowerConsumption();
-  double VoltageV = m_source->GetSupplyVoltage();
+  double PowerConsumption = GetPower () + GetPeripheralsPowerConsumption ();
+  double VoltageV = m_source->GetSupplyVoltage ();
   double CurrentA = (PowerConsumption / VoltageV);
+
   return CurrentA;
 }
 

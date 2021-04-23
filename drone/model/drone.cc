@@ -41,30 +41,27 @@ TypeId
 Drone::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::Drone")
-    .SetParent<Node> ()
-    .SetGroupName("Network")
-    .AddConstructor<Drone> ()
-    .AddAttribute ("Mass", "The mass of this Drone.",
-                  DoubleValue (0),
-                  MakeDoubleAccessor (&Drone::setMass,
-                                      &Drone::getMass),
-                  MakeDoubleChecker<double> ())
-    .AddAttribute ("RotorDiskArea", "The area of the rotor disk of this Drone.",
-                  DoubleValue (0),
-                  MakeDoubleAccessor (&Drone::setArea,
-                                      &Drone::getArea),
-                  MakeDoubleChecker<double> ())
-    .AddAttribute ("DragCoefficient", "Drag Coefficient relative to this Drone.",
-                  DoubleValue (0),
-                  MakeDoubleAccessor (&Drone::getDragCoefficient,
-                                      &Drone::setDragCoefficient),
-                  MakeDoubleChecker<double> ())
+          .SetParent<Node> ()
+          .SetGroupName ("Network")
+          .AddConstructor<Drone> ()
+          .AddAttribute ("Mass", "The mass of this Drone.",
+                         DoubleValue (0),
+                         MakeDoubleAccessor (&Drone::setMass, &Drone::getMass),
+                         MakeDoubleChecker<double> ())
+          .AddAttribute ("RotorDiskArea", "The area of the rotor disk of this Drone.",
+                         DoubleValue (0),
+                         MakeDoubleAccessor (&Drone::setArea, &Drone::getArea),
+                         MakeDoubleChecker<double> ())
+          .AddAttribute ("DragCoefficient", "Drag Coefficient relative to this Drone.",
+                         DoubleValue (0),
+                         MakeDoubleAccessor (&Drone::getDragCoefficient, &Drone::setDragCoefficient),
+                         MakeDoubleChecker<double> ())
 
-  ;
+          ;
   return tid;
 }
 
-Drone::Drone()
+Drone::Drone ()
 {
 }
 
@@ -79,56 +76,56 @@ void
 Drone::DoInitialize (void)
 {
   NS_LOG_FUNCTION (this);
-  m_peripheralContainer = CreateObject<DronePeripheralContainer>();
+  m_peripheralContainer = CreateObject<DronePeripheralContainer> ();
   Node::DoInitialize ();
 }
 
 Ptr<DronePeripheralContainer>
 Drone::getPeripherals ()
 {
-  NS_LOG_FUNCTION(this);
+  NS_LOG_FUNCTION (this);
   return m_peripheralContainer;
 }
 
 void
-Drone::setMass(double mass)
+Drone::setMass (double mass)
 {
   m_mass = mass;
-  m_weightForce = m_mass*GRAVITY;
+  m_weightForce = m_mass * GRAVITY;
 }
 
 void
-Drone::setArea(double area)
+Drone::setArea (double area)
 {
   m_diskArea = area;
 }
 
 void
-Drone::setDragCoefficient(double coefficient)
+Drone::setDragCoefficient (double coefficient)
 {
   m_dragCoefficient = coefficient;
 }
 
 double
-Drone::getMass() const
+Drone::getMass () const
 {
   return m_mass;
 }
 
 double
-Drone::getWeight() const
+Drone::getWeight () const
 {
   return m_weightForce;
 }
 
 double
-Drone::getArea() const
+Drone::getArea () const
 {
   return m_diskArea;
 }
 
 double
-Drone::getDragCoefficient() const
+Drone::getDragCoefficient () const
 {
   return m_dragCoefficient;
 }

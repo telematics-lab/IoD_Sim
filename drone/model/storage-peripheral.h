@@ -25,19 +25,19 @@ namespace ns3 {
 /**
  * \brief This class describes a generic storage peripheral.
  */
-class StoragePeripheral: public DronePeripheral
+class StoragePeripheral : public DronePeripheral
 {
 public:
   /**
   * \brief Multipliers to ease the conversion among units of measure.
   */
-  enum unit{
+  enum unit {
     bit = 1,
     kbit = 1024,
-    mbit = 1024*1024,
+    mbit = 1024 * 1024,
     byte = 8,
-    kbyte = 8*1024,
-    mbyte = 8*1024*1024
+    kbyte = 8 * 1024,
+    mbyte = 8 * 1024 * 1024
   };
 
   /**
@@ -45,23 +45,23 @@ public:
    *
    * \returns the object TypeId
    */
-  static TypeId GetTypeId(void);
+  static TypeId GetTypeId (void);
 
-  StoragePeripheral();
+  StoragePeripheral ();
 
   /**
    * \brief Sets the capacity of the drive.
    *
    * \param cap Capacity of the drive in bits.
    */
-  void SetCapacity(int cap);
+  void SetCapacity (int cap);
 
   /**
    * \brief Returns the capacity of the drive.
    *
    * \returns Capacity of the drive in bits.
    */
-  int GetCapacity(void) const;
+  int GetCapacity (void) const;
 
   /**
    * \brief Allocates a certain amount of data to the drive.
@@ -80,8 +80,8 @@ public:
   void Free (int amount, unit amountUnit);
 
 protected:
-  void DoInitialize(void);
-  void DoDispose(void);
+  void DoInitialize (void);
+  void DoDispose (void);
 
 private:
   double m_capacity;
