@@ -44,7 +44,18 @@ EntityConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
   const auto mobilityModel = DecodeMobilityConfiguration (json["mobilityModel"]);
   const auto applications = DecodeApplicationConfigurations (json["applications"]);
 
-  return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications);
+  if (json.HasMember("mechanics") && json.HasMember("battery") && json.HasMember("peripherals"))
+    {
+      const auto mechanics = DecodeMechanicsConfiguration (json["mechanics"]);
+      const auto battery = DecodeBatteryConfiguration (json["battery"]);
+      const auto peripherals = DecodePeripheralConfigurations (json["peripherals"]);
+      return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications, mechanics, battery, peripherals);
+    }
+  else
+    {
+      return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications);
+    }
+
 }
 
 EntityConfigurationHelper::EntityConfigurationHelper ()
@@ -118,6 +129,42 @@ EntityConfigurationHelper::DecodeApplicationConfigurations (const rapidjson::Val
                     "Application model configuration must be an object.");
 
       confs.push_back (DecodeModelConfiguration(appl));
+    }
+
+  return confs;
+}
+
+const ModelConfiguration
+EntityConfigurationHelper::DecodeMechanicsConfiguration (const rapidjson::Value& json)
+{
+  NS_ASSERT_MSG (json.IsObject (),
+                 "Entity mechanics configuration must be an object.");
+
+  return DecodeModelConfiguration (json);
+}
+
+const ModelConfiguration
+EntityConfigurationHelper::DecodeBatteryConfiguration (const rapidjson::Value& json)
+{
+  NS_ASSERT_MSG (json.IsObject (),
+                 "Entity battery configuration must be an object.");
+
+  return DecodeModelConfiguration (json);
+}
+
+const std::vector<ModelConfiguration>
+EntityConfigurationHelper::DecodePeripheralConfigurations (const rapidjson::Value& json)
+{
+  NS_ASSERT_MSG (json.IsArray (),
+                 "Entity configuration 'peripherals' property must be an array.");
+
+  std::vector<ModelConfiguration> confs;
+  for (auto& peripheral : json.GetArray ())
+    {
+      NS_ASSERT_MSG (peripheral.IsObject (),
+                    "Peripheral model configuration must be an object.");
+
+      confs.push_back (DecodeModelConfiguration(peripheral));
     }
 
   return confs;

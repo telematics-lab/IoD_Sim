@@ -54,7 +54,11 @@
     "logComponents": [
         "ReportSimulation",
         "Scenario",
-        "SimulationDuration"
+        "SimulationDuration",
+        "Drone",
+        "LiIonEnergySource",
+        "EnergySource",
+        "DroneEnergyModel"
     ],
     "resultsPath": "../results/"
 }

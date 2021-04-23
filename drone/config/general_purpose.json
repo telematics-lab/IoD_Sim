@@ -1,8 +1,8 @@
 {
     "name": "IoD Sim",
-    "resultsPath": "../results",
+    "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 300,
+    "duration": 100,
     "staticNs3Config": [{
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
@@ -110,6 +110,72 @@
                         "value": 299.0
                     }
                 ]
+            }],
+            "mechanics": {
+                "name": "ns3::Drone",
+                "attributes": [
+                    {
+                        "name": "Mass",
+                        "value": 0.750
+                    },
+                    {
+                        "name": "RotorDiskArea",
+                        "value": 0.18
+                    },
+                    {
+                        "name": "DragCoefficient",
+                        "value": 0.08
+                    }
+                ]
+            },
+            "battery": {
+                "name": "ns3::LiIonEnergySource",
+                "attributes": [
+                    {
+                        "name": "LiIonEnergySourceInitialEnergyJ",
+                        "value": 200.0
+                    },
+                    {
+                        "name": "LiIonEnergyLowBatteryThreshold",
+                        "value": 0.2
+                    }
+                ]
+            },
+            "peripherals": [{
+                "name": "ns3::DronePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    }
+                ]
+            },
+            {
+                "name": "ns3::StoragePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "Capacity",
+                        "value": 8000000
+                    }
+                ]
+            },
+            {
+                "name": "ns3::InputPeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "DataRate",
+                        "value": 1e+6
+                    }
+                ]
+
             }]
         },
         {
@@ -166,6 +232,76 @@
                         "value": 299.0
                     }
                 ]
+            }],
+            "mechanics": {
+                "name": "ns3::Drone",
+                "attributes": [
+                    {
+                        "name": "Mass",
+                        "value": 0.750
+                    },
+                    {
+                        "name": "RotorDiskArea",
+                        "value": 0.18
+                    },
+                    {
+                        "name": "DragCoefficient",
+                        "value": 0.08
+                    }
+                ]
+            },
+            "battery": {
+                "name": "ns3::LiIonEnergySource",
+                "attributes": [
+                    {
+                        "name": "LiIonEnergySourceInitialEnergyJ",
+                        "value": 200.0
+                    },
+                    {
+                        "name": "LiIonEnergyLowBatteryThreshold",
+                        "value": 0.2
+                    }
+                ]
+            },
+            "peripherals": [{
+                "name": "ns3::DronePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    }
+                ]
+            },
+            {
+                "name": "ns3::StoragePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "Capacity",
+                        "value": 8000000
+                    }
+                ]
+            },
+            {
+                "name": "ns3::InputPeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "DataRate",
+                        "value": 1e+6
+                    },
+                    {
+                        "name": "HasStorage",
+                        "value": "true"
+                    }
+                ]
+
             }]
         }
     ],
@@ -209,6 +345,14 @@
         "ParametricSpeedDroneMobilityModel",
         "DroneServerApplication",
         "DroneClientApplication",
-        "ScenarioConfigurationHelper"
+        "ScenarioConfigurationHelper",
+        "Drone",
+        "LiIonEnergySource",
+        "EnergySource",
+        "DroneEnergyModel",
+        "Scenario",
+        "DronePeripheral",
+        "StoragePeripheral",
+        "InputPeripheral"
     ]
 }

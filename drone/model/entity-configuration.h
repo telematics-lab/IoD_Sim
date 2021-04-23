@@ -34,16 +34,30 @@ class EntityConfiguration : public Object
     EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
                          ModelConfiguration m_mobility,
                          std::vector<ModelConfiguration> m_applications);
+
+    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                         ModelConfiguration m_mobility,
+                         std::vector<ModelConfiguration> m_applications,
+                         ModelConfiguration m_mechanics,
+                         ModelConfiguration m_battery,
+                         std::vector<ModelConfiguration> m_peripherals);
+
     ~EntityConfiguration ();
 
   const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices () const;
   const ModelConfiguration& GetMobilityModel () const;
   const std::vector<ModelConfiguration>& GetApplications () const;
+  const ModelConfiguration& GetMechanics () const;
+  const ModelConfiguration& GetBattery () const;
+  const std::vector<ModelConfiguration>& GetPeripherals () const;
 
 private:
   std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
   ModelConfiguration m_mobility;
   std::vector<ModelConfiguration> m_applications;
+  ModelConfiguration m_mechanics;
+  ModelConfiguration m_battery;
+  std::vector<ModelConfiguration> m_peripherals;
 };
 
 } // namespace ns3
