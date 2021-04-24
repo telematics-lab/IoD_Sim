@@ -121,6 +121,11 @@ DroneScenarioHelper::Run () const
   Simulator::Run ();
   Simulator::Destroy ();
 
+  if (m_configurator->RadioMap ())
+    {
+      system (("python3 ../tools/makeplot.py " + m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem").c_str ());
+    }
+
   /*
   Since ns3::LteHelper generates its traces in the root folder of ns3 by default
   and there's no way to change that, here if it finds any "lte" type network the
