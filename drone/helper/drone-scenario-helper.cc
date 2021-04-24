@@ -388,24 +388,20 @@ DroneScenarioHelper::SetupNetworks ()
 void
 DroneScenarioHelper::GenerateRadioMap () const
 {
-    Ptr<RadioEnvironmentMapHelper> remHelper;
-    remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-    // setting default values
-    remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath() + m_configurator->GetName() + ".rem"));
-    remHelper->SetAttribute ("XMin", DoubleValue (-100));
-    remHelper->SetAttribute ("XMax", DoubleValue (100));
-    remHelper->SetAttribute ("YMin", DoubleValue (-100));
-    remHelper->SetAttribute ("YMax", DoubleValue (100));
-    remHelper->SetAttribute ("Z", DoubleValue (10));
-    remHelper->SetAttribute ("UseDataChannel", BooleanValue (true));
+  // making it static in order for it to be alive when simulation run
+  static Ptr<RadioEnvironmentMapHelper> m_remHelper = CreateObject<RadioEnvironmentMapHelper> ();
+  // setting default values
+  m_remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath() + m_configurator->GetName() + ".rem"));
+  m_remHelper->SetAttribute ("XRes", UintegerValue (100));
+  m_remHelper->SetAttribute ("YRes", UintegerValue (100));
 
-    auto parameters = m_configurator->GetRadioMapParameters ();
-    for (auto par : parameters)
-      {
-        remHelper->SetAttribute (par.first, StringValue (par.second));
-      }
+  auto parameters = m_configurator->GetRadioMapParameters ();
+  for (auto par : parameters)
+    {
+      m_remHelper->SetAttribute (par.first, StringValue (par.second));
+    }
 
-    remHelper->Install ();
+  m_remHelper->Install ();
 }
 
 

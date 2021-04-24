@@ -11,7 +11,10 @@
   ],
 
   "radioMapParameters": [
-    "YMax", "300",
+    "XMin", "-200",
+    "XMax", "200",
+    "YMin", "-200",
+    "YMax", "200",
     "ChannelPath", "/ChannelList/2"
   ],
 
@@ -85,9 +88,8 @@
   ],
 
   "duration": 10.0,
-  "logOnFile": true,
+  "logOnFile": false,
   "logComponents": [
-    "RadioEnvironmentMapHelper",
     "Scenario",
     "DroneServer",
     "DroneClient",

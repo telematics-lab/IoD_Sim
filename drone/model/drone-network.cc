@@ -165,7 +165,7 @@ LteDroneNetwork::Generate ()
   m_lteHelper->Attach (m_droneDevs);
 
   // activate a dedicated bearer for video trasmission on all the UEs
-  enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
   GbrQosInformation qos;
   qos.gbrDl = 20000000;  // Downlink GBR (bit/s): 20 Mbps
   qos.gbrUl = 5000000;  // Uplink GBR: 5 Mbps
