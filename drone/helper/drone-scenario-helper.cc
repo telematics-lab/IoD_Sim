@@ -174,6 +174,19 @@ DroneScenarioHelper::SetMobilityModels () const
 
   this->SetDronesMobility ();
   this->SetAntennasPosition ();
+
+  /*
+  install the building helper to each antenna and drone of the scenario.
+  Once the building have been created in GetBuildings() there
+  is no need to store them in a container since the BuildingHelper has a global
+  reference to all of them already
+  */
+  m_configurator->GetBuildings ();
+
+  BuildingsHelper::Install (m_antennaNodes);
+  BuildingsHelper::Install (m_droneNodes);
+
+  //BuildingsHelper::MakeMobilityModelConsistent ();
 }
 
 uint32_t
@@ -377,16 +390,6 @@ DroneScenarioHelper::SetupNetworks ()
         }
     }
 
-  /*
-  install the building helper to each antenna and drone of the scenario.
-  m_building is actually not used, once the building have been created there
-  is no need to store them in a container since the BuildingHelper has a global
-  reference to all of them already
-  */
-  m_buildings = m_configurator->GetBuildings ();
-
-  BuildingsHelper::Install (m_antennaNodes);
-  BuildingsHelper::Install (m_droneNodes);
 }
 
 
@@ -395,10 +398,16 @@ DroneScenarioHelper::GenerateRadioMap () const
 {
   // making it static in order for it to be alive when simulation run
   static Ptr<RadioEnvironmentMapHelper> m_remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-  // setting default values
   m_remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath() + m_configurator->GetName() + ".rem"));
+
+  // setting default values range (-50:50) for both x and y, 100x100 points at height 10 mt
+  m_remHelper->SetAttribute ("XMin", DoubleValue (-50.0));
+  m_remHelper->SetAttribute ("XMax", DoubleValue (50.0));
   m_remHelper->SetAttribute ("XRes", UintegerValue (100));
+  m_remHelper->SetAttribute ("YMin", DoubleValue (-50.0));
+  m_remHelper->SetAttribute ("YMax", DoubleValue (50.0));
   m_remHelper->SetAttribute ("YRes", UintegerValue (100));
+  m_remHelper->SetAttribute ("Z", DoubleValue (10.0));
 
   auto parameters = m_configurator->GetRadioMapParameters ();
   for (auto par : parameters)
@@ -407,6 +416,8 @@ DroneScenarioHelper::GenerateRadioMap () const
     }
 
   m_remHelper->Install ();
+
+  NS_LOG_DEBUG ("Buildings present: " << BuildingList::GetNBuildings ());
 }
 
 

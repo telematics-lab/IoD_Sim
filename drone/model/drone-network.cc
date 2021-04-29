@@ -136,6 +136,14 @@ LteDroneNetwork::Generate ()
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
+  m_lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::HybridBuildingsPropagationLossModel"));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaExtWalls", DoubleValue (0));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaOutdoor", DoubleValue (1));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaIndoor", DoubleValue (1.5));
+  // always use NLos
+  m_lteHelper->SetPathlossModelAttribute ("Los2NlosThr", DoubleValue (0));
+  m_lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
+
   // installing eNB devices and UE devices
   // if more than one eNB create X2 interfaces between them for auto handover
   m_antennaDevs = m_lteHelper->InstallEnbDevice (m_antennaNodes);

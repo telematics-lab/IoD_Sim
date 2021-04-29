@@ -9,12 +9,12 @@ filepath = sys.argv[1]
 
 x,y,z,values = np.loadtxt(filepath).T
 
-print(x, y, z)
+#print(x, y, z)
 
 values = np.reshape(values, (len(set(x)), len(set(y)))).T
 values = np.flipud(values)
 
-print(values)
+#print(values)
 
 minimum = values.min()
 maximum = values.max()
@@ -28,7 +28,8 @@ x_range = int(x.max()-x.min())
 y_range = int(y.max()-y.min())
 ratio_x = x_range / np.gcd(x_range, y_range)
 ratio_y = y_range / np.gcd(x_range, y_range)
-print(ratio_x, ratio_y)
+
+#print(ratio_x, ratio_y)
 #plt.rcParams["figure.figsize"] = [ratio_x,ratio_y]
 
 plt.imshow(values, extent=(x.min(), x.max(), y.min(), y.max()),
@@ -37,3 +38,5 @@ plt.imshow(values, extent=(x.min(), x.max(), y.min(), y.max()),
 
 name = ".".join(filepath.split(".")[:-1])
 plt.savefig(name + "-plot")
+
+print("Plot generated.")
