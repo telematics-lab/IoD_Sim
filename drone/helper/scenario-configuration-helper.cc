@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <rapidjson/filereadstream.h>
+#include <rapidjson/pointer.h>
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
@@ -1104,6 +1105,30 @@ ScenarioConfigurationHelper::GetRadioMapParameters () const
     }
 
   return parameters;
+}
+
+uint32_t
+ScenarioConfigurationHelper::GetUint (const char* path) const
+{
+  return rapidjson::Pointer(path).Get(m_config)->GetUint();
+}
+
+double
+ScenarioConfigurationHelper::GetDouble (const char* path) const
+{
+  return rapidjson::Pointer(path).Get(m_config)->GetDouble();
+}
+
+const std::string
+ScenarioConfigurationHelper::GetString (const char* path) const
+{
+  return rapidjson::Pointer(path).Get(m_config)->GetString();
+}
+
+bool
+ScenarioConfigurationHelper::CheckPath (const char* path) const
+{
+  return rapidjson::Pointer(path).Get(m_config) != nullptr;
 }
 
 

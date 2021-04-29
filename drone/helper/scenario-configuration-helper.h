@@ -308,6 +308,30 @@ public:
   const std::vector<uint32_t> GetAntennasInNetwork (const std::string& net_name) const;
 
   /**
+   * \param path the path to check in form eg "/parent/children/index/key"
+   * \return true if the path is valid else false
+   */
+  bool CheckPath (const char* path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns the unsigned integer at the specified path
+   */
+  uint32_t GetUint (const char* path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns the double at the specified path
+   */
+  double GetDouble (const char* path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns the string at the specified path
+   */
+  const std::string GetString(const char* path) const;
+
+  /**
    * \brief default destructor
    */
   ~ScenarioConfigurationHelper ();
