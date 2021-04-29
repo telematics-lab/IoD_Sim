@@ -327,6 +327,12 @@ public:
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns the boolean at the specified path
+   */
+  bool GetBool (const char* path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
    * \returns the string at the specified path
    */
   const std::string GetString(const char* path) const;

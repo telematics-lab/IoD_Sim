@@ -1119,6 +1119,12 @@ ScenarioConfigurationHelper::GetDouble (const char* path) const
   return rapidjson::Pointer(path).Get(m_config)->GetDouble();
 }
 
+bool
+ScenarioConfigurationHelper::GetBool (const char* path) const
+{
+  return rapidjson::Pointer(path).Get(m_config)->GetBool();
+}
+
 const std::string
 ScenarioConfigurationHelper::GetString (const char* path) const
 {
