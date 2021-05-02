@@ -314,10 +314,24 @@ public:
   bool CheckPath (const char* path) const;
 
   /**
+   * \param path1 the first part of the path
+   * \param path2 the second part of the path
+   * \return the concatenation of those 2 paths adding a '/' if necessary
+   */
+  const std::string MakePath (const char* path1, const char* path2) const;
+
+  /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
    * \returns the unsigned integer at the specified path
    */
   uint32_t GetUint (const char* path) const;
+
+  /**
+   * \param path the first part of the path
+   * \param last the last part of the path
+   * \returns the unsigned integer at the specified path
+   */
+  uint32_t GetUint (const char* path, const char* last) const;
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
@@ -326,16 +340,37 @@ public:
   double GetDouble (const char* path) const;
 
   /**
+   * \param path the first part of the path
+   * \param last the last part of the path
+   * \returns the double at the specified path
+   */
+  double GetDouble (const char* path, const char* last) const;
+
+  /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
    * \returns the boolean at the specified path
    */
   bool GetBool (const char* path) const;
+
+    /**
+   * \param path the first part of the path
+   * \param last the last part of the path
+   * \returns the boolean at the specified path
+   */
+  bool GetBool (const char* path, const char* last) const;
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
    * \returns the string at the specified path
    */
   const std::string GetString(const char* path) const;
+
+  /**
+   * \param path the first part of the path
+   * \param last the last part of the path
+   * \returns the string at the specified path
+   */
+  const std::string GetString (const char* path, const char* last) const;
 
   /**
    * \brief default destructor

@@ -1107,10 +1107,26 @@ ScenarioConfigurationHelper::GetRadioMapParameters () const
   return parameters;
 }
 
+const std::string
+ScenarioConfigurationHelper::MakePath (const char* path1, const char* path2) const
+{
+  std::string npath(path1);
+  if (npath.back() != '/')
+    npath.push_back('/');
+  npath.append(path2);
+  return npath;
+}
+
 uint32_t
 ScenarioConfigurationHelper::GetUint (const char* path) const
 {
   return rapidjson::Pointer(path).Get(m_config)->GetUint();
+}
+
+uint32_t
+ScenarioConfigurationHelper::GetUint (const char* path, const char* last) const
+{
+  return GetUint (MakePath (path, last).c_str ());
 }
 
 double
@@ -1119,16 +1135,34 @@ ScenarioConfigurationHelper::GetDouble (const char* path) const
   return rapidjson::Pointer(path).Get(m_config)->GetDouble();
 }
 
+double
+ScenarioConfigurationHelper::GetDouble (const char* path, const char* last) const
+{
+  return GetDouble (MakePath (path, last).c_str ());
+}
+
 bool
 ScenarioConfigurationHelper::GetBool (const char* path) const
 {
   return rapidjson::Pointer(path).Get(m_config)->GetBool();
 }
 
+bool
+ScenarioConfigurationHelper::GetBool (const char* path, const char* last) const
+{
+  return GetBool (MakePath (path, last).c_str ());
+}
+
 const std::string
 ScenarioConfigurationHelper::GetString (const char* path) const
 {
   return rapidjson::Pointer(path).Get(m_config)->GetString();
+}
+
+const std::string
+ScenarioConfigurationHelper::GetString (const char* path, const char* last) const
+{
+  return GetString (MakePath (path, last).c_str ());
 }
 
 bool
