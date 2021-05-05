@@ -33,6 +33,20 @@ EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration
                                           ModelConfiguration mobility,
                                           std::vector<ModelConfiguration> applications,
                                           ModelConfiguration mechanics,
+                                          ModelConfiguration battery) :
+  m_netDevices {netDevices},
+  m_mobility {mobility},
+  m_applications {applications},
+  m_mechanics {mechanics},
+  m_battery {battery}
+{
+
+}
+
+EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                          ModelConfiguration mobility,
+                                          std::vector<ModelConfiguration> applications,
+                                          ModelConfiguration mechanics,
                                           ModelConfiguration battery,
                                           std::vector<ModelConfiguration> peripherals) :
   m_netDevices {netDevices},
