@@ -7,21 +7,21 @@ def main():
       description="This script generates a serpentine path for a drone to cover a given square area")
   parser.add_argument("-f", "--fileName",
       help="Name of the config file to create")
-  parser.add_argument("--height", default=10.0,
+  parser.add_argument("-h", "--height", default=10.0,
       help="The constant Z coordinate of the path")
-  parser.add_argument("--origin", nargs=2, default=[0, 0],
+  parser.add_argument("-o", "--origin", nargs=2, default=[0, 0],
       help="The top-left/central point of the square")
   parser.add_argument("--originType", choices=["topleft", "center"], default="center",
       help="If origin refers to the top-left corner of the square or its center")
-  parser.add_argument("--size", default=200,
+  parser.add_argument("-w", "--size", default=200,
       help="The size of the square along each direction")
-  parser.add_argument("--steps", default=10, type=int,
+  parser.add_argument("-s", "--steps", default=10, type=int,
       help="The number of subdivisions along each direction")
   parser.add_argument("--direction", choices=["x", "y"], default="x",
       help="The direction of the straight pieces of the path")
-  parser.add_argument("--duration", default=100.0,
+  parser.add_argument("-d", "--duration", default=100.0,
       help="The duration of the simulation, drone speed will be calculated accordingly")
-  parser.add_argument("--restTime", default=0.1,
+  parser.add_argument("-r", "--restTime", default=0.1,
       help="The duration of pause on each point, drone speed will be calculated accordingly")
 
   args = parser.parse_args(sys.argv[1:])
