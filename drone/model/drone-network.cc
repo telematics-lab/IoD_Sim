@@ -23,6 +23,7 @@
 #include <ns3/internet-stack-helper.h>
 #include <ns3/trace-helper.h>
 #include <ns3/scenario-configuration-helper.h>
+#include <ns3/system-path.h>
 
 namespace ns3
 {
@@ -191,10 +192,70 @@ LteDroneNetwork::EnableTraces ()
   AsciiTraceHelper ascii;
 
   std::string p2pPath, ipPath;
-  std::string path = ScenarioConfigurationHelper::Get ()->GetResultsPath ();
+  std::string path = ScenarioConfigurationHelper::Get ()->GetResultsPath () + m_name;
+
+  SystemPath::MakeDirectories(path);
+
+  path += "/";
 
   p2pPath = path + "REMOTE";
   ipPath = path + "IP";
+
+  m_lteHelper->EnableTraces ();
+
+  /*
+  LteHelperHack:
+  This class is an hack to allow access to private members of LteHelper class,
+  in particular to the StatsCalculators in order to set their output path.
+  A structurally identical class is defined with all attributes set to public,
+  then with a reinterpret_cast we interpret the LteHelper as this new class
+  so the compiler won't complain about accessing its private members.
+  */
+  class LteHelperHack : public Object {
+  public:
+    Ptr<SpectrumChannel> dlC, ulC;
+    Ptr<Object>  dlPlM, ulPlM;
+    ObjectFactory a, b, c, d, e, f, g, h, i, j, k;
+    std::string fMT;
+    ObjectFactory fMF;
+    Ptr<SpectrumPropagationLossModel> fM;
+    bool fSA;
+    Ptr<PhyStatsCalculator> phyStat;
+    Ptr<PhyTxStatsCalculator> phyTxStat;
+    Ptr<PhyRxStatsCalculator> phyRxStat;
+    Ptr<MacStatsCalculator> macStat;
+    Ptr<RadioBearerStatsCalculator> rlcStat;
+    Ptr<RadioBearerStatsCalculator> pdcpStat;
+    RadioBearerStatsConnector radioBearerStatsConnector;
+    Ptr<EpcHelper> m_epcHelper;
+    uint64_t m_imsiCounter;
+    uint16_t m_cellIdCounter;
+    bool l, m, n, o;
+    std::map< uint8_t, ComponentCarrier > m_componentCarrierPhyParams;
+    uint16_t m_noOfCcs;
+  };
+
+  auto lteHelperHack = reinterpret_cast<LteHelperHack*>(&(*m_lteHelper));
+
+  Ptr<RadioBearerStatsCalculator> rlcStat = m_lteHelper->GetRlcStats();
+  rlcStat->SetDlOutputFilename(path + "RlcDlStats.txt");
+  rlcStat->SetUlOutputFilename(path + "RlcUlStats.txt");
+  Ptr<RadioBearerStatsCalculator> pdcpStat = m_lteHelper->GetPdcpStats();
+  pdcpStat->SetDlPdcpOutputFilename(path + "PdcpDlStats.txt");
+  pdcpStat->SetUlPdcpOutputFilename(path + "PdcpUlStats.txt");
+
+  lteHelperHack->phyStat->SetUeSinrFilename(path + "PhySinrUlStats.txt");
+  lteHelperHack->phyStat->SetInterferenceFilename(path + "PhyInterferenceUlStats.txt");
+  lteHelperHack->phyStat->SetCurrentCellRsrpSinrFilename(path + "PhyRsrpSinrDlStats.txt");
+
+  lteHelperHack->phyRxStat->SetDlRxOutputFilename(path + "PhyRxDlStats.txt");
+  lteHelperHack->phyRxStat->SetUlRxOutputFilename(path + "PhyRxUlStats.txt");
+
+  lteHelperHack->phyTxStat->SetDlTxOutputFilename(path + "PhyTxDlStats.txt");
+  lteHelperHack->phyTxStat->SetUlTxOutputFilename(path + "PhyTxUlStats.txt");
+
+  lteHelperHack->macStat->SetDlOutputFilename(path + "MacDlStats.txt");
+  lteHelperHack->macStat->SetUlOutputFilename(path + "MacUlStats.txt");
 
   m_p2pHelper.EnableAsciiAll (ascii.CreateFileStream (p2pPath));
   m_p2pHelper.EnablePcapAll (p2pPath);
@@ -202,7 +263,6 @@ LteDroneNetwork::EnableTraces ()
   m_internetHelper.EnableAsciiIpv4All (ascii.CreateFileStream (ipPath));
   m_internetHelper.EnablePcapIpv4All (ipPath);
 
-  m_lteHelper->EnableTraces ();
 }
 
 

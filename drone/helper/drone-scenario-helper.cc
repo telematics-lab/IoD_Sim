@@ -100,15 +100,14 @@ DroneScenarioHelper::Run () const
   NS_COMPMAN_ENSURE_UNIQUE ();
   NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
-  bool anyLte = false;
-  for (auto i = m_networks.Begin (); i != m_networks.End (); i++)
-    {
-      anyLte = (*i)->GetProtocol () == "lte";
-      if (anyLte) break;
-    }
-
   if (m_configurator->RadioMap ())
     {
+      bool anyLte = false;
+      for (auto i = m_networks.Begin (); i != m_networks.End (); i++)
+        {
+          anyLte = (*i)->GetProtocol () == "lte";
+          if (anyLte) break;
+        }
       NS_ASSERT_MSG (anyLte,
           "Environment Radio Map can be generated only if an LTE network is present. Aborting simulation.");
       NS_LOG_INFO ("Generating Environment Radio Map, simulation will not run.");
@@ -118,23 +117,13 @@ DroneScenarioHelper::Run () const
     {
       Simulator::Stop (Seconds (m_configurator->GetDuration ()));
     }
+
   Simulator::Run ();
   Simulator::Destroy ();
 
   if (m_configurator->RadioMap ())
     {
       system (("python3 ../tools/makeplot.py " + m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem").c_str ());
-    }
-
-  /*
-  Since ns3::LteHelper generates its traces in the root folder of ns3 by default
-  and there's no way to change that, here if it finds any "lte" type network the
-  helper manually moves them to the current result folder using "mv" with a system call.
-  */
-  if (anyLte && !m_configurator->RadioMap ())
-    {
-      system (("mv Dl* " + m_configurator->GetResultsPath ()).c_str ());
-      system (("mv Ul* " + m_configurator->GetResultsPath ()).c_str ());
     }
 
   NS_COMPMAN_REGISTER_COMPONENT ();
