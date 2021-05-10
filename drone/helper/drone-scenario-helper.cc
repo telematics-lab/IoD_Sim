@@ -123,7 +123,7 @@ DroneScenarioHelper::Run () const
 
   if (m_configurator->RadioMap ())
     {
-      system (("python3 ../tools/makeplot.py " + m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem").c_str ());
+      system (("python3 ../tools/makeplot-rem.py " + m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem").c_str ());
     }
 
   NS_COMPMAN_REGISTER_COMPONENT ();
