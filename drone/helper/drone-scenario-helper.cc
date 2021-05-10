@@ -232,6 +232,18 @@ DroneScenarioHelper::SetDronesMobility () const
               m_droneNodes.Get (i)->GetObject<MobilityModel>()->SetPosition (m_configurator->GetDronePosition (i));
             } break;
 
+          case WAYPOINTS:
+            {
+              mobility.SetMobilityModel (mobilityModel);
+              mobility.Install (m_droneNodes.Get (i));
+
+              auto wpMobilityModel = m_droneNodes.Get (i)->GetObject<WaypointMobilityModel>();
+              for (Waypoint wp : m_configurator->GetDroneWaypoints (i))
+                {
+                  wpMobilityModel->AddWaypoint(wp);
+                }
+            } break;
+
           case PARAMETRIC_SPEED:
             {
               mobility.SetMobilityModel (mobilityModel,

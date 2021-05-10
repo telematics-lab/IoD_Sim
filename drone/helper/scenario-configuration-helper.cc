@@ -209,6 +209,51 @@ ScenarioConfigurationHelper::GetDronesPosition (Ptr<ListPositionAllocator> alloc
     }
 }
 
+const std::vector<Waypoint>
+ScenarioConfigurationHelper::GetDroneWaypoints (uint32_t i) const
+{
+  NS_ASSERT_MSG (GetDroneMobilityModel(i) == "ns3::WaypointMobilityModel",
+      "Waypoints are usable only with ns3::WaypointMobilityModel");
+
+  const auto drones = m_config["drones"].GetArray ();
+  const auto drone  = drones[i].GetObject ();
+
+  std::vector<Waypoint> waypoints;
+
+  Time prevTime = Seconds (0);
+
+  for (auto point = drone["trajectory"].Begin ();
+       point != drone["trajectory"].End ();
+       point++)
+    {
+      NS_ASSERT_MSG (point->IsObject (),
+                     "Each waypoint in drone trajectory must be a JSON object.");
+      NS_ASSERT_MSG (point->HasMember ("position")
+                     && (*point)["position"].IsArray ()
+                     && (*point)["position"][0].IsDouble ()
+                     && (*point)["position"][1].IsDouble ()
+                     && (*point)["position"][2].IsDouble ()
+                     && point->HasMember ("time")
+                     && (*point)["time"].IsDouble (),
+                     "Cannot decode waypoint, please check that each point in trajectory has at least position and time.");
+
+      Time time = Seconds ((*point)["time"].GetDouble ());
+
+      NS_ASSERT_MSG (time >= prevTime,
+          "Check waypoints, time of a waypoint must be greater or equal to the previous");
+
+      Vector position = Vector ({(*point)["position"][0].GetDouble (),
+                                 (*point)["position"][1].GetDouble (),
+                                 (*point)["position"][2].GetDouble ()});
+
+      waypoints.emplace_back (Waypoint (time, position));
+
+      prevTime = time;
+    }
+
+  return waypoints;
+}
+
 const float
 ScenarioConfigurationHelper::GetCurveStep () const
 {

@@ -142,7 +142,7 @@ LteDroneNetwork::Generate ()
   m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaOutdoor", DoubleValue (1));
   m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaIndoor", DoubleValue (1.5));
   // always use NLos
-  m_lteHelper->SetPathlossModelAttribute ("Los2NlosThr", DoubleValue (0));
+  //m_lteHelper->SetPathlossModelAttribute ("Los2NlosThr", DoubleValue (0));
   m_lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
 
   // installing eNB devices and UE devices

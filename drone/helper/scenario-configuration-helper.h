@@ -24,6 +24,7 @@
 
 #include <rapidjson/document.h>
 #include <ns3/position-allocator.h>
+#include <ns3/waypoint.h>
 #include <ns3/log.h>
 #include <ns3/flight-plan.h>
 #include <ns3/speed-coefficients.h>
@@ -104,6 +105,11 @@ public:
    * \param allocator the allocator to be filled with drones positions.
    */
   void GetDronesPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
+   * \param n the index of the drone in the list
+   * \return the list of waypoints of drone with index i
+   */
+  const std::vector<Waypoint> GetDroneWaypoints (uint32_t i) const;
   /**
    * \return the step of the curve to be generated.
    */

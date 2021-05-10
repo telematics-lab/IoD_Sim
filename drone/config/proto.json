@@ -56,8 +56,25 @@
     },
     {
       "name": "drone2",
-      "mobilityModel": "ns3::ConstantPositionMobilityModel",
-      "position": [50.0, 0.0, 50.0],
+      "mobilityModel": "ns3::WaypointMobilityModel",
+      "trajectory": [
+        {
+          "position": [0.0, 0.0, 50.0],
+          "time": 0.0
+        },
+        {
+          "position": [10.0, 0.0, 50.0],
+          "time": 2.0
+        },
+        {
+          "position": [10.0, 0.0, 50.0],
+          "time": 7.0
+        },
+        {
+          "position": [20.0, 0.0, 50.0],
+          "time": 8.0
+        }
+      ],
       "applicationStartTime": 1.1,
       "applicationStopTime": 9.0,
       "interfaces": ["lte_net0"]
@@ -101,7 +118,7 @@
   ],
 
   "duration": 10.0,
-  "logOnFile": false,
+  "logOnFile": true,
   "logComponents": [
     "Scenario",
     "DroneServer",
