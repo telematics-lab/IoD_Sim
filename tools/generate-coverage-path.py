@@ -198,13 +198,10 @@ def main():
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-    fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
-
-    def watt2dbm(x):
-      return 10*np.log10(1000*x)
-
+    watt2dbm = lambda x: 10*np.log10(1000*x)
     rsrpDBm = watt2dbm(rsrp)
 
+    fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
     # Create a continuous norm to map from data points to colors
     norm = plt.Normalize(rsrpDBm.min(), rsrpDBm.max())
     lc = LineCollection(segments, cmap='rainbow', norm=norm)
@@ -219,7 +216,28 @@ def main():
     #plt.show()
 
     name = ".".join(args.fileName.split(".")[:-1])
-    plt.savefig(name + "-plot")
+    plt.savefig(name + "-RSRPplot")
+
+    lin2db = lambda x: 10*np.log10(x)
+    sinrDB = lin2db(sinr)
+
+    plt.clf()
+    fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(sinrDB.min(), sinrDB.max())
+    lc = LineCollection(segments, cmap='rainbow', norm=norm)
+    # Set the values used for colormapping
+    lc.set_array(sinrDB)
+    lc.set_linewidth(2)
+    line = axs.add_collection(lc)
+    fig.colorbar(line, ax=axs)
+
+    axs.set_xlim(min(x)-10, max(x)+10)
+    axs.set_ylim(min(y)-10, max(y)+10)
+    #plt.show()
+
+    name = ".".join(args.fileName.split(".")[:-1])
+    plt.savefig(name + "-SINRplot")
 
 
 
