@@ -135,7 +135,16 @@
     {
       "label": "run drone-scenario",
       "type": "shell",
-      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario} --radioMap=${input:radioMapDroneScenario}\"",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run drone-scenario-noapp",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-noapp --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -325,7 +334,7 @@
       "id": "configFileDroneScenario",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/proto.json"
+      "default": "proto"
     },
     {
       "id": "nameDroneScenario",
