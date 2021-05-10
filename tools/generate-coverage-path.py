@@ -7,7 +7,7 @@ def main():
       description="This script generates a serpentine path for a drone to cover a given square area")
   parser.add_argument("-f", "--fileName",
       help="Name of the config file to create")
-  parser.add_argument("-h", "--height", default=10.0,
+  parser.add_argument("-z", "--height", default=10.0,
       help="The constant Z coordinate of the path")
   parser.add_argument("-o", "--origin", nargs=2, default=[0, 0],
       help="The top-left/central point of the square")

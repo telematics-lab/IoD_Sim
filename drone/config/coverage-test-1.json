@@ -1,0 +1,2264 @@
+{
+	"duration": 180.0,
+	"logOnFile": true,
+  "logComponents": [
+    "Scenario",
+    "ScenarioConfigurationHelper",
+    "DroneScenarioHelper",
+    "DroneNetwork",
+		"ParametricSpeedDroneMobilityModel"
+  ],
+
+  "networks": [
+    {
+      "name": "lte_0",
+      "protocol": "lte",
+			"attributes": []
+    }
+  ],
+
+  "antennas": [
+    {
+      "name": "antenna_0",
+      "position": [0.0, 0.0, 20.0],
+      "interfaces": ["lte_0"]
+    }
+  ],
+
+	"remotes": [
+		{
+			"name": "remote_0",
+			"applicationStartTime": 0.0,
+			"applicationStopTime": 180.0
+		}
+	],
+
+	"buildings": [
+    {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [10.0, 90.0, 0.0, 10.0, 0.0, 200.0],
+        "floors": 12,
+        "rooms": [8, 1]
+    }
+	],
+
+  "dronesMobilityModel": "mixed",
+	"drones": [
+		{
+			"applicationStartTime": 1.0,
+			"applicationStopTime": 179.0,
+      "name": "drone_0",
+      "interfaces": ["lte_0"],
+			"mobilityModel": "ns3::ParametricSpeedDroneMobilityModel",
+			"speedCoefficients": [25.116],
+			"trajectory": [
+				{
+					"position": [-100.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, -10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 0.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 10.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 20.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 30.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 40.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 50.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 60.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 70.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 80.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 90.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-100.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-90.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-80.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-70.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-60.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-50.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-40.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-30.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-20.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [-10.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [0.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [10.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [20.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [30.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [40.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [50.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [60.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [70.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [80.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [90.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				},
+				{
+					"position": [100.0, 100.0, 10.0],
+					"interest": 0,
+					"restTime": 0.01
+				}
+			]
+		}
+	]
+}

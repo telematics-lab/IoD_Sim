@@ -89,6 +89,11 @@ def build(bld):
                                   'core'])
     obj.source = 'drone-scenario.cc'
 
+    obj = bld.create_ns3_program('drone-scenario-noapp',
+                                 ['lte', 'drone', 'wifi',
+                                  'internet', 'mobility', 'core'])
+    obj.source = 'drone-scenario-noapp.cc'
+
 '''
     # The following scenarios are strictly dependent on LTE only
     obj = bld.create_ns3_program('lte-lena-costvelocity',
