@@ -24,6 +24,7 @@
 
 #include <rapidjson/document.h>
 #include <ns3/position-allocator.h>
+#include <ns3/waypoint.h>
 #include <ns3/log.h>
 #include <ns3/flight-plan.h>
 #include <ns3/speed-coefficients.h>
@@ -46,6 +47,12 @@ namespace ns3 {
 class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper>
 {
 public:
+
+  /**
+   * \brief default destructor
+   */
+  ~ScenarioConfigurationHelper ();
+
   /**
    * \brief Bootstrap Singleton with basic data.
    * \param argc The number of command line arguments.
@@ -104,6 +111,11 @@ public:
    * \param allocator the allocator to be filled with drones positions.
    */
   void GetDronesPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
+   * \param n the index of the drone in the list
+   * \return the list of waypoints of drone with index i
+   */
+  const std::vector<Waypoint> GetDroneWaypoints (uint32_t i) const;
   /**
    * \return the step of the curve to be generated.
    */
@@ -307,75 +319,63 @@ public:
    */
   const std::vector<uint32_t> GetAntennasInNetwork (const std::string& net_name) const;
 
-  /**
-   * \param path the path to check in form eg "/parent/children/index/key"
-   * \return true if the path is valid else false
-   */
-  bool CheckPath (const char* path) const;
+
+
+
+
+/// General purpose value retrieving methods
 
   /**
    * \param path1 the first part of the path
    * \param path2 the second part of the path
    * \return the concatenation of those 2 paths adding a '/' if necessary
    */
-  const std::string MakePath (const char* path1, const char* path2) const;
-
-  /**
-   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
-   * \returns the unsigned integer at the specified path
-   */
-  uint32_t GetUint (const char* path) const;
+  const std::string MakePath (const std::string& path1, const std::string& path2="") const;
 
   /**
    * \param path the first part of the path
-   * \param last the last part of the path
-   * \returns the unsigned integer at the specified path
+   * \param index the index of the element at the path
+   * \return the concatenation of path and index, adding a '/' if necessary
    */
-  uint32_t GetUint (const char* path, const char* last) const;
+  const std::string MakePath (const std::string& path, uint32_t index) const;
+
+  /**
+   * \param path the path to check in form eg "/parent/children/index/key"
+   * \return true if the path is valid else false
+   */
+  bool CheckPath (const std::string& path) const;
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
-   * \returns the double at the specified path
+   * \returns if the path is valid returns a pair <true, int32_t at path, else <false, 0>
    */
-  double GetDouble (const char* path) const;
-
-  /**
-   * \param path the first part of the path
-   * \param last the last part of the path
-   * \returns the double at the specified path
-   */
-  double GetDouble (const char* path, const char* last) const;
+  const std::pair<bool, int32_t> GetInt (const std::string& path) const;
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
-   * \returns the boolean at the specified path
+   * \returns if the path is valid returns a pair <true, uint32_t at path, else <false, 0>
    */
-  bool GetBool (const char* path) const;
-
-    /**
-   * \param path the first part of the path
-   * \param last the last part of the path
-   * \returns the boolean at the specified path
-   */
-  bool GetBool (const char* path, const char* last) const;
+  const std::pair<bool, uint32_t> GetUint (const std::string& path) const;
 
   /**
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
-   * \returns the string at the specified path
+   * \returns if the path is valid returns a pair <true, double at path, else <false, 0.0>
    */
-  const std::string GetString(const char* path) const;
+  const std::pair<bool, double> GetDouble (const std::string& path) const;
 
   /**
-   * \param path the first part of the path
-   * \param last the last part of the path
-   * \returns the string at the specified path
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, bool at path>, else <false, false>
    */
-  const std::string GetString (const char* path, const char* last) const;
+  const std::pair<bool, bool> GetBool (const std::string& path) const;
 
   /**
-   * \brief default destructor
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, std::string at path>, else <false, "">
    */
-  ~ScenarioConfigurationHelper ();
+  const std::pair<bool, std::string> GetString(const std::string& path) const;
+
+
 
 private:
   /**
