@@ -18,7 +18,6 @@
 
 
 #include "drone-scenario-helper.h"
-#include <ns3/component-manager.h>
 
 //#define CONFIGURATOR ScenarioConfigurationHelper::Get()
 
@@ -32,22 +31,15 @@ void
 DroneScenarioHelper::Initialize (uint32_t argc, char **argv, const std::string& name /*="DroneScenario"*/)
 {
   NS_LOG_FUNCTION (argc << argv << name);
-  NS_COMPMAN_ENSURE_UNIQUE ();
 
   m_configurator = ScenarioConfigurationHelper::Get ();
   m_configurator->Initialize (argc, argv, name);
 
   this->LoadGlobalSettings ();
-
   this->CreateNodes ();
-
   this->SetMobilityModels ();
-
   this->SetupNetworks ();
-
   this->LoadIndividualSettings ();
-
-  NS_COMPMAN_REGISTER_COMPONENT ();
 }
 
 void
@@ -56,7 +48,6 @@ DroneScenarioHelper::EnableTraces (uint32_t net_id) const
   if (m_configurator->RadioMap()) return;
 
   NS_LOG_FUNCTION (net_id);
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   m_networks.Get (net_id)->EnableTraces ();
 }
@@ -67,7 +58,6 @@ DroneScenarioHelper::EnableTraces (const std::string& net_name) const
   if (m_configurator->RadioMap()) return;
 
   NS_LOG_FUNCTION (net_name);
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   m_networks.Get (net_name)->EnableTraces ();
 }
@@ -78,7 +68,6 @@ DroneScenarioHelper::EnableTracesAll () const
   if (m_configurator->RadioMap()) return;
 
   NS_LOG_FUNCTION_NOARGS ();
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   for (auto net = m_networks.Begin (); net != m_networks.End (); net++)
     {
@@ -89,7 +78,6 @@ DroneScenarioHelper::EnableTracesAll () const
 ScenarioConfigurationHelper*
 DroneScenarioHelper::GetConfigurator () const
 {
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   return ScenarioConfigurationHelper::Get ();
 }
 
@@ -97,8 +85,6 @@ void
 DroneScenarioHelper::Run () const
 {
   NS_LOG_FUNCTION_NOARGS ();
-  NS_COMPMAN_ENSURE_UNIQUE ();
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   if (m_configurator->RadioMap ())
     {
@@ -125,21 +111,17 @@ DroneScenarioHelper::Run () const
     {
       system (("python3 ../tools/makeplot-rem.py " + m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem").c_str ());
     }
-
-  NS_COMPMAN_REGISTER_COMPONENT ();
 }
 
 uint32_t
 DroneScenarioHelper::GetRemoteId (uint32_t num) const
 {
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   return m_remoteNodes.Get (num)->GetId ();
 }
 
 uint32_t
 DroneScenarioHelper::GetAntennaId (uint32_t num) const
 {
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
   NS_ASSERT_MSG (num < m_antennaNodes.GetN (), "Antenna index out of bound");
   return m_antennaNodes.Get (num)->GetId ();
 }
@@ -390,7 +372,6 @@ DroneScenarioHelper::SetupNetworks ()
           staticRouteRem->AddNetworkRouteTo (netGwInternalIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
         }
     }
-
 }
 
 
@@ -431,65 +412,17 @@ DroneScenarioHelper::GetIpv4Address (Ptr<Node> node, uint32_t index) const
 Ipv4Address
 DroneScenarioHelper::GetDroneIpv4Address (uint32_t id, uint32_t index) const
 {
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
-
   return this->GetIpv4Address (m_droneNodes.Get (id), index);
 }
 
 Ipv4Address
 DroneScenarioHelper::GetRemoteIpv4Address (uint32_t id, uint32_t index) const
 {
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
-
   // add 1 since index 0 is the PGW (for LTE with EPC network)
   return this->GetIpv4Address (m_remoteNodes.Get (id), index);
 }
 
-/*
-Ipv4InterfaceContainer
-DroneScenarioHelper::GetDronesIpv4Interfaces()
-{
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-
-  return m_droneIpv4;
-}
-
-Ipv4InterfaceContainer
-DroneScenarioHelper::GetRemotesIpv4Interfaces()
-{
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-
-  return m_remoteIpv4;
-}
-
 // private
-Ipv4Address
-DroneScenarioHelper::GetIpv4Address(Ipv4InterfaceContainer& ifaces, uint32_t id)
-{
-  return ifaces.GetAddress(id);
-}
-
-Ipv4Address
-DroneScenarioHelper::GetDroneIpv4Address(uint32_t id)
-{
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-
-  return this->GetIpv4Address(m_droneIpv4, id);
-}
-
-Ipv4Address
-DroneScenarioHelper::GetRemoteIpv4Address(uint32_t id)
-{
-  NS_COMPMAN_REQUIRE_COMPONENT("Initialize");
-
-  // add 1 since index 0 is the PGW (for LTE with EPC network)
-  return this->GetIpv4Address(m_remoteIpv4, id + 1);
-}
-*/
-
-
-// private
-// why should I pass pointers to apps container by reference?
 void
 DroneScenarioHelper::SetApplications (NodeContainer nodes, ApplicationContainer apps) const
 {
@@ -510,61 +443,29 @@ void
 DroneScenarioHelper::SetDroneApplication (uint32_t id, Ptr<Application> app) const
 {
   NS_LOG_FUNCTION (id << app);
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   this->SetApplication (m_droneNodes, id, app);
-
-/*
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDroneApplication" + std::to_string(id));
-
-  if (! NS_COMPMAN_CHECK_COMPONENT("SetDronesApplication") &&
-      NS_COMPMAN_CHECK_MULTI_COMPONENT("SetDroneApplication", m_droneNodes.GetN()))
-  {
-    NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetDronesApplication");
-    if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
-      NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
-  }
-*/
 }
 
 void
 DroneScenarioHelper::SetDronesApplication (ApplicationContainer apps) const
 {
   NS_LOG_FUNCTION (&apps);
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
-  NS_COMPMAN_ENSURE_UNIQUE ();
-
   this->SetApplications (m_droneNodes, apps);
-
-  NS_COMPMAN_REGISTER_COMPONENT ();
 }
 
 void
 DroneScenarioHelper::SetRemoteApplication (uint32_t id, Ptr<Application> app) const
 {
   NS_LOG_FUNCTION (app);
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
 
   this->SetApplication (m_remoteNodes, id, app);
-
-/*
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemoteApplication" + std::to_string(id));
-  if (! NS_COMPMAN_CHECK_COMPONENT("SetRemotesApplication") &&
-      NS_COMPMAN_CHECK_MULTI_COMPONENT("SetRemoteApplication", m_remoteNodes.GetN()))
-  {
-    NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME("SetRemotesApplication");
-    if (! NS_COMPMAN_CHECK_COMPONENT("CreateIpv4Routing"))
-      NS_LOG_WARN("No internet routing has been created yet, apps may not work without IP addresses");
-  }
-*/
 }
 
 void
 DroneScenarioHelper::UseUdpEchoApplications () const
 {
   NS_LOG_FUNCTION_NOARGS ();
-  NS_COMPMAN_REQUIRE_COMPONENT ("Initialize");
-  NS_COMPMAN_ENSURE_UNIQUE ();
 
   LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
   UdpEchoServerHelper echoServer (9);
@@ -588,9 +489,6 @@ DroneScenarioHelper::UseUdpEchoApplications () const
       clientApps.Get (i)->SetStartTime (Seconds (m_configurator->GetDroneApplicationStartTime (i)));
       clientApps.Get (i)->SetStopTime (Seconds (m_configurator->GetDroneApplicationStopTime (i)));
     }
-
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME ("SetRemotesApplication");
-  NS_COMPMAN_REGISTER_COMPONENT_WITH_NAME ("SetDronesApplication");
 }
 
 

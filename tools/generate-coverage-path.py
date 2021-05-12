@@ -1,3 +1,12 @@
+'''
+Coverage Path Generator - Michele Abruzzese 2021
+This script generates or plots the result of a serpentine path for a drone to cover a given square area.
+The available options and parameters can be listed passing the -h or --help flag.
+
+Beware that for the moment plotting works only if a single drone is present in the simulation.
+If more than one drone is present the plot (if successful) will not be meaningful.
+'''
+
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.collections import LineCollection
@@ -8,9 +17,9 @@ import sys
 
 def main():
   parser = argparse.ArgumentParser(prog="Coverage Path Generator",
-      description="This script generates a serpentine path for a drone to cover a given square area")
+      description="This script generates or plots the result of a serpentine path for a drone to cover a given square area")
   parser.add_argument("-p", "--plot", action='store_true', default=False,
-      help="If present the scripts generates the plot of a result instead of the config file (works only with waypoints)")
+      help="If present, the script generates the plot of a result instead of the config file (works only with waypoints and a single drone)")
   parser.add_argument("-f", "--fileName",
       help="Name of the config file to create or the file to use as source (when using --plot)")
   parser.add_argument("-z", "--height", default=10.0,
@@ -238,8 +247,6 @@ def main():
 
     name = ".".join(args.fileName.split(".")[:-1])
     plt.savefig(name + "-SINRplot")
-
-
 
 
 if __name__ == "__main__":

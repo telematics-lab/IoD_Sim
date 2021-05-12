@@ -1,3 +1,9 @@
+'''
+This scripts generates the plot of a Radio Environment Map using a .rem file.
+Simply pass the path to the .rem file as an argument and a .png file is generated
+in the same folder with same name and -plot as suffix.
+'''
+
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np

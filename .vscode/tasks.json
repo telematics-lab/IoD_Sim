@@ -22,8 +22,6 @@
         "$gcc"
       ]
     },
-
-
     {
       "label": "run allen",
       "type": "shell",
@@ -150,8 +148,6 @@
       },
       "group": "test"
     },
-
-
     {
       "label": "run debug",
       "type": "shell",
@@ -170,8 +166,6 @@
       },
       "group": "test"
     },
-
-
     {
       "label": "docs",
       "type": "shell",
@@ -264,7 +258,6 @@
     }
   ],
 
-
   "inputs": [
     {
       "id": "numDrones",
@@ -278,8 +271,6 @@
       "description": "Duration of this simulation, in seconds",
       "default": "10"
     },
-
-
     {
       "id": "scenario",
       "type": "promptString",
@@ -304,8 +295,6 @@
       "description": "Optional next command (piping, output redirection, etc...)",
       "default": "> ../results/`date +%y%m%d-%H%M`.out 2>&1"
     },
-
-
     {
       "id": "configFileDaVinci",
       "type": "promptString",
