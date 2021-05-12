@@ -53,12 +53,12 @@ public:
   /**
    * \return the name of the network
    */
-  std::string GetName ();
+  const std::string& GetName () const;
 
   /**
    * \return the name of the general protocol used
    */
-  std::string GetProtocol ();
+  const std::string& GetProtocol () const;
 
   /** \brief sets the attributes for the network
    *  \param attributes a vector of key/value string pairs for each attribute */
@@ -67,22 +67,22 @@ public:
   /**
    * \return a reference to the node container for the drones in this network
    */
-  NodeContainer& GetDroneNodes ();
+  NodeContainer GetDroneNodes () const;
 
   /**
    * \return a reference to the node container for the antennas in this network
    */
-  NodeContainer& GetAntennaNodes ();
+  NodeContainer GetAntennaNodes () const;
 
   /**
    * \return a reference to the net devices container for the drones in this network
    */
-  NetDeviceContainer& GetDroneNetDevices ();
+  NetDeviceContainer GetDroneNetDevices () const;
 
   /**
    * \return a reference to the net devices container for the drones in this network
    */
-  NetDeviceContainer& GetAntennaNetDevices ();
+  NetDeviceContainer GetAntennaNetDevices () const;
 
   /**
    * \brief add a drone to the drone list of this network

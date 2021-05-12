@@ -24,6 +24,7 @@
 
 #include <rapidjson/document.h>
 #include <ns3/position-allocator.h>
+#include <ns3/waypoint.h>
 #include <ns3/log.h>
 #include <ns3/flight-plan.h>
 #include <ns3/speed-coefficients.h>
@@ -46,6 +47,12 @@ namespace ns3 {
 class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper>
 {
 public:
+
+  /**
+   * \brief default destructor
+   */
+  ~ScenarioConfigurationHelper ();
+
   /**
    * \brief Bootstrap Singleton with basic data.
    * \param argc The number of command line arguments.
@@ -104,6 +111,11 @@ public:
    * \param allocator the allocator to be filled with drones positions.
    */
   void GetDronesPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
+   * \param n the index of the drone in the list
+   * \return the list of waypoints of drone with index i
+   */
+  const std::vector<Waypoint> GetDroneWaypoints (uint32_t i) const;
   /**
    * \return the step of the curve to be generated.
    */
@@ -189,6 +201,16 @@ public:
 //  LTE SPECIFIC CONFIGURATORS
 
   /**
+   * \return true if the generation of the Radio Environment Map is required
+   */
+  const bool RadioMap () const;
+
+  /**
+   * \return a list of parameters for the Radio Environment Map generator
+   */
+  const std::vector<std::pair<std::string, std::string> > GetRadioMapParameters () const;
+
+  /**
    * \return the number of antennas to be simulated.
    */
   const uint32_t GetAntennasN () const;
@@ -236,14 +258,14 @@ public:
    * \param index the index of the element to which retrieve the name
    * \return the name associated to the object at the index in the field
    */
-  std::string GetObjectName (const char* field, uint32_t index) const;
+  const std::string GetObjectName (const char* field, uint32_t index) const;
 
   /**
    * \param field the name of the field to search into
    * \param name the name of the element to which retrieve the index
    * \return the index of the object of given name
    */
-  uint32_t GetObjectIndex (const char* field, std::string name) const;
+  const uint32_t GetObjectIndex (const char* field, const std::string& name) const;
 
 
 //  NETWORKS SPECIFIC CONFIGURATORS
@@ -257,50 +279,103 @@ public:
    * \param id the index of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
-  std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
+  const std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
    /**
    * \param name the name of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
-  std::vector<uint32_t> GetDroneNetworks (std::string name) const;
+  const std::vector<uint32_t> GetDroneNetworks (const std::string& name) const;
 
   /**
    * \param id the index of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
-  std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
+  const std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
    /**
    * \param name the name of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
-  std::vector<uint32_t> GetAntennaNetworks (std::string name) const;
+  const std::vector<uint32_t> GetAntennaNetworks (const std::string& name) const;
 
   /**
    * \param id the index of the network
    * \return a list of id of all the drones connected to a network
    */
-  std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
+  const std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
     /**
    * \param net_name the name of the network
    * \return a list of id of all the drones connected to a network
    */
-  std::vector<uint32_t> GetDronesInNetwork (std::string net_name) const;
+  const std::vector<uint32_t> GetDronesInNetwork (const std::string& net_name) const;
 
   /**
    * \param id the index of the network
    * \return a list of id of all the antennas connected to a network
    */
-  std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
+  const std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
    /**
    * \param net_name the name of the network
    * \return a list of id of all the antennas connected to a network
    */
-  std::vector<uint32_t> GetAntennasInNetwork (std::string net_name) const;
+  const std::vector<uint32_t> GetAntennasInNetwork (const std::string& net_name) const;
+
+
+
+
+
+/// General purpose value retrieving methods
 
   /**
-   * \brief default destructor
+   * \param path1 the first part of the path
+   * \param path2 the second part of the path
+   * \return the concatenation of those 2 paths adding a '/' if necessary
    */
-  ~ScenarioConfigurationHelper ();
+  const std::string MakePath (const std::string& path1, const std::string& path2="") const;
+
+  /**
+   * \param path the first part of the path
+   * \param index the index of the element at the path
+   * \return the concatenation of path and index, adding a '/' if necessary
+   */
+  const std::string MakePath (const std::string& path, uint32_t index) const;
+
+  /**
+   * \param path the path to check in form eg "/parent/children/index/key"
+   * \return true if the path is valid else false
+   */
+  bool CheckPath (const std::string& path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, int32_t at path, else <false, 0>
+   */
+  const std::pair<bool, int32_t> GetInt (const std::string& path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, uint32_t at path, else <false, 0>
+   */
+  const std::pair<bool, uint32_t> GetUint (const std::string& path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, double at path, else <false, 0.0>
+   */
+  const std::pair<bool, double> GetDouble (const std::string& path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, bool at path>, else <false, false>
+   */
+  const std::pair<bool, bool> GetBool (const std::string& path) const;
+
+  /**
+   * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
+   * \returns if the path is valid returns a pair <true, std::string at path>, else <false, "">
+   */
+  const std::pair<bool, std::string> GetString(const std::string& path) const;
+
+
 
 private:
   /**
@@ -338,6 +413,7 @@ private:
   std::ofstream m_out;          /// output stream for clog
   std::string m_name;           /// name of the simulation
   std::string m_dateTime;       /// cache for the current datetime
+  bool m_radioMap;              /// a flag for radio map generation
 };
 
 } // namespace ns3

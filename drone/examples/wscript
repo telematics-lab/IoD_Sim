@@ -85,16 +85,19 @@ def build(bld):
                                  ['lte'])
     obj.source = 'lte-lena-simple-RWMM.cc'
 
-
     obj = bld.create_ns3_program('lte-scenario-basic',
                                  ['lte', 'drone', 'wifi',
                                   'internet', 'mobility', 'applications',
                                   'core'])
     obj.source = 'lte-scenario-basic.cc'
 
-
     obj = bld.create_ns3_program('drone-scenario',
                                  ['lte', 'drone', 'wifi',
                                   'internet', 'mobility', 'applications',
                                   'core'])
     obj.source = 'drone-scenario.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-noapp',
+                                 ['lte', 'drone', 'wifi',
+                                  'internet', 'mobility', 'core'])
+    obj.source = 'drone-scenario-noapp.cc'

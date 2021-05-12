@@ -22,8 +22,6 @@
         "$gcc"
       ]
     },
-
-
     {
       "label": "run allen",
       "type": "shell",
@@ -135,18 +133,25 @@
     {
       "label": "run drone-scenario",
       "type": "shell",
-      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=${input:configFileDroneScenario}\"",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
       "group": "test"
     },
-
-
+    {
+      "label": "run drone-scenario-noapp",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-noapp --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
     {
       "label": "run debug",
       "type": "shell",
-      "command": "./waf --run \"${input:scenario} --config=${input:configFileDebug}\" --gdb",
+      "command": "./waf --run \"${input:scenario} ${input:opt_scenArgs}\" --gdb",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -161,8 +166,6 @@
       },
       "group": "test"
     },
-
-
     {
       "label": "docs",
       "type": "shell",
@@ -255,7 +258,6 @@
     }
   ],
 
-
   "inputs": [
     {
       "id": "numDrones",
@@ -269,13 +271,11 @@
       "description": "Duration of this simulation, in seconds",
       "default": "10"
     },
-
-
     {
       "id": "scenario",
       "type": "promptString",
       "description": "Name of the scenario to run",
-      "default": "drone-scenario"
+      "default": "test-scenario"
     },
     {
       "id": "opt_args",
@@ -287,7 +287,7 @@
       "id": "opt_scenArgs",
       "type": "promptString",
       "description": "Optional arguments to pass to the scenario script",
-      "default": ""
+      "default": "--config=../drone/config/test.json"
     },
     {
       "id": "opt_nextCmd",
@@ -295,8 +295,6 @@
       "description": "Optional next command (piping, output redirection, etc...)",
       "default": "> ../results/`date +%y%m%d-%H%M`.out 2>&1"
     },
-
-
     {
       "id": "configFileDaVinci",
       "type": "promptString",
@@ -325,13 +323,19 @@
       "id": "configFileDroneScenario",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/proto.json"
+      "default": "proto"
     },
     {
       "id": "nameDroneScenario",
       "type": "promptString",
       "description": "Name of the scenario",
       "default": "DRONE_SCENARIO"
+    },
+    {
+      "id": "radioMapDroneScenario",
+      "type": "promptString",
+      "description": "Generate the Radio Environment Map",
+      "default": "false"
     },
     {
       "id": "configFileDebug",

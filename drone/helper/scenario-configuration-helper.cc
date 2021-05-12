@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <rapidjson/filereadstream.h>
+#include <rapidjson/pointer.h>
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
@@ -206,6 +207,51 @@ ScenarioConfigurationHelper::GetDronesPosition (Ptr<ListPositionAllocator> alloc
       NS_LOG_LOGIC ("Allocating a drone in space at " << v);
       allocator->Add (v);
     }
+}
+
+const std::vector<Waypoint>
+ScenarioConfigurationHelper::GetDroneWaypoints (uint32_t i) const
+{
+  NS_ASSERT_MSG (GetDroneMobilityModel(i) == "ns3::WaypointMobilityModel",
+      "Waypoints are usable only with ns3::WaypointMobilityModel");
+
+  const auto drones = m_config["drones"].GetArray ();
+  const auto drone  = drones[i].GetObject ();
+
+  std::vector<Waypoint> waypoints;
+
+  Time prevTime = Seconds (0);
+
+  for (auto point = drone["trajectory"].Begin ();
+       point != drone["trajectory"].End ();
+       point++)
+    {
+      NS_ASSERT_MSG (point->IsObject (),
+                     "Each waypoint in drone trajectory must be a JSON object.");
+      NS_ASSERT_MSG (point->HasMember ("position")
+                     && (*point)["position"].IsArray ()
+                     && (*point)["position"][0].IsDouble ()
+                     && (*point)["position"][1].IsDouble ()
+                     && (*point)["position"][2].IsDouble ()
+                     && point->HasMember ("time")
+                     && (*point)["time"].IsDouble (),
+                     "Cannot decode waypoint, please check that each point in trajectory has at least position and time.");
+
+      Time time = Seconds ((*point)["time"].GetDouble ());
+
+      NS_ASSERT_MSG (time >= prevTime,
+          "Check waypoints, time of a waypoint must be greater or equal to the previous");
+
+      Vector position = Vector ({(*point)["position"][0].GetDouble (),
+                                 (*point)["position"][1].GetDouble (),
+                                 (*point)["position"][2].GetDouble ()});
+
+      waypoints.emplace_back (Waypoint (time, position));
+
+      prevTime = time;
+    }
+
+  return waypoints;
 }
 
 const float
@@ -478,6 +524,7 @@ ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
   CommandLine cmd;
   cmd.AddValue ("name", "Name of the scenario", m_name);
   cmd.AddValue ("config", "Configuration file path", configFilePath);
+  cmd.AddValue ("radioMap", "Enables the generation of the EnvironmentRadioMap", m_radioMap);
   cmd.Parse (argc, argv);
 
   if (configFilePath.empty ())
@@ -926,15 +973,15 @@ ScenarioConfigurationHelper::GetNetworks () const
   return container;
 }
 
-std::string
+const std::string
 ScenarioConfigurationHelper::GetObjectName (const char* field, uint32_t index) const
 {
   NS_ASSERT (index < m_config[field].GetArray ().Size ());
   return m_config[field].GetArray ()[index].GetObject ()["name"].GetString ();
 }
 
-uint32_t
-ScenarioConfigurationHelper::GetObjectIndex (const char* field, std::string name) const
+const uint32_t
+ScenarioConfigurationHelper::GetObjectIndex (const char* field, const std::string& name) const
 {
   auto array = m_config[field].GetArray ();
   for (uint32_t i = 0; i < array.Size (); i++)
@@ -949,7 +996,7 @@ ScenarioConfigurationHelper::GetObjectIndex (const char* field, std::string name
   return array.Size ();
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetDroneNetworks (uint32_t id) const
 {
   const auto drones = m_config["drones"].GetArray ();
@@ -981,13 +1028,13 @@ ScenarioConfigurationHelper::GetDroneNetworks (uint32_t id) const
   return droneNetworks;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetDroneNetworks (std::string name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDroneNetworks (const std::string& name) const
 {
   return GetDroneNetworks (GetObjectIndex ("drones", name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetAntennaNetworks (uint32_t id) const
 {
   const auto antennas = m_config["antennas"].GetArray ();
@@ -1019,13 +1066,13 @@ ScenarioConfigurationHelper::GetAntennaNetworks (uint32_t id) const
   return antennaNetworks;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetAntennaNetworks (std::string name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennaNetworks (const std::string& name) const
 {
   return GetAntennaNetworks (GetObjectIndex ("antennas", name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetDronesInNetwork (uint32_t id) const
 {
   std::vector<uint32_t> dronesInNet;
@@ -1045,13 +1092,13 @@ ScenarioConfigurationHelper::GetDronesInNetwork (uint32_t id) const
   return dronesInNet;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetDronesInNetwork (std::string net_name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetDronesInNetwork (const std::string& net_name) const
 {
   return GetDronesInNetwork (GetObjectIndex ("networks", net_name));
 }
 
-std::vector<uint32_t>
+const std::vector<uint32_t>
 ScenarioConfigurationHelper::GetAntennasInNetwork (uint32_t id) const
 {
   std::vector<uint32_t> antennasInNet;
@@ -1071,10 +1118,130 @@ ScenarioConfigurationHelper::GetAntennasInNetwork (uint32_t id) const
   return antennasInNet;
 }
 
-std::vector<uint32_t>
-ScenarioConfigurationHelper::GetAntennasInNetwork (std::string net_name) const
+const std::vector<uint32_t>
+ScenarioConfigurationHelper::GetAntennasInNetwork (const std::string& net_name) const
 {
   return GetAntennasInNetwork (GetObjectIndex ("networks", net_name));
 }
+
+
+const bool
+ScenarioConfigurationHelper::RadioMap () const
+{
+  return m_radioMap;
+}
+
+const std::vector<std::pair<std::string, std::string> >
+ScenarioConfigurationHelper::GetRadioMapParameters () const
+{
+  std::vector<std::pair<std::string, std::string> > parameters;
+  NS_ASSERT_MSG (m_config.HasMember("radioMapParameters"),
+      "'radioMapParameters' key is not present in the configuration file.");
+
+  NS_ASSERT_MSG (m_config["radioMapParameters"].IsArray () && m_config["radioMapParameters"].Size () % 2 == 0,
+                  "Check 'radioMapParameters': should be an array of even number elements.");
+
+  for (auto i = m_config["radioMapParameters"].Begin (); i != m_config["radioMapParameters"].End (); i += 2)
+    {
+      NS_ASSERT ((*i).IsString ());
+      NS_ASSERT ((*(i + 1)).IsString ());
+
+      parameters.push_back ({(*i).GetString (), (*(i + 1)).GetString ()});
+    }
+
+  return parameters;
+}
+
+const std::string
+ScenarioConfigurationHelper::MakePath (const std::string& path1, const std::string& path2 /* ="" */) const
+{
+  std::string npath(path1);
+  if (npath.at(0) != '/')
+    npath.insert(0, "/");
+  if (!path2.empty())
+    {
+      if (npath.back() != '/')
+        npath.push_back('/');
+      npath.append(path2);
+    }
+  if (npath.back() == '/')
+    npath.pop_back();
+  return npath;
+}
+
+const std::string
+ScenarioConfigurationHelper::MakePath (const std::string& path, uint32_t index) const
+{
+  return MakePath (path, std::to_string(index));
+}
+
+bool
+ScenarioConfigurationHelper::CheckPath (const std::string& path) const
+{
+  return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config) != nullptr;
+}
+
+const std::pair<bool, int32_t>
+ScenarioConfigurationHelper::GetInt (const std::string& path) const
+{
+  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  if (value == nullptr)
+    return std::make_pair<bool, int32_t>(false, 0);
+
+  NS_ASSERT_MSG (value->IsInt(), "Object at path '" << path << "' is not an integer");
+
+  return std::make_pair<bool, int32_t>(true, value->GetInt());
+}
+
+const std::pair<bool, uint32_t>
+ScenarioConfigurationHelper::GetUint (const std::string& path) const
+{
+  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  if (value == nullptr)
+    return std::make_pair<bool, uint32_t>(false, 0);
+
+  NS_ASSERT_MSG (value->IsUint(), "Object at path '" << path << "' is not an unsigned integer");
+
+  return std::make_pair<bool, uint32_t>(true, value->GetUint());
+}
+
+const std::pair<bool, double>
+ScenarioConfigurationHelper::GetDouble (const std::string& path) const
+{
+  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  if (value == nullptr)
+    return std::make_pair<bool, double>(false, 0.0);
+
+  NS_ASSERT_MSG (value->IsDouble(), "Object at path '" << path << "' is not a double");
+
+  return std::make_pair<bool, double>(true, value->GetDouble());
+}
+
+const std::pair<bool, bool>
+ScenarioConfigurationHelper::GetBool (const std::string& path) const
+{
+  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  if (value == nullptr)
+    return std::make_pair<bool, bool>(false, false);
+
+  NS_ASSERT_MSG (value->IsBool(), "Object at path '" << path << "' is not a boolean");
+
+  return std::make_pair<bool, bool>(true, value->GetBool());
+}
+
+const std::pair<bool, std::string>
+ScenarioConfigurationHelper::GetString (const std::string& path) const
+{
+  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  if (value == nullptr)
+    return std::make_pair<bool, std::string>(false, "");
+
+  NS_ASSERT_MSG (value->IsString(), "Object at path '" << path << "' is not a string");
+
+  return std::make_pair<bool, std::string>(true, value->GetString());
+}
+
+
+
 
 } // namespace ns3

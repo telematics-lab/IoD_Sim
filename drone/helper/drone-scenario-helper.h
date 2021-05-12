@@ -49,6 +49,7 @@ namespace ns3
 */
 const std::string _mobilityModels[] = {
   "ns3::ConstantPositionMobilityModel",             // CONSTANT_POSITION
+  "ns3::WaypointMobilityModel",                     // WAYPOINTS
   "ns3::ConstantAccelerationDroneMobilityModel",    // CONSTANT_ACCELERATION
   "ns3::ParametricSpeedDroneMobilityModel",         // PARAMETRIC_SPEED
 };
@@ -61,6 +62,7 @@ const std::string _mobilityModels[] = {
 enum _MobilityModelName
 {
   CONSTANT_POSITION,
+  WAYPOINTS,
   CONSTANT_ACCELERATION,
   PARAMETRIC_SPEED,
   ENUM_SIZE // Keep last, size of the enum
@@ -79,7 +81,7 @@ public:
   /**
    * \return a pointer to the singleton instance of the ScenarioConfigurationHelper
    */
-  ScenarioConfigurationHelper* GetConfigurator ();
+  ScenarioConfigurationHelper* GetConfigurator () const;
 
   /**
    * \brief main procedure to call after instanciation. It calls all the individual procedures
@@ -88,12 +90,12 @@ public:
    * \param argv the pointer to the list of arguments to pass (forwarded from main)
    * \param name the name of the scenario (used mostrly in log)
    */
-  void Initialize (uint32_t argc, char **argv, std::string name = "DroneScenario");
+  void Initialize (uint32_t argc, char **argv, const std::string& name = "DroneScenario");
 
   /**
    * \brief after initializiation, runs the simulation and terminates it after it's over.
    */
-  void Run ();
+  void Run () const;
 
 /*
   Ipv4InterfaceContainer GetDronesIpv4Interfaces();
@@ -106,7 +108,7 @@ public:
    * \param id the id of the drone
    * \param app a pointer to the ns3::Application to install
    */
-  void SetDroneApplication (uint32_t id, Ptr<Application> app);
+  void SetDroneApplication (uint32_t id, Ptr<Application> app) const;
 
   /**
    * \brief install all the apps in an ns3::ApplicationContainer into the
@@ -114,69 +116,69 @@ public:
    * \param apps the ns3::ApplicationContainer containing the pointers to ns3::Application
    *             to install in each drone.
    */
-  void SetDronesApplication (ApplicationContainer apps);
+  void SetDronesApplication (ApplicationContainer apps) const;
 
   /**
    * \brief install an application on a single remote
    * \param id the id of the drone
    * \param app a pointer to the ns3::Application to install
    */
-  void SetRemoteApplication (uint32_t id, Ptr<Application> app);
+  void SetRemoteApplication (uint32_t id, Ptr<Application> app) const;
 
   /**
    * \brief quickly install on all the drones and on the first remote a simple UDP echo
    *        clients and server for debug purposes or if no special application is needed.
    */
-  void UseUdpEchoApplications ();
+  void UseUdpEchoApplications () const;
 
   /**
    * \brief enable the traces of a single network idenfied by the index in the list
    * \param net_id the index of the network in the list
    */
-  void EnableTraces (uint32_t net_id);
+  void EnableTraces (uint32_t net_id) const;
   /**
    * \brief enable the traces of a single network idenfied by its name
    * \param net_name the name of the network
    */
-  void EnableTraces (std::string net_name);
+  void EnableTraces (const std::string& net_name) const;
 
   /**
    * \brief enable the traces for all the networks in the list
    */
-  void EnableTracesAll ();
+  void EnableTracesAll () const;
 
   /**
    * \param num the number of the remote in the remotes list
    * \return the node ID of that remote
    */
-  uint32_t GetRemoteId (uint32_t num);
+  uint32_t GetRemoteId (uint32_t num) const;
 
   /**
    * \param num the number of the antenna in the antennas list
    * \return the node ID of that antenna
    */
-  uint32_t GetAntennaId (uint32_t num);
+  uint32_t GetAntennaId (uint32_t num) const;
 
   /**
    * \param node the node of which the Ipv4Address is needed
    * \param index the index of the NetDevice (0 is localhost)
    * \return the ns3::Ipv4Address of that node
    */
-  Ipv4Address GetIpv4Address (Ptr<Node> node, uint32_t index);
+  Ipv4Address GetIpv4Address (Ptr<Node> node, uint32_t index) const;
 
   /**
    * \param id the id of the drone of which the Ipv4Address is needed
    * \param index the index of the NetDevice (0 is localhost)
    * \return the ns3::Ipv4Address of that drone
    */
-  Ipv4Address GetDroneIpv4Address (uint32_t id, uint32_t index);
+  Ipv4Address GetDroneIpv4Address (uint32_t id, uint32_t index) const ;
 
   /**
    * \param id the id of the remote of which the Ipv4Address is needed
    * \param index the index of the NetDevice (0 is localhost)
    * \return the ns3::Ipv4Address of that remote
    */
-  Ipv4Address GetRemoteIpv4Address (uint32_t id, uint32_t index);
+  Ipv4Address GetRemoteIpv4Address (uint32_t id, uint32_t index) const;
 
 private:
 
@@ -184,7 +186,7 @@ private:
    * \param mobilityModel the string identifying the mobility model
    * \return the index in the enumerator for that mobility model
    */
-  uint32_t MobilityToEnum (std::string mobilityModel);
+  uint32_t MobilityToEnum (const std::string& mobilityModel) const;
 
   /**
    * \brief creates the list of nodes for drones, antennas and remotes
@@ -194,17 +196,17 @@ private:
   /**
    * \brief sets the positions of the antennas and the mobility model for each drone
    */
-  void SetMobilityModels ();
+  void SetMobilityModels () const;
 
   /**
    * \brief sets the mobility model for each drone
    */
-  void SetDronesMobility ();
+  void SetDronesMobility () const;
 
   /**
    * \brief sets the position for each antenna
    */
-  void SetAntennasPosition ();
+  void SetAntennasPosition () const;
 
   /**
    * \brief generates each network in the list and attaches its gateway in the backbone LAN
@@ -215,22 +217,27 @@ private:
   /**
    * \brief loads and applies the global settings for the scenario defined in the config file
    */
-  void LoadGlobalSettings ();
+  void LoadGlobalSettings () const;
 
   /**
    * \brief Loads and applies the setting for individual entities of the scenario defined
    *        in the config file.
    */
-  void LoadIndividualSettings ();
+  void LoadIndividualSettings () const;
 
   /**
    * \brief general purpose application setter using containers
    */
-  void SetApplications (NodeContainer nodes, ApplicationContainer apps);
+  void SetApplications (NodeContainer nodes, ApplicationContainer apps) const;
   /**
    * \brief general purpose application setter using a node and a pointer to application
    */
-  void SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app);
+  void SetApplication (NodeContainer nodes, uint32_t id, Ptr<Application> app) const;
+
+  /**
+   * \brief configures and generater the LTE Radio Environment Map if enabled
+   */
+  void GenerateRadioMap () const;
 
 
   ScenarioConfigurationHelper *m_configurator;

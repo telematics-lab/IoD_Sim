@@ -23,44 +23,45 @@
 #include <ns3/internet-stack-helper.h>
 #include <ns3/trace-helper.h>
 #include <ns3/scenario-configuration-helper.h>
+#include <ns3/system-path.h>
 
 namespace ns3
 {
 
 NS_LOG_COMPONENT_DEFINE_MASK ("DroneNetwork", LOG_PREFIX_ALL);
 
-std::string
-DroneNetwork::GetName ()
+const std::string&
+DroneNetwork::GetName () const
 {
   return m_name;
 }
 
-std::string
-DroneNetwork::GetProtocol ()
+const std::string&
+DroneNetwork::GetProtocol () const
 {
   return m_protocol;
 }
 
-NodeContainer&
-DroneNetwork::GetDroneNodes ()
+NodeContainer
+DroneNetwork::GetDroneNodes () const
 {
   return m_droneNodes;
 }
 
-NodeContainer&
-DroneNetwork::GetAntennaNodes ()
+NodeContainer
+DroneNetwork::GetAntennaNodes () const
 {
   return m_antennaNodes;
 }
 
-NetDeviceContainer&
-DroneNetwork::GetDroneNetDevices ()
+NetDeviceContainer
+DroneNetwork::GetDroneNetDevices () const
 {
   return m_droneDevs;
 }
 
-NetDeviceContainer&
-DroneNetwork::GetAntennaNetDevices ()
+NetDeviceContainer
+DroneNetwork::GetAntennaNetDevices () const
 {
   return m_antennaDevs;
 }
@@ -120,6 +121,7 @@ LteDroneNetwork::Generate ()
 
   //auto m_configurator = ScenarioConfigurationHelper::Get ();
 
+  // setting up default values before generating the network
   for (auto s : m_attributes)
     {
       Config::SetDefault (s.first, StringValue (s.second));
@@ -128,15 +130,23 @@ LteDroneNetwork::Generate ()
   ConfigStore config;
   config.ConfigureDefaults ();
 
-  m_internetHelper.Install (m_droneNodes);
+  //m_internetHelper.Install (m_droneNodes);
 
+  // create the LteHelper and assign the EpcHelper to it
   m_lteHelper = CreateObject<LteHelper> ();
   m_epcHelper = CreateObject<PointToPointEpcHelper> ();
   m_lteHelper->SetEpcHelper (m_epcHelper);
 
-  Ipv4StaticRoutingHelper routingHelper;
-  m_internetHelper.SetRoutingHelper (routingHelper);
+  m_lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::HybridBuildingsPropagationLossModel"));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaExtWalls", DoubleValue (0));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaOutdoor", DoubleValue (1));
+  m_lteHelper->SetPathlossModelAttribute ("ShadowSigmaIndoor", DoubleValue (1.5));
+  // always use NLos
+  //m_lteHelper->SetPathlossModelAttribute ("Los2NlosThr", DoubleValue (0));
+  m_lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
 
+  // installing eNB devices and UE devices
+  // if more than one eNB create X2 interfaces between them for auto handover
   m_antennaDevs = m_lteHelper->InstallEnbDevice (m_antennaNodes);
   if (m_antennaNodes.GetN () > 1)
     {
@@ -144,10 +154,15 @@ LteDroneNetwork::Generate ()
     }
   m_droneDevs = m_lteHelper->InstallUeDevice (m_droneNodes);
 
-  // assigning address 7.0.0.0/8
+  // assigning address 7.0.0.0/8 to UE devices
+  // unfortunately this is hardwired into EpcHelper implementation
   Ipv4InterfaceContainer m_droneIpv4;
   m_droneIpv4 = m_epcHelper->AssignUeIpv4Address (m_droneDevs);
 
+  // create a static route for each UE to the SGW/PGW in order to communicate
+  // with the internet
+  Ipv4StaticRoutingHelper routingHelper;
+  m_internetHelper.SetRoutingHelper (routingHelper);
   // assign to each drone the default route to the SGW
   for (uint32_t i = 0; i < m_droneNodes.GetN (); ++i)
     {
@@ -155,24 +170,18 @@ LteDroneNetwork::Generate ()
       dronesStaticRoute->SetDefaultRoute (m_epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
-/*
+  // auto attach each drone UE to the eNB with the strongest signal
+  m_lteHelper->Attach (m_droneDevs);
+
+  // activate a dedicated bearer for video trasmission on all the UEs
   enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
   GbrQosInformation qos;
-  //qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
-  //qos.gbrUl = 132;
-  //qos.mbrDl = qos.gbrDl;
-  //qos.mbrUl = qos.gbrUl;
-  qos.gbrDl = 20000000;            // Downlink GBR (bit/s) ---> 20 Mbps
-  qos.gbrUl = 5000000;	          // Uplink GBR ---> 5 Mbps
-  qos.mbrDl = 20000000;		 // Downlink MBR
-  qos.mbrUl = 5000000;          // Uplink MBR,
+  qos.gbrDl = 20000000;  // Downlink GBR (bit/s): 20 Mbps
+  qos.gbrUl = 5000000;  // Uplink GBR: 5 Mbps
+  qos.mbrDl = 20000000;  // Downlink MBR: 20 Mbps
+  qos.mbrUl = 5000000;  // Uplink MBR: 5 Mbps
   EpsBearer bearer(q, qos);
   m_lteHelper->ActivateDedicatedEpsBearer (m_droneDevs, bearer, EpcTft::Default());
-
-*/
-
-  // attach each drone ue to the antenna with the strongest signal
-  m_lteHelper->Attach (m_droneDevs);
 }
 
 void
@@ -183,10 +192,70 @@ LteDroneNetwork::EnableTraces ()
   AsciiTraceHelper ascii;
 
   std::string p2pPath, ipPath;
-  std::string path = ScenarioConfigurationHelper::Get ()->GetResultsPath ();
+  std::string path = ScenarioConfigurationHelper::Get ()->GetResultsPath () + m_name;
+
+  SystemPath::MakeDirectories(path);
+
+  path += "/";
 
   p2pPath = path + "REMOTE";
   ipPath = path + "IP";
+
+  m_lteHelper->EnableTraces ();
+
+  /*
+  LteHelperHack:
+  This class is an hack to allow access to private members of LteHelper class,
+  in particular to the StatsCalculators in order to set their output path.
+  A structurally identical class is defined with all attributes set to public,
+  then with a reinterpret_cast we interpret the LteHelper as this new class
+  so the compiler won't complain about accessing its private members.
+  */
+  class LteHelperHack : public Object {
+  public:
+    Ptr<SpectrumChannel> dlC, ulC;
+    Ptr<Object>  dlPlM, ulPlM;
+    ObjectFactory a, b, c, d, e, f, g, h, i, j, k;
+    std::string fMT;
+    ObjectFactory fMF;
+    Ptr<SpectrumPropagationLossModel> fM;
+    bool fSA;
+    Ptr<PhyStatsCalculator> phyStat;
+    Ptr<PhyTxStatsCalculator> phyTxStat;
+    Ptr<PhyRxStatsCalculator> phyRxStat;
+    Ptr<MacStatsCalculator> macStat;
+    Ptr<RadioBearerStatsCalculator> rlcStat;
+    Ptr<RadioBearerStatsCalculator> pdcpStat;
+    RadioBearerStatsConnector radioBearerStatsConnector;
+    Ptr<EpcHelper> m_epcHelper;
+    uint64_t m_imsiCounter;
+    uint16_t m_cellIdCounter;
+    bool l, m, n, o;
+    std::map< uint8_t, ComponentCarrier > m_componentCarrierPhyParams;
+    uint16_t m_noOfCcs;
+  };
+
+  auto lteHelperHack = reinterpret_cast<LteHelperHack*>(&(*m_lteHelper));
+
+  Ptr<RadioBearerStatsCalculator> rlcStat = m_lteHelper->GetRlcStats();
+  rlcStat->SetDlOutputFilename(path + "RlcDlStats.txt");
+  rlcStat->SetUlOutputFilename(path + "RlcUlStats.txt");
+  Ptr<RadioBearerStatsCalculator> pdcpStat = m_lteHelper->GetPdcpStats();
+  pdcpStat->SetDlPdcpOutputFilename(path + "PdcpDlStats.txt");
+  pdcpStat->SetUlPdcpOutputFilename(path + "PdcpUlStats.txt");
+
+  lteHelperHack->phyStat->SetUeSinrFilename(path + "PhySinrUlStats.txt");
+  lteHelperHack->phyStat->SetInterferenceFilename(path + "PhyInterferenceUlStats.txt");
+  lteHelperHack->phyStat->SetCurrentCellRsrpSinrFilename(path + "PhyRsrpSinrDlStats.txt");
+
+  lteHelperHack->phyRxStat->SetDlRxOutputFilename(path + "PhyRxDlStats.txt");
+  lteHelperHack->phyRxStat->SetUlRxOutputFilename(path + "PhyRxUlStats.txt");
+
+  lteHelperHack->phyTxStat->SetDlTxOutputFilename(path + "PhyTxDlStats.txt");
+  lteHelperHack->phyTxStat->SetUlTxOutputFilename(path + "PhyTxUlStats.txt");
+
+  lteHelperHack->macStat->SetDlOutputFilename(path + "MacDlStats.txt");
+  lteHelperHack->macStat->SetUlOutputFilename(path + "MacUlStats.txt");
 
   m_p2pHelper.EnableAsciiAll (ascii.CreateFileStream (p2pPath));
   m_p2pHelper.EnablePcapAll (p2pPath);
@@ -194,7 +263,6 @@ LteDroneNetwork::EnableTraces ()
   m_internetHelper.EnableAsciiIpv4All (ascii.CreateFileStream (ipPath));
   m_internetHelper.EnablePcapIpv4All (ipPath);
 
-  m_lteHelper->EnableTraces ();
 }
 
 
