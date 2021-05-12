@@ -155,7 +155,7 @@
     {
       "label": "run debug",
       "type": "shell",
-      "command": "./waf --run \"${input:scenario} --config=${input:configFileDebug}\" --gdb",
+      "command": "./waf --run \"${input:scenario} ${input:opt_scenArgs}\" --gdb",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -284,7 +284,7 @@
       "id": "scenario",
       "type": "promptString",
       "description": "Name of the scenario to run",
-      "default": "drone-scenario"
+      "default": "test-scenario"
     },
     {
       "id": "opt_args",
@@ -296,7 +296,7 @@
       "id": "opt_scenArgs",
       "type": "promptString",
       "description": "Optional arguments to pass to the scenario script",
-      "default": ""
+      "default": "--config=../drone/config/test.json"
     },
     {
       "id": "opt_nextCmd",
