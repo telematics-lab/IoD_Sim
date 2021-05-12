@@ -122,7 +122,7 @@ ParametricSpeedFlight::UpdateDistance (const double &t) const
   // analytic polynomial integration
   double distance;
   const uint32_t order = m_speedParams.size ();
-
+  
   for (uint32_t i = 0; i < order; i++)
       distance += m_speedParams[i] / (order - i) * std::pow (t, order - i);
 
@@ -256,6 +256,7 @@ ParametricSpeedFlight::FindTime () const
       status = gsl_root_fdfsolver_iterate (s);
       if (status != GSL_SUCCESS)
         NS_LOG_ERROR ("GSL Encountered and error when applying the Newton-Raphson method. Error code: " << status);
+
       x0 = x;
       x = gsl_root_fdfsolver_root (s);
       status = gsl_root_test_delta (x, x0, 0, 1e-3);
