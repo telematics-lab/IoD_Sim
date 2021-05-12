@@ -1,0 +1,74 @@
+diff --git a/src/visualizer/model/visual-simulator-impl.cc b/src/visualizer/model/visual-simulator-impl.cc
+index 2748d7189..b6a8f0aea 100644
+--- a/src/visualizer/model/visual-simulator-impl.cc
++++ b/src/visualizer/model/visual-simulator-impl.cc
+@@ -114,9 +114,9 @@ VisualSimulatorImpl::Run (void)
+ {
+   if (!Py_IsInitialized ()) 
+     {
+-      const char *argv[] = { "python", NULL};
++      const wchar_t *argv[] = { L"python", NULL};
+       Py_Initialize ();
+-      PySys_SetArgv (1, (char**) argv);
++      PySys_SetArgv (1, (wchar_t**) argv);
+       PyRun_SimpleString (
+                           "import visualizer\n"
+                           "visualizer.start();\n"
+diff --git a/src/visualizer/visualizer/base.py b/src/visualizer/visualizer/base.py
+index 17668b833..224cc1c03 100644
+--- a/src/visualizer/visualizer/base.py
++++ b/src/visualizer/visualizer/base.py
+@@ -126,7 +126,7 @@ def load_plugins():
+             continue
+         try:
+             plugin_module = __import__(name)
+-        except ImportError, ex:
++        except ImportError as ex:
+             print >> sys.stderr, "Could not load plugin %r: %s" % (filename, str(ex))
+             continue
+         try:
+diff --git a/src/visualizer/visualizer/plugins/olsr.py b/src/visualizer/visualizer/plugins/olsr.py
+index eb59e5e2d..726b11610 100644
+--- a/src/visualizer/visualizer/plugins/olsr.py
++++ b/src/visualizer/visualizer/plugins/olsr.py
+@@ -120,7 +120,7 @@ def populate_node_menu(viz, node, menu):
+     ns3_node = ns.network.NodeList.GetNode(node.node_index)
+     olsr = ns3_node.GetObject(ns.olsr.olsr.RoutingProtocol.GetTypeId())
+     if olsr is None:
+-        print "No OLSR"
++        print("No OLSR")
+         return
+ 
+     menu_item = Gtk.MenuItem("Show OLSR Routing Table")
+diff --git a/src/visualizer/visualizer/svgitem.py b/src/visualizer/visualizer/svgitem.py
+index 261803d91..c281110d6 100644
+--- a/src/visualizer/visualizer/svgitem.py
++++ b/src/visualizer/visualizer/svgitem.py
+@@ -120,7 +120,7 @@ class SvgItem(GooCanvas.ItemSimple):
+             self.changed(True)
+ 
+         else:
+-            raise AttributeError, 'unknown property %s' % pspec.name
++            raise AttributeError('unknown property %s' % pspec.name)
+ 
+     def _size_changed(self):
+         """!
+@@ -172,7 +172,7 @@ class SvgItem(GooCanvas.ItemSimple):
+             return self.height
+ 
+         else:
+-            raise AttributeError, 'unknown property %s' % pspec.name
++            raise AttributeError('unknown property %s' % pspec.name)
+ 
+     def do_simple_paint(self, cr, bounds):
+         """!
+diff --git a/waf b/waf
+index b05bc9cde..40301d544 100755
+--- a/waf
++++ b/waf
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # encoding: latin-1
+ # Thomas Nagy, 2005-2018
+ #
