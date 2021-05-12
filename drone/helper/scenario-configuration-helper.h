@@ -280,7 +280,8 @@ public:
    * \return a list of the network IDs the drone is connected to
    */
   const std::vector<uint32_t> GetDroneNetworks (uint32_t id) const;
-   /**
+
+  /**
    * \param name the name of the drone to query
    * \return a list of the network IDs the drone is connected to
    */
@@ -291,7 +292,8 @@ public:
    * \return a list of the network IDs the antenna is connected to
    */
   const std::vector<uint32_t> GetAntennaNetworks (uint32_t id) const;
-   /**
+
+  /**
    * \param name the name of the antenna to query
    * \return a list of the network IDs the antenna is connected to
    */
@@ -302,7 +304,8 @@ public:
    * \return a list of id of all the drones connected to a network
    */
   const std::vector<uint32_t> GetDronesInNetwork (uint32_t id) const;
-    /**
+
+  /**
    * \param net_name the name of the network
    * \return a list of id of all the drones connected to a network
    */
@@ -313,7 +316,8 @@ public:
    * \return a list of id of all the antennas connected to a network
    */
   const std::vector<uint32_t> GetAntennasInNetwork (uint32_t id) const;
-   /**
+
+  /**
    * \param net_name the name of the network
    * \return a list of id of all the antennas connected to a network
    */
@@ -330,7 +334,7 @@ public:
    * \param path2 the second part of the path
    * \return the concatenation of those 2 paths adding a '/' if necessary
    */
-  const std::string MakePath (const std::string& path1, const std::string& path2="") const;
+  const std::string MakePath (const std::string& path1, const std::string& path2 = "") const;
 
   /**
    * \param path the first part of the path
@@ -373,9 +377,7 @@ public:
    * \param path the path of the value to retrieve in form eg "/parent/children/index/key"
    * \returns if the path is valid returns a pair <true, std::string at path>, else <false, "">
    */
-  const std::pair<bool, std::string> GetString(const std::string& path) const;
-
-
+  const std::pair<bool, std::string> GetString (const std::string& path) const;
 
 private:
   /**

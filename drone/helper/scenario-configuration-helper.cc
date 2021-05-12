@@ -212,8 +212,8 @@ ScenarioConfigurationHelper::GetDronesPosition (Ptr<ListPositionAllocator> alloc
 const std::vector<Waypoint>
 ScenarioConfigurationHelper::GetDroneWaypoints (uint32_t i) const
 {
-  NS_ASSERT_MSG (GetDroneMobilityModel(i) == "ns3::WaypointMobilityModel",
-      "Waypoints are usable only with ns3::WaypointMobilityModel");
+  NS_ASSERT_MSG (GetDroneMobilityModel (i) == "ns3::WaypointMobilityModel",
+                 "Waypoints are usable only with ns3::WaypointMobilityModel");
 
   const auto drones = m_config["drones"].GetArray ();
   const auto drone  = drones[i].GetObject ();
@@ -240,7 +240,7 @@ ScenarioConfigurationHelper::GetDroneWaypoints (uint32_t i) const
       Time time = Seconds ((*point)["time"].GetDouble ());
 
       NS_ASSERT_MSG (time >= prevTime,
-          "Check waypoints, time of a waypoint must be greater or equal to the previous");
+                     "Check waypoints, time of a waypoint must be greater or equal to the previous");
 
       Vector position = Vector ({(*point)["position"][0].GetDouble (),
                                  (*point)["position"][1].GetDouble (),
@@ -1135,11 +1135,11 @@ const std::vector<std::pair<std::string, std::string> >
 ScenarioConfigurationHelper::GetRadioMapParameters () const
 {
   std::vector<std::pair<std::string, std::string> > parameters;
-  NS_ASSERT_MSG (m_config.HasMember("radioMapParameters"),
-      "'radioMapParameters' key is not present in the configuration file.");
+  NS_ASSERT_MSG (m_config.HasMember ("radioMapParameters"),
+                 "'radioMapParameters' key is not present in the configuration file.");
 
   NS_ASSERT_MSG (m_config["radioMapParameters"].IsArray () && m_config["radioMapParameters"].Size () % 2 == 0,
-                  "Check 'radioMapParameters': should be an array of even number elements.");
+                 "Check 'radioMapParameters': should be an array of even number elements.");
 
   for (auto i = m_config["radioMapParameters"].Begin (); i != m_config["radioMapParameters"].End (); i += 2)
     {
@@ -1155,90 +1155,106 @@ ScenarioConfigurationHelper::GetRadioMapParameters () const
 const std::string
 ScenarioConfigurationHelper::MakePath (const std::string& path1, const std::string& path2 /* ="" */) const
 {
-  std::string npath(path1);
-  if (npath.at(0) != '/')
-    npath.insert(0, "/");
-  if (!path2.empty())
+  std::string npath (path1);
+  if (npath.at (0) != '/')
     {
-      if (npath.back() != '/')
-        npath.push_back('/');
-      npath.append(path2);
+      npath.insert (0, "/");
     }
-  if (npath.back() == '/')
-    npath.pop_back();
+  if (!path2.empty ())
+    {
+      if (npath.back () != '/')
+        {
+          npath.push_back ('/');
+        }
+      npath.append (path2);
+    }
+  if (npath.back () == '/')
+    {
+      npath.pop_back ();
+    }
   return npath;
 }
 
 const std::string
 ScenarioConfigurationHelper::MakePath (const std::string& path, uint32_t index) const
 {
-  return MakePath (path, std::to_string(index));
+  return MakePath (path, std::to_string (index));
 }
 
 bool
 ScenarioConfigurationHelper::CheckPath (const std::string& path) const
 {
-  return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config) != nullptr;
+  return rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config) != nullptr;
 }
 
 const std::pair<bool, int32_t>
 ScenarioConfigurationHelper::GetInt (const std::string& path) const
 {
-  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  const rapidjson::Value* value = rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config);
   if (value == nullptr)
-    return std::make_pair<bool, int32_t>(false, 0);
+    {
+      return std::make_pair<bool, int32_t> (false, 0);
+    }
 
-  NS_ASSERT_MSG (value->IsInt(), "Object at path '" << path << "' is not an integer");
+  NS_ASSERT_MSG (value->IsInt (), "Object at path '" << path << "' is not an integer");
 
-  return std::make_pair<bool, int32_t>(true, value->GetInt());
+  return std::make_pair<bool, int32_t> (true, value->GetInt ());
 }
 
 const std::pair<bool, uint32_t>
 ScenarioConfigurationHelper::GetUint (const std::string& path) const
 {
-  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  const rapidjson::Value* value = rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config);
   if (value == nullptr)
-    return std::make_pair<bool, uint32_t>(false, 0);
+    {
+      return std::make_pair<bool, uint32_t> (false, 0);
+    }
 
-  NS_ASSERT_MSG (value->IsUint(), "Object at path '" << path << "' is not an unsigned integer");
+  NS_ASSERT_MSG (value->IsUint (), "Object at path '" << path << "' is not an unsigned integer");
 
-  return std::make_pair<bool, uint32_t>(true, value->GetUint());
+  return std::make_pair<bool, uint32_t> (true, value->GetUint ());
 }
 
 const std::pair<bool, double>
 ScenarioConfigurationHelper::GetDouble (const std::string& path) const
 {
-  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  const rapidjson::Value* value = rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config);
   if (value == nullptr)
-    return std::make_pair<bool, double>(false, 0.0);
+    {
+      return std::make_pair<bool, double> (false, 0.0);
+    }
 
-  NS_ASSERT_MSG (value->IsDouble(), "Object at path '" << path << "' is not a double");
+  NS_ASSERT_MSG (value->IsDouble (), "Object at path '" << path << "' is not a double");
 
-  return std::make_pair<bool, double>(true, value->GetDouble());
+  return std::make_pair<bool, double> (true, value->GetDouble ());
 }
 
 const std::pair<bool, bool>
 ScenarioConfigurationHelper::GetBool (const std::string& path) const
 {
-  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  const rapidjson::Value* value = rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config);
   if (value == nullptr)
-    return std::make_pair<bool, bool>(false, false);
+    {
+      return std::make_pair<bool, bool> (false, false);
+    }
 
-  NS_ASSERT_MSG (value->IsBool(), "Object at path '" << path << "' is not a boolean");
+  NS_ASSERT_MSG (value->IsBool (), "Object at path '" << path << "' is not a boolean");
 
-  return std::make_pair<bool, bool>(true, value->GetBool());
+  return std::make_pair<bool, bool> (true, value->GetBool ());
 }
 
 const std::pair<bool, std::string>
 ScenarioConfigurationHelper::GetString (const std::string& path) const
 {
-  const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+  const rapidjson::Value* value = rapidjson::Pointer (MakePath (path).c_str ()).Get (m_config);
   if (value == nullptr)
-    return std::make_pair<bool, std::string>(false, "");
+    {
+      return std::make_pair<bool, std::string> (false, "");
+    }
 
-  NS_ASSERT_MSG (value->IsString(), "Object at path '" << path << "' is not a string");
+  NS_ASSERT_MSG (value->IsString (), "Object at path '" << path << "' is not a string");
 
-  return std::make_pair<bool, std::string>(true, value->GetString());
+  return std::make_pair<bool, std::string> (true, value->GetString ());
 }
 
 

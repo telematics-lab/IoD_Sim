@@ -45,7 +45,10 @@ DroneScenarioHelper::Initialize (uint32_t argc, char **argv, const std::string& 
 void
 DroneScenarioHelper::EnableTraces (uint32_t net_id) const
 {
-  if (m_configurator->RadioMap()) return;
+  if (m_configurator->RadioMap ())
+    {
+      return;
+    }
 
   NS_LOG_FUNCTION (net_id);
 
@@ -55,7 +58,10 @@ DroneScenarioHelper::EnableTraces (uint32_t net_id) const
 void
 DroneScenarioHelper::EnableTraces (const std::string& net_name) const
 {
-  if (m_configurator->RadioMap()) return;
+  if (m_configurator->RadioMap ())
+    {
+      return;
+    }
 
   NS_LOG_FUNCTION (net_name);
 
@@ -65,7 +71,10 @@ DroneScenarioHelper::EnableTraces (const std::string& net_name) const
 void
 DroneScenarioHelper::EnableTracesAll () const
 {
-  if (m_configurator->RadioMap()) return;
+  if (m_configurator->RadioMap ())
+    {
+      return;
+    }
 
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -92,10 +101,13 @@ DroneScenarioHelper::Run () const
       for (auto i = m_networks.Begin (); i != m_networks.End (); i++)
         {
           anyLte = (*i)->GetProtocol () == "lte";
-          if (anyLte) break;
+          if (anyLte)
+            {
+              break;
+            }
         }
       NS_ASSERT_MSG (anyLte,
-          "Environment Radio Map can be generated only if an LTE network is present. Aborting simulation.");
+                     "Environment Radio Map can be generated only if an LTE network is present. Aborting simulation.");
       NS_LOG_INFO ("Generating Environment Radio Map, simulation will not run.");
       this->GenerateRadioMap ();
     }
@@ -222,7 +234,7 @@ DroneScenarioHelper::SetDronesMobility () const
               auto wpMobilityModel = m_droneNodes.Get (i)->GetObject<WaypointMobilityModel>();
               for (Waypoint wp : m_configurator->GetDroneWaypoints (i))
                 {
-                  wpMobilityModel->AddWaypoint(wp);
+                  wpMobilityModel->AddWaypoint (wp);
                 }
             } break;
 
@@ -380,7 +392,7 @@ DroneScenarioHelper::GenerateRadioMap () const
 {
   // making it static in order for it to be alive when simulation run
   static Ptr<RadioEnvironmentMapHelper> m_remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-  m_remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath() + m_configurator->GetName() + ".rem"));
+  m_remHelper->SetAttribute ("OutputFile", StringValue (m_configurator->GetResultsPath () + m_configurator->GetName () + ".rem"));
 
   // setting default values range (-50:50) for both x and y, 100x100 points at height 10 mt
   m_remHelper->SetAttribute ("XMin", DoubleValue (-50.0));

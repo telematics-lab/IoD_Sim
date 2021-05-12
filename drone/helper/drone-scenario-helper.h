@@ -171,7 +171,7 @@ public:
    * \param index the index of the NetDevice (0 is localhost)
    * \return the ns3::Ipv4Address of that drone
    */
-  Ipv4Address GetDroneIpv4Address (uint32_t id, uint32_t index) const ;
+  Ipv4Address GetDroneIpv4Address (uint32_t id, uint32_t index) const;
 
   /**
    * \param id the id of the remote of which the Ipv4Address is needed
