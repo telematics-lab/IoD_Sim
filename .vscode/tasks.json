@@ -122,6 +122,51 @@
       "group": "test"
     },
     {
+      "label": "run lte-scenario-basic",
+      "type": "shell",
+      "command": "./waf --run \"lte-scenario-basic --config=${input:configFileLteBasic}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run drone-scenario",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run drone-scenario-noapp",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-noapp --name=${input:nameDroneScenario} --config=./src/drone/config/${input:configFileDroneScenario}.json --radioMap=${input:radioMapDroneScenario}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run debug",
+      "type": "shell",
+      "command": "./waf --run \"${input:scenario} ${input:opt_scenArgs}\" --gdb",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run simulation with args",
+      "type": "shell",
+      "command": "./waf --run ${input:scenario} ${input:opt_args} --command-template=\"%s ${input:opt_scenArgs}\" ${input:opt_nextCmd}",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
       "label": "docs",
       "type": "shell",
       "command": "make html",
@@ -212,6 +257,7 @@
       }
     }
   ],
+
   "inputs": [
     {
       "id": "numDrones",
@@ -224,6 +270,30 @@
       "type": "promptString",
       "description": "Duration of this simulation, in seconds",
       "default": "10"
+    },
+    {
+      "id": "scenario",
+      "type": "promptString",
+      "description": "Name of the scenario to run",
+      "default": "test-scenario"
+    },
+    {
+      "id": "opt_args",
+      "type": "promptString",
+      "description": "Optional arguments to pass to waf command",
+      "default": "--cwd=../results/"
+    },
+    {
+      "id": "opt_scenArgs",
+      "type": "promptString",
+      "description": "Optional arguments to pass to the scenario script",
+      "default": "--config=../drone/config/test.json"
+    },
+    {
+      "id": "opt_nextCmd",
+      "type": "promptString",
+      "description": "Optional next command (piping, output redirection, etc...)",
+      "default": "> ../results/`date +%y%m%d-%H%M`.out 2>&1"
     },
     {
       "id": "configFileDaVinci",
@@ -242,6 +312,36 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/easley.json"
+    },
+    {
+      "id": "configFileLteBasic",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/lte-basic.json"
+    },
+    {
+      "id": "configFileDroneScenario",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "proto"
+    },
+    {
+      "id": "nameDroneScenario",
+      "type": "promptString",
+      "description": "Name of the scenario",
+      "default": "DRONE_SCENARIO"
+    },
+    {
+      "id": "radioMapDroneScenario",
+      "type": "promptString",
+      "description": "Generate the Radio Environment Map",
+      "default": "false"
+    },
+    {
+      "id": "configFileDebug",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/proto.json"
     }
   ]
 }

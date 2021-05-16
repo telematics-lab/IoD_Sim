@@ -4,11 +4,13 @@
 # Also setup symbolic links automatically to include IoD Sim modules
 ####
 
-git clone                           \
-  --branch=ns-3.29                  \
-  --depth=1                         \
-  git@gitlab.com:nsnam/ns-3-dev.git \
+git clone                                \
+  --branch=ns-3.33                       \
+  --depth=1                              \
+  https://gitlab.com/nsnam/ns-3-dev.git/ \
   ns3
 
-ln -s ../../drone ns3/src/drone
-ln -s ../../report ns3/src/report
+cd ns3/src
+ln -s ../../drone drone
+ln -s ../../report report
+cd ../../

@@ -1,0 +1,130 @@
+{
+  "globalSettings": [
+    "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "1.0",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaIndoor", "1.5",
+    "ns3::BuildingsPropagationLossModel::ShadowSigmaExtWalls", "0.0",
+    "ns3::BuildingsPropagationLossModel::Los2NlosThr", "1e6",
+
+    "ns3::CsmaChannel::DataRate", "5000000",
+    "ns3::CsmaChannel::Delay", "2ms"
+  ],
+
+  "radioMapParameters": [
+    "XMin", "-200",
+    "XMax", "200",
+    "XRes", "500",
+    "YMin", "-200",
+    "YMax", "200",
+    "YRes", "500",
+    "ChannelPath", "/ChannelList/2"
+  ],
+
+  "networks": [
+    {
+      "name": "lte_net0",
+      "protocol": "lte",
+      "attributes": [
+        "ns3::LteEnbPhy::TxPower", "46.0",
+        "ns3::LteHelper::Scheduler", "ns3::PfFfMacScheduler",
+        "ns3::PfFfMacScheduler::HarqEnabled", "true",
+        "ns3::PfFfMacScheduler::CqiTimerThreshold", "1000",
+        "ns3::PointToPointNetDevice::DataRate", "100Gb/s",
+        "ns3::PointToPointNetDevice::Mtu", "1500",
+        "ns3::PointToPointChannel::Delay", "10ms"
+      ]
+    }
+  ],
+
+  "antennas": [
+    {
+      "name": "antenna_0",
+      "position": [-150.0, 150.0, 50.0],
+      "interfaces": ["lte_net0"]
+    }
+  ],
+
+  "dronesMobilityModel": "mixed",
+  "drones": [
+    {
+      "name": "drone1",
+      "mobilityModel": "ns3::ConstantPositionMobilityModel",
+      "position": [100.0, 0.0, 10.0],
+      "applicationStartTime": 1.0,
+      "applicationStopTime": 9.0,
+      "interfaces": [0]
+    },
+    {
+      "name": "drone2",
+      "mobilityModel": "ns3::WaypointMobilityModel",
+      "trajectory": [
+        {
+          "position": [0.0, 0.0, 50.0],
+          "time": 0.0
+        },
+        {
+          "position": [10.0, 0.0, 50.0],
+          "time": 2.0
+        },
+        {
+          "position": [10.0, 0.0, 50.0],
+          "time": 7.0
+        },
+        {
+          "position": [20.0, 0.0, 50.0],
+          "time": 8.0
+        }
+      ],
+      "applicationStartTime": 1.1,
+      "applicationStopTime": 9.0,
+      "interfaces": ["lte_net0"]
+    }
+  ],
+
+  "remotes": [
+    {
+      "name": "remote1",
+      "applicationStartTime": 0.5,
+      "applicationStopTime": 9.5
+    },
+    {
+      "name": "remote2"
+    }
+  ],
+
+  "buildings": [
+    {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [10.0, 90.0, 0.0, 10.0, 0.0, 200.0],
+        "floors": 12,
+        "rooms": [8, 1]
+    },
+    {
+      "type": "commercial",
+      "walls": "concreteWithWindows",
+      "boundaries": [-30.0, -10.0, -30.0, -10.0, 0.0, 50.0],
+      "floors": 12,
+      "rooms": [2, 2]
+    },
+    {
+      "type": "commercial",
+      "walls": "concreteWithWindows",
+      "boundaries": [-30.0, -10.0, -60.0, -40.0, 0.0, 50.0],
+      "floors": 12,
+      "rooms": [2, 2]
+    }
+
+  ],
+
+  "duration": 10.0,
+  "logOnFile": true,
+  "logComponents": [
+    "Scenario",
+    "DroneServer",
+    "DroneClient",
+    "ScenarioConfigurationHelper",
+    "DroneScenarioHelper",
+    "DroneNetwork"
+  ]
+}
