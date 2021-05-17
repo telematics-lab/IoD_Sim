@@ -10,7 +10,3 @@ results/*
 
 # Ignore Python cache
 __pycache__
-
-# Containers
-.devcontainer
-container
