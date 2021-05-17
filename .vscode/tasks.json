@@ -8,7 +8,8 @@
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
-      "group": "build"
+      "group": "build",
+      "problemMatcher": []
     },
     {
       "label": "build",
@@ -21,6 +22,50 @@
       "problemMatcher": [
         "$gcc"
       ]
+    },
+    {
+      "label": "run allen (droneclass)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-allen-droneclass --numDrones=1\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "run davinci (droneclass)",
+      "type": "shell",
+      "command": "./waf --run \"drone-scenario-davinci-droneclass --config=${input:configFileDaVinciDroneclass}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Cleanup results directory",
+      "type": "shell",
+      "command": "rm ./results/*",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Cleanup Build",
+      "type": "shell",
+      "command": "./waf clean",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "run IoD Sim",
+      "type": "shell",
+      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
     },
     {
       "label": "run allen",
@@ -89,15 +134,6 @@
       "label": "run easley (hybrid LTE+WiFi)",
       "type": "shell",
       "command": "./waf --run \"drone-scenario-easley-hybrid-lte-wifi --config=${input:configFileEasley}\"",
-      "options": {
-        "cwd": "${workspaceFolder}/ns3"
-      },
-      "group": "test"
-    },
-    {
-      "label": "run IoD Sim",
-      "type": "shell",
-      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -196,20 +232,6 @@
       "dependsOn": [
         "docs (venv)"
       ]
-    },
-    {
-      "type": "shell",
-      "label": "g++ build active file",
-      "command": "/usr/bin/g++",
-      "args": [
-        "-g",
-        "${file}",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
-      ],
-      "options": {
-        "cwd": "/usr/bin"
-      }
     }
   ],
   "inputs": [
@@ -232,6 +254,12 @@
       "default": "./src/drone/config/davinci.json"
     },
     {
+      "id": "configFileDaVinciDroneclass",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/davinci-droneclass.json"
+    },
+    {
       "id": "configFileLte",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
@@ -242,6 +270,12 @@
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/easley.json"
+    },
+    {
+      "id": "configFileGeneralPurpose",
+      "type": "promptString",
+      "description": "Path to configuration file for this scenario",
+      "default": "./src/drone/config/general_purpose.json"
     }
   ]
 }

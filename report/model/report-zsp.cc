@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2019 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -21,7 +21,6 @@
 
 #include <ns3/application.h>
 #include <ns3/config.h>
-#include <ns3/drone-server.h>
 #include <ns3/integer.h>
 #include <ns3/ipv4-l3-protocol.h>
 #include <ns3/log.h>

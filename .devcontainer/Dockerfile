@@ -1,51 +1,33 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-ARG nproc=2
-
-WORKDIR /opt/drone
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 ####
 # Machine Setup
 ####
-RUN apt-get update          \ 
-    && apt-get install -y   \
-    # general
-    xz-utils                \
+RUN apt-get update \
+    && apt-get install --no-install-recommends --quiet --assume-yes \
+    git \
+    gcc \
+    g++ \
+    gdb \
+    valgrind \
     # ns3 dependencies
-    git                     \
-    python3                 \
-    python3-pip             \
-    pkg-config              \
-    libgtk-3-dev            \
-    libsqlite3-dev          \
-    python3-gi-cairo        \
-    python3-pygraphviz      \
-    gir1.2-goocanvas-2.0    \
-    valgrind                \
-    gdb                     \
-    libgsl-dev              \
-    doxygen                 \
-    libopenmpi-dev          \
+    python3 \
+    python-is-python3 \
+    python3-dev \
+    python3-pip \
+    python3-pybindgen \
+    python3-pygccxml \
+    pkg-config \
+    sqlite3 \
+    #libgtk-3-dev \
+    #libsqlite3-dev \
     # pybindgen dependencies
-    castxml                 \
-    libboost-dev            \
+    #libboost-dev \
+    #castxml \
     # IoD_Sim dependencies
-    rapidjson-dev           \
-    && pip3 install -U pip  \
-    && pip install -U       \
-           pygccxml         \
-           sphinx           \
-           sphinx_rtd_theme \
-    && mkdir third_party    \
-    && cd ./third_party     \
-    && git clone https://github.com/gjcarneiro/pybindgen.git \
-    && cd pybindgen         \
-    && python3 setup.py install      
-
-RUN git clone https://gitlab.com/nsnam/ns-3-dev.git ns3 \
-    && cd ./ns3 \
-    # link directories
-    && ln -s /workspaces/IoD_Sim/drone /opt/drone/ns3/src/drone \
-    && ln -s /workspaces/IoD_Sim/results /opt/drone/results \
-    # force the use of python3 so to not install python 2.7
-    && sed -i 's/python/python3/' ./waf
+    rapidjson-dev \
+    libgsl-dev \
+    libxml2-dev

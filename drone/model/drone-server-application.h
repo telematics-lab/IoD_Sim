@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -31,13 +31,13 @@ ServerState
    SERVER_LISTEN
   };
 
-class DroneServer : public Application
+class DroneServerApplication : public Application
 {
 public:
   static TypeId GetTypeId ();
 
-  DroneServer ();
-  virtual ~DroneServer ();
+  DroneServerApplication ();
+  virtual ~DroneServerApplication ();
 
 protected:
   virtual void DoDispose ();
@@ -59,10 +59,10 @@ private:
   uint32_t    m_port;
   ServerState m_state;
 
-  mutable EventId     m_sendEvent;
+  mutable EventId m_sendEvent;
   TracedCallback<Ptr<const Packet>> m_txTrace;
 
-  double      m_duration;
+  double m_duration;
   mutable int32_t m_sequenceNumber; // correlated with the node, not the connection
 };
 

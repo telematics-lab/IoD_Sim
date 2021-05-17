@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -45,9 +45,9 @@
 
 #include <ns3/report.h>
 
-#include <ns3/drone-client.h>
+#include <ns3/drone-client-application.h>
 #include <ns3/drone-list.h>
-#include <ns3/drone-server.h>
+#include <ns3/drone-server-application.h>
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
 #include <ns3/scenario-configuration-helper.h>
@@ -274,7 +274,7 @@ Scenario::ConfigureApplicationDrones ()
 
   for (uint32_t i = 0; i < m_drones.GetN (); i++)
     {
-      auto client = CreateObjectWithAttributes<DroneClient>
+      auto client = CreateObjectWithAttributes<DroneClientApplication>
         ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (i)),
          "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask),
          "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
@@ -297,7 +297,7 @@ Scenario::ConfigureApplicationZsps ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  auto server = CreateObjectWithAttributes<DroneServer>
+  auto server = CreateObjectWithAttributes<DroneServerApplication>
     ("Ipv4Address", Ipv4AddressValue (m_ifaceIps.GetAddress (m_ifaceIps.GetN () - 1)),
      "Ipv4SubnetMask", Ipv4MaskValue (m_ifaceNetMask));
 

@@ -38,8 +38,6 @@
 #include "ns3/flow-monitor-module.h"
 #include <ns3/flow-monitor-helper.h>
 
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
 #include <ns3/scenario-configuration-helper.h>

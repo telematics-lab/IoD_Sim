@@ -1,4 +1,16 @@
 def build(bld):
+    obj = bld.create_ns3_program('drone-scenario-allen-droneclass',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet', 'report'])
+    obj.source = 'scenario-allen-drone.cc'
+
+    obj = bld.create_ns3_program('drone-scenario-davinci-droneclass',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'scenario-davinci-drone.cc'
+
     obj = bld.create_ns3_program('drone-scenario-allen',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
@@ -70,6 +82,13 @@ def build(bld):
                                   'applications', 'mobility', 'wifi', 'lte',
                                   'internet'])
     obj.source = 'scenario-easley-threelogdist-hybrid-lte-wifi.cc'
+
+    obj = bld.create_ns3_program('iod-sim',
+                                 ['drone', 'core', 'network',
+                                  'applications', 'mobility', 'wifi',
+                                  'internet'])
+    obj.source = 'iod-sim.cc'
+
     # lte-lena-simple-davinci shouldn't have wifi as dependency,
     # but for some reason there are weak references to it.
     obj = bld.create_ns3_program('lte-lena-simple-davinci',

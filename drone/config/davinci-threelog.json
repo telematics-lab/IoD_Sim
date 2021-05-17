@@ -13,7 +13,7 @@
             {"key": "ReferenceLoss", "value": 46.6777}
         ]
     },
-    "duration": 100.0,
+    "duration": 100,
     "drones": [
         {
             "acceleration": 1.0,

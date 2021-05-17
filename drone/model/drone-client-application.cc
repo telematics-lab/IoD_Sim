@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -23,45 +23,47 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include "drone-client.h"
+#include "drone-client-application.h"
 #include "drone-communications.h"
 #include "constant-acceleration-drone-mobility-model.h"
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("DroneClient");
+NS_LOG_COMPONENT_DEFINE ("DroneClientApplication");
+
+NS_OBJECT_ENSURE_REGISTERED (DroneClientApplication);
 
 TypeId
-DroneClient::GetTypeId ()
+DroneClientApplication::GetTypeId ()
 {
-  static TypeId tid = TypeId ("ns3::DroneClient")
+  static TypeId tid = TypeId ("ns3::DroneClientApplication")
     .SetParent<Application> ()
-    .AddConstructor<DroneClient> ()
+    .AddConstructor<DroneClientApplication> ()
     .AddAttribute ("Ipv4Address", "IPv4 Address of this device",
                    Ipv4AddressValue (),
-                   MakeIpv4AddressAccessor (&DroneClient::m_address),
+                   MakeIpv4AddressAccessor (&DroneClientApplication::m_address),
                    MakeIpv4AddressChecker ())
     .AddAttribute ("Ipv4SubnetMask", "IPv4 Subnet Mask of this device",
                    Ipv4MaskValue (),
-                   MakeIpv4MaskAccessor (&DroneClient::m_subnetMask),
+                   MakeIpv4MaskAccessor (&DroneClientApplication::m_subnetMask),
                    MakeIpv4MaskChecker ())
     .AddAttribute ("Port", "Destination application port.",
                    UintegerValue (80),
-                   MakeUintegerAccessor (&DroneClient::m_destPort),
+                   MakeUintegerAccessor (&DroneClientApplication::m_destPort),
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("Duration", "Duration of the application.",
                    DoubleValue (120.0),
-                   MakeDoubleAccessor (&DroneClient::m_duration),
+                   MakeDoubleAccessor (&DroneClientApplication::m_duration),
                    MakeDoubleChecker<double> ())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
-                     MakeTraceSourceAccessor (&DroneClient::m_txTrace),
+                     MakeTraceSourceAccessor (&DroneClientApplication::m_txTrace),
                      "ns3::Packet::TracedCallback")
     ;
 
   return tid;
 }
 
-DroneClient::DroneClient ()
+DroneClientApplication::DroneClientApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -70,7 +72,7 @@ DroneClient::DroneClient ()
   m_sequenceNumber = 0;
 }
 
-DroneClient::~DroneClient ()
+DroneClientApplication::~DroneClientApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -78,7 +80,7 @@ DroneClient::~DroneClient ()
 }
 
 void
-DroneClient::DoDispose ()
+DroneClientApplication::DoDispose ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -91,7 +93,7 @@ DroneClient::DoDispose ()
 }
 
 void
-DroneClient::StartApplication ()
+DroneClientApplication::StartApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -107,7 +109,7 @@ DroneClient::StartApplication ()
           m_socket->SetAllowBroadcast (true);
           m_socket->Bind (InetSocketAddress (Ipv4Address::GetAny (),
                                              m_destPort));
-          m_socket->SetRecvCallback (MakeCallback (&DroneClient::ReceivePacket,
+          m_socket->SetRecvCallback (MakeCallback (&DroneClientApplication::ReceivePacket,
                                                    this));
 
           NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
@@ -119,12 +121,12 @@ DroneClient::StartApplication ()
           xPathCallback << "/NodeList/" << nodeId
                         << "/$ns3::MobilityModel/CourseChange";
           Config::Connect (xPathCallback.str (),
-                           MakeCallback (&DroneClient::CourseChange, this));
+                           MakeCallback (&DroneClientApplication::CourseChange, this));
       }
 
       /* cancel any previous event and start rendezvous process */
       Simulator::Cancel (m_sendEvent);
-      m_sendEvent = Simulator::ScheduleNow (&DroneClient::SendPacket,
+      m_sendEvent = Simulator::ScheduleNow (&DroneClientApplication::SendPacket,
                                             this,
                                             NEW,
                                             m_socket,
@@ -133,7 +135,7 @@ DroneClient::StartApplication ()
 }
 
 void
-DroneClient::StopApplication ()
+DroneClientApplication::StopApplication ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
@@ -148,7 +150,7 @@ DroneClient::StopApplication ()
 }
 
 void
-DroneClient::SendPacket (const Intent i,
+DroneClientApplication::SendPacket (const Intent i,
                          const Ptr<Socket> socket,
                          const Ipv4Address targetAddress) const
 {
@@ -236,7 +238,7 @@ DroneClient::SendPacket (const Intent i,
 }
 
 void
-DroneClient::ReceivePacket (const Ptr<Socket> socket) const
+DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 {
   NS_LOG_FUNCTION (socket);
 
@@ -274,12 +276,12 @@ DroneClient::ReceivePacket (const Ptr<Socket> socket) const
 
               m_state = CONNECTED;
 
-              // TODO: make this number parametric, so it is possible to decide the burst intensity of DroneClient messages
+              // TODO: make this number parametric, so it is possible to decide the burst intensity of DroneClientApplication messages
               for (double i = 1.0; i < m_duration; i += 1.0)
                 {
                   Simulator::ScheduleWithContext (GetNode ()->GetId (),
                                                   Seconds (i),
-                                                  &DroneClient::SendPacket,
+                                                  &DroneClientApplication::SendPacket,
                                                   this,
                                                   NEW,
                                                   m_socket,
@@ -298,7 +300,7 @@ DroneClient::ReceivePacket (const Ptr<Socket> socket) const
               NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
                            << "] UPDATE received!");
 
-              m_sendEvent = Simulator::ScheduleNow (&DroneClient::SendPacket,
+              m_sendEvent = Simulator::ScheduleNow (&DroneClientApplication::SendPacket,
                                                     this,
                                                     ACK,
                                                     socket,
@@ -311,7 +313,7 @@ DroneClient::ReceivePacket (const Ptr<Socket> socket) const
 }
 
 void
-DroneClient::CourseChange (const std::string context,
+DroneClientApplication::CourseChange (const std::string context,
                            const Ptr<const MobilityModel> mobility) const
 {
   NS_LOG_FUNCTION (context << mobility);

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -25,9 +25,14 @@
 #include <rapidjson/document.h>
 #include <ns3/position-allocator.h>
 #include <ns3/log.h>
-#include <ns3/flight-plan.h>
-#include <ns3/speed-coefficients.h>
 #include <ns3/singleton.h>
+
+#include <ns3/entity-configuration-helper.h>
+#include <ns3/flight-plan.h>
+#include <ns3/mac-layer-configuration.h>
+#include <ns3/network-layer-configuration.h>
+#include <ns3/phy-layer-configuration.h>
+#include <ns3/speed-coefficients.h>
 
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 
@@ -49,6 +54,14 @@ public:
    *
    * \param argc The number of command line arguments.
    * \param argv The list of command line arguments.
+   */
+  void Initialize (int argc, char ** argv);
+
+  /**
+   * \brief Bootstrap Singleton with basic data.
+   *
+   * \param argc The number of command line arguments.
+   * \param argv The list of command line arguments.
    * \param name The name of the scenario.
    */
   void Initialize (int argc, char ** argv, const std::string name);
@@ -58,7 +71,7 @@ public:
    *
    * \return the name of the scenario.
    */
-  const std::string GetName () const;
+  const std::string GetName ();
 
   /**
    * \brief Get the current date and time as a human-readable string
@@ -72,14 +85,49 @@ public:
    *
    * \return A preconfigured path to place scenario data files
    */
-  const std::string GetResultsPath () const;
+  const std::string GetResultsPath ();
 
   /**
    * \brief Get the file path of log file.
    *
    * \return file path of the logging file.
    */
-  const std::string GetLoggingFilePath () const;
+  const std::string GetLoggingFilePath ();
+
+  /**
+   * \brief Retrieve Static Configuration Parameters as a key/value pair.
+   *
+   * \return Static configuration defined in the configuration file.
+   */
+  const std::vector<std::pair<std::string, std::string>> GetStaticConfig ();
+
+  /**
+   * \brief Retrieve the list of PHY Layers defined for this simulation.
+   *
+   * \return The list of PHY Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<PhyLayerConfiguration>> GetPhyLayers () const;
+
+  /**
+   * \brief Retrieve the list of MAC Layers defined for this simulation.
+   *
+   * \return The list of MAC Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<MacLayerConfiguration>> GetMacLayers () const;
+
+  /**
+   * \brief Retrieve the list of Network Layers defined for this simulation.
+   *
+   * \return The list of Network Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<NetworkLayerConfiguration>> GetNetworkLayers () const;
+
+  /**
+   * \brief Retrieve the list of generic enetities to be defined for this simulation.
+   *
+   * \return The list of Network Layers to be defined for this simulation.
+   */
+  const std::vector<Ptr<EntityConfiguration>> GetEntitiesConfiguration (const std::string& entityKey) const;
 
   /**
    * \return the phy mode for WiFi communications.
@@ -170,6 +218,10 @@ public:
    * \param allocator the allocator to be filled with ENBs positions.
    */
   void GetEnbsPosition (Ptr<ListPositionAllocator> allocator) const;
+  /**
+   * \brief Check if dry run is wanted.
+   */
+  const bool IsDryRun () const;
 
   /**
    * \brief default destructor
@@ -218,6 +270,7 @@ private:
 
   std::string m_name;           /// name of the simulation
   std::string m_dateTime;       /// cache for the current datetime
+  std::vector<std::pair<std::string, std::string>> m_staticConfig; /// cache for ns-3 static config params
 };
 
 } // namespace ns3

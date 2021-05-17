@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -334,8 +334,8 @@ ReportEntity::GetIpv4Address ()
        * Assumption: only one DroneClient is available on a Drone and
        *             only one DroneServer is available on a ZSP
        */
-      if (matchClassName == "ns3::DroneClient"
-          || matchClassName == "ns3::DroneServer")
+      if (matchClassName == "ns3::DroneClientApplication"
+          || matchClassName == "ns3::DroneServerApplication")
         {
           TypeId::AttributeInformation info;
           Ipv4AddressValue ipv4Address;
@@ -358,7 +358,7 @@ ReportEntity::GetIpv4Address ()
         }
     }
 
-  NS_FATAL_ERROR ("Expected to find a DroneClient/Server Application on "
+  NS_FATAL_ERROR ("Expected to find a Client/Server Application on "
                   "entity, but it was not there!");
 }
 

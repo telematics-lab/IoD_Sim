@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2020 The IoD_Sim Authors.
+ * Copyright (c) 2018-2021 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -90,8 +90,8 @@
 #include <ns3/report.h>
 
 #include <ns3/drone-list.h>
-#include <ns3/drone-server.h>
-#include <ns3/drone-client.h>
+#include <ns3/drone-server-application.h>
+#include <ns3/drone-client-application.h>
 #include <ns3/zsp-list.h>
 
 using namespace ns3;
@@ -99,9 +99,9 @@ using ms = std::chrono::duration<float, std::milli>;
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
 
-void DroneClientTxCallback  (Ptr<const Packet> p)
+void DroneClientApplicationTxCallback  (Ptr<const Packet> p)
 {
-    std::cout << "DroneClient: Packet sent!" << std::endl;
+    std::cout << "DroneClientApplication: Packet sent!" << std::endl;
 }
 
 /*
@@ -129,8 +129,8 @@ int main(int argc, char** argv) {
      * Logging configuration
      */
     LogComponentEnable("Scenario", LOG_LEVEL_ALL);
-    LogComponentEnable("DroneServer", LOG_LEVEL_ALL);
-    LogComponentEnable("DroneClient", LOG_LEVEL_ALL);
+    LogComponentEnable("DroneServerApplication", LOG_LEVEL_ALL);
+    LogComponentEnable("DroneClientApplication", LOG_LEVEL_ALL);
 
     // redirect stdout to log file
     std::ofstream out("../results/dronesim-allen.log");
@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
      */
     NS_LOG_INFO("> Creating applications for nodes.");
     for (auto node = nodes.Begin(); node != nodes.End(); node++) {
-        auto client = CreateObjectWithAttributes<DroneClient>(
+        auto client = CreateObjectWithAttributes<DroneClientApplication>(
             "Ipv4Address", Ipv4AddressValue(i.GetAddress((*node)->GetId ())),
             "Ipv4SubnetMask", Ipv4MaskValue(subnetMask));
         (*node)->AddApplication(client);
@@ -284,7 +284,7 @@ int main(int argc, char** argv) {
         client->SetStartTime(Seconds(1));
     }
 
-    Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer>(
+    Ptr<DroneServerApplication> server = CreateObjectWithAttributes<DroneServerApplication>(
         "Ipv4Address", Ipv4AddressValue(i.GetAddress(i.GetN() - 1)),
         "Ipv4SubnetMask", Ipv4MaskValue(subnetMask));
     ap.Get(0)->AddApplication(server);
@@ -296,8 +296,8 @@ int main(int argc, char** argv) {
     /*
      * Simulation Configuration.
      */
-    Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::DroneClient/Tx",
-                                  MakeCallback(&DroneClientTxCallback));
+    Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::DroneClientApplication/Tx",
+                                  MakeCallback(&DroneClientApplicationTxCallback));
 
     // Tracing
     wifiPhy.EnablePcap("../results/dronesim", devices);
