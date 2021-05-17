@@ -13,6 +13,7 @@ RUN apt-get update \
     g++ \
     gdb \
     valgrind \
+    patch \
     # ns3 dependencies
     python3 \
     python-is-python3 \

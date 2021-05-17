@@ -3,5 +3,5 @@
 git submodule update --init
 
 pushd ns3
-git am ../tools/0001-Integrate-ns-3-with-IoD-Sim.patch
+patch -s -p1 < ../tools/0001-Integrate-ns-3-with-IoD-Sim.patch
 popd
