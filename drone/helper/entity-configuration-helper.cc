@@ -44,12 +44,16 @@ EntityConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
   const auto mobilityModel = DecodeMobilityConfiguration (json["mobilityModel"]);
   const auto applications = DecodeApplicationConfigurations (json["applications"]);
 
-  if (json.HasMember("mechanics") && json.HasMember("battery") && json.HasMember("peripherals"))
+  if (json.HasMember("mechanics") && json.HasMember("battery"))
     {
       const auto mechanics = DecodeMechanicsConfiguration (json["mechanics"]);
       const auto battery = DecodeBatteryConfiguration (json["battery"]);
-      const auto peripherals = DecodePeripheralConfigurations (json["peripherals"]);
-      return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications, mechanics, battery, peripherals);
+      if (json.HasMember("peripherals"))
+        {
+          const auto peripherals = DecodePeripheralConfigurations (json["peripherals"]);
+          return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications, mechanics, battery, peripherals);
+        }
+      return CreateObject<EntityConfiguration> (netDevices, mobilityModel, applications, mechanics, battery);
     }
   else
     {

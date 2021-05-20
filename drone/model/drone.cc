@@ -63,6 +63,7 @@ Drone::GetTypeId (void)
 
 Drone::Drone ()
 {
+  m_peripheralContainer = CreateObject<DronePeripheralContainer> ();
 }
 
 void
@@ -76,7 +77,6 @@ void
 Drone::DoInitialize (void)
 {
   NS_LOG_FUNCTION (this);
-  m_peripheralContainer = CreateObject<DronePeripheralContainer> ();
   Node::DoInitialize ();
 }
 

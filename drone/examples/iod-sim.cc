@@ -446,6 +446,7 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
   NS_LOG_FUNCTION (entityKey << entityId << conf);
   std::vector<Ptr<DronePeripheral>> peripherals;
   auto dronePeripheralsContainer = m_drones.Get(entityId)->getPeripherals();
+  if (conf->GetPeripherals().size() == 0) return;
   for (auto perConf : conf->GetPeripherals ())
     {
       dronePeripheralsContainer->Add(perConf.GetName());

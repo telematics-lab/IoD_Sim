@@ -39,6 +39,12 @@ class EntityConfiguration : public Object
                          ModelConfiguration m_mobility,
                          std::vector<ModelConfiguration> m_applications,
                          ModelConfiguration m_mechanics,
+                         ModelConfiguration m_battery);
+
+    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                         ModelConfiguration m_mobility,
+                         std::vector<ModelConfiguration> m_applications,
+                         ModelConfiguration m_mechanics,
                          ModelConfiguration m_battery,
                          std::vector<ModelConfiguration> m_peripherals);
 
