@@ -78,7 +78,7 @@ public:
   /**
    * \return The name of the scenario.
    */
-  const std::string GetName () const;
+  const std::string GetName ();
 
   /**
    * \return The current date and time as a human-readable string.
@@ -90,12 +90,12 @@ public:
    *        folder at <path>/<scenario_name>-<datetime> where to place files
    * \return The full path of the folder where to put result files
    */
-  const std::string GetResultsPath () const;
+  const std::string GetResultsPath ();
 
   /**
    * \return The file path of the logging file.
    */
-  const std::string GetLoggingFilePath () const;
+  const std::string GetLoggingFilePath ();
 
   /**
    * \brief Retrieve Static Configuration Parameters as a key/value pair.

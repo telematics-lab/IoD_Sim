@@ -18,8 +18,8 @@
 
 #include <ns3/core-module.h>
 #include <ns3/applications-module.h>
-#include <ns3/drone-server.h>
-#include <ns3/drone-client.h>
+#include <ns3/drone-server-application.h>
+#include <ns3/drone-client-application.h>
 #include <ns3/drone-scenario-helper.h>
 
 #define DSH DroneScenarioHelper::Get ()
@@ -35,7 +35,7 @@ int main (int argc, char **argv)
 
   for (uint32_t i = 0; i < CONFIG->GetDronesN (); ++i)
     {
-      Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClient> (
+      Ptr<Application> clientApp = CreateObjectWithAttributes<DroneClientApplication> (
         "Ipv4Address", Ipv4AddressValue (DSH->GetDroneIpv4Address (i, 1)),
         "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"),
         "Duration", DoubleValue (CONFIG->GetDuration ()),
@@ -46,7 +46,7 @@ int main (int argc, char **argv)
     }
 
   // Install DroneServer application on the first remote only
-  Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServer> (
+  Ptr<Application> serverApp = CreateObjectWithAttributes<DroneServerApplication> (
     "Ipv4Address", Ipv4AddressValue (DSH->GetRemoteIpv4Address (0, 1)),
     "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"));
   serverApp->SetStartTime (Seconds (CONFIG->GetRemoteApplicationStartTime (0)));

@@ -23,8 +23,8 @@
 #include <ns3/point-to-point-module.h>
 #include <ns3/config-store-module.h>
 #include <ns3/applications-module.h>
-#include <ns3/drone-client.h>
-#include <ns3/drone-server.h>
+#include <ns3/drone-client-application.h>
+#include <ns3/drone-server-application.h>
 #include <ns3/scenario-configuration-helper.h>
 
 using namespace ns3;
@@ -94,14 +94,14 @@ int main (int argc, char *argv[])
 
   lteHelper->Attach (ueDevices, enbDevices.Get (0));
 
-  Ptr<DroneServer> server = CreateObjectWithAttributes<DroneServer> (
+  Ptr<DroneServerApplication> server = CreateObjectWithAttributes<DroneServerApplication> (
     "Ipv4Address", Ipv4AddressValue (hostIp),
     "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"));
   hostNodes.Get (0)->AddApplication (server);
 
   for (uint32_t i = 0; i < ueNodes.GetN (); ++i)
     {
-      auto client = CreateObjectWithAttributes<DroneClient> (
+      auto client = CreateObjectWithAttributes<DroneClientApplication> (
         "Ipv4Address", Ipv4AddressValue (lteDevsIfaces.GetAddress (i)),
         "Ipv4SubnetMask", Ipv4MaskValue ("255.0.0.0"),
         "DestinationIpv4Address", Ipv4AddressValue (hostIp));

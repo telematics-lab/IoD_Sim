@@ -1,6 +1,6 @@
 {
     "duration": 10.0,
-
+    "resultsPath": "../results/",
     "dronesMobilityModel": "ns3::ConstantPositionMobilityModel",
     "drones": [
         {
@@ -31,8 +31,8 @@
     "logOnFile": true,
     "logComponents": [
         "ReportSimulation",
-        "DroneServer",
-        "DroneClient",
+        "DroneServerApplication",
+        "DroneClientApplication",
         "Scenario",
         "SimulationDuration",
         "ScenarioConfigurationHelper"

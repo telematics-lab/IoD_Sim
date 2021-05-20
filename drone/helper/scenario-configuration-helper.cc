@@ -86,7 +86,7 @@ ScenarioConfigurationHelper::GetName ()
       NS_ASSERT_MSG (m_config["name"].IsString(),
                     "Scenario 'name' must be a String.");
 
-      m_name = m_config["name"].GetString();
+      m_name = m_config["name"].GetString ();
       NS_ASSERT_MSG (!m_name.empty(), "Scenario 'name' must be non empty.");
     }
 
@@ -110,8 +110,8 @@ ScenarioConfigurationHelper::GetResultsPath ()
   std::stringstream path;
 
   path << m_config["resultsPath"].GetString ()
-       << "/" <<
-       << GetName() << "-"
+       << "/"
+       << GetName () << "-"
        << m_dateTime;
 
   SystemPath::MakeDirectories (path.str ());
@@ -261,10 +261,18 @@ const double
 ScenarioConfigurationHelper::GetDuration () const
 {
   NS_ASSERT (m_config.HasMember ("duration"));
-  NS_ASSERT_MSG (m_config["duration"].IsDouble (), // TODO: check in case of int
+  NS_ASSERT_MSG (m_config["duration"].IsNumber (), // TODO: check in case of int
                  "Please define duration in configuration file.");
 
-  return m_config["duration"].GetDouble ();
+  double duration = 0.0;
+
+  if (m_config["duration"].IsUint ()) {
+    duration = static_cast<double> (m_config["duration"].GetUint ());
+  } else {
+    duration = m_config["duration"].GetDouble ();
+  }
+
+  return duration;
 }
 
 const std::string

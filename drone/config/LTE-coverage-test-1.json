@@ -1,6 +1,7 @@
 {
 	"duration": 20.0,
 	"logOnFile": true,
+	"resultsPath": "../results/",
   "logComponents": [
     "Scenario",
     "ScenarioConfigurationHelper",

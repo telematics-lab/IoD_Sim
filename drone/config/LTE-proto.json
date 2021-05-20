@@ -1,4 +1,5 @@
 {
+  "resultsPath": "../results/",
   "globalSettings": [
     "ns3::LteHelper::PathlossModel", "ns3::HybridBuildingsPropagationLossModel",
     "ns3::BuildingsPropagationLossModel::ShadowSigmaOutdoor", "1.0",
@@ -121,8 +122,8 @@
   "logOnFile": true,
   "logComponents": [
     "Scenario",
-    "DroneServer",
-    "DroneClient",
+    "DroneServerApplication",
+    "DroneClientApplication",
     "ScenarioConfigurationHelper",
     "DroneScenarioHelper",
     "DroneNetwork"
