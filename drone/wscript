@@ -7,7 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('drone', ['core', 'network', 'applications', 'mobility', 'report'])
+    module = bld.create_ns3_module('drone', ['core', 'network', 'applications', 'mobility', 'report', 'lte'])
     module.source = [
         'helper/entity-configuration-helper.cc',
         'helper/ipv4-simulation-helper.cc',
@@ -53,7 +53,10 @@ def build(bld):
         'model/storage-peripheral.cc',
         'model/drone-peripheral-container.cc',
         'model/drone.cc',
-        'model/drone-container.cc'
+        'model/drone-container.cc',
+        # Abruzzese Contribution
+        'model/drone-network.cc',
+        'helper/drone-scenario-helper.cc',
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -107,7 +110,10 @@ def build(bld):
         'model/storage-peripheral.h',
         'model/drone-peripheral-container.h',
         'model/drone.h',
-        'model/drone-container.h'
+        'model/drone-container.h',
+        # Abruzzese Contribution
+        'model/drone-network.h',
+        'helper/drone-scenario-helper.h',
         ]
 
     if bld.env.ENABLE_EXAMPLES:
