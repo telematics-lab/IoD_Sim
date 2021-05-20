@@ -140,7 +140,43 @@
                         "value": 0.2
                     }
                 ]
-            }
+            },
+            "peripherals": [{
+                "name": "ns3::DronePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    }
+                ]
+            },
+            {
+                "name": "ns3::StoragePeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "Capacity",
+                        "value": 8000000
+                    }
+                ]
+            },
+            {
+                "name": "ns3::InputPeripheral",
+                "attributes":[
+                    {
+                        "name": "PowerConsumption",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "DataRate",
+                        "value": 1e+6
+                    }
+                ]
+
+            }]
         },
         {
             "netDevices": [{
