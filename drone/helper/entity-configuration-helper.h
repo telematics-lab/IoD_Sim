@@ -19,11 +19,15 @@
 #define ENTITY_CONFIGURATION_HELPER_H
 
 #include <ns3/entity-configuration.h>
+#include <ns3/lte-bearer-configuration.h>
 #include <ns3/netdevice-configuration.h>
+#include <ns3/wifi-netdevice-configuration.h>
 
 #include <rapidjson/document.h>
 
 namespace ns3 {
+
+using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
 
 /**
  * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the following properties:
@@ -47,6 +51,7 @@ private:
   EntityConfigurationHelper ();
 
   static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations (const rapidjson::Value& json);
+  static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations (const JsonArray& json);
   static const ModelConfiguration DecodeMobilityConfiguration (const rapidjson::Value& json);
   static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
   static const ModelConfiguration DecodeMechanicsConfiguration (const rapidjson::Value& json);

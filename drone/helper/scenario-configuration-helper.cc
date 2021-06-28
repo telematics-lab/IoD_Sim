@@ -250,7 +250,7 @@ ScenarioConfigurationHelper::GetEntitiesConfiguration (const std::string& entity
 
   for (auto& el : arr)
     {
-      auto conf = EntityConfigurationHelper::GetConfiguration(el);
+      auto conf = EntityConfigurationHelper::GetConfiguration (el);
       entityConf.push_back (conf);
     }
 

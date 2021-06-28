@@ -15,33 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#include "lte-setup-helper.h"
 
 namespace ns3 {
 
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
+Ptr<NetDevice>
+LteSetupHelper::InstallSingleEnbDevice (Ptr<LteHelper> helper, Ptr<Node> n)
 {
-
-}
-
-NetdeviceConfiguration::~NetdeviceConfiguration ()
-{
-
-}
-
-const std::string
-NetdeviceConfiguration::GetType () const
-{
-  return m_type;
-}
-
-const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
-{
-  return m_networkLayerId;
+  return helper->InstallSingleEnbDevice (n);
 }
 
 } // namespace ns3

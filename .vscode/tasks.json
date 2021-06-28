@@ -44,7 +44,7 @@
     {
       "label": "Cleanup results directory",
       "type": "shell",
-      "command": "rm ./results/*",
+      "command": "rm -rf ./results/*",
       "group": "none",
       "problemMatcher": []
     },
@@ -345,7 +345,7 @@
       "id": "configFileGeneralPurpose",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/general_purpose.json"
+      "default": "./src/drone/config/general_purpose_with_lte.json"
     },
     {
       "id": "configFileLteBasic",

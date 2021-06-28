@@ -15,10 +15,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef NETDEVICE_CONFIGURATION_H
-#define NETDEVICE_CONFIGURATION_H
+#ifndef WIFI_NETDEVICE_CONFIGURATION_H
+#define WIFI_NETDEVICE_CONFIGURATION_H
 
 #include <ns3/object.h>
+
+#include "netdevice-configuration.h"
 #include "model-configuration.h"
 
 namespace ns3 {
@@ -26,7 +28,7 @@ namespace ns3 {
 /**
  * Data class to recnognize and configure a Network Device for an entity to be simulated.
  */
-class NetdeviceConfiguration : public Object
+class WifiNetdeviceConfiguration : public NetdeviceConfiguration
 {
 public:
   /**
@@ -37,25 +39,21 @@ public:
    * \param networkLayerId The identifier for the Network Layer that has been defined for this simulation.
    *                       It must be compatible with the given type and macLayer.
    */
-  NetdeviceConfiguration (const std::string type,
+  WifiNetdeviceConfiguration (const std::string type,
+                          const ModelConfiguration macLayer,
                           const uint32_t networkLayerId);
   /** Default destructor */
-  ~NetdeviceConfiguration ();
+  ~WifiNetdeviceConfiguration ();
 
   /**
-   * \return The type of the Network Device.
+   * \return The MAC Layer configuration.
    */
-  const std::string GetType () const;
-  /**
-   * \return The reference network layer identifier.
-   */
-  virtual const uint32_t GetNetworkLayerId () const;
+  const ModelConfiguration GetMacLayer () const;
 
 private:
-  const std::string m_type;
-  const uint32_t m_networkLayerId;
+  const ModelConfiguration m_macLayer;
 };
 
 } // namespace ns3
 
-#endif /* NETDEVICE_CONFIGURATION_H */
+#endif /* WIFI_NETDEVICE_CONFIGURATION_H */

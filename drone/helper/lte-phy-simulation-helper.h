@@ -15,33 +15,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#ifndef LTE_PHY_SIMULATION_HELPER_H
+#define LTE_PHY_SIMULATION_HELPER_H
+
+#include <ns3/object.h>
+#include <ns3/lte-helper.h>
+#include <ns3/point-to-point-epc-helper.h>
 
 namespace ns3 {
 
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
+/**
+ * A data class to store information about a WiFi PHY layer configuration for a simulation.
+ */
+class LtePhySimulationHelper : public Object
 {
+public:
+  /** Default constructor */
+  LtePhySimulationHelper ();
+  /** Default destructor */
+  ~LtePhySimulationHelper ();
 
-}
+  /**
+   * \return The LTE Helper used to configure this layer.
+   */
+  Ptr<LteHelper> GetLteHelper ();
+  /**
+   * \return The LTE EPC PHY Helper used to configure this layer.
+   */
+  Ptr<PointToPointEpcHelper> GetEpcHelper ();
 
-NetdeviceConfiguration::~NetdeviceConfiguration ()
-{
-
-}
-
-const std::string
-NetdeviceConfiguration::GetType () const
-{
-  return m_type;
-}
-
-const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
-{
-  return m_networkLayerId;
-}
+private:
+  Ptr<LteHelper> m_lte;
+  Ptr<PointToPointEpcHelper> m_epc;
+};
 
 } // namespace ns3
+
+#endif /* LTE_PHY_SIMULATION_HELPER_H */

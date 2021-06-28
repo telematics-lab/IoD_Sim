@@ -84,6 +84,14 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
                     "Entity Network Device 'type' property must be a string.");
 
       const std::string type = netdev["type"].GetString ();
+
+      NS_ASSERT_MSG (netdev.HasMember ("networkLayer"),
+                     "Entity Network Device must have 'networkLayer' property defined.");
+      NS_ASSERT_MSG (netdev["networkLayer"].IsUint (),
+                     "Entity Network Device 'networkLayer' property must be an unsigned integer.");
+
+      const uint32_t networkLayerId = netdev["networkLayer"].GetUint ();
+
       if (type.compare("wifi") == 0)
         {
           NS_ASSERT_MSG (netdev.HasMember ("macLayer"),
@@ -93,14 +101,23 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
 
           const auto macLayer = DecodeModelConfiguration (netdev["macLayer"]);
 
-          NS_ASSERT_MSG (netdev.HasMember ("networkLayer"),
-                        "Entity WiFi Network Device must have 'networkLayer' property defined.");
-          NS_ASSERT_MSG (netdev["networkLayer"].IsUint (),
-                        "Entity WiFi Network Device 'networkLayer' property must be an unsigned integer.");
+          confs.push_back (CreateObject<WifiNetdeviceConfiguration> (type, macLayer, networkLayerId));
+        }
+      else if (type.compare ("lte") == 0)
+        {
+          NS_ASSERT_MSG (netdev.HasMember ("role"),
+                         "Entity LTE Network Device must have 'role' property defined.");
+          NS_ASSERT_MSG (netdev["role"].IsString (),
+                         "Entity LTE Network Device 'role' property must be a string.");
 
-          const uint32_t networkLayerId = netdev["networkLayer"].GetUint ();
+          const std::string role = netdev["role"].GetString ();
 
-          confs.push_back (CreateObject<NetdeviceConfiguration> (type, macLayer, networkLayerId));
+          NS_ASSERT_MSG (netdev.HasMember ("bearers"),
+                         "Entity LTE Network Device must have 'bearers' property defined.");
+          NS_ASSERT_MSG (netdev["bearers"].IsArray (),
+                         "Entity LTE Network Device 'bearers' must be an array.");
+
+          const auto bearers = DecodeLteBearerConfigurations (netdev["bearers"].GetArray ());
         }
       else
         {
@@ -109,6 +126,62 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
     }
 
   return confs;
+}
+
+const std::vector<LteBearerConfiguration>
+EntityConfigurationHelper::DecodeLteBearerConfigurations (const JsonArray& jsonArray)
+{
+  auto bearers = std::vector<LteBearerConfiguration> ();
+
+  for (auto& bearerConf : jsonArray)
+    {
+      NS_ASSERT_MSG (bearerConf.HasMember ("type"),
+                     "Entity LTE Bearer configuration must have 'type' property defined.");
+      NS_ASSERT_MSG (bearerConf["type"].IsString (),
+                     "Entity LTE Bearer configuration 'type' must be an array.");
+      NS_ASSERT_MSG (bearerConf.HasMember ("bitrate"),
+                     "Entity LTE Bearer configuration must have 'bitrate' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"].IsObject (),
+                     "Entity LTE Bearer configuration 'bitrate' must be an object.");
+      NS_ASSERT_MSG (bearerConf["bitrate"].HasMember ("guaranteed"),
+                     "Entity LTE Bearer configuration bitrate must have 'guaranteed' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["guaranteed"].IsObject (),
+                     "Entity LTE Bearer configuration 'guaranteed' bitrate must be an object.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["guaranteed"].HasMember ("downlink"),
+                     "Entity LTE Bearer configuration guaranteed bitrate must have 'downlink' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["guaranteed"]["downlink"].IsDouble (),
+                     "Entity LTE Bearer configuration 'downlink' guaranteed bitrate must be an unsigned integer.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["guaranteed"].HasMember ("uplink"),
+                     "Entity LTE Bearer configuration guaranteed bitrate must have 'uplink' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["guaranteed"]["uplink"].IsDouble (),
+                     "Entity LTE Bearer configuration 'uplink' guaranteed bitrate must be an unsigned integer.");
+      NS_ASSERT_MSG (bearerConf["bitrate"].HasMember ("maximum"),
+                     "Entity LTE Bearer configuration bitrate must have 'maximum' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["maximum"].IsObject (),
+                     "Entity LTE Bearer configuration 'maximum' bitrate must be an object.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["maximum"].HasMember ("downlink"),
+                     "Entity LTE Bearer configuration maximum bitrate must have 'downlink' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["maximum"]["downlink"].IsDouble (),
+                     "Entity LTE Bearer configuration 'downlink' maximum bitrate must be an unsigned integer.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["maximum"].HasMember ("uplink"),
+                     "Entity LTE Bearer configuration maximum bitrate must have 'uplink' property defined.");
+      NS_ASSERT_MSG (bearerConf["bitrate"]["maximum"]["uplink"].IsDouble (),
+                     "Entity LTE Bearer configuration 'uplink' maximum bitrate must be an unsigned integer.");
+
+      const std::string type = bearerConf["type"].GetString ();
+      const double gbrDl = bearerConf["bitrate"]["guaranteed"]["downlink"].GetDouble ();
+      const double gbrUl = bearerConf["bitrate"]["guaranteed"]["uplink"].GetDouble ();
+      const double mbrDl = bearerConf["bitrate"]["maximum"]["downlink"].GetDouble ();
+      const double mbrUl = bearerConf["bitrate"]["maximum"]["uplink"].GetDouble ();
+
+      NS_ASSERT_MSG (gbrDl >= 0.0 && gbrUl >= 0.0 && mbrDl >= 0.0 && mbrUl >= 0.0 &&
+                     floor(gbrDl) == gbrDl && floor(gbrUl) == gbrUl && floor(mbrDl) == mbrDl && floor(mbrUl) == mbrUl,
+                     "Bitrate must be a positive integral number.");
+
+      bearers.push_back (LteBearerConfiguration (type, (uint64_t) gbrDl, (uint64_t) gbrUl, (uint64_t) mbrDl, (uint64_t) mbrUl));
+    }
+
+  return bearers;
 }
 
 const ModelConfiguration

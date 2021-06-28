@@ -15,33 +15,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#include "lte-phy-layer-configuration.h"
+
+#include <ns3/abort.h>
 
 namespace ns3 {
 
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
+LtePhyLayerConfiguration::LtePhyLayerConfiguration(std::string phyType,
+                                                   ModelConfiguration channelPropagationLossModel,
+                                                   ModelConfiguration channelSpectrumModel) :
+  PhyLayerConfiguration {phyType},
+  m_channelPropagationLossModel {channelPropagationLossModel},
+  m_channelSpectrumModel {channelSpectrumModel}
 {
 
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration ()
+LtePhyLayerConfiguration::~LtePhyLayerConfiguration()
 {
 
 }
 
-const std::string
-NetdeviceConfiguration::GetType () const
+const ModelConfiguration
+LtePhyLayerConfiguration::GetChannelPropagationLossModel ()
 {
-  return m_type;
+  return m_channelPropagationLossModel;
 }
 
-const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
+const ModelConfiguration
+LtePhyLayerConfiguration::GetChannelSpectrumModel ()
 {
-  return m_networkLayerId;
+  return m_channelSpectrumModel;
 }
 
 } // namespace ns3

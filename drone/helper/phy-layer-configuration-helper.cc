@@ -23,6 +23,7 @@
 #include <ns3/string.h>
 #include <ns3/type-id.h>
 
+#include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/wifi-phy-layer-configuration.h>
 
 namespace ns3 {
@@ -68,12 +69,34 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
       const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
       const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
 
-      return Create<WifiPhyLayerConfiguration> (jsonPhyLayer["type"].GetString (),
+      return Create<WifiPhyLayerConfiguration> (phyType,
                                                 jsonPhyLayer["standard"].GetString (),
                                                 jsonPhyLayer["rxGain"].GetDouble (),
                                                 jsonPhyLayer["mode"].GetString (),
                                                 propagationDelayModel,
                                                 propagationLossModel);
+    }
+  else if (phyType.compare ("lte") == 0)
+    {
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
+                    "PHY Layer definition must have 'channel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
+                    "PHY Layer 'mode' property must be an object.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
+                    "PHY Layer channel definition must have 'propagationLossModel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
+                    "PHY Layer channel 'propagationLossModel' must be an object");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("spectrumModel"),
+                    "PHY Layer channel definition must have 'spectrumModel' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["channel"]["spectrumModel"].IsObject (),
+                    "PHY Layer channel 'spectrumModel' must be an object");
+
+      const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
+      const auto spectrumModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["spectrumModel"]);
+
+      return Create<LtePhyLayerConfiguration> (phyType,
+                                               propagationLossModel,
+                                               spectrumModel);
     }
   else
     {

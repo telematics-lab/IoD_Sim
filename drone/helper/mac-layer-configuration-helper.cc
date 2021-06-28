@@ -49,9 +49,13 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
 
       const auto remoteStationManagerConfiguration = DecodeModelConfiguration (jsonMacLayer["remoteStationManager"]);
 
-      return Create<WifiMacLayerConfiguration> (jsonMacLayer["type"].GetString (),
+      return Create<WifiMacLayerConfiguration> (macType,
                                                 jsonMacLayer["ssid"].GetString (),
                                                 remoteStationManagerConfiguration);
+    }
+  else if (macType.compare ("lte") == 0)
+    {
+      return Create<MacLayerConfiguration> (macType);
     }
   else
     {

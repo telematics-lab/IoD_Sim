@@ -133,9 +133,6 @@ private:
   Ipv4Address m_destAddr;
   uint32_t m_destPort;
 
-  Ipv4Address m_address;
-  Ipv4Mask m_subnetMask;
-
   Ptr<Socket> m_socket;     /// the socket to be used for communications
   mutable EventId m_sendEvent;  /// the event scheduled to send a new packet
 

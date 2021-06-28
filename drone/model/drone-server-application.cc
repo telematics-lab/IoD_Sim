@@ -38,14 +38,6 @@ DroneServerApplication::GetTypeId ()
   static TypeId tid = TypeId ("ns3::DroneServerApplication")
     .SetParent<Application> ()
     .AddConstructor<DroneServerApplication> ()
-    .AddAttribute ("Ipv4Address", "IPv4 Address of this device.",
-                   Ipv4AddressValue (),
-                   MakeIpv4AddressAccessor (&DroneServerApplication::m_address),
-                   MakeIpv4AddressChecker ())
-    .AddAttribute ("Ipv4SubnetMask", "IPv4 Subnet Mask of this device",
-                   Ipv4MaskValue (),
-                   MakeIpv4MaskAccessor (&DroneServerApplication::m_subnetMask),
-                   MakeIpv4MaskChecker ())
     .AddAttribute ("Port", "Listening port.",
                    UintegerValue (80),
                    MakeUintegerAccessor (&DroneServerApplication::m_port),
@@ -213,18 +205,12 @@ DroneServerApplication::SendHelloAck (const Ptr<Socket> socket,
 
   const std::string command = PacketType (PacketType::HELLO_ACK).ToString ();
 
-  std::stringstream ssMyIpv4;
-  ssMyIpv4 << m_address;
-  const std::string myIpv4 = ssMyIpv4.str ();
-
   rapidjson::StringBuffer jsonBuf;
   rapidjson::Writer<rapidjson::StringBuffer> writer (jsonBuf);
 
   writer.StartObject ();
   writer.Key ("cmd");
   writer.String (command.c_str ());
-  writer.Key ("ip");
-  writer.String (myIpv4.c_str ());
   writer.Key ("sn");
   writer.Int (m_sequenceNumber++);
   writer.EndObject ();

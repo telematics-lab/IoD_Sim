@@ -39,14 +39,6 @@ DroneClientApplication::GetTypeId ()
   static TypeId tid = TypeId ("ns3::DroneClientApplication")
     .SetParent<Application> ()
     .AddConstructor<DroneClientApplication> ()
-    .AddAttribute ("Ipv4Address", "IPv4 Address of this device",
-                   Ipv4AddressValue (),
-                   MakeIpv4AddressAccessor (&DroneClientApplication::m_address),
-                   MakeIpv4AddressChecker ())
-    .AddAttribute ("Ipv4SubnetMask", "IPv4 Subnet Mask of this device",
-                   Ipv4MaskValue (),
-                   MakeIpv4MaskAccessor (&DroneClientApplication::m_subnetMask),
-                   MakeIpv4MaskChecker ())
     .AddAttribute ("DestinationIpv4Address", "IPv4 Address of the destination device",
                    Ipv4AddressValue (Ipv4Address::GetBroadcast ()),
                    MakeIpv4AddressAccessor (&DroneClientApplication::m_destAddr),
@@ -273,7 +265,7 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 
           if (PacketType (command) == PacketType::HELLO_ACK && m_state == HELLO_SENT)
             {
-              m_apIp = Ipv4Address (d["ip"].GetString ());
+              m_apIp = senderIpv4;
 
               NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
                            << "] received HELLO_ACK with IP " << m_apIp);

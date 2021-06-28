@@ -15,18 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef NETDEVICE_CONFIGURATION_H
-#define NETDEVICE_CONFIGURATION_H
+#ifndef LTE_BEARER_CONFIGURATION_H
+#define LTE_BEARER_CONFIGURATION_H
 
 #include <ns3/object.h>
-#include "model-configuration.h"
+#include <ns3/epc-tft.h>
+#include <ns3/eps-bearer.h>
 
 namespace ns3 {
 
 /**
- * Data class to recnognize and configure a Network Device for an entity to be simulated.
+ * Data class to store parameters useful at LTE Bearer configuration.
  */
-class NetdeviceConfiguration : public Object
+class LteBearerConfiguration : public Object
 {
 public:
   /**
@@ -37,25 +38,28 @@ public:
    * \param networkLayerId The identifier for the Network Layer that has been defined for this simulation.
    *                       It must be compatible with the given type and macLayer.
    */
-  NetdeviceConfiguration (const std::string type,
-                          const uint32_t networkLayerId);
+  LteBearerConfiguration (const std::string type,
+                          const uint64_t gbrDl,
+                          const uint64_t gbrUl,
+                          const uint64_t mbrDl,
+                          const uint64_t mbrUl);
   /** Default destructor */
-  ~NetdeviceConfiguration ();
+  ~LteBearerConfiguration ();
 
   /**
    * \return The type of the Network Device.
    */
-  const std::string GetType () const;
+  const EpsBearer::Qci GetType () const;
   /**
    * \return The reference network layer identifier.
    */
-  virtual const uint32_t GetNetworkLayerId () const;
+  const GbrQosInformation GetQos () const;
 
 private:
-  const std::string m_type;
-  const uint32_t m_networkLayerId;
+  const EpsBearer::Qci m_type;
+  const GbrQosInformation m_qos;
 };
 
 } // namespace ns3
 
-#endif /* NETDEVICE_CONFIGURATION_H */
+#endif /* LTE_BEARER_CONFIGURATION_H */

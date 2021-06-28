@@ -15,33 +15,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#ifndef LTE_SETUP_HELPER_H
+#define LTE_SETUP_HELPER_H
+
+#include <ns3/lte-helper.h>
 
 namespace ns3 {
 
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
-{
+/**
+ * Helper to enhance ns-3 LteHelper functionalities with additional
+ * features, without modifying objects external to IoD_Sim.
+ */
+class LteSetupHelper {
+public:
+  /**
+   * Create an eNodeB device (LteEnbNetDevice) on the given node.
+   * \param n the node where the device is to be installed
+   * \return pointer to the created device
+   */
+  static Ptr<NetDevice> InstallSingleEnbDevice (Ptr<LteHelper> helper, Ptr<Node> n);
+
+private:
+  LteSetupHelper ();
+};
 
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration ()
-{
-
-}
-
-const std::string
-NetdeviceConfiguration::GetType () const
-{
-  return m_type;
-}
-
-const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
-{
-  return m_networkLayerId;
-}
-
-} // namespace ns3
+#endif /* LTE_SETUP_HELPER_H */

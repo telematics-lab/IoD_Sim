@@ -15,33 +15,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#include "lte-phy-simulation-helper.h"
 
 namespace ns3 {
 
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
+LtePhySimulationHelper::LtePhySimulationHelper () :
+  m_lte {CreateObject<LteHelper> ()},
+  m_epc {CreateObject<PointToPointEpcHelper> ()}
+{
+  m_lte->SetEpcHelper(m_epc);
+}
+
+LtePhySimulationHelper::~LtePhySimulationHelper ()
 {
 
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration ()
+Ptr<LteHelper>
+LtePhySimulationHelper::GetLteHelper ()
 {
-
+  return m_lte;
 }
 
-const std::string
-NetdeviceConfiguration::GetType () const
+Ptr<PointToPointEpcHelper>
+LtePhySimulationHelper::GetEpcHelper ()
 {
-  return m_type;
-}
-
-const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
-{
-  return m_networkLayerId;
+  return m_epc;
 }
 
 } // namespace ns3

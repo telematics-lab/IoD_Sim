@@ -19,6 +19,10 @@
 #include <vector>
 // NS3 Core Components
 #include <ns3/config.h>
+#include <ns3/csma-module.h>
+#include <ns3/internet-module.h>
+#include <ns3/ipv4-address-helper.h>
+#include <ns3/ipv4-static-routing-helper.h>
 #include <ns3/log.h>
 #include <ns3/mobility-helper.h>
 #include <ns3/object-factory.h>
@@ -40,8 +44,13 @@
 #include <ns3/input-peripheral.h>
 #include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/ipv4-simulation-helper.h>
+#include <ns3/lte-netdevice-configuration.h>
+#include <ns3/lte-phy-layer-configuration.h>
+#include <ns3/lte-phy-simulation-helper.h>
+#include <ns3/lte-setup-helper.h>
 #include <ns3/mobility-factory-helper.h>
 #include <ns3/scenario-configuration-helper.h>
+#include <ns3/wifi-netdevice-configuration.h>
 #include <ns3/wifi-mac-factory-helper.h>
 #include <ns3/wifi-mac-layer-configuration.h>
 #include <ns3/wifi-mac-simulation-helper.h>
@@ -76,34 +85,39 @@ private:
   void ConfigureEntityMobility (const std::string& entityKey,
                                 Ptr<EntityConfiguration> entityConf,
                                 const uint32_t entityId);
-  void ConfigureEntityMechanics (const std::string& entityKey,
-                                   Ptr<EntityConfiguration> entityConf,
-                                   const uint32_t entityId);
-  Ptr<EnergySource> ConfigureEntityBattery (const std::string& entityKey,
-                                   Ptr<EntityConfiguration> entityConf,
-                                   const uint32_t entityId);
   NetDeviceContainer ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
                                                Ptr<Node> entityNode,
                                                const uint32_t entityId,
                                                const uint32_t deviceId,
                                                const uint32_t netId);
+  void ConfigureLteEnb (Ptr<Node> entityNode, const uint32_t netId);
+  void ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfiguration> bearers, const uint32_t netId);
   Ipv4Address ConfigureEntityIpv4Network (Ptr<Node> entityNode,
                                           NetDeviceContainer devContainer,
                                           const uint32_t deviceId,
                                           const uint32_t netId);
   void ConfigureEntityApplications (const std::string& entityKey,
+                                    const Ptr<EntityConfiguration>& conf,
                                     const uint32_t& entityId,
                                     const uint32_t& deviceId,
-                                    const uint32_t& netId,
-                                    const Ipv4Address& deviceAddress,
-                                    const Ptr<EntityConfiguration>& conf);
+                                    const uint32_t& netId);
+  void ConfigureEntityMechanics (const std::string& entityKey,
+                                 Ptr<EntityConfiguration> entityConf,
+                                 const uint32_t entityId);
+  Ptr<EnergySource> ConfigureEntityBattery (const std::string& entityKey,
+                                            Ptr<EntityConfiguration> entityConf,
+                                            const uint32_t entityId);
   void ConfigureEntityPeripherals (const std::string& entityKey,
-                                    const Ptr<EntityConfiguration>& conf,
-                                    const uint32_t& entityId);
+                                   const Ptr<EntityConfiguration>& conf,
+                                   const uint32_t& entityId);
+  void ConfigureInternetRemotes ();
+  void ConfigureInternetBackbone ();
   void ConfigureSimulator ();
 
   DroneContainer m_drones;
   NodeContainer m_zsps;
+  NodeContainer m_remoteNodes;
+  NodeContainer m_backbone;
 
   std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
 };
@@ -116,6 +130,7 @@ Scenario::Scenario (int argc, char **argv)
 
   m_drones.Create (CONFIGURATOR->GetDronesN ());
   m_zsps.Create (CONFIGURATOR->GetZspsN ());
+  m_remoteNodes.Create(CONFIGURATOR->GetRemotesN ());
 
   // Register created Drones and ZSPs in /DroneList/ and /ZspList/ respectively
   for (auto drone = m_drones.Begin (); drone != m_drones.End (); drone++)
@@ -179,6 +194,27 @@ Scenario::ConfigurePhy ()
 
           m_protocolStacks[PHY_LAYER].push_back (wifiSim);
         }
+      else if (phyLayerConf->GetType ().compare("lte") == 0)
+        {
+          auto lteSim = CreateObject<LtePhySimulationHelper> ();
+          auto lteConf = StaticCast<LtePhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
+          auto lteHelper = lteSim->GetLteHelper();
+
+          auto pathlossConf = lteConf->GetChannelPropagationLossModel ();
+          lteHelper->SetAttribute ("PathlossModel", StringValue (pathlossConf.GetName ()));
+          for (auto& attr : pathlossConf.GetAttributes ())
+            lteHelper->SetPathlossModelAttribute (attr.first, *(attr.second));
+
+          auto spectrumConf = lteConf->GetChannelSpectrumModel ();
+          lteHelper->SetSpectrumChannelType (spectrumConf.GetName ());
+          for (auto& attr : spectrumConf.GetAttributes ())
+            lteHelper->SetSpectrumChannelAttribute (attr.first, *(attr.second));
+
+          // FIXME: What should be the method of adding a gateway to the Internet?
+          m_backbone.Add (lteSim->GetEpcHelper ()->GetPgwNode ());
+
+          m_protocolStacks[PHY_LAYER].push_back (lteSim);
+        }
       else
         {
           NS_FATAL_ERROR ("Unsupported PHY Layer Type: " << phyLayerConf->GetType ());
@@ -206,9 +242,15 @@ Scenario::ConfigureMac ()
           Ssid ssid = Ssid (wifiConf->GetSsid ());
 
           WifiMacFactoryHelper::SetRemoteStationManager (*(wifiPhy->GetWifiHelper ()),
-                                                        wifiConf->GetRemoteStationManagerConfiguration ());
+                                                         wifiConf->GetRemoteStationManagerConfiguration ());
 
           m_protocolStacks[MAC_LAYER].push_back (wifiMac);
+        }
+      else if (macLayerConf->GetType ().compare ("lte") == 0)
+        {
+          // NO OPERATION NEEDED HERE
+          const auto lteMac = CreateObject<Object> ();
+          m_protocolStacks[MAC_LAYER].push_back(lteMac);
         }
       else
         {
@@ -233,7 +275,7 @@ Scenario::ConfigureNetwork ()
           const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask ());
 
           ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
-                                            Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
+                                             Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
 
           m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
         }
@@ -255,36 +297,76 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
   for (auto& entityConf : entityConfs) {
     size_t deviceId = 0;
 
+    auto entityNode = nodes.Get (entityId);
+    ConfigureEntityMobility (entityKey, entityConf, entityId);
+
     for (auto& entityNetDev : entityConf->GetNetDevices ())
       {
+        const auto netId = entityNetDev->GetNetworkLayerId ();
+
         if (entityNetDev->GetType ().compare("wifi") == 0)
           {
-            const auto netId = entityNetDev->GetNetworkLayerId ();
-            auto entityNode = nodes.Get (entityId);
             auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
-            auto assignedIpv4 = ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
-            ConfigureEntityMobility (entityKey, entityConf, entityId);
-            ConfigureEntityApplications (entityKey, entityId, deviceId, netId, assignedIpv4, entityConf);
-            if (entityKey.compare("drones") == 0)
-            {
-              ConfigureEntityMechanics(entityKey, entityConf, entityId);
-              auto energySource = ConfigureEntityBattery(entityKey, entityConf, entityId);
-              /// Installing Energy Model on Drone
-              DroneEnergyModelHelper energyModel;
-              energyModel.Install(m_drones.Get(entityId), energySource);
-              ConfigureEntityPeripherals(entityKey, entityConf, entityId);
-            }
+            ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
+          }
+        else if (entityNetDev->GetType ().compare("lte") == 0)
+          {
+            const auto entityLteDevConf = StaticCast<LteNetdeviceConfiguration, NetdeviceConfiguration> (entityNetDev);
+            const auto role = entityLteDevConf->GetRole ();
+
+            switch (role)
+              {
+              case eNB:
+                ConfigureLteEnb (entityNode, netId);
+                break;
+              case UE:
+                ConfigureLteUe (entityNode, entityLteDevConf->GetBearers (), netId);
+                break;
+              default:
+                NS_FATAL_ERROR ("Unrecognized LTE role for entity ID " << entityId);
+              }
           }
         else
           {
             NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
           }
 
+        ConfigureEntityApplications (entityKey, entityConf, entityId, deviceId, netId);
+
         deviceId++;
       }
 
+      if (entityKey.compare("drones") == 0)
+        {
+          DroneEnergyModelHelper energyModel;
+          Ptr<EnergySource> energySource;
+
+          ConfigureEntityMechanics (entityKey, entityConf, entityId);
+          energySource = ConfigureEntityBattery (entityKey, entityConf, entityId);
+          /// Installing Energy Model on Drone
+          energyModel.Install (StaticCast<Drone, Node> (entityNode), energySource);
+          ConfigureEntityPeripherals (entityKey, entityConf, entityId);
+        }
+
     entityId++;
   }
+}
+
+void
+Scenario::ConfigureEntityMobility (const std::string& entityKey,
+                                   Ptr<EntityConfiguration> entityConf,
+                                   const uint32_t entityId)
+{
+  NS_LOG_FUNCTION (entityKey << entityConf << entityId);
+
+  MobilityHelper mobility;
+  const auto mobilityType = entityConf->GetMobilityModel ().GetName (); // Configure Entity Mobility
+  MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
+
+  if (entityKey.compare ("drones") == 0)
+    mobility.Install (m_drones.Get (entityId));
+  else if (entityKey.compare ("ZSPs") == 0)
+    mobility.Install (m_zsps.Get (entityId));
 }
 
 NetDeviceContainer
@@ -298,10 +380,11 @@ Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
 
   auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
   auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][netId]);
+  auto wifiNetDev = StaticCast<WifiNetdeviceConfiguration, NetdeviceConfiguration> (entityNetDev);
 
-  wifiMac->GetMacHelper ().SetType (entityNetDev->GetMacLayer ().GetName (),
-                                    entityNetDev->GetMacLayer ().GetAttributes ()[0].first,
-                                    *entityNetDev->GetMacLayer ().GetAttributes ()[0].second);
+  wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName (),
+                                    wifiNetDev->GetMacLayer ().GetAttributes ()[0].first,
+                                    *wifiNetDev->GetMacLayer ().GetAttributes ()[0].second);
 
   NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ()->Install (*wifiPhy->GetWifiPhyHelper (),
                                                                         wifiMac->GetMacHelper (),
@@ -323,6 +406,46 @@ Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
   return devContainer;
 }
 
+void
+Scenario::ConfigureLteEnb (Ptr<Node> entityNode, const uint32_t netId)
+{
+  // NOTICE: no checks are made for backbone/netid combination that do not represent an LTE backbone!
+  static std::vector<NodeContainer> backbonePerStack (m_protocolStacks[PHY_LAYER].size ());
+  auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
+
+  LteSetupHelper::InstallSingleEnbDevice(ltePhy->GetLteHelper (), entityNode);
+  for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin (); eNB != backbonePerStack[netId].End (); eNB++)
+    ltePhy->GetLteHelper ()->AddX2Interface (entityNode, *eNB);
+  backbonePerStack[netId].Add (entityNode);
+}
+
+void
+Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfiguration> bearers, const uint32_t netId)
+{
+  // NOTICE: no checks are made for ue/netid combination that do not represent an LTE backbone!
+  static std::vector<NodeContainer> uePerStack (m_protocolStacks[PHY_LAYER].size ());
+  auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
+  Ipv4StaticRoutingHelper routingHelper;
+
+  auto dev = LteSetupHelper::InstallSingleEnbDevice (ltePhy->GetLteHelper (), entityNode);
+  // Register UEs into network 7.0.0.0/8
+  // unfortunately this is hardwired into EpcHelper implementation
+  ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
+  // create a static route for each UE to the SGW/PGW in order to communicate
+  // with the internet
+  // FIXME: this routing instruction should be put in ::ConfigureEntityApplications (...)
+  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (entityNode->GetObject<Ipv4> ());
+  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), 1);
+  // auto attach each drone UE to the eNB with the strongest signal
+  ltePhy->GetLteHelper ()->Attach (dev);
+  // init bearers on UE
+  for (auto& bearerConf : bearers)
+    {
+      EpsBearer bearer (bearerConf.GetType (), bearerConf.GetQos ());
+      ltePhy->GetLteHelper ()->ActivateDedicatedEpsBearer (dev, bearer, EpcTft::Default ());
+    }
+}
+
 Ipv4Address
 Scenario::ConfigureEntityIpv4Network (Ptr<Node> entityNode,
                                       NetDeviceContainer devContainer,
@@ -340,31 +463,13 @@ Scenario::ConfigureEntityIpv4Network (Ptr<Node> entityNode,
 }
 
 void
-Scenario::ConfigureEntityMobility (const std::string& entityKey,
-                                   Ptr<EntityConfiguration> entityConf,
-                                   const uint32_t entityId)
-{
-  NS_LOG_FUNCTION (entityKey << entityConf << entityId);
-
-  MobilityHelper mobility;
-  const auto mobilityType = entityConf->GetMobilityModel ().GetName (); // Configure Entity Mobility
-  MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
-
-  if (entityKey.compare ("drones") == 0)
-    mobility.Install (m_drones.Get (entityId));
-  else if (entityKey.compare ("ZSPs") == 0)
-    mobility.Install (m_zsps.Get (entityId));
-}
-
-void
 Scenario::ConfigureEntityApplications (const std::string& entityKey,
+                                       const Ptr<EntityConfiguration>& conf,
                                        const uint32_t& entityId,
                                        const uint32_t& deviceId,
-                                       const uint32_t& netId,
-                                       const Ipv4Address& deviceAddress,
-                                       const Ptr<EntityConfiguration>& conf)
+                                       const uint32_t& netId)
 {
-  NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << deviceAddress << conf);
+  NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << conf);
 
   for (auto appConf : conf->GetApplications ())
     {
@@ -373,9 +478,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
         {
           auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
           const auto ipMask = ipv4Conf->GetMask ();
-          auto app = CreateObjectWithAttributes<DroneClientApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                                        "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()),
-                                                                        "Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+          auto app = CreateObjectWithAttributes<DroneClientApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);
@@ -390,8 +493,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
         {
           auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
           const auto ipMask = ipv4Conf->GetMask ();
-          auto app = CreateObjectWithAttributes<DroneServerApplication>("Ipv4Address", Ipv4AddressValue (deviceAddress),
-                                                                        "Ipv4SubnetMask", Ipv4MaskValue (ipMask.c_str ()));
+          auto app = CreateObjectWithAttributes<DroneServerApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);
@@ -458,14 +560,77 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
 }
 
 void
+Scenario::ConfigureInternetRemotes ()
+{
+  for (NodeContainer::Iterator remote = m_remoteNodes.Begin (); remote != m_remoteNodes.End (); remote++)
+    {
+      auto serverApp = CreateObjectWithAttributes<DroneServerApplication> (
+        "StartTime", TimeValue (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0))),
+        "StopTime", TimeValue (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0))));
+      (*remote)->AddApplication (serverApp);
+
+      // Install DroneServer Application on the first remote only
+      break;
+    }
+
+  return;
+}
+
+void
+Scenario::ConfigureInternetBackbone ()
+{
+  // setup a CSMA LAN between all the remotes and network gateways in the backbone
+  CsmaHelper csma;
+  //csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
+  //csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
+  NetDeviceContainer backboneDevs = csma.Install (m_backbone);
+
+  // set a new address base for the backbone
+  Ipv4AddressHelper ipv4H;
+  ipv4H.SetBase (Ipv4Address ("200.0.0.0"), Ipv4Mask ("255.0.0.0"));
+  ipv4H.Assign (backboneDevs);
+
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+
+  // create static routes between each remote node to each network gateway
+  InternetStackHelper internetHelper;
+  Ipv4StaticRoutingHelper routingHelper;
+  internetHelper.SetRoutingHelper (routingHelper);
+  for (uint32_t i = 0; i < m_remoteNodes.GetN (); i++)
+    {
+      Ptr<Node> remoteNode = m_backbone.Get (i);
+      for (uint32_t j = m_remoteNodes.GetN (); j < m_backbone.GetN (); j++)
+        {
+          Ptr<Node> netGwNode = m_backbone.Get (j);
+          uint32_t netGwBackboneDevIndex = netGwNode->GetNDevices () - 1;
+
+          // since network gateway have at least 2 ipv4 addresses (one in the network and the other for the backbone)
+          // we should create a route to the internal ip using the backbone ip as next hop
+          Ipv4Address netGwBackboneIpv4 = netGwNode->GetObject<Ipv4> ()
+                                            ->GetAddress (netGwBackboneDevIndex, 0).GetLocal ();
+          Ipv4Address netGwInternalIpv4 = netGwNode->GetObject<Ipv4> ()
+                                            ->GetAddress (1, 0).GetLocal ();
+
+          NS_LOG_LOGIC ("Setting-up static route: REMOTE " << i << " "
+                        << "(" << remoteNode->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal () << ") "
+                        << "-> NETWORK " << j - m_remoteNodes.GetN () << " "
+                        << "(" << netGwBackboneIpv4 << " -> " << netGwInternalIpv4 << ")");
+
+          Ptr<Ipv4StaticRouting> staticRouteRem = routingHelper.GetStaticRouting (remoteNode->GetObject<Ipv4> ());
+          staticRouteRem->AddNetworkRouteTo (netGwInternalIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
+        }
+    }
+}
+
+void
 Scenario::ConfigureSimulator ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
   // Enable Report
-  Report::Get ()->Initialize (CONFIGURATOR->GetName (),
-                              CONFIGURATOR->GetCurrentDateTime (),
-                              CONFIGURATOR->GetResultsPath ());
+  // Report::Get ()->Initialize (CONFIGURATOR->GetName (),
+  //                             CONFIGURATOR->GetCurrentDateTime (),
+  //                             CONFIGURATOR->GetResultsPath ());
 
   Simulator::Stop (Seconds (CONFIGURATOR->GetDuration ()));
 }
@@ -482,7 +647,7 @@ Scenario::operator() ()
 
   Simulator::Run ();
   // Report Module needs the simulator context alive to introspect it
-  Report::Get ()->Save ();
+  //Report::Get ()->Save ();
   Simulator::Destroy ();
 }
 
