@@ -78,6 +78,7 @@ public:
 
 private:
   void ApplyStaticConfig ();
+  void ConfigureWorld ();
   void ConfigurePhy ();
   void ConfigureMac ();
   void ConfigureNetwork ();
@@ -160,6 +161,14 @@ Scenario::ApplyStaticConfig ()
   const auto staticConfig = CONFIGURATOR->GetStaticConfig ();
   for (auto& param : staticConfig)
       Config::SetDefault (param.first, StringValue (param.second));
+}
+
+void
+Scenario::ConfigureWorld ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  CONFIGURATOR->GetBuildings (); // buildings created here are automatically added to BuildingsList
 }
 
 void
