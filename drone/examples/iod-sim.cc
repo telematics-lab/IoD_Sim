@@ -113,6 +113,7 @@ private:
                                    const uint32_t& entityId);
   void ConfigureInternetRemotes ();
   void ConfigureInternetBackbone ();
+  void EnablePhyLteTraces ();
   void ConfigureSimulator ();
 
   DroneContainer m_drones;
@@ -146,6 +147,7 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureNetwork ();
   ConfigureEntities ("drones", m_drones);
   ConfigureEntities ("ZSPs", m_zsps);
+  EnablePhyLteTraces ();
   ConfigureSimulator ();
 }
 
@@ -230,6 +232,89 @@ Scenario::ConfigurePhy ()
         }
 
       phyId++;
+    }
+}
+
+void
+Scenario::EnablePhyLteTraces ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  // FIXME: lteHelper->EnableTraces() throws SIGIOT.
+  return;
+
+  for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
+    {
+      auto obj = m_protocolStacks[PHY_LAYER][phyId];
+
+      if (typeid(*obj) == typeid(LtePhySimulationHelper))
+        {
+          auto phy = StaticCast<LtePhySimulationHelper, Object> (obj);
+          auto lteHelper = phy->GetLteHelper ();
+
+          /* LteHelperQuirk:
+           *  This class is an hack to allow access to private members of LteHelper class,
+           *  in particular to the StatsCalculators in order to set their output path.
+           *  A structurally identical class is defined with all attributes set to public,
+           *  then with a reinterpret_cast we interpret the LteHelper as this new class
+           *  so the compiler won't complain about accessing its private members.
+           */
+          class LteHelperQuirk : public Object
+          {
+          public:
+            Ptr<SpectrumChannel> dlC, ulC;
+            Ptr<Object>  dlPlM, ulPlM;
+            ObjectFactory a, b, c, d, e, f, g, h, i, j, k;
+            std::string fMT;
+            ObjectFactory fMF;
+            Ptr<SpectrumPropagationLossModel> fM;
+            bool fSA;
+            Ptr<PhyStatsCalculator> phyStat;
+            Ptr<PhyTxStatsCalculator> phyTxStat;
+            Ptr<PhyRxStatsCalculator> phyRxStat;
+            Ptr<MacStatsCalculator> macStat;
+            Ptr<RadioBearerStatsCalculator> rlcStat;
+            Ptr<RadioBearerStatsCalculator> pdcpStat;
+            RadioBearerStatsConnector radioBearerStatsConnector;
+            Ptr<EpcHelper> m_epcHelper;
+            uint64_t m_imsiCounter;
+            uint16_t m_cellIdCounter;
+            bool l, m, n, o;
+            std::map< uint8_t, ComponentCarrier > m_componentCarrierPhyParams;
+            uint16_t m_noOfCcs;
+          };
+
+          std::stringstream basePath;
+
+          basePath << CONFIGURATOR->GetResultsPath () << "lte-" << phyId << "-";
+          lteHelper->EnableTraces (); // SIGIOT!!!
+          // To make sure all nodes are
+          // traced, traces should be enabled once all UEs and eNodeBs are in place and
+          // connected, just before starting the simulation.
+
+          auto rlcStat = lteHelper->GetRlcStats ();
+          rlcStat->SetDlOutputFilename (basePath.str () + "RlcDlStats.txt");
+          rlcStat->SetUlOutputFilename (basePath.str () + "RlcUlStats.txt");
+
+          auto pdcpStat = lteHelper->GetPdcpStats ();
+          pdcpStat->SetDlOutputFilename (basePath.str () + "PdcpDlStats.txt");
+          pdcpStat->SetUlOutputFilename (basePath.str () + "PdcpUlStats.txt");
+
+          auto lteHelperQ = reinterpret_cast<LteHelperQuirk*> (&(*lteHelper));
+
+          lteHelperQ->phyStat->SetUeSinrFilename (basePath.str () + "PhySinrUlStats.txt");
+          lteHelperQ->phyStat->SetInterferenceFilename (basePath.str () + "PhyInterferenceUlStats.txt");
+          lteHelperQ->phyStat->SetCurrentCellRsrpSinrFilename (basePath.str () + "PhyRsrpSinrDlStats.txt");
+
+          lteHelperQ->phyRxStat->SetDlRxOutputFilename (basePath.str () + "PhyRxDlStats.txt");
+          lteHelperQ->phyRxStat->SetUlRxOutputFilename (basePath.str () + "PhyRxUlStats.txt");
+
+          lteHelperQ->phyTxStat->SetDlTxOutputFilename (basePath.str () + "PhyTxDlStats.txt");
+          lteHelperQ->phyTxStat->SetUlTxOutputFilename (basePath.str () + "PhyTxUlStats.txt");
+
+          lteHelperQ->macStat->SetDlOutputFilename (basePath.str () + "MacDlStats.txt");
+          lteHelperQ->macStat->SetUlOutputFilename (basePath.str () + "MacUlStats.txt");
+        }
     }
 }
 
