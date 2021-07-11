@@ -58,6 +58,10 @@
 #include <ns3/wifi-phy-layer-configuration.h>
 #include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/zsp-list.h>
+//temp
+#include <ns3/node-list.h>
+
+#include <ns3/debug-helper.h>
 
 namespace ns3 {
 
@@ -93,15 +97,15 @@ private:
                                                const uint32_t netId);
   void ConfigureLteEnb (Ptr<Node> entityNode, const uint32_t netId);
   void ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfiguration> bearers, const uint32_t netId);
-  Ipv4Address ConfigureEntityIpv4Network (Ptr<Node> entityNode,
-                                          NetDeviceContainer devContainer,
-                                          const uint32_t deviceId,
-                                          const uint32_t netId);
+  void InstallEntityIpv4 (Ptr<Node> entityNode, NetDeviceContainer netDevices, const uint32_t netId);
+  void InstallEntityIpv4 (Ptr<Node> entityNode, Ptr<NetDevice> netDevice, const uint32_t netId);
+  void ConfigureEntityIpv4 (Ptr<Node> entityNode,
+                            NetDeviceContainer devContainer,
+                            const uint32_t deviceId,
+                            const uint32_t netId);
   void ConfigureEntityApplications (const std::string& entityKey,
                                     const Ptr<EntityConfiguration>& conf,
-                                    const uint32_t& entityId,
-                                    const uint32_t& deviceId,
-                                    const uint32_t& netId);
+                                    const uint32_t& entityId);
   void ConfigureEntityMechanics (const std::string& entityKey,
                                  Ptr<EntityConfiguration> entityConf,
                                  const uint32_t entityId);
@@ -133,6 +137,7 @@ Scenario::Scenario (int argc, char **argv)
   m_drones.Create (CONFIGURATOR->GetDronesN ());
   m_zsps.Create (CONFIGURATOR->GetZspsN ());
   m_remoteNodes.Create(CONFIGURATOR->GetRemotesN ());
+  m_backbone.Add (m_remoteNodes);
 
   // Register created Drones and ZSPs in /DroneList/ and /ZspList/ respectively
   for (auto drone = m_drones.Begin (); drone != m_drones.End (); drone++)
@@ -147,7 +152,12 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureNetwork ();
   ConfigureEntities ("drones", m_drones);
   ConfigureEntities ("ZSPs", m_zsps);
+  ConfigureInternetBackbone ();
+  ConfigureInternetRemotes ();
   EnablePhyLteTraces ();
+
+  DebugHelper::ProbeNodes ();
+
   ConfigureSimulator ();
 }
 
@@ -211,6 +221,8 @@ Scenario::ConfigurePhy ()
           auto lteConf = StaticCast<LtePhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
           auto lteHelper = lteSim->GetLteHelper();
 
+          lteHelper->Initialize ();
+
           auto pathlossConf = lteConf->GetChannelPropagationLossModel ();
           lteHelper->SetAttribute ("PathlossModel", StringValue (pathlossConf.GetName ()));
           for (auto& attr : pathlossConf.GetAttributes ())
@@ -240,18 +252,12 @@ Scenario::EnablePhyLteTraces ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  // FIXME: lteHelper->EnableTraces() throws SIGIOT.
-  return;
-
   for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
     {
       auto obj = m_protocolStacks[PHY_LAYER][phyId];
 
       if (typeid(*obj) == typeid(LtePhySimulationHelper))
         {
-          auto phy = StaticCast<LtePhySimulationHelper, Object> (obj);
-          auto lteHelper = phy->GetLteHelper ();
-
           /* LteHelperQuirk:
            *  This class is an hack to allow access to private members of LteHelper class,
            *  in particular to the StatsCalculators in order to set their output path.
@@ -284,13 +290,13 @@ Scenario::EnablePhyLteTraces ()
             uint16_t m_noOfCcs;
           };
 
+          auto phy = StaticCast<LtePhySimulationHelper, Object> (obj);
+          auto lteHelper = phy->GetLteHelper ();
           std::stringstream basePath;
 
           basePath << CONFIGURATOR->GetResultsPath () << "lte-" << phyId << "-";
-          lteHelper->EnableTraces (); // SIGIOT!!!
-          // To make sure all nodes are
-          // traced, traces should be enabled once all UEs and eNodeBs are in place and
-          // connected, just before starting the simulation.
+
+          lteHelper->EnableTraces ();
 
           auto rlcStat = lteHelper->GetRlcStats ();
           rlcStat->SetDlOutputFilename (basePath.str () + "RlcDlStats.txt");
@@ -343,8 +349,7 @@ Scenario::ConfigureMac ()
       else if (macLayerConf->GetType ().compare ("lte") == 0)
         {
           // NO OPERATION NEEDED HERE
-          const auto lteMac = CreateObject<Object> ();
-          m_protocolStacks[MAC_LAYER].push_back(lteMac);
+          m_protocolStacks[MAC_LAYER].push_back (nullptr);
         }
       else
         {
@@ -401,7 +406,8 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
         if (entityNetDev->GetType ().compare("wifi") == 0)
           {
             auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
-            ConfigureEntityIpv4Network (entityNode, devContainer, deviceId, netId);
+            InstallEntityIpv4 (entityNode, devContainer, netId);
+            ConfigureEntityIpv4 (entityNode, devContainer, deviceId, netId);
           }
         else if (entityNetDev->GetType ().compare("lte") == 0)
           {
@@ -425,10 +431,11 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
             NS_FATAL_ERROR ("Unsupported Drone Network Device Type: " << entityNetDev->GetType ());
           }
 
-        ConfigureEntityApplications (entityKey, entityConf, entityId, deviceId, netId);
 
         deviceId++;
       }
+
+      ConfigureEntityApplications (entityKey, entityConf, entityId);
 
       if (entityKey.compare("drones") == 0)
         {
@@ -490,11 +497,11 @@ Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
   AsciiTraceHelper  ascii;
 
   // Configure WiFi TXT PHY Logging
-  phyTraceLog << CONFIGURATOR->GetResultsPath () << "-phy-" << netId << "-host-" << entityId << "-" << deviceId << ".log";
+  phyTraceLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-host-" << entityId << "-" << deviceId << ".log";
   wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityId, deviceId);
 
   // Configure WiFi PCAP Logging
-  pcapLog << CONFIGURATOR->GetResultsPath () << "-phy-" << netId << "-host";
+  pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-host";
   wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityId, deviceId);
 
   return devContainer;
@@ -521,7 +528,10 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
   Ipv4StaticRoutingHelper routingHelper;
 
-  auto dev = LteSetupHelper::InstallSingleEnbDevice (ltePhy->GetLteHelper (), entityNode);
+  auto dev = LteSetupHelper::InstallSingleUeDevice (ltePhy->GetLteHelper (), entityNode);
+
+  // Install network layer in order to proceed with IPv4 LTE configuration
+  InstallEntityIpv4 (entityNode, dev, netId);
   // Register UEs into network 7.0.0.0/8
   // unfortunately this is hardwired into EpcHelper implementation
   ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
@@ -540,38 +550,61 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
     }
 }
 
-Ipv4Address
-Scenario::ConfigureEntityIpv4Network (Ptr<Node> entityNode,
-                                      NetDeviceContainer devContainer,
-                                      const uint32_t deviceId,
-                                      const uint32_t netId)
+void
+Scenario::InstallEntityIpv4 (Ptr<Node> entityNode,
+                             NetDeviceContainer netDevices,
+                             const uint32_t netId)
+{
+  NS_LOG_FUNCTION (entityNode << netId);
+
+  for (NetDeviceContainer::Iterator i = netDevices.Begin (); i != netDevices.End (); i++)
+    InstallEntityIpv4 (entityNode, *i, netId);
+}
+
+void
+Scenario::InstallEntityIpv4 (Ptr<Node> entityNode,
+                             Ptr<NetDevice> netDevice,
+                             const uint32_t netId)
+{
+  NS_LOG_FUNCTION (entityNode << netId);
+
+  auto ipv4Obj = entityNode->GetObject<Ipv4> ();
+
+  if (ipv4Obj == nullptr)
+    {
+      auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
+      netLayer->GetInternetHelper ().Install (entityNode);
+    }
+  else
+    {
+      ipv4Obj->AddInterface (netDevice);
+    }
+}
+
+void
+Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
+                               NetDeviceContainer devContainer,
+                               const uint32_t deviceId,
+                               const uint32_t netId)
 {
   NS_LOG_FUNCTION (entityNode << deviceId << netId);
 
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
-
-  netLayer->GetInternetHelper ().Install (entityNode);
   auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
-
-  return assignedIPs.GetAddress (deviceId, 0);
 }
 
 void
 Scenario::ConfigureEntityApplications (const std::string& entityKey,
                                        const Ptr<EntityConfiguration>& conf,
-                                       const uint32_t& entityId,
-                                       const uint32_t& deviceId,
-                                       const uint32_t& netId)
+                                       const uint32_t& entityId)
 {
-  NS_LOG_FUNCTION (entityKey << entityId << deviceId << netId << conf);
+  NS_LOG_FUNCTION (entityKey << conf << entityId);
 
   for (auto appConf : conf->GetApplications ())
     {
       const auto appName = appConf.GetName ();
       if (appName.compare("ns3::DroneClientApplication") == 0)
         {
-          auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
-          const auto ipMask = ipv4Conf->GetMask ();
           auto app = CreateObjectWithAttributes<DroneClientApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
@@ -585,8 +618,6 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
         }
       else if (appName.compare("ns3::DroneServerApplication") == 0)
         {
-          auto ipv4Conf = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
-          const auto ipMask = ipv4Conf->GetMask ();
           auto app = CreateObjectWithAttributes<DroneServerApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
@@ -656,6 +687,8 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
 void
 Scenario::ConfigureInternetRemotes ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
+
   for (NodeContainer::Iterator remote = m_remoteNodes.Begin (); remote != m_remoteNodes.End (); remote++)
     {
       auto serverApp = CreateObjectWithAttributes<DroneServerApplication> (
@@ -673,6 +706,13 @@ Scenario::ConfigureInternetRemotes ()
 void
 Scenario::ConfigureInternetBackbone ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
+
+  InternetStackHelper internetHelper;
+  Ipv4StaticRoutingHelper routingHelper;
+
+  internetHelper.Install (m_remoteNodes);
+
   // setup a CSMA LAN between all the remotes and network gateways in the backbone
   CsmaHelper csma;
   //csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
@@ -687,9 +727,8 @@ Scenario::ConfigureInternetBackbone ()
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   // create static routes between each remote node to each network gateway
-  InternetStackHelper internetHelper;
-  Ipv4StaticRoutingHelper routingHelper;
   internetHelper.SetRoutingHelper (routingHelper);
+
   for (uint32_t i = 0; i < m_remoteNodes.GetN (); i++)
     {
       Ptr<Node> remoteNode = m_backbone.Get (i);

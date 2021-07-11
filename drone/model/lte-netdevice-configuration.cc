@@ -64,9 +64,6 @@ LteNetdeviceConfiguration::GetBearers () const
 const uint32_t
 LteNetdeviceConfiguration::GetNetworkLayerId () const
 {
-  if (m_role == eNB)
-    NS_FATAL_ERROR ("Cannot request the Network Layer ID for an eNB Configuration");
-
   return NetdeviceConfiguration::GetNetworkLayerId ();
 }
 

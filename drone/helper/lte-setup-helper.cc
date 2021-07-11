@@ -25,4 +25,10 @@ LteSetupHelper::InstallSingleEnbDevice (Ptr<LteHelper> helper, Ptr<Node> n)
   return helper->InstallSingleEnbDevice (n);
 }
 
+Ptr<NetDevice>
+LteSetupHelper::InstallSingleUeDevice (Ptr<LteHelper> helper, Ptr<Node> n)
+{
+  return helper->InstallSingleUeDevice (n);
+}
+
 } // namespace ns3

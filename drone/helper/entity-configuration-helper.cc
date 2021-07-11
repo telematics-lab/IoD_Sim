@@ -24,7 +24,9 @@
 #include <ns3/vector.h>
 
 #include <ns3/flight-plan.h>
+#include <ns3/lte-netdevice-configuration.h>
 #include <ns3/speed-coefficients.h>
+#include <ns3/wifi-netdevice-configuration.h>
 
 namespace ns3 {
 
@@ -118,6 +120,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
                          "Entity LTE Network Device 'bearers' must be an array.");
 
           const auto bearers = DecodeLteBearerConfigurations (netdev["bearers"].GetArray ());
+
+          confs.push_back (CreateObject<LteNetdeviceConfiguration> (type, role, bearers, networkLayerId));
         }
       else
         {

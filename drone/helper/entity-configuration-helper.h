@@ -21,7 +21,6 @@
 #include <ns3/entity-configuration.h>
 #include <ns3/lte-bearer-configuration.h>
 #include <ns3/netdevice-configuration.h>
-#include <ns3/wifi-netdevice-configuration.h>
 
 #include <rapidjson/document.h>
 
