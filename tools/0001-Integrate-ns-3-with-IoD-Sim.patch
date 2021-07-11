@@ -1,37 +1,49 @@
-From 86814cbf7c5f3e22660df281c50c6bd18e4894e0 Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni@grieco.dev>
-Date: Sun, 28 Feb 2021 17:21:56 +0100
-Subject: [PATCH] Integrate ns-3 with IoD Sim
-
-Co-authored-by: Sara Galasso <sgalass96@gmail.com>
----
- src/drone                             | 1 +
- src/report                            | 1 +
- src/wifi/helper/wifi-helper.h         | 2 ++
- src/wifi/helper/yans-wifi-helper.h    | 2 ++
- src/mobility/helper/mobility-helper.h | 2 ++
- 5 files changed, 8 insertions(+)
- create mode 120000 src/drone
- create mode 120000 src/report
-
+diff --git a/b/src/drone b/b/src/drone
+new file mode 120000
+index 0000000000..2b76d29a42
+--- /dev/null
++++ b/b/src/drone
+@@ -0,0 +1 @@
++../../drone
+\ No newline at end of file
+diff --git a/b/src/report b/b/src/report
+new file mode 120000
+index 0000000000..4bc1423586
+--- /dev/null
++++ b/b/src/report
+@@ -0,0 +1 @@
++../../report
+\ No newline at end of file
 diff --git a/src/drone b/src/drone
 new file mode 120000
-index 000000000..2b76d29a4
+index 0000000000..2b76d29a42
 --- /dev/null
 +++ b/src/drone
 @@ -0,0 +1 @@
 +../../drone
 \ No newline at end of file
+diff --git a/src/lte/helper/lte-helper.h b/src/lte/helper/lte-helper.h
+index 2731be7abc..fd5ce6fbc7 100644
+--- a/src/lte/helper/lte-helper.h
++++ b/src/lte/helper/lte-helper.h
+@@ -102,6 +102,8 @@ class SpectrumPropagationLossModel;
+ class LteHelper : public Object
+ {
+ public:
++  friend class LteSetupHelper;
++
+   LteHelper (void);
+   virtual ~LteHelper (void);
 diff --git a/src/report b/src/report
 new file mode 120000
-index 000000000..4bc142358
+index 0000000000..4bc1423586
 --- /dev/null
 +++ b/src/report
 @@ -0,0 +1 @@
 +../../report
 \ No newline at end of file
 diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
-index b15888e2f..d8f7cf1b1 100644
+index b15888e2f3..d8f7cf1b1f 100644
 --- a/src/wifi/helper/wifi-helper.h
 +++ b/src/wifi/helper/wifi-helper.h
 @@ -326,6 +326,8 @@ private:
@@ -44,7 +56,7 @@ index b15888e2f..d8f7cf1b1 100644
 
    /**
 diff --git a/src/wifi/helper/yans-wifi-helper.h b/src/wifi/helper/yans-wifi-helper.h
-index 61193c80b..5d4324bc7 100644
+index 61193c80ba..5d4324bc77 100644
 --- a/src/wifi/helper/yans-wifi-helper.h
 +++ b/src/wifi/helper/yans-wifi-helper.h
 @@ -36,6 +36,8 @@ namespace ns3 {

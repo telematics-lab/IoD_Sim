@@ -1,0 +1,29 @@
+diff --git a/src/lte/helper/no-backhaul-epc-helper.cc b/src/lte/helper/no-backhaul-epc-helper.cc
+index adc9bfc23a..b69de60974 100644
+--- a/src/lte/helper/no-backhaul-epc-helper.cc
++++ b/src/lte/helper/no-backhaul-epc-helper.cc
+@@ -315,8 +315,11 @@ NoBackhaulEpcHelper::AddEnb (Ptr<Node> enb, Ptr<NetDevice> lteEnbNetDevice, uint
+   int retval;
+ 
+   // add an IPv4 stack to the previously created eNB
++  if (enb->GetObject<Ipv4> () == nullptr)
++    {
+   InternetStackHelper internet;
+   internet.Install (enb);
++    }
+   NS_LOG_LOGIC ("number of Ipv4 ifaces of the eNB after node creation: " << enb->GetObject<Ipv4> ()->GetNInterfaces ());
+ 
+   // create LTE socket for the ENB 
+@@ -350,9 +353,9 @@ NoBackhaulEpcHelper::AddEnb (Ptr<Node> enb, Ptr<NetDevice> lteEnbNetDevice, uint
+   NS_LOG_INFO ("Create EpcEnbApplication");
+   Ptr<EpcEnbApplication> enbApp = CreateObject<EpcEnbApplication> (enbLteSocket, enbLteSocket6, cellId);
+   enb->AddApplication (enbApp);
+-  NS_ASSERT (enb->GetNApplications () == 1);
+-  NS_ASSERT_MSG (enb->GetApplication (0)->GetObject<EpcEnbApplication> () != 0, "cannot retrieve EpcEnbApplication");
+-  NS_LOG_LOGIC ("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication (0));
++  // NS_ASSERT (enb->GetNApplications () == 1);
++  // NS_ASSERT_MSG (enb->GetApplication (0)->GetObject<EpcEnbApplication> () != 0, "cannot retrieve EpcEnbApplication");
++  // NS_LOG_LOGIC ("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication (0));
+ 
+   NS_LOG_INFO ("Create EpcX2 entity");
+   Ptr<EpcX2> x2 = CreateObject<EpcX2> ();
