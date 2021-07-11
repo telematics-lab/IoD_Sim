@@ -123,6 +123,7 @@ def build(bld):
         'model/drone.h',
         'model/drone-container.h',
         'model/wifi-netdevice-configuration.h',
+        'helper/debug-helper.h',
         # Abruzzese Contribution
         'model/drone-network.h',
         'helper/drone-scenario-helper.h',
