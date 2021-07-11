@@ -1,20 +1,9 @@
 {
-    "name": "IoD Sim",
+    "name": "GP-LteOnly",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 50,
-    "staticNs3Config": [{
-            "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
-            "value": "2200"
-        },
-        {
-            "name": "ns3::WifiRemoteStationManager::RtsCtsThreshold",
-            "value": "2200"
-        },
-        {
-            "name": "ns3::WifiRemoteStationManager::NonUnicastMode",
-            "value": "DsssRate1Mbps"
-        }
+    "duration": 25,
+    "staticNs3Config": [
     ],
 
     "world" : {
@@ -42,25 +31,6 @@
     },
 
     "phyLayer": [
-        {
-            "type": "wifi",
-            "standard": "802.11n-2.4GHz",
-            "rxGain": 0.0,
-            "mode": "DsssRate1Mbps",
-            "channel": {
-                "propagationDelayModel": {
-                    "name": "ns3::ConstantSpeedPropagationDelayModel",
-                    "attributes": []
-                },
-                "propagationLossModel": {
-                    "name": "ns3::FriisPropagationLossModel",
-                    "attributes": [{
-                        "name": "Frequency",
-                        "value": 2.4e9
-                    }]
-                }
-            }
-        },
         {
             "type": "lte",
             "channel": {
@@ -91,32 +61,11 @@
 
     "macLayer": [
         {
-            "type": "wifi",
-            "ssid": "wifi-default",
-            "remoteStationManager": {
-                "name": "ns3::ConstantRateWifiManager",
-                "attributes": [{
-                        "name": "DataMode",
-                        "value": "DsssRate1Mbps"
-                    },
-                    {
-                        "name": "ControlMode",
-                        "value": "DsssRate1Mbps"
-                    }
-                ]
-            }
-        },
-        {
             "type": "lte"
         }
     ],
 
     "networkLayer": [
-        {
-            "type": "ipv4",
-            "address": "10.42.0.0",
-            "mask": "255.255.255.0"
-        },
         {
             "type": "ipv4",
             "address": "10.1.0.0",
@@ -127,19 +76,8 @@
     "drones": [{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-default"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
-                    "networkLayer": 1,
+                    "networkLayer": 0,
                     "role": "UE",
                     "bearers": [
                         {
@@ -278,7 +216,7 @@
             {
                 "type": "lte",
                 "role": "eNB",
-                "networkLayer": 1,
+                "networkLayer": 0,
                 "bearers": [
                     {
                         "type": "GBR_CONV_VIDEO",
@@ -294,17 +232,6 @@
                         }
                     }
                 ]
-            },
-            {
-                "type": "wifi",
-                "macLayer": {
-                    "name": "ns3::ApWifiMac",
-                    "attributes": [{
-                        "name": "Ssid",
-                        "value": "wifi-default"
-                    }]
-                },
-                "networkLayer": 0
             }
         ],
         "mobilityModel": {
@@ -319,21 +246,7 @@
 
     "remotes": [
         {
-            "name": "remote_0",
-            "networkLayer": 1,
-            "applications": [{
-                "name": "ns3::DroneServerApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 299.0
-                    }
-                ]
-            }]
+            "name": "remote_0"
         }
     ],
 
@@ -346,12 +259,11 @@
 
     "logComponents": [
         "DroneServerApplication",
-        "ScenarioConfigurationHelper",
+        "DroneClientApplication",
         "Drone",
         "Scenario",
         "LteHelper",
         "NoBackhaulEpcHelper",
-        "LteEnbNetDevice",
-        "DroneClientApplication"
+        "LteEnbNetDevice"
     ]
 }
