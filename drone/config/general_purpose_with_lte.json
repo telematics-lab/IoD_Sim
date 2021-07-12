@@ -115,7 +115,8 @@
         {
             "type": "ipv4",
             "address": "10.42.0.0",
-            "mask": "255.255.255.0"
+            "mask": "255.255.255.0",
+            "gateway": "10.42.0.1"
         },
         {
             "type": "ipv4",
@@ -202,6 +203,19 @@
                     {
                         "name": "DestinationIpv4Address",
                         "value": "200.0.0.1"
+                    }
+                ]
+            },
+            {
+                "name": "ns3::DroneClientApplication",
+                "attributes": [
+                    {
+                        "name": "StartTime",
+                        "value": 1.0
+                    },
+                    {
+                        "name": "StopTime",
+                        "value": 299.0
                     }
                 ]
             }],
@@ -314,7 +328,19 @@
                 "value": [10.0, 10.0, 0.0]
             }]
         },
-        "applications": []
+        "applications": [{
+            "name": "ns3::DroneServerApplication",
+            "attributes": [
+                {
+                    "name": "StartTime",
+                    "value": 1.0
+                },
+                {
+                    "name": "StopTime",
+                    "value": 299.0
+                }
+            ]
+        }]
     }],
 
     "remotes": [

@@ -23,6 +23,7 @@
 #include <ns3/internet-module.h>
 #include <ns3/ipv4-address-helper.h>
 #include <ns3/ipv4-static-routing-helper.h>
+#include <ns3/ipv4-routing-helper.h>
 #include <ns3/log.h>
 #include <ns3/mobility-helper.h>
 #include <ns3/object-factory.h>
@@ -537,9 +538,8 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
   // create a static route for each UE to the SGW/PGW in order to communicate
   // with the internet
-  // FIXME: this routing instruction should be put in ::ConfigureEntityApplications (...)
   Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (entityNode->GetObject<Ipv4> ());
-  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), 1);
+  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), dev->GetIfIndex ());
   // auto attach each drone UE to the eNB with the strongest signal
   ltePhy->GetLteHelper ()->Attach (dev);
   // init bearers on UE
@@ -591,6 +591,10 @@ Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
 
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
   auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
+
+  Ipv4StaticRoutingHelper routingHelper;
+  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (entityNode->GetObject<Ipv4> ());
+  ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), 1);
 }
 
 void
@@ -759,6 +763,9 @@ void
 Scenario::ConfigureSimulator ()
 {
   NS_LOG_FUNCTION_NOARGS ();
+
+  auto stdoutWrapper = Create<OutputStreamWrapper> (&std::cout);
+  Ipv4RoutingHelper::PrintRoutingTableAllAt (Seconds (1.0), stdoutWrapper);
 
   // Enable Report
   // Report::Get ()->Initialize (CONFIGURATOR->GetName (),
