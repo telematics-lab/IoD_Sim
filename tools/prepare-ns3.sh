@@ -3,6 +3,5 @@
 git submodule update --init
 
 pushd ns3
-patch -s -p1 < ../tools/0001-Integrate-ns-3-with-IoD-Sim.patch
-patch -s -p1 < ../tools/0002-No-Backhaul-EPC-Helper-WIP-LTEFIX.patch
+patch -s -p1 < ../tools/*.patch
 popd

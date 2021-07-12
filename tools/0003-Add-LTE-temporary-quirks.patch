@@ -1,5 +1,14 @@
+From 1ff5d2f6ca07bcd2b382423ea3e25cf18ecef177 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Mon, 12 Jul 2021 08:53:34 +0000
+Subject: [PATCH] Add LTE temporary quirks
+
+---
+ src/lte/helper/no-backhaul-epc-helper.cc | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
 diff --git a/src/lte/helper/no-backhaul-epc-helper.cc b/src/lte/helper/no-backhaul-epc-helper.cc
-index adc9bfc23a..b69de60974 100644
+index adc9bfc23..b69de6097 100644
 --- a/src/lte/helper/no-backhaul-epc-helper.cc
 +++ b/src/lte/helper/no-backhaul-epc-helper.cc
 @@ -315,8 +315,11 @@ NoBackhaulEpcHelper::AddEnb (Ptr<Node> enb, Ptr<NetDevice> lteEnbNetDevice, uint
@@ -27,3 +36,6 @@ index adc9bfc23a..b69de60974 100644
  
    NS_LOG_INFO ("Create EpcX2 entity");
    Ptr<EpcX2> x2 = CreateObject<EpcX2> ();
+-- 
+2.25.1
+

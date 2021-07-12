@@ -1,0 +1,31 @@
+From 92db20f0ad34c81b0563d8168c89e15ba66f2559 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Mon, 12 Jul 2021 08:50:20 +0000
+Subject: [PATCH] Integrate ns3 with IoD Sim
+
+---
+ src/drone  | 1 +
+ src/report | 1 +
+ 2 files changed, 2 insertions(+)
+ create mode 120000 src/drone
+ create mode 120000 src/report
+
+diff --git a/src/drone b/src/drone
+new file mode 120000
+index 000000000..2b76d29a4
+--- /dev/null
++++ b/src/drone
+@@ -0,0 +1 @@
++../../drone
+\ No newline at end of file
+diff --git a/src/report b/src/report
+new file mode 120000
+index 000000000..5f034e800
+--- /dev/null
++++ b/src/report
+@@ -0,0 +1 @@
++../../report/
+\ No newline at end of file
+-- 
+2.25.1
+
