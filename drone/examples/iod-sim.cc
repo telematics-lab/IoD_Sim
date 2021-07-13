@@ -757,6 +757,13 @@ Scenario::ConfigureInternetBackbone ()
           staticRouteRem->AddNetworkRouteTo (netGwInternalIpv4, Ipv4Mask ("255.0.0.0"), netGwBackboneIpv4, 1);
         }
     }
+
+  std::stringstream logFilePathBuilder;
+  logFilePathBuilder << CONFIGURATOR->GetResultsPath () << "internet";
+  const auto logFilePath = logFilePathBuilder.str ();
+
+  csma.EnablePcapAll (logFilePath, true);
+  csma.EnableAsciiAll (logFilePath);
 }
 
 void
