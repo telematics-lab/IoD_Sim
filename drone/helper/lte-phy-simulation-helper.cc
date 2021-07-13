@@ -17,11 +17,39 @@
  */
 #include "lte-phy-simulation-helper.h"
 
+#include <ns3/boolean.h>
+#include <ns3/string.h>
+
+#include <ns3/scenario-configuration-helper.h>
+
 namespace ns3 {
 
-LtePhySimulationHelper::LtePhySimulationHelper () :
+class LtePhySimulationHelperPriv
+{
+public:
+  static std::string GetS1uLinkPcapPrefix (const size_t stackId)
+  {
+    std::stringstream prefixBuilder;
+    prefixBuilder << CONFIGURATOR->GetResultsPath () << "lte-" << stackId << "-s1u";
+
+    return prefixBuilder.str ();
+  }
+
+  static std::string GetX2LinkPcapPrefix (const size_t stackId)
+  {
+    std::stringstream prefixBuilder;
+    prefixBuilder << CONFIGURATOR->GetResultsPath () << "lte-" << stackId << "-x2";
+
+    return prefixBuilder.str ();
+  }
+};
+
+LtePhySimulationHelper::LtePhySimulationHelper (const size_t stackId) :
   m_lte {CreateObject<LteHelper> ()},
-  m_epc {CreateObject<PointToPointEpcHelper> ()}
+  m_epc {CreateObjectWithAttributes<PointToPointEpcHelper> ("S1uLinkEnablePcap", BooleanValue (true),
+                                                            "S1uLinkPcapPrefix", StringValue (LtePhySimulationHelperPriv::GetS1uLinkPcapPrefix (stackId)),
+                                                            "X2LinkEnablePcap", BooleanValue (true),
+                                                            "X2LinkPcapPrefix" , StringValue (LtePhySimulationHelperPriv::GetX2LinkPcapPrefix (stackId)))}
 {
   m_lte->SetEpcHelper(m_epc);
 }

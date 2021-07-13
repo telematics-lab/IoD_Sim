@@ -218,7 +218,7 @@ Scenario::ConfigurePhy ()
         }
       else if (phyLayerConf->GetType ().compare("lte") == 0)
         {
-          auto lteSim = CreateObject<LtePhySimulationHelper> ();
+          auto lteSim = CreateObject<LtePhySimulationHelper> (phyId);
           auto lteConf = StaticCast<LtePhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
           auto lteHelper = lteSim->GetLteHelper();
 

@@ -31,7 +31,7 @@ class LtePhySimulationHelper : public Object
 {
 public:
   /** Default constructor */
-  LtePhySimulationHelper ();
+  LtePhySimulationHelper (const size_t stackId);
   /** Default destructor */
   ~LtePhySimulationHelper ();
 
