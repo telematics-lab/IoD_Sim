@@ -64,7 +64,6 @@ DroneClientApplication::DroneClientApplication ()
   NS_LOG_FUNCTION_NOARGS ();
 
   m_state = CLOSED;
-  //m_destAddr = Ipv4Address::GetBroadcast ();
   m_sequenceNumber = 0;
 }
 
@@ -103,8 +102,6 @@ DroneClientApplication::StartApplication ()
           m_socket = socketFactory->CreateSocket ();
 
           m_socket->SetAllowBroadcast (true);
-          m_socket->Bind (InetSocketAddress (Ipv4Address::GetAny (),
-                                             m_destPort));
           m_socket->SetRecvCallback (MakeCallback (&DroneClientApplication::ReceivePacket,
                                                    this));
 
@@ -147,8 +144,8 @@ DroneClientApplication::StopApplication ()
 
 void
 DroneClientApplication::SendPacket (const Intent i,
-                         const Ptr<Socket> socket,
-                         const Ipv4Address targetAddress) const
+                                    const Ptr<Socket> socket,
+                                    const Ipv4Address targetAddress) const
 {
   NS_LOG_FUNCTION (ToString (i) << socket << targetAddress);
 
@@ -310,7 +307,7 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 
 void
 DroneClientApplication::CourseChange (const std::string context,
-                           const Ptr<const MobilityModel> mobility) const
+                                      const Ptr<const MobilityModel> mobility) const
 {
   NS_LOG_FUNCTION (context << mobility);
 

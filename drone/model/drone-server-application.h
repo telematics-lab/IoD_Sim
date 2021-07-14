@@ -48,9 +48,11 @@ private:
 
   void ReceivePacket (const Ptr<Socket> socket) const;
   void SendHelloAck (const Ptr<Socket> socket,
-                     const Ipv4Address senderAddr) const;
+                     const Ipv4Address senderAddr,
+                     const uint32_t senderPort) const;
   void SendUpdateAck (const Ptr<Socket> socket,
-                     const Ipv4Address senderAddr) const;
+                      const Ipv4Address senderAddr,
+                      const uint32_t senderPort) const;
   void SendUpdateBroadcast () const;
 
   Ptr<Socket> m_socket;

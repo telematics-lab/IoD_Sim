@@ -105,15 +105,6 @@ DroneServerApplication::StartApplication ()
       m_state = SERVER_LISTEN;
 
       Simulator::Cancel (m_sendEvent);
-
-      /* In case you want to broadcast data, uncomment this.
-       *
-       * for (double i = 1.0; i < m_duration; i += 30.0)
-       *   Simulator::ScheduleWithContext (GetNode ()->GetId (),
-       *                                   Seconds (i),
-       *                                   &DroneServerApplication::SendUpdateBroadcast,
-       *                                   this);
-       */
     }
 }
 
@@ -136,14 +127,14 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
 
   Ptr<Packet> packet;
   Address senderAddr;
-  Ipv4Address senderIpv4;
 
   while ((packet = socket->RecvFrom (senderAddr)))
     {
       if (InetSocketAddress::IsMatchingType (senderAddr))
         {
-          senderIpv4 = InetSocketAddress::ConvertFrom (senderAddr)
-                       .GetIpv4 ();
+          const auto sockAddr = InetSocketAddress::ConvertFrom (senderAddr);
+          const auto senderIpv4 = sockAddr.GetIpv4 ();
+          const auto senderPort = sockAddr.GetPort ();
 
           NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
                        << "] received " << packet->GetSize ()
@@ -170,7 +161,8 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
               m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendHelloAck,
                                                     this,
                                                     socket,
-                                                    senderIpv4);
+                                                    senderIpv4,
+                                                    senderPort);
               break;
             case PacketType::UPDATE:
               NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
@@ -178,7 +170,8 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
               m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendUpdateAck,
                                                     this,
                                                     socket,
-                                                    senderIpv4);
+                                                    senderIpv4,
+                                                    senderPort);
               break;
             case PacketType::UPDATE_ACK:
               NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
@@ -196,7 +189,8 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
 
 void
 DroneServerApplication::SendHelloAck (const Ptr<Socket> socket,
-                           const Ipv4Address senderAddr) const
+                                      const Ipv4Address senderAddr,
+                                      const uint32_t senderPort) const
 {
   NS_LOG_FUNCTION (socket << senderAddr);
 
@@ -219,13 +213,14 @@ DroneServerApplication::SendHelloAck (const Ptr<Socket> socket,
   const auto packet = Create<Packet>
     ((const uint8_t *) json, strlen (json) * sizeof (char));
 
-  socket->SendTo (packet, 0, InetSocketAddress (senderAddr, m_port));
+  socket->SendTo (packet, 0, InetSocketAddress (senderAddr, senderPort));
   m_txTrace (packet);
 }
 
 void
 DroneServerApplication::SendUpdateAck (const Ptr<Socket> socket,
-                           const Ipv4Address senderAddr) const
+                                       const Ipv4Address senderAddr,
+                                       const uint32_t senderPort) const
 {
   NS_LOG_FUNCTION (socket << senderAddr);
   NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
@@ -247,37 +242,7 @@ DroneServerApplication::SendUpdateAck (const Ptr<Socket> socket,
   const auto packet = Create<Packet>
     ((const uint8_t *) json, strlen (json) * sizeof (char));
 
-  socket->SendTo (packet, 0, InetSocketAddress (senderAddr, m_port));
-  m_txTrace (packet);
-}
-
-void
-DroneServerApplication::SendUpdateBroadcast () const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  const std::string command = PacketType (PacketType::UPDATE).ToString ();
-
-  rapidjson::StringBuffer jsonBuf;
-  rapidjson::Writer<rapidjson::StringBuffer> writer (jsonBuf);
-
-  writer.StartObject ();
-  writer.Key ("cmd");
-  writer.String (command.c_str ());
-  writer.Key ("sn");
-  writer.Int (m_sequenceNumber);
-  writer.EndObject ();
-
-  const char *json = jsonBuf.GetString ();
-  const auto packet = Create<Packet>
-    ((const uint8_t *) json, strlen (json) * sizeof (char));
-
-  NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] sending a Broadcast Update, NOW!");
-
-  m_socket->SendTo (packet,
-                    0,
-                    InetSocketAddress (Ipv4Address::GetBroadcast (), m_port));
-
+  socket->SendTo (packet, 0, InetSocketAddress (senderAddr, senderPort));
   m_txTrace (packet);
 }
 
