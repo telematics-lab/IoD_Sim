@@ -91,7 +91,8 @@ private:
   void ConfigureEntityMobility (const std::string& entityKey,
                                 Ptr<EntityConfiguration> entityConf,
                                 const uint32_t entityId);
-  NetDeviceContainer ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
+  NetDeviceContainer ConfigureEntityWifiStack (std::string entityKey,
+                                               Ptr<NetdeviceConfiguration> entityNetDev,
                                                Ptr<Node> entityNode,
                                                const uint32_t entityId,
                                                const uint32_t deviceId,
@@ -406,7 +407,7 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 
         if (entityNetDev->GetType ().compare("wifi") == 0)
           {
-            auto devContainer = ConfigureEntityWifiStack (entityNetDev, entityNode, entityId, deviceId, netId);
+            auto devContainer = ConfigureEntityWifiStack (entityKey, entityNetDev, entityNode, entityId, deviceId, netId);
             InstallEntityIpv4 (entityNode, devContainer, netId);
             ConfigureEntityIpv4 (entityNode, devContainer, deviceId, netId);
           }
@@ -472,7 +473,8 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
 }
 
 NetDeviceContainer
-Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
+Scenario::ConfigureEntityWifiStack (const std::string entityKey,
+                                    Ptr<NetdeviceConfiguration> entityNetDev,
                                     Ptr<Node> entityNode,
                                     const uint32_t entityId,
                                     const uint32_t deviceId,
@@ -498,11 +500,11 @@ Scenario::ConfigureEntityWifiStack (Ptr<NetdeviceConfiguration> entityNetDev,
   AsciiTraceHelper  ascii;
 
   // Configure WiFi TXT PHY Logging
-  phyTraceLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-host-" << entityId << "-" << deviceId << ".log";
+  phyTraceLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey << "-host-" << entityId << "-" << deviceId << ".log";
   wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityId, deviceId);
 
   // Configure WiFi PCAP Logging
-  pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-host";
+  pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey <<  "-host";
   wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityId, deviceId);
 
   return devContainer;
