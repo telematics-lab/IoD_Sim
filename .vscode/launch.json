@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug",
-      "args": ["--config=./src/drone/config/general_purpose_lteonly.json"],
+      "args": ["--config=./src/drone/config/general_purpose_with_lte.json"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/ns3/",
       "environment": [{
