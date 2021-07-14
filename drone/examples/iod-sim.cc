@@ -589,13 +589,16 @@ Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
                                const uint32_t netId)
 {
   NS_LOG_FUNCTION (entityNode << deviceId << netId);
+  NS_ASSERT_MSG (1 == devContainer.GetN (), "ConfigureEntityIpv4 assumes to receive a NetDeviceContainer with only one NetDevice, but there are " << devContainer.GetN ());
 
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
   auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
 
-  Ipv4StaticRoutingHelper routingHelper;
-  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (entityNode->GetObject<Ipv4> ());
-  ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), 1);
+  // Ipv4StaticRoutingHelper routingHelper;
+  // auto deviceIP = assignedIPs.Get(0);
+  // Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (deviceIP.first);
+
+  // ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), deviceIP.second);
 }
 
 void
