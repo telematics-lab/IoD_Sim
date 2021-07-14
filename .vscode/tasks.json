@@ -4,7 +4,7 @@
     {
       "label": "configure",
       "type": "shell",
-      "command": "./waf configure --enable-examples --enable-mpi --disable-python",
+      "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },

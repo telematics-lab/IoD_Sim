@@ -29,7 +29,6 @@
 #include <ns3/singleton.h>
 #include <ns3/waypoint.h>
 
-#include <ns3/drone-network.h>
 #include <ns3/entity-configuration-helper.h>
 #include <ns3/flight-plan.h>
 #include <ns3/mac-layer-configuration.h>
@@ -333,11 +332,6 @@ public:
 
 
 //  NETWORKS SPECIFIC CONFIGURATORS
-
-  /**
-   * \return a container of Ptr<DroneNetwork> already configured with attributes and name, but not generated.
-   */
-  DroneNetworkContainer GetNetworks () const;
 
   /**
    * \param id the index of the drone to query
