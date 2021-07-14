@@ -501,11 +501,11 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
 
   // Configure WiFi TXT PHY Logging
   phyTraceLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey << "-host-" << entityId << "-" << deviceId << ".log";
-  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityId, deviceId);
+  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityNode->GetId(), devContainer.Get(0)->GetIfIndex());
 
   // Configure WiFi PCAP Logging
   pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey <<  "-host";
-  wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityId, deviceId);
+  wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityNode->GetId(), devContainer.Get(0)->GetIfIndex());
 
   return devContainer;
 }
