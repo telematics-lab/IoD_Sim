@@ -538,8 +538,9 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
   // create a static route for each UE to the SGW/PGW in order to communicate
   // with the internet
-  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (entityNode->GetObject<Ipv4> ());
-  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), dev->GetIfIndex ());
+  auto nodeIpv4 = entityNode->GetObject<Ipv4> ();
+  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (nodeIpv4);
+  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), nodeIpv4->GetInterfaceForDevice(dev));
   // auto attach each drone UE to the eNB with the strongest signal
   ltePhy->GetLteHelper ()->Attach (dev);
   // init bearers on UE
