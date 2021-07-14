@@ -242,8 +242,7 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
     {
       if (InetSocketAddress::IsMatchingType (senderAddr))
         {
-          const auto senderIpv4 = InetSocketAddress::ConvertFrom (senderAddr)
-                                  .GetIpv4 ();
+          const auto senderIpv4 = InetSocketAddress::ConvertFrom (senderAddr).GetIpv4 ();
 
           NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
                         << "] client received " << packet->GetSize()
