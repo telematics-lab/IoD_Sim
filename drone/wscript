@@ -22,6 +22,7 @@ def build(bld):
         'helper/wifi-mac-simulation-helper.cc',
         'helper/wifi-phy-factory-helper.cc',
         'helper/wifi-phy-simulation-helper.cc',
+        'helper/remote-configuration-helper.cc',
         'model/constant-acceleration-drone-mobility-model.cc',
         'model/constant-acceleration-flight.cc',
         'model/constant-acceleration-param.cc',
@@ -60,6 +61,7 @@ def build(bld):
         'model/drone.cc',
         'model/drone-container.cc',
         'model/wifi-netdevice-configuration.cc',
+        'model/remote-configuration.cc',
         # Abruzzese Contribution
         'model/drone-network.cc',
         'helper/drone-scenario-helper.cc',
@@ -85,6 +87,7 @@ def build(bld):
         'helper/wifi-mac-simulation-helper.h',
         'helper/wifi-phy-factory-helper.h',
         'helper/wifi-phy-simulation-helper.h',
+        'helper/remote-configuration-helper.h',
         'model/constant-acceleration-drone-mobility-model.h',
         'model/constant-acceleration-flight.h',
         'model/constant-acceleration-param.h',
@@ -123,6 +126,7 @@ def build(bld):
         'model/drone.h',
         'model/drone-container.h',
         'model/wifi-netdevice-configuration.h',
+        'model/remote-configuration.h',
         'helper/debug-helper.h',
         # Abruzzese Contribution
         'model/drone-network.h',

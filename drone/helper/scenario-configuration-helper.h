@@ -23,20 +23,20 @@
 #include <sstream>
 
 #include <rapidjson/document.h>
-#include <ns3/position-allocator.h>
-#include <ns3/waypoint.h>
+#include <ns3/building.h>
 #include <ns3/log.h>
+#include <ns3/position-allocator.h>
 #include <ns3/singleton.h>
+#include <ns3/waypoint.h>
 
+#include <ns3/drone-network.h>
 #include <ns3/entity-configuration-helper.h>
 #include <ns3/flight-plan.h>
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/network-layer-configuration.h>
 #include <ns3/phy-layer-configuration.h>
+#include <ns3/remote-configuration.h>
 #include <ns3/speed-coefficients.h>
-#include <ns3/singleton.h>
-#include <ns3/building.h>
-#include <ns3/drone-network.h>
 
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 
@@ -128,9 +128,16 @@ public:
   /**
    * \brief Retrieve the list of generic enetities to be defined for this simulation.
    *
-   * \return The list of Network Layers to be defined for this simulation.
+   * \return The list of Entities to be defined for this simulation.
    */
   const std::vector<Ptr<EntityConfiguration>> GetEntitiesConfiguration (const std::string& entityKey) const;
+
+  /**
+   * \brief Retrieve the list of remotes to be defined for this simulation.
+   *
+   * \return The list of remotes to be defined for this simulation.
+   */
+  const std::vector<Ptr<RemoteConfiguration>> GetRemotesConfiguration () const;
 
   /**
    * \return The duration of the simulation in seconds.

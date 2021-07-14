@@ -500,8 +500,15 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
   AsciiTraceHelper  ascii;
 
   // Configure WiFi TXT PHY Logging
-  phyTraceLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey << "-host-" << entityId << "-" << deviceId << ".log";
-  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()), entityNode->GetId(), devContainer.Get(0)->GetIfIndex());
+  phyTraceLog << CONFIGURATOR->GetResultsPath ()
+              << "wifi-phy-" << netId
+              << "-" << entityKey
+              << "-host-" << entityId
+              << "-" << deviceId
+              << ".log";
+  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()),
+                                             entityNode->GetId(),
+                                             devContainer.Get(0)->GetIfIndex());
 
   // Configure WiFi PCAP Logging
   pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey <<  "-host";
@@ -542,7 +549,8 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   // with the internet
   auto nodeIpv4 = entityNode->GetObject<Ipv4> ();
   Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (nodeIpv4);
-  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (), nodeIpv4->GetInterfaceForDevice(dev));
+  ueStaticRoute->SetDefaultRoute (ltePhy->GetEpcHelper ()->GetUeDefaultGatewayAddress (),
+                                  nodeIpv4->GetInterfaceForDevice(dev));
   // auto attach each drone UE to the eNB with the strongest signal
   ltePhy->GetLteHelper ()->Attach (dev);
   // init bearers on UE
@@ -591,7 +599,9 @@ Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
                                const uint32_t netId)
 {
   NS_LOG_FUNCTION (entityNode << deviceId << netId);
-  NS_ASSERT_MSG (1 == devContainer.GetN (), "ConfigureEntityIpv4 assumes to receive a NetDeviceContainer with only one NetDevice, but there are " << devContainer.GetN ());
+  NS_ASSERT_MSG (1 == devContainer.GetN (),
+                 "ConfigureEntityIpv4 assumes to receive a NetDeviceContainer with only one NetDevice, but there are "
+                 << devContainer.GetN ());
 
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
   auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
@@ -615,7 +625,8 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
       const auto appName = appConf.GetName ();
       if (appName.compare("ns3::DroneClientApplication") == 0)
         {
-          auto app = CreateObjectWithAttributes<DroneClientApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+          auto app = CreateObjectWithAttributes<DroneClientApplication>
+            ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);
@@ -628,7 +639,8 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
         }
       else if (appName.compare("ns3::DroneServerApplication") == 0)
         {
-          auto app = CreateObjectWithAttributes<DroneServerApplication> ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+          auto app = CreateObjectWithAttributes<DroneServerApplication>
+            ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);
@@ -658,8 +670,8 @@ Scenario::ConfigureEntityMechanics(const std::string& entityKey,
 
 Ptr<EnergySource>
 Scenario::ConfigureEntityBattery(const std::string& entityKey,
-                                   Ptr<EntityConfiguration> entityConf,
-                                   const uint32_t entityId)
+                                 Ptr<EntityConfiguration> entityConf,
+                                 const uint32_t entityId)
 {
   NS_LOG_FUNCTION_NOARGS();
   const auto battery = entityConf->GetBattery();
@@ -677,8 +689,8 @@ Scenario::ConfigureEntityBattery(const std::string& entityKey,
 
 void
 Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
-                                    const Ptr<EntityConfiguration>& conf,
-                                    const uint32_t& entityId)
+                                      const Ptr<EntityConfiguration>& conf,
+                                      const uint32_t& entityId)
 {
   NS_LOG_FUNCTION (entityKey << entityId << conf);
   std::vector<Ptr<DronePeripheral>> peripherals;
@@ -699,18 +711,32 @@ Scenario::ConfigureInternetRemotes ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  for (NodeContainer::Iterator remote = m_remoteNodes.Begin (); remote != m_remoteNodes.End (); remote++)
+  const auto remoteConfs = CONFIGURATOR->GetRemotesConfiguration ();
+  size_t remoteId = 0;
+
+  for (auto& conf : remoteConfs)
     {
-      auto serverApp = CreateObjectWithAttributes<DroneServerApplication> (
-        "StartTime", TimeValue (Seconds (CONFIGURATOR->GetRemoteApplicationStartTime (0))),
-        "StopTime", TimeValue (Seconds (CONFIGURATOR->GetRemoteApplicationStopTime (0))));
-      (*remote)->AddApplication (serverApp);
+      const auto appConfs = conf->GetApplications ();
 
-      // Install DroneServer Application on the first remote only
-      break;
+      for (auto& appConf : appConfs)
+        {
+          TypeId appTid;
+          NS_ASSERT_MSG (TypeId::LookupByNameFailSafe (appConf.GetName (), &appTid),
+                         "Failed to initialize application " << appConf.GetName () << ". It does not exist!");
+
+          ObjectFactory factory (appTid.GetName ());
+
+          for (auto& appAttr : appConf.GetAttributes ())
+            {
+              factory.Set (appAttr.first, *appAttr.second);
+            }
+
+          auto app = StaticCast<Application, Object> (factory.Create ());
+          m_remoteNodes.Get (remoteId)->AddApplication (app);
+        }
+
+      remoteId++;
     }
-
-  return;
 }
 
 void

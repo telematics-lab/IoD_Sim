@@ -30,6 +30,7 @@
 #include <ns3/network-layer-configuration-helper.h>
 #include <ns3/object-factory.h>
 #include <ns3/phy-layer-configuration-helper.h>
+#include <ns3/remote-configuration-helper.h>
 #include <ns3/system-path.h>
 
 namespace ns3 {
@@ -255,6 +256,27 @@ ScenarioConfigurationHelper::GetEntitiesConfiguration (const std::string& entity
     }
 
   return entityConf;
+}
+
+const std::vector<Ptr<RemoteConfiguration>>
+ScenarioConfigurationHelper::GetRemotesConfiguration () const
+{
+  std::vector<Ptr<RemoteConfiguration>> remoteConf;
+
+  if (!m_config.HasMember ("remotes"))
+    return remoteConf;
+
+  NS_ASSERT_MSG (m_config["remotes"].IsArray (),
+                 "JSON property 'remotes' must be an array.");
+
+  const auto arr = m_config["remotes"].GetArray ();
+  for (auto& el : arr)
+    {
+      auto conf = RemoteConfigurationHelper::GetConfiguration (el);
+      remoteConf.push_back (conf);
+    }
+
+  return remoteConf;
 }
 
 const double

@@ -203,6 +203,10 @@
                     {
                         "name": "DestinationIpv4Address",
                         "value": "200.0.0.1"
+                    },
+                    {
+                        "name": "Port",
+                        "value": "1337"
                     }
                 ]
             },
@@ -345,7 +349,6 @@
 
     "remotes": [
         {
-            "name": "remote_0",
             "networkLayer": 1,
             "applications": [{
                 "name": "ns3::DroneServerApplication",
@@ -357,6 +360,10 @@
                     {
                         "name": "StopTime",
                         "value": 299.0
+                    },
+                    {
+                        "name": "Port",
+                        "value": 1337
                     }
                 ]
             }]
