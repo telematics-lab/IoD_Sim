@@ -173,6 +173,27 @@ Scenario::~Scenario ()
 }
 
 void
+Scenario::operator() ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  if (CONFIGURATOR->IsDryRun ())
+    return;
+
+  std::stringstream progressLogFilePath;
+  progressLogFilePath << CONFIGURATOR->GetResultsPath () << "progress.log";
+  auto progressLogSink = Create<OutputStreamWrapper> (progressLogFilePath.str (), std::ios::out);
+
+  ShowProgress progressLog {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), (*progressLogSink->GetStream ())};
+  ShowProgress progressStdout {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
+
+  Simulator::Run ();
+  // Report Module needs the simulator context alive to introspect it
+  //Report::Get ()->Save ();
+  Simulator::Destroy ();
+}
+
+void
 Scenario::ApplyStaticConfig ()
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -250,83 +271,6 @@ Scenario::ConfigurePhy ()
         }
 
       phyId++;
-    }
-}
-
-void
-Scenario::EnablePhyLteTraces ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
-    {
-      auto obj = m_protocolStacks[PHY_LAYER][phyId];
-
-      if (typeid(*obj) == typeid(LtePhySimulationHelper))
-        {
-          /* LteHelperQuirk:
-           *  This class is an hack to allow access to private members of LteHelper class,
-           *  in particular to the StatsCalculators in order to set their output path.
-           *  A structurally identical class is defined with all attributes set to public,
-           *  then with a reinterpret_cast we interpret the LteHelper as this new class
-           *  so the compiler won't complain about accessing its private members.
-           */
-          class LteHelperQuirk : public Object
-          {
-          public:
-            Ptr<SpectrumChannel> dlC, ulC;
-            Ptr<Object>  dlPlM, ulPlM;
-            ObjectFactory a, b, c, d, e, f, g, h, i, j, k;
-            std::string fMT;
-            ObjectFactory fMF;
-            Ptr<SpectrumPropagationLossModel> fM;
-            bool fSA;
-            Ptr<PhyStatsCalculator> phyStat;
-            Ptr<PhyTxStatsCalculator> phyTxStat;
-            Ptr<PhyRxStatsCalculator> phyRxStat;
-            Ptr<MacStatsCalculator> macStat;
-            Ptr<RadioBearerStatsCalculator> rlcStat;
-            Ptr<RadioBearerStatsCalculator> pdcpStat;
-            RadioBearerStatsConnector radioBearerStatsConnector;
-            Ptr<EpcHelper> m_epcHelper;
-            uint64_t m_imsiCounter;
-            uint16_t m_cellIdCounter;
-            bool l, m, n, o;
-            std::map< uint8_t, ComponentCarrier > m_componentCarrierPhyParams;
-            uint16_t m_noOfCcs;
-          };
-
-          auto phy = StaticCast<LtePhySimulationHelper, Object> (obj);
-          auto lteHelper = phy->GetLteHelper ();
-          std::stringstream basePath;
-
-          basePath << CONFIGURATOR->GetResultsPath () << "lte-" << phyId << "-";
-
-          lteHelper->EnableTraces ();
-
-          auto rlcStat = lteHelper->GetRlcStats ();
-          rlcStat->SetDlOutputFilename (basePath.str () + "RlcDlStats.txt");
-          rlcStat->SetUlOutputFilename (basePath.str () + "RlcUlStats.txt");
-
-          auto pdcpStat = lteHelper->GetPdcpStats ();
-          pdcpStat->SetDlPdcpOutputFilename (basePath.str () + "PdcpDlStats.txt");
-          pdcpStat->SetUlPdcpOutputFilename (basePath.str () + "PdcpUlStats.txt");
-
-          auto lteHelperQ = reinterpret_cast<LteHelperQuirk*> (&(*lteHelper));
-
-          lteHelperQ->phyStat->SetUeSinrFilename (basePath.str () + "PhySinrUlStats.txt");
-          lteHelperQ->phyStat->SetInterferenceFilename (basePath.str () + "PhyInterferenceUlStats.txt");
-          lteHelperQ->phyStat->SetCurrentCellRsrpSinrFilename (basePath.str () + "PhyRsrpSinrDlStats.txt");
-
-          lteHelperQ->phyRxStat->SetDlRxOutputFilename (basePath.str () + "PhyRxDlStats.txt");
-          lteHelperQ->phyRxStat->SetUlRxOutputFilename (basePath.str () + "PhyRxUlStats.txt");
-
-          lteHelperQ->phyTxStat->SetDlTxOutputFilename (basePath.str () + "PhyTxDlStats.txt");
-          lteHelperQ->phyTxStat->SetUlTxOutputFilename (basePath.str () + "PhyTxUlStats.txt");
-
-          lteHelperQ->macStat->SetDlOutputFilename (basePath.str () + "MacDlStats.txt");
-          lteHelperQ->macStat->SetUlOutputFilename (basePath.str () + "MacUlStats.txt");
-        }
     }
 }
 
@@ -834,6 +778,83 @@ Scenario::ConfigureInternetBackbone ()
 }
 
 void
+Scenario::EnablePhyLteTraces ()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
+    {
+      auto obj = m_protocolStacks[PHY_LAYER][phyId];
+
+      if (typeid(*obj) == typeid(LtePhySimulationHelper))
+        {
+          /* LteHelperQuirk:
+           *  This class is an hack to allow access to private members of LteHelper class,
+           *  in particular to the StatsCalculators in order to set their output path.
+           *  A structurally identical class is defined with all attributes set to public,
+           *  then with a reinterpret_cast we interpret the LteHelper as this new class
+           *  so the compiler won't complain about accessing its private members.
+           */
+          class LteHelperQuirk : public Object
+          {
+          public:
+            Ptr<SpectrumChannel> dlC, ulC;
+            Ptr<Object>  dlPlM, ulPlM;
+            ObjectFactory a, b, c, d, e, f, g, h, i, j, k;
+            std::string fMT;
+            ObjectFactory fMF;
+            Ptr<SpectrumPropagationLossModel> fM;
+            bool fSA;
+            Ptr<PhyStatsCalculator> phyStat;
+            Ptr<PhyTxStatsCalculator> phyTxStat;
+            Ptr<PhyRxStatsCalculator> phyRxStat;
+            Ptr<MacStatsCalculator> macStat;
+            Ptr<RadioBearerStatsCalculator> rlcStat;
+            Ptr<RadioBearerStatsCalculator> pdcpStat;
+            RadioBearerStatsConnector radioBearerStatsConnector;
+            Ptr<EpcHelper> m_epcHelper;
+            uint64_t m_imsiCounter;
+            uint16_t m_cellIdCounter;
+            bool l, m, n, o;
+            std::map< uint8_t, ComponentCarrier > m_componentCarrierPhyParams;
+            uint16_t m_noOfCcs;
+          };
+
+          auto phy = StaticCast<LtePhySimulationHelper, Object> (obj);
+          auto lteHelper = phy->GetLteHelper ();
+          std::stringstream basePath;
+
+          basePath << CONFIGURATOR->GetResultsPath () << "lte-" << phyId << "-";
+
+          lteHelper->EnableTraces ();
+
+          auto rlcStat = lteHelper->GetRlcStats ();
+          rlcStat->SetDlOutputFilename (basePath.str () + "RlcDlStats.txt");
+          rlcStat->SetUlOutputFilename (basePath.str () + "RlcUlStats.txt");
+
+          auto pdcpStat = lteHelper->GetPdcpStats ();
+          pdcpStat->SetDlPdcpOutputFilename (basePath.str () + "PdcpDlStats.txt");
+          pdcpStat->SetUlPdcpOutputFilename (basePath.str () + "PdcpUlStats.txt");
+
+          auto lteHelperQ = reinterpret_cast<LteHelperQuirk*> (&(*lteHelper));
+
+          lteHelperQ->phyStat->SetUeSinrFilename (basePath.str () + "PhySinrUlStats.txt");
+          lteHelperQ->phyStat->SetInterferenceFilename (basePath.str () + "PhyInterferenceUlStats.txt");
+          lteHelperQ->phyStat->SetCurrentCellRsrpSinrFilename (basePath.str () + "PhyRsrpSinrDlStats.txt");
+
+          lteHelperQ->phyRxStat->SetDlRxOutputFilename (basePath.str () + "PhyRxDlStats.txt");
+          lteHelperQ->phyRxStat->SetUlRxOutputFilename (basePath.str () + "PhyRxUlStats.txt");
+
+          lteHelperQ->phyTxStat->SetDlTxOutputFilename (basePath.str () + "PhyTxDlStats.txt");
+          lteHelperQ->phyTxStat->SetUlTxOutputFilename (basePath.str () + "PhyTxUlStats.txt");
+
+          lteHelperQ->macStat->SetDlOutputFilename (basePath.str () + "MacDlStats.txt");
+          lteHelperQ->macStat->SetUlOutputFilename (basePath.str () + "MacUlStats.txt");
+        }
+    }
+}
+
+void
 Scenario::ConfigureRegionsOfInterest ()
 {
   const auto regions = CONFIGURATOR->GetRegionsOfInterest();
@@ -879,27 +900,6 @@ Scenario::ConfigureSimulator ()
   //                             CONFIGURATOR->GetResultsPath ());
 
   Simulator::Stop (Seconds (CONFIGURATOR->GetDuration ()));
-}
-
-void
-Scenario::operator() ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  if (CONFIGURATOR->IsDryRun ())
-    return;
-
-  std::stringstream progressLogFilePath;
-  progressLogFilePath << CONFIGURATOR->GetResultsPath () << "progress.log";
-  auto progressLogSink = Create<OutputStreamWrapper> (progressLogFilePath.str (), std::ios::out);
-
-  ShowProgress progressLog {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), (*progressLogSink->GetStream ())};
-  ShowProgress progressStdout {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
-
-  Simulator::Run ();
-  // Report Module needs the simulator context alive to introspect it
-  //Report::Get ()->Save ();
-  Simulator::Destroy ();
 }
 
 } // namespace ns3
