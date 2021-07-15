@@ -59,10 +59,7 @@
 #include <ns3/wifi-phy-layer-configuration.h>
 #include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/zsp-list.h>
-//temp
 #include <ns3/node-list.h>
-
-#include <ns3/debug-helper.h>
 
 namespace ns3 {
 
@@ -157,8 +154,6 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureInternetBackbone ();
   ConfigureInternetRemotes ();
   EnablePhyLteTraces ();
-
-  DebugHelper::ProbeNodes ();
 
   ConfigureSimulator ();
 }
