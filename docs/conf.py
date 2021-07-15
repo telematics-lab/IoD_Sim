@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'IoD_Sim'
-copyright = '2019, The IoD_Sim Authors'
+copyright = '2021, The IoD_Sim Authors'
 author = 'The IoD_Sim Authors'
 
 # The full version, including alpha/beta/rc tags

@@ -9,7 +9,7 @@ software itself, is very much a work in progress.
     :caption: Table of Contents
 
     general_information
+    install
     compile/container
     compile/native
     usage/usage
-    
