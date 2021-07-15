@@ -235,7 +235,6 @@ Scenario::ConfigurePhy ()
           for (auto& attr : spectrumConf.GetAttributes ())
             lteHelper->SetSpectrumChannelAttribute (attr.first, *(attr.second));
 
-          // FIXME: What should be the method of adding a gateway to the Internet?
           m_backbone.Add (lteSim->GetEpcHelper ()->GetPgwNode ());
 
           m_protocolStacks[PHY_LAYER].push_back (lteSim);
@@ -305,8 +304,8 @@ Scenario::EnablePhyLteTraces ()
           rlcStat->SetUlOutputFilename (basePath.str () + "RlcUlStats.txt");
 
           auto pdcpStat = lteHelper->GetPdcpStats ();
-          pdcpStat->SetDlOutputFilename (basePath.str () + "PdcpDlStats.txt");
-          pdcpStat->SetUlOutputFilename (basePath.str () + "PdcpUlStats.txt");
+          pdcpStat->SetDlPdcpOutputFilename (basePath.str () + "PdcpDlStats.txt");
+          pdcpStat->SetUlPdcpOutputFilename (basePath.str () + "PdcpUlStats.txt");
 
           auto lteHelperQ = reinterpret_cast<LteHelperQuirk*> (&(*lteHelper));
 
