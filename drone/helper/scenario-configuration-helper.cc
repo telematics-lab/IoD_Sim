@@ -871,10 +871,11 @@ ScenarioConfigurationHelper::GetAntennasPosition (Ptr<ListPositionAllocator> all
 const uint32_t
 ScenarioConfigurationHelper::GetRemotesN () const
 {
-  NS_ASSERT (m_config.HasMember ("remotes"));
-  NS_ASSERT (m_config["remotes"].IsArray ());
-  NS_ASSERT_MSG (m_config["remotes"].Size () > 0,
-                 "Please define at least one remote host in configuration file.");
+  if (!m_config.HasMember ("remotes"))
+    return 0;
+
+  NS_ASSERT_MSG (m_config["remotes"].IsArray (),
+                 "JSON property 'remotes' must be an array.");
 
   return m_config["remotes"].Size ();
 }
@@ -1399,6 +1400,10 @@ const std::vector<DoubleVector>
 ScenarioConfigurationHelper::GetRegionsOfInterest() const
 {
   std::vector<DoubleVector> final_regions;
+
+  if (!m_config.HasMember ("world"))
+    return final_regions;
+
   const auto world = m_config["world"].GetObject ();
   if (world.HasMember ("regionsOfInterest"))
   {
