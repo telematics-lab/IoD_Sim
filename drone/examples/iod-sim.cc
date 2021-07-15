@@ -581,11 +581,11 @@ Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
   auto netLayer = StaticCast<Ipv4SimulationHelper, Object> (m_protocolStacks[NET_LAYER][netId]);
   auto assignedIPs = netLayer->GetIpv4Helper ().Assign (devContainer);
 
-  // Ipv4StaticRoutingHelper routingHelper;
-  // auto deviceIP = assignedIPs.Get(0);
-  // Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (deviceIP.first);
+  Ipv4StaticRoutingHelper routingHelper;
+  auto deviceIP = assignedIPs.Get(0);
+  Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (deviceIP.first);
 
-  // ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), deviceIP.second);
+  ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), deviceIP.second);
 }
 
 void
