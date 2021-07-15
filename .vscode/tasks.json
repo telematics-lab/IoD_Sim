@@ -2,6 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Integrate IoD Sim with ns3",
+      "type": "shell",
+      "command": "./tools/prepare-ns3.sh",
+      "problemMatcher": []
+    },
+    {
       "label": "configure",
       "type": "shell",
       "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone",
