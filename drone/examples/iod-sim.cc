@@ -127,6 +127,7 @@ private:
   void ConfigureRegionsOfInterest ();
   void CourseChange (std::string context, Ptr<const MobilityModel> model);
   void ConfigureSimulator ();
+
   DroneContainer m_drones;
   NodeContainer m_zsps;
   NodeContainer m_remoteNodes;

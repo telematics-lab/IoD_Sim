@@ -738,7 +738,7 @@ ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
   rapidjson::FileReadStream jsonFileStream (m_configFilePtr,
                                             configFileBuffer,
                                             configFileBufferSize);
-  m_config.ParseStream (jsonFileStream);
+  m_config.ParseStream<rapidjson::kParseCommentsFlag> (jsonFileStream);
 
   // close???
 
