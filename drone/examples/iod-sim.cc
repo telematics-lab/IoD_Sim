@@ -84,6 +84,7 @@ private:
   void ConfigurePhy ();
   void ConfigureMac ();
   void ConfigureNetwork ();
+  void EnableIpv4RoutingTableReporting ();
   void ConfigureEntities (const std::string& entityKey, NodeContainer& nodes);
   void ConfigureEntityMobility (const std::string& entityKey,
                                 Ptr<EntityConfiguration> entityConf,
@@ -372,6 +373,8 @@ Scenario::ConfigureNetwork ()
           ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
                                              Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
 
+          EnableIpv4RoutingTableReporting ();
+
           m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
         }
       else
@@ -379,6 +382,24 @@ Scenario::ConfigureNetwork ()
           NS_FATAL_ERROR ("Unsupported Network Layer Type: " << layerConf->GetType ());
         }
     }
+}
+
+void
+Scenario::EnableIpv4RoutingTableReporting ()
+{
+  // this method should be called once
+  static bool hasBeenCalled = false;
+  if (hasBeenCalled)
+    return;
+  else
+    hasBeenCalled = true;
+
+  NS_LOG_FUNCTION_NOARGS ();
+
+  std::stringstream routingTableFilePath;
+  routingTableFilePath << CONFIGURATOR->GetResultsPath () << "ipv4-routing-tables.txt";
+  auto routingTableSink = Create<OutputStreamWrapper> (routingTableFilePath.str (), std::ios::out);
+  Ipv4RoutingHelper::PrintRoutingTableAllAt (Seconds (1.0), routingTableSink);
 }
 
 void
@@ -796,9 +817,6 @@ void
 Scenario::ConfigureSimulator ()
 {
   NS_LOG_FUNCTION_NOARGS ();
-
-  auto stdoutWrapper = Create<OutputStreamWrapper> (&std::cout);
-  Ipv4RoutingHelper::PrintRoutingTableAllAt (Seconds (1.0), stdoutWrapper);
 
   // Enable Report
   // Report::Get ()->Initialize (CONFIGURATOR->GetName (),
