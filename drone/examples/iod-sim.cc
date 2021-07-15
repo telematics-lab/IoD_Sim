@@ -821,7 +821,12 @@ Scenario::operator() ()
   if (CONFIGURATOR->IsDryRun ())
     return;
 
-  ShowProgress progress {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
+  std::stringstream progressLogFilePath;
+  progressLogFilePath << CONFIGURATOR->GetResultsPath () << "progress.log";
+  auto progressLogSink = Create<OutputStreamWrapper> (progressLogFilePath.str (), std::ios::out);
+
+  ShowProgress progressLog {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), (*progressLogSink->GetStream ())};
+  ShowProgress progressStdout {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
   Simulator::Run ();
   // Report Module needs the simulator context alive to introspect it
