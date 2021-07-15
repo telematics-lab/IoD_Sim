@@ -25,8 +25,9 @@
 
 #include <ns3/flight-plan.h>
 #include <ns3/lte-netdevice-configuration.h>
-#include <ns3/speed-coefficients.h>
 #include <ns3/wifi-netdevice-configuration.h>
+#include <ns3/double-vector.h>
+#include <ns3/int-vector.h>
 
 namespace ns3 {
 
@@ -167,7 +168,7 @@ RemoteConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 for (auto& c : arr) {
                   coeffs.push_back (c.GetDouble ());
                 }
-                attrValue = attrInfo.checker->CreateValidValue (SpeedCoefficientsValue (coeffs));
+                attrValue = attrInfo.checker->CreateValidValue (DoubleVectorValue (coeffs));
               }
             else if (attrName.compare("FlightPlan") == 0 && arr[0].IsObject ())
               {

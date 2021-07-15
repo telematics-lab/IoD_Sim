@@ -15,8 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef SPEED_COEFFICIENTS_H
-#define SPEED_COEFFICIENTS_H
+#ifndef INT_VECTOR_H
+#define INT_VECTOR_H
 
 #include <istream>
 #include <ostream>
@@ -24,50 +24,46 @@
 
 #include <ns3/attribute.h>
 #include <ns3/attribute-helper.h>
-#include <ns3/double.h>
+#include <ns3/integer.h>
 
 namespace ns3 {
 
 /**
- * \brief keep track of a set of coefficients.
- *
- * This is useful if we want to operate on more than one SpeedCoefficients
- * at a time or just keep them organized in a data structure and pass it to a
- * MobilityModel compatible with the IoD proposed strucutres.
+ * \brief Definition of a new attribute type, in the form vector<int>.
  */
-class SpeedCoefficients
+class IntVector
 {
 public:
-  typedef std::vector<double>::const_iterator Iterator;
+  typedef std::vector<int>::const_iterator Iterator;
 
-  SpeedCoefficients ();
-  SpeedCoefficients (std::vector<double> coefficients);
-  SpeedCoefficients (const SpeedCoefficients &a);
+  IntVector ();
+  IntVector (std::vector<int> coefficients);
+  IntVector (const IntVector &a);
 
   Iterator Begin () const;
   Iterator End () const;
 
   uint32_t GetN () const;
 
-  std::vector<double> Get () const;
-  double Get (const uint32_t i) const;
+  std::vector<int> Get () const;
+  int Get (const uint32_t i) const;
 
-  double GetFront () const;
-  double GetBack () const;
+  int GetFront () const;
+  int GetBack () const;
 
-  void Add (double coefficient);
+  void Add (int coefficient);
 
 private:
-  std::vector<double> m_speedCoefficients;
+  std::vector<int> m_IntVector;
 };
 
-ATTRIBUTE_HELPER_HEADER (SpeedCoefficients);
+ATTRIBUTE_HELPER_HEADER (IntVector);
 
 std::ostream & operator<< (std::ostream &os,
-                           const SpeedCoefficients &SpeedCoefficients);
+                           const IntVector &IntVector);
 std::istream & operator>> (std::istream &is,
-                           SpeedCoefficients &SpeedCoefficients);
+                           IntVector &IntVector);
 
 } // namespace ns3
 
-#endif /* SPEED_COEFFICIENTS_H */
+#endif /* INT_VECTOR_H */

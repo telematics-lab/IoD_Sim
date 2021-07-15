@@ -197,7 +197,7 @@ Scenario::ConfigureMobilityDrones ()
 
       mobility.SetMobilityModel (
           "ns3::ParametricSpeedDroneMobilityModel", "SpeedCoefficients",
-          SpeedCoefficientsValue (CONFIGURATOR->GetDroneSpeedCoefficients (i)), "FlightPlan",
+          DoubleVectorValue (CONFIGURATOR->GetDroneSpeedCoefficients (i)), "FlightPlan",
           FlightPlanValue (CONFIGURATOR->GetDroneFlightPlan (i)), "CurveStep",
           DoubleValue (CONFIGURATOR->GetCurveStep ()));
       mobility.Install (m_drones.Get (i));

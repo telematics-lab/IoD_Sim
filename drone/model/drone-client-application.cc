@@ -308,7 +308,7 @@ void
 DroneClientApplication::CourseChange (const std::string context,
                                       const Ptr<const MobilityModel> mobility) const
 {
-  NS_LOG_FUNCTION (context << mobility);
+  //NS_LOG_FUNCTION (context << mobility);
 
   const Vector position = mobility->GetPosition ();
   const Vector velocity = mobility->GetVelocity ();

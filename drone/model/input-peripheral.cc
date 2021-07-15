@@ -80,7 +80,6 @@ InputPeripheral::Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
   if (storage != NULL)
     {
       SetStorage (storage);
-      AcquireData ();
     }
 }
 
@@ -92,14 +91,29 @@ InputPeripheral::AcquireData (void)
 
   m_dataAcquisitionEvent.Cancel ();
 
-  if (Simulator::Now ().GetMilliSeconds () >= m_acquisitionTimeInterval.GetMilliSeconds ())
+  if (Simulator::Now ().GetMilliSeconds () >= m_acquisitionTimeInterval.GetMilliSeconds () && m_storage != NULL)
     {
       m_storage->Alloc (m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds () / 1000,
                         StoragePeripheral::bit);
     }
+  if (GetState() == PeripheralState::ON) m_dataAcquisitionEvent = Simulator::Schedule (m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
+}
 
-  m_dataAcquisitionEvent =
-      Simulator::Schedule (m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
+void
+InputPeripheral::OnChangeState(PeripheralState s)
+{
+  switch (s)
+    {
+      case OFF:
+      break;
+      case IDLE:
+        break;
+      case ON:
+        AcquireData();
+      break;
+      default:
+      break;
+    }
 }
 
 } // namespace ns3

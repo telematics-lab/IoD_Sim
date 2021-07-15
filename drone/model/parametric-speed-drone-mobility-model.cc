@@ -21,7 +21,7 @@
 #include <ns3/log.h>
 #include <ns3/object-vector.h>
 #include <ns3/simulator.h>
-#include "speed-coefficients.h"
+#include "double-vector.h"
 
 namespace ns3 {
 
@@ -38,9 +38,9 @@ ParametricSpeedDroneMobilityModel::GetTypeId ()
     .SetGroupName ("Mobility")
     .AddConstructor<ParametricSpeedDroneMobilityModel> ()
     .AddAttribute ("SpeedCoefficients", "Coefficients to construct speed curve.",
-                   SpeedCoefficientsValue (),
-                   MakeSpeedCoefficientsAccessor (&ParametricSpeedDroneMobilityModel::SetSpeedCoefficients),
-                   MakeSpeedCoefficientsChecker ())
+                   DoubleVectorValue (),
+                   MakeDoubleVectorAccessor (&ParametricSpeedDroneMobilityModel::SetSpeedCoefficients),
+                   MakeDoubleVectorChecker ())
     .AddAttribute ("FlightPlan", "The ideal trajectory that the drone should run across.",
                    FlightPlanValue (),
                    MakeFlightPlanAccessor (&ParametricSpeedDroneMobilityModel::m_flightPlan),
@@ -139,7 +139,7 @@ ParametricSpeedDroneMobilityModel::DoDispose ()
 }
 
 void
-ParametricSpeedDroneMobilityModel::SetSpeedCoefficients (const SpeedCoefficients &a)
+ParametricSpeedDroneMobilityModel::SetSpeedCoefficients (const DoubleVector &a)
 {
   for (auto c = a.Begin (); c != a.End (); c++)
     {

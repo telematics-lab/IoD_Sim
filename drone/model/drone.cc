@@ -83,7 +83,7 @@ Drone::DoInitialize (void)
 Ptr<DronePeripheralContainer>
 Drone::getPeripherals ()
 {
-  NS_LOG_FUNCTION (this);
+  //NS_LOG_FUNCTION (this);
   return m_peripheralContainer;
 }
 

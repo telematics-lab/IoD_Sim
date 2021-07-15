@@ -31,7 +31,7 @@ TypeId
 DronePeripheralContainer::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::DronePeripheralContainer")
-    .SetParent<Node> ()
+    .SetParent<Object> ()
     .SetGroupName("Network")
     .AddConstructor<DronePeripheralContainer> ()
     ;
@@ -50,10 +50,21 @@ DronePeripheralContainer::Set (std::string name, const AttributeValue &v)
   m_dronePeripheralFactory.Set (name, v);
 }
 
+void
+DronePeripheralContainer::SetDrone (Ptr<Drone> drone)
+{
+  NS_LOG_FUNCTION (this << drone);
+  NS_ASSERT (drone != NULL);
+  m_drone = drone;
+}
+
 Ptr<DronePeripheral>
 DronePeripheralContainer::Create()
 {
   auto peripheral = m_dronePeripheralFactory.Create<DronePeripheral>();
+  //if there are no trigger regions, this peripheral is always ON
+  if (peripheral->GetNRoI() == 0) peripheral->SetState(DronePeripheral::PeripheralState::ON);
+  peripheral->SetDrone(m_drone);
   m_dronePeripherals.push_back(peripheral);
   return peripheral;
 }
@@ -107,15 +118,15 @@ DronePeripheralContainer::InstallAll(Ptr<Drone> drone)
   PinStorage();
   for (auto peripheral: m_dronePeripherals)
     {
-      peripheral->SetDrone(drone);
+      //peripheral->SetDrone(drone);
       auto value = BooleanValue(false);
       if (peripheral->GetAttributeFailSafe("HasStorage", value) && value)
         {
           auto newperipheral = StaticCast<InputPeripheral, DronePeripheral>(peripheral);
           auto storageperipheral = StaticCast<StoragePeripheral, DronePeripheral>(m_dronePeripherals[0]);
           newperipheral->SetStorage(storageperipheral);
-          newperipheral->AcquireData();
         }
+      NS_LOG_DEBUG("DronePeripheralContainer: Peripheral Installed on Drone #"<<drone->GetId()<<" with State "<< peripheral->GetState());
     }
 }
 

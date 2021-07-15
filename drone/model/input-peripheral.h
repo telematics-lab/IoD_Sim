@@ -70,6 +70,13 @@ public:
    */
   void Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone);
 
+  /**
+   * \brief Executes custom operations on state transition.
+   *
+   * \param ocs new state.
+   */
+  virtual void OnChangeState(PeripheralState ocs);
+
 protected:
   void DoInitialize (void);
   void DoDispose (void);

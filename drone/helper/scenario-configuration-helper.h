@@ -35,7 +35,7 @@
 #include <ns3/network-layer-configuration.h>
 #include <ns3/phy-layer-configuration.h>
 #include <ns3/remote-configuration.h>
-#include <ns3/speed-coefficients.h>
+#include <ns3/double-vector.h>
 
 #define CONFIGURATOR ScenarioConfigurationHelper::Get ()
 
@@ -196,9 +196,9 @@ public:
   const double GetDroneMaxSpeed (uint32_t i) const;
   /**
    * \param i the drone index number.
-   * \return the speed coefficients in a specific `SpeedCoefficients` class object
+   * \return the polynomial speed coeffients.
    */
-  const SpeedCoefficients GetDroneSpeedCoefficients (uint32_t i) const;
+  const DoubleVector GetDroneSpeedCoefficients (uint32_t i) const;
   /**
    * \param i the drone index number.
    * \return the instant, in seconds, indicating the start of the application.
@@ -259,7 +259,10 @@ public:
    * \brief Check if dry run is wanted.
    */
   const bool IsDryRun () const;
-
+  /**
+   * \return a structure containing points describing regions of interest
+   */
+  const std::vector<DoubleVector> GetRegionsOfInterest() const;
 
 //  LTE SPECIFIC CONFIGURATORS
 

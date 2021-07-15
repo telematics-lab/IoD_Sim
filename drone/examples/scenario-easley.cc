@@ -50,7 +50,7 @@
 #include <ns3/flight-plan.h>
 #include <ns3/proto-point.h>
 #include <ns3/scenario-configuration-helper.h>
-#include <ns3/speed-coefficients.h>
+#include <ns3/double-vector.h>
 #include <ns3/zsp-list.h>
 
 namespace ns3 {
@@ -200,7 +200,7 @@ Scenario::ConfigureMobilityDrones ()
   for (uint32_t i = 0; i < m_drones.GetN (); i++)
     {
       mobility.SetMobilityModel ("ns3::ParametricSpeedDroneMobilityModel",
-                                 "SpeedCoefficients", SpeedCoefficientsValue(CONFIGURATOR->GetDroneSpeedCoefficients (i)),
+                                 "SpeedCoefficients", DoubleVectorValue(CONFIGURATOR->GetDroneSpeedCoefficients (i)),
                                  "FlightPlan", FlightPlanValue (CONFIGURATOR->GetDroneFlightPlan (i)),
                                  "CurveStep", DoubleValue (CONFIGURATOR->GetCurveStep ()));
 

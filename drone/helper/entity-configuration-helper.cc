@@ -25,8 +25,9 @@
 
 #include <ns3/flight-plan.h>
 #include <ns3/lte-netdevice-configuration.h>
-#include <ns3/speed-coefficients.h>
 #include <ns3/wifi-netdevice-configuration.h>
+#include <ns3/double-vector.h>
+#include <ns3/int-vector.h>
 
 namespace ns3 {
 
@@ -326,14 +327,14 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
                 attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
               }
-            else if (attrName.compare("SpeedCoefficients") == 0 && arr[0].IsNumber ())
+            else if ((attrName.compare("SpeedCoefficients") == 0 || attrName.compare("PowerConsumption") == 0) && arr[0].IsNumber ())
               {
                 std::vector<double> coeffs;
 
                 for (auto& c : arr) {
                   coeffs.push_back (c.GetDouble ());
                 }
-                attrValue = attrInfo.checker->CreateValidValue (SpeedCoefficientsValue (coeffs));
+                attrValue = attrInfo.checker->CreateValidValue (DoubleVectorValue (coeffs));
               }
             else if (attrName.compare("FlightPlan") == 0 && arr[0].IsObject ())
               {
@@ -361,6 +362,15 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                   }
 
                 attrValue = attrInfo.checker->CreateValidValue (FlightPlanValue (fp));
+              }
+            else if (attrName.compare("RoITrigger") == 0 && arr[0].IsInt ())
+              {
+                std::vector<int> coeffs;
+
+                for (auto& c : arr) {
+                  coeffs.push_back (c.GetDouble ());
+                }
+                attrValue = attrInfo.checker->CreateValidValue (IntVectorValue (coeffs));
               }
             else
               {

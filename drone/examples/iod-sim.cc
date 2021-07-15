@@ -17,6 +17,8 @@
  */
 // Standard Library
 #include <vector>
+#include <algorithm>
+
 // NS3 Core Components
 #include <ns3/config.h>
 #include <ns3/csma-module.h>
@@ -40,6 +42,7 @@
 #include <ns3/drone-energy-model-helper.h>
 #include <ns3/drone-list.h>
 #include <ns3/drone-peripheral.h>
+#include <ns3/drone-peripheral-container.h>
 #include <ns3/drone-server-application.h>
 #include <ns3/energy-source.h>
 #include <ns3/input-peripheral.h>
@@ -60,6 +63,9 @@
 #include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/zsp-list.h>
 #include <ns3/node-list.h>
+#include <ns3/traced-value.h>
+#include <ns3/trace-source-accessor.h>
+#include <ns3/interest-region-container.h>
 
 namespace ns3 {
 
@@ -118,12 +124,14 @@ private:
   void ConfigureInternetRemotes ();
   void ConfigureInternetBackbone ();
   void EnablePhyLteTraces ();
+  void ConfigureRegionsOfInterest ();
+  void CourseChange (std::string context, Ptr<const MobilityModel> model);
   void ConfigureSimulator ();
-
   DroneContainer m_drones;
   NodeContainer m_zsps;
   NodeContainer m_remoteNodes;
   NodeContainer m_backbone;
+  Ptr<InterestRegionContainer> irc = CreateObject<InterestRegionContainer>();
 
   std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
 };
@@ -150,6 +158,7 @@ Scenario::Scenario (int argc, char **argv)
   ConfigurePhy ();
   ConfigureMac ();
   ConfigureNetwork ();
+  ConfigureRegionsOfInterest();
   ConfigureEntities ("drones", m_drones);
   ConfigureEntities ("ZSPs", m_zsps);
   ConfigureInternetBackbone ();
@@ -482,7 +491,14 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
   MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
 
   if (entityKey.compare ("drones") == 0)
+  {
     mobility.Install (m_drones.Get (entityId));
+  std::ostringstream oss;
+  oss <<
+    "/NodeList/" << m_drones.Get (entityId)->GetId () <<
+    "/$ns3::MobilityModel/CourseChange";
+  Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
+  }
   else if (entityKey.compare ("ZSPs") == 0)
     mobility.Install (m_zsps.Get (entityId));
 }
@@ -708,7 +724,6 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
                                       const uint32_t& entityId)
 {
   NS_LOG_FUNCTION (entityKey << entityId << conf);
-  std::vector<Ptr<DronePeripheral>> peripherals;
   auto dronePeripheralsContainer = m_drones.Get(entityId)->getPeripherals();
   if (conf->GetPeripherals().size() == 0) return;
   for (auto perConf : conf->GetPeripherals ())
@@ -716,7 +731,12 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
       dronePeripheralsContainer->Add(perConf.GetName());
       for (auto attr : perConf.GetAttributes ())
           dronePeripheralsContainer->Set(attr.first, *attr.second);
-      dronePeripheralsContainer->Create();
+      auto peripheral = dronePeripheralsContainer->Create();
+      for (uint32_t index = 0; index< (uint32_t) peripheral->GetNRoI();index++)
+      {
+        auto reg = irc->Get(index);
+        if (!irc->Get(index)) NS_FATAL_ERROR("Region of Interest #"<<index<<" does not exist.");
+      }
     }
   dronePeripheralsContainer->InstallAll(m_drones.Get(entityId));
 }
@@ -811,6 +831,41 @@ Scenario::ConfigureInternetBackbone ()
 
   csma.EnablePcapAll (logFilePath, true);
   csma.EnableAsciiAll (logFilePath);
+}
+
+void
+Scenario::ConfigureRegionsOfInterest ()
+{
+  const auto regions = CONFIGURATOR->GetRegionsOfInterest();
+  Ptr<InterestRegion> reg;
+  for (auto region : regions)
+  {
+    reg = irc->Create(region);
+  }
+}
+
+void
+Scenario::CourseChange (std::string context, Ptr<const MobilityModel> model)
+{
+  Vector position = model->GetPosition ();
+  std::string start = "/NodeList/";
+  std::string end = "/$ns3::MobilityModel/CourseChange";
+  std::string id = context.substr(context.find(start) + start.length(), context.length() - end.length() - start.length());
+  auto dronePeripheralsContainer = m_drones.Get(std::stoi(id))->getPeripherals();
+  Ptr<DronePeripheral> peripheral;
+  std::vector<int> regionindex;
+  for (DronePeripheralContainer::Iterator i = dronePeripheralsContainer->Begin (); i != dronePeripheralsContainer->End (); i++)
+  {
+    peripheral = *i;
+    regionindex = peripheral->GetRegionsOfInterest();
+    if (regionindex.empty()) continue;
+    if (irc->IsInRegions(regionindex, position))
+    {
+      if (peripheral->GetState() != DronePeripheral::PeripheralState::ON) peripheral->SetState(DronePeripheral::PeripheralState::ON);
+    } else {
+      if (peripheral->GetState() == DronePeripheral::PeripheralState::ON) peripheral->SetState(DronePeripheral::PeripheralState::IDLE);
+    }
+  }
 }
 
 void

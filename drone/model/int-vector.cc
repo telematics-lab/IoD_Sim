@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "speed-coefficients.h"
+#include "int-vector.h"
 
 #include <ns3/integer.h>
 #include <ns3/names.h>
@@ -23,13 +23,13 @@
 
 namespace ns3 {
 
-ATTRIBUTE_HELPER_CPP (SpeedCoefficients);
+ATTRIBUTE_HELPER_CPP (IntVector);
 
-SpeedCoefficients::SpeedCoefficients ()
+IntVector::IntVector ()
 {
 }
 
-SpeedCoefficients::SpeedCoefficients (std::vector<double> coeffs)
+IntVector::IntVector (std::vector<int> coeffs)
 {
   for (auto c : coeffs)
     {
@@ -37,7 +37,7 @@ SpeedCoefficients::SpeedCoefficients (std::vector<double> coeffs)
     }
 }
 
-SpeedCoefficients::SpeedCoefficients (const SpeedCoefficients &a)
+IntVector::IntVector (const IntVector &a)
 {
   for (auto c = a.Begin (); c != a.End (); c++)
     {
@@ -45,30 +45,30 @@ SpeedCoefficients::SpeedCoefficients (const SpeedCoefficients &a)
     }
 }
 
-SpeedCoefficients::Iterator
-SpeedCoefficients::Begin () const
+IntVector::Iterator
+IntVector::Begin () const
 {
-  return m_speedCoefficients.begin ();
+  return m_IntVector.begin ();
 }
 
-SpeedCoefficients::Iterator
-SpeedCoefficients::End () const
+IntVector::Iterator
+IntVector::End () const
 {
-  return m_speedCoefficients.end ();
+  return m_IntVector.end ();
 }
 
 uint32_t
-SpeedCoefficients::GetN () const
+IntVector::GetN () const
 {
-  return m_speedCoefficients.size ();
+  return m_IntVector.size ();
 }
 
-std::vector<double>
-SpeedCoefficients::Get () const
+std::vector<int>
+IntVector::Get () const
 {
-  std::vector<double> v;
+  std::vector<int> v;
 
-  for (auto c : m_speedCoefficients)
+  for (auto c : m_IntVector)
     {
       v.push_back (c);
     }
@@ -76,32 +76,32 @@ SpeedCoefficients::Get () const
   return v;
 }
 
-double
-SpeedCoefficients::Get (const uint32_t i) const
+int
+IntVector::Get (const uint32_t i) const
 {
-  return m_speedCoefficients[i];
+  return m_IntVector[i];
 }
 
-double
-SpeedCoefficients::GetFront () const
+int
+IntVector::GetFront () const
 {
-  return m_speedCoefficients.front ();
+  return m_IntVector.front ();
 }
 
-double
-SpeedCoefficients::GetBack () const
+int
+IntVector::GetBack () const
 {
-  return m_speedCoefficients.back ();
+  return m_IntVector.back ();
 }
 
 void
-SpeedCoefficients::Add (double coeff)
+IntVector::Add (int coeff)
 {
-  m_speedCoefficients.push_back (coeff);
+  m_IntVector.push_back (coeff);
 }
 
 std::ostream &
-operator<< (std::ostream &os, const SpeedCoefficients &coeffs)
+operator<< (std::ostream &os, const IntVector &coeffs)
 {
   os << coeffs.GetN () << ";";
 
@@ -116,11 +116,11 @@ operator<< (std::ostream &os, const SpeedCoefficients &coeffs)
 }
 
 std::istream &
-operator>> (std::istream &is, SpeedCoefficients &coeffs)
+operator>> (std::istream &is, IntVector &coeffs)
 {
   char separator = '\0';
   uint32_t n;
-  double coeff;
+  int coeff;
 
   is >> n >> separator;
   if (separator != ';')

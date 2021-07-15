@@ -75,6 +75,7 @@ StoragePeripheral::DoDispose ()
 void
 StoragePeripheral::Alloc (int amount, unit amountUnit)
 {
+  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Alloc opeation not possible."); return;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
   if (amount * amountUnit <= m_remainingCapacity)
     {
@@ -89,6 +90,7 @@ StoragePeripheral::Alloc (int amount, unit amountUnit)
 void
 StoragePeripheral::Free (int amount, unit amountUnit)
 {
+  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
   if (amount * amountUnit < m_capacity - m_remainingCapacity)
     m_remainingCapacity += amount * amountUnit;

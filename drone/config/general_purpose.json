@@ -2,7 +2,12 @@
     "name": "IoD Sim",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 100,
+    "duration": 50,
+    "world": {
+        "regionsOfInterest": [
+            [2.0, 15.0, 2.0, 15.0, 0.0, 50.0]
+        ]
+    },
     "staticNs3Config": [{
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
@@ -268,7 +273,11 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
+                    },
+                    {
+                        "name": "RoITrigger",
+                        "value": [0]
                     }
                 ]
             },
@@ -277,7 +286,7 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
                     },
                     {
                         "name": "Capacity",
@@ -290,7 +299,7 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
                     },
                     {
                         "name": "DataRate",
@@ -352,6 +361,7 @@
         "DroneEnergyModel",
         "Scenario",
         "DronePeripheral",
+        "DronePeripheralContainer",
         "StoragePeripheral",
         "InputPeripheral"
     ]

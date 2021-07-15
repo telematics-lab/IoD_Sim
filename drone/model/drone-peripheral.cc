@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "drone-peripheral.h"
+#include <ns3/integer.h>
+#include "vector-type.h"
 
 namespace ns3 {
 
@@ -30,16 +32,22 @@ DronePeripheral::GetTypeId ()
           .SetParent<Object> ()
           .SetGroupName ("Peripheral")
           .AddConstructor<DronePeripheral> ()
-          .AddAttribute ("PowerConsumption", "The power consumption of the peripheral in J/s",
-                         DoubleValue (0),
-                         MakeDoubleAccessor (&DronePeripheral::m_powerConsumption),
-                         MakeDoubleChecker<double> ())
+          .AddAttribute ("PowerConsumption", "The power consumption [J/s] of the peripheral, in OFF|IDLE|ON states",
+                   DoubleVectorValue (),
+                   MakeDoubleVectorAccessor (&DronePeripheral::SetPowerConsumptionStates),
+                   MakeDoubleVectorChecker ())
+          .AddAttribute ("RoITrigger", "Indexes of Regions of Interest",
+                   IntVectorValue (),
+                   MakeIntVectorAccessor (&DronePeripheral::SetRegionsOfInterest),
+                   MakeIntVectorChecker ())
           ;
   return tid;
 }
 
 DronePeripheral::DronePeripheral ()
 {
+  m_state = OFF;
+  m_powerConsumption = 0;
 }
 
 void
@@ -53,6 +61,7 @@ void
 DronePeripheral::DoInitialize (void)
 {
   NS_LOG_FUNCTION (this);
+  SetState(IDLE);
   Object::DoInitialize ();
 }
 
@@ -75,6 +84,80 @@ DronePeripheral::GetPowerConsumption (void)
 {
   NS_LOG_FUNCTION (this);
   return m_powerConsumption;
+}
+void
+DronePeripheral::SetPowerConsumption(double pc)
+{
+  NS_LOG_FUNCTION (this);
+  m_powerConsumption = pc;
+}
+
+DronePeripheral::PeripheralState
+DronePeripheral::GetState(void)
+{
+  return m_state;
+}
+
+void
+DronePeripheral::SetState(PeripheralState s)
+{
+  m_state = s;
+  switch (s)
+    {
+      case OFF:
+        SetPowerConsumption(GetPowerConsumptionStates()[0]);
+      break;
+      case IDLE:
+        SetPowerConsumption(GetPowerConsumptionStates()[1]);
+      break;
+      case ON:
+        SetPowerConsumption(GetPowerConsumptionStates()[2]);
+      break;
+    }
+  if (GetDrone () != NULL) NS_LOG_DEBUG ("DronePeripheral on Drone #" << GetDrone ()->GetId ()<< ": changing peripheral state to "<<GetState());
+  OnChangeState(s);
+}
+
+void
+DronePeripheral::OnChangeState(PeripheralState ocs)
+{
+
+}
+
+void
+DronePeripheral::SetPowerConsumptionStates (const DoubleVector &a)
+{
+  for (auto c = a.Begin (); c != a.End (); c++)
+    {
+      m_powerConsumptionStates.push_back(*c);
+    }
+}
+
+std::vector<double>
+DronePeripheral::GetPowerConsumptionStates (void)
+{
+  return m_powerConsumptionStates;
+}
+
+void
+DronePeripheral::SetRegionsOfInterest (const IntVector &a)
+{
+  for (auto c = a.Begin (); c != a.End (); c++)
+    {
+      m_roi.push_back(*c);
+    }
+}
+
+std::vector<int>
+DronePeripheral::GetRegionsOfInterest (void)
+{
+  return m_roi;
+}
+
+int
+DronePeripheral::GetNRoI (void)
+{
+  return m_roi.size();
 }
 
 } //namespace ns3

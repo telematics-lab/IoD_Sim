@@ -47,7 +47,7 @@ def build(bld):
         'model/phy-layer-configuration.cc',
         'model/planner.cc',
         'model/proto-point.cc',
-        'model/speed-coefficients.cc',
+        'model/double-vector.cc',
         'model/wifi-mac-layer-configuration.cc',
         'model/wifi-phy-layer-configuration.cc',
         'model/lte-phy-layer-configuration.cc',
@@ -61,7 +61,10 @@ def build(bld):
         'model/drone.cc',
         'model/drone-container.cc',
         'model/wifi-netdevice-configuration.cc',
-        'model/remote-configuration.cc'
+        'model/remote-configuration.cc',
+        'model/interest-region.cc',
+        'model/interest-region-container.cc',
+        'model/int-vector.cc'
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -109,7 +112,7 @@ def build(bld):
         'model/phy-layer-configuration.h',
         'model/planner.h',
         'model/proto-point.h',
-        'model/speed-coefficients.h',
+        'model/double-vector.h',
         'model/wifi-mac-layer-configuration.h',
         'model/wifi-phy-layer-configuration.h',
         'model/lte-phy-layer-configuration.h',
@@ -124,7 +127,11 @@ def build(bld):
         'model/drone-container.h',
         'model/wifi-netdevice-configuration.h',
         'model/remote-configuration.h',
-        'helper/debug-helper.h'
+        'helper/debug-helper.h',
+        'model/interest-region.h',
+        'model/interest-region-container.h',
+        'model/int-vector.h',
+        'model/vector-type.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

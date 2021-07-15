@@ -86,6 +86,13 @@ public:
   Iterator End (void) const;
 
   /**
+   * \brief Sets the pointer of the drone.
+   *
+   * \param drone Pointer of the drone.
+   */
+  void SetDrone (Ptr<Drone> drone);
+
+  /**
    * \brief Get the number of Ptr<DronePeripheral> stored in this container.
    *
    * \returns the number of Ptr<DronePeripheral> stored in this container.
@@ -121,6 +128,7 @@ private:
 
   std::vector<Ptr<DronePeripheral> > m_dronePeripherals; //!< Drone peripherals smart pointers
   ObjectFactory m_dronePeripheralFactory;
+  Ptr<Drone> m_drone;
 };
 
 } // namespace ns3

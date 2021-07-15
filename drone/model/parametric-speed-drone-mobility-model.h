@@ -26,7 +26,7 @@
 #include "flight-plan.h"
 #include "planner.h"
 #include "proto-point.h"
-#include "speed-coefficients.h"
+#include "double-vector.h"
 
 namespace ns3 {
 
@@ -51,7 +51,7 @@ private:
   virtual Vector DoGetPosition () const;
   virtual Vector DoGetVelocity () const;
 
-  void SetSpeedCoefficients (const SpeedCoefficients &a);
+  void SetSpeedCoefficients (const DoubleVector &a);
 protected:
   mutable Vector m_position;
   mutable Vector m_velocity;

@@ -538,7 +538,7 @@ ScenarioConfigurationHelper::GetDroneMaxSpeed (uint32_t i) const
   return drone["maxSpeed"].GetDouble ();
 }
 
-const SpeedCoefficients
+const DoubleVector
 ScenarioConfigurationHelper::GetDroneSpeedCoefficients (uint32_t i) const
 {
   // checks for drones were already made in ::ConfGetNumDrones.
@@ -546,7 +546,7 @@ ScenarioConfigurationHelper::GetDroneSpeedCoefficients (uint32_t i) const
   const auto drones = m_config["drones"].GetArray ();
   const auto drone  = drones[i].GetObject ();
 
-  SpeedCoefficients speedCoefficients;
+  DoubleVector speedCoefficients;
 
   NS_ASSERT (drone.HasMember ("speedCoefficients")
              && drone["speedCoefficients"].IsArray ()
@@ -1395,7 +1395,28 @@ ScenarioConfigurationHelper::GetString (const std::string& path) const
   return std::make_pair<bool, std::string> (true, value->GetString ());
 }
 
-
-
+const std::vector<DoubleVector>
+ScenarioConfigurationHelper::GetRegionsOfInterest() const
+{
+  std::vector<DoubleVector> final_regions;
+  const auto world = m_config["world"].GetObject ();
+  if (world.HasMember ("regionsOfInterest"))
+  {
+    const auto regions = world["regionsOfInterest"].GetArray();
+    for (auto region = regions.Begin (); region != regions.End (); region++)
+    {
+      const auto xMin = (*region)[0].GetDouble();
+      const auto xMax = (*region)[1].GetDouble();
+      const auto yMin = (*region)[2].GetDouble();
+      const auto yMax = (*region)[3].GetDouble();
+      const auto zMin = (*region)[4].GetDouble();
+      const auto zMax = (*region)[5].GetDouble();
+      final_regions.push_back(DoubleVector({
+        xMin,xMax,yMin,yMax,zMin,zMax
+      }));
+    }
+  }
+  return final_regions;
+}
 
 } // namespace ns3

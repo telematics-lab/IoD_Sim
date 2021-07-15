@@ -2,7 +2,7 @@
     "name": "IoD Sim",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 50,
+    "duration": 25,
     "staticNs3Config": [{
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
@@ -38,6 +38,9 @@
                 "floors": 5,
                 "rooms": [2, 2]
             }
+        ],
+        "regionsOfInterest": [
+            [2.0, 15.0, 2.0, 15.0, 0.0, 50.0]
         ]
     },
 
@@ -258,7 +261,7 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
                     }
                 ]
             },
@@ -267,7 +270,7 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
                     },
                     {
                         "name": "Capacity",
@@ -280,11 +283,19 @@
                 "attributes":[
                     {
                         "name": "PowerConsumption",
-                        "value": 1.0
+                        "value": [0, 1.0, 5.0]
                     },
                     {
                         "name": "DataRate",
                         "value": 1e+6
+                    },
+                    {
+                        "name": "HasStorage",
+                        "value": "true"
+                    },
+                    {
+                        "name": "RoITrigger",
+                        "value": [0]
                     }
                 ]
 
@@ -385,6 +396,11 @@
         "LteHelper",
         "NoBackhaulEpcHelper",
         "LteEnbNetDevice",
-        "DroneClientApplication"
+        "DroneClientApplication",
+        "DronePeripheral",
+        "DronePeripheralContainer",
+        "InputPeripheral",
+        "StoragePeripheral",
+        "DroneEnergyModel"
     ]
 }
