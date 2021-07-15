@@ -29,16 +29,49 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("Curve");
 
+class CurvePriv
+{
+public:
+  /**
+   * Get virtual knots according to real knots' interest level.
+   */
+  static const FlightPlan GetVirtualKnots (const FlightPlan knots)
+  {
+    FlightPlan virtualKnots {};
+
+    for (auto k = knots.Begin (); k != knots.End(); k++)
+      {
+        auto interestLevel = (*k)->GetInterest ();
+
+        if (interestLevel <= 1)
+          {
+            virtualKnots.Add (*k);
+          }
+        else
+          {
+            for (uint32_t i = 0; i < interestLevel; i++)
+              {
+                virtualKnots.Add (*k);
+              }
+          }
+      }
+
+    return virtualKnots;
+  }
+};
+
 Curve::Curve (const FlightPlan knots,
               const float step) :
-  m_knots {knots},
+  m_knots {CurvePriv::GetVirtualKnots (knots)},
+  m_knotsN {knots.GetN ()},
   m_step {step}
 {
   NS_LOG_FUNCTION (knots.GetN () << step);
 }
 
 Curve::Curve (const FlightPlan knots) :
-  m_knots {knots}
+  m_knots {CurvePriv::GetVirtualKnots (knots)},
+  m_knotsN {knots.GetN ()}
 {
   NS_LOG_FUNCTION (knots.GetN ());
 }
@@ -60,7 +93,7 @@ Curve::Generate () const
 
   double absoluteDistance = 0.0;
 
-  NS_LOG_LOGIC ("Constructing Bézier curve with " << m_knots.GetN () << " knots.");
+  NS_LOG_LOGIC ("Constructing Bézier curve with " << m_knotsN << " knots.");
   for (float t = 0.0; t < 1.0; t += m_step) {
     const Vector point = GetPoint (t);
     double relativeDistance = 0.0;

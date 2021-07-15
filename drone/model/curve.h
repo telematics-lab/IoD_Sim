@@ -83,7 +83,8 @@ protected:
 
   mutable std::vector<CurvePoint> m_curve;  /// The ordered set of points
                                             /// representing the curve.
-  FlightPlan m_knots;  /// Flight plan used to generate the curve.
+  FlightPlan m_knots;  /// Flight plan (as in virtual knots) used to generate the curve.
+  size_t m_knotsN;     /// Number of real knots being used to generate the curve.
   float m_step;        /// Step of the curve.
 };
 
