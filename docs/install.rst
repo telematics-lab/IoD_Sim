@@ -44,8 +44,7 @@ a ``$``, it means that the command can be run as a user. In case of a ``#``, it 
 You can prefix the command with ``sudo`` to request root privileges temporarily. Furthermore, if a command line ends with
 a ``\``, please continue the command by following the next line.
 
-.. code-block:: bash
-  :linenos:
+::
 
   # apt update
   # apt install --no-install-recommends -y \
@@ -56,10 +55,7 @@ Clone IoD Sim
 =============
 The cloning process is a specific process of ``git`` software that allows distribute code sharing among engineers.
 Once you have the *git clone URL* at hand, you can clone the remote repository on your Linux environment with the
-following command. Then, you can start VSCode to jump to the next step in the guide:
-
-.. code-block:: bash
-  :linenos:
+following command. Then, you can start VSCode to jump to the next step in the guide::
 
   $ git clone <Paste_IoD_Sim_git_clone_URL_here>
   $ code IoD_Sim/
