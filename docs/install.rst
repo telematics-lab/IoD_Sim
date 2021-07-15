@@ -31,8 +31,8 @@ a safe working environment by following this mini-guide:
 1. Install Docker and VSCode.
 2. Clone IoD Sim source code with git on your Linux environment.
 3. Open the IoD Sim directory with VSCode.
-4. Install VSCode "Remote - Containers" extension.
-5. Run `Remote-Containers: Rebuild And Reopen In Container` from VSCode Command Palette.
+4. Install VSCode ``Remote - Containers`` extension.
+5. Run ``Remote-Containers: Rebuild And Reopen In Container`` from VSCode Command Palette.
 
 After this set of operations, you can skip this guide to the configuration and build of IoD Sim.
 
@@ -40,9 +40,9 @@ After this set of operations, you can skip this guide to the configuration and b
 Required Software Packages
 ==========================
 The following packages must be installed in order to compile and run IoD Sim. If you see the bash command prefixed with
-a `$`, it means that the command can be run as a user. In case of a `#`, it means that you have to be the `root` user.
-You can prefix the command with `sudo` to request root privileges temporarily. Furthermore, if a command line ends with
-a `\`, please continue the command by following the next line.
+a ``$``, it means that the command can be run as a user. In case of a ``#``, it means that you have to be the ``root`` user.
+You can prefix the command with ``sudo`` to request root privileges temporarily. Furthermore, if a command line ends with
+a ``\``, please continue the command by following the next line.
 
 .. code-block:: bash
   :linenos:
@@ -54,8 +54,8 @@ a `\`, please continue the command by following the next line.
 
 Clone IoD Sim
 =============
-The cloning process is a specific process of `git` software that allows distribute code sharing among engineers.
-Once you have the _git clone URL_ at hand, you can clone the remote repository on your Linux environment with the
+The cloning process is a specific process of ``git`` software that allows distribute code sharing among engineers.
+Once you have the *git clone URL* at hand, you can clone the remote repository on your Linux environment with the
 following command. Then, you can start VSCode to jump to the next step in the guide:
 
 .. code-block:: bash
@@ -72,27 +72,27 @@ it possible that VSCode suggests some extensions to install. Please do so in ord
 IoD Sim.
 
 When extension install has finished, you can proceed with configuration and compilation of IoD Sim.
-In order to configure IoD Sim project, from VSCode Command Palette select `Task: Run Task` and then
-`Integrate IoD Sim with ns3`.
+In order to configure IoD Sim project, from VSCode Command Palette select ``Task: Run Task`` and then
+``Integrate IoD Sim with ns3``.
 
-After the integration completes, run the task `configure`. This task emits an colored output. You can check yellow and
+After the integration completes, run the task ``configure``. This task emits an colored output. You can check yellow and
 red text to evaluate source code configuration. Most yellow and red messages can be ignored, as they are not relevant
 for IoD Sim. Please ensure that the output is green for the following checks:
 
-* `Checking for 'gcc' (C compiler)`
-* `Checking for 'g++' (C++ compiler)`
-* `Checking for program 'pkg-config'`
-* `Checking for 'libxml-2.0 >= 2.7'`
-* `Checking for 'gsl'`
-* `Examples`
-* `GNU Scientific Library (GSL)`
+* ``Checking for 'gcc' (C compiler)``
+* ``Checking for 'g++' (C++ compiler)``
+* ``Checking for program 'pkg-config'``
+* ``Checking for 'libxml-2.0 >= 2.7'``
+* ``Checking for 'gsl'``
+* ``Examples``
+* ``GNU Scientific Library (GSL)``
 
-If the `configure` task was executed successfully, it is now time to run `build` task.
+If the ``configure`` task was executed successfully, it is now time to run ``build`` task.
 
 Run a Scenario to Verify the Compilation
 ========================================
-To check if the compilation went without problems, you can execute the task `run IoD Sim`. Simulation output files will
-be stored in the `results/` directory.
+To check if the compilation went without problems, you can execute the task ``run IoD Sim``. Simulation output files will
+be stored in the ``results/`` directory.
 
 Conclusions
 ===========
