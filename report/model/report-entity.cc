@@ -320,46 +320,64 @@ ReportEntity::IsWifiNetDevice (Ptr<NetDevice> device)
 const std::tuple<const std::string, const std::string>
 ReportEntity::GetIpv4Address ()
 {
-  std::stringstream bPath;
+  const auto node = NodeList::GetNode (m_reference);
+  const auto nodeIpv4 = node->GetObject<Ipv4> ();
 
-  bPath << "/NodeList/" << m_reference << "/ApplicationList/*";
-  auto matches = Config::LookupMatches (bPath.str ());
+  if (nodeIpv4 == nullptr)
+    return std::tuple<const std::string, const std::string> {"", ""};
 
-  for (std::size_t i = 0; i < matches.GetN (); i++)
-    {
-      auto match = matches.Get (i);
-      const auto matchClassName = match->GetInstanceTypeId ().GetName ();
+  // FIXME: we should bring all addresses available for all interfaces
+  const auto firstIpv4Addr = nodeIpv4->GetAddress (0, 0);
+
+  std::stringstream localIpv4AddrBuilder, netmaskIpv4AddrBuilder;
+  firstIpv4Addr.GetLocal ().Print (localIpv4AddrBuilder);
+  firstIpv4Addr.GetBroadcast ().Print (netmaskIpv4AddrBuilder);
+
+  return {localIpv4AddrBuilder.str (), netmaskIpv4AddrBuilder.str ()};
+
+
+  // REMOVE FROM HERE
+  // std::stringstream bPath;
+
+  // bPath << "/NodeList/" << m_reference;
+  // auto matches = Config::LookupMatches (bPath.str ());
+
+  // for (std::size_t i = 0; i < matches.GetN (); i++)
+  //   {
+      // auto match = StaticCast<Node, Object> (matches.Get (i));
+      // const auto matchClassName = match->GetInstanceTypeId ();
 
       /*
+       * FIXME: this is not valid anymore!
        * Assumption: only one DroneClient is available on a Drone and
        *             only one DroneServer is available on a ZSP
        */
-      if (matchClassName == "ns3::DroneClientApplication"
-          || matchClassName == "ns3::DroneServerApplication")
-        {
-          TypeId::AttributeInformation info;
-          Ipv4AddressValue ipv4Address;
-          Ipv4MaskValue ipv4NetMask;
-          std::stringstream bIpv4Address,
-                            bIpv4NetMask;
+      // if (matchClassName == "ns3::DroneClientApplication"
+      //     || matchClassName == "ns3::DroneServerApplication")
+      //   {
+      //     TypeId::AttributeInformation info;
+      //     Ipv4AddressValue ipv4Address;
+      //     Ipv4MaskValue ipv4NetMask;
+      //     std::stringstream bIpv4Address,
+      //                       bIpv4NetMask;
 
-          match->GetInstanceTypeId ().LookupAttributeByName ("Ipv4Address",
-                                                             &info);
-          // This method should support Ptr<> type!
-          info.accessor->Get (&(*match), ipv4Address);
-          match->GetInstanceTypeId ().LookupAttributeByName ("Ipv4SubnetMask",
-                                                             &info);
-          info.accessor->Get (&(*match), ipv4NetMask);
+      //     match->GetInstanceTypeId ().LookupAttributeByName ("Ipv4Address",
+      //                                                        &info);
+      //     // This method should support Ptr<> type!
+      //     info.accessor->Get (&(*match), ipv4Address);
+      //     match->GetInstanceTypeId ().LookupAttributeByName ("Ipv4SubnetMask",
+      //                                                        &info);
+      //     info.accessor->Get (&(*match), ipv4NetMask);
 
-          bIpv4Address << ipv4Address.Get ();
-          bIpv4NetMask << ipv4NetMask.Get ();
+      //     bIpv4Address << ipv4Address.Get ();
+      //     bIpv4NetMask << ipv4NetMask.Get ();
 
-          return {bIpv4Address.str (), bIpv4NetMask.str ()};
-        }
-    }
+      //     return {bIpv4Address.str (), bIpv4NetMask.str ()};
+      //   }
+    // }
 
-  NS_FATAL_ERROR ("Expected to find a Client/Server Application on "
-                  "entity, but it was not there!");
+  // NS_FATAL_ERROR ("Expected to find a Client/Server Application on "
+  //                 "entity, but it was not there!");
 }
 
 } // namespace ns3
