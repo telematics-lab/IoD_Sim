@@ -64,7 +64,6 @@ private:
   mutable EventId m_sendEvent;
   TracedCallback<Ptr<const Packet>> m_txTrace;
 
-  double m_duration;
   mutable int32_t m_sequenceNumber; // correlated with the node, not the connection
 };
 

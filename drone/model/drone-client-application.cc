@@ -47,9 +47,9 @@ DroneClientApplication::GetTypeId ()
                    UintegerValue (80),
                    MakeUintegerAccessor (&DroneClientApplication::m_destPort),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Duration", "Duration of the application.",
-                   DoubleValue (120.0),
-                   MakeDoubleAccessor (&DroneClientApplication::m_duration),
+    .AddAttribute ("TransmissionInterval", "Interval between the transmission of packets, in seconds.",
+                   DoubleValue (1.0),
+                   MakeDoubleAccessor (&DroneClientApplication::m_interval),
                    MakeDoubleChecker<double> ())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                      MakeTraceSourceAccessor (&DroneClientApplication::m_txTrace),
@@ -214,9 +214,7 @@ DroneClientApplication::SendPacket (const Intent i,
       Ptr<Packet> packet = Create<Packet> ((const uint8_t*) json,
                                            strlen (json) * sizeof (char));
 
-      socket->SendTo (packet,
-                      0,
-                      InetSocketAddress (targetAddress, m_destPort));
+      socket->SendTo (packet, 0, InetSocketAddress (targetAddress, m_destPort));
       m_txTrace (packet);
 
       NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
@@ -234,6 +232,11 @@ void
 DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 {
   NS_LOG_FUNCTION (socket);
+
+  TypeId::AttributeInformation appInfo;
+  DoubleValue appStopTime;
+  NS_ASSERT (GetTypeId ().LookupAttributeByName ("StopTime", &appInfo));
+  appInfo.accessor->Get (this, appStopTime);
 
   Ptr<Packet> packet;
   Address senderAddr;
@@ -268,8 +271,9 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 
               m_state = CONNECTED;
 
-              // TODO: make this number parametric, so it is possible to decide the burst intensity of DroneClientApplication messages
-              for (double i = 1.0; i < m_duration; i += 1.0)
+              // It's safe to use Simulator::Now() here because we execute this code during the simulation.
+              // If we use Application Start Time attribute, we risk to insert events in the past, which is pure garbage.
+              for (double i = Simulator::Now ().GetSeconds (); i < appStopTime.Get (); i += m_interval)
                 {
                   Simulator::ScheduleWithContext (GetNode ()->GetId (),
                                                   Seconds (i),

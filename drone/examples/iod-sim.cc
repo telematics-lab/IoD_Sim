@@ -438,11 +438,11 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
   if (entityKey.compare ("drones") == 0)
   {
     mobility.Install (m_drones.Get (entityId));
-  std::ostringstream oss;
-  oss <<
-    "/NodeList/" << m_drones.Get (entityId)->GetId () <<
-    "/$ns3::MobilityModel/CourseChange";
-  Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
+    std::ostringstream oss;
+    oss <<
+      "/NodeList/" << m_drones.Get (entityId)->GetId () <<
+      "/$ns3::MobilityModel/CourseChange";
+    Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
   }
   else if (entityKey.compare ("ZSPs") == 0)
     mobility.Install (m_zsps.Get (entityId));
@@ -601,8 +601,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
       const auto appName = appConf.GetName ();
       if (appName.compare("ns3::DroneClientApplication") == 0)
         {
-          auto app = CreateObjectWithAttributes<DroneClientApplication>
-            ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+          auto app = CreateObject<DroneClientApplication> ();
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);
@@ -615,8 +614,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
         }
       else if (appName.compare("ns3::DroneServerApplication") == 0)
         {
-          auto app = CreateObjectWithAttributes<DroneServerApplication>
-            ("Duration", DoubleValue (CONFIGURATOR->GetDuration ()));
+          auto app = CreateObject<DroneServerApplication> ();
 
           if (entityKey.compare("drones") == 0)
             m_drones.Get (entityId)->AddApplication (app);

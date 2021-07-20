@@ -139,7 +139,7 @@ private:
   mutable int32_t m_sequenceNumber; // correlated with the drone, not the connection
   mutable ClientState m_state; /// the state of the client
 
-  double m_duration;
+  double m_interval;
 
   TracedCallback<Ptr<const Packet>> m_txTrace;
 };

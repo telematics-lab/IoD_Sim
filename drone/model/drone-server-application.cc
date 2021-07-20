@@ -42,10 +42,6 @@ DroneServerApplication::GetTypeId ()
                    UintegerValue (80),
                    MakeUintegerAccessor (&DroneServerApplication::m_port),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Duration", "Duration of the application.",
-                   DoubleValue (120.0),
-                   MakeDoubleAccessor (&DroneServerApplication::m_duration),
-                   MakeDoubleChecker<double> ())
   ;
 
   return tid;
@@ -95,11 +91,10 @@ DroneServerApplication::StartApplication ()
 
           m_socket->SetAllowBroadcast (true);
           m_socket->Bind (InetSocketAddress (Ipv4Address::GetAny (), m_port));
-          m_socket->SetRecvCallback
-            (MakeCallback (&DroneServerApplication::ReceivePacket, this));
+          m_socket->SetRecvCallback (MakeCallback (&DroneServerApplication::ReceivePacket, this));
 
-          NS_LOG_INFO ("[Node " << GetNode ()->GetId () <<
-                       "] new server socket (" << m_socket << ")");
+          NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] "
+                       "new server socket (" << m_socket << ")");
         }
 
       m_state = SERVER_LISTEN;
@@ -210,8 +205,7 @@ DroneServerApplication::SendHelloAck (const Ptr<Socket> socket,
   writer.EndObject ();
 
   const char *json = jsonBuf.GetString ();
-  const auto packet = Create<Packet>
-    ((const uint8_t *) json, strlen (json) * sizeof (char));
+  const auto packet = Create<Packet> ((const uint8_t *) json, strlen (json) * sizeof (char));
 
   socket->SendTo (packet, 0, InetSocketAddress (senderAddr, senderPort));
   m_txTrace (packet);
@@ -223,8 +217,8 @@ DroneServerApplication::SendUpdateAck (const Ptr<Socket> socket,
                                        const uint32_t senderPort) const
 {
   NS_LOG_FUNCTION (socket << senderAddr);
-  NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-               << "] sending UPDATE ACK back.");
+  NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] "
+               "sending UPDATE ACK back.");
 
   const std::string command = PacketType (PacketType::UPDATE_ACK).ToString ();
 
@@ -239,8 +233,7 @@ DroneServerApplication::SendUpdateAck (const Ptr<Socket> socket,
   writer.EndObject ();
 
   const char *json = jsonBuf.GetString ();
-  const auto packet = Create<Packet>
-    ((const uint8_t *) json, strlen (json) * sizeof (char));
+  const auto packet = Create<Packet> ((const uint8_t *) json, strlen (json) * sizeof (char));
 
   socket->SendTo (packet, 0, InetSocketAddress (senderAddr, senderPort));
   m_txTrace (packet);
