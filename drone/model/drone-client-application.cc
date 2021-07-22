@@ -233,11 +233,6 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 {
   NS_LOG_FUNCTION (socket);
 
-  TypeId::AttributeInformation appInfo;
-  DoubleValue appStopTime;
-  NS_ASSERT (GetTypeId ().LookupAttributeByName ("StopTime", &appInfo));
-  appInfo.accessor->Get (this, appStopTime);
-
   Ptr<Packet> packet;
   Address senderAddr;
 
@@ -273,7 +268,7 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 
               // It's safe to use Simulator::Now() here because we execute this code during the simulation.
               // If we use Application Start Time attribute, we risk to insert events in the past, which is pure garbage.
-              for (double i = Simulator::Now ().GetSeconds (); i < appStopTime.Get (); i += m_interval)
+              for (double i = Simulator::Now ().GetSeconds (); i < m_stopTime.GetSeconds (); i += m_interval)
                 {
                   Simulator::ScheduleWithContext (GetNode ()->GetId (),
                                                   Seconds (i),
