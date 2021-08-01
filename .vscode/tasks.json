@@ -47,11 +47,23 @@
       "problemMatcher": []
     },
     {
-      "label": "run IoD Sim",
+      "label": "Run IoD Sim",
       "type": "shell",
       "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Profile IoD Sim",
+      "type": "shell",
+      "command": "valgrind --tool=callgrind ${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug --config=${input:configFileGeneralPurpose}",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3",
+        "env": {
+          "LD_LIBRARY_PATH": "${workspaceFolder}/ns3/build/lib/"
+        }
       },
       "group": "test"
     },
