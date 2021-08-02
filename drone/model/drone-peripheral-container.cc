@@ -138,9 +138,16 @@ DronePeripheralContainer::PinStorage(void)
     if (m_dronePeripherals[i]->GetInstanceTypeId() == StoragePeripheral::GetTypeId())
     {
       std::swap(m_dronePeripherals[0], m_dronePeripherals[i]);
+      m_storage = true;
       break;
     }
   }
+}
+
+bool
+DronePeripheralContainer::thereIsStorage(void)
+{
+  return m_storage;
 }
 
 } // namespace ns3

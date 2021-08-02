@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_SIMULATION_H
 #define REPORT_SIMULATION_H
@@ -27,6 +27,7 @@
 
 #include "report-container.h"
 #include "simulation-duration.h"
+#include "report-world.h"
 
 namespace ns3 {
 
@@ -91,6 +92,8 @@ private:
 
   ReportContainer<ReportDrone> m_drones;  /// Report of drones
   ReportContainer<ReportZsp>   m_zsps;    /// Report of ZSPs
+  ReportContainer<ReportRemote>   m_remotes;    /// Report of Remotes
+  ReportWorld m_world; /// Report of World
 };
 
 } // namespace ns3

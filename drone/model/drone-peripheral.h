@@ -109,6 +109,11 @@ public:
    */
   int GetNRoI (void);
 
+  /**
+   * \return Gets the power consumption vector for each state.
+   */
+  std::vector<double> GetPowerConsumptionStates (void);
+
 protected:
   virtual void DoDispose (void);
   virtual void DoInitialize (void);
@@ -126,11 +131,6 @@ protected:
    * \param a Structure describing the power consumption for OFF|IDLE|ON state
    */
   void SetPowerConsumptionStates (const DoubleVector &a);
-
-  /**
-   * \return Gets the power consumption vector for each state.
-   */
-  std::vector<double> GetPowerConsumptionStates (void);
 
   /**
    * \brief Sets the trigger regions of interest.

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_DRONE_H
 #define REPORT_DRONE_H
@@ -33,6 +33,7 @@
 #include "report-location.h"
 #include "report-protocol-stack.h"
 #include "report-transfer.h"
+#include "report-peripheral.h"
 
 namespace ns3 {
 
@@ -74,22 +75,22 @@ private:
   void DoInitializeTrajectoryMonitor ();
 
   /**
-   * Explore a given drone object and build an abstraction of its network stacks
-   */
-  void DoInitializeNetworkStacks ();
-
-  /**
    * Callback to monitor drone trajectory
    *
    * \params mobility the mobility model of the drone to inspect
    */
   void DoMonitorTrajectory (const Ptr<const MobilityModel> mobility);
 
+  /**
+   * Initialize Peripherals
+   */
+  void DoInitializePeripherals ();
+
 
   /// drone trajectory
   std::vector<ReportLocation> m_trajectory;
-  /// abstract representation of the network stacks used
-  std::vector<ReportProtocolStack> m_networkStacks;
+  std::vector<int> m_roi;
+  std::vector<ReportPeripheral> m_peripherals;
 };
 
 } // namespace ns3

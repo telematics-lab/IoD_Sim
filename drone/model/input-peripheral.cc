@@ -116,4 +116,22 @@ InputPeripheral::OnChangeState(PeripheralState s)
     }
 }
 
+double
+InputPeripheral::GetDatarate ()
+{
+  return m_dataRate;
+}
+
+Time
+InputPeripheral::GetAcquisitionTimeInterval ()
+{
+  return m_acquisitionTimeInterval;
+}
+
+bool
+InputPeripheral::HasStorage ()
+{
+  return m_hasStorage;
+}
+
 } // namespace ns3

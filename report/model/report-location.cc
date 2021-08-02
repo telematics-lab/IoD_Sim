@@ -25,9 +25,18 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("ReportLocation");
 
+ReportLocation::ReportLocation (Vector position, Time instant, int roi) :
+  m_position {position},
+  m_instant {instant},
+  m_roi {roi}
+{
+  NS_LOG_FUNCTION (this << position << instant);
+}
+
 ReportLocation::ReportLocation (Vector position, Time instant) :
   m_position {position},
-  m_instant {instant}
+  m_instant {instant},
+  m_roi {-2}
 {
   NS_LOG_FUNCTION (this << position << instant);
 }
@@ -40,6 +49,12 @@ ReportLocation::ReportLocation ()
 ReportLocation::~ReportLocation ()
 {
   NS_LOG_FUNCTION (this);
+}
+
+Vector
+ReportLocation::GetPosition()
+{
+  return m_position;
 }
 
 void
@@ -76,6 +91,12 @@ ReportLocation::Write (xmlTextWriterPtr h)
 
   rc = xmlTextWriterWriteElement (h, BAD_CAST "t", BAD_CAST bT.str ().c_str ());
   NS_ASSERT (rc >= 0);
+
+  if (m_roi != -2)
+  {
+    rc = xmlTextWriterWriteElement (h, BAD_CAST "RoI", BAD_CAST std::to_string(m_roi).c_str ());
+    NS_ASSERT (rc >= 0);
+  }
 
   rc = xmlTextWriterEndElement(h);
   NS_ASSERT (rc >= 0);

@@ -15,52 +15,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-#ifndef REPORT_LOCATION_H
-#define REPORT_LOCATION_H
-#include <ns3/nstime.h>
+#ifndef REPORT_WORLD_H
+#define REPORT_WORLD_H
 #include <ns3/vector.h>
 
 #include <libxml/xmlwriter.h>
+#include <ns3/interest-region-container.h>
 
 namespace ns3 {
 
-class ReportLocation
+class ReportWorld
 {
 public:
     /**
-     * Initialize a report location with a given position, instant, and region of interest
+     * Initialize a world report
      */
-    ReportLocation (Vector position, Time instant, int roi);
-    /**
-     * Initialize a report location with a given position and instant
-     */
-    ReportLocation (Vector position, Time instant);
-    /**
-     * Default constructor for commodity purposes
-     */
-    ReportLocation ();
+    ReportWorld ();
     /**
      * Default destructor
      */
-    ~ReportLocation ();
-    /**
-   * \return the position vector
-   */
-    Vector GetPosition();
+    ~ReportWorld ();
     /**
      * Write Zsp report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on
      */
-    void Write (xmlTextWriterPtr handle);
-private:
-    Vector m_position;  /// the position descibing the location
-    Time m_instant;     /// the time at which this position is assumed
-    int m_roi;
+    void Write (xmlTextWriterPtr handle) const;
 };
 
 } // namespace ns3
 
-#endif /* REPORT_LOCATION_H */
+#endif /* REPORT_WORLD_H */

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
 #include "report-simulation.h"
 
@@ -56,8 +56,9 @@ ReportSimulation::GetTypeId ()
 }
 
 ReportSimulation::ReportSimulation () :
-  m_drones {"drones"},
-  m_zsps {"zsps"}
+  m_drones {"Drones"},
+  m_zsps {"ZSPs"},
+  m_remotes {"Remotes"}
 {
   NS_LOG_FUNCTION (this);
 }
@@ -104,8 +105,10 @@ ReportSimulation::Write (xmlTextWriterPtr h) const
 
   /* Nested Elements */
   m_duration.Write (h);
+  m_world.Write (h);
   m_zsps.Write (h);
   m_drones.Write (h);
+  m_remotes.Write (h);
 
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
@@ -118,6 +121,7 @@ ReportSimulation::ProbeSimulation ()
 
   PopulateEntities ("/DroneList/*", &m_drones);
   PopulateEntities ("/ZspList/*", &m_zsps);
+  PopulateEntities ("/RemoteList/*", &m_remotes);
 }
 
 template <class EntityContainer>

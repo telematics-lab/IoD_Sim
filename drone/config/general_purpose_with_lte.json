@@ -2,7 +2,7 @@
     "name": "IoD Sim",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 25,
+    "duration": 10,
     "staticNs3Config": [{
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
@@ -234,6 +234,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "FreeData",
+                        "value": "true"
                     }
                 ]
             },
@@ -298,6 +302,10 @@
                     },
                     {
                         "name": "Capacity",
+                        "value": 8000000
+                    },
+                    {
+                        "name": "InitialRemainingCapacity",
                         "value": 8000000
                     }
                 ]

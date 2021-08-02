@@ -47,7 +47,6 @@ public:
     for (auto iNode = NodeList::Begin (); iNode != NodeList::End (); iNode++)
       {
         std::cout << std::endl << (*iNode)->GetInstanceTypeId () << std::endl;
-
         auto nDevices = (*iNode)->GetNDevices ();
         std::cout << "There are " << nDevices << " devices" << std::endl;
 
@@ -74,7 +73,29 @@ public:
 
     std::cout << "********************************************************************************" << std::endl;
   }
+
+  static void ObjectAttributes(Ptr<Object> o)
+  {
+      for (size_t n=0; n < o->GetInstanceTypeId ().GetParent().GetAttributeN(); n++)
+      {
+          TypeId::AttributeInformation attrInfo = o->GetInstanceTypeId ().GetParent().GetAttribute(n);
+          Ptr<AttributeValue> attrValue;
+          std::string attrName = o->GetInstanceTypeId ().GetParent().GetAttribute(n).name;
+          std::string typeidvalue = attrInfo.checker->GetValueTypeName();
+          std::cout<<attrName<<" "<<typeidvalue<<" "<<attrInfo.initialValue->SerializeToString(attrInfo.checker)<<std::endl;
+      }
+      for (size_t n=0; n < o->GetInstanceTypeId ().GetAttributeN(); n++)
+      {
+          TypeId::AttributeInformation attrInfo = o->GetInstanceTypeId ().GetAttribute(n);
+          Ptr<AttributeValue> attrValue;
+          std::string attrName = o->GetInstanceTypeId ().GetAttribute(n).name;
+          std::string typeidvalue = attrInfo.checker->GetValueTypeName();
+          std::cout<<attrName<<" "<<typeidvalue<<" "<<attrInfo.initialValue->SerializeToString(attrInfo.checker)<<std::endl;
+      }
+}
 };
+
+
 
 } // namespace ns3
 

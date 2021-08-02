@@ -24,6 +24,9 @@
 #include <ns3/network-module.h>
 #include <ns3/internet-module.h>
 #include "drone-communications.h"
+#include "drone.h"
+#include "drone-list.h"
+#include "storage-peripheral.h"
 
 namespace ns3 {
 
@@ -42,6 +45,10 @@ DroneServerApplication::GetTypeId ()
                    UintegerValue (80),
                    MakeUintegerAccessor (&DroneServerApplication::m_port),
                    MakeUintegerChecker<uint32_t> ())
+    .AddAttribute ("StoreData", "Store data if the StoragePeripheral is available.",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&DroneServerApplication::m_storage),
+                   MakeBooleanChecker())
   ;
 
   return tid;
@@ -139,6 +146,12 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
             (packet->GetSize () + 1, sizeof (uint8_t));
 
           packet->CopyData (payload, packet->GetSize ());
+          if (GetNode ()->GetInstanceTypeId().GetName() == "ns3::Drone" && DroneList::GetDrone(GetNode ()->GetId ())->getPeripherals()->thereIsStorage() && m_storage)
+          {
+            Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral>(DroneList::GetDrone(GetNode ()->GetId ())->getPeripherals()->Get(0));
+            if (storage->Alloc(strlen ((char*) payload) * sizeof (char),StoragePeripheral::byte))
+              NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Stored " << strlen ((char*) payload) * sizeof (char) << " bytes ");
+          }
 
           NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
                         << "] packet contents: " << (char*) payload);

@@ -116,6 +116,11 @@ public:
    */
   void InstallAll(Ptr<Drone> drone);
 
+  /**
+   * \return the presence of storage peripheral
+   */
+  bool thereIsStorage();
+
 protected:
   void virtual DoInitialize (void);
   void virtual DoDispose (void);
@@ -129,6 +134,7 @@ private:
   std::vector<Ptr<DronePeripheral> > m_dronePeripherals; //!< Drone peripherals smart pointers
   ObjectFactory m_dronePeripheralFactory;
   Ptr<Drone> m_drone;
+  bool m_storage = false;
 };
 
 } // namespace ns3

@@ -29,6 +29,12 @@
 #include <ns3/simulator.h>
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
+#include <ns3/interest-region-container.h>
+#include <ns3/drone.h>
+#include <ns3/drone-list.h>
+#include <ns3/report-helper.h>
+#include <ns3/storage-peripheral.h>
+#include <ns3/input-peripheral.h>
 
 #include <rapidjson/document.h>
 
@@ -56,6 +62,7 @@ ReportDrone::GetTypeId ()
 
 ReportDrone::ReportDrone ()
 {
+  DoInitializePeripherals();
   NS_LOG_FUNCTION (this);
 }
 
@@ -77,7 +84,7 @@ ReportDrone::DoWrite (xmlTextWriterPtr h)
 
   int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "drone");
+  rc = xmlTextWriterStartElement (h, BAD_CAST "Drone");
   NS_ASSERT (rc >= 0);
 
   /* Nested Elements */
@@ -90,11 +97,69 @@ ReportDrone::DoWrite (xmlTextWriterPtr h)
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "networkStacks");
+  rc = xmlTextWriterStartElement (h, BAD_CAST "Peripherals");
   NS_ASSERT (rc >= 0);
 
-  for (auto& stack : m_networkStacks)
-    stack.Write (h);
+  for (auto p : m_peripherals)
+    p.Write (h);
+
+  rc = xmlTextWriterEndElement (h);
+  NS_ASSERT (rc >= 0);
+
+  rc = xmlTextWriterStartElement (h, BAD_CAST "NetDevices");
+  NS_ASSERT (rc >= 0);
+
+  for (int nid = 0; nid < (int) m_networkStacks.size(); nid++)
+  {
+    rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevice");
+    NS_ASSERT (rc >= 0);
+
+    m_networkStacks[nid].Write (h);
+
+    rc = xmlTextWriterStartElement (h, BAD_CAST "dataTx");
+    NS_ASSERT (rc >= 0);
+
+    for (auto rid=m_dataTx.begin(); rid !=m_dataTx.end();)
+    {
+      if ((*rid)->GetIface() == nid)
+      {
+        (*rid)->Write (h);
+        m_dataTx.erase(rid);
+      } else {
+        rid++;
+      }
+    }
+    rc = xmlTextWriterEndElement (h);
+    NS_ASSERT (rc >= 0);
+
+    rc = xmlTextWriterStartElement (h, BAD_CAST "dataRx");
+    NS_ASSERT (rc >= 0);
+
+    for (auto rid=m_dataRx.begin(); rid !=m_dataRx.end();)
+    {
+      if ((*rid)->GetIface() == nid)
+      {
+        (*rid)->Write (h);
+        m_dataRx.erase(rid);
+      } else {
+        rid++;
+      }
+    }
+
+    rc = xmlTextWriterEndElement (h);
+    NS_ASSERT (rc >= 0);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT (rc >= 0);
+  }
+  rc = xmlTextWriterEndElement (h);
+  NS_ASSERT (rc >= 0);
+
+  rc = xmlTextWriterStartElement (h, BAD_CAST "dataTx");
+  //broadcast
+  NS_ASSERT (rc >= 0);
+
+  for (auto rid=m_dataTx.begin(); rid !=m_dataTx.end();rid++) (*rid)->Write (h);
 
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
@@ -102,20 +167,11 @@ ReportDrone::DoWrite (xmlTextWriterPtr h)
   rc = xmlTextWriterStartElement (h, BAD_CAST "dataRx");
   NS_ASSERT (rc >= 0);
 
-  for (auto& transfer : m_dataRx)
-    transfer->Write (h);
+  for (auto rid=m_dataRx.begin(); rid !=m_dataRx.end();rid++) (*rid)->Write (h);
 
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
-
-  rc = xmlTextWriterStartElement (h, BAD_CAST "dataTx");
-  NS_ASSERT (rc >= 0);
-
-  for (auto& transfer : m_dataTx)
-    transfer->Write (h);
-
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+ //////
 
   rc = xmlTextWriterStartElement (h, BAD_CAST "cumulativeDataTx");
   NS_ASSERT (rc >= 0);
@@ -156,54 +212,34 @@ void
 ReportDrone::DoMonitorTrajectory (const Ptr<const MobilityModel> mobility)
 {
   NS_LOG_FUNCTION (mobility);
-  const Vector position = mobility->GetPosition ();
+  Ptr<Node> drone = NodeList::GetNode(m_reference);
+  Vector position = mobility->GetPosition ();
 
-  m_trajectory.push_back (ReportLocation (position, Simulator::Now ()));
+  if (m_trajectory.size() == 0 || m_trajectory.back().GetPosition() != position)
+  {
+    m_trajectory.push_back (ReportLocation (position, Simulator::Now (), irc->IsInRegions(position)));
+    m_roi.push_back (irc->IsInRegions(position));
+  }
 }
 
 void
-ReportDrone::DoInitializeNetworkStacks ()
+ReportDrone::DoInitializePeripherals ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  Ptr<Node> drone = NodeList::GetNode(m_reference);
-  std::vector<uint32_t> ifaces;   // ifaces that needs to be registered
+  Ptr<Drone> drone = DroneList::GetDrone(m_reference);
+  auto percont = drone->getPeripherals();
 
-  if (drone == nullptr)
-    NS_FATAL_ERROR ("Report is trying to monitor NodeId " << m_reference << ", "
-                    "but the object is null!");
-
-  for (uint32_t i = 0; i < drone->GetNDevices (); i++)
+  for (auto p=percont->Begin(); p != percont->End(); p++)
+  {
+    m_peripherals.push_back(ReportPeripheral((*p)->GetInstanceTypeId().GetName(),(*p)->GetPowerConsumptionStates(),(*p)->GetRegionsOfInterest()));
+    if ((*p)->GetInstanceTypeId().GetName() == "ns3::StoragePeripheral") m_peripherals.back().AddAttribute({"Capacity",std::to_string(StaticCast<StoragePeripheral,DronePeripheral>((*p))->GetCapacity())});
+    if ((*p)->GetInstanceTypeId().GetName() == "ns3::InputPeripheral")
     {
-      auto dev = drone->GetDevice (i);
-
-      if (IsWifiNetDevice (dev))
-        {
-          auto inspector = WifiInspector (dev);
-          auto phyLayer = CreateObjectWithAttributes<WifiPhyLayer>
-            ("Frequency", IntegerValue (inspector.GetCarrierFrequency ()),
-              "Standard", StringValue (inspector.GetWifiStandard ()),
-              "PropagationDelayModel", StringValue (inspector.GetPropagationDelayModel ()),
-              "PropagationLossModel", StringValue (inspector.GetPropagationLossModel ()));
-          auto macLayer = CreateObjectWithAttributes<WifiMacLayer>
-            ("Ssid", StringValue (inspector.GetWifiSsid ()),
-             "Mode", StringValue (inspector.GetWifiMode ()));
-          auto ipv4AddressMask = GetIpv4Address ();
-          auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
-            ("Ipv4Address", StringValue (std::get<0> (ipv4AddressMask)),
-             "SubnetMask", StringValue (std::get<1> (ipv4AddressMask)));
-          auto droneControlLayer = CreateObjectWithAttributes<DroneControlLayer>
-            ("NotImplemented", StringValue ());
-
-          phyLayer->Initialize ();
-
-          ifaces.push_back (i);
-          m_networkStacks.push_back ({});
-          m_networkStacks.back ().Add (phyLayer);
-          m_networkStacks.back ().Add (macLayer);
-          m_networkStacks.back ().Add (ipv4Layer);
-          m_networkStacks.back ().Add (droneControlLayer);
-        }
+      Ptr<InputPeripheral> inper = StaticCast<InputPeripheral,DronePeripheral>((*p));
+      m_peripherals.back().AddAttribute({"DataRate",std::to_string(inper->GetDatarate())});
+      m_peripherals.back().AddAttribute({"DataAcquisitionTimeInterval",std::to_string(inper->GetAcquisitionTimeInterval().GetSeconds())});
+      m_peripherals.back().AddAttribute({"HasStorage",inper->HasStorage()? "true" : "false"});
     }
+  }
 }
 
 } // namespace ns3

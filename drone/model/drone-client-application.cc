@@ -26,6 +26,10 @@
 #include "drone-client-application.h"
 #include "drone-communications.h"
 #include "constant-acceleration-drone-mobility-model.h"
+#include "drone.h"
+#include "drone-list.h"
+#include "storage-peripheral.h"
+#include "drone-peripheral.h"
 
 namespace ns3 {
 
@@ -54,6 +58,10 @@ DroneClientApplication::GetTypeId ()
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                      MakeTraceSourceAccessor (&DroneClientApplication::m_txTrace),
                      "ns3::Packet::TracedCallback")
+    .AddAttribute ("FreeData", "Free data if the StoragePeripheral is available.",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&DroneClientApplication::m_storage),
+                   MakeBooleanChecker())
     ;
 
   return tid;
@@ -215,6 +223,11 @@ DroneClientApplication::SendPacket (const Intent i,
                                            strlen (json) * sizeof (char));
 
       socket->SendTo (packet, 0, InetSocketAddress (targetAddress, m_destPort));
+      if (GetNode ()->GetInstanceTypeId().GetName() == "ns3::Drone" && DroneList::GetDrone(nodeId)->getPeripherals()->thereIsStorage() && m_storage)
+      {
+         Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral>(DroneList::GetDrone(nodeId)->getPeripherals()->Get(0));
+         if (storage->Free(strlen (json) * sizeof (char),StoragePeripheral::byte)) NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Freed " << strlen (json) * sizeof (char) << " bytes ");
+      }
       m_txTrace (packet);
 
       NS_LOG_INFO ("[Node " << GetNode ()->GetId ()

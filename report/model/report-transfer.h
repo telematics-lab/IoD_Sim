@@ -50,6 +50,7 @@ public:
    */
   ~ReportTransfer ();
 
+  int32_t GetIface();
   /**
    * Write Transfer report data to a XML file with a given handler
    *
@@ -57,6 +58,10 @@ public:
    */
   void Write (xmlTextWriterPtr handle);
 private:
+  /// entityid
+  uint32_t m_entityid;
+  /// netdevice id
+  int32_t m_iface;
   /// the type of transfer
   PacketType m_type;
   /// the direction related to the monitored entity (Tx or Rx?)

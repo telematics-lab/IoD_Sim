@@ -15,63 +15,45 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>
+ * Authors: Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-#include "report-protocol-stack.h"
+#include "protocol-layer.h"
 
 #include <ns3/log.h>
+#include <ns3/string.h>
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("ReportProtocolStack");
+NS_LOG_COMPONENT_DEFINE ("ProtocolLayer");
+NS_OBJECT_ENSURE_REGISTERED (ProtocolLayer);
 
-ReportProtocolStack::ReportProtocolStack ()
+TypeId
+ProtocolLayer::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::ProtocolLayer")
+    .AddConstructor<ProtocolLayer> ()
+    .SetParent<Object>()
+    .AddAttribute ("InstanceType", "The InstanceTypeId",
+                   StringValue (),
+                   MakeStringAccessor (&ProtocolLayer::m_instancetypeid),
+                   MakeStringChecker ())
+    ;
+
+  return tid;
+}
+
+ProtocolLayer::ProtocolLayer ()
 {
   NS_LOG_FUNCTION (this);
 }
 
-ReportProtocolStack::Iterator
-ReportProtocolStack::Begin () const
+ProtocolLayer::~ProtocolLayer ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-
-  return m_layers.begin ();
-}
-
-ReportProtocolStack::Iterator
-ReportProtocolStack::End () const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  return m_layers.end ();
-}
-
-uint32_t
-ReportProtocolStack::GetN () const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  return m_layers.size ();
-}
-
-Ptr<ProtocolLayer>
-ReportProtocolStack::Get (const uint32_t i) const
-{
-  NS_LOG_FUNCTION (i);
-
-  return m_layers[i];
+  NS_LOG_FUNCTION (this);
 }
 
 void
-ReportProtocolStack::Add (Ptr<ProtocolLayer> layer)
-{
-  NS_LOG_FUNCTION (layer);
-
-  m_layers.push_back (layer);
-}
-
-void
-ReportProtocolStack::Write (xmlTextWriterPtr h)
+ProtocolLayer::Write (xmlTextWriterPtr h)
 {
   NS_LOG_FUNCTION (h);
   if (h == nullptr)
@@ -81,9 +63,12 @@ ReportProtocolStack::Write (xmlTextWriterPtr h)
       return;
     }
 
-  /* Nested Elements */
-  for (auto& layer : m_layers)
-    layer->Write (h);
+  int rc;
+
+  rc = xmlTextWriterWriteElement(h,
+                                 BAD_CAST "type",
+                                 BAD_CAST m_instancetypeid.c_str ());
+  NS_ASSERT (rc >= 0);
 }
 
 } // namespace ns3

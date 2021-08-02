@@ -15,40 +15,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-#ifndef REPORT_LOCATION_H
-#define REPORT_LOCATION_H
-#include <ns3/nstime.h>
+#ifndef REPORT_PERIPHERAL_H
+#define REPORT_PERIPHERAL_H
 #include <ns3/vector.h>
 
 #include <libxml/xmlwriter.h>
 
 namespace ns3 {
 
-class ReportLocation
+class ReportPeripheral
 {
 public:
     /**
-     * Initialize a report location with a given position, instant, and region of interest
+     * Initialize a report peripheral with a given power consumptions and regions of interest
      */
-    ReportLocation (Vector position, Time instant, int roi);
-    /**
-     * Initialize a report location with a given position and instant
-     */
-    ReportLocation (Vector position, Time instant);
-    /**
-     * Default constructor for commodity purposes
-     */
-    ReportLocation ();
+    ReportPeripheral (std::string, std::vector<double>, std::vector<int>);
     /**
      * Default destructor
      */
-    ~ReportLocation ();
+    ~ReportPeripheral ();
     /**
-   * \return the position vector
-   */
-    Vector GetPosition();
+     * \param a tuple containing the name and the value (string) of an additional attribute
+     */
+    void AddAttribute(std::tuple<std::string, std::string>);
     /**
      * Write Zsp report data to a XML file with a given handler
      *
@@ -56,11 +47,12 @@ public:
      */
     void Write (xmlTextWriterPtr handle);
 private:
-    Vector m_position;  /// the position descibing the location
-    Time m_instant;     /// the time at which this position is assumed
-    int m_roi;
+    std::string m_tid;
+    std::vector<double> m_powerConsumptionStates; //!< Power consumptions for each state
+    std::vector<int> m_roi; //!< Regions of interest indexes
+    std::vector<std::tuple<std::string, std::string>> m_otherAttributes;
 };
 
 } // namespace ns3
 
-#endif /* REPORT_LOCATION_H */
+#endif /* REPORT_PERIPHERAL_H */

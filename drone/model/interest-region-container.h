@@ -21,14 +21,17 @@
 #include <vector>
 #include <ns3/boolean.h>
 #include <ns3/object-factory.h>
+#include <ns3/singleton.h>
 #include "interest-region.h"
+
+#define irc InterestRegionContainer::Get()
 
 namespace ns3 {
 
 /**
  * \brief Keeps track of a set of region of interest pointers.
  */
-class InterestRegionContainer : public Object
+class InterestRegionContainer : public Singleton<InterestRegionContainer>
 {
 public:
   /**
@@ -36,9 +39,10 @@ public:
    *
    * \returns the object TypeId
    */
-  static TypeId GetTypeId (void);
+  // static TypeId GetTypeId (void);
 
-  InterestRegionContainer(){}
+  InterestRegionContainer();
+  ~InterestRegionContainer();
 
   /// Container iterator
   typedef std::vector<Ptr<InterestRegion>>::const_iterator Iterator;
@@ -49,7 +53,7 @@ public:
    * \param coords 3D coordinates of the desired box
    * \return The RoI pointer created
    */
-  Ptr<InterestRegion> Create (const DoubleVector &coords);
+  const Ptr<InterestRegion> Create (const DoubleVector &coords);
 
   /**
    * \brief An iterator which refers to the first RoI in the
@@ -81,20 +85,19 @@ public:
    * \param i the index of the requested RoI pointer.
    * \returns the requested RoI pointer.
    */
-  Ptr<InterestRegion> Get (uint32_t i) const;
+  Ptr<InterestRegion> GetRoI (uint32_t i);
 
   /**
    * \brief Verifies that a certain point belongs to a set of regions
    *
    * \param indexes vector of regions' indexes.
    * \param position Vector of 3D coordinates describing the point.
-   * \returns condition meeting
+   * \returns -1 If it does not belong to any region
+   *          -2 If the region vector is empty
+   *          <index> If it does belong to a region
    */
-  bool IsInRegions(std::vector<int> indexes, Vector &position);
-
-protected:
-  void virtual DoInitialize (void);
-  void virtual DoDispose (void);
+  int IsInRegions(std::vector<int> indexes, Vector &position);
+  int IsInRegions(Vector &position);
 
 private:
   std::vector<Ptr<InterestRegion>> m_interestRegions; //!< Regions smart pointers

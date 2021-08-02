@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_ENTITY_H
 #define REPORT_ENTITY_H
@@ -82,12 +82,6 @@ protected:
   virtual void DoInitializeTrajectoryMonitor ();
 
   /**
-   * Explore a given entity object and build an abstraction of
-   * its network stacks
-   */
-  virtual void DoInitializeNetworkStacks ();
-
-  /**
    * Callback to monitor entity trajectory
    *
    * \params mobility the mobility model of the entity to inspect
@@ -129,7 +123,7 @@ protected:
    * \param drone the drone to inspect
    * \return a tuple with the IPv4 address and its Network Mask
    */
-  const std::tuple<const std::string, const std::string> GetIpv4Address ();
+  const std::tuple<const int32_t, const std::string, const std::string> GetIpv4Address (Ptr<const NetDevice> dev);
 
   /// cumulative Stats in Rx
   std::vector<Ptr<ReportDataStats>> m_cumulativeDataRx;
@@ -139,6 +133,8 @@ protected:
   std::vector<Ptr<ReportTransfer>> m_dataRx;
   /// monitored traffic Tx
   std::vector<Ptr<ReportTransfer>> m_dataTx;
+  /// abstract representation of the network stacks used
+  std::vector<ReportProtocolStack> m_networkStacks;
 
   uint32_t m_reference;    /// Entity UID of reference
 private:
@@ -164,6 +160,11 @@ private:
    * \param direction the direction of the traffic flow
    */
   void DoInitializeTrafficMonitor (TransferDirection direction);
+
+  /**
+   * Build an abstraction of entity's network stacks
+   */
+  void DoInitializeNetworkStacks ();
 };
 
 } // namespace ns3

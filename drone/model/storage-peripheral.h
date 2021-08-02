@@ -69,7 +69,7 @@ public:
    * \param amount Amount of data.
    * \param amountUnit Unit of measure.
    */
-  void Alloc (int amount, unit amountUnit);
+  bool Alloc (int amount, unit amountUnit);
 
   /**
    * \brief Frees a certain amount of data from the drive.
@@ -77,7 +77,7 @@ public:
    * \param amount Amount of data.
    * \param amountUnit Unit of measure.
    */
-  void Free (int amount, unit amountUnit);
+  bool Free (int amount, unit amountUnit);
 
 protected:
   void DoInitialize (void);

@@ -37,6 +37,14 @@ ReportTransfer::GetTypeId ()
   static TypeId tid = TypeId ("ns3::ReportTransfer")
     .AddConstructor<ReportTransfer> ()
     .SetParent<Object> ()
+    .AddAttribute ("EntityID", "The id of entity",
+                   IntegerValue (),
+                   MakeIntegerAccessor (&ReportTransfer::m_entityid),
+                   MakeIntegerChecker<std::uint32_t> ())
+    .AddAttribute ("Interface", "The ipv4 interface number",
+                   IntegerValue (),
+                   MakeIntegerAccessor (&ReportTransfer::m_iface),
+                   MakeIntegerChecker<std::int32_t> ())
     .AddAttribute ("PacketType", "The Type of the Packet",
                    PacketTypeValue (),
                    MakePacketTypeAccessor (&ReportTransfer::m_type),
@@ -84,6 +92,11 @@ ReportTransfer::~ReportTransfer ()
   NS_LOG_FUNCTION (this);
 }
 
+int32_t
+ReportTransfer::GetIface ()
+{
+  return m_iface;
+}
 void
 ReportTransfer::Write (xmlTextWriterPtr h)
 {
@@ -107,6 +120,16 @@ ReportTransfer::Write (xmlTextWriterPtr h)
   rc = xmlTextWriterWriteAttribute (h,
                                     BAD_CAST "type",
                                     BAD_CAST m_type.ToString ());
+  NS_ASSERT (rc >= 0);
+
+  rc = xmlTextWriterWriteAttribute (h,
+                                    BAD_CAST "entityid",
+                                    BAD_CAST std::to_string(m_entityid).c_str());
+  NS_ASSERT (rc >= 0);
+
+  rc = xmlTextWriterWriteAttribute (h,
+                                    BAD_CAST "iface",
+                                    BAD_CAST std::to_string(m_iface).c_str());
   NS_ASSERT (rc >= 0);
 
   /* Nested Elements */

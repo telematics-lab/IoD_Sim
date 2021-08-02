@@ -142,6 +142,7 @@ private:
   double m_interval;
 
   TracedCallback<Ptr<const Packet>> m_txTrace;
+  bool m_storage = false;
 };
 
 } // namespace ns3

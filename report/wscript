@@ -11,6 +11,7 @@ def build(bld):
     module.source = [
             'model/drone-control-layer.cc',
             'model/ipv4-layer.cc',
+            'model/protocol-layer.cc',
             'model/report-container.cc',
             'model/report-data-stats.cc',
             'model/report-drone.cc',
@@ -26,7 +27,10 @@ def build(bld):
             'model/wifi-inspector.cc',
             'model/wifi-mac-layer.cc',
             'model/wifi-phy-layer.cc',
-            'helper/report-helper.cc'
+            'helper/report-helper.cc',
+            'model/report-peripheral.cc',
+            'model/report-world.cc',
+            'model/report-remote.cc'
         ]
 
     module.use.append('LIBXML2')
@@ -57,7 +61,10 @@ def build(bld):
             'model/wifi-inspector.h',
             'model/wifi-mac-layer.h',
             'model/wifi-phy-layer.h',
-            'helper/report-helper.h'
+            'helper/report-helper.h',
+            'model/report-peripheral.h',
+            'model/report-world.h',
+            'model/report-remote.h'
         ]
 
     #if bld.env.ENABLE_EXAMPLES:

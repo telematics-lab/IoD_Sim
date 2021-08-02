@@ -36,6 +36,10 @@ StoragePeripheral::GetTypeId ()
                          MakeIntegerAccessor (&StoragePeripheral::SetCapacity,
                                               &StoragePeripheral::GetCapacity),
                          MakeIntegerChecker<int> (0))
+          .AddAttribute ("InitialRemainingCapacity", "The initial capacity of the disk in bit",
+                         IntegerValue (8e+6), //1MByte
+                         MakeIntegerAccessor (&StoragePeripheral::m_remainingCapacity),
+                         MakeIntegerChecker<int> (0))
           .AddTraceSource ("RemainingCapacity", "Remaining Capacity at Storage Peripheral.",
                            MakeTraceSourceAccessor (&StoragePeripheral::m_remainingCapacity),
                            "ns3::TracedValueCallback::Integer")
@@ -72,31 +76,37 @@ StoragePeripheral::DoDispose ()
   DronePeripheral::DoDispose ();
 }
 
-void
+bool
 StoragePeripheral::Alloc (int amount, unit amountUnit)
 {
-  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Alloc opeation not possible."); return;}
+  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Alloc opeation not possible."); return false;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
   if (amount * amountUnit <= m_remainingCapacity)
     {
       m_remainingCapacity -= amount * amountUnit;
       NS_LOG_DEBUG ("StoragePeripheral:Available memory on Drone #"
                     << GetDrone ()->GetId () << ": " << m_remainingCapacity << " bits");
+      return true;
     }
   else
     NS_LOG_INFO ("StoragePeripheral:Not enough memory on Drone #" << GetDrone ()->GetId ());
+    return false;
 }
 
-void
+bool
 StoragePeripheral::Free (int amount, unit amountUnit)
 {
-  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return;}
+  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return false;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
   if (amount * amountUnit < m_capacity - m_remainingCapacity)
+  {
     m_remainingCapacity += amount * amountUnit;
-  else
+    return true;
+  } else {
     NS_LOG_INFO ("StoragePeripheral:Impossible to free more memory than occupied on Drone #"
                  << GetDrone ()->GetId ());
+    return false;
+  }
 }
 
 } // namespace ns3

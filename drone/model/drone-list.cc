@@ -21,7 +21,7 @@
 
 #include <ns3/config.h>
 #include <ns3/log.h>
-#include <ns3/node.h>
+#include <ns3/drone.h>
 #include <ns3/object.h>
 #include <ns3/object-vector.h>
 #include <ns3/simulator.h>
@@ -50,9 +50,9 @@ public:
    * \param drone drone to add
    * \returns index of drone in list
    *
-   * This method should be called automatically from Node::Node at this time.
+   * This method should be called automatically from Drone::Drone at this time.
    */
-  uint32_t Add (Ptr<Node> drone);
+  uint32_t Add (Ptr<Drone> drone);
 
   /**
    * \returns a C++ iterator located at the beginning of this list.
@@ -65,10 +65,10 @@ public:
   DroneList::Iterator End () const;
 
   /**
-   * \param n index of requested node.
+   * \param n index of requested Drone.
    * \returns the Drone (Node) associated to index n.
    */
-  Ptr<Node> GetDrone (uint32_t n);
+  Ptr<Drone> GetDrone (uint32_t n);
 
   /**
    * \returns the number of drones currently in the list.
@@ -98,7 +98,7 @@ private:
    */
   virtual void DoDispose ();
 
-  std::vector<Ptr<Node>> m_drones; //!< drone objects container
+  std::vector<Ptr<Drone>> m_drones; //!< drone objects container
 };
 
 TypeId
@@ -110,7 +110,7 @@ DroneListPriv::GetTypeId ()
     .AddAttribute ("DroneList", "The list of all drones created during the simulation.",
                    ObjectVectorValue (),
                    MakeObjectVectorAccessor (&DroneListPriv::m_drones),
-                   MakeObjectVectorChecker<Node> ())
+                   MakeObjectVectorChecker<Drone> ())
     ;
 
   return tid;
@@ -176,14 +176,14 @@ DroneListPriv::DoDispose ()
 }
 
 uint32_t
-DroneListPriv::Add (Ptr<Node> drone)
+DroneListPriv::Add (Ptr<Drone> drone)
 {
   NS_LOG_FUNCTION (this << drone);
 
   uint32_t index = m_drones.size ();
 
   m_drones.push_back (drone);
-  Simulator::ScheduleWithContext (index, TimeStep (0), &Node::Initialize, drone);
+  Simulator::ScheduleWithContext (index, TimeStep (0), &Drone::Initialize, drone);
 
   return index;
 }
@@ -212,7 +212,7 @@ DroneListPriv::GetNDrones ()
   return m_drones.size ();
 }
 
-Ptr<Node>
+Ptr<Drone>
 DroneListPriv::GetDrone (uint32_t n)
 {
   NS_LOG_FUNCTION (this << n);
@@ -233,7 +233,7 @@ DroneListPriv::GetDrone (uint32_t n)
 namespace ns3 {
 
 uint32_t
-DroneList::Add (Ptr<Node> drone)
+DroneList::Add (Ptr<Drone> drone)
 {
   NS_LOG_FUNCTION (drone);
 
@@ -256,7 +256,7 @@ DroneList::End ()
   return DroneListPriv::Get ()->End ();
 }
 
-Ptr<Node>
+Ptr<Drone>
 DroneList::GetDrone (uint32_t n)
 {
   NS_LOG_FUNCTION (n);

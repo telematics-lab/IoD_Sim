@@ -62,10 +62,12 @@
 #include <ns3/wifi-phy-layer-configuration.h>
 #include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/zsp-list.h>
+#include <ns3/remote-list.h>
 #include <ns3/node-list.h>
 #include <ns3/traced-value.h>
 #include <ns3/trace-source-accessor.h>
 #include <ns3/interest-region-container.h>
+#include <ns3/debug-helper.h>
 
 namespace ns3 {
 
@@ -132,7 +134,6 @@ private:
   NodeContainer m_zsps;
   NodeContainer m_remoteNodes;
   NodeContainer m_backbone;
-  Ptr<InterestRegionContainer> irc = CreateObject<InterestRegionContainer>();
 
   std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
 };
@@ -142,20 +143,23 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 Scenario::Scenario (int argc, char **argv)
 {
   CONFIGURATOR->Initialize (argc, argv);
-
   m_drones.Create (CONFIGURATOR->GetDronesN ());
   m_zsps.Create (CONFIGURATOR->GetZspsN ());
   m_remoteNodes.Create(CONFIGURATOR->GetRemotesN ());
   m_backbone.Add (m_remoteNodes);
 
-  // Register created Drones and ZSPs in /DroneList/ and /ZspList/ respectively
+  // Register created entities in their lists
   for (auto drone = m_drones.Begin (); drone != m_drones.End (); drone++)
     DroneList::Add (*drone);
 
   for (auto zsp = m_zsps.Begin (); zsp != m_zsps.End (); zsp++)
     ZspList::Add (*zsp);
 
+  for (auto remote = m_remoteNodes.Begin (); remote != m_remoteNodes.End (); remote++)
+    RemoteList::Add (*remote);
+
   ApplyStaticConfig ();
+  ConfigureWorld ();
   ConfigurePhy ();
   ConfigureMac ();
   ConfigureNetwork ();
@@ -166,6 +170,7 @@ Scenario::Scenario (int argc, char **argv)
   ConfigureInternetRemotes ();
   EnablePhyLteTraces ();
 
+  //DebugHelper::ProbeNodes();
   ConfigureSimulator ();
 }
 
@@ -190,7 +195,7 @@ Scenario::operator() ()
 
   Simulator::Run ();
   // Report Module needs the simulator context alive to introspect it
-  //Report::Get ()->Save ();
+  Report::Get ()->Save ();
   Simulator::Destroy ();
 }
 
@@ -677,8 +682,8 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
       auto peripheral = dronePeripheralsContainer->Create();
       for (uint32_t index = 0; index< (uint32_t) peripheral->GetNRoI();index++)
       {
-        auto reg = irc->Get(index);
-        if (!irc->Get(index)) NS_FATAL_ERROR("Region of Interest #"<<index<<" does not exist.");
+        auto reg = irc->GetRoI(index);
+        if (!irc->GetRoI(index)) NS_FATAL_ERROR("Region of Interest #"<<index<<" does not exist.");
       }
     }
   dronePeripheralsContainer->InstallAll(m_drones.Get(entityId));
@@ -878,8 +883,9 @@ Scenario::CourseChange (std::string context, Ptr<const MobilityModel> model)
   {
     peripheral = *i;
     regionindex = peripheral->GetRegionsOfInterest();
+    int status = irc->IsInRegions(regionindex, position);
     if (regionindex.empty()) continue;
-    if (irc->IsInRegions(regionindex, position))
+    if (status >= 0 || status == -2)
     {
       if (peripheral->GetState() != DronePeripheral::PeripheralState::ON) peripheral->SetState(DronePeripheral::PeripheralState::ON);
     } else {
@@ -894,9 +900,9 @@ Scenario::ConfigureSimulator ()
   NS_LOG_FUNCTION_NOARGS ();
 
   // Enable Report
-  // Report::Get ()->Initialize (CONFIGURATOR->GetName (),
-  //                             CONFIGURATOR->GetCurrentDateTime (),
-  //                             CONFIGURATOR->GetResultsPath ());
+  Report::Get ()->Initialize (CONFIGURATOR->GetName (),
+                              CONFIGURATOR->GetCurrentDateTime (),
+                              CONFIGURATOR->GetResultsPath ());
 
   Simulator::Stop (Seconds (CONFIGURATOR->GetDuration ()));
 }

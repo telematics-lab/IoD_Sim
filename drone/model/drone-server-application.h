@@ -65,6 +65,7 @@ private:
   TracedCallback<Ptr<const Packet>> m_txTrace;
 
   mutable int32_t m_sequenceNumber; // correlated with the node, not the connection
+  bool m_storage = false;
 };
 
 } // namespace ns3

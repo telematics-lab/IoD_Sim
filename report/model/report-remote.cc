@@ -17,7 +17,7 @@
  *
  * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-#include "report-zsp.h"
+#include "report-remote.h"
 
 #include <ns3/application.h>
 #include <ns3/config.h>
@@ -40,32 +40,32 @@
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("ReportZsp");
-NS_OBJECT_ENSURE_REGISTERED (ReportZsp);
+NS_LOG_COMPONENT_DEFINE ("ReportRemote");
+NS_OBJECT_ENSURE_REGISTERED (ReportRemote);
 
 TypeId
-ReportZsp::GetTypeId ()
+ReportRemote::GetTypeId ()
 {
-  static TypeId tid = TypeId ("ns3::ReportZsp")
-    .AddConstructor<ReportZsp> ()
+  static TypeId tid = TypeId ("ns3::ReportRemote")
+    .AddConstructor<ReportRemote> ()
     .SetParent<ReportEntity> ()
     ;
 
   return tid;
 }
 
-ReportZsp::ReportZsp ()
+ReportRemote::ReportRemote ()
 {
   NS_LOG_FUNCTION (this);
 }
 
-ReportZsp::~ReportZsp ()
+ReportRemote::~ReportRemote ()
 {
   NS_LOG_FUNCTION (this);
 }
 
 void
-ReportZsp::DoWrite (xmlTextWriterPtr h)
+ReportRemote::DoWrite (xmlTextWriterPtr h)
 {
   NS_LOG_FUNCTION (h);
   if (h == nullptr)
@@ -77,12 +77,10 @@ ReportZsp::DoWrite (xmlTextWriterPtr h)
 
   int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "ZSP");
+  rc = xmlTextWriterStartElement (h, BAD_CAST "Remote");
   NS_ASSERT (rc >= 0);
 
   /* Nested Elements */
-  m_position.Write (h);
-
   rc = xmlTextWriterStartElement (h, BAD_CAST "NetDevices");
   NS_ASSERT (rc >= 0);
 
@@ -169,29 +167,6 @@ ReportZsp::DoWrite (xmlTextWriterPtr h)
 
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
-}
-
-void
-ReportZsp::DoInitializeTrajectoryMonitor()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  std::stringstream bPath;
-
-  bPath << "/NodeList/" << m_reference << "/$ns3::MobilityModel";
-  auto matches = Config::LookupMatches (bPath.str ());
-  NS_ASSERT (matches.GetN () == 1);
-
-  Ptr<MobilityModel> obj = DynamicCast<MobilityModel> (matches.Get (0));
-  if (obj == nullptr)
-    NS_FATAL_ERROR ("Expected a MobilityModel on node id " << m_reference << ","
-                    " but none was found!");
-
-  m_position = ReportLocation (obj->GetPosition (), Simulator::Now ());
-}
-
-void
-ReportZsp::DoMonitorTrajectory (const Ptr<const MobilityModel> mobility)
-{
 }
 
 } // namespace ns3

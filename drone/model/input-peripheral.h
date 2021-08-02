@@ -77,6 +77,12 @@ public:
    */
   virtual void OnChangeState(PeripheralState ocs);
 
+  double GetDatarate ();
+
+  Time GetAcquisitionTimeInterval ();
+
+  bool HasStorage ();
+
 protected:
   void DoInitialize (void);
   void DoDispose (void);

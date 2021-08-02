@@ -15,10 +15,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-#ifndef REPORT_ZSP_H
-#define REPORT_ZSP_H
+#ifndef REPORT_REMOTE_H
+#define REPORT_REMOTE_H
 
 #include <ns3/ipv4.h>
 #include <ns3/mobility-model.h>
@@ -36,13 +36,12 @@
 namespace ns3 {
 
 /**
- * Retrieve and store data about a ZSP, like its
- *  - position (presumably fixed)
+ * Retrieve and store data about a Remote, like its
  *  - network stack
  *  - traffic (Rx and Tx)
  *  - and eventual cumulative statistics that can be derived
  */
-class ReportZsp : public ReportEntity
+class ReportRemote : public ReportEntity
 {
 public:
   /**
@@ -54,37 +53,23 @@ public:
   /**
    * Default constructor
    */
-  ReportZsp ();
+  ReportRemote ();
   /**
    * Default destructor
    */
-  ~ReportZsp ();
+  ~ReportRemote ();
 private:
   /**
-   * Write Zsp report data to a XML file with a given handler
+   * Write Remote report data to a XML file with a given handler
    *
    * \param handle the XML handler to write data on
    */
   void DoWrite (xmlTextWriterPtr handle);
 
-  /**
-   * Get ZSP position
-   */
-  void DoInitializeTrajectoryMonitor ();
-
-  /**
-   * Placeholder, monitor nothing because the ZSP in fixed in space
-   *
-   * \params mobility the mobility model of the entity to inspect
-   */
-  void DoMonitorTrajectory (const Ptr<const MobilityModel> mobility);
-
-  /// ZSP position
-  ReportLocation m_position;
   /// abstract representation of the network stack
   ReportProtocolStack m_stack;
 };
 
 } // namespace ns3
 
-#endif /* REPORT_ZSP_H */
+#endif /* REPORT_REMOTE_H */

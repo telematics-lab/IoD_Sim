@@ -22,20 +22,19 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("InterestRegionContainer");
 
-NS_OBJECT_ENSURE_REGISTERED (InterestRegionContainer);
+InterestRegionContainer::InterestRegionContainer(){}
 
-TypeId
-InterestRegionContainer::GetTypeId (void)
-{
-  static TypeId tid = TypeId ("ns3::InterestRegionContainer")
-    .SetParent<Object> ()
-    .SetGroupName("Scenario")
-    .AddConstructor<InterestRegionContainer> ()
-    ;
-  return tid;
+InterestRegionContainer::~InterestRegionContainer(){
+  for (std::vector<ns3::Ptr<ns3::InterestRegion>>::iterator i = m_interestRegions.begin (); i != m_interestRegions.end (); i++)
+      {
+        Ptr<InterestRegion> region = *i;
+        region->Dispose ();
+        *i = 0;
+      }
+    m_interestRegions.clear();
 }
 
-Ptr<InterestRegion>
+const Ptr<InterestRegion>
 InterestRegionContainer::Create(const DoubleVector &coords)
 {
   auto region = CreateObjectWithAttributes<InterestRegion>("Coordinates",DoubleVectorValue(coords));
@@ -50,7 +49,7 @@ InterestRegionContainer::GetN (void) const
 }
 
 Ptr<InterestRegion>
-InterestRegionContainer::Get (uint32_t i) const
+InterestRegionContainer::GetRoI (uint32_t i)
 {
   return m_interestRegions[i];
 }
@@ -67,33 +66,25 @@ InterestRegionContainer::End (void) const
   return m_interestRegions.end ();
 }
 
-void
-InterestRegionContainer::DoInitialize (void)
-{
-  Object::DoInitialize();
-}
-
-void
-InterestRegionContainer::DoDispose (void)
-{
-  for (std::vector<ns3::Ptr<ns3::InterestRegion>>::iterator i = m_interestRegions.begin (); i != m_interestRegions.end (); i++)
-    {
-      Ptr<InterestRegion> region = *i;
-      region->Dispose ();
-      *i = 0;
-    }
-  m_interestRegions.clear();
-  Object::DoDispose();
-}
-
-bool
+int
 InterestRegionContainer::IsInRegions(std::vector<int> indexes, Vector &position)
 {
+  if (m_interestRegions.size() == 0) return -2;
   for (auto index : indexes)
   {
-    if (m_interestRegions[index]->IsInside(position)) return true;
+    if (m_interestRegions[index]->IsInside(position)) return index;
   }
-  return false;
+  return -1;
 }
 
+int
+InterestRegionContainer::IsInRegions(Vector &position)
+{
+  if (m_interestRegions.size() == 0) return -2;
+  for (int index=0;index< (int) m_interestRegions.size();index++)
+  {
+    if (m_interestRegions[index]->IsInside(position)) return index;
+  }
+  return -1;
+}
 } // namespace ns3

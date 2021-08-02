@@ -29,6 +29,7 @@
 
 #include "report-drone.h"
 #include "report-zsp.h"
+#include "report-remote.h"
 
 namespace ns3 {
 
@@ -98,6 +99,7 @@ private:
  */
 template class ReportContainer<ReportDrone>;
 template class ReportContainer<ReportZsp>;
+template class ReportContainer<ReportRemote>;
 
 } // namespace ns3
 
