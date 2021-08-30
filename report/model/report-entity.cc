@@ -29,12 +29,15 @@
 #include <ns3/udp-header.h>
 #include <ns3/report-helper.h>
 #include <rapidjson/document.h>
+#include <ns3/lte-ue-net-device.h>
+// #include <ns3/debug-helper.h>
 
 #include "drone-control-layer.h"
 #include "ipv4-layer.h"
 #include "wifi-inspector.h"
 #include "wifi-mac-layer.h"
 #include "wifi-phy-layer.h"
+#include "lte-ue-phy-layer.h"
 
 namespace ns3 {
 
@@ -426,6 +429,31 @@ ReportEntity::DoInitializeNetworkStacks ()
           m_networkStacks[ifid].Add (macLayer);
           m_networkStacks[ifid].Add (ipv4Layer);
           m_networkStacks[ifid].Add (droneControlLayer);
+        } else if (dev->GetInstanceTypeId ().GetName () == "ns3::LteUeNetDevice") {
+          auto lteuenetdev = StaticCast<LteUeNetDevice,NetDevice> (dev);
+          NS_ASSERT(lteuenetdev->GetCcMap().begin() != lteuenetdev->GetCcMap().end());
+          auto ccmap = (lteuenetdev->GetCcMap().begin())->second;
+
+          auto pldltype = ccmap->GetPhy()->GetDlSpectrumPhy ()->GetChannel()->GetPropagationLossModel()->GetInstanceTypeId().GetName();
+          auto plultype = ccmap->GetPhy()->GetUlSpectrumPhy ()->GetChannel()->GetPropagationLossModel()->GetInstanceTypeId().GetName();
+          auto layer = CreateObjectWithAttributes<ProtocolLayer>
+            ("InstanceType", StringValue (dev->GetInstanceTypeId ().GetName ()));
+          auto phyLayer = CreateObjectWithAttributes<LteUEPhyLayer>
+            ("IMSI", StringValue (std::to_string(lteuenetdev->GetImsi())),
+              "PropagationLossModelDl", StringValue (pldltype),
+              "PropagationLossModelUl", StringValue (plultype),
+              "DlEarfcn", StringValue (std::to_string(ccmap->GetDlEarfcn())),
+              "DlBandwidth", StringValue (std::to_string(ccmap->GetDlBandwidth())),
+              "UlEarfcn", StringValue (std::to_string(ccmap->GetUlEarfcn())),
+              "UlBandwidth", StringValue (std::to_string(ccmap->GetUlBandwidth())));
+
+          auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
+            ("Ipv4Address", StringValue (std::get<1>(ipv4AddressMask)),
+             "SubnetMask", StringValue (std::get<2>(ipv4AddressMask)));
+          ifaces.push_back (i);
+          m_networkStacks[ifid].Add (layer);
+          m_networkStacks[ifid].Add (phyLayer);
+          m_networkStacks[ifid].Add (ipv4Layer);
         } else {
           auto layer = CreateObjectWithAttributes<ProtocolLayer>
             ("InstanceType", StringValue (dev->GetInstanceTypeId ().GetName ()));

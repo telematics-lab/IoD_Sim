@@ -30,7 +30,8 @@ def build(bld):
             'helper/report-helper.cc',
             'model/report-peripheral.cc',
             'model/report-world.cc',
-            'model/report-remote.cc'
+            'model/report-remote.cc',
+            'model/lte-ue-phy-layer.cc'
         ]
 
     module.use.append('LIBXML2')
@@ -64,7 +65,8 @@ def build(bld):
             'helper/report-helper.h',
             'model/report-peripheral.h',
             'model/report-world.h',
-            'model/report-remote.h'
+            'model/report-remote.h',
+            'model/lte-ue-phy-layer.h'
         ]
 
     #if bld.env.ENABLE_EXAMPLES:
