@@ -62,13 +62,18 @@ ReportDrone::GetTypeId ()
 
 ReportDrone::ReportDrone ()
 {
-  DoInitializePeripherals();
   NS_LOG_FUNCTION (this);
 }
 
 ReportDrone::~ReportDrone ()
 {
   NS_LOG_FUNCTION (this);
+}
+
+void ReportDrone::DoInitialize()
+{
+  DoInitializePeripherals();
+  ReportEntity::DoInitialize();
 }
 
 void

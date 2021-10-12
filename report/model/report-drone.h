@@ -61,6 +61,10 @@ public:
    * Default destructor
    */
   ~ReportDrone ();
+
+protected:
+  void DoInitialize();
+
 private:
   /**
    * Write internal interface

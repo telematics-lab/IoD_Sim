@@ -70,6 +70,11 @@ public:
   void Write (xmlTextWriterPtr handle);
 protected:
   /**
+   * Object internal initialization
+   */
+  void DoInitialize ();
+
+  /**
    * Write internal interface
    *
    * \param handle the XML handler to write data on
@@ -138,11 +143,6 @@ protected:
 
   uint32_t m_reference;    /// Entity UID of reference
 private:
-  /**
-   * Object internal initialization
-   */
-  void DoInitialize ();
-
   /**
    * Initialize Data Stats accumulators
    */
