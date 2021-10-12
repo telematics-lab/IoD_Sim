@@ -137,10 +137,11 @@ Curve::GetPoint (const float &t) const
   return p;
 }
 
-const uint32_t
-Curve::Factorial (const uint32_t &x) const
+const double
+Curve::Factorial (const double x) const
 {
-  return tgamma (x + 1);
+  //return tgamma (x + 1);
+  return (x == 0) || (x == 1) ? 1 : x * Factorial(x - 1);
 }
 
 } // namespace ns3

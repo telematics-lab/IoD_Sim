@@ -79,7 +79,7 @@ protected:
    * \param x the integer for which is needed it's factorial
    * \reutrn x!
    */
-  const uint32_t Factorial (const uint32_t &x) const;
+  const double Factorial (const double x) const;
 
   mutable std::vector<CurvePoint> m_curve;  /// The ordered set of points
                                             /// representing the curve.
