@@ -53,8 +53,6 @@ WifiPhyLayerConfiguration::GetStandard ()
     return WIFI_STANDARD_80211g;
   else if (m_standard.compare("802.11p") == 0)
     return WIFI_STANDARD_80211p;
-  else if (m_standard.compare("802.11a-holland") == 0)
-    return WIFI_STANDARD_holland;
   else if (m_standard.compare("802.11n-2.4GHz") == 0)
     return WIFI_STANDARD_80211n_2_4GHZ;
   else if (m_standard.compare("802.11n-5GHz") == 0)
