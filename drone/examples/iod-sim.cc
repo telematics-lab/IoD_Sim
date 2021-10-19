@@ -53,6 +53,7 @@
 #include <ns3/lte-phy-simulation-helper.h>
 #include <ns3/lte-setup-helper.h>
 #include <ns3/mobility-factory-helper.h>
+#include <ns3/nat-application.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/wifi-netdevice-configuration.h>
 #include <ns3/wifi-mac-factory-helper.h>
@@ -630,6 +631,19 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
 
           for (auto attr : appConf.GetAttributes ())
               app->SetAttribute (attr.first, *attr.second);
+        }
+      else if (appName.compare("ns3::NatApplication") == 0)
+        {
+          auto app = CreateObject<NatApplication> ();
+
+          if (entityKey.compare("drones") == 0)
+            m_drones.Get (entityId)->AddApplication (app);
+          else if (entityKey.compare("ZSPs") == 0)
+            m_zsps.Get (entityId)->AddApplication (app);
+
+          for (auto attr : appConf.GetAttributes ()) {
+            app->SetAttribute (attr.first, *attr.second);
+          }
         }
       else
         {

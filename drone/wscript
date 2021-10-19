@@ -72,7 +72,8 @@ def build(bld):
         'model/interest-region.cc',
         'model/interest-region-container.cc',
         'model/int-vector.cc',
-        'model/remote-list.cc'
+        'model/remote-list.cc',
+        'model/nat-application.cc'
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -140,7 +141,8 @@ def build(bld):
         'model/interest-region-container.h',
         'model/int-vector.h',
         'model/vector-type.h',
-        'model/remote-list.h'
+        'model/remote-list.h',
+        'model/nat-application.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
