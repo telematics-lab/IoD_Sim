@@ -34,7 +34,7 @@ public:
   /**
    * Default constructor. It is needed the network mask used for the configured IPv4 network.
    */
-  Ipv4SimulationHelper (const std::string mask);
+  Ipv4SimulationHelper (const std::string mask, const std::string gatewayAddress);
   /** Default destructor */
   ~Ipv4SimulationHelper ();
 
@@ -54,12 +54,17 @@ public:
    * \return The network mask associated to this layer.
    */
   const std::string& GetMask();
+  /**
+   * \return The Gateway Address.
+   */
+  const Ipv4Address& GetGatewayAddress ();
 
 private:
   Ipv4InterfaceContainer m_ifacesIps;
   InternetStackHelper m_internetHelper;
   Ipv4AddressHelper m_ipv4Helper;
   const std::string m_mask;
+  const Ipv4Address m_gatewayAddress;
 };
 
 } // namespace ns3

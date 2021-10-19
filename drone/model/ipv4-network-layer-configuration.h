@@ -36,10 +36,12 @@ public:
    * \param type The type of network layer configuration. It must be "ipv4".
    * \param address The network address.
    * \param mask The network mask.
+   * \param gatewayAddress The gateway address.
    */
   Ipv4NetworkLayerConfiguration (std::string type,
                                  std::string address,
-                                 std::string mask);
+                                 std::string mask,
+                                 std::string gatewayAddress);
   /** Default destructor */
   ~Ipv4NetworkLayerConfiguration ();
 
@@ -51,10 +53,15 @@ public:
    * \return The configured network mask.
    */
   const std::string GetMask () const;
+  /**
+   * \return The configured network gateway address.
+   */
+  const std::string GetGatewayAddress () const;
 
 private:
   const std::string m_address;
   const std::string m_mask;
+  const std::string m_gatewayAddress;
 };
 
 } // namespace ns3

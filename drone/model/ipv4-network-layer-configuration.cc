@@ -23,10 +23,12 @@ namespace ns3 {
 
 Ipv4NetworkLayerConfiguration::Ipv4NetworkLayerConfiguration (std::string type,
                                                               std::string address,
-                                                              std::string mask):
+                                                              std::string mask,
+                                                              std::string gatewayAddress):
   NetworkLayerConfiguration {type},
   m_address {address},
-  m_mask {mask}
+  m_mask {mask},
+  m_gatewayAddress {gatewayAddress}
 {
 
 }
@@ -46,6 +48,12 @@ const std::string
 Ipv4NetworkLayerConfiguration::GetMask () const
 {
   return m_mask;
+}
+
+const std::string
+Ipv4NetworkLayerConfiguration::GetGatewayAddress () const
+{
+  return m_gatewayAddress;
 }
 
 } // namespace ns3

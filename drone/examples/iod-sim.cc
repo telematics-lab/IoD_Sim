@@ -327,7 +327,7 @@ Scenario::ConfigureNetwork ()
       if (layerConf->GetType ().compare("ipv4") == 0)
         {
           const auto ipv4Conf = StaticCast<Ipv4NetworkLayerConfiguration, NetworkLayerConfiguration> (layerConf);
-          const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask ());
+          const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask (), ipv4Conf->GetGatewayAddress ());
 
           ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
                                              Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
@@ -591,7 +591,9 @@ Scenario::ConfigureEntityIpv4 (Ptr<Node> entityNode,
   auto deviceIP = assignedIPs.Get(0);
   Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting (deviceIP.first);
 
-  ueStaticRoute->SetDefaultRoute (assignedIPs.GetAddress(0, 0), deviceIP.second);
+  const Ipv4Address nodeAddr = assignedIPs.GetAddress(0, 0);
+  if (nodeAddr != netLayer->GetGatewayAddress ())
+    ueStaticRoute->SetDefaultRoute (netLayer->GetGatewayAddress (), deviceIP.second);
 }
 
 void

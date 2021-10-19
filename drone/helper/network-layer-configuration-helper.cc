@@ -47,10 +47,13 @@ NetworkLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
                     "Network Layer definition must have 'mask' property.");
       NS_ASSERT_MSG (json["mask"].IsString (),
                     "Network Layer 'mask' property must be a string.");
+      NS_ASSERT_MSG (json["gateway"].IsString (),
+                    "Network Layer 'gateway' property must be a string.");
 
       return Create<Ipv4NetworkLayerConfiguration> (json["type"].GetString (),
                                                     json["address"].GetString (),
-                                                    json["mask"].GetString ());
+                                                    json["mask"].GetString (),
+                                                    json["gateway"].GetString ());
     }
   else
     {
