@@ -224,8 +224,8 @@ ReportEntity::DoMonitorRxTraffic (Ptr<const Packet> packet,
     Ipv4Address ipv4dstaddr;
     ipv4dstaddr.Set(ipv4Dst.c_str());
     auto reportTransfer = CreateObjectWithAttributes<ReportTransfer>
-      ("EntityID", IntegerValue(m_reference),
-      "Interface", IntegerValue(ipv4->GetInterfaceForAddress(ipv4dstaddr)),
+      ("EntityID", IntegerValue (m_reference),
+      "Interface", IntegerValue (ipv4->GetInterfaceForAddress(ipv4dstaddr)),
       "PacketType", PacketTypeValue (packetType),
       "TransferDirection", TransferDirectionValue (direction),
       "Time", TimeValue (Simulator::Now ()),
@@ -302,21 +302,24 @@ ReportEntity::DoMonitorTxTraffic (Ptr<const Packet> packet,
   const std::string payloadDecoded ((char *) buf);
   free (buf);
 
-  m_cumulativeDataTx[packetType]->Add (payloadSize);
-  Ipv4Address ipv4srcaddr;
-  ipv4srcaddr.Set(ipv4Src.c_str());
-  auto reportTransfer = CreateObjectWithAttributes<ReportTransfer>
-    ("EntityID", IntegerValue(m_reference),
-     "Interface", IntegerValue(ipv4->GetInterfaceForAddress(ipv4srcaddr)),
-     "PacketType", PacketTypeValue (packetType),
-     "TransferDirection", TransferDirectionValue (direction),
-     "Time", TimeValue (Simulator::Now ()),
-     "SourceAddress", StringValue (ipv4Src),
-     "DestinationAddress", StringValue (ipv4Dst),
-     "PacketLength", IntegerValue (payloadSize),
-     "SequenceNumber", IntegerValue (sequenceNumber),
-     "Payload", StringValue (payloadDecoded));
-  m_dataTx.push_back (reportTransfer);
+  if (payloadSize > 0)
+  {
+    m_cumulativeDataTx[packetType]->Add (payloadSize);
+    Ipv4Address ipv4srcaddr;
+    ipv4srcaddr.Set(ipv4Src.c_str());
+    auto reportTransfer = CreateObjectWithAttributes<ReportTransfer>
+      ("EntityID", IntegerValue (m_reference),
+      "Interface", IntegerValue (ipv4->GetInterfaceForAddress(ipv4srcaddr)),
+      "PacketType", PacketTypeValue (packetType),
+      "TransferDirection", TransferDirectionValue (direction),
+      "Time", TimeValue (Simulator::Now ()),
+      "SourceAddress", StringValue (ipv4Src),
+      "DestinationAddress", StringValue (ipv4Dst),
+      "PacketLength", IntegerValue (payloadSize),
+      "SequenceNumber", IntegerValue (sequenceNumber),
+      "Payload", StringValue (payloadDecoded));
+    m_dataTx.push_back (reportTransfer);
+  }
 }
 
 bool
