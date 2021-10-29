@@ -53,6 +53,10 @@ ParametricSpeedDroneMobilityModel::GetTypeId ()
                    DoubleValue (0.001),
                    MakeDoubleAccessor (&ParametricSpeedDroneMobilityModel::m_curveStep),
                    MakeDoubleChecker<float> ())
+    .AddAttribute ("UpdateInterval", "Time interval, in seconds, that must pass to update drone position",
+                   TimeValue (Seconds (0.002)),
+                   MakeTimeAccessor (&ParametricSpeedDroneMobilityModel::m_updateInterval),
+                   MakeTimeChecker ())
     ;
 
   return tid;
@@ -125,7 +129,7 @@ ParametricSpeedDroneMobilityModel::DoInitialize ()
   NS_LOG_FUNCTION_NOARGS ();
 
   m_planner = Planner<ParametricSpeedParam, ParametricSpeedFlight>
-    (m_flightPlan, m_flightParams, m_curveStep, m_simulationDuration);
+    (m_flightPlan, m_flightParams, m_curveStep, m_updateInterval, m_simulationDuration);
 
   MobilityModel::DoInitialize ();
 }

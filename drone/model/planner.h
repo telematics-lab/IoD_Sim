@@ -36,6 +36,7 @@ public:
   Planner (FlightPlan flightPlan,
            FlightParam flightParam,
            float step,
+           Time updateInterval,
            double simulationDuration);
   Planner ();
   virtual ~Planner ();

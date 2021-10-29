@@ -25,6 +25,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 #include <ns3/log.h>
+#include <ns3/simulator.h>
 
 namespace ns3 {
 
@@ -48,9 +49,11 @@ NS_LOG_COMPONENT_DEFINE ("ParametricSpeedFlight");
 
 ParametricSpeedFlight::ParametricSpeedFlight (FlightPlan flightPlan,
                                               ParametricSpeedParam speedParams,
-                                              double step) :
+                                              double step,
+                                              Time updateInterval) :
   Curve (flightPlan, step),
-  m_speedParams {speedParams.GetSpeedCoefficients ()}
+  m_speedParams {speedParams.GetSpeedCoefficients ()},
+  m_updateInterval {updateInterval}
 {
   NS_LOG_FUNCTION_NOARGS ();  // TODO: ostreams and istreams
                               // implementations for complex
@@ -153,6 +156,15 @@ ParametricSpeedFlight::UpdateVelocity () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_LOGIC ("old vel: " << m_currentVelocity);
+
+  Time now = Simulator::Now();
+  if (now - m_simTime < m_updateInterval)
+  {
+    NS_LOG_LOGIC ("Mobility Model update suppressed");
+    m_simTime = now;
+    return;
+  }
+
 
   const Vector relativeDistance = m_currentPosition.GetRelativeDistanceVector (m_pastPosition);
   const double relativeDistScalar = m_currentPosition.GetRelativeDistance (m_pastPosition);

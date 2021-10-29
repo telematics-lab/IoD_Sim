@@ -30,7 +30,8 @@ class ConstantAccelerationFlight : public Curve
 public:
   ConstantAccelerationFlight (FlightPlan flightPlan,
                               ConstantAccelerationParam flightParam,
-                              double step);
+                              double step,
+                              Time updateInterval);
   ~ConstantAccelerationFlight ();
 
   void Generate ();

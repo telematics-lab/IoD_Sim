@@ -34,7 +34,8 @@ public:
    */
   ParametricSpeedFlight (FlightPlan flightPlan,
                          ParametricSpeedParam speedParams,
-                         double step);
+                         double step,
+                         Time updateInterval);
   /**
    * default destructor
    */
@@ -63,8 +64,10 @@ protected:
 
   double m_length;         /// Total length of the flight path
   Time   m_time;           /// Total time the drone would take to complete it
+  mutable Time m_simTime;
 
   std::vector<double> m_speedParams;
+  Time m_updateInterval;
 };
 
 } // namespace ns3

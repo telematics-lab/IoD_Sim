@@ -67,6 +67,7 @@ protected:
   mutable Time m_lastUpdate;
 
   float m_curveStep;
+  Time m_updateInterval;
 };
 
 } // namespace ns3
