@@ -55,10 +55,6 @@ Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
       m_flightPlans.back ().Add (*point);
     }
 
-  // we set the last point in the container with a long restTime in order to
-  // freeze the drone there until new directives.
-  m_flightPlans.back ().GetBack ()->SetRestTime (Seconds (m_simulationDuration));
-
   for (auto flightPlan : m_flightPlans)
     {
       // push new trajectory
