@@ -140,7 +140,6 @@ Curve::GetPoint (const float &t) const
 const double
 Curve::Factorial (const double x) const
 {
-  //return tgamma (x + 1);
   return (x == 0) || (x == 1) ? 1 : x * Factorial(x - 1);
 }
 

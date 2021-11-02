@@ -23,6 +23,9 @@
 
 namespace ns3 {
 
+/**
+ * Handle a partial curvilinear trajectory between two rest points (i.e., Interest Points with I. Level set to 0).
+ */
 class ParametricSpeedFlight : public Curve
 {
 public:
