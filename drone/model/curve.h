@@ -34,6 +34,8 @@ namespace ns3 {
 class Curve
 {
 public:
+  typedef std::vector<CurvePoint>::iterator Iterator;
+
   /**
    * \brief the constructor requesting all the needed parameters.
    */

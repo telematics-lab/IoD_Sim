@@ -56,6 +56,7 @@ protected:
   const double FindTime () const;
 
   mutable CurvePoint m_currentPosition;
+  mutable Curve::Iterator m_currentPositionPtr;
   mutable CurvePoint m_pastPosition;
   mutable double     m_currentDistance;
 

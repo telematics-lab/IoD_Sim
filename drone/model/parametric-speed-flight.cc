@@ -143,7 +143,11 @@ ParametricSpeedFlight::UpdatePosition () const
     {
       if ((*i).GetAbsoluteDistance () > m_currentDistance)
         {
-          m_currentPosition = (*i);
+          if (i != m_currentPositionPtr)
+          {
+            m_currentPosition = (*i);
+            m_currentPositionPtr = i;
+          }
           break;
         }
     }
@@ -156,15 +160,6 @@ ParametricSpeedFlight::UpdateVelocity () const
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_LOGIC ("old vel: " << m_currentVelocity);
-
-  Time now = Simulator::Now();
-  if (now - m_simTime < m_updateInterval)
-  {
-    NS_LOG_LOGIC ("Mobility Model update suppressed");
-    m_simTime = now;
-    return;
-  }
-
 
   const Vector relativeDistance = m_currentPosition.GetRelativeDistanceVector (m_pastPosition);
   const double relativeDistScalar = m_currentPosition.GetRelativeDistance (m_pastPosition);
