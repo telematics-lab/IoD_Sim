@@ -825,7 +825,7 @@ ScenarioConfigurationHelper::EnableLogComponents () const
         {
           NS_ASSERT_MSG ((*i).IsString (),
                          "'logComponents' elements must be strings.");
-          LogComponentEnable ((*i).GetString (), LOG_LEVEL_ALL);
+          LogComponentEnable ((*i).GetString (), LOG_ALL);
         }
     }
 }
