@@ -35,11 +35,8 @@ Planner<FlightParam, FlightType>::Planner ()
 template<typename FlightParam, typename FlightType>
 Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
                                            FlightParam flightParam,
-                                           float step,
-                                           Time updateInterval,
-                                           double simulationDuration) :
+                                           float step) :
   m_step {step},
-  m_simulationDuration {simulationDuration},
   m_flightParams {flightParam}
 {
   for (auto point = flightPlan.Begin (); point != flightPlan.End (); point++)
@@ -60,8 +57,7 @@ Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
       // push new trajectory
       m_flights.push_back (FlightType (flightPlan,
                                        flightParam,
-                                       step,
-                                       updateInterval));
+                                       step));
       // estimate timeWindow
       const Time time = m_flights.back ().GetTime ();
       const double startTime = (m_timeWindows.size () == 0)

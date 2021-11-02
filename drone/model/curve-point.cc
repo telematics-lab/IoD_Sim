@@ -36,6 +36,13 @@ CurvePoint::CurvePoint (const Vector position,
     m_absoluteDistance {absoluteDistance}
 {}
 
+CurvePoint::CurvePoint (const Vector position) :
+    m_position {position},
+    m_t {0.0},
+    m_relativeDistance {0.0},
+    m_absoluteDistance {0.0}
+{}
+
 CurvePoint::CurvePoint () :
     m_position {0.0, 0.0, 0.0},
     m_t {0.0},

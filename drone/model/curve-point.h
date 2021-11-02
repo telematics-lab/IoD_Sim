@@ -44,6 +44,9 @@ public:
               float t,
               double relativeDistance,
               double absoluteDistance);
+
+  CurvePoint (const Vector position);
+
   /**
    * \brief default constructor
    */

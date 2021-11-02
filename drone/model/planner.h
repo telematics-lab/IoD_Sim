@@ -35,9 +35,7 @@ class Planner
 public:
   Planner (FlightPlan flightPlan,
            FlightParam flightParam,
-           float step,
-           Time updateInterval,
-           double simulationDuration);
+           float step);
   Planner ();
   virtual ~Planner ();
 
@@ -52,7 +50,6 @@ private:
   mutable Vector m_currentPosition;
 
   float m_step;
-  double m_simulationDuration;
 
   std::vector<FlightParam> m_flightParams;
   std::vector<FlightPlan> m_flightPlans;

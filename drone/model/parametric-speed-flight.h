@@ -34,8 +34,7 @@ public:
    */
   ParametricSpeedFlight (FlightPlan flightPlan,
                          ParametricSpeedParam speedParams,
-                         double step,
-                         Time updateInterval);
+                         double step);
   /**
    * default destructor
    */

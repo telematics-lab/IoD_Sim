@@ -48,18 +48,10 @@ ConstantAccelerationDroneMobilityModel::GetTypeId ()
                    FlightPlanValue (),
                    MakeFlightPlanAccessor (&ConstantAccelerationDroneMobilityModel::m_flightPlan),
                    MakeFlightPlanChecker ())
-    .AddAttribute ("SimulationDuration", "The duration of the simulation.",
-                   DoubleValue (1.0),
-                   MakeDoubleAccessor (&ConstantAccelerationDroneMobilityModel::m_simulationDuration),
-                   MakeDoubleChecker<double> ())
     .AddAttribute ("CurveStep", "The step of the curve to generate. Lower step means more points generated, hence higher resolution.",
                    DoubleValue (0.001),
                    MakeDoubleAccessor (&ConstantAccelerationDroneMobilityModel::m_curveStep),
                    MakeDoubleChecker<float> ())
-    .AddAttribute ("UpdateInterval", "Time interval, in seconds, that must pass to update drone position",
-                   TimeValue (Seconds (0.002)),
-                   MakeTimeAccessor (&ConstantAccelerationDroneMobilityModel::m_updateInterval),
-                   MakeTimeChecker ())
     ;
 
   return tid;
@@ -135,7 +127,7 @@ ConstantAccelerationDroneMobilityModel::DoInitialize ()
   m_flightParams = { m_acceleration, m_maxSpeed };
 
   m_planner = Planner<ConstantAccelerationParam, ConstantAccelerationFlight>
-    (m_flightPlan, m_flightParams, m_curveStep, m_updateInterval, m_simulationDuration);
+    (m_flightPlan, m_flightParams, m_curveStep);
 
   MobilityModel::DoInitialize ();
 }

@@ -45,18 +45,10 @@ ParametricSpeedDroneMobilityModel::GetTypeId ()
                    FlightPlanValue (),
                    MakeFlightPlanAccessor (&ParametricSpeedDroneMobilityModel::m_flightPlan),
                    MakeFlightPlanChecker ())
-    .AddAttribute ("SimulationDuration", "The duration of the simulation.",
-                   DoubleValue (1.0),
-                   MakeDoubleAccessor (&ParametricSpeedDroneMobilityModel::m_simulationDuration),
-                   MakeDoubleChecker<double> ())
     .AddAttribute ("CurveStep", "The step of the curve to generate. Lower step means more points generated, hence higher resolution.",
                    DoubleValue (0.001),
                    MakeDoubleAccessor (&ParametricSpeedDroneMobilityModel::m_curveStep),
                    MakeDoubleChecker<float> ())
-    .AddAttribute ("UpdateInterval", "Time interval, in seconds, that must pass to update drone position",
-                   TimeValue (Seconds (0.002)),
-                   MakeTimeAccessor (&ParametricSpeedDroneMobilityModel::m_updateInterval),
-                   MakeTimeChecker ())
     ;
 
   return tid;
@@ -129,7 +121,7 @@ ParametricSpeedDroneMobilityModel::DoInitialize ()
   NS_LOG_FUNCTION_NOARGS ();
 
   m_planner = Planner<ParametricSpeedParam, ParametricSpeedFlight>
-    (m_flightPlan, m_flightParams, m_curveStep, m_updateInterval, m_simulationDuration);
+    (m_flightPlan, m_flightParams, m_curveStep);
 
   MobilityModel::DoInitialize ();
 }

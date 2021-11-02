@@ -49,8 +49,7 @@ NS_LOG_COMPONENT_DEFINE ("ParametricSpeedFlight");
 
 ParametricSpeedFlight::ParametricSpeedFlight (FlightPlan flightPlan,
                                               ParametricSpeedParam speedParams,
-                                              double step,
-                                              Time updateInterval) :
+                                              double step) :
   Curve (flightPlan, step),
   m_speedParams {speedParams.GetSpeedCoefficients ()},
   m_updateInterval {updateInterval}

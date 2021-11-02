@@ -58,7 +58,6 @@ protected:
 
   double m_acceleration;
   double m_maxSpeed;
-  double m_simulationDuration;
 
   FlightPlan m_flightPlan;
   ParametricSpeedParam m_flightParams;
@@ -67,7 +66,6 @@ protected:
   mutable Time m_lastUpdate;
 
   float m_curveStep;
-  Time m_updateInterval;
 };
 
 } // namespace ns3
