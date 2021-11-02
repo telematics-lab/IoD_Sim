@@ -47,6 +47,7 @@ Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
             {
               m_flightPlans.back ().Add (*point);
             }
+          m_flightPlans.push_back (FlightPlan (*point)); // Flight Plan to hover on the point
           m_flightPlans.push_back (FlightPlan ());
         }
       m_flightPlans.back ().Add (*point);

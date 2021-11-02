@@ -67,10 +67,9 @@ protected:
 
   double m_length;         /// Total length of the flight path
   Time   m_time;           /// Total time the drone would take to complete it
-  mutable Time m_simTime;
 
   std::vector<double> m_speedParams;
-  Time m_updateInterval;
+  bool m_isHovering;
 };
 
 } // namespace ns3

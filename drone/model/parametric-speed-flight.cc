@@ -52,11 +52,9 @@ ParametricSpeedFlight::ParametricSpeedFlight (FlightPlan flightPlan,
                                               double step) :
   Curve (flightPlan, step),
   m_speedParams {speedParams.GetSpeedCoefficients ()},
-  m_updateInterval {updateInterval}
+  m_isHovering {flightPlan.GetN () == 1}
 {
-  NS_LOG_FUNCTION_NOARGS ();  // TODO: ostreams and istreams
-                              // implementations for complex
-                              // objects
+  NS_LOG_FUNCTION_NOARGS ();
 
   Generate ();
 }
@@ -70,8 +68,20 @@ ParametricSpeedFlight::Generate ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  m_length = Curve::Generate ();
-  m_time = Seconds (FindTime ());
+  if (m_isHovering)
+    {
+      // this is a dummy flight plan to hover on a specific point.
+      m_length = 0;
+      m_currentPosition = CurvePoint (m_knots.GetBack ()->GetPosition ());
+      m_currentVelocity = Vector3D ();
+      m_time = m_knots.GetBack ()->GetRestTime ();
+    }
+  else
+    {
+      m_length = Curve::Generate ();
+      m_currentPositionPtr = m_curve.begin ();
+      m_time = Seconds (FindTime ());
+    }
 }
 
 void
@@ -79,13 +89,16 @@ ParametricSpeedFlight::Update (const double &t) const
 {
   NS_LOG_FUNCTION (t);
 
-  UpdateSpeed (t);
-  UpdateDistance (t);
-  UpdatePosition ();
-  UpdateVelocity ();
+  if (!m_isHovering)
+    {
+      UpdateSpeed (t);
+      UpdateDistance (t);
+      UpdatePosition ();
+      UpdateVelocity ();
 
-  NS_LOG_LOGIC ("t: " << t << " speed: " << m_currentSpeed
-                << " dist: " << m_currentDistance);
+      NS_LOG_LOGIC ("t: " << t << " speed: " << m_currentSpeed
+                    << " dist: " << m_currentDistance);
+    }
 }
 
 Time
@@ -123,10 +136,10 @@ ParametricSpeedFlight::UpdateDistance (const double &t) const
 {
   // analytic polynomial integration
   double distance;
-  const uint32_t order = m_speedParams.size ();
+  const uint32_t orderp1 = m_speedParams.size (); // order of the polynomial, plus 1
 
-  for (uint32_t i = 0; i < order; i++)
-      distance += m_speedParams[i] / (order - i) * std::pow (t, order - i);
+  for (uint32_t i = 0; i < orderp1; i++)
+      distance += m_speedParams[i] / (i + 1) * std::pow (t, i + 1);
 
   m_currentDistance = distance;
 }
@@ -142,11 +155,8 @@ ParametricSpeedFlight::UpdatePosition () const
     {
       if ((*i).GetAbsoluteDistance () > m_currentDistance)
         {
-          if (i != m_currentPositionPtr)
-          {
-            m_currentPosition = (*i);
-            m_currentPositionPtr = i;
-          }
+          m_currentPosition = (*i);
+          m_currentPositionPtr = i;
           break;
         }
     }
@@ -162,6 +172,9 @@ ParametricSpeedFlight::UpdateVelocity () const
 
   const Vector relativeDistance = m_currentPosition.GetRelativeDistanceVector (m_pastPosition);
   const double relativeDistScalar = m_currentPosition.GetRelativeDistance (m_pastPosition);
+
+  if (relativeDistScalar == 0.0)
+    return;
 
   const double velX = (relativeDistance.x != 0)
                       ? (relativeDistance.x / relativeDistScalar) * m_currentSpeed
