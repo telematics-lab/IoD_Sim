@@ -2,10 +2,7 @@
 
 source /etc/os-release
 
-if [[ "$id" -eq "debian" ]]; then
-  echo "${NAME} has been detected in your system. Installing IoD_Sim required packages automatically."
-  echo "Please insert your sudo password when requested to gain administration privileges."
-
+function install_debian_deps() {
   sudo apt install -y --no-install-recommends \
     g++           \
     gdb           \
@@ -16,7 +13,30 @@ if [[ "$id" -eq "debian" ]]; then
     pkg-config    \
     python3       \
     rapidjson-dev
-else
-  echo "${NAME} is not supported by this script. Please, install IoD Sim dependencies manually by following the official guide."
-  exit 1
-fi
+}
+
+function install_fedora_deps() {
+  sudo dnf -y install \
+    gdb               \
+    gcc               \
+    gcc-c++           \
+    gsl-devel         \
+    libxml2-devel     \
+    patch             \
+    pkgconf           \
+    python3           \
+    rapidjson-devel
+}
+
+case "$ID" in
+  debian)
+    install_debian_deps
+    ;;
+  fedora)
+    install_fedora_deps
+    ;;
+  *)
+    echo "${NAME} is not supported by this script. Please, install IoD Sim dependencies manually by following the official guide."
+    exit 1
+    ;;
+esac
