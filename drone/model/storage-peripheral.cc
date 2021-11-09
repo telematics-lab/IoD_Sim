@@ -89,8 +89,10 @@ StoragePeripheral::Alloc (int amount, unit amountUnit)
       return true;
     }
   else
-    NS_LOG_INFO ("StoragePeripheral:Not enough memory on Drone #" << GetDrone ()->GetId ());
-    return false;
+    {
+      NS_LOG_INFO ("StoragePeripheral:Not enough memory on Drone #" << GetDrone ()->GetId ());
+      return false;
+    }
 }
 
 bool
