@@ -117,6 +117,8 @@ DroneEnergyModel::DoGetCurrentA (void) const
   double VoltageV = m_source->GetSupplyVoltage ();
   double CurrentA = (PowerConsumption / VoltageV);
 
+  NS_LOG_LOGIC("Current draw for Drone #" << GetDrone ()->GetId () << ": " << CurrentA << " A");
+
   return CurrentA;
 }
 
