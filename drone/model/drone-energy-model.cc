@@ -101,6 +101,10 @@ DroneEnergyModel::GetPower () const
   double Pdrag = (1 / 8) * drone->getDragCoefficient () * AIR_DENSITY * drone->getArea () *
                  pow (sqrt (pow (velocity.x, 2) + pow (velocity.y, 2)), 3);
   double Pvertical = drone->getWeight () * velocity.z;
+
+  if (Pvertical < 0.0)
+    Pvertical = 0.0;
+
   double PowerConsumption = Plevel + Pdrag + Pvertical;
 
   return PowerConsumption;
