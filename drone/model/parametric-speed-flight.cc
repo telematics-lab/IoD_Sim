@@ -72,7 +72,6 @@ ParametricSpeedFlight::Generate ()
     {
       // this is a dummy flight plan to hover on a specific point.
       m_length = 0;
-      m_currentPosition = CurvePoint (m_knots.GetBack ()->GetPosition ());
       m_currentVelocity = Vector3D ();
       m_time = m_knots.GetBack ()->GetRestTime ();
     }
@@ -81,7 +80,11 @@ ParametricSpeedFlight::Generate ()
       m_length = Curve::Generate ();
       m_currentPositionPtr = m_curve.begin ();
       m_time = Seconds (FindTime ());
+
+      NS_LOG_LOGIC ("Drone will take " << m_time << " to traverse the path.");
     }
+
+    m_currentPosition = CurvePoint (m_knots.GetFront ()->GetPosition ());
 }
 
 void
