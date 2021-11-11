@@ -210,7 +210,7 @@
       "id": "configFileGeneralPurpose",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/general_purpose_with_lte.json"
+      "default": "./src/drone/config/gp_tesi_1.json"
     },
     {
       "id": "configFileLteBasic",
