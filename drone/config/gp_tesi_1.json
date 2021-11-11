@@ -2,7 +2,7 @@
     "name": "gp_tesi_1",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 500,
+    "duration": 45,
     "staticNs3Config": [{
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
@@ -98,7 +98,7 @@
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
                 "attributes": [{
                         "name": "SpeedCoefficients",
-                        "value": [1.0, 0.0]
+                        "value": [5.0]
                     },
                     {
                         "name": "FlightPlan",
@@ -263,7 +263,7 @@
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
                 "attributes": [{
                         "name": "SpeedCoefficients",
-                        "value": [1.0, 0.0]
+                        "value": [3.0]
                     },
                     {
                         "name": "FlightPlan",
@@ -416,7 +416,7 @@
                 "name": "ns3::ConstantPositionMobilityModel",
                 "attributes": [{
                     "name": "Position",
-                    "value": [10.0, 10.0, 0.0]
+                    "value": [60.0, 45.0, 0.0]
                 }]
             },
             "applications": [{
@@ -439,6 +439,7 @@
     ],
 
     "logComponents": [
+        "ParametricSpeedFlight",
         "Scenario",
         "DroneEnergyModel",
         "DronePeripheral",

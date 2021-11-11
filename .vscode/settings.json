@@ -83,5 +83,6 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "wscript": "python"
-    }
+    },
+    "git.ignoreLimitWarning": true
 }
