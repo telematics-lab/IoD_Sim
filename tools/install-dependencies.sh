@@ -32,6 +32,9 @@ case "$ID" in
   debian)
     install_debian_deps
     ;;
+  ubuntu)
+    install_debian_deps
+    ;;
   fedora)
     install_fedora_deps
     ;;
