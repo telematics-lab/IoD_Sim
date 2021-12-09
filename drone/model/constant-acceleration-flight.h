@@ -49,6 +49,7 @@ protected:
 
   double m_acceleration;   // m/s^2
   double m_maxSpeed;       // m/s
+  bool m_isHovering;
 
   double m_accelerationZoneLength;
   double m_accelerationZoneTime;
@@ -56,6 +57,7 @@ protected:
   mutable CurvePoint m_currentPosition;
   mutable CurvePoint m_pastPosition;
   mutable double     m_currentDistance;
+  mutable double m_currentT;
 
   mutable Vector m_currentVelocity;
   mutable double m_currentSpeed;

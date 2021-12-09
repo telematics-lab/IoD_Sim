@@ -32,7 +32,11 @@ ConstantAccelerationFlight::ConstantAccelerationFlight (FlightPlan flightPlan,
                                                         double step) :
   Curve (flightPlan, step),
   m_acceleration {flightParam.GetAcceleration ()},
-  m_maxSpeed {flightParam.GetMaxSpeed ()}
+  m_maxSpeed {flightParam.GetMaxSpeed ()},
+  m_isHovering {flightPlan.GetN () == 1},
+  m_currentDistance {0.0},
+  m_currentT {0.0},
+  m_currentSpeed {0.0}
 {
   NS_LOG_FUNCTION (this << m_acceleration << m_maxSpeed);
 
@@ -49,19 +53,29 @@ ConstantAccelerationFlight::Generate ()
 {
   NS_LOG_FUNCTION (this);
 
-  m_length = Curve::Generate ();
+  if (m_isHovering)
+    {
+      // this is a dummy flight plan to hover on a specific point.
+      m_length = 0;
+      m_currentVelocity = Vector3D ();
+      m_time = m_knots.GetBack ()->GetRestTime ();
+    }
+  else
+    {
+      m_length = Curve::Generate ();
+      m_accelerationZoneLength = 0.5 * std::pow (m_maxSpeed, 2) / m_acceleration;
+      m_accelerationZoneTime = m_maxSpeed / m_acceleration;
 
-  m_accelerationZoneLength = 0.5 * std::pow (m_maxSpeed, 2) / m_acceleration;
-  m_accelerationZoneTime = m_maxSpeed / m_acceleration;
+      const double aZonesL = 2 * m_accelerationZoneLength; // total length of acceleration zones
+      const double aZonesT = 2 * m_accelerationZoneTime;   // total time of acceleration zones
 
-  const double aZonesL = 2 * m_accelerationZoneLength; // total length of acceleration zones
-  const double aZonesT = 2 * m_accelerationZoneTime;   // total time of acceleration zones
+      m_time = Seconds (aZonesT + (m_length - aZonesL) / m_maxSpeed);
 
-  m_currentPosition = *m_curve.begin ();
-  m_time = Seconds (aZonesT + (m_length - aZonesL) / m_maxSpeed);
-  NS_LOG_LOGIC ("Time: " << m_time << " by " << aZonesT
-                << " + (" << m_length << " - " << aZonesL
-                << ") / " << m_maxSpeed);
+      if (m_time.GetSeconds () <= aZonesT) // in case the trajectory is too short to never reach m_maxSpeed
+        m_time = Seconds (std::sqrt (4.0 * m_length / m_acceleration));
+    }
+
+  m_currentPosition = CurvePoint (m_knots.GetFront ()->GetPosition ());
 }
 
 void
@@ -69,49 +83,17 @@ ConstantAccelerationFlight::Update (const double &t) const
 {
   NS_LOG_FUNCTION (this << t);
 
-  if (m_length > 2.0 * m_accelerationZoneLength)
-    {
-      if (t <= m_accelerationZoneTime)
-        {
-          m_currentSpeed = m_acceleration * t;
-          m_currentDistance = 0.5 * m_acceleration * std::pow (t, 2);
-        }
-      else if (t < m_time.GetSeconds () - m_accelerationZoneTime)
-        {
-          m_currentSpeed = m_maxSpeed;
-          m_currentDistance = 0.5 * (m_maxSpeed / m_acceleration)
-                              + m_maxSpeed * (t - m_accelerationZoneTime);
-        }
-      else
-        {
-          m_currentSpeed = m_maxSpeed
-                           - m_acceleration * (m_time.GetSeconds () - t);
-          m_currentDistance = m_length
-                              + m_maxSpeed * (t - m_time.GetSeconds ()
-                                              + m_accelerationZoneTime)
-                              - 0.5 * m_acceleration
-                                * std::pow (t - m_time.GetSeconds ()
-                                            + m_accelerationZoneTime, 2);
-        }
-    }
-  else
-    {
-      if (t <= m_time.GetSeconds () / 2.0)
-        {
-          m_currentSpeed = m_acceleration * t;
-          m_currentDistance = 0.5 * m_acceleration * std::pow (t, 2);
-        }
-      else
-        {
-          m_currentSpeed = m_acceleration * 0.5 * (2 * t - m_time.GetSeconds ());
-          m_currentDistance = 0.125 * m_acceleration
-                                * std::pow (m_time.GetSeconds (), 2)
-                              + 0.5 * m_acceleration * m_time.GetSeconds ()
-                                * (t - 0.5 * m_time.GetSeconds ())
-                              - 0.5 * m_acceleration
-                                * std::pow (t - 0.5 * m_time.GetSeconds (), 2);
-        }
-    }
+  if (m_isHovering)
+    return;
+
+  double a = (m_currentSpeed < m_maxSpeed) ? m_acceleration : 0.0;
+
+  if (m_currentDistance >= m_length - 0.5 * std::pow (m_currentSpeed, 2) / m_acceleration)
+    a = -m_acceleration;
+
+  m_currentDistance += m_currentSpeed * (t - m_currentT) + 0.5 * a * std::pow (t - m_currentT, 2);
+  m_currentSpeed += a * (t - m_currentT);
+  m_currentT = t;
 
   UpdatePosition ();
   UpdateVelocity ();
@@ -166,6 +148,9 @@ ConstantAccelerationFlight::UpdateVelocity () const
 
   const Vector relativeDistance = m_currentPosition.GetRelativeDistanceVector (m_pastPosition);
   const double relativeDistScalar = m_currentPosition.GetRelativeDistance (m_pastPosition);
+
+  if (relativeDistScalar == 0.0)
+    return;
 
   const double velX = (relativeDistance.x != 0)
                       ? (relativeDistance.x / relativeDistScalar) * m_currentSpeed
