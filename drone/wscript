@@ -73,7 +73,10 @@ def build(bld):
         'model/interest-region-container.cc',
         'model/int-vector.cc',
         'model/remote-list.cc',
-        'model/nat-application.cc'
+        'model/nat-application.cc',
+        'model/random-udp-application.cc',
+        'model/tcp-stub-client-application.cc',
+        'model/tcp-stub-server-application.cc'
         ]
 
     #module_test = bld.create_ns3_module_test_library('drone')
@@ -142,7 +145,10 @@ def build(bld):
         'model/int-vector.h',
         'model/vector-type.h',
         'model/remote-list.h',
-        'model/nat-application.h'
+        'model/nat-application.h',
+        'model/random-udp-application.h',
+        'model/tcp-stub-client-application.h',
+        'model/tcp-stub-server-application.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
