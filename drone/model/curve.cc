@@ -104,7 +104,7 @@ Curve::Generate () const
         absoluteDistance += relativeDistance;
       }
 
-    //NS_LOG_LOGIC("  NP:  " << point << " | t: " << t << " | rD: " << relativeDistance << " | aD: " << absoluteDistance);
+    NS_LOG_LOGIC ("  NP:  " << point << " | t: " << t << " | rD: " << relativeDistance << " | aD: " << absoluteDistance);
     m_curve.push_back ({point, t, relativeDistance, absoluteDistance});
   }
 

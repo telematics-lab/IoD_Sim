@@ -51,7 +51,7 @@ ConstantAccelerationFlight::Generate ()
 
   m_length = Curve::Generate ();
 
-  m_accelerationZoneLength = (0.5 * std::pow (m_maxSpeed, 2)) / m_acceleration;
+  m_accelerationZoneLength = 0.5 * std::pow (m_maxSpeed, 2) / m_acceleration;
   m_accelerationZoneTime = m_maxSpeed / m_acceleration;
 
   const double aZonesL = 2 * m_accelerationZoneLength; // total length of acceleration zones

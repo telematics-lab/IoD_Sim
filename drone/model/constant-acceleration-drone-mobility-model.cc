@@ -61,17 +61,18 @@ ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel (
   m_flightParams {m_acceleration, m_maxSpeed},
   m_lastUpdate {-1}
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 }
 
 ConstantAccelerationDroneMobilityModel::~ConstantAccelerationDroneMobilityModel ()
 {
+  NS_LOG_FUNCTION (this);
 }
 
 void
 ConstantAccelerationDroneMobilityModel::Update () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   const Time t = Simulator::Now ();
   if (t.Compare (m_lastUpdate) <= 0)
@@ -92,7 +93,7 @@ ConstantAccelerationDroneMobilityModel::Update () const
 Vector
 ConstantAccelerationDroneMobilityModel::DoGetPosition () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("position: " << m_position);
 
   Update ();
@@ -102,7 +103,7 @@ ConstantAccelerationDroneMobilityModel::DoGetPosition () const
 void
 ConstantAccelerationDroneMobilityModel::DoSetPosition (const Vector &position)
 {
-  NS_LOG_FUNCTION (position);
+  NS_LOG_FUNCTION (this << position);
 
   m_position = position;
 }
@@ -110,7 +111,7 @@ ConstantAccelerationDroneMobilityModel::DoSetPosition (const Vector &position)
 Vector
 ConstantAccelerationDroneMobilityModel::DoGetVelocity () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   Update ();
 
@@ -121,9 +122,8 @@ ConstantAccelerationDroneMobilityModel::DoGetVelocity () const
 void
 ConstantAccelerationDroneMobilityModel::DoInitialize ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
-  // late flight param reinitialization
   m_flightParams = { m_acceleration, m_maxSpeed };
 
   m_planner = Planner<ConstantAccelerationParam, ConstantAccelerationFlight>
@@ -135,7 +135,7 @@ ConstantAccelerationDroneMobilityModel::DoInitialize ()
 void
 ConstantAccelerationDroneMobilityModel::DoDispose ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   MobilityModel::DoDispose ();
 }

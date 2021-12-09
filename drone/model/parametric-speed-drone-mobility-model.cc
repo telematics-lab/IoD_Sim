@@ -58,7 +58,7 @@ ParametricSpeedDroneMobilityModel::ParametricSpeedDroneMobilityModel () :
   m_flightParams {{}},
   m_lastUpdate {-1}
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 }
 
 ParametricSpeedDroneMobilityModel::~ParametricSpeedDroneMobilityModel ()
@@ -68,7 +68,7 @@ ParametricSpeedDroneMobilityModel::~ParametricSpeedDroneMobilityModel ()
 void
 ParametricSpeedDroneMobilityModel::Update () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   const Time t = Simulator::Now ();
   if (t.Compare (m_lastUpdate) <= 0)
@@ -89,7 +89,7 @@ ParametricSpeedDroneMobilityModel::Update () const
 Vector
 ParametricSpeedDroneMobilityModel::DoGetPosition () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("position: " << m_position);
 
   Update ();
@@ -107,7 +107,7 @@ ParametricSpeedDroneMobilityModel::DoSetPosition (const Vector &position)
 Vector
 ParametricSpeedDroneMobilityModel::DoGetVelocity () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   Update ();
 
@@ -118,7 +118,7 @@ ParametricSpeedDroneMobilityModel::DoGetVelocity () const
 void
 ParametricSpeedDroneMobilityModel::DoInitialize ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   m_planner = Planner<ParametricSpeedParam, ParametricSpeedFlight>
     (m_flightPlan, m_flightParams, m_curveStep);
@@ -129,7 +129,7 @@ ParametricSpeedDroneMobilityModel::DoInitialize ()
 void
 ParametricSpeedDroneMobilityModel::DoDispose ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   MobilityModel::DoDispose ();
 }
@@ -137,10 +137,10 @@ ParametricSpeedDroneMobilityModel::DoDispose ()
 void
 ParametricSpeedDroneMobilityModel::SetSpeedCoefficients (const DoubleVector &a)
 {
+  NS_LOG_FUNCTION (this << a);
+
   for (auto c = a.Begin (); c != a.End (); c++)
-    {
-      m_flightParams.Add (*c);
-    }
+    m_flightParams.Add (*c);
 }
 
 } // ns3 namespace
