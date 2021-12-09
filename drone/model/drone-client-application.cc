@@ -225,8 +225,9 @@ DroneClientApplication::SendPacket (const Intent i,
       socket->SendTo (packet, 0, InetSocketAddress (targetAddress, m_destPort));
       if (GetNode ()->GetInstanceTypeId().GetName() == "ns3::Drone" && DroneList::GetDrone(nodeId)->getPeripherals()->thereIsStorage() && m_storage)
       {
-         Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral>(DroneList::GetDrone(nodeId)->getPeripherals()->Get(0));
-         if (storage->Free(strlen (json) * sizeof (char),StoragePeripheral::byte)) NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Freed " << strlen (json) * sizeof (char) << " bytes ");
+        Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral> (DroneList::GetDrone (nodeId)->getPeripherals ()->Get (0));
+        if (storage->Free (strlen (json) * sizeof (char), StoragePeripheral::byte))
+          NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Freed " << strlen (json) * sizeof (char) << " bytes ");
       }
       m_txTrace (packet);
 

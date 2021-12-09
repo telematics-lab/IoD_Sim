@@ -148,8 +148,8 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
           packet->CopyData (payload, packet->GetSize ());
           if (GetNode ()->GetInstanceTypeId().GetName() == "ns3::Drone" && DroneList::GetDrone(GetNode ()->GetId ())->getPeripherals()->thereIsStorage() && m_storage)
           {
-            Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral>(DroneList::GetDrone(GetNode ()->GetId ())->getPeripherals()->Get(0));
-            if (storage->Alloc(strlen ((char*) payload) * sizeof (char),StoragePeripheral::byte))
+            Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral,DronePeripheral> (DroneList::GetDrone (GetNode ()->GetId ())->getPeripherals ()->Get (0));
+            if (storage->Alloc (strlen ((char*) payload) * sizeof (char), StoragePeripheral::byte))
               NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Stored " << strlen ((char*) payload) * sizeof (char) << " bytes ");
           }
 
@@ -158,36 +158,43 @@ DroneServerApplication::ReceivePacket (const Ptr<Socket> socket) const
 
           rapidjson::Document d;
           d.Parse ((char *) payload);
-          const char *commandStr = d["cmd"].GetString ();
-
-          const PacketType command = PacketType (commandStr);
-          switch (command)
+          if (d.HasParseError ())
             {
-            case PacketType::HELLO:
-              NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                          << "] HELLO packet!");
-              m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendHelloAck,
-                                                    this,
-                                                    socket,
-                                                    senderIpv4,
-                                                    senderPort);
-              break;
-            case PacketType::UPDATE:
-              NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                          << "] UPDATE packet!");
-              m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendUpdateAck,
-                                                    this,
-                                                    socket,
-                                                    senderIpv4,
-                                                    senderPort);
-              break;
-            case PacketType::UPDATE_ACK:
-              NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                          << "] UPDATE_ACK received!");
-              break;
-            default:
-              NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                          << "] unknown packet received!");
+              NS_LOG_INFO ("[Node " << GetNode ()->GetId () << "] Received malformed packet! DROP");
+            }
+          else
+            {
+              const char *commandStr = d["cmd"].GetString ();
+              const PacketType command = PacketType (commandStr);
+
+              switch (command)
+                {
+                case PacketType::HELLO:
+                  NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
+                              << "] HELLO packet!");
+                  m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendHelloAck,
+                                                        this,
+                                                        socket,
+                                                        senderIpv4,
+                                                        senderPort);
+                  break;
+                case PacketType::UPDATE:
+                  NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
+                              << "] UPDATE packet!");
+                  m_sendEvent = Simulator::ScheduleNow (&DroneServerApplication::SendUpdateAck,
+                                                        this,
+                                                        socket,
+                                                        senderIpv4,
+                                                        senderPort);
+                  break;
+                case PacketType::UPDATE_ACK:
+                  NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
+                              << "] UPDATE_ACK received!");
+                  break;
+                default:
+                  NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
+                              << "] unknown packet received!");
+                }
             }
 
           free (payload);
