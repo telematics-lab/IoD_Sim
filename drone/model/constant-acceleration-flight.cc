@@ -34,30 +34,30 @@ ConstantAccelerationFlight::ConstantAccelerationFlight (FlightPlan flightPlan,
   m_acceleration {flightParam.GetAcceleration ()},
   m_maxSpeed {flightParam.GetMaxSpeed ()}
 {
-  NS_LOG_FUNCTION (m_acceleration << m_maxSpeed); // TODO: ostreams and istreams
-                                                  // implementations for complex
-                                                  // objects
+  NS_LOG_FUNCTION (this << m_acceleration << m_maxSpeed);
 
   Generate ();
 }
 
 ConstantAccelerationFlight::~ConstantAccelerationFlight ()
 {
+  NS_LOG_FUNCTION (this);
 }
 
 void
 ConstantAccelerationFlight::Generate ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   m_length = Curve::Generate ();
 
   m_accelerationZoneLength = (0.5 * std::pow (m_maxSpeed, 2)) / m_acceleration;
   m_accelerationZoneTime = m_maxSpeed / m_acceleration;
 
-  const double aZonesT = 2 * m_accelerationZoneTime;   // total time of acceleration zones
   const double aZonesL = 2 * m_accelerationZoneLength; // total length of acceleration zones
+  const double aZonesT = 2 * m_accelerationZoneTime;   // total time of acceleration zones
 
+  m_currentPosition = *m_curve.begin ();
   m_time = Seconds (aZonesT + (m_length - aZonesL) / m_maxSpeed);
   NS_LOG_LOGIC ("Time: " << m_time << " by " << aZonesT
                 << " + (" << m_length << " - " << aZonesL
@@ -67,7 +67,7 @@ ConstantAccelerationFlight::Generate ()
 void
 ConstantAccelerationFlight::Update (const double &t) const
 {
-  NS_LOG_FUNCTION (t);
+  NS_LOG_FUNCTION (this << t);
 
   if (m_length > 2.0 * m_accelerationZoneLength)
     {
@@ -142,7 +142,7 @@ ConstantAccelerationFlight::GetVelocity () const
 void
 ConstantAccelerationFlight::UpdatePosition () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("old pos vector: " << m_currentPosition.GetPosition ());
   m_pastPosition = m_currentPosition;
 
@@ -161,7 +161,7 @@ ConstantAccelerationFlight::UpdatePosition () const
 void
 ConstantAccelerationFlight::UpdateVelocity () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("old vel: " << m_currentVelocity);
 
   const Vector relativeDistance = m_currentPosition.GetRelativeDistanceVector (m_pastPosition);
