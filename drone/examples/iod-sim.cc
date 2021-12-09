@@ -606,49 +606,19 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
 
   for (auto appConf : conf->GetApplications ())
     {
-      const auto appName = appConf.GetName ();
-      if (appName.compare("ns3::DroneClientApplication") == 0)
-        {
-          auto app = CreateObject<DroneClientApplication> ();
+      ObjectFactory f {appConf.GetName ()};
 
-          if (entityKey.compare("drones") == 0)
-            m_drones.Get (entityId)->AddApplication (app);
-          else if (entityKey.compare("ZSPs") == 0)
-            m_zsps.Get (entityId)->AddApplication (app);
+      for (auto attr : appConf.GetAttributes ())
+        f.Set (attr.first, *attr.second);
 
-          for (auto attr : appConf.GetAttributes ()) {
-            app->SetAttribute (attr.first, *attr.second);
-          }
-        }
-      else if (appName.compare("ns3::DroneServerApplication") == 0)
-        {
-          auto app = CreateObject<DroneServerApplication> ();
+      auto app = StaticCast<Application, Object> (f.Create ());
 
-          if (entityKey.compare("drones") == 0)
-            m_drones.Get (entityId)->AddApplication (app);
-          else if (entityKey.compare("ZSPs") == 0)
-            m_zsps.Get (entityId)->AddApplication (app);
-
-          for (auto attr : appConf.GetAttributes ())
-              app->SetAttribute (attr.first, *attr.second);
-        }
-      else if (appName.compare("ns3::NatApplication") == 0)
-        {
-          auto app = CreateObject<NatApplication> ();
-
-          if (entityKey.compare("drones") == 0)
-            m_drones.Get (entityId)->AddApplication (app);
-          else if (entityKey.compare("ZSPs") == 0)
-            m_zsps.Get (entityId)->AddApplication (app);
-
-          for (auto attr : appConf.GetAttributes ()) {
-            app->SetAttribute (attr.first, *attr.second);
-          }
-        }
+      if (entityKey == "drones")
+        m_drones.Get (entityId)->AddApplication (app);
+      else if (entityKey == "ZSPs")
+        m_zsps.Get (entityId)->AddApplication (app);
       else
-        {
-          NS_FATAL_ERROR ("Unsupported Application Type: " << appName);
-        }
+        NS_FATAL_ERROR ("Unsupported Entity Type " << entityKey);
     }
 }
 
