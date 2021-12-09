@@ -282,7 +282,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
       NS_ASSERT_MSG (el.HasMember ("value"),
                     "Attribute model must have 'value' property.");
 
-      const std::string attrName = el["name"].GetString();
+      const std::string attrName = el["name"].GetString ();
       TypeId::AttributeInformation attrInfo = {};
 
       NS_ASSERT_MSG (modelTid.LookupAttributeByName (attrName, &attrInfo),
@@ -302,8 +302,17 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
           {
             if (el["value"].IsInt ())
               {
-                const int attrValueInt = el["value"].GetInt ();
-                attrValue = attrInfo.checker->CreateValidValue (IntegerValue (attrValueInt));
+                const auto attrValueInt = el["value"].GetInt ();
+                const auto acceptedType = attrInfo.checker->GetValueTypeName ();
+
+                if (acceptedType == "ns3::IntegerValue")
+                  attrValue = attrInfo.checker->CreateValidValue (IntegerValue (attrValueInt));
+                else if (acceptedType == "ns3::UintegerValue")
+                  attrValue = attrInfo.checker->CreateValidValue (UintegerValue (attrValueInt));
+                else
+                  NS_FATAL_ERROR ("The attribute value for property " << attrName << " defined in model " << modelName
+                                  << " has incompatible type: " << acceptedType << " is needed.");
+
               }
             else if (el["value"].IsDouble ())
               {
@@ -315,6 +324,11 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                   attrValue = attrInfo.checker->CreateValidValue (TimeValue (Seconds (attrValueDouble)));
                 else
                   NS_FATAL_ERROR ("Cannot read attribute " << attrName << " for model " << modelName);
+              }
+            else
+              {
+                NS_FATAL_ERROR ("Cannot read attribute " << attrName << " for model " << modelName << ". "
+                                << "A number was detected, but it is not a valid Integer neither a Double.");
               }
           }
           break;
@@ -387,10 +401,15 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
           break;
         }
 
-      attributes.emplace_back(std::make_pair(attrName, attrValue));
+      NS_ABORT_MSG_IF (attrValue == nullptr, "The attribute value for property " << attrName
+                                             << " defined in model " << modelName << " was not accepted. "
+                                             << "Insert a valid value according to "
+                                             << attrInfo.checker->GetUnderlyingTypeInformation ());
+
+      attributes.emplace_back (std::make_pair (attrName, attrValue));
     }
 
-  return ModelConfiguration(modelName, attributes);
+  return ModelConfiguration (modelName, attributes);
 }
 
 } // namespace ns3
