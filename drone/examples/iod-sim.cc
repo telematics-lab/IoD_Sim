@@ -666,10 +666,11 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
       for (auto attr : perConf.GetAttributes ())
           dronePeripheralsContainer->Set(attr.first, *attr.second);
       auto peripheral = dronePeripheralsContainer->Create();
-      for (uint32_t index = 0; index< (uint32_t) peripheral->GetNRoI();index++)
+      for (uint32_t i = 0; i < (uint32_t) peripheral->GetNRoI (); i++)
       {
-        auto reg = irc->GetRoI(index);
-        if (!irc->GetRoI(index)) NS_FATAL_ERROR("Region of Interest #"<<index<<" does not exist.");
+        auto reg = irc->GetRoI (i);
+        if (!irc->GetRoI (i))
+          NS_FATAL_ERROR("Region of Interest #" << i << " does not exist.");
       }
     }
   dronePeripheralsContainer->InstallAll(m_drones.Get(entityId));
