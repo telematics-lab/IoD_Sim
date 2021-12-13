@@ -98,7 +98,7 @@ ConstantAccelerationFlight::Update (const double &t) const
   UpdatePosition ();
   UpdateVelocity ();
 
-  NS_LOG_LOGIC ("current speed: " << m_currentSpeed);
+  NS_LOG_LOGIC ("Current speed: " << m_currentSpeed);
   NS_LOG_LOGIC ("Current distance: " << m_currentDistance);
 }
 
