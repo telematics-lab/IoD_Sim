@@ -77,20 +77,25 @@ ReportPeripheral::Write (xmlTextWriterPtr h)
   rc = xmlTextWriterEndElement(h);
   NS_ASSERT (rc >= 0);
 
-  for (auto r : m_roi) roistr << std::to_string(r)<<", ";
-  std::string roiser = roistr.str();
-  roiser.pop_back();
+  if (m_roi.size () > 0)
+    {
+      for (auto r : m_roi)
+        roistr << std::to_string (r) << ", ";
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "RoITrigger", BAD_CAST roiser.c_str ());
-  NS_ASSERT (rc >= 0);
+      std::string roiser = roistr.str ();
+      roiser.pop_back ();
+
+      rc = xmlTextWriterWriteElement (h, BAD_CAST "RoITrigger", BAD_CAST roiser.c_str ());
+      NS_ASSERT (rc >= 0);
+    }
 
   for (auto attr : m_otherAttributes)
-  {
-    rc = xmlTextWriterWriteElement (h, BAD_CAST std::get<0>(attr).c_str(), BAD_CAST std::get<1>(attr).c_str());
-    NS_ASSERT (rc >= 0);
-  }
+    {
+      rc = xmlTextWriterWriteElement (h, BAD_CAST std::get<0> (attr).c_str (), BAD_CAST std::get<1> (attr).c_str ());
+      NS_ASSERT (rc >= 0);
+    }
 
-  rc = xmlTextWriterEndElement(h);
+  rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
 }
 
