@@ -10,3 +10,6 @@ results/*
 
 # Ignore Python cache
 __pycache__
+
+# Ignore Python virtual environment
+.venv/
