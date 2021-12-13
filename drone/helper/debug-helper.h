@@ -47,6 +47,16 @@ public:
     for (auto iNode = NodeList::Begin (); iNode != NodeList::End (); iNode++)
       {
         std::cout << std::endl << (*iNode)->GetInstanceTypeId () << std::endl;
+
+        auto aggregateIter = (*iNode)->GetAggregateIterator ();
+        std::cout << "Aggregate objects " << std::endl;
+        while (aggregateIter.HasNext ())
+          {
+            auto o = aggregateIter.Next ();
+            std::cout << "Object " << o->GetInstanceTypeId () << std::endl;
+          }
+        std::cout << std::endl;
+
         auto nDevices = (*iNode)->GetNDevices ();
         std::cout << "There are " << nDevices << " devices" << std::endl;
 
