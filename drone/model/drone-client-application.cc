@@ -34,7 +34,6 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DroneClientApplication");
-
 NS_OBJECT_ENSURE_REGISTERED (DroneClientApplication);
 
 TypeId
