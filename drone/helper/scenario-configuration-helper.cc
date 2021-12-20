@@ -828,6 +828,8 @@ ScenarioConfigurationHelper::EnableLogComponents () const
           LogComponentEnable ((*i).GetString (), LOG_ALL);
         }
     }
+
+  LogComponentEnableAll (LOG_PREFIX_ALL);
 }
 
 
