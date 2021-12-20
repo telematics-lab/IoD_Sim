@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/ns3/build/src/drone/examples/ns3.35-iod-sim-debug",
-      "args": ["--config=./src/drone/config/gp_tesi_1.json"],
+      "args": ["--config=./src/drone/config/paper_2.json"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/ns3/",
       "environment": [{

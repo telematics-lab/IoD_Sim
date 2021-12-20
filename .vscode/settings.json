@@ -82,7 +82,19 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "wscript": "python"
+        "wscript": "python",
+        "compare": "cpp",
+        "cassert": "cpp",
+        "ccomplex": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "concepts": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "numbers": "cpp",
+        "queue": "cpp"
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "jupyter.jupyterServerType": "local"
 }
