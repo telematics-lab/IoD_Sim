@@ -32,17 +32,17 @@ StoragePeripheral::GetTypeId ()
           .SetGroupName ("Peripheral")
           .AddConstructor<StoragePeripheral> ()
           .AddAttribute ("Capacity", "The capacity of the disk in bit",
-                         IntegerValue (8e+6), //1MByte
-                         MakeIntegerAccessor (&StoragePeripheral::SetCapacity,
-                                              &StoragePeripheral::GetCapacity),
-                         MakeIntegerChecker<int> (0))
+                         UintegerValue (8000000), //1MByte
+                         MakeUintegerAccessor (&StoragePeripheral::SetCapacity,
+                                               &StoragePeripheral::GetCapacity),
+                         MakeUintegerChecker<uint64_t> ())
           .AddAttribute ("InitialRemainingCapacity", "The initial capacity of the disk in bit",
-                         IntegerValue (8e+6), //1MByte
-                         MakeIntegerAccessor (&StoragePeripheral::m_remainingCapacity),
-                         MakeIntegerChecker<int> (0))
+                         UintegerValue (8000000), //1MByte
+                         MakeUintegerAccessor (&StoragePeripheral::m_remainingCapacity),
+                         MakeUintegerChecker<uint64_t> ())
           .AddTraceSource ("RemainingCapacity", "Remaining Capacity at Storage Peripheral.",
                            MakeTraceSourceAccessor (&StoragePeripheral::m_remainingCapacity),
-                           "ns3::TracedValueCallback::Integer")
+                           "ns3::TracedValueCallback::Uint64")
           ;
   return tid;
 }
@@ -52,13 +52,13 @@ StoragePeripheral::StoragePeripheral ()
 }
 
 void
-StoragePeripheral::SetCapacity (int cap)
+StoragePeripheral::SetCapacity (uint64_t cap)
 {
   m_capacity = cap;
   m_remainingCapacity = m_capacity;
 }
 
-int
+uint64_t
 StoragePeripheral::GetCapacity () const
 {
   return m_capacity;
@@ -77,7 +77,7 @@ StoragePeripheral::DoDispose ()
 }
 
 bool
-StoragePeripheral::Alloc (int amount, unit amountUnit)
+StoragePeripheral::Alloc (uint64_t amount, unit amountUnit)
 {
   if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Alloc opeation not possible."); return false;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
@@ -96,7 +96,7 @@ StoragePeripheral::Alloc (int amount, unit amountUnit)
 }
 
 bool
-StoragePeripheral::Free (int amount, unit amountUnit)
+StoragePeripheral::Free (uint64_t amount, unit amountUnit)
 {
   if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return false;}
   NS_LOG_FUNCTION (this << amount * amountUnit);

@@ -54,14 +54,14 @@ public:
    *
    * \param cap Capacity of the drive in bits.
    */
-  void SetCapacity (int cap);
+  void SetCapacity (uint64_t cap);
 
   /**
    * \brief Returns the capacity of the drive.
    *
    * \returns Capacity of the drive in bits.
    */
-  int GetCapacity (void) const;
+  uint64_t GetCapacity (void) const;
 
   /**
    * \brief Allocates a certain amount of data to the drive.
@@ -69,7 +69,7 @@ public:
    * \param amount Amount of data.
    * \param amountUnit Unit of measure.
    */
-  bool Alloc (int amount, unit amountUnit);
+  bool Alloc (uint64_t amount, unit amountUnit);
 
   /**
    * \brief Frees a certain amount of data from the drive.
@@ -77,15 +77,15 @@ public:
    * \param amount Amount of data.
    * \param amountUnit Unit of measure.
    */
-  bool Free (int amount, unit amountUnit);
+  bool Free (uint64_t amount, unit amountUnit);
 
 protected:
   void DoInitialize (void);
   void DoDispose (void);
 
 private:
-  double m_capacity;
-  TracedValue<double> m_remainingCapacity;
+  uint64_t m_capacity;
+  TracedValue<uint64_t> m_remainingCapacity;
 };
 
 } // namespace ns3
