@@ -61,12 +61,12 @@ Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
                                        step));
       // estimate timeWindow
       const Time time = m_flights.back ().GetTime ();
-      const double startTime = (m_timeWindows.size () == 0)
-                               ? 0
-                               : m_timeWindows.back ().second.GetSeconds ();
+      const Time startTime = (m_timeWindows.size () == 0)
+                             ? Seconds (0)
+                             : m_timeWindows.back ().second;
 
-      m_timeWindows.push_back ({Seconds (startTime),
-                                Seconds (startTime + time.GetSeconds ())});
+      m_timeWindows.push_back ({startTime,
+                                startTime + time});
 
       NS_LOG_LOGIC ("Added flight " << flightPlan);
       NS_LOG_LOGIC ("TimeWindow: start at " << startTime << " for " << time);
@@ -99,8 +99,7 @@ Planner<FlightParam, FlightType>::Update (const Time time) const
       return;
     }
 
-  const double timeOffset = time.GetSeconds ()
-                            - m_timeWindows[flightIndex].first.GetSeconds ();
+  const double timeOffset = (time - m_timeWindows[flightIndex].first).GetSeconds ();
 
   NS_LOG_LOGIC ("flightIndex: " << flightIndex << "; timeOffset: " << timeOffset);
 
