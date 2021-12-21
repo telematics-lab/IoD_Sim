@@ -2,8 +2,9 @@
     "name": "gp_tesi_1",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 55,
-    "staticNs3Config": [{
+    "duration": 45,
+    "staticNs3Config": [
+        {
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
             "value": "2200"
         },
@@ -177,10 +178,6 @@
                                 "restTime": 5.0
                             }
                         ]
-                    },
-                    {
-                        "name": "CurveStep",
-                        "value": 0.001
                     }
                 ]
             },
@@ -506,6 +503,7 @@
             }]
         }
     ],
+
     "ZSPs": [
         {
             "netDevices": [
@@ -551,7 +549,6 @@
         "ParametricSpeedFlight",
         "Scenario",
         "DroneEnergyModel",
-        "DronePeripheral",
-        "InputPeripheral"
+        "DronePeripheral"
     ]
 }
