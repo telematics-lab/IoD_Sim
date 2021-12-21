@@ -20,6 +20,7 @@
 
 #include <ns3/application.h>
 #include <ns3/socket.h>
+#include <ns3/storage-peripheral.h>
 #include <ns3/traced-callback.h>
 
 namespace ns3 {
@@ -81,28 +82,35 @@ private:
   void OnReceivedData (Ptr<Socket> s);
 
   /**
-   * \brief Send a random packet
+   * \brief Send a random packet of a given size
    */
-  void SendPacket ();
+  bool SendPacket (const uint16_t payloadSize);
   /**
    * \brief Create the payload to be sent
    */
   Ptr<Packet> CreatePacket (uint32_t size) const;
+  /**
+   * \brief Find storage in drone
+   */
+  Ptr<StoragePeripheral> FindStorage () const;
+  /**
+   * \brief Callback when the underlying drone storage receives data updates
+   */
+  void OnStorageUpdate (const uint64_t oldvalue, const uint64_t newvalue);
+
 
   Ipv4Address m_destAddr;      /// Remote Server Address
   uint16_t m_destPort;         /// UDP Port
-  uint32_t m_txFreq;           /// Transmission frequency
-  uint16_t m_packetSize;       /// Packet size in bytes - 16 bits are given as limit due to UDP header field
+  uint16_t m_maxPayloadSize;   /// Payload size in bytes
   /// Trace new connections being made
   TracedCallback<Ptr<const TcpStubClientApplication>, Ptr<Socket> > m_connectionEstablishedTrace;
   /// Trace to signal the transmission of packets from application-level
   TracedCallback<Ptr<const Packet> > m_txTrace;
 
-  EventId m_sendEvent;         /// Event of a packet being sent
   Ptr<Socket> m_socket;        /// The socket to be used for communications
   uint32_t m_seqNum;           /// Packet Sequence Number
   uint16_t m_payloadSize;      /// Payload size, excluding L3,4 header sizes
-  double m_packetInterval;     /// Packet Tx interval, the inverse of m_txFreq, in Seconds
+  Ptr<StoragePeripheral> m_storage; /// Reference to drone storage peripheral.
 };
 
 } // namespace ns3
