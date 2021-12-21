@@ -61,7 +61,10 @@ DronePeripheralContainer::SetDrone (Ptr<Drone> drone)
 Ptr<DronePeripheral>
 DronePeripheralContainer::Create()
 {
-  auto peripheral = m_dronePeripheralFactory.Create<DronePeripheral>();
+  auto peripheral = StaticCast<DronePeripheral, Object> (m_dronePeripheralFactory.Create ());
+  NS_ASSERT (peripheral != nullptr);
+
+  peripheral->Initialize ();
   //if there are no trigger regions, this peripheral is always ON
   if (peripheral->GetNRoI() == 0) peripheral->SetState(DronePeripheral::PeripheralState::ON);
   peripheral->SetDrone(m_drone);
