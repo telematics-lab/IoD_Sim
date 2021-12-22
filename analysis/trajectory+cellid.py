@@ -3,10 +3,10 @@ import csv
 base_results_dir = 'results/paper_2-2021-12-21.17-19-01'
 n_drones = 5 # quanti droni?
 
-start = -1.0
-cellid = 0
-
 for i_drone in range(n_drones):
+  start = -1.0
+  cellid = 0
+
   rlcf = open(f'{base_results_dir}/lte-rlc-drone-{i_drone}.csv', 'r')
   rlc_csvr = csv.reader(rlcf)
   next(rlc_csvr) # discard header
@@ -29,6 +29,7 @@ for i_drone in range(n_drones):
       rlc_row = rlc_csvr.__next__()
       start = float(rlc_row[0])
       cellid = int(rlc_row[2])
+      print(rlc_row, start, cellid)
 
     dest_csvw.writerow([x, y, z, t, cellid])
 
