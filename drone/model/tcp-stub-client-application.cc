@@ -49,10 +49,10 @@ TcpStubClientApplication::GetTypeId ()
                    UintegerValue (80),
                    MakeUintegerAccessor (&TcpStubClientApplication::m_destPort),
                    MakeUintegerChecker<uint16_t> ())
-    .AddAttribute ("MaxPayloadSize", "Maximum size of the payload.",
-                   UintegerValue (UINT16_MAX - HDR_SZ),
+    .AddAttribute ("MaxPayloadSize", "Maximum size of the payload, in bytes.",
+                   UintegerValue (UINT16_MAX - HDR_SZ - 1),
                    MakeUintegerAccessor (&TcpStubClientApplication::m_maxPayloadSize),
-                   MakeUintegerChecker<uint16_t> (1, std::numeric_limits<uint16_t>::max () - HDR_SZ))
+                   MakeUintegerChecker<uint16_t> (1, std::numeric_limits<uint16_t>::max () - HDR_SZ - 1))
     .AddTraceSource ("Connection", "A new connection has been established.",
                      MakeTraceSourceAccessor (&TcpStubClientApplication::m_connectionEstablishedTrace),
                      "ns3::TcpStubClientApplication::OnConnectionSucceeded")
