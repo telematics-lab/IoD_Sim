@@ -121,6 +121,8 @@ TcpStubClientApplication::StopApplication ()
 
   if (m_socket != NULL)
     m_socket->Close ();
+
+  m_socket = nullptr;
 }
 
 void
@@ -173,6 +175,9 @@ bool
 TcpStubClientApplication::SendPacket (const uint16_t payloadSize)
 {
   NS_LOG_FUNCTION (this << payloadSize << Simulator::Now ());
+
+  if (m_socket == nullptr)
+    return false;
 
   SeqTsHeader seqTs;
   auto p = CreatePacket (payloadSize);
