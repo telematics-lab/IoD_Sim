@@ -300,9 +300,9 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
           break;
         case rapidjson::Type::kNumberType:
           {
-            if (el["value"].IsInt ())
+            if (el["value"].IsInt64 ())
               {
-                const auto attrValueInt = el["value"].GetInt ();
+                const auto attrValueInt = el["value"].GetInt64 ();
                 const auto acceptedType = attrInfo.checker->GetValueTypeName ();
 
                 if (acceptedType == "ns3::IntegerValue")
@@ -312,7 +312,19 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 else
                   NS_FATAL_ERROR ("The attribute value for property " << attrName << " defined in model " << modelName
                                   << " has incompatible type: " << acceptedType << " is needed.");
+              }
+            else if (el["value"].IsUint64 ())
+              {
+                const auto attrValueInt = el["value"].GetUint64 ();
+                const auto acceptedType = attrInfo.checker->GetValueTypeName ();
 
+                if (acceptedType == "ns3::IntegerValue")
+                  attrValue = attrInfo.checker->CreateValidValue (IntegerValue (attrValueInt));
+                else if (acceptedType == "ns3::UintegerValue")
+                  attrValue = attrInfo.checker->CreateValidValue (UintegerValue (attrValueInt));
+                else
+                  NS_FATAL_ERROR ("The attribute value for property " << attrName << " defined in model " << modelName
+                                  << " has incompatible type: " << acceptedType << " is needed.");
               }
             else if (el["value"].IsDouble ())
               {
