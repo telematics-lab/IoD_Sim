@@ -100,7 +100,7 @@ StoragePeripheral::Free (uint64_t amount, unit amountUnit)
 {
   if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return false;}
   NS_LOG_FUNCTION (this << amount * amountUnit);
-  if (amount * amountUnit < m_capacity - m_remainingCapacity)
+  if (amount * amountUnit <= m_capacity - m_remainingCapacity)
   {
     m_remainingCapacity += amount * amountUnit;
     return true;
