@@ -5,11 +5,15 @@
     // remote server.
     // Tutti i droni sono connessi mediante LTE. Vi sono 2 eNB.
     // Non ci sono buildings, né RoI.
-    "name": "paper_2",
+    "name": "paper_2-MaxPayloadSize_1024-MSS_1380",
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 250,
     "staticNs3Config": [
+        {
+            "name": "ns3::TcpSocket::SegmentSize",
+            "value": "1380"
+        }
     ],
 
     "world" : {
@@ -80,12 +84,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -122,7 +126,7 @@
                     },
                     {
                         "name": "MaxPayloadSize",
-                        "value": 1000
+                        "value": 1024
                     }
                 ]
             }],
@@ -166,11 +170,11 @@
                         },
                         {
                             "name": "Capacity",
-                            "value": 8000000
+                            "value": 3300000000
                         },
                         {
                             "name": "InitialRemainingCapacity",
-                            "value": 8000000
+                            "value": 3300000000
                         }
                     ]
                 },
@@ -183,7 +187,7 @@
                         },
                         {
                             "name": "DataRate",
-                            "value": 5000.0
+                            "value": 2000000.0
                         },
                         {
                             "name": "HasStorage",
@@ -204,12 +208,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -246,7 +250,7 @@
                     },
                     {
                         "name": "MaxPayloadSize",
-                        "value": 1000
+                        "value": 1024
                     }
                 ]
             }],
@@ -290,11 +294,11 @@
                         },
                         {
                             "name": "Capacity",
-                            "value": 8000000
+                            "value": 3300000000
                         },
                         {
                             "name": "InitialRemainingCapacity",
-                            "value": 8000000
+                            "value": 3300000000
                         }
                     ]
                 },
@@ -307,7 +311,7 @@
                         },
                         {
                             "name": "DataRate",
-                            "value": 5000.0
+                            "value": 1600000.0
                         },
                         {
                             "name": "HasStorage",
@@ -328,12 +332,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -370,7 +374,7 @@
                     },
                     {
                         "name": "MaxPayloadSize",
-                        "value": 1000
+                        "value": 1024
                     }
                 ]
             }],
@@ -414,11 +418,11 @@
                         },
                         {
                             "name": "Capacity",
-                            "value": 8000000
+                            "value": 3300000000
                         },
                         {
                             "name": "InitialRemainingCapacity",
-                            "value": 8000000
+                            "value": 3300000000
                         }
                     ]
                 },
@@ -431,7 +435,7 @@
                         },
                         {
                             "name": "DataRate",
-                            "value": 5000.0
+                            "value": 1300000.0
                         },
                         {
                             "name": "HasStorage",
@@ -452,136 +456,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
-                                }
-                            }
-                        }
-                    ]
-                }
-            ],
-            "mobilityModel": {
-                "name": "ns3::ConstantAccelerationDroneMobilityModel",
-                "attributes": [{
-                        "name": "Acceleration",
-                        "value": 4.0
-                    },
-                    {
-                        "name": "MaxSpeed",
-                        "value": 20.0
-                    },
-                    {"name": "FlightPlan", "value": [{"position": [500.0, 300.0, 0.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 300.0, 7.0], "interest": 1, "restTime": 0.1}, {"position": [500.0, 370.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 370.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 440.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 440.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 510.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 510.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 580.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 580.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 650.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 650.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 720.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 720.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 790.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 790.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 860.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 860.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [500.0, 930.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 930.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 1000.0, 7.0], "interest": 0, "restTime": 0.1}, {"position": [700.0, 1000.0, 7.0], "interest": 3, "restTime": 0.1}, {"position": [700.0, 1000.0, 0.0], "interest": 0, "restTime": 0.1}]}
-                ]
-            },
-            "applications": [{
-                "name": "ns3::TcpStubClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 224.0
-                    },
-                    {
-                        "name": "RemoteAddress",
-                        "value": "200.0.0.1"
-                    },
-                    {
-                        "name": "MaxPayloadSize",
-                        "value": 1000
-                    }
-                ]
-            }],
-            "mechanics": {
-                "name": "ns3::Drone",
-                "attributes": [
-                    {
-                        "name": "Mass",
-                        "value": 0.750
-                    },
-                    {
-                        "name": "RotorDiskArea",
-                        "value": 0.18
-                    },
-                    {
-                        "name": "DragCoefficient",
-                        "value": 0.08
-                    }
-                ]
-            },
-            "battery": {
-                "name": "ns3::LiIonEnergySource",
-                "attributes": [
-                    {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
-                    },
-                    {
-                        "name": "LiIonEnergyLowBatteryThreshold",
-                        "value": 0.2
-                    }
-                ]
-            },
-            "peripherals": [
-                {
-                    "name": "ns3::StoragePeripheral",
-                    "attributes": [
-                        {
-                            "name": "PowerConsumption",
-                            "value": [0, 1.0, 5.0]
-                        },
-                        {
-                            "name": "Capacity",
-                            "value": 8000000
-                        },
-                        {
-                            "name": "InitialRemainingCapacity",
-                            "value": 8000000
-                        }
-                    ]
-                },
-                {
-                    "name": "ns3::InputPeripheral",
-                    "attributes":[
-                        {
-                            "name": "PowerConsumption",
-                            "value": [0, 1.0, 5.0]
-                        },
-                        {
-                            "name": "DataRate",
-                            "value": 5000.0
-                        },
-                        {
-                            "name": "HasStorage",
-                            "value": "true"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "netDevices": [
-                {
-                    "type": "lte",
-                    "networkLayer": 0,
-                    "role": "UE",
-                    "bearers": [
-                        {
-                            "type": "GBR_CONV_VIDEO",
-                            "bitrate": {
-                                "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
-                                },
-                                "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -618,7 +498,7 @@
                     },
                     {
                         "name": "MaxPayloadSize",
-                        "value": 1000
+                        "value": 1024
                     }
                 ]
             }],
@@ -662,11 +542,11 @@
                         },
                         {
                             "name": "Capacity",
-                            "value": 8000000
+                            "value": 3300000000
                         },
                         {
                             "name": "InitialRemainingCapacity",
-                            "value": 8000000
+                            "value": 3300000000
                         }
                     ]
                 },
@@ -679,7 +559,7 @@
                         },
                         {
                             "name": "DataRate",
-                            "value": 5000.0
+                            "value": 1000000.0
                         },
                         {
                             "name": "HasStorage",
@@ -703,12 +583,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -735,12 +615,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
                                 }
                             }
                         }
@@ -752,6 +632,38 @@
                 "attributes": [{
                     "name": "Position",
                     "value": [900.0, 200.0, 0.0]
+                }]
+            },
+            "applications": []
+        },
+        {
+            "netDevices": [
+                {
+                    "type": "lte",
+                    "role": "eNB",
+                    "networkLayer": 0,
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
+                                },
+                                "maximum": {
+                                    "downlink": 50e6,
+                                    "uplink": 20e6
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+            "mobilityModel": {
+                "name": "ns3::ConstantPositionMobilityModel",
+                "attributes": [{
+                    "name": "Position",
+                    "value": [700.0, 900.0, 0.0]
                 }]
             },
             "applications": []
@@ -781,7 +693,6 @@
         "Scenario",
         "TcpStubClientApplication",
         "TcpStubServerApplication",
-        "ConstantAccelerationFlight",
-        "ConstantAccelerationDroneMobilityModel"
+	"StoragePeripheral"
     ]
 }
