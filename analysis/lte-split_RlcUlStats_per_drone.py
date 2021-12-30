@@ -34,7 +34,7 @@ with open(args.rlc_filepath, 'r') as rlcf:
 # for each imsi in samples, write csv
 i_drone = 0
 for d in samples:
-  with open(f'{args.output_dir}/{OUT_FILE_PREFIX}-{i_drone}.csv', 'w') as f:
+  with open(f'{args.output_dir}/{OUT_FILE_PREFIX}_{i_drone}.csv', 'w') as f:
     csvw = csv.writer(f)
     csvw.writerow(['start', 'end', 'cellId']) # header
     csvw.writerows(d)
