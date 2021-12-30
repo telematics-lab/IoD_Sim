@@ -1,5 +1,14 @@
+#!/usr/bin/env python
 import csv
+from argparse import ArgumentParser
 from xml.etree.ElementTree import ElementTree
+
+P = ArgumentParser(description='Parse drone trajectories from summary file')
+P.add_argument('summary_filepath', type=str, help='Summary file path')
+P.add_argument('results_dir', type=str, help='Destination directory where to store CSV files')
+args = P.parse_args()
+
+OUTPUT_FILE_PREFIX = 'trajectory-drone'
 
 def pick_float_from_el(parent, el_name):
   v = parent.find(el_name)
@@ -8,20 +17,15 @@ def pick_float_from_el(parent, el_name):
   assert(v is not None)
   return float(v)
 
-# TODO: Argument parser to get summary_fp and destination_csv_dir from stdin
-# TODO: main func
-summary_fp = 'results/paper_2-2021-12-21.17-19-01/-summary.xml'
-destination_csv_dir = 'results/paper_2-2021-12-21.17-19-01/'
-
 tree = ElementTree()
-tree.parse(summary_fp)
+tree.parse(args.summary_filepath)
 
 drones = tree.find("Drones")
 assert(drones is not None)
 
 i_drone = 0
 for d in drones.iter('Drone'):
-  with open(f'{destination_csv_dir}/{i_drone}.csv', 'w') as f:
+  with open(f'{args.results_dir}/{OUTPUT_FILE_PREFIX}_{i_drone}.csv', 'w') as f:
     csvw = csv.writer(f)
 
     csvw.writerow(['x','y','z','t']) # write headings
@@ -37,3 +41,4 @@ for d in drones.iter('Drone'):
       csvw.writerow([x,y,z,t])
 
   i_drone += 1
+
