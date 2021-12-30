@@ -1,8 +1,17 @@
+#!/usr/bin/env python
 import csv
+import sys
+from argparse import ArgumentParser
 
-# Read LTE RlcDlStats.txt and get cellid per IMSI
-rlc_fp = 'results/paper_2-2021-12-21.17-19-01/lte-0-RlcDlStats.txt'
-out_csv_dir = 'results/paper_2-2021-12-21.17-19-01/'
+P = ArgumentParser(description="Parse LTE Rlc Ul Stats file and output one file per drone/IMSI containing the LTE Cell ID")
+
+P.add_argument('rlc_filepath', type=str, help='LTE Rlc Ul Stats file path')
+P.add_argument('output_dir', type=str, help='Output directory where new CSV files will be stored')
+
+P.parse_args()
+
+rlc_fp = P.rlc_filepath
+out_csv_dir = P.output_dir
 
 COL_START = 0
 COL_END = 1
@@ -36,3 +45,4 @@ for d in samples:
     csvw.writerows(d)
 
   i_drone += 1
+
