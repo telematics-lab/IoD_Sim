@@ -21,6 +21,7 @@
 #include <ns3/socket-factory.h>
 #include <ns3/tcp-socket-factory.h>
 #include <ns3/uinteger.h>
+#include <ns3/nstime.h>
 
 #include "tcp-stub-client-application.h"
 
@@ -249,14 +250,21 @@ TcpStubClientApplication::FindStorage () const
 void
 TcpStubClientApplication::OnStorageUpdate (const uint64_t oldValBits, const uint64_t newValBits)
 {
-  NS_LOG_FUNCTION (this << oldValBits << newValBits << Simulator::Now ());
+  NS_LOG_FUNCTION (this << oldValBits << newValBits);
 
-  const uint32_t maxPayloadSizeBits = m_maxPayloadSize * StoragePeripheral::byte;
-  uint16_t nextPayloadSize = (newValBits >= maxPayloadSizeBits)
-                             ? maxPayloadSizeBits
-                             : newValBits / StoragePeripheral::byte;
+  const uint64_t maxPayloadSizeBits = m_maxPayloadSize * StoragePeripheral::byte;
+  const uint64_t occupiedStorageBits = m_storage->GetCapacity () - newValBits;
 
-  Simulator::ScheduleNow (&TcpStubClientApplication::SendPacket, this, nextPayloadSize);
+  if (occupiedStorageBits == 0)
+    return;
+
+  NS_LOG_LOGIC ("Occupied memory in bits: " << occupiedStorageBits << " | MaxPayloadSize bits " << maxPayloadSizeBits);
+
+  uint16_t nextPayloadSizeBytes = (occupiedStorageBits >= maxPayloadSizeBits)
+			          ? m_maxPayloadSize
+                                  : occupiedStorageBits / StoragePeripheral::byte;
+
+  Simulator::Schedule (Seconds(0.1), &TcpStubClientApplication::SendPacket, this, nextPayloadSizeBytes);
 }
 
 } // namespace ns3
