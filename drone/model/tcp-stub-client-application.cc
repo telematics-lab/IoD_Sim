@@ -205,6 +205,7 @@ TcpStubClientApplication::SendPacket (const uint16_t payloadSize)
 
       NS_LOG_WARN ("Error while sending " << m_maxPayloadSize << " bytes to " << addrStr.str ()
                    << " ErrNo=" << m_socket->GetErrno ());
+
       return false;
     }
 }
