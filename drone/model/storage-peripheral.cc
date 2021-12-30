@@ -84,8 +84,8 @@ StoragePeripheral::Alloc (uint64_t amount, unit amountUnit)
   if (amount * amountUnit <= m_remainingCapacity)
     {
       m_remainingCapacity -= amount * amountUnit;
-      NS_LOG_DEBUG ("StoragePeripheral:Available memory on Drone #"
-                    << GetDrone ()->GetId () << ": " << m_remainingCapacity << " bits");
+      NS_LOG_DEBUG ("StoragePeripheral:Stored memory on Drone #"
+                    << GetDrone ()->GetId () << ": " << m_capacity - m_remainingCapacity << " bits");
       return true;
     }
   else
@@ -103,6 +103,8 @@ StoragePeripheral::Free (uint64_t amount, unit amountUnit)
   if (amount * amountUnit <= m_capacity - m_remainingCapacity)
   {
     m_remainingCapacity += amount * amountUnit;
+    NS_LOG_DEBUG ("StoragePeripheral:Stored memory on Drone #"
+                    << GetDrone ()->GetId () << ": " << m_capacity - m_remainingCapacity << " bits");
     return true;
   } else {
     NS_LOG_INFO ("StoragePeripheral:Impossible to free more memory than occupied on Drone #"
