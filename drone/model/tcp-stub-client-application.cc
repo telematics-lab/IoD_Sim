@@ -174,7 +174,7 @@ TcpStubClientApplication::OnReceivedData (Ptr<Socket> s)
 bool
 TcpStubClientApplication::SendPacket (const uint16_t payloadSize)
 {
-  NS_LOG_FUNCTION (this << payloadSize << Simulator::Now ());
+  NS_LOG_FUNCTION (this << payloadSize << GetNode ()->GetId ());
 
   if (m_socket == nullptr)
     return false;
