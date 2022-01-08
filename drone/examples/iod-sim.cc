@@ -467,10 +467,14 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
   auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
   auto wifiMac = StaticCast<WifiMacSimulationHelper, Object> (m_protocolStacks[MAC_LAYER][netId]);
   auto wifiNetDev = StaticCast<WifiNetdeviceConfiguration, NetdeviceConfiguration> (entityNetDev);
+  auto wifiMacAttrs = wifiNetDev->GetMacLayer ().GetAttributes ();
 
-  wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName (),
-                                    wifiNetDev->GetMacLayer ().GetAttributes ()[0].first,
-                                    *wifiNetDev->GetMacLayer ().GetAttributes ()[0].second);
+  if (wifiMacAttrs.size () == 0)
+    wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName ());
+  else if (wifiMacAttrs.size () == 1)
+    wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName (),
+                                      wifiMacAttrs[0].first,
+                                      *wifiMacAttrs[0].second);
 
   NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ()->Install (*wifiPhy->GetWifiPhyHelper (),
                                                                         wifiMac->GetMacHelper (),
