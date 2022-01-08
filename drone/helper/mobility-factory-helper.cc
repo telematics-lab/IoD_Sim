@@ -26,6 +26,9 @@ MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConf
 
   if (modelConf.GetName ().compare("ns3::ConstantPositionMobilityModel") == 0)
     {
+      if (modelConf.GetAttributes ().size() == 0)
+        return;
+
       auto positionAllocator = CreateObject<ListPositionAllocator> ();
       Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes ()[0].second)->Get();
       positionAllocator->Add (initialPosition);
