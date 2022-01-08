@@ -693,6 +693,6 @@
         "Scenario",
         "TcpStubClientApplication",
         "TcpStubServerApplication",
-	"StoragePeripheral"
+	    "StoragePeripheral"
     ]
 }
