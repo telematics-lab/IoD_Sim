@@ -110,7 +110,7 @@ DroneEnergyModel::GetPower () const
   NS_LOG_LOGIC ("Plevel for Drone #" << GetDrone ()->GetId () << ": " << Plevel << " W");
   NS_LOG_LOGIC ("Pdrag for Drone #" << GetDrone ()->GetId () << ": " << Pdrag << " W");
   NS_LOG_LOGIC ("Pvertical for Drone #" << GetDrone ()->GetId () << ": " << Pvertical << " W");
-  NS_LOG_LOGIC ("PowerConsumption for Drone #" << GetDrone ()->GetId () << ": " << PowerConsumption << " W");
+  NS_LOG_LOGIC ("Mechanical Power Consumption for Drone #" << GetDrone ()->GetId () << ": " << PowerConsumption << " W");
 
   return PowerConsumption;
 }
@@ -122,6 +122,7 @@ DroneEnergyModel::DoGetCurrentA (void) const
   double VoltageV = m_source->GetSupplyVoltage ();
   double CurrentA = (PowerConsumption / VoltageV);
 
+  NS_LOG_LOGIC ("Total Power Consumption for Drone #" << GetDrone ()->GetId () << ": " << PowerConsumption << " W");
   NS_LOG_LOGIC ("Current draw for Drone #" << GetDrone ()->GetId () << ": " << CurrentA << " A");
 
   return CurrentA;
