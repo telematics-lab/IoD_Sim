@@ -20,6 +20,7 @@
 #include <algorithm>
 
 // NS3 Core Components
+#include <ns3/buildings-helper.h>
 #include <ns3/config.h>
 #include <ns3/csma-module.h>
 #include <ns3/internet-module.h>
@@ -428,6 +429,8 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 
     entityId++;
   }
+
+  BuildingsHelper::Install (nodes);
 }
 
 void
