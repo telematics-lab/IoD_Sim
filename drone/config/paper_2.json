@@ -5,7 +5,7 @@
     // remote server.
     // Tutti i droni sono connessi mediante LTE. Vi sono 2 eNB.
     // Non ci sono buildings, né RoI.
-    "name": "paper_2-MaxPayloadSize_1024-MSS_1380",
+    "name": "paper_2-PayloadSize_1024-MSS_1380",
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 250,
@@ -110,7 +110,7 @@
                 ]
             },
             "applications": [{
-                "name": "ns3::TcpStubClientApplication",
+                "name": "ns3::TcpStorageClientApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -121,11 +121,11 @@
                         "value": 101.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "200.0.0.1"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 1024
                     }
                 ]
@@ -234,7 +234,7 @@
                 ]
             },
             "applications": [{
-                "name": "ns3::TcpStubClientApplication",
+                "name": "ns3::TcpStorageClientApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -245,11 +245,11 @@
                         "value": 145.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "200.0.0.1"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 1024
                     }
                 ]
@@ -358,7 +358,7 @@
                 ]
             },
             "applications": [{
-                "name": "ns3::TcpStubClientApplication",
+                "name": "ns3::TcpStorageClientApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -369,11 +369,11 @@
                         "value": 246.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "200.0.0.1"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 1024
                     }
                 ]
@@ -482,7 +482,7 @@
                 ]
             },
             "applications": [{
-                "name": "ns3::TcpStubClientApplication",
+                "name": "ns3::TcpStorageClientApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -493,11 +493,11 @@
                         "value": 201.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "200.0.0.1"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 1024
                     }
                 ]
@@ -674,15 +674,11 @@
         {
             "networkLayer": 0,
             "applications": [{
-                "name": "ns3::TcpStubServerApplication",
+                "name": "ns3::TcpEchoServerApplication",
                 "attributes": [
                     {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 499.0
+                        "name": "Address",
+                        "value": "200.0.0.1"
                     }
                 ]
             }]
@@ -691,8 +687,11 @@
 
     "logComponents": [
         "Scenario",
-        "TcpStubClientApplication",
-        "TcpStubServerApplication",
-	    "StoragePeripheral"
+        "TcpStorageClientApplication",
+        "TcpEchoServerApplication",
+	    "StoragePeripheral",
+        "Application",
+        "TcpClientServerApplication",
+        "TcpStubClientApplication"
     ]
 }

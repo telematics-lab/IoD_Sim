@@ -15,40 +15,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef TCP_STUB_CLIENT_APPLICATION_H
-#define TCP_STUB_CLIENT_APPLICATION_H
+#ifndef TCP_STUB_SERVER_APPLICATION_H
+#define TCP_STUB_SERVER_APPLICATION_H
 
-#include <ns3/application.h>
-#include <ns3/socket.h>
-#include <ns3/storage-peripheral.h>
-#include <ns3/traced-callback.h>
-
-#include "tcp-storage-client-application.h"
+#include "tcp-client-server-application.h"
 
 namespace ns3 {
 
 /**
- * Application that sends random packets with Seq.Num. and Timestamp to a remote server
+ * Basic Server TCP application that echoes in case data is received.
  */
-class TcpStubClientApplication : public TcpStorageClientApplication
+class TcpEchoServerApplication : public TcpClientServerApplication
 {
 public:
   static TypeId GetTypeId ();
-  TcpStubClientApplication ();
-  virtual ~TcpStubClientApplication ();
+  TcpEchoServerApplication ();
+  virtual ~TcpEchoServerApplication ();
 
 protected:
-  virtual void DoInitialize ();
   virtual void StartApplication ();
+  virtual void ReceivedDataCallback (Ptr<Socket> s);
 
 private:
-  /// \brief Send a random packet of a given size
-  void SendPacket ();
-
-  double m_txFrequency;   /// Transmission frequency
-  ns3::Time m_txInterval; /// Frequency inverse
+  TracedCallback<Ptr<const Packet>, const Address& > m_rxTrace;
 };
 
 } // namespace ns3
 
-#endif /* TCP_STUB_CLIENT_APPLICATION_H */
+#endif /* TCP_STUB_SERVER_APPLICATION_H */
