@@ -2,7 +2,7 @@
     "name": "gp_tesi_1",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 45,
+    "duration": 51,
     "staticNs3Config": [
         {
             "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
