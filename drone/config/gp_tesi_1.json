@@ -209,6 +209,10 @@
                     {
                         "name": "LiIonEnergyLowBatteryThreshold",
                         "value": 0.2
+                    },
+                    {
+                        "name": "PeriodicEnergyUpdateInterval",
+                        "value": "100ms"
                     }
                 ]
             },
@@ -360,6 +364,10 @@
                     {
                         "name": "LiIonEnergyLowBatteryThreshold",
                         "value": 0.2
+                    },
+                    {
+                        "name": "PeriodicEnergyUpdateInterval",
+                        "value": "100ms"
                     }
                 ]
             },
@@ -469,6 +477,10 @@
                     {
                         "name": "LiIonEnergyLowBatteryThreshold",
                         "value": 0.2
+                    },
+                    {
+                        "name": "PeriodicEnergyUpdateInterval",
+                        "value": "100ms"
                     }
                 ]
             },
