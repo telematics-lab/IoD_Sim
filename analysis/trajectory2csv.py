@@ -23,7 +23,7 @@ tree.parse(args.summary_filepath)
 drones = tree.find("Drones")
 assert(drones is not None)
 
-i_drone = 0
+i_drone = 1
 for d in drones.iter('Drone'):
   with open(f'{args.results_dir}/{OUTPUT_FILE_PREFIX}_{i_drone}.csv', 'w') as f:
     csvw = csv.writer(f)
@@ -41,4 +41,3 @@ for d in drones.iter('Drone'):
       csvw.writerow([x,y,z,t])
 
   i_drone += 1
-

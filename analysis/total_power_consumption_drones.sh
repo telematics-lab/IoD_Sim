@@ -13,9 +13,10 @@ N_DRONES=$(grep -oP '(?<=Total Power Consumption for Drone #)([0-9]+)' $RESULTS_
             | head -n1)
 
 for i in $(seq 0 $N_DRONES); do
-  echo 'time,power_W' > $RESULTS_DIR/$OUTPUT_FILE_PREFIX-$i.csv # csv header
+  ipp=$(( $i + 1 ))
+  echo 'time,power_W' > $RESULTS_DIR/$OUTPUT_FILE_PREFIX-drone_$ipp.csv # csv header
 
   grep "Total Power Consumption for Drone #${i}" $RESULTS_DIR/$DEBUG_LOG_FILE \
     | sed -r 's/^\+([0-9\.]+)s.* ([0-9\.]+) W/\1,\2/g' \
-    >> $RESULTS_DIR/$OUTPUT_FILE_PREFIX-$i.csv
+    >> $RESULTS_DIR/$OUTPUT_FILE_PREFIX-drone_$ipp.csv
 done
