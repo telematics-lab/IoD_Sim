@@ -728,8 +728,6 @@ Scenario::ConfigureInternetBackbone ()
 
   // setup a CSMA LAN between all the remotes and network gateways in the backbone
   CsmaHelper csma;
-  //csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (5000000)));
-  //csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (2)));
   NetDeviceContainer backboneDevs = csma.Install (m_backbone);
 
   // set a new address base for the backbone
@@ -855,7 +853,7 @@ Scenario::EnablePhyLteTraces ()
 void
 Scenario::ConfigureRegionsOfInterest ()
 {
-  const auto regions = CONFIGURATOR->GetRegionsOfInterest();
+  const auto regions = CONFIGURATOR->GetRegionsOfInterest ();
   Ptr<InterestRegion> reg;
   for (auto region : regions)
   {
@@ -869,21 +867,23 @@ Scenario::CourseChange (std::string context, Ptr<const MobilityModel> model)
   Vector position = model->GetPosition ();
   std::string start = "/NodeList/";
   std::string end = "/$ns3::MobilityModel/CourseChange";
-  std::string id = context.substr(context.find(start) + start.length(), context.length() - end.length() - start.length());
-  auto dronePeripheralsContainer = m_drones.Get(std::stoi(id))->getPeripherals();
+  std::string id = context.substr (context.find (start) + start.length (), context.length () - end.length () - start.length ());
+  auto dronePeripheralsContainer = m_drones.Get (std::stoi (id))->getPeripherals ();
   Ptr<DronePeripheral> peripheral;
   std::vector<int> regionindex;
   for (DronePeripheralContainer::Iterator i = dronePeripheralsContainer->Begin (); i != dronePeripheralsContainer->End (); i++)
   {
     peripheral = *i;
-    regionindex = peripheral->GetRegionsOfInterest();
-    int status = irc->IsInRegions(regionindex, position);
-    if (regionindex.empty()) continue;
+    regionindex = peripheral->GetRegionsOfInterest ();
+    int status = irc->IsInRegions (regionindex, position);
+    if (regionindex.empty ()) continue;
     if (status >= 0 || status == -2)
     {
-      if (peripheral->GetState() != DronePeripheral::PeripheralState::ON) peripheral->SetState(DronePeripheral::PeripheralState::ON);
+      if (peripheral->GetState () != DronePeripheral::PeripheralState::ON)
+        peripheral->SetState (DronePeripheral::PeripheralState::ON);
     } else {
-      if (peripheral->GetState() == DronePeripheral::PeripheralState::ON) peripheral->SetState(DronePeripheral::PeripheralState::IDLE);
+      if (peripheral->GetState () == DronePeripheral::PeripheralState::ON)
+        peripheral->SetState (DronePeripheral::PeripheralState::IDLE);
     }
   }
 }
