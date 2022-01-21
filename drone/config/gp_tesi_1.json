@@ -157,23 +157,7 @@
                                 "interest": 1
                             },
                             {
-                                "position": [80.0, 60.0, 5.0],
-                                "interest": 2
-                            },
-                            {
-                                "position": [85.0, 60.0, 5.0],
-                                "interest": 3
-                            },
-                            {
-                                "position": [65.0, 50.0, 15.0],
-                                "interest": 4
-                            },
-                            {
-                                "position": [50.0, 53.0, 5.0],
-                                "interest": 3
-                            },
-                            {
-                                "position": [50.0, 53.0, 0.0],
+                                "position": [80.0, 40.0, 0.0],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
