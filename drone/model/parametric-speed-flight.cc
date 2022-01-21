@@ -125,7 +125,7 @@ ParametricSpeedFlight::GetVelocity () const
 void
 ParametricSpeedFlight::UpdateSpeed (const double &t) const
 {
-  double speed;
+  double speed = 0.0;
   const uint32_t order = m_speedParams.size ();
 
   for (uint32_t i = 0; i < order; i++)
@@ -138,7 +138,7 @@ void
 ParametricSpeedFlight::UpdateDistance (const double &t) const
 {
   // analytic polynomial integration
-  double distance;
+  double distance = 0.0;
   const uint32_t orderp1 = m_speedParams.size (); // order of the polynomial, plus 1
 
   for (uint32_t i = 0; i < orderp1; i++)
