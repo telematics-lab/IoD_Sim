@@ -414,6 +414,8 @@ ReportEntity::DoInitializeNetworkStacks ()
       if (IsWifiNetDevice (dev))
         {
           auto inspector = WifiInspector (dev);
+          auto layer = CreateObjectWithAttributes<ProtocolLayer>
+            ("InstanceType", StringValue (dev->GetInstanceTypeId ().GetName ()));
           auto phyLayer = CreateObjectWithAttributes<WifiPhyLayer>
             ("Frequency", IntegerValue (inspector.GetCarrierFrequency ()),
              "Standard", StringValue (inspector.GetWifiStandard ()),
@@ -433,6 +435,7 @@ ReportEntity::DoInitializeNetworkStacks ()
           phyLayer->Initialize ();
 
           ifaces.push_back (i);
+          m_networkStacks[ifid].Add (layer);
           m_networkStacks[ifid].Add (phyLayer);
           m_networkStacks[ifid].Add (macLayer);
           m_networkStacks[ifid].Add (ipv4Layer);
