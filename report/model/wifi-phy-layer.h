@@ -34,6 +34,8 @@ namespace ns3 {
 class WifiPhyLayer : public ProtocolLayer
 {
 public:
+  typedef std::tuple<Time /* Sim Time */, Mac48Address /* Signal From */, double /* dBm */> RssiSample;
+
   /**
    * Register the type using ns-3 TypeId System.
    * \return the object TypeId
@@ -76,19 +78,12 @@ private:
   /**
    * Handle the arrival of new RSSI data
    */
-  void DoMonitorRssi (std::string context,
-                      Ptr<const Packet> packet,
-                      uint16_t channelFreqMhz,
-                      WifiTxVector txVector,
-                      MpduInfo aMpdu,
-                      SignalNoiseDbm signalNoise,
-                      uint16_t staId);
+  void DoMonitorRssi (Ptr<const Packet> packet, RxPowerWattPerChannelBand rxPowersW);
 
   uint32_t m_droneReference;            /// ID of the drone
   uint32_t m_netdevReference;           /// ID of the network device
 
-  /// RSSI history of the device
-  std::vector<std::tuple<Time, Mac48Address, double, uint16_t>> m_rssi;
+  std::vector<RssiSample> m_rssi;       /// RSSI history of the device
 
   double m_frequency;                   /// the carrier frequency set
   Mac48Address m_address;               /// Device MAC Address

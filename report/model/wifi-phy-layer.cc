@@ -19,10 +19,14 @@
  */
 #include "wifi-phy-layer.h"
 
+#include <algorithm>
+
 #include <ns3/config.h>
 #include <ns3/integer.h>
 #include <ns3/ipv4-header.h>
 #include <ns3/log.h>
+#include <ns3/node.h>
+#include <ns3/node-list.h>
 #include <ns3/simulator.h>
 #include <ns3/string.h>
 #include <ns3/wifi-mac-header.h>
@@ -153,11 +157,6 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
                                         BAD_CAST bSig.str ().c_str ());
       NS_ASSERT (rc >= 0);
 
-      bStaId << std::get<3>(sig);
-      rc = xmlTextWriterWriteAttribute (h,
-                                        BAD_CAST "staId",
-                                        BAD_CAST bStaId.str ().c_str ());
-
       rc = xmlTextWriterEndElement (h);
       NS_ASSERT (rc >= 0);
     }
@@ -189,9 +188,9 @@ WifiPhyLayer::DoInitializeRssiMonitor ()
 
   xPathCallback << "/NodeList/" << m_droneReference
                 << "/DeviceList/" << m_netdevReference
-                << "/$ns3::WifiNetDevice/Phy/MonitorSnifferRx";
-  Config::Connect (xPathCallback.str (),
-                   MakeCallback (&WifiPhyLayer::DoMonitorRssi, this));
+                << "/$ns3::WifiNetDevice/Phy/PhyRxBegin";
+  Config::ConnectWithoutContext (xPathCallback.str (),
+                                 MakeCallback (&WifiPhyLayer::DoMonitorRssi, this));
 }
 
 Mac48Address
@@ -204,25 +203,33 @@ WifiPhyLayer::GetDeviceAddress ()
 }
 
 void
-WifiPhyLayer::DoMonitorRssi (std::string x,
-                             Ptr<const Packet> packet,
-                             uint16_t channelFreqMhz,
-                             WifiTxVector txVector,
-                             MpduInfo aMpdu,
-                             SignalNoiseDbm signalNoise,
-                             uint16_t staId)
+WifiPhyLayer::DoMonitorRssi (Ptr<const Packet> packet, RxPowerWattPerChannelBand rxPowersW)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  WifiMacHeader wifiMacHeader;
-  Ipv4Header ipv4Header;
+  //The total RX power corresponds to the maximum over all the bands
+  auto it = std::max_element (rxPowersW.begin (), rxPowersW.end (),
+                              [] (const std::pair<WifiSpectrumBand, double> &p1,
+                                  const std::pair<WifiSpectrumBand, double> &p2) {
+                                return p1.second < p2.second;
+                              });
+  auto rssi = 10 * log (it->second / 1e-3 /* to mW */);
 
-  auto pCopy = packet->Copy ();
+  WifiMacHeader hdr;
+  Mac48Address sender;
+  packet->PeekHeader (hdr);
 
-  pCopy->RemoveHeader (wifiMacHeader);
-  if (!wifiMacHeader.IsData ())  // Look up DATA frames only
+  // check if packet is for this net device
+  auto da = (hdr.IsToDs ()) ? hdr.GetAddr3 () : hdr.GetAddr1 ();
+  if (da != m_address)
     return;
 
-  m_rssi.push_back({ Simulator::Now(), wifiMacHeader.GetAddr2 (), signalNoise.signal, staId });
+  if ((!hdr.IsToDs () && !hdr.IsFromDs ()) || (hdr.IsToDs () && !hdr.IsFromDs ()))
+    sender = hdr.GetAddr2 ();
+  else if (!hdr.IsToDs () && hdr.IsFromDs ())
+    sender = hdr.GetAddr3 ();
+  else if (hdr.IsToDs () && hdr.IsFromDs ())
+    sender = hdr.GetAddr4 ();
+
+  m_rssi.push_back({ Simulator::Now (), sender, rssi });
 }
 
 } // namespace ns3
