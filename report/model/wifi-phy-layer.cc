@@ -139,7 +139,7 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
                                       BAD_CAST "rssi");
       NS_ASSERT (rc >= 0);
 
-      bTime << std::get<0>(sig).GetNanoSeconds ();
+      bTime << std::get<0>(sig);
       rc = xmlTextWriterWriteAttribute (h,
                                         BAD_CAST "time",
                                         BAD_CAST bTime.str ().c_str ());
@@ -229,7 +229,7 @@ WifiPhyLayer::DoMonitorRssi (Ptr<const Packet> packet, RxPowerWattPerChannelBand
   else if (hdr.IsToDs () && hdr.IsFromDs ())
     sender = hdr.GetAddr4 ();
 
-  m_rssi.push_back({ Simulator::Now (), sender, rssi });
+  m_rssi.push_back({ Simulator::Now ().GetSeconds (), sender, rssi });
 }
 
 } // namespace ns3

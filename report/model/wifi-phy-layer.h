@@ -34,7 +34,7 @@ namespace ns3 {
 class WifiPhyLayer : public ProtocolLayer
 {
 public:
-  typedef std::tuple<Time /* Sim Time */, Mac48Address /* Signal From */, double /* dBm */> RssiSample;
+  typedef std::tuple<double /* Sim Time */, Mac48Address /* Signal From */, double /* dBm */> RssiSample;
 
   /**
    * Register the type using ns-3 TypeId System.
