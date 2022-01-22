@@ -229,6 +229,10 @@ WifiPhyLayer::DoMonitorRssi (Ptr<const Packet> packet, RxPowerWattPerChannelBand
   else if (hdr.IsToDs () && hdr.IsFromDs ())
     sender = hdr.GetAddr4 ();
 
+  // filter out any sender, which happens in case of CTL ACK frames
+  if (sender == Mac48Address())
+    return;
+
   m_rssi.push_back({ Simulator::Now ().GetSeconds (), sender, rssi });
 }
 
