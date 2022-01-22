@@ -64,6 +64,10 @@ protected:
 
 private:
   /**
+   * Retrieve device MAC Address.
+   */
+  Mac48Address GetDeviceAddress ();
+  /**
    * Initialize RSSI monitor in order to build a history of the RSSI for
    * the current entity with the current network device
    */
@@ -87,6 +91,7 @@ private:
   std::vector<std::tuple<Time, Mac48Address, double, uint16_t>> m_rssi;
 
   double m_frequency;                   /// the carrier frequency set
+  Mac48Address m_address;               /// Device MAC Address
   std::string m_standard;               /// the wifi standard used
   std::string m_propagationDelayModel;  /// the prop. delay model set
   std::string m_propagationLossModel;   /// the prop. loss model set

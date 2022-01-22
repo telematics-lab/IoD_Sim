@@ -106,6 +106,13 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
                                   BAD_CAST bFrequency.str ().c_str ());
   NS_ASSERT (rc >= 0);
 
+  std::stringstream bAddress;
+  bAddress << m_address;
+  rc = xmlTextWriterWriteElement (h,
+                                  BAD_CAST "address",
+                                  BAD_CAST bAddress.str ().c_str ());
+  NS_ASSERT (rc >= 0);
+
   rc = xmlTextWriterWriteElement (h,
                                   BAD_CAST "propagationDelayModel",
                                   BAD_CAST m_propagationDelayModel.c_str ());
@@ -167,6 +174,7 @@ WifiPhyLayer::DoInitialize ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
+  m_address = GetDeviceAddress ();  // TODO: it would be usedul to report it in the XML file.
   DoInitializeRssiMonitor ();
 
   ProtocolLayer::DoInitialize ();
@@ -184,6 +192,15 @@ WifiPhyLayer::DoInitializeRssiMonitor ()
                 << "/$ns3::WifiNetDevice/Phy/MonitorSnifferRx";
   Config::Connect (xPathCallback.str (),
                    MakeCallback (&WifiPhyLayer::DoMonitorRssi, this));
+}
+
+Mac48Address
+WifiPhyLayer::GetDeviceAddress ()
+{
+  auto n = NodeList::GetNode (m_droneReference);
+  auto d = n->GetDevice (m_netdevReference);
+  auto a = d->GetAddress ();
+  return Mac48Address::ConvertFrom (a);
 }
 
 void
