@@ -155,10 +155,10 @@ WifiPhyLayer::Write (xmlTextWriterPtr h)
       NS_ASSERT (rc >= 0);
     }
 
-  rc = xmlTextWriterEndElement(h);
+  rc = xmlTextWriterEndElement(h);  // signal
   NS_ASSERT (rc >= 0);
 
-  rc = xmlTextWriterEndElement(h);
+  rc = xmlTextWriterEndElement(h);  // phy
   NS_ASSERT (rc >= 0);
 }
 
