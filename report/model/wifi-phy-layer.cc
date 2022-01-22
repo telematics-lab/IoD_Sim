@@ -54,11 +54,11 @@ WifiPhyLayer::GetTypeId ()
                    StringValue (),
                    MakeStringAccessor (&WifiPhyLayer::m_propagationLossModel),
                    MakeStringChecker ())
-    .AddAttribute ("DroneId", "ID of the drone",
+    .AddAttribute ("NodeId", "Global unique identifier of the node",
                    IntegerValue (),
                    MakeIntegerAccessor (&WifiPhyLayer::m_droneReference),
                    MakeIntegerChecker<uint32_t> ())
-    .AddAttribute ("NetdevId", "ID of the Network Device of the given drone",
+    .AddAttribute ("NetdevId", "ID of the Network Device of the given node",
                    IntegerValue (),
                    MakeIntegerAccessor (&WifiPhyLayer::m_netdevReference),
                    MakeIntegerChecker<uint32_t> ())

@@ -416,13 +416,14 @@ ReportEntity::DoInitializeNetworkStacks ()
           auto inspector = WifiInspector (dev);
           auto phyLayer = CreateObjectWithAttributes<WifiPhyLayer>
             ("Frequency", IntegerValue (inspector.GetCarrierFrequency ()),
-              "Standard", StringValue (inspector.GetWifiStandard ()),
-              "PropagationDelayModel", StringValue (inspector.GetPropagationDelayModel ()),
-              "PropagationLossModel", StringValue (inspector.GetPropagationLossModel ()));
+             "Standard", StringValue (inspector.GetWifiStandard ()),
+             "PropagationDelayModel", StringValue (inspector.GetPropagationDelayModel ()),
+             "PropagationLossModel", StringValue (inspector.GetPropagationLossModel ()),
+             "NodeId", IntegerValue (m_reference),
+             "NetdevId", IntegerValue (i));
           auto macLayer = CreateObjectWithAttributes<WifiMacLayer>
             ("Ssid", StringValue (inspector.GetWifiSsid ()),
              "Mode", StringValue (inspector.GetWifiMode ()));
-
           auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
             ("Ipv4Address", StringValue (std::get<1>(ipv4AddressMask)),
              "SubnetMask", StringValue (std::get<2>(ipv4AddressMask)));
