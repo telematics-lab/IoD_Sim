@@ -1,5 +1,6 @@
 # Ignore upstream repository
-ns3*
+ns3/src/drone/*
+ns3/src/report/*
 
 # Ignore third-party builds
 third_party/*
