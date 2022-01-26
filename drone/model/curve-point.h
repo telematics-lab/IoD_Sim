@@ -98,6 +98,8 @@ public:
    */
   const Vector GetPosition () const;
 
+  bool operator!= (const CurvePoint& b) const;
+
 private:
   Vector m_position;          /// Location of this point in space.
   float  m_t;                 /// Parameter used by the curve for the

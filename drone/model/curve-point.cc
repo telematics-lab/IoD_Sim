@@ -91,4 +91,13 @@ CurvePoint::GetPosition () const
   return m_position;
 }
 
+bool
+CurvePoint::operator!= (const CurvePoint& b) const
+{
+  return m_position != b.m_position
+         && m_t != b.m_t
+         && m_relativeDistance != b.m_relativeDistance
+         && m_absoluteDistance != b.m_absoluteDistance;
+}
+
 } // namespace ns3
