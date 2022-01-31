@@ -49,10 +49,6 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
                     "PHY Layer definition must have 'rxGain' property.");
       NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
                     "PHY Layer 'rxGain' property must be a double.");
-      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("mode"),
-                    "PHY Layer definition must have 'mode' property.");
-      NS_ASSERT_MSG (jsonPhyLayer["mode"].IsString (),
-                    "PHY Layer 'mode' property must be a string.");
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
                     "PHY Layer definition must have 'channel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
@@ -72,7 +68,6 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
       return Create<WifiPhyLayerConfiguration> (phyType,
                                                 jsonPhyLayer["standard"].GetString (),
                                                 jsonPhyLayer["rxGain"].GetDouble (),
-                                                jsonPhyLayer["mode"].GetString (),
                                                 propagationDelayModel,
                                                 propagationLossModel);
     }

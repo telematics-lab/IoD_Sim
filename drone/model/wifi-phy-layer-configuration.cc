@@ -24,13 +24,11 @@ namespace ns3 {
 WifiPhyLayerConfiguration::WifiPhyLayerConfiguration(std::string phyType,
                                                      std::string standard,
                                                      double rxGain,
-                                                     std::string mode,
                                                      ModelConfiguration channelPropagationDelayModel,
                                                      ModelConfiguration channelPropagationLossModel) :
   PhyLayerConfiguration {phyType},
   m_standard {standard},
   m_rxGain {rxGain},
-  m_mode {mode},
   m_channelPropagationDelayModel {channelPropagationDelayModel},
   m_channelPropagationLossModel {channelPropagationLossModel}
 {
@@ -73,12 +71,6 @@ const double
 WifiPhyLayerConfiguration::GetRxGain ()
 {
   return m_rxGain;
-}
-
-const std::string
-WifiPhyLayerConfiguration::GetMode ()
-{
-  return m_mode;
 }
 
 const ModelConfiguration

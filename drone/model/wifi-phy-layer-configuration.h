@@ -46,7 +46,6 @@ public:
   WifiPhyLayerConfiguration (std::string phyType,
                              std::string standard,
                              double rxGain,
-                             std::string mode,
                              ModelConfiguration channelPropagationDelayModel,
                              ModelConfiguration channelPropagationLossModel);
   /** Default destructor */
@@ -61,10 +60,6 @@ public:
    */
   const double GetRxGain ();
   /**
-   * \return The configured WiFi PHY mode.
-   */
-  const std::string GetMode ();
-  /**
    * \return The Propagation Delay Model configuration.
    */
   const ModelConfiguration GetChannelPropagationDelayModel ();
@@ -76,7 +71,6 @@ public:
 private:
   const std::string m_standard;
   const double m_rxGain;
-  const std::string m_mode;
   const ModelConfiguration m_channelPropagationDelayModel;
   const ModelConfiguration m_channelPropagationLossModel;
 };
