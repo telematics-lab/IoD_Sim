@@ -1,5 +1,5 @@
 {
-    "name": "paper_3",
+    "name": "paper_3-lte",
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 50,
@@ -122,93 +122,6 @@
 
     "phyLayer": [
         {
-            "type": "wifi",
-            "standard": "802.11ax-6GHz",
-            "rxGain": 0.0,
-            "mode": "DsssRate1Mbps",
-            "channel": {
-                "propagationDelayModel": {
-                    "name": "ns3::ConstantSpeedPropagationDelayModel",
-                    "attributes": []
-                },
-                "propagationLossModel": {
-                    "name": "ns3::HybridBuildingsPropagationLossModel",
-                    "attributes": [
-                        {
-                            "name": "ShadowSigmaExtWalls",
-                            "value": 0
-                        },
-                        {
-                            "name": "ShadowSigmaOutdoor",
-                            "value": 1
-                        },
-                        {
-                            "name": "ShadowSigmaIndoor",
-                            "value": 1.5
-                        }
-                    ]
-                }
-            }
-        },
-        {
-            "type": "wifi",
-            "standard": "802.11ax-6GHz",
-            "rxGain": 0.0,
-            "mode": "DsssRate1Mbps",
-            "channel": {
-                "propagationDelayModel": {
-                    "name": "ns3::ConstantSpeedPropagationDelayModel",
-                    "attributes": []
-                },
-                "propagationLossModel": {
-                    "name": "ns3::HybridBuildingsPropagationLossModel",
-                    "attributes": [
-                        {
-                            "name": "ShadowSigmaExtWalls",
-                            "value": 0
-                        },
-                        {
-                            "name": "ShadowSigmaOutdoor",
-                            "value": 1
-                        },
-                        {
-                            "name": "ShadowSigmaIndoor",
-                            "value": 1.5
-                        }
-                    ]
-                }
-            }
-        },
-        {
-            "type": "wifi",
-            "standard": "802.11ax-6GHz",
-            "rxGain": 0.0,
-            "mode": "DsssRate1Mbps",
-            "channel": {
-                "propagationDelayModel": {
-                    "name": "ns3::ConstantSpeedPropagationDelayModel",
-                    "attributes": []
-                },
-                "propagationLossModel": {
-                    "name": "ns3::HybridBuildingsPropagationLossModel",
-                    "attributes": [
-                        {
-                            "name": "ShadowSigmaExtWalls",
-                            "value": 0
-                        },
-                        {
-                            "name": "ShadowSigmaOutdoor",
-                            "value": 1
-                        },
-                        {
-                            "name": "ShadowSigmaIndoor",
-                            "value": 1.5
-                        }
-                    ]
-                }
-            }
-        },
-        {
             "type": "lte",
             "channel": {
                 "propagationLossModel": {
@@ -238,100 +151,11 @@
 
     "macLayer": [
         {
-            "type": "wifi",
-            "ssid": "wifi-1",
-            "remoteStationManager": {
-                "name": "ns3::ConstantRateWifiManager",
-                "attributes": [{
-                        "name": "DataMode",
-                        "value": "DsssRate1Mbps"
-                    },
-                    {
-                        "name": "ControlMode",
-                        "value": "DsssRate1Mbps"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "wifi",
-            "ssid": "wifi-2",
-            "remoteStationManager": {
-                "name": "ns3::ConstantRateWifiManager",
-                "attributes": [{
-                        "name": "DataMode",
-                        "value": "DsssRate1Mbps"
-                    },
-                    {
-                        "name": "ControlMode",
-                        "value": "DsssRate1Mbps"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "wifi",
-            "ssid": "wifi-3",
-            "remoteStationManager": {
-                "name": "ns3::ConstantRateWifiManager",
-                "attributes": [{
-                        "name": "DataMode",
-                        "value": "DsssRate1Mbps"
-                    },
-                    {
-                        "name": "ControlMode",
-                        "value": "DsssRate1Mbps"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "lte",
-            "channel": {
-                "propagationLossModel": {
-                    "name": "ns3::HybridBuildingsPropagationLossModel",
-                    "attributes": [
-                        {
-                            "name": "ShadowSigmaExtWalls",
-                            "value": 1.0
-                        },
-                        {
-                            "name": "ShadowSigmaOutdoor",
-                            "value": 2.0
-                        },
-                        {
-                            "name": "ShadowSigmaIndoor",
-                            "value": 2.5
-                        }
-                    ]
-                },
-                "spectrumModel": {
-                    "name": "ns3::MultiModelSpectrumChannel",
-                    "attributes": []
-                }
-            }
+            "type": "lte"
         }
     ],
 
     "networkLayer": [
-        {
-            "type": "ipv4",
-            "address": "10.1.0.0",
-            "mask": "255.255.255.0",
-            "gateway": "10.1.0.1"
-        },
-        {
-            "type": "ipv4",
-            "address": "10.20.0.0",
-            "mask": "255.255.255.0",
-            "gateway": "10.20.0.1"
-        },
-        {
-            "type": "ipv4",
-            "address": "10.42.0.0",
-            "mask": "255.255.255.0",
-            "gateway": "10.42.0.1"
-        },
         {
             "type": "ipv4",
             "address": "10.60.0.0",
@@ -341,22 +165,11 @@
     ],
 
     "drones": [
-        {
+		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
-                    "networkLayer": 3,
+                    "networkLayer": 0,
                     "role": "UE",
                     "bearers": [
                         {
@@ -373,70 +186,6 @@
                             }
                         }
                     ]
-                }
-            ],
-            "mobilityModel": {
-                "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [80.0, 100.0, 50.0]
-                }]
-            },
-            "applications": [{
-                "name": "ns3::NatApplication",
-                "attributes": [{
-                        "name": "InternalNetDeviceId",
-                        "value": 0
-                },
-                {
-                    "name": "ExternalNetDeviceId",
-                    "value": 1
-                }]
-            }],
-            "mechanics": {
-                "name": "ns3::Drone",
-                "attributes": [
-                    {
-                        "name": "Mass",
-                        "value": 0.750
-                    },
-                    {
-                        "name": "RotorDiskArea",
-                        "value": 0.18
-                    },
-                    {
-                        "name": "DragCoefficient",
-                        "value": 0.08
-                    }
-                ]
-            },
-            "battery": {
-                "name": "ns3::LiIonEnergySource",
-                "attributes": [
-                    {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
-                    },
-                    {
-                        "name": "LiIonEnergyLowBatteryThreshold",
-                        "value": 0.2
-                    }
-                ]
-            },
-            "peripherals": []
-        },
-		{
-            "netDevices": [
-                {
-                    "type": "wifi",
-                    "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
                 }
             ],
             "mobilityModel": {
@@ -502,15 +251,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
+                    "type": "lte",
                     "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -576,15 +334,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
+                    "type": "lte",
                     "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -650,15 +417,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
+                    "type": "lte",
                     "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -724,15 +500,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
+                    "type": "lte",
                     "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -795,22 +580,11 @@
             },
             "peripherals": []
         },
-        {
+		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
-                    "networkLayer": 3,
+                    "networkLayer": 0,
                     "role": "UE",
                     "bearers": [
                         {
@@ -827,70 +601,6 @@
                             }
                         }
                     ]
-                }
-            ],
-            "mobilityModel": {
-                "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [100.0, 240.0, 50.0]
-                }]
-            },
-            "applications": [{
-                "name": "ns3::NatApplication",
-                "attributes": [{
-                        "name": "InternalNetDeviceId",
-                        "value": 0
-                },
-                {
-                    "name": "ExternalNetDeviceId",
-                    "value": 1
-                }]
-            }],
-            "mechanics": {
-                "name": "ns3::Drone",
-                "attributes": [
-                    {
-                        "name": "Mass",
-                        "value": 0.750
-                    },
-                    {
-                        "name": "RotorDiskArea",
-                        "value": 0.18
-                    },
-                    {
-                        "name": "DragCoefficient",
-                        "value": 0.08
-                    }
-                ]
-            },
-            "battery": {
-                "name": "ns3::LiIonEnergySource",
-                "attributes": [
-                    {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
-                    },
-                    {
-                        "name": "LiIonEnergyLowBatteryThreshold",
-                        "value": 0.2
-                    }
-                ]
-            },
-            "peripherals": []
-        },
-		{
-            "netDevices": [
-                {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
                 }
             ],
             "mobilityModel": {
@@ -956,15 +666,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1030,15 +749,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1104,15 +832,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1178,15 +915,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1249,22 +995,11 @@
             },
             "peripherals": []
         },
-        {
+		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
-                    "networkLayer": 3,
+                    "networkLayer": 0,
                     "role": "UE",
                     "bearers": [
                         {
@@ -1281,70 +1016,6 @@
                             }
                         }
                     ]
-                }
-            ],
-            "mobilityModel": {
-                "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [230.0, 140.0, 50.0]
-                }]
-            },
-            "applications": [{
-                "name": "ns3::NatApplication",
-                "attributes": [{
-                        "name": "InternalNetDeviceId",
-                        "value": 0
-                },
-                {
-                    "name": "ExternalNetDeviceId",
-                    "value": 1
-                }]
-            }],
-            "mechanics": {
-                "name": "ns3::Drone",
-                "attributes": [
-                    {
-                        "name": "Mass",
-                        "value": 0.750
-                    },
-                    {
-                        "name": "RotorDiskArea",
-                        "value": 0.18
-                    },
-                    {
-                        "name": "DragCoefficient",
-                        "value": 0.08
-                    }
-                ]
-            },
-            "battery": {
-                "name": "ns3::LiIonEnergySource",
-                "attributes": [
-                    {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
-                    },
-                    {
-                        "name": "LiIonEnergyLowBatteryThreshold",
-                        "value": 0.2
-                    }
-                ]
-            },
-            "peripherals": []
-        },
-		{
-            "netDevices": [
-                {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
                 }
             ],
             "mobilityModel": {
@@ -1410,15 +1081,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1484,15 +1164,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1558,15 +1247,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1632,15 +1330,24 @@
 		{
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
+                    "type": "lte",
+                    "networkLayer": 0,
+                    "role": "UE",
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
+                            }
+                        }
+                    ]
                 }
             ],
             "mobilityModel": {
@@ -1711,7 +1418,7 @@
                 {
                     "type": "lte",
                     "role": "eNB",
-                    "networkLayer": 3,
+                    "networkLayer": 0,
                     "bearers": [
                         {
                             "type": "GBR_CONV_VIDEO",
@@ -1742,7 +1449,7 @@
 
     "remotes": [
         {
-            "networkLayer": 3,
+            "networkLayer": 0,
             "applications": [{
                 "name": "ns3::DroneServerApplication",
                 "attributes": [
