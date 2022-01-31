@@ -238,8 +238,6 @@ Scenario::ConfigurePhy ()
 
           wifiSim->GetWifiHelper ()->SetStandard (wifiConf->GetStandard ());
 
-          // This is one parameter that matters when using FixedRssLossModel
-          // set it to zero; otherwise, gain will be added
           wifiPhy->Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
           // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
           wifiPhy->SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
