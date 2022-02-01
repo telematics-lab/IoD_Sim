@@ -126,20 +126,7 @@
             "channel": {
                 "propagationLossModel": {
                     "name": "ns3::HybridBuildingsPropagationLossModel",
-                    "attributes": [
-                        {
-                            "name": "ShadowSigmaExtWalls",
-                            "value": 0
-                        },
-                        {
-                            "name": "ShadowSigmaOutdoor",
-                            "value": 1
-                        },
-                        {
-                            "name": "ShadowSigmaIndoor",
-                            "value": 1.5
-                        }
-                    ]
+                    "attributes": []
                 },
                 "spectrumModel": {
                     "name": "ns3::MultiModelSpectrumChannel",
