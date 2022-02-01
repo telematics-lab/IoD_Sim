@@ -200,6 +200,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -283,6 +287,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -366,6 +374,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -449,6 +461,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -532,6 +548,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -615,6 +635,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -698,6 +722,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -781,6 +809,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -864,6 +896,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -947,6 +983,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -1030,6 +1070,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -1113,6 +1157,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -1196,6 +1244,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -1279,6 +1331,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
@@ -1362,6 +1418,10 @@
                     {
                         "name": "Port",
                         "value": "1337"
+                    },
+                    {
+                        "name": "TransmissionInterval",
+                        "value": 0.1
                     }
                 ]
             }],
