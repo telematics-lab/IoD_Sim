@@ -96,5 +96,8 @@
         "queue": "cpp"
     },
     "git.ignoreLimitWarning": true,
+    "git.ignoredRepositories": [
+        "ns3"
+    ],
     "jupyter.jupyterServerType": "local"
 }
