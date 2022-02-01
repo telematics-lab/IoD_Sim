@@ -111,6 +111,7 @@ NatApplication::RecvPktFromIntNetDev (Ptr<NetDevice> netdev,
                                       const Address& receiver,
                                       enum NetDevice::PacketType pktType)
 {
+  NS_LOG_FUNCTION (this << netdev << pkt << protocol << sender << receiver << pktType);
   return RecvPktFromNetDev (netdev, pkt, protocol, sender, receiver, pktType);
 }
 
@@ -120,6 +121,7 @@ NatApplication::RecvPktFromExtNetDev (Ptr<NetDevice> netdev,
                                       uint16_t protocol,
                                       const Address& sender)
 {
+  NS_LOG_FUNCTION (this << netdev << pkt << protocol << sender);
   //TODO: This is a fake address. How can we easily retrieve the receiver IP Address from the packet?
   auto receiver = Ipv4Address::GetZero ();
 
