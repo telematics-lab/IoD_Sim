@@ -247,17 +247,6 @@
         {
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 0,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-1"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
                     "networkLayer": 3,
                     "role": "UE",
@@ -276,6 +265,17 @@
                             }
                         }
                     ]
+                },
+                {
+                    "type": "wifi",
+                    "networkLayer": 0,
+                    "macLayer": {
+                        "name": "ns3::ApWifiMac",
+                        "attributes": [{
+                            "name": "Ssid",
+                            "value": "wifi-1"
+                        }]
+                    }
                 }
             ],
             "mobilityModel": {
@@ -289,11 +289,11 @@
                 "name": "ns3::NatApplication",
                 "attributes": [{
                         "name": "InternalNetDeviceId",
-                        "value": 0
+                        "value": 2
                 },
                 {
                     "name": "ExternalNetDeviceId",
-                    "value": 1
+                    "value": 0
                 }]
             }],
             "mechanics": {
@@ -701,17 +701,6 @@
         {
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 1,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-2"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
                     "networkLayer": 3,
                     "role": "UE",
@@ -730,6 +719,17 @@
                             }
                         }
                     ]
+                },
+                {
+                    "type": "wifi",
+                    "networkLayer": 1,
+                    "macLayer": {
+                        "name": "ns3::ApWifiMac",
+                        "attributes": [{
+                            "name": "Ssid",
+                            "value": "wifi-2"
+                        }]
+                    }
                 }
             ],
             "mobilityModel": {
@@ -743,11 +743,11 @@
                 "name": "ns3::NatApplication",
                 "attributes": [{
                         "name": "InternalNetDeviceId",
-                        "value": 0
+                        "value": 2
                 },
                 {
                     "name": "ExternalNetDeviceId",
-                    "value": 1
+                    "value": 0
                 }]
             }],
             "mechanics": {
@@ -1155,17 +1155,6 @@
         {
             "netDevices": [
                 {
-                    "type": "wifi",
-                    "networkLayer": 2,
-                    "macLayer": {
-                        "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-3"
-                        }]
-                    }
-                },
-                {
                     "type": "lte",
                     "networkLayer": 3,
                     "role": "UE",
@@ -1184,6 +1173,17 @@
                             }
                         }
                     ]
+                },
+                {
+                    "type": "wifi",
+                    "networkLayer": 2,
+                    "macLayer": {
+                        "name": "ns3::ApWifiMac",
+                        "attributes": [{
+                            "name": "Ssid",
+                            "value": "wifi-3"
+                        }]
+                    }
                 }
             ],
             "mobilityModel": {
@@ -1197,11 +1197,11 @@
                 "name": "ns3::NatApplication",
                 "attributes": [{
                         "name": "InternalNetDeviceId",
-                        "value": 0
+                        "value": 2
                 },
                 {
                     "name": "ExternalNetDeviceId",
-                    "value": 1
+                    "value": 0
                 }]
             }],
             "mechanics": {
