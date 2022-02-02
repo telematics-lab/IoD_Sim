@@ -175,7 +175,7 @@ NatApplication::RecvPktFromNetDev (Ptr<NetDevice> netdev,
 
           // substitute source IP and port
           auto ifId = m_extNetDev->GetIfIndex (); /* LTE does something strange with interface index */
-          auto extIpv4Addr = GetNode ()->GetObject<Ipv4> ()->GetAddress(ifId + 1, 0).GetLocal ();
+          auto extIpv4Addr = GetNode ()->GetObject<Ipv4> ()->GetAddress (ifId + 1, 0).GetLocal ();
 
           ipHdr.SetSource (extIpv4Addr);
           udpHdr.SetSourcePort (outPort);
