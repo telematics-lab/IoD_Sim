@@ -23,6 +23,8 @@
 
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/pointer.h>
+#include <rapidjson/error/en.h>
+
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
@@ -743,7 +745,8 @@ ScenarioConfigurationHelper::InitializeConfiguration (int argc, char **argv)
   // close???
 
   NS_ABORT_MSG_IF (m_config.HasParseError (),
-                   "The given configuration schema is not valid JSON.");
+                   "The given configuration schema is not valid JSON: "
+                   << rapidjson::GetParseError_En(m_config.GetParseError ()));
 }
 
 void
