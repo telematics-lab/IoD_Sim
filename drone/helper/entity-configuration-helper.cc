@@ -95,7 +95,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
 
       const uint32_t networkLayerId = netdev["networkLayer"].GetUint ();
 
-      if (type.compare("wifi") == 0)
+      if (type == "wifi")
         {
           NS_ASSERT_MSG (netdev.HasMember ("macLayer"),
                         "Entity WiFi Network Device must have 'macLayer' property defined.");
@@ -106,7 +106,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations (const rapidjson::Value
 
           confs.push_back (CreateObject<WifiNetdeviceConfiguration> (type, macLayer, networkLayerId));
         }
-      else if (type.compare ("lte") == 0)
+      else if (type == "lte")
         {
           NS_ASSERT_MSG (netdev.HasMember ("role"),
                          "Entity LTE Network Device must have 'role' property defined.");
@@ -353,7 +353,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
                 attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
               }
-            else if ((attrName.compare("SpeedCoefficients") == 0 || attrName.compare("PowerConsumption") == 0) && arr[0].IsNumber ())
+            else if ((attrName == "SpeedCoefficients" || attrName == "PowerConsumption") && arr[0].IsNumber ())
               {
                 std::vector<double> coeffs;
 
@@ -362,7 +362,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 }
                 attrValue = attrInfo.checker->CreateValidValue (DoubleVectorValue (coeffs));
               }
-            else if (attrName.compare("FlightPlan") == 0 && arr[0].IsObject ())
+            else if (attrName == "FlightPlan" && arr[0].IsObject ())
               {
                 FlightPlan fp {};
 
@@ -389,7 +389,7 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
 
                 attrValue = attrInfo.checker->CreateValidValue (FlightPlanValue (fp));
               }
-            else if (attrName.compare("RoITrigger") == 0 && arr[0].IsInt ())
+            else if (attrName == "RoITrigger" && arr[0].IsInt ())
               {
                 std::vector<int> coeffs;
 

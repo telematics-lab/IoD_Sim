@@ -229,7 +229,7 @@ Scenario::ConfigurePhy ()
   size_t phyId = 0;
   for (auto& phyLayerConf : phyLayerConfs)
     {
-      if (phyLayerConf->GetType ().compare("wifi") == 0)
+      if (phyLayerConf->GetType () == "wifi")
         {
           YansWifiChannelHelper wifiChannel;
           const auto wifiConf = StaticCast<WifiPhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
@@ -249,7 +249,7 @@ Scenario::ConfigurePhy ()
 
           m_protocolStacks[PHY_LAYER].push_back (wifiSim);
         }
-      else if (phyLayerConf->GetType ().compare("lte") == 0)
+      else if (phyLayerConf->GetType () == "lte")
         {
           auto lteSim = CreateObject<LtePhySimulationHelper> (phyId);
           auto lteConf = StaticCast<LtePhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
@@ -290,7 +290,7 @@ Scenario::ConfigureMac ()
   size_t i = 0;
   for (auto& macLayerConf : macLayerConfs)
     {
-      if (macLayerConf->GetType ().compare ("wifi") == 0)
+      if (macLayerConf->GetType () == "wifi")
         {
           const auto wifiPhy = StaticCast<WifiPhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][i]);
           const auto wifiMac = CreateObject<WifiMacSimulationHelper> ();
@@ -302,7 +302,7 @@ Scenario::ConfigureMac ()
 
           m_protocolStacks[MAC_LAYER].push_back (wifiMac);
         }
-      else if (macLayerConf->GetType ().compare ("lte") == 0)
+      else if (macLayerConf->GetType () == "lte")
         {
           // NO OPERATION NEEDED HERE
           m_protocolStacks[MAC_LAYER].push_back (nullptr);
@@ -324,7 +324,7 @@ Scenario::ConfigureNetwork ()
   const auto layerConfs = CONFIGURATOR->GetNetworkLayers ();
   for (auto& layerConf : layerConfs)
     {
-      if (layerConf->GetType ().compare("ipv4") == 0)
+      if (layerConf->GetType () == "ipv4")
         {
           const auto ipv4Conf = StaticCast<Ipv4NetworkLayerConfiguration, NetworkLayerConfiguration> (layerConf);
           const auto ipv4Sim = CreateObject<Ipv4SimulationHelper> (ipv4Conf->GetMask (), ipv4Conf->GetGatewayAddress ());
@@ -379,13 +379,13 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
       {
         const auto netId = entityNetDev->GetNetworkLayerId ();
 
-        if (entityNetDev->GetType ().compare("wifi") == 0)
+        if (entityNetDev->GetType () == "wifi")
           {
             auto devContainer = ConfigureEntityWifiStack (entityKey, entityNetDev, entityNode, entityId, deviceId, netId);
             InstallEntityIpv4 (entityNode, devContainer, netId);
             ConfigureEntityIpv4 (entityNode, devContainer, deviceId, netId);
           }
-        else if (entityNetDev->GetType ().compare("lte") == 0)
+        else if (entityNetDev->GetType () == "lte")
           {
             const auto entityLteDevConf = StaticCast<LteNetdeviceConfiguration, NetdeviceConfiguration> (entityNetDev);
             const auto role = entityLteDevConf->GetRole ();
@@ -413,7 +413,7 @@ Scenario::ConfigureEntities (const std::string& entityKey, NodeContainer& nodes)
 
       ConfigureEntityApplications (entityKey, entityConf, entityId);
 
-      if (entityKey.compare("drones") == 0)
+      if (entityKey == "drones")
         {
           DroneEnergyModelHelper energyModel;
           Ptr<EnergySource> energySource;

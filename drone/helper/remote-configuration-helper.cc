@@ -161,7 +161,7 @@ RemoteConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
                 attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
               }
-            else if (attrName.compare("SpeedCoefficients") == 0 && arr[0].IsNumber ())
+            else if (attrName == "SpeedCoefficients" && arr[0].IsNumber ())
               {
                 std::vector<double> coeffs;
 
@@ -170,7 +170,7 @@ RemoteConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                 }
                 attrValue = attrInfo.checker->CreateValidValue (DoubleVectorValue (coeffs));
               }
-            else if (attrName.compare("FlightPlan") == 0 && arr[0].IsObject ())
+            else if (attrName == "FlightPlan" && arr[0].IsObject ())
               {
                 FlightPlan fp {};
 

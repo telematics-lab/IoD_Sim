@@ -43,25 +43,25 @@ WifiPhyLayerConfiguration::~WifiPhyLayerConfiguration()
 const enum WifiStandard
 WifiPhyLayerConfiguration::GetStandard ()
 {
-  if (m_standard.compare("802.11a") == 0)
+  if (m_standard == "802.11a")
     return WIFI_STANDARD_80211a;
-  else if (m_standard.compare("802.11b") == 0)
+  else if (m_standard == "802.11b")
     return WIFI_STANDARD_80211b;
-  else if (m_standard.compare("802.11g") == 0)
+  else if (m_standard == "802.11g")
     return WIFI_STANDARD_80211g;
-  else if (m_standard.compare("802.11p") == 0)
+  else if (m_standard == "802.11p")
     return WIFI_STANDARD_80211p;
-  else if (m_standard.compare("802.11n-2.4GHz") == 0)
+  else if (m_standard == "802.11n-2.4GHz")
     return WIFI_STANDARD_80211n_2_4GHZ;
-  else if (m_standard.compare("802.11n-5GHz") == 0)
+  else if (m_standard == "802.11n-5GHz")
     return WIFI_STANDARD_80211n_5GHZ;
-  else if (m_standard.compare("802.11ac") == 0)
+  else if (m_standard == "802.11ac")
     return WIFI_STANDARD_80211ac;
-  else if (m_standard.compare("802.11ax-2.4GHz") == 0)
+  else if (m_standard == "802.11ax-2.4GHz")
     return WIFI_STANDARD_80211ax_2_4GHZ;
-  else if (m_standard.compare("802.11ax-5GHz") == 0)
+  else if (m_standard == "802.11ax-5GHz")
     return WIFI_STANDARD_80211ax_5GHZ;
-  else if (m_standard.compare("802.11ax-6GHz") == 0)
+  else if (m_standard == "802.11ax-6GHz")
     return WIFI_STANDARD_80211ax_6GHZ;
   else
     NS_FATAL_ERROR ("Cannot decode Wifi Standard: " << m_standard);

@@ -24,9 +24,9 @@ class LteNetdeviceConfigurationPriv
 public:
   static const LteRole ParseRole (const std::string rawRole)
   {
-    if (rawRole.compare("UE") == 0)
+    if (rawRole == "UE")
       return LteRole::UE;
-    else if (rawRole.compare("eNB") == 0)
+    else if (rawRole == "eNB")
       return LteRole::eNB;
     else
       NS_FATAL_ERROR ("Unsupported LTE Role: " << rawRole);

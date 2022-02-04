@@ -39,7 +39,7 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
                  "PHY Layer 'type' property must be a string.");
 
   const std::string phyType = jsonPhyLayer["type"].GetString ();
-  if (phyType.compare("wifi") == 0)
+  if (phyType == "wifi")
     {
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
                     "PHY Layer definition must have 'standard' property.");
@@ -71,7 +71,7 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
                                                 propagationDelayModel,
                                                 propagationLossModel);
     }
-  else if (phyType.compare ("lte") == 0)
+  else if (phyType == "lte")
     {
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
                     "PHY Layer definition must have 'channel' property.");

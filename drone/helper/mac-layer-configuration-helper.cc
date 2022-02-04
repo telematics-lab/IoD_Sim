@@ -38,7 +38,7 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
                  "MAC Layer 'type' property must be a string.");
 
   const std::string macType = jsonMacLayer["type"].GetString ();
-  if (macType.compare("wifi") == 0)
+  if (macType == "wifi")
     {
       NS_ASSERT_MSG (jsonMacLayer.HasMember ("ssid"),
                     "MAC Layer definition must have 'ssid' property.");
@@ -53,7 +53,7 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
                                                 jsonMacLayer["ssid"].GetString (),
                                                 remoteStationManagerConfiguration);
     }
-  else if (macType.compare ("lte") == 0)
+  else if (macType == "lte")
     {
       return Create<MacLayerConfiguration> (macType);
     }

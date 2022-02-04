@@ -37,7 +37,7 @@ NetworkLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
                  "Network Layer 'type' property must be a string.");
 
   const std::string type = json["type"].GetString ();
-  if (type.compare("ipv4") == 0)
+  if (type == "ipv4")
     {
       NS_ASSERT_MSG (json.HasMember ("address"),
                     "Network Layer definition must have 'address' property.");
