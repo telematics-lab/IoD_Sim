@@ -255,8 +255,6 @@ Scenario::ConfigurePhy ()
           auto lteConf = StaticCast<LtePhyLayerConfiguration, PhyLayerConfiguration> (phyLayerConf);
           auto lteHelper = lteSim->GetLteHelper();
 
-          lteHelper->Initialize ();
-
           auto pathlossConf = lteConf->GetChannelPropagationLossModel ();
           lteHelper->SetAttribute ("PathlossModel", StringValue (pathlossConf.GetName ()));
           for (auto& attr : pathlossConf.GetAttributes ())
@@ -266,6 +264,8 @@ Scenario::ConfigurePhy ()
           lteHelper->SetSpectrumChannelType (spectrumConf.GetName ());
           for (auto& attr : spectrumConf.GetAttributes ())
             lteHelper->SetSpectrumChannelAttribute (attr.first, *(attr.second));
+
+          lteHelper->Initialize ();
 
           m_backbone.Add (lteSim->GetEpcHelper ()->GetPgwNode ());
 
