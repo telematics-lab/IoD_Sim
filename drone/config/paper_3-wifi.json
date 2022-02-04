@@ -123,7 +123,7 @@
     "phyLayer": [
         {
             "type": "wifi",
-            "standard": "802.11ax-6GHz",
+            "standard": "802.11ax-2.4GHz",
             "rxGain": 0.0,
             "channel": {
                 "propagationDelayModel": {
@@ -138,7 +138,7 @@
         },
         {
             "type": "wifi",
-            "standard": "802.11ax-6GHz",
+            "standard": "802.11ax-2.4GHz",
             "rxGain": 0.0,
             "channel": {
                 "propagationDelayModel": {
@@ -153,7 +153,7 @@
         },
         {
             "type": "wifi",
-            "standard": "802.11ax-6GHz",
+            "standard": "802.11ax-2.4GHz",
             "rxGain": 0.0,
             "channel": {
                 "propagationDelayModel": {
