@@ -442,17 +442,19 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
   const auto mobilityType = entityConf->GetMobilityModel ().GetName (); // Configure Entity Mobility
   MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
 
-  if (entityKey.compare ("drones") == 0)
-  {
-    mobility.Install (m_drones.Get (entityId));
-    std::ostringstream oss;
-    oss <<
-      "/NodeList/" << m_drones.Get (entityId)->GetId () <<
-      "/$ns3::MobilityModel/CourseChange";
-    Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
-  }
-  else if (entityKey.compare ("ZSPs") == 0)
-    mobility.Install (m_zsps.Get (entityId));
+  if (entityKey == "drones")
+    {
+      mobility.Install (m_drones.Get (entityId));
+      std::ostringstream oss;
+      oss <<
+        "/NodeList/" << m_drones.Get (entityId)->GetId () <<
+        "/$ns3::MobilityModel/CourseChange";
+      Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
+    }
+  else if (entityKey == "ZSPs")
+    {
+      mobility.Install (m_zsps.Get (entityId));
+    }
 }
 
 NetDeviceContainer
