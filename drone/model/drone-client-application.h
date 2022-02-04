@@ -117,7 +117,7 @@ private:
    *
    * \param s the socket to be listened.
    */
-  void ReceivePacket (const Ptr<Socket> s) const;
+  void ReceivePacket (const Ptr<Socket> s);
 
   /**
    * \brief Callback to detect a variation in the mobility model and get
@@ -129,17 +129,17 @@ private:
   void CourseChange (const std::string context,
                      const Ptr<const MobilityModel> mobility) const;
 
-  mutable Ipv4Address m_apIp;       /// IP of the ZSP connected to.
   Ipv4Address m_destAddr;
   uint32_t m_destPort;
-
-  Ptr<Socket> m_socket;     /// the socket to be used for communications
-  mutable EventId m_sendEvent;  /// the event scheduled to send a new packet
-
-  mutable int32_t m_sequenceNumber; // correlated with the drone, not the connection
-  mutable ClientState m_state; /// the state of the client
-
   double m_interval;
+  bool m_initialHandshakeEnable;
+
+  Ptr<Socket> m_socket; /// socket to be used for communications.
+  EventId m_sendEvent; /// event scheduled to send a new packet.
+
+  mutable int32_t m_sequenceNumber;
+  mutable ClientState m_state;
+
 
   TracedCallback<Ptr<const Packet>> m_txTrace;
   bool m_storage = false;

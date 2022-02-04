@@ -54,13 +54,17 @@ DroneClientApplication::GetTypeId ()
                    DoubleValue (1.0),
                    MakeDoubleAccessor (&DroneClientApplication::m_interval),
                    MakeDoubleChecker<double> ())
-    .AddTraceSource ("Tx", "A new packet is created and is sent",
-                     MakeTraceSourceAccessor (&DroneClientApplication::m_txTrace),
-                     "ns3::Packet::TracedCallback")
+    .AddAttribute ("InitialHandshake", "Flag for initial HELLO handshake between client and server.",
+                   BooleanValue (true),
+                   MakeBooleanAccessor (&DroneClientApplication::m_initialHandshakeEnable),
+                   MakeBooleanChecker ())
     .AddAttribute ("FreeData", "Free data if the StoragePeripheral is available.",
                    BooleanValue (false),
                    MakeBooleanAccessor (&DroneClientApplication::m_storage),
                    MakeBooleanChecker())
+    .AddTraceSource ("Tx", "A new packet is created and is sent",
+                     MakeTraceSourceAccessor (&DroneClientApplication::m_txTrace),
+                     "ns3::Packet::TracedCallback")
     ;
 
   return tid;
@@ -68,7 +72,7 @@ DroneClientApplication::GetTypeId ()
 
 DroneClientApplication::DroneClientApplication ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   m_state = CLOSED;
   m_sequenceNumber = 0;
@@ -76,7 +80,7 @@ DroneClientApplication::DroneClientApplication ()
 
 DroneClientApplication::~DroneClientApplication ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   m_state = CLOSED;
 }
@@ -84,7 +88,7 @@ DroneClientApplication::~DroneClientApplication ()
 void
 DroneClientApplication::DoDispose ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   if (m_socket != NULL)
       m_socket->Close ();
@@ -97,47 +101,55 @@ DroneClientApplication::DoDispose ()
 void
 DroneClientApplication::StartApplication ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
-  if (m_state == CLOSED)
+  if (m_socket == NULL)
     {
-      if (m_socket == NULL)
-        {
-          Ptr<SocketFactory> socketFactory = GetNode ()->GetObject<SocketFactory>
-                                             (UdpSocketFactory::GetTypeId ());
+      Ptr<SocketFactory> socketFactory = GetNode ()->GetObject<SocketFactory> (UdpSocketFactory::GetTypeId ());
+      m_socket = socketFactory->CreateSocket ();
 
-          m_socket = socketFactory->CreateSocket ();
+      m_socket->SetAllowBroadcast (true);
+      m_socket->SetRecvCallback (MakeCallback (&DroneClientApplication::ReceivePacket, this));
 
-          m_socket->SetAllowBroadcast (true);
-          m_socket->SetRecvCallback (MakeCallback (&DroneClientApplication::ReceivePacket,
-                                                   this));
+      NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
+                    << "] new client socket (" << m_socket << ")");
 
-          NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                       << "] new client socket (" << m_socket << ")");
-
-          /* set CourseChange callback using ns-3 XPath addressing system */
-          const uint32_t nodeId = GetNode ()->GetId ();
-          std::stringstream xPathCallback;
-          xPathCallback << "/NodeList/" << nodeId
-                        << "/$ns3::MobilityModel/CourseChange";
-          Config::Connect (xPathCallback.str (),
-                           MakeCallback (&DroneClientApplication::CourseChange, this));
-      }
-
-      /* cancel any previous event and start rendezvous process */
-      Simulator::Cancel (m_sendEvent);
-      m_sendEvent = Simulator::ScheduleNow (&DroneClientApplication::SendPacket,
-                                            this,
-                                            NEW,
-                                            m_socket,
-                                            m_destAddr);
+      /* set CourseChange callback using ns-3 XPath addressing system */
+      const uint32_t nodeId = GetNode ()->GetId ();
+      std::stringstream xPathCallback;
+      xPathCallback << "/NodeList/" << nodeId
+                    << "/$ns3::MobilityModel/CourseChange";
+      Config::Connect (xPathCallback.str (),
+                        MakeCallback (&DroneClientApplication::CourseChange, this));
   }
+
+  Simulator::Cancel (m_sendEvent);
+
+  if (m_initialHandshakeEnable)
+    {
+      m_sendEvent = Simulator::ScheduleNow (&DroneClientApplication::SendPacket, this, NEW, m_socket, m_destAddr);
+    }
+  else
+    {
+      m_state = CONNECTED;
+
+      for (double i = Simulator::Now ().GetSeconds (); i < m_stopTime.GetSeconds (); i += m_interval)
+        {
+          Simulator::ScheduleWithContext (GetNode ()->GetId (),
+                                          Seconds (i),
+                                          &DroneClientApplication::SendPacket,
+                                          this,
+                                          NEW,
+                                          m_socket,
+                                          m_destAddr);
+        }
+    }
 }
 
 void
 DroneClientApplication::StopApplication ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   Simulator::Cancel (m_sendEvent);
 
@@ -154,7 +166,7 @@ DroneClientApplication::SendPacket (const Intent i,
                                     const Ptr<Socket> socket,
                                     const Ipv4Address targetAddress) const
 {
-  NS_LOG_FUNCTION (ToString (i) << socket << targetAddress);
+  NS_LOG_FUNCTION (this << ToString (i) << socket << targetAddress);
 
   if (m_socket != NULL)
     {
@@ -242,9 +254,9 @@ DroneClientApplication::SendPacket (const Intent i,
 }
 
 void
-DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
+DroneClientApplication::ReceivePacket (const Ptr<Socket> socket)
 {
-  NS_LOG_FUNCTION (socket);
+  NS_LOG_FUNCTION (this << socket);
 
   Ptr<Packet> packet;
   Address senderAddr;
@@ -272,10 +284,10 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
 
           if (PacketType (command) == PacketType::HELLO_ACK && m_state == HELLO_SENT)
             {
-              m_apIp = senderIpv4;
+              m_destAddr = senderIpv4;
 
               NS_LOG_INFO ("[Node " << GetNode ()->GetId ()
-                           << "] received HELLO_ACK with IP " << m_apIp);
+                           << "] received HELLO_ACK with IP " << m_destAddr);
 
               m_state = CONNECTED;
 
@@ -289,7 +301,7 @@ DroneClientApplication::ReceivePacket (const Ptr<Socket> socket) const
                                                   this,
                                                   NEW,
                                                   m_socket,
-                                                  m_apIp);
+                                                  m_destAddr);
                 }
             }
           else if (PacketType (command) == PacketType::UPDATE_ACK
