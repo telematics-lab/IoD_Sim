@@ -79,7 +79,7 @@ void ReportDrone::DoInitialize()
 void
 ReportDrone::DoWrite (xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
+  NS_LOG_FUNCTION (this << h);
   if (h == nullptr)
     {
       NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
@@ -203,7 +203,7 @@ ReportDrone::DoWrite (xmlTextWriterPtr h)
 void
 ReportDrone::DoInitializeTrajectoryMonitor ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   /* set CourseChange callback using ns-3 XPath addressing system */
   std::stringstream xPathCallback;
 
@@ -216,7 +216,7 @@ ReportDrone::DoInitializeTrajectoryMonitor ()
 void
 ReportDrone::DoMonitorTrajectory (const Ptr<const MobilityModel> mobility)
 {
-  NS_LOG_FUNCTION (mobility);
+  NS_LOG_FUNCTION (this << mobility);
   Ptr<Node> drone = NodeList::GetNode(m_reference);
   Vector position = mobility->GetPosition ();
 
@@ -230,20 +230,26 @@ ReportDrone::DoMonitorTrajectory (const Ptr<const MobilityModel> mobility)
 void
 ReportDrone::DoInitializePeripherals ()
 {
-  Ptr<Drone> drone = DroneList::GetDrone(m_reference);
-  auto percont = drone->getPeripherals();
+  NS_LOG_FUNCTION (this);
+  Ptr<Drone> drone = DroneList::GetDrone (m_reference);
+  auto percont = drone->getPeripherals ();
 
-  for (auto p=percont->Begin(); p != percont->End(); p++)
+  for (auto p = percont->Begin (); p != percont->End (); p++)
   {
-    m_peripherals.push_back(ReportPeripheral((*p)->GetInstanceTypeId().GetName(),(*p)->GetPowerConsumptionStates(),(*p)->GetRegionsOfInterest()));
-    if ((*p)->GetInstanceTypeId().GetName() == "ns3::StoragePeripheral") m_peripherals.back().AddAttribute({"Capacity",std::to_string(StaticCast<StoragePeripheral,DronePeripheral>((*p))->GetCapacity())});
-    if ((*p)->GetInstanceTypeId().GetName() == "ns3::InputPeripheral")
-    {
-      Ptr<InputPeripheral> inper = StaticCast<InputPeripheral,DronePeripheral>((*p));
-      m_peripherals.back().AddAttribute({"DataRate",std::to_string(inper->GetDatarate())});
-      m_peripherals.back().AddAttribute({"DataAcquisitionTimeInterval",std::to_string(inper->GetAcquisitionTimeInterval().GetSeconds())});
-      m_peripherals.back().AddAttribute({"HasStorage",inper->HasStorage()? "true" : "false"});
-    }
+    m_peripherals.push_back (ReportPeripheral ((*p)->GetInstanceTypeId ().GetName (), (*p)->GetPowerConsumptionStates (), (*p)->GetRegionsOfInterest ()));
+
+    auto pName = (*p)->GetInstanceTypeId ().GetName ();
+    if (pName == "ns3::StoragePeripheral")
+      {
+        m_peripherals.back ().AddAttribute ({ "Capacity", std::to_string (StaticCast<StoragePeripheral,DronePeripheral> ((*p))->GetCapacity ()) });
+      }
+    else if (pName == "ns3::InputPeripheral")
+      {
+        Ptr<InputPeripheral> inper = StaticCast<InputPeripheral,DronePeripheral> ((*p));
+        m_peripherals.back ().AddAttribute ({ "DataRate", std::to_string (inper->GetDatarate ()) });
+        m_peripherals.back ().AddAttribute ({ "DataAcquisitionTimeInterval", std::to_string (inper->GetAcquisitionTimeInterval ().GetSeconds ()) });
+        m_peripherals.back ().AddAttribute ({ "HasStorage", inper->HasStorage () ? "true" : "false" });
+      }
   }
 }
 
