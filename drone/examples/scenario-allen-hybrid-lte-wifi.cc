@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 The IoD_Sim Authors.
+ * Copyright (c) 2018-2022 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

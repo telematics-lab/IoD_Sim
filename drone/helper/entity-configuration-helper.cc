@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2018-2021 The IoD_Sim Authors.
+ * Copyright (c) 2018-2022 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,6 +20,7 @@
 #include <ns3/double.h>
 #include <ns3/integer.h>
 #include <ns3/object-factory.h>
+#include <ns3/rectangle.h>
 #include <ns3/string.h>
 #include <ns3/vector.h>
 
@@ -397,6 +398,12 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
                   coeffs.push_back (c.GetDouble ());
                 }
                 attrValue = attrInfo.checker->CreateValidValue (IntVectorValue (coeffs));
+              }
+            else if (attrName == "Bounds" && arr[0].IsDouble() && arr.Size () == 4)
+              {
+                auto rect = Rectangle (arr[0].GetDouble (), arr[1].GetDouble (),
+                                       arr[2].GetDouble (), arr[3].GetDouble ());
+                attrValue = attrInfo.checker->CreateValidValue (RectangleValue (rect));
               }
             else
               {
