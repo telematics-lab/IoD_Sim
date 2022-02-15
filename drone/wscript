@@ -76,6 +76,7 @@ def build(bld):
         'model/tcp-echo-server-application.cc',
         'model/tcp-storage-client-application.cc',
         'model/tcp-stub-client-application.cc',
+        'model/udp-echo-client-application.cc',
         ]
 
     headers = bld(features='ns3header')
@@ -146,6 +147,7 @@ def build(bld):
         'model/tcp-echo-server-application.h',
         'model/tcp-storage-client-application.h',
         'model/tcp-stub-client-application.h',
+        'model/udp-echo-client-application.h',
         ]
 
     if bld.env.ENABLE_EXAMPLES:
