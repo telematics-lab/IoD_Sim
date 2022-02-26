@@ -42,6 +42,8 @@ protected:
   virtual void StartApplication ();
 
 private:
+  /// \brief Schedule intial handshake with remote server
+  bool Connect ();
   /// \brief Send a random packet of a given size
   void SendPacket ();
 

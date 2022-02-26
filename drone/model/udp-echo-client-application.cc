@@ -129,7 +129,7 @@ UdpEchoClientApplication::Send (void)
   NS_ASSERT (m_sendEvent.IsExpired ());
   SeqTsHeader seqTs;
   seqTs.SetSeq (m_sent);
-  Ptr<Packet> p = Create<Packet> (m_size-(8+4)); // 8+4 : the size of the seqTs header
+  Ptr<Packet> p = Create<Packet> (m_size - 8 + 4); // 8+4 : the size of the seqTs header
   p->AddHeader (seqTs);
 
   if ((m_socket->Send (p)) >= 0)
@@ -137,10 +137,11 @@ UdpEchoClientApplication::Send (void)
       ++m_sent;
       m_totalTx += p->GetSize ();
 
-      NS_LOG_INFO ("TraceDelay TX " << m_size << " bytes to "
-                                    << m_peerAddress << " Uid: "
-                                    << p->GetUid () << " Time: "
-                                    << (Simulator::Now ()).As (Time::S));
+      NS_LOG_INFO ("TX " << m_size << " bytes to "
+                   << m_peerAddress << " "
+                   << "Uid: " << p->GetUid () << " "
+                   << "Time: " << Simulator::Now ().As (Time::S) << " "
+                   << "Packet: " << p->ToString ());
     }
   else
     {

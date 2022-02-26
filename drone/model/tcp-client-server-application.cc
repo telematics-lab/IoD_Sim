@@ -115,7 +115,7 @@ TcpClientServerApplication::Listen ()
   NS_ABORT_MSG_IF (ret < 0, "Failed to listen to " << m_addr << ":" << m_port << ". ErrNo=" << m_socket->GetErrno ());
 }
 
-void
+bool
 TcpClientServerApplication::Connect ()
 {
   NS_LOG_FUNCTION (this);
@@ -125,8 +125,10 @@ TcpClientServerApplication::Connect ()
   NS_ABORT_MSG_IF (ret < 0, "Failed to bind IPv4-based Socket.");
 
   ret = m_socket->Connect (InetSocketAddress (m_addr, m_port));
-  NS_ABORT_MSG_IF (ret < 0, "Failed to connect to " << m_addr << ":" << m_port
-                            << " ErrNo=" << m_socket->GetErrno ());
+  if (ret < 0)
+    NS_LOG_LOGIC ("Failed to connect to " << m_addr << ":" << m_port << " ErrNo=" << m_socket->GetErrno ());
+
+  return (ret == 0) ? true : false;
 }
 
 void

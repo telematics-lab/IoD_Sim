@@ -67,9 +67,28 @@ TcpStubClientApplication::StartApplication ()
 {
   NS_LOG_FUNCTION (this);
   TcpClientServerApplication::StartApplication ();
-  Connect ();
 
-  Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+  Simulator::ScheduleNow (&TcpStubClientApplication::Connect, this); // TODO: parametrize Seconds (0.5)
+  //Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+}
+
+bool
+TcpStubClientApplication::Connect ()
+{
+  NS_LOG_FUNCTION (this);
+  const bool isConnected = TcpClientServerApplication::Connect ();
+
+  if (isConnected)
+    {
+      Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+    }
+  else
+    {
+      NS_LOG_LOGIC ("Connect will retry again later.");
+      Simulator::Schedule (Seconds (0.5), &TcpStubClientApplication::Connect, this);
+    }
+
+  return isConnected;
 }
 
 void

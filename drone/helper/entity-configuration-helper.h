@@ -51,7 +51,8 @@ private:
 
   static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations (const rapidjson::Value& json);
   static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations (const JsonArray& json);
-  static const ModelConfiguration DecodeMobilityConfiguration (const rapidjson::Value& json);
+  static const MobilityModelConfiguration DecodeMobilityConfiguration (const rapidjson::Value& json);
+  static const std::optional<Vector> DecodeInitialPosition (const rapidjson::Value& json);
   static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
   static const ModelConfiguration DecodeMechanicsConfiguration (const rapidjson::Value& json);
   static const ModelConfiguration DecodeBatteryConfiguration (const rapidjson::Value& json);

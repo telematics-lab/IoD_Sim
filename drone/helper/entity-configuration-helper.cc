@@ -17,6 +17,8 @@
  */
 #include "entity-configuration-helper.h"
 
+#include <optional>
+
 #include <ns3/double.h>
 #include <ns3/integer.h>
 #include <ns3/object-factory.h>
@@ -190,13 +192,16 @@ EntityConfigurationHelper::DecodeLteBearerConfigurations (const JsonArray& jsonA
   return bearers;
 }
 
-const ModelConfiguration
+const MobilityModelConfiguration
 EntityConfigurationHelper::DecodeMobilityConfiguration (const rapidjson::Value& json)
 {
   NS_ASSERT_MSG (json.IsObject (),
                  "Entity mobility model configuration must be an object.");
 
-  return DecodeModelConfiguration (json);
+  const ModelConfiguration base = DecodeModelConfiguration (json);
+  const std::optional<Vector> initialPosition = DecodeInitialPosition (json);
+
+  return MobilityModelConfiguration (base.GetName (), base.GetAttributes (), initialPosition);
 }
 
 const std::vector<ModelConfiguration>
@@ -429,6 +434,23 @@ EntityConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jso
     }
 
   return ModelConfiguration (modelName, attributes);
+}
+
+const std::optional<Vector>
+EntityConfigurationHelper::DecodeInitialPosition (const rapidjson::Value& jsonModel)
+{
+  // Initial Position is optional as not all mobility models use it!
+  if (!(jsonModel.HasMember ("initialPosition")))
+    return std::nullopt;
+
+  NS_ASSERT_MSG (jsonModel["initialPosition"].IsArray (),
+                 "Mobility Model initialPosition must be an array of 3 coordinates.");
+
+  auto arr = jsonModel["initialPosition"].GetArray();
+  NS_ASSERT_MSG (arr.Size () != 3 || !arr[0].IsDouble () || !arr[1].IsDouble () || !arr[2].IsDouble (),
+                 "Mobility Model initialPosition must be an array of 3 coordinates.");
+
+  return Vector(arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ());
 }
 
 } // namespace ns3

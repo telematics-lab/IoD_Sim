@@ -210,7 +210,7 @@
       "id": "configFileGeneralPurpose",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/gp_tesi_1.json"
+      "default": "./src/drone/config/paper_3-wifi-staticGU-TCP.json"
     },
     {
       "id": "configFileLteBasic",

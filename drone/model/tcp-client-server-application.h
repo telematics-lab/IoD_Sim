@@ -38,7 +38,7 @@ protected:
   virtual void StartApplication ();
   virtual void StopApplication ();
   virtual void Listen ();
-  virtual void Connect ();
+  virtual bool Connect ();
   virtual void ReceivedDataCallback (Ptr<Socket> s);
 
   const Ipv4Address& GetAddress () const;

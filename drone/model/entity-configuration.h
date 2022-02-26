@@ -21,6 +21,7 @@
 #include <ns3/object.h>
 
 #include "model-configuration.h"
+#include "mobility-model-configuration.h"
 #include "netdevice-configuration.h"
 
 namespace ns3 {
@@ -32,17 +33,17 @@ class EntityConfiguration : public Object
 {
   public:
     EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         ModelConfiguration m_mobility,
+                         MobilityModelConfiguration m_mobility,
                          std::vector<ModelConfiguration> m_applications);
 
     EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         ModelConfiguration m_mobility,
+                         MobilityModelConfiguration m_mobility,
                          std::vector<ModelConfiguration> m_applications,
                          ModelConfiguration m_mechanics,
                          ModelConfiguration m_battery);
 
     EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         ModelConfiguration m_mobility,
+                         MobilityModelConfiguration m_mobility,
                          std::vector<ModelConfiguration> m_applications,
                          ModelConfiguration m_mechanics,
                          ModelConfiguration m_battery,
@@ -51,19 +52,19 @@ class EntityConfiguration : public Object
     ~EntityConfiguration ();
 
   const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices () const;
-  const ModelConfiguration& GetMobilityModel () const;
+  const MobilityModelConfiguration& GetMobilityModel () const;
   const std::vector<ModelConfiguration>& GetApplications () const;
   const ModelConfiguration& GetMechanics () const;
   const ModelConfiguration& GetBattery () const;
   const std::vector<ModelConfiguration>& GetPeripherals () const;
 
 private:
-  std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
-  ModelConfiguration m_mobility;
-  std::vector<ModelConfiguration> m_applications;
-  ModelConfiguration m_mechanics;
-  ModelConfiguration m_battery;
-  std::vector<ModelConfiguration> m_peripherals;
+  const std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
+  const MobilityModelConfiguration m_mobility;
+  const std::vector<ModelConfiguration> m_applications;
+  const ModelConfiguration m_mechanics;
+  const ModelConfiguration m_battery;
+  const std::vector<ModelConfiguration> m_peripherals;
 };
 
 } // namespace ns3

@@ -31,6 +31,8 @@ namespace ns3 {
 class ModelConfiguration
 {
 public:
+  typedef std::vector<std::pair<std::string, Ptr<AttributeValue>>> AttributeVector;
+
   /**
    * Create a new object instance.
    *
@@ -38,7 +40,7 @@ public:
    * \param attributes The list of attributes that configures the chosen model.
    */
   ModelConfiguration (const std::string name,
-                      const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes);
+                      const AttributeVector attributes);
 
   ModelConfiguration (){}
 

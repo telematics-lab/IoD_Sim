@@ -17,6 +17,8 @@
  */
 #include "mobility-factory-helper.h"
 
+#include <ns3/building-position-allocator.h>
+
 namespace ns3 {
 
 void
@@ -32,6 +34,11 @@ MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConf
       auto positionAllocator = CreateObject<ListPositionAllocator> ();
       Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes ()[0].second)->Get();
       positionAllocator->Add (initialPosition);
+      helper.SetPositionAllocator (positionAllocator);
+    }
+  else if (modelConf.GetName () == "ns3::RandomWalk2dOutdoorMobilityModel")
+    {
+      static auto positionAllocator = CreateObject<OutdoorPositionAllocator> ();
       helper.SetPositionAllocator (positionAllocator);
     }
   else

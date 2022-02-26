@@ -28,6 +28,8 @@
 #include <ns3/ipv4-static-routing-helper.h>
 #include <ns3/ipv4-routing-helper.h>
 #include <ns3/log.h>
+#include <ns3/lte-enb-net-device.h>
+#include <ns3/lte-ue-net-device.h>
 #include <ns3/mobility-helper.h>
 #include <ns3/object-factory.h>
 #include <ns3/net-device-container.h>
@@ -239,6 +241,14 @@ Scenario::ConfigurePhy ()
           wifiSim->GetWifiHelper ()->SetStandard (wifiConf->GetStandard ());
 
           wifiPhy->Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
+          wifiPhy->Set ("TxGain", DoubleValue (wifiConf->GetRxGain ())); // TODO: Add TxGain? Gain param? Transform WifiPhy as a model?
+          wifiPhy->Set ("TxPowerStart", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model!
+          wifiPhy->Set ("TxPowerEnd", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model! - Ref: https://afar.net/tutorials/fcc-rules/
+          wifiPhy->Set ("TxPowerEnd", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model!
+          wifiPhy->Set ("Antennas", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
+          wifiPhy->Set ("MaxSupportedTxSpatialStreams", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
+          wifiPhy->Set ("MaxSupportedRxSpatialStreams", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
+
           // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
           wifiPhy->SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
@@ -264,6 +274,10 @@ Scenario::ConfigurePhy ()
           lteHelper->SetSpectrumChannelType (spectrumConf.GetName ());
           for (auto& attr : spectrumConf.GetAttributes ())
             lteHelper->SetSpectrumChannelAttribute (attr.first, *(attr.second));
+
+          // lteHelper->SetAttribute ("UseCa", BooleanValue (true)); // TODO: Add as part of LteHelper model
+          // lteHelper->SetAttribute ("NumberOfComponentCarriers", UintegerValue (2)); // TODO: Add as part of LteHelper model - https://www.qualcomm.com/media/documents/files/carrier-aggregation-infographic.pdf
+          // lteHelper->SetAttribute ("EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager")); // TODO: Add as part of LteHelper model - https://www.qualcomm.com/media/documents/files/carrier-aggregation-infographic.pdf
 
           lteHelper->Initialize ();
 
@@ -439,8 +453,14 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
   NS_LOG_FUNCTION (entityKey << entityConf << entityId);
 
   MobilityHelper mobility;
-  const auto mobilityType = entityConf->GetMobilityModel ().GetName (); // Configure Entity Mobility
-  MobilityFactoryHelper::SetMobilityModel (mobility, entityConf->GetMobilityModel ());
+  const auto mobilityConf = entityConf->GetMobilityModel ();
+  const auto mobilityType = mobilityConf.GetName (); // Configure Entity Mobility
+  MobilityFactoryHelper::SetMobilityModel (mobility, mobilityConf);
+
+  // const auto initialPosition = mobilityConf.GetInitialPosition ();
+  // if (initialPosition)
+  
+
 
   if (entityKey == "drones")
     {
@@ -513,7 +533,10 @@ Scenario::ConfigureLteEnb (Ptr<Node> entityNode, const uint32_t netId)
   static std::vector<NodeContainer> backbonePerStack (m_protocolStacks[PHY_LAYER].size ());
   auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
 
-  LteSetupHelper::InstallSingleEnbDevice(ltePhy->GetLteHelper (), entityNode);
+  auto dev = StaticCast<LteEnbNetDevice, NetDevice>
+    (LteSetupHelper::InstallSingleEnbDevice(ltePhy->GetLteHelper (), entityNode));
+  dev->GetPhy ()->SetAttribute ("TxPower", DoubleValue (49.0)); // TODO: How can we place it on the JSON? - Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
+
   for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin (); eNB != backbonePerStack[netId].End (); eNB++)
     ltePhy->GetLteHelper ()->AddX2Interface (entityNode, *eNB);
   backbonePerStack[netId].Add (entityNode);
@@ -527,7 +550,9 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
   Ipv4StaticRoutingHelper routingHelper;
 
-  auto dev = LteSetupHelper::InstallSingleUeDevice (ltePhy->GetLteHelper (), entityNode);
+  auto dev = StaticCast<LteUeNetDevice, NetDevice>
+    (LteSetupHelper::InstallSingleUeDevice (ltePhy->GetLteHelper (), entityNode));
+  dev->GetPhy ()->SetAttribute ("TxPower", DoubleValue (24.0)); // TODO: How can we place it on the JSON? - Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
 
   // Install network layer in order to proceed with IPv4 LTE configuration
   InstallEntityIpv4 (entityNode, dev, netId);

@@ -20,7 +20,7 @@
 namespace ns3 {
 
 EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          ModelConfiguration mobility,
+                                          MobilityModelConfiguration mobility,
                                           std::vector<ModelConfiguration> applications) :
   m_netDevices {netDevices},
   m_mobility {mobility},
@@ -30,7 +30,7 @@ EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration
 }
 
 EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          ModelConfiguration mobility,
+                                          MobilityModelConfiguration mobility,
                                           std::vector<ModelConfiguration> applications,
                                           ModelConfiguration mechanics,
                                           ModelConfiguration battery) :
@@ -44,7 +44,7 @@ EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration
 }
 
 EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          ModelConfiguration mobility,
+                                          MobilityModelConfiguration mobility,
                                           std::vector<ModelConfiguration> applications,
                                           ModelConfiguration mechanics,
                                           ModelConfiguration battery,
@@ -70,7 +70,7 @@ EntityConfiguration::GetNetDevices () const
   return m_netDevices;
 }
 
-const ModelConfiguration&
+const MobilityModelConfiguration&
 EntityConfiguration::GetMobilityModel () const
 {
   return m_mobility;
