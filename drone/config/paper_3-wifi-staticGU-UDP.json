@@ -2,11 +2,23 @@
     "name": "paper_3-wifi-staticGU-UDP",
     "resultsPath": "../results/",
     "logOnFile": true,
-    "duration": 400,
+    "duration": 100,
     "staticNs3Config": [
         {
-            "name": "ns3::ArpCache::DeadTimeout",
-            "value": "+5.0s"
+            "name": "ns3::ConstantRateWifiManager::DataMode",
+            "value": "DsssRate1Mbps"
+        },
+        {
+            "name": "ns3::ConstantRateWifiManager::ControlMode",
+            "value": "DsssRate1Mbps"
+        },
+        {
+            "name": "ns3::WifiRemoteStationManager::FragmentationThreshold",
+            "value": "22000"
+        },
+        {
+            "name": "ns3::WifiRemoteStationManager::RtsCtsThreshold",
+            "value": "22000"
         }
     ],
     "world" : {
@@ -127,7 +139,7 @@
     "phyLayer": [
         {
             "type": "wifi",
-            "standard": "802.11ax-2.4GHz",
+            "standard": "802.11b",
             "rxGain": 6.0,
             "channel": {
                 "propagationDelayModel": {
@@ -142,7 +154,7 @@
         },
         {
             "type": "wifi",
-            "standard": "802.11ax-2.4GHz",
+            "standard": "802.11b",
             "rxGain": 6.0,
             "channel": {
                 "propagationDelayModel": {
@@ -157,7 +169,7 @@
         },
         {
             "type": "wifi",
-            "standard": "802.11ax-2.4GHz",
+            "standard": "802.11b",
             "rxGain": 6.0,
             "channel": {
                 "propagationDelayModel": {
@@ -195,7 +207,8 @@
                 //  - IdealWifiManager: https://www.nsnam.org/doxygen/classns3_1_1_ideal_wifi_manager.html#details
                 //  - MinstrelHtWifiManager: https://www.nsnam.org/doxygen/classns3_1_1_minstrel_ht_wifi_manager.html#details
                 //  - ThompsonSamplingWifiManager: https://www.nsnam.org/doxygen/classns3_1_1_thompson_sampling_wifi_manager.html#details
-                "name": "ns3::MinstrelHtWifiManager",
+                //"name": "ns3::MinstrelHtWifiManager",
+                "name": "ns3::ConstantRateWifiManager",
                 "attributes": []
             }
         },
@@ -203,7 +216,7 @@
             "type": "wifi",
             "ssid": "wifi-2",
             "remoteStationManager": {
-                "name": "ns3::MinstrelHtWifiManager",
+                "name": "ns3::ConstantRateWifiManager",
                 "attributes": []
             }
         },
@@ -211,7 +224,7 @@
             "type": "wifi",
             "ssid": "wifi-3",
             "remoteStationManager": {
-                "name": "ns3::MinstrelHtWifiManager",
+                "name": "ns3::ConstantRateWifiManager",
                 "attributes": []
             }
         },
