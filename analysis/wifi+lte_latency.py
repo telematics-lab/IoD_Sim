@@ -46,6 +46,10 @@ for fn in wifi_tx_trace_filenames:
 
   tx_traces.append(pd.DataFrame(pkts))
 
+
+for i in range(len(tx_traces)):
+  tx_traces[i] = tx_traces[i].groupby('sn').first()
+
 #%%
 pnat = {
     "7.0.0.2:1": "10.1.0.7",
@@ -77,32 +81,41 @@ internet_rx_trace_filename = 'internet-29-1.tr'
 
 rx_traces = []
 
-for k,v in pnat.items():
-  lte_ip, lte_port = k.split(':')
-  rex = re.compile(fr'r (?P<time>[0-9\.+]+).+{lte_ip}.+{lte_port} > 1337.+ns3::SeqTsHeader \(\(seq=(?P<sn>[0-9]+).+')
-  pkts = []
+rex = re.compile(r'r (?P<time>[0-9\.+]+).+7\.0\.0\.(?P<lte_host_id>[0-9]+).+(?P<lte_port>[0-9]+) > 1337.+ns3::SeqTsHeader \(\(seq=(?P<sn>[0-9]+).+')
+pkts = {}
 
-  with open(f'{base_results_dir}/{scenario_dir}/{internet_rx_trace_filename}', 'r') as f:
-    for l in f:
-      r = rex.match(l)
+# init pkts
+for v in pnat.values():
+  pkts[v] = []
 
-      if r is not None:
-        ## DEBUG
-        # print(r[0])
-        # print(r.groupdict())
-        # break
-        ##
-        pkts.append({k: float(v) for k,v in r.groupdict().items()})
+with open(f'{base_results_dir}/{scenario_dir}/{internet_rx_trace_filename}', 'r') as f:
+  for l in f:
+    r = rex.match(l)
 
-  rx_traces.append(pd.DataFrame(pkts))
+    if r is not None:
+      ## DEBUG
+      # print(r[0])
+      # print(r.groupdict())
+      # break
+      ##
+      g = r.groupdict()
+      host_addr = pnat[f'7.0.0.{g["lte_host_id"]}:{g["lte_port"]}']
+
+      pkt = {
+        'time': float(g['time']),
+        'sn': float(g['sn'])
+      }
+      pkts[host_addr].append(pkt)
+
+for k in sorted(pkts.keys()):
+  rx_traces.append(pd.DataFrame(pkts[k]))
 
 # %%
 latency = {}
 
 for i in range(len(tx_traces)):
-  txgp = tx_traces[i].groupby(['sn']).first()
-  lat = pd.merge(txgp, rx_traces[i], on='sn', how='outer')
-  latency[tx_traces[i]['ipaddr'][0]] = (lat['time_y'] - lat['time_x']) * 1e-3
+  lat = pd.merge(tx_traces[i], rx_traces[i], on='sn')
+  latency[tx_traces[i]['ipaddr'][0]] = (lat['time_y'] - lat['time_x']) * 1e3 # to milliseconds
 
 # %%
 fig = px.box(latency, labels=dict(value='Latency [ms]', variable='GU IP Address'))
