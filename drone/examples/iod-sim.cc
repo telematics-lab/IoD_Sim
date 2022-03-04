@@ -459,7 +459,7 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
 
   // const auto initialPosition = mobilityConf.GetInitialPosition ();
   // if (initialPosition)
-  
+
 
 
   if (entityKey == "drones")
@@ -529,7 +529,7 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
 void
 Scenario::ConfigureLteEnb (Ptr<Node> entityNode, const uint32_t netId)
 {
-  // NOTICE: no checks are made for backbone/netid combination that do not represent an LTE backbone!
+  // !NOTICE: no checks are made for backbone/netid combination that do not represent an LTE backbone!
   static std::vector<NodeContainer> backbonePerStack (m_protocolStacks[PHY_LAYER].size ());
   auto ltePhy = StaticCast<LtePhySimulationHelper, Object> (m_protocolStacks[PHY_LAYER][netId]);
 
@@ -558,7 +558,19 @@ Scenario::ConfigureLteUe (Ptr<Node> entityNode, const std::vector<LteBearerConfi
   InstallEntityIpv4 (entityNode, dev, netId);
   // Register UEs into network 7.0.0.0/8
   // unfortunately this is hardwired into EpcHelper implementation
-  ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
+
+  auto assignedIpAddrs = ltePhy->GetEpcHelper ()->AssignUeIpv4Address (NetDeviceContainer (dev));
+  for (auto assignedIpIter = assignedIpAddrs.Begin (); assignedIpIter != assignedIpAddrs.End (); assignedIpIter++)
+    {
+      NS_LOG_LOGIC ("Assigned IPv4 Address to UE with Node ID " << entityNode->GetId () << ":"
+                    << " Iface " << assignedIpIter->second);
+
+      for (uint32_t i = 0; i < assignedIpIter->first->GetNAddresses (assignedIpIter->second); i++)
+        {
+          NS_LOG_LOGIC (" Addr " << assignedIpIter->first->GetAddress (assignedIpIter->second, i));
+        }
+    }
+
   // create a static route for each UE to the SGW/PGW in order to communicate
   // with the internet
   auto nodeIpv4 = entityNode->GetObject<Ipv4> ();
