@@ -81,12 +81,10 @@ internet_rx_trace_filename = 'internet-29-1.tr'
 
 rx_traces = []
 
-rex = re.compile(r'r (?P<time>[0-9\.+]+).+7\.0\.0\.(?P<lte_host_id>[0-9]+).+(?P<lte_port>[0-9]+) > 1337.+ns3::SeqTsHeader \(\(seq=(?P<sn>[0-9]+).+')
-pkts = {}
-
-# init pkts
-for v in pnat.values():
-  pkts[v] = []
+rex = re.compile(r'r (?P<time>[0-9\.+]+).+7\.0\.0\.(?P<lte_host_id>[0-9]+).+'
+                 r'(?P<lte_port>[0-9]+) > 1337.+ns3::SeqTsHeader '
+                 r'\(\(seq=(?P<sn>[0-9]+).+')
+pkts = {k: [] for k in pnat.values()}
 
 with open(f'{base_results_dir}/{scenario_dir}/{internet_rx_trace_filename}', 'r') as f:
   for l in f:
