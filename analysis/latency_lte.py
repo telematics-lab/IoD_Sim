@@ -87,6 +87,23 @@ assert(tx_traces.keys() == rx_traces.keys())
 latency = {k: to_latency(tx_traces[k], rx_traces[k])
            for k in tx_traces.keys()}
 
+# %% Export to MATLAB
+lat2matlab = {
+  'NodeID': [],
+  'latency': []
+}
+
+nodeid = 1
+for k in latency.keys():
+  for v in latency[k]:
+    lat2matlab['NodeID'].append(nodeid)
+    lat2matlab['latency'].append(v)
+
+  nodeid += 1
+
+pd.DataFrame(lat2matlab).to_csv('./s3-latency_lte.csv')
+
+
 # %%
 fig = px.box(latency,
              labels=dict(value='Latency [s]', variable='GU IP Address'),
