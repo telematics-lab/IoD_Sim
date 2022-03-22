@@ -1,0 +1,14 @@
+name: Build IoD Sim
+on: [push]
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Install dependencies
+      run: sudo ./tools/install-rependencies.sh
+    - name: Integrate ns3 and IoD Sim
+      run: ./tools/prepare-ns3.sh
+    - name: Build IoD Sim
+      run: ./tools/compile.sh
