@@ -8,6 +8,7 @@ function install_debian_deps() {
     g++           \
     gdb           \
     gcc           \
+    git           \
     libgsl-dev    \
     libxml2-dev   \
     patch         \
@@ -21,6 +22,7 @@ function install_fedora_deps() {
     gdb               \
     gcc               \
     gcc-c++           \
+    git               \
     gsl-devel         \
     libxml2-devel     \
     patch             \
