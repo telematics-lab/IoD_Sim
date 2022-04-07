@@ -8,7 +8,9 @@ import plotly.express as px
 #%%
 base_results_dir = '../results/'
 scenario_name = 'paper_3-lte'
-scenario_dir = f'{scenario_name}-2022-03-03.20-38-18'
+scenario_datetime = '2022-03-15.16-53-33'
+internet_rx_trace_filename = 'internet-35-1.tr'
+scenario_dir = f'{scenario_name}-{scenario_datetime}'
 tx_trace_filename = 'paper_3-lte.log'
 
 lte_id2addr_offset = 2
@@ -48,7 +50,6 @@ for k in tx_traces.keys():
 
 
 #%%
-internet_rx_trace_filename = 'internet-37-1.tr'
 ip_addrs = [f'7.0.0.{i}' for i in range(lte_id2addr_offset, len(tx_traces.keys()) + 1)]
 
 rex = re.compile(r'r (?P<time>[0-9\.+]+).+7\.0\.0\.(?P<lte_host_id>[0-9]+).+'
@@ -106,7 +107,6 @@ pd.DataFrame(lat2matlab).to_csv('./s3-latency_lte.csv')
 
 # %%
 fig = px.box(latency,
-             labels=dict(value='Latency [s]', variable='GU IP Address'),
-             log_y=True)
+             labels=dict(value='Latency [s]', variable='GU IP Address'))
 fig.show()
 # %%
