@@ -1,5 +1,5 @@
 {
-    "name": "test_periphstream",
+    "name": "test_periphstream-wifi",
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 100,

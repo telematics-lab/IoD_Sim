@@ -1,5 +1,5 @@
 {
-    "name": "test_periphstream",
+    "name": "test_periphstream-lte",
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 20,
