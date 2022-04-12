@@ -93,7 +93,8 @@
         "ios": "cpp",
         "locale": "cpp",
         "numbers": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "*.json": "jsonc"
     },
     "git.ignoreLimitWarning": true,
     "git.ignoredRepositories": [
