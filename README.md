@@ -17,7 +17,7 @@ of drones that:
 * Exchange messages with network access points deployed on a generic and flat
   3D space.
 
-The [IoD_Sim](https://telematics.poliba.it/iod-sim) repository is where this
+The IoD_Sim repository is where this
 software is developed and there are many ways in which you can participate in
 the project, for example:
 * [Submit bugs and feature requests](issues) and help us verify as they are
@@ -34,6 +34,9 @@ to use [Docker](https://www.docker.com/),
 (pseudo)virtualization platform that can provide you a stable Linux-based work
 environment. You are welcome to provide new compatibility solutions any time.
 
+For more details, a dedicated publication that describes the entire simulation platform is available on [arXiv](https://arxiv.org/abs/2203.13710).
+
+Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrieco/IoD_Sim-airflow) is a Visual Programming Editor ad-hoc for IoD_Sim! It relies on [splash](https://github.com/GiovanniGrieco/IoD_Sim-splash) to transpile C++ models in Python visual blocks.
 
 ## Getting Started
 
