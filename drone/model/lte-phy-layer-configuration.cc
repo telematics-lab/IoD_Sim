@@ -22,9 +22,10 @@
 namespace ns3 {
 
 LtePhyLayerConfiguration::LtePhyLayerConfiguration(std::string phyType,
+                                                   std::vector<ModelConfiguration::Attribute> attributes,
                                                    ModelConfiguration channelPropagationLossModel,
                                                    ModelConfiguration channelSpectrumModel) :
-  PhyLayerConfiguration {phyType},
+  PhyLayerConfiguration {phyType, attributes},
   m_channelPropagationLossModel {channelPropagationLossModel},
   m_channelSpectrumModel {channelSpectrumModel}
 {

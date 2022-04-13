@@ -34,6 +34,7 @@
     "phyLayer": [
         {
             "type": "lte",
+            "attributes": [],
             "channel": {
                 "propagationLossModel": {
                     "name": "ns3::HybridBuildingsPropagationLossModel",

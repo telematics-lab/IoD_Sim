@@ -130,8 +130,12 @@
                     "name": "ns3::FriisPropagationLossModel"
                 }
             },
-            "mode": "OfdmRate6Mbps",
-            "rxGain": 0.0,
+            "attributes": [
+                {
+                    "name": "RxGain",
+                    "value": 0.0
+                }
+            ],
             "standard": "802.11n-5GHz",
             "type": "wifi"
         }

@@ -41,6 +41,8 @@ public:
 
 private:
   PhyLayerConfigurationHelper();
+  static const std::vector<ModelConfiguration::Attribute> DecodeModelAttributes (const TypeId& model, const rapidjson::Value::ConstArray& jAttrs);
+  static const ModelConfiguration::Attribute DecodeModelAttribute (const TypeId& model, const rapidjson::Value& jAttr);
   static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value& jsonModel);
 };
 

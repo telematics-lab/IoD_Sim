@@ -29,6 +29,8 @@
 #include <ns3/double-vector.h>
 #include <ns3/int-vector.h>
 
+#include "model-configuration-helper.h"
+
 namespace ns3 {
 
 Ptr<RemoteConfiguration>
@@ -74,148 +76,10 @@ RemoteConfigurationHelper::DecodeApplicationConfigurations (const rapidjson::Val
       NS_ASSERT_MSG (appl.IsObject (),
                     "Application model configuration must be an object.");
 
-      confs.push_back (DecodeModelConfiguration(appl));
+      confs.push_back (ModelConfigurationHelper::Get (appl));
     }
 
   return confs;
-}
-
-// TODO merge with other helpers
-const ModelConfiguration
-RemoteConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
-{
-  NS_ASSERT_MSG (jsonModel.HasMember ("name"),
-                 "Model configuration must have 'name' property.");
-  NS_ASSERT_MSG (jsonModel["name"].IsString (),
-                 "Model configuration 'name' property must be a string.");
-  NS_ASSERT_MSG (jsonModel.HasMember ("attributes"),
-            	   "Model configuration must have 'attributes' property.");
-  NS_ASSERT_MSG (jsonModel["attributes"].IsArray (),
-                  "Model configuration 'attributes' property must be an array.");
-
-  const std::string modelName = jsonModel["name"].GetString ();
-
-  TypeId modelTid = TypeId::LookupByName (modelName);
-  auto jsonAttributes = jsonModel["attributes"].GetArray ();
-  std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
-
-  for (auto& el : jsonAttributes)
-    {
-      NS_ASSERT_MSG (el.IsObject (),
-                    "Attribute model definition must be an object, got " << el.GetType ());
-      NS_ASSERT_MSG (el.HasMember ("name"),
-                    "Attribute model must have 'name' property.");
-      NS_ASSERT_MSG (el["name"].IsString (),
-                    "Attribute model name must be a string.");
-      NS_ASSERT_MSG (el.HasMember ("value"),
-                    "Attribute model must have 'value' property.");
-
-      const std::string attrName = el["name"].GetString();
-      TypeId::AttributeInformation attrInfo = {};
-
-      NS_ASSERT_MSG (modelTid.LookupAttributeByName (attrName, &attrInfo),
-                     "Attribute '" << attrName << "' for model '" << modelName << "' does not exist.");
-
-      const auto attrValueType = el["value"].GetType ();
-      Ptr<AttributeValue> attrValue;
-      switch (attrValueType)
-        {
-        case rapidjson::Type::kStringType:
-          {
-            const auto attrValueString = el["value"].GetString ();
-            attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
-          }
-          break;
-        case rapidjson::Type::kNumberType:
-          {
-            if (el["value"].IsInt ())
-              {
-                const int attrValueInt = el["value"].GetInt ();
-                attrValue = attrInfo.checker->CreateValidValue (IntegerValue (attrValueInt));
-
-                // maybe an unsigned integer?
-                if (attrValue == nullptr)
-                  {
-                    attrValue = attrInfo.checker->CreateValidValue (UintegerValue (attrValueInt));
-                  }
-              }
-            else if (el["value"].IsDouble ())
-              {
-                const double attrValueDouble = el["value"].GetDouble ();
-
-                if (attrInfo.checker->Check (DoubleValue (attrValueDouble)))
-                  attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
-                else if (attrInfo.checker->Check (TimeValue (Seconds (attrValueDouble))))
-                  attrValue = attrInfo.checker->CreateValidValue (TimeValue (Seconds (attrValueDouble)));
-                else
-                  NS_FATAL_ERROR ("Cannot read attribute " << attrName << " for model " << modelName);
-              }
-          }
-          break;
-        case rapidjson::Type::kArrayType:
-          {
-            const auto arr = el["value"].GetArray ();
-
-            if (arr.Size () == 3 && arr[0].IsDouble ())
-              {
-                const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
-                attrValue = attrInfo.checker->CreateValidValue (Vector3DValue (vec));
-              }
-            else if (attrName == "SpeedCoefficients" && arr[0].IsNumber ())
-              {
-                std::vector<double> coeffs;
-
-                for (auto& c : arr) {
-                  coeffs.push_back (c.GetDouble ());
-                }
-                attrValue = attrInfo.checker->CreateValidValue (DoubleVectorValue (coeffs));
-              }
-            else if (attrName == "FlightPlan" && arr[0].IsObject ())
-              {
-                FlightPlan fp {};
-
-                for (auto& p : arr)
-                  {
-                    NS_ASSERT_MSG (p.IsObject () &&
-                                   p.HasMember ("position") &&
-                                   p["position"].IsArray () &&
-                                   p["position"][0].IsDouble () &&
-                                   p.HasMember ("interest") &&
-                                   p["interest"].IsUint (),
-                                   "FlightPlan contains invalid points.");
-
-                    const Vector3D position { p["position"][0].GetDouble (),
-                                              p["position"][1].GetDouble (),
-                                              p["position"][2].GetDouble () };
-                    const double restTime = (p.HasMember ("restTime") && p["restTime"].IsDouble ())
-                                            ? p["restTime"].GetDouble ()
-                                            : 0;
-                    fp.Add (CreateObjectWithAttributes<ProtoPoint> ("Position", VectorValue (position),
-                                                                    "Interest", IntegerValue (p["interest"].GetUint ()),
-                                                                    "RestTime", TimeValue (Seconds (restTime))));
-                  }
-
-                attrValue = attrInfo.checker->CreateValidValue (FlightPlanValue (fp));
-              }
-            else
-              {
-                NS_FATAL_ERROR ("Unsupported attribute value type of " << attrName);
-              }
-          }
-          break;
-        case rapidjson::Type::kFalseType:
-        case rapidjson::Type::kTrueType:
-        case rapidjson::Type::kNullType:
-        case rapidjson::Type::kObjectType:
-        default:
-          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
-          break;
-        }
-
-      attributes.emplace_back(std::make_pair(attrName, attrValue));
-    }
-
-  return ModelConfiguration(modelName, attributes);
 }
 
 } // namespace ns3

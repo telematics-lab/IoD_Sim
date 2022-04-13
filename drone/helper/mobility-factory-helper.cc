@@ -32,7 +32,7 @@ MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConf
         return;
 
       auto positionAllocator = CreateObject<ListPositionAllocator> ();
-      Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes ()[0].second)->Get();
+      Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue> (modelConf.GetAttributes ()[0].value)->Get();
       positionAllocator->Add (initialPosition);
       helper.SetPositionAllocator (positionAllocator);
     }
@@ -44,7 +44,7 @@ MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConf
   else
     {
       for (auto& attr : modelConf.GetAttributes ())
-        helper.m_mobility.Set (attr.first, *attr.second);
+        helper.m_mobility.Set (attr.name, *attr.value);
     }
 }
 

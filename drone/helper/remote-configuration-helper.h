@@ -47,7 +47,6 @@ private:
 
   static const uint32_t DecodeNetworkLayerId (const rapidjson::Value& json);
   static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
-  static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value &json);
 };
 
 }

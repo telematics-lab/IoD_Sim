@@ -123,7 +123,32 @@
     {
         "type": "wifi",
         "standard": "802.11ax-2.4GHz",
-        "rxGain": 0.0,
+        "attributes": [
+          {
+            "name": "RxGain",
+            "value": 0.0
+          },
+          {
+            "name": "TxPowerStart",
+            "value": 30.0
+          },
+          {
+            "name": "TxPowerEnd",
+            "value": 30.0
+          },
+          {
+            "name": "Antennas",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedTxSpatialStreams",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedRxSpatialStreams",
+            "value": 4
+          }
+        ],
         "channel": {
             "propagationDelayModel": {
                 "name": "ns3::ConstantSpeedPropagationDelayModel",
@@ -143,7 +168,32 @@
     {
       "type": "wifi",
       "standard": "802.11ax-2.4GHz",
-      "rxGain": 0.0,
+      "attributes": [
+          {
+            "name": "RxGain",
+            "value": 0.0
+          },
+          {
+            "name": "TxPowerStart",
+            "value": 30.0
+          },
+          {
+            "name": "TxPowerEnd",
+            "value": 30.0
+          },
+          {
+            "name": "Antennas",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedTxSpatialStreams",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedRxSpatialStreams",
+            "value": 4
+          }
+      ],
       "channel": {
           "propagationDelayModel": {
               "name": "ns3::ConstantSpeedPropagationDelayModel",
@@ -163,7 +213,32 @@
     {
         "type": "wifi",
         "standard": "802.11ax-2.4GHz",
-        "rxGain": 0.0,
+        "attributes": [
+          {
+            "name": "RxGain",
+            "value": 0.0
+          },
+          {
+            "name": "TxPowerStart",
+            "value": 30.0
+          },
+          {
+            "name": "TxPowerEnd",
+            "value": 30.0
+          },
+          {
+            "name": "Antennas",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedTxSpatialStreams",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedRxSpatialStreams",
+            "value": 4
+          }
+        ],
         "channel": {
             "propagationDelayModel": {
                 "name": "ns3::ConstantSpeedPropagationDelayModel",
@@ -183,7 +258,32 @@
     {
         "type": "wifi",
         "standard": "802.11ax-2.4GHz",
-        "rxGain": 0.0,
+        "attributes": [
+          {
+            "name": "RxGain",
+            "value": 0.0
+          },
+          {
+            "name": "TxPowerStart",
+            "value": 30.0
+          },
+          {
+            "name": "TxPowerEnd",
+            "value": 30.0
+          },
+          {
+            "name": "Antennas",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedTxSpatialStreams",
+            "value": 4
+          },
+          {
+            "name": "MaxSupportedRxSpatialStreams",
+            "value": 4
+          }
+        ],
         "channel": {
             "propagationDelayModel": {
                 "name": "ns3::ConstantSpeedPropagationDelayModel",
@@ -202,6 +302,7 @@
     },
     {
         "type": "lte",
+        "attributes": [],
         "channel": {
             "propagationLossModel": {
                 "name": "ns3::HybridBuildingsPropagationLossModel",

@@ -26,7 +26,7 @@ WifiMacFactoryHelper::SetRemoteStationManager (WifiHelper& helper, const ModelCo
 
   factory.SetTypeId (modelConf.GetName ());
   for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.first, *attr.second);
+    factory.Set (attr.name, *attr.value);
 
   helper.m_stationManager = factory;
 }

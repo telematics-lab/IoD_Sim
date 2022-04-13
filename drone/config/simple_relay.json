@@ -21,6 +21,7 @@
     "phyLayer": [
         {
             "type": "lte",
+            "attributes": [],
             "channel": {
                 "propagationLossModel": {
                     "name": "ns3::HybridBuildingsPropagationLossModel",
@@ -48,8 +49,12 @@
         {
             "type": "wifi",
             "standard": "802.11n-2.4GHz",
-            "rxGain": 0.0,
-            "mode": "DsssRate1Mbps",
+            "attributes": [
+                {
+                    "name": "RxGain",
+                    "value": 0.0
+                }
+            ],
             "channel": {
                 "propagationDelayModel": {
                     "name": "ns3::ConstantSpeedPropagationDelayModel",

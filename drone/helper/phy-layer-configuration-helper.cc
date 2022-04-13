@@ -26,6 +26,8 @@
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/wifi-phy-layer-configuration.h>
 
+#include "model-configuration-helper.h"
+
 namespace ns3 {
 
 Ptr<PhyLayerConfiguration>
@@ -42,54 +44,61 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
   if (phyType == "wifi")
     {
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
-                    "PHY Layer definition must have 'standard' property.");
+                    "Wi-Fi PHY Layer definition must have 'standard' property.");
       NS_ASSERT_MSG (jsonPhyLayer["standard"].IsString (),
-                    "PHY Layer 'standard' property must be a string.");
-      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("rxGain"),
-                    "PHY Layer definition must have 'rxGain' property.");
-      NS_ASSERT_MSG (jsonPhyLayer["rxGain"].IsDouble (),
-                    "PHY Layer 'rxGain' property must be a double.");
+                    "Wi-Fi PHY Layer 'standard' property must be a string.");
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("attributes"),
+                    "Wi-Fi PHY Layer definition must have 'attributes' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["attributes"].IsArray (),
+                    "Wi-Fi PHY Layer 'attributes' must be an object.");
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
-                    "PHY Layer definition must have 'channel' property.");
+                    "Wi-Fi PHY Layer definition must have 'channel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
-                    "PHY Layer 'mode' property must be an object.");
+                    "Wi-Fi PHY Layer 'mode' property must be an object.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationDelayModel"),
-                    "PHY Layer channel definition must have 'propagationDelayModel' property.");
+                    "Wi-Fi PHY Layer channel definition must have 'propagationDelayModel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationDelayModel"].IsObject (),
-                    "PHY Layer channel 'propagationDelayModel' must be an object");
+                    "Wi-Fi PHY Layer channel 'propagationDelayModel' must be an object");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
-                    "PHY Layer channel definition must have 'propagationLossModel' property.");
+                    "Wi-Fi PHY Layer channel definition must have 'propagationLossModel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
-                    "PHY Layer channel 'propagationLossModel' must be an object");
+                    "Wi-Fi PHY Layer channel 'propagationLossModel' must be an object");
 
-      const auto propagationDelayModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationDelayModel"]);
-      const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
+      const auto phyAttributes = ModelConfigurationHelper::GetAttributes (TypeId::LookupByName ("ns3::WifiPhy"), jsonPhyLayer["attributes"].GetArray ());
+      const auto propagationDelayModel = ModelConfigurationHelper::Get (jsonPhyLayer["channel"]["propagationDelayModel"]);
+      const auto propagationLossModel = ModelConfigurationHelper::Get (jsonPhyLayer["channel"]["propagationLossModel"]);
 
       return Create<WifiPhyLayerConfiguration> (phyType,
                                                 jsonPhyLayer["standard"].GetString (),
-                                                jsonPhyLayer["rxGain"].GetDouble (),
+                                                phyAttributes,
                                                 propagationDelayModel,
                                                 propagationLossModel);
     }
   else if (phyType == "lte")
     {
+      NS_ASSERT_MSG (jsonPhyLayer.HasMember ("attributes"),
+                    "LTE PHY Layer definition must have 'attributes' property.");
+      NS_ASSERT_MSG (jsonPhyLayer["attributes"].IsArray (),
+                    "LTE PHY Layer 'attributes' must be an object.");
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("channel"),
-                    "PHY Layer definition must have 'channel' property.");
+                    "LTE PHY Layer definition must have 'channel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].IsObject (),
-                    "PHY Layer 'mode' property must be an object.");
+                    "LTE PHY Layer 'mode' property must be an object.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("propagationLossModel"),
-                    "PHY Layer channel definition must have 'propagationLossModel' property.");
+                    "LTE PHY Layer channel definition must have 'propagationLossModel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"]["propagationLossModel"].IsObject (),
-                    "PHY Layer channel 'propagationLossModel' must be an object");
+                    "LTE PHY Layer channel 'propagationLossModel' must be an object");
       NS_ASSERT_MSG (jsonPhyLayer["channel"].HasMember ("spectrumModel"),
-                    "PHY Layer channel definition must have 'spectrumModel' property.");
+                    "LTE PHY Layer channel definition must have 'spectrumModel' property.");
       NS_ASSERT_MSG (jsonPhyLayer["channel"]["spectrumModel"].IsObject (),
-                    "PHY Layer channel 'spectrumModel' must be an object");
+                    "LTE PHY Layer channel 'spectrumModel' must be an object");
 
-      const auto propagationLossModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["propagationLossModel"]);
-      const auto spectrumModel = DecodeModelConfiguration (jsonPhyLayer["channel"]["spectrumModel"]);
+      const auto phyAttributes = ModelConfigurationHelper::GetAttributes (TypeId::LookupByName ("ns3::LteHelper"), jsonPhyLayer["attributes"].GetArray ());
+      const auto propagationLossModel = ModelConfigurationHelper::Get (jsonPhyLayer["channel"]["propagationLossModel"]);
+      const auto spectrumModel = ModelConfigurationHelper::Get (jsonPhyLayer["channel"]["spectrumModel"]);
 
       return Create<LtePhyLayerConfiguration> (phyType,
+                                               phyAttributes,
                                                propagationLossModel,
                                                spectrumModel);
     }
@@ -102,71 +111,6 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
 PhyLayerConfigurationHelper::PhyLayerConfigurationHelper ()
 {
 
-}
-
-const ModelConfiguration
-PhyLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
-{
-  NS_ASSERT_MSG (jsonModel.HasMember ("name"),
-                 "Model configuration must have 'name' property.");
-  NS_ASSERT_MSG (jsonModel["name"].IsString (),
-                 "Model configuration 'name' property must be a string.");
-  NS_ASSERT_MSG (jsonModel.HasMember ("attributes"),
-            	   "Model configuration must have 'attributes' property.");
-  NS_ASSERT_MSG (jsonModel["attributes"].IsArray (),
-                  "Model configuration 'attributes' property must be an array.");
-
-  const std::string modelName = jsonModel["name"].GetString ();
-  TypeId modelTid = TypeId::LookupByName (modelName);
-  auto jsonAttributes = jsonModel["attributes"].GetArray ();
-  std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
-
-  for (auto& el : jsonAttributes)
-    {
-      NS_ASSERT_MSG (el.IsObject (),
-                    "Attribute model definition must be an object, got " << el.GetType ());
-      NS_ASSERT_MSG (el.HasMember ("name"),
-                    "Attribute model must have 'name' property.");
-      NS_ASSERT_MSG (el["name"].IsString (),
-                    "Attribute model name must be a string.");
-      NS_ASSERT_MSG (el.HasMember ("value"),
-                    "Attribute model must have 'value' property.");
-
-      const std::string attrName = el["name"].GetString();
-      TypeId::AttributeInformation attrInfo = {};
-
-      NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
-
-      const auto attrValueType = el["value"].GetType ();
-      Ptr<AttributeValue> attrValue;
-      switch (attrValueType)
-        {
-        case rapidjson::Type::kStringType:
-          {
-            const auto attrValueString = el["value"].GetString ();
-            attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
-          }
-          break;
-        case rapidjson::Type::kNumberType:
-          {
-            const auto attrValueDouble = el["value"].GetDouble ();
-            attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
-          }
-          break;
-        case rapidjson::Type::kArrayType:
-        case rapidjson::Type::kFalseType:
-        case rapidjson::Type::kTrueType:
-        case rapidjson::Type::kNullType:
-        case rapidjson::Type::kObjectType:
-        default:
-          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
-          break;
-        }
-
-      attributes.emplace_back(std::make_pair(attrName, attrValue));
-    }
-
-  return ModelConfiguration(modelName, attributes);
 }
 
 } // namespace ns3

@@ -19,6 +19,7 @@
 #define LTE_PHY_LAYER_CONFIGURATION_H
 
 #include <string>
+#include <vector>
 
 #include <ns3/wifi-phy.h>
 
@@ -41,6 +42,7 @@ public:
    * \param channelSpectrumModel The Spectrum Model type to be used.
    */
   LtePhyLayerConfiguration (std::string phyType,
+                            std::vector<ModelConfiguration::Attribute> attributes,
                             ModelConfiguration channelPropagationLossModel,
                             ModelConfiguration channelSpectrumModel);
   /** Default destructor */

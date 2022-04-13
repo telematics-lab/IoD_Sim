@@ -20,7 +20,7 @@
 namespace ns3 {
 
 ModelConfiguration::ModelConfiguration (const std::string name,
-                                        const std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes) :
+                                        const std::vector<Attribute> attributes) :
   m_name {name},
   m_attributes {attributes}
 {
@@ -38,7 +38,7 @@ ModelConfiguration::GetName () const
   return m_name;
 }
 
-const std::vector<std::pair<std::string, Ptr<AttributeValue>>>
+const std::vector<ModelConfiguration::Attribute>
 ModelConfiguration::GetAttributes () const
 {
   return m_attributes;

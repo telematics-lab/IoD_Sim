@@ -240,14 +240,8 @@ Scenario::ConfigurePhy ()
 
           wifiSim->GetWifiHelper ()->SetStandard (wifiConf->GetStandard ());
 
-          wifiPhy->Set ("RxGain", DoubleValue (wifiConf->GetRxGain ()));
-          wifiPhy->Set ("TxGain", DoubleValue (wifiConf->GetRxGain ())); // TODO: Add TxGain? Gain param? Transform WifiPhy as a model?
-          wifiPhy->Set ("TxPowerStart", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model!
-          wifiPhy->Set ("TxPowerEnd", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model! - Ref: https://afar.net/tutorials/fcc-rules/
-          wifiPhy->Set ("TxPowerEnd", DoubleValue (30.0)); // TODO: Don't add it as a standalone param, but as a model!
-          wifiPhy->Set ("Antennas", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
-          wifiPhy->Set ("MaxSupportedTxSpatialStreams", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
-          wifiPhy->Set ("MaxSupportedRxSpatialStreams", UintegerValue (4)); // TODO: Don't add it as a standalone param, but as a model!
+          for (auto& attr : wifiConf->GetAttributes ())
+            wifiPhy->Set (attr.name, *attr.value);
 
           // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
           wifiPhy->SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
@@ -268,16 +262,15 @@ Scenario::ConfigurePhy ()
           auto pathlossConf = lteConf->GetChannelPropagationLossModel ();
           lteHelper->SetAttribute ("PathlossModel", StringValue (pathlossConf.GetName ()));
           for (auto& attr : pathlossConf.GetAttributes ())
-            lteHelper->SetPathlossModelAttribute (attr.first, *(attr.second));
+            lteHelper->SetPathlossModelAttribute (attr.name, *attr.value);
 
           auto spectrumConf = lteConf->GetChannelSpectrumModel ();
           lteHelper->SetSpectrumChannelType (spectrumConf.GetName ());
           for (auto& attr : spectrumConf.GetAttributes ())
-            lteHelper->SetSpectrumChannelAttribute (attr.first, *(attr.second));
+            lteHelper->SetSpectrumChannelAttribute (attr.name, *attr.value);
 
-          // lteHelper->SetAttribute ("UseCa", BooleanValue (true)); // TODO: Add as part of LteHelper model
-          // lteHelper->SetAttribute ("NumberOfComponentCarriers", UintegerValue (2)); // TODO: Add as part of LteHelper model - https://www.qualcomm.com/media/documents/files/carrier-aggregation-infographic.pdf
-          // lteHelper->SetAttribute ("EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager")); // TODO: Add as part of LteHelper model - https://www.qualcomm.com/media/documents/files/carrier-aggregation-infographic.pdf
+          for (auto& attr : lteConf->GetAttributes ())
+            lteHelper->SetAttribute (attr.name, *attr.value);
 
           lteHelper->Initialize ();
 
@@ -496,8 +489,8 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
     wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName ());
   else if (wifiMacAttrs.size () == 1)
     wifiMac->GetMacHelper ().SetType (wifiNetDev->GetMacLayer ().GetName (),
-                                      wifiMacAttrs[0].first,
-                                      *wifiMacAttrs[0].second);
+                                      wifiMacAttrs[0].name,
+                                      *wifiMacAttrs[0].value);
 
   NetDeviceContainer devContainer = wifiPhy->GetWifiHelper ()->Install (*wifiPhy->GetWifiPhyHelper (),
                                                                         wifiMac->GetMacHelper (),
@@ -653,7 +646,7 @@ Scenario::ConfigureEntityApplications (const std::string& entityKey,
       ObjectFactory f {appConf.GetName ()};
 
       for (auto attr : appConf.GetAttributes ())
-        f.Set (attr.first, *attr.second);
+        f.Set (attr.name, *attr.value);
 
       auto app = StaticCast<Application, Object> (f.Create ());
 
@@ -674,7 +667,7 @@ Scenario::ConfigureEntityMechanics(const std::string& entityKey,
   NS_LOG_FUNCTION_NOARGS();
   const auto mechanics = entityConf->GetMechanics();
   for (auto attr : mechanics.GetAttributes ())
-      m_drones.Get(entityId)->SetAttribute (attr.first, *attr.second);
+      m_drones.Get(entityId)->SetAttribute (attr.name, *attr.value);
 }
 
 Ptr<EnergySource>
@@ -688,7 +681,7 @@ Scenario::ConfigureEntityBattery(const std::string& entityKey,
   batteryFactory.SetTypeId(entityConf->GetBattery().GetName());
 
   for (auto attr : battery.GetAttributes ())
-      batteryFactory.Set(attr.first, *attr.second);
+      batteryFactory.Set(attr.name, *attr.value);
   auto mountedBattery = batteryFactory.Create<EnergySource>();
 
   mountedBattery->SetNode(m_drones.Get(entityId));
@@ -708,7 +701,7 @@ Scenario::ConfigureEntityPeripherals (const std::string& entityKey,
     {
       dronePeripheralsContainer->Add(perConf.GetName());
       for (auto attr : perConf.GetAttributes ())
-          dronePeripheralsContainer->Set(attr.first, *attr.second);
+          dronePeripheralsContainer->Set(attr.name, *attr.value);
       auto peripheral = dronePeripheralsContainer->Create();
       for (uint32_t i = 0; i < (uint32_t) peripheral->GetNRoI (); i++)
       {
@@ -741,9 +734,7 @@ Scenario::ConfigureInternetRemotes ()
           ObjectFactory factory (appTid.GetName ());
 
           for (auto& appAttr : appConf.GetAttributes ())
-            {
-              factory.Set (appAttr.first, *appAttr.second);
-            }
+            factory.Set (appAttr.name, *appAttr.value);
 
           auto app = StaticCast<Application, Object> (factory.Create ());
           m_remoteNodes.Get (remoteId)->AddApplication (app);

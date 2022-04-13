@@ -19,8 +19,11 @@
 #define PHY_LAYER_CONFIGURATION_H
 
 #include <string>
+#include <vector>
 
 #include <ns3/object.h>
+
+#include "model-configuration.h"
 
 namespace ns3 {
 
@@ -36,7 +39,7 @@ public:
    *
    * \param type The type of the PHY Layer to be configured.
    */
-  PhyLayerConfiguration (std::string type);
+  PhyLayerConfiguration (std::string type, std::vector<ModelConfiguration::Attribute> attributes);
   /** Default destructor */
   virtual ~PhyLayerConfiguration ();
 
@@ -44,9 +47,14 @@ public:
    * \brief The type of the decoded PHY Layer
    */
   virtual const std::string GetType () const;
+  /**
+   * \brief The attributes of the decoded PHY Layer
+   */
+  virtual const std::vector<ModelConfiguration::Attribute> GetAttributes () const;
 
 private:
-  const std::string m_type; /// PHY Layer type
+  const std::string m_type;                  /// PHY Layer type
+  const std::vector<ModelConfiguration::Attribute> m_attributes; /// PHY Layer Attributes
 };
 
 } // ns3 namespace

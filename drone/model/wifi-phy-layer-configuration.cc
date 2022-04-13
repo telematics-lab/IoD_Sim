@@ -23,12 +23,11 @@ namespace ns3 {
 
 WifiPhyLayerConfiguration::WifiPhyLayerConfiguration(std::string phyType,
                                                      std::string standard,
-                                                     double rxGain,
+                                                     std::vector<ModelConfiguration::Attribute> attributes,
                                                      ModelConfiguration channelPropagationDelayModel,
                                                      ModelConfiguration channelPropagationLossModel) :
-  PhyLayerConfiguration {phyType},
+  PhyLayerConfiguration {phyType, attributes},
   m_standard {standard},
-  m_rxGain {rxGain},
   m_channelPropagationDelayModel {channelPropagationDelayModel},
   m_channelPropagationLossModel {channelPropagationLossModel}
 {
@@ -65,12 +64,6 @@ WifiPhyLayerConfiguration::GetStandard ()
     return WIFI_STANDARD_80211ax_6GHZ;
   else
     NS_FATAL_ERROR ("Cannot decode Wifi Standard: " << m_standard);
-}
-
-const double
-WifiPhyLayerConfiguration::GetRxGain ()
-{
-  return m_rxGain;
 }
 
 const ModelConfiguration

@@ -31,7 +31,17 @@ namespace ns3 {
 class ModelConfiguration
 {
 public:
-  typedef std::vector<std::pair<std::string, Ptr<AttributeValue>>> AttributeVector;
+  class Attribute
+  {
+  public:
+    const std::string name;
+    const Ptr<AttributeValue> value;
+
+    Attribute (std::string name, Ptr<AttributeValue> value) :
+      name {name},
+      value {value}
+    {}
+  };
 
   /**
    * Create a new object instance.
@@ -40,7 +50,7 @@ public:
    * \param attributes The list of attributes that configures the chosen model.
    */
   ModelConfiguration (const std::string name,
-                      const AttributeVector attributes);
+                      const std::vector<ModelConfiguration::Attribute> attributes);
 
   ModelConfiguration (){}
 
@@ -54,11 +64,11 @@ public:
   /**
    * \return The list of attributes as a std::pair of attribute name and its configured value.
    */
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetAttributes () const;
+  const std::vector<ModelConfiguration::Attribute> GetAttributes () const;
 
 private:
   const std::string m_name;
-  const std::vector<std::pair<std::string, Ptr<AttributeValue>>> m_attributes;
+  const std::vector<ModelConfiguration::Attribute> m_attributes;
 };
 
 } // namespace ns3

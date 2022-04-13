@@ -20,7 +20,7 @@
 namespace ns3 {
 
 MobilityModelConfiguration::MobilityModelConfiguration (const std::string name,
-                                                        const ModelConfiguration::AttributeVector attributes,
+                                                        const std::vector<ModelConfiguration::Attribute> attributes,
                                                         const std::optional<Vector> initialPosition) :
   ModelConfiguration (name, attributes),
   m_initialPosition {initialPosition}

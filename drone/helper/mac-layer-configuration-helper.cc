@@ -25,6 +25,8 @@
 
 #include <ns3/wifi-mac-layer-configuration.h>
 
+#include "model-configuration-helper.h"
+
 namespace ns3 {
 
 Ptr<MacLayerConfiguration>
@@ -47,7 +49,7 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
       NS_ASSERT_MSG (jsonMacLayer["remoteStationManager"].IsObject (),
                   "MAC Layer 'remoteStationManager' property must be an object.");
 
-      const auto remoteStationManagerConfiguration = DecodeModelConfiguration (jsonMacLayer["remoteStationManager"]);
+      const auto remoteStationManagerConfiguration = ModelConfigurationHelper::Get (jsonMacLayer["remoteStationManager"]);
 
       return Create<WifiMacLayerConfiguration> (macType,
                                                 jsonMacLayer["ssid"].GetString (),
@@ -66,72 +68,6 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
 MacLayerConfigurationHelper::MacLayerConfigurationHelper ()
 {
 
-}
-
-// TODO same code with PhyLayerConfigurationHelper!
-const ModelConfiguration
-MacLayerConfigurationHelper::DecodeModelConfiguration (const rapidjson::Value& jsonModel)
-{
-  NS_ASSERT_MSG (jsonModel.HasMember ("name"),
-                 "Model configuration must have 'name' property.");
-  NS_ASSERT_MSG (jsonModel["name"].IsString (),
-                 "Model configuration 'name' property must be a string.");
-  NS_ASSERT_MSG (jsonModel.HasMember ("attributes"),
-            	   "Model configuration must have 'attributes' property.");
-  NS_ASSERT_MSG (jsonModel["attributes"].IsArray (),
-                  "Model configuration 'attributes' property must be an array.");
-
-  const std::string modelName = jsonModel["name"].GetString ();
-  TypeId modelTid = TypeId::LookupByName (modelName);
-  auto jsonAttributes = jsonModel["attributes"].GetArray ();
-  std::vector<std::pair<std::string, Ptr<AttributeValue>>> attributes;
-
-  for (auto& el : jsonAttributes)
-    {
-      NS_ASSERT_MSG (el.IsObject (),
-                    "Attribute model definition must be an object, got " << el.GetType ());
-      NS_ASSERT_MSG (el.HasMember ("name"),
-                    "Attribute model must have 'name' property.");
-      NS_ASSERT_MSG (el["name"].IsString (),
-                    "Attribute model name must be a string.");
-      NS_ASSERT_MSG (el.HasMember ("value"),
-                    "Attribute model must have 'value' property.");
-
-      const std::string attrName = el["name"].GetString();
-      TypeId::AttributeInformation attrInfo = {};
-
-      NS_ASSERT (modelTid.LookupAttributeByName (attrName, &attrInfo));
-
-      const auto attrValueType = el["value"].GetType ();
-      Ptr<AttributeValue> attrValue;
-      switch (attrValueType)
-        {
-        case rapidjson::Type::kStringType:
-          {
-            const auto attrValueString = el["value"].GetString ();
-            attrValue = attrInfo.checker->CreateValidValue (StringValue (attrValueString));
-          }
-          break;
-        case rapidjson::Type::kNumberType:
-          {
-            const auto attrValueDouble = el["value"].GetDouble ();
-            attrValue = attrInfo.checker->CreateValidValue (DoubleValue (attrValueDouble));
-          }
-          break;
-        case rapidjson::Type::kArrayType:
-        case rapidjson::Type::kFalseType:
-        case rapidjson::Type::kTrueType:
-        case rapidjson::Type::kNullType:
-        case rapidjson::Type::kObjectType:
-        default:
-          NS_FATAL_ERROR ("Cannot determine attribute value type of " << attrName);
-          break;
-        }
-
-      attributes.emplace_back(std::make_pair(attrName, attrValue));
-    }
-
-  return ModelConfiguration(modelName, attributes);
 }
 
 } // namespace ns3

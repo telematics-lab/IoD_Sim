@@ -19,7 +19,12 @@
         {
             "type": "wifi",
             "standard": "802.11a",
-            "rxGain": 0.0,
+            "attributes": [
+                {
+                    "name": "RxGain",
+                    "value": 0.0
+                }
+            ],
             "channel": {
                 "propagationDelayModel": {
                     "name": "ns3::ConstantSpeedPropagationDelayModel",

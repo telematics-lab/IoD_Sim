@@ -26,7 +26,7 @@ WifiPhyFactoryHelper::SetPropagationDelay (YansWifiChannelHelper& channelHelper,
 
   factory.SetTypeId (modelConf.GetName ());
   for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.first, *attr.second);
+    factory.Set (attr.name, *attr.value);
 
   channelHelper.m_propagationDelay = factory;
 }
@@ -38,7 +38,7 @@ WifiPhyFactoryHelper::AddPropagationLoss (YansWifiChannelHelper& channelHelper, 
 
   factory.SetTypeId (modelConf.GetName ());
   for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.first, *attr.second);
+    factory.Set (attr.name, *attr.value);
 
   channelHelper.m_propagationLoss.push_back (factory);
 }

@@ -38,14 +38,14 @@ public:
    *
    * \param phyType The type of the PHY Layer to be configured. It should be "wifi".
    * \param standard The reference WiFi Standard.
-   * \param rxGain The receiver antenna gain in dBm.
+   * \param attributes Wi-Fi PHY Attributes.
    * \param mode The mode of WiFi PHY according to YANS.
    * \param channelPropagationDelayModel The Propagation Delay Model to be used for this Layer.
    * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
    */
   WifiPhyLayerConfiguration (std::string phyType,
                              std::string standard,
-                             double rxGain,
+                             std::vector<ModelConfiguration::Attribute> attributes,
                              ModelConfiguration channelPropagationDelayModel,
                              ModelConfiguration channelPropagationLossModel);
   /** Default destructor */
@@ -55,10 +55,6 @@ public:
    * \return The configured WiFi Standard.
    */
   const enum WifiStandard GetStandard ();
-  /**
-   * \return The configured Antenna Rx Gain.
-   */
-  const double GetRxGain ();
   /**
    * \return The Propagation Delay Model configuration.
    */
@@ -70,7 +66,6 @@ public:
 
 private:
   const std::string m_standard;
-  const double m_rxGain;
   const ModelConfiguration m_channelPropagationDelayModel;
   const ModelConfiguration m_channelPropagationLossModel;
 };

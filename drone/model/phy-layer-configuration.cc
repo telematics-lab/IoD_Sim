@@ -19,8 +19,9 @@
 
 namespace ns3 {
 
-PhyLayerConfiguration::PhyLayerConfiguration (std::string type) :
-  m_type {type}
+PhyLayerConfiguration::PhyLayerConfiguration (std::string type, std::vector<ModelConfiguration::Attribute> attributes) :
+  m_type {type},
+  m_attributes {attributes}
 {
 
 }
@@ -34,6 +35,12 @@ const std::string
 PhyLayerConfiguration::GetType () const
 {
   return m_type;
+}
+
+const std::vector<ModelConfiguration::Attribute>
+PhyLayerConfiguration::GetAttributes () const
+{
+  return m_attributes;
 }
 
 } // namespace ns3
