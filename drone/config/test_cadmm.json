@@ -36,7 +36,6 @@
             "type": "wifi",
             "standard": "802.11n-2.4GHz",
             "rxGain": 10.0,
-            "mode": "DsssRate1Mbps",
             "channel": {
                 "propagationDelayModel": {
                     "name": "ns3::ConstantSpeedPropagationDelayModel",
