@@ -49,7 +49,7 @@
     {
       "label": "Run IoD Sim",
       "type": "shell",
-      "command": "./waf --run \"iod-sim --config=${input:configFileGeneralPurpose}\"",
+      "command": "./waf --run \"iod-sim --config=${input:scenarioConfigurationFilepath}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -58,7 +58,7 @@
     {
       "label": "Profile IoD Sim",
       "type": "shell",
-      "command": "valgrind --tool=callgrind ${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug --config=${input:configFileGeneralPurpose}",
+      "command": "valgrind --tool=callgrind ${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug --config=${input:scenarioConfigurationFilepath}",
       "options": {
         "cwd": "${workspaceFolder}/ns3",
         "env": {
@@ -147,100 +147,10 @@
 
   "inputs": [
     {
-      "id": "numDrones",
-      "type": "promptString",
-      "description": "Number of drones to simulate",
-      "default": "1"
-    },
-    {
-      "id": "duration",
-      "type": "promptString",
-      "description": "Duration of this simulation, in seconds",
-      "default": "10"
-    },
-    {
-      "id": "scenario",
-      "type": "promptString",
-      "description": "Name of the scenario to run",
-      "default": "test-scenario"
-    },
-    {
-      "id": "opt_args",
-      "type": "promptString",
-      "description": "Optional arguments to pass to waf command",
-      "default": "--cwd=../results/"
-    },
-    {
-      "id": "opt_scenArgs",
-      "type": "promptString",
-      "description": "Optional arguments to pass to the scenario script",
-      "default": "--config=../drone/config/test.json"
-    },
-    {
-      "id": "opt_nextCmd",
-      "type": "promptString",
-      "description": "Optional next command (piping, output redirection, etc...)",
-      "default": "> ../results/`date +%y%m%d-%H%M`.out 2>&1"
-    },
-    {
-      "id": "configFileDaVinci",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/davinci.json"
-    },
-    {
-      "id": "configFileDaVinciDroneclass",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/davinci-droneclass.json"
-    },
-    {
-      "id": "configFileLte",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/lte-scenario.json"
-    },
-    {
-      "id": "configFileEasley",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/easley.json"
-    },
-    {
-      "id": "configFileGeneralPurpose",
+      "id": "scenarioConfigurationFilepath",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
       "default": "./src/drone/config/simple_wifi.json"
-    },
-    {
-      "id": "configFileLteBasic",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/LTE-basic.json"
-    },
-    {
-      "id": "configFileDroneScenario",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "proto"
-    },
-    {
-      "id": "nameDroneScenario",
-      "type": "promptString",
-      "description": "Name of the scenario",
-      "default": "DRONE_SCENARIO"
-    },
-    {
-      "id": "radioMapDroneScenario",
-      "type": "promptString",
-      "description": "Generate the Radio Environment Map",
-      "default": "false"
-    },
-    {
-      "id": "configFileDebug",
-      "type": "promptString",
-      "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/proto.json"
     }
   ]
 }
