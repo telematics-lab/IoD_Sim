@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/ns3/build/src/drone/examples/ns3.35-iod-sim-debug",
       "args": [
-        "--config=./src/drone/config/paper_3-wifi-staticGU-UDP.json"
+        "--config=./src/drone/config/simple_wifi.json"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/ns3/",
