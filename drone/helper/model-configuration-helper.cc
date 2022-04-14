@@ -18,6 +18,7 @@
 #include "model-configuration-helper.h"
 
 #include <ns3/assert.h>
+#include <ns3/boolean.h>
 #include <ns3/double.h>
 #include <ns3/double-vector.h>
 #include <ns3/fatal-error.h>
@@ -211,6 +212,11 @@ ModelConfigurationHelper::DecodeModelAttribute (const TypeId& model, const rapid
       break;
     case rapidjson::Type::kFalseType:
     case rapidjson::Type::kTrueType:
+      {
+        const auto attrValueBool = el["value"].GetBool ();
+        attrValue = attrInfo.checker->CreateValidValue (BooleanValue (attrValueBool));
+      }
+      break;
     case rapidjson::Type::kNullType:
     case rapidjson::Type::kObjectType:
     default:

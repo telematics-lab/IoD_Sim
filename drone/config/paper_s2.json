@@ -190,7 +190,7 @@
                         },
                         {
                             "name": "HasStorage",
-                            "value": "true"
+                            "value": true
                         }
                     ]
                 }
@@ -314,7 +314,7 @@
                         },
                         {
                             "name": "HasStorage",
-                            "value": "true"
+                            "value": true
                         }
                     ]
                 }
@@ -438,7 +438,7 @@
                         },
                         {
                             "name": "HasStorage",
-                            "value": "true"
+                            "value": true
                         }
                     ]
                 }
@@ -562,7 +562,7 @@
                         },
                         {
                             "name": "HasStorage",
-                            "value": "true"
+                            "value": true
                         }
                     ]
                 }
