@@ -107,7 +107,7 @@
                     {
                         "name": "FlightPlan",
                         "value": [{
-                                "position": [50.0, 50.0, 0.0],
+                                "position": [50.0, 50.0, 0.1],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
@@ -176,7 +176,7 @@
                                 "interest": 3
                             },
                             {
-                                "position": [50.0, 53.0, 0.0],
+                                "position": [50.0, 53.0, 0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -196,11 +196,11 @@
                         "value": 299.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "10.42.0.2"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 100
                     }
                 ]
@@ -293,11 +293,11 @@
                 "name": "ns3::ConstantPositionMobilityModel",
                 "attributes": [{
                     "name": "Position",
-                    "value": [60.0, 45.0, 0.0]
+                    "value": [60.0, 45.0, 0.1]
                 }]
             },
             "applications": [{
-                "name": "ns3::TcpStubServerApplication",
+                "name": "ns3::TcpEchoServerApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -322,6 +322,6 @@
         "InputPeripheral",
         "StoragePeripheral",
         "TcpStubClientApplication",
-        "TcpStubServerApplication"
+        "TcpEchoServerApplication"
     ]
 }

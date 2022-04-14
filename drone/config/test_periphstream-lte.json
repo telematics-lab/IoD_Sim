@@ -28,11 +28,11 @@
                     "attributes": [
                         {
                             "name": "ShadowSigmaExtWalls",
-                            "value": 0
+                            "value": 0.0
                         },
                         {
                             "name": "ShadowSigmaOutdoor",
-                            "value": 1
+                            "value": 1.0
                         },
                         {
                             "name": "ShadowSigmaIndoor",
@@ -95,7 +95,7 @@
                     {
                         "name": "FlightPlan",
                         "value": [{
-                                "position": [50.0, 50.0, 0.0],
+                                "position": [50.0, 50.0, 0.1],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
@@ -164,7 +164,7 @@
                                 "interest": 3
                             },
                             {
-                                "position": [50.0, 53.0, 0.0],
+                                "position": [50.0, 53.0, 0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -184,11 +184,11 @@
                         "value": 299.0
                     },
                     {
-                        "name": "RemoteAddress",
+                        "name": "Address",
                         "value": "200.0.0.1"
                     },
                     {
-                        "name": "MaxPayloadSize",
+                        "name": "PayloadSize",
                         "value": 1000
                     }
                 ]
@@ -289,7 +289,7 @@
                 "name": "ns3::ConstantPositionMobilityModel",
                 "attributes": [{
                     "name": "Position",
-                    "value": [60.0, 45.0, 0.0]
+                    "value": [60.0, 45.0, 0.1]
                 }]
             },
             "applications": []
@@ -300,7 +300,7 @@
         {
             "networkLayer": 0,
             "applications": [{
-                "name": "ns3::TcpStubServerApplication",
+                "name": "ns3::TcpEchoServerApplication",
                 "attributes": [
                     {
                         "name": "StartTime",
@@ -322,6 +322,6 @@
         "InputPeripheral",
         "StoragePeripheral",
         "TcpStubClientApplication",
-        "TcpStubServerApplication"
+        "TcpEchoServerApplication"
     ]
 }

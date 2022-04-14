@@ -41,11 +41,11 @@
                     "attributes": [
                         {
                             "name": "ShadowSigmaExtWalls",
-                            "value": 0
+                            "value": 0.0
                         },
                         {
                             "name": "ShadowSigmaOutdoor",
-                            "value": 1
+                            "value": 1.0
                         },
                         {
                             "name": "ShadowSigmaIndoor",

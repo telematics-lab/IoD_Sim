@@ -33,11 +33,11 @@
                     "attributes": [
                         {
                             "name": "ShadowSigmaExtWalls",
-                            "value": 0
+                            "value": 0.0
                         },
                         {
                             "name": "ShadowSigmaOutdoor",
-                            "value": 1
+                            "value": 1.0
                         },
                         {
                             "name": "ShadowSigmaIndoor",
@@ -100,7 +100,7 @@
                     {
                         "name": "FlightPlan",
                         "value": [{
-                                "position": [50.0, 50.0, 0.0],
+                                "position": [50.0, 50.0, 0.1],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
@@ -141,7 +141,7 @@
                                 "interest": 2
                             },
                             {
-                                "position": [50.0, 45.0, 0.0],
+                                "position": [50.0, 45.0, 0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -251,7 +251,7 @@
                         "name": "FlightPlan",
                         "value": [
                             {
-                                "position": [50.0,65.0,0.0],
+                                "position": [50.0,65.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             },
@@ -288,7 +288,7 @@
                                 "interest": 4
                             },
                             {
-                                "position": [50.0,70.0,0.0],
+                                "position": [50.0,70.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -398,7 +398,7 @@
                         "name": "FlightPlan",
                         "value": [
                             {
-                                "position": [65.0,75.0,0.0],
+                                "position": [65.0,75.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             },
@@ -459,7 +459,7 @@
                                 "interest": 5
                             },
                             {
-                                "position": [73.0,67.0,0.0],
+                                "position": [73.0,67.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -569,7 +569,7 @@
                         "name": "FlightPlan",
                         "value": [
                             {
-                                "position": [80.0,75.0,0.0],
+                                "position": [80.0,75.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             },
@@ -618,7 +618,7 @@
                                 "interest": 3
                             },
                             {
-                                "position": [85.0,55.0,0.0],
+                                "position": [85.0,55.0,0.1],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -724,7 +724,7 @@
                 "name": "ns3::ConstantPositionMobilityModel",
                 "attributes": [{
                     "name": "Position",
-                    "value": [0.0, 60.0, 0.0]
+                    "value": [0.0, 60.0, 0.1]
                 }]
             },
             "applications": []

@@ -35,7 +35,12 @@
         {
             "type": "wifi",
             "standard": "802.11n-2.4GHz",
-            "rxGain": 10.0,
+            "attributes": [
+                {
+                    "name": "RxGain",
+                    "value": 10.0
+                }
+            ],
             "channel": {
                 "propagationDelayModel": {
                     "name": "ns3::ConstantSpeedPropagationDelayModel",
@@ -232,8 +237,6 @@
         "RandomUdpApplication",
         "DroneClientApplication",
         "DroneServerApplication",
-        "TcpStubClientApplication",
-        "TcpStubServerApplication",
         "ConstantAccelerationFlight",
         "Curve"
     ]
