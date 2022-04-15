@@ -3,7 +3,6 @@ A preview of a given simulation configuration in terms of drone trajectories and
 ZSPs position.
 """
 import jstyleson
-import re
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -91,10 +90,13 @@ def parse_positions(jd):
     zsp_positions = []
 
     for zsp in zsps:
-        # check for defined ZSPs position (paper_simple.json need this check)
-        if len(zsp['mobilityModel']['attributes']) > 0 :
-            zsp_positions.append(Point(zsp['mobilityModel']['attributes'][0]['value'])) #Actually ZSPs mobilityModel contains always only one attributes (Position)
+        mobilityModel=zsp['mobilityModel']['attributes']
+        if len(mobilityModel) > 0 :
+            for attributes in mobilityModel:
+                if attributes['name'] == 'Position':
+                    zsp_positions.append(Point(attributes['value']))
         else:
+            #support for not defined ZSPs Position
             zsp_positions.append(Point([0.0, 0.0, 0.0]))
 
     # get drones positions
@@ -245,16 +247,14 @@ def main():
     build_zsp_space(ax, zsps)
 
     trajectories = []
-    i=0
-    for drone in drones:
+    for i, drone in enumerate(drones):
         trajectories.append(build_drone_trajectory(drone, step[i]))
-        i += 1
     build_drone_space(ax, trajectories)
 
     ax.legend()
     if args.pdf:
         #For environment without graphic interface (Output is a .pdf file):
-        plt.savefig(re.sub('.json','.pdf',args.input_file))
+        plt.savefig(args.input_file.replace('.json','.pdf'))
     else:
         #For environment with graphic interface:
         plt.show()
