@@ -2,13 +2,19 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Integrate IoD Sim with ns3",
+      "label": "1-Install dependencies",
+      "type": "shell",
+      "command": "./tools/install-dependencies.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "2-Integrate IoD Sim with ns3",
       "type": "shell",
       "command": "./tools/prepare-ns3.sh",
       "problemMatcher": []
     },
     {
-      "label": "configure",
+      "label": "3-Configure IoD Sim",
       "type": "shell",
       "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone",
       "options": {
@@ -18,7 +24,7 @@
       "problemMatcher": []
     },
     {
-      "label": "build",
+      "label": "4-Build IoD Sim",
       "type": "shell",
       "command": "./waf build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {

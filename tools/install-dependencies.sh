@@ -31,18 +31,13 @@ function install_fedora_deps() {
     rapidjson-devel
 }
 
-case "$ID" in
-  debian)
-    install_debian_deps
-    ;;
-  ubuntu)
-    install_debian_deps
-    ;;
-  fedora)
-    install_fedora_deps
-    ;;
-  *)
-    echo "${NAME} is not supported by this script. Please, install IoD Sim dependencies manually by following the official guide."
-    exit 1
-    ;;
-esac
+if [ ! -z "$(which dnf)" ]
+then
+install_fedora_deps
+elif [ ! -z "$(which apt)" ]
+then
+install_debian_deps
+else
+echo "${NAME} is not supported by this script. Please, install IoD Sim dependencies manually by following the official guide."
+exit 1
+fi
