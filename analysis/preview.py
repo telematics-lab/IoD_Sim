@@ -2,7 +2,8 @@
 A preview of a given simulation configuration in terms of drone trajectories and
 ZSPs position.
 """
-import json
+import jstyleson
+import re
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -49,6 +50,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Preview a given simulation '
                                      'in terms of drone trajectories and ZSPs '
                                      'position.')
+    parser.add_argument('--pdf', help='Plot the figure in a pdf file'
+                        '(default: display the plot on a GUI)', action="store_true")
 
     parser.add_argument('input_file', type=str,
                         help='IoD Sim Scenario Configuration.')
@@ -67,7 +70,7 @@ def get_configuration(filepath):
         A dictionary containing decoded JSON data.
     """
     with open(filepath, 'r') as f:
-        jdoc = json.load(f)
+        jdoc = jstyleson.loads(f.read())
 
     return jdoc
 
@@ -81,28 +84,41 @@ def parse_positions(jd):
         jd: JSON Document that describes the scenario to be simulated.
 
     Returns:
-        A tuple containing ZSP and Drones positions, respectively.
+        Three arrays containing ZSP positions, Drones positions and Drone trajectories curve step.
     """
     # ZSPs are the easiest
     zsps = jd['ZSPs']
-
     zsp_positions = []
+
     for zsp in zsps:
-        zsp_positions.append(Point(zsp['position']))
+        # check for defined ZSPs position (paper_simple.json need this check)
+        if len(zsp['mobilityModel']['attributes']) > 0 :
+            zsp_positions.append(Point(zsp['mobilityModel']['attributes'][0]['value'])) #Actually ZSPs mobilityModel contains always only one attributes (Position)
+        else:
+            zsp_positions.append(Point([0.0, 0.0, 0.0]))
 
     # get drones positions
     drones = jd['drones']
 
     drones_trajectories = []
+    drones_curvestep = []
+    flag = 0
     for drone in drones:
+        mobilityModel=drone['mobilityModel']['attributes']
         trajectory = []
+        for attributes in mobilityModel:
+            if attributes['name'] == 'FlightPlan':
+                for point in attributes['value']:
+                    trajectory.append(Point(point['position'], point['interest']))
+                drones_trajectories.append(trajectory)
+            if attributes['name'] == 'CurveStep':
+                flag = 1
+                drones_curvestep.append(attributes['value'])
+        # Support for not defined CurveStep
+        if flag != 1:
+            drones_curvestep.append(0.01)
 
-        for p in drone['trajectory']:
-            trajectory.append(Point(p['position'], p['interest']))
-
-        drones_trajectories.append(trajectory)
-
-    return zsp_positions, drones_trajectories
+    return zsp_positions, drones_trajectories, drones_curvestep
 
 
 def build_zsp_space(ax, zsps):
@@ -223,19 +239,25 @@ def main():
     args = parse_args()
     jdoc = get_configuration(args.input_file)
 
-    zsps, drones = parse_positions(jdoc)
+    zsps, drones, step = parse_positions(jdoc)
 
     ax = setup_3dplot()
     build_zsp_space(ax, zsps)
 
     trajectories = []
+    i=0
     for drone in drones:
-        trajectories.append(build_drone_trajectory(drone))
+        trajectories.append(build_drone_trajectory(drone, step[i]))
+        i += 1
     build_drone_space(ax, trajectories)
 
     ax.legend()
-    plt.show()
-
+    if args.pdf:
+        #For environment without graphic interface (Output is a .pdf file):
+        plt.savefig(re.sub('.json','.pdf',args.input_file))
+    else:
+        #For environment with graphic interface:
+        plt.show()
 
 if __name__ == '__main__':
     main()

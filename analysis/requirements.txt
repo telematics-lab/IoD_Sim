@@ -1,0 +1,3 @@
+jstyleson
+numpy
+matplotlib
