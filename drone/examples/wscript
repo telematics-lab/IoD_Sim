@@ -2,5 +2,5 @@ def build(bld):
     obj = bld.create_ns3_program('iod-sim',
                                  ['drone', 'core', 'network',
                                   'applications', 'mobility', 'wifi',
-                                  'internet'])
+                                  'internet', 'report-ts'])
     obj.source = 'iod-sim.cc'

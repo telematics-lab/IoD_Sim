@@ -16,7 +16,7 @@
     {
       "label": "3-Configure IoD Sim",
       "type": "shell",
-      "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone",
+      "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone,report,report-ts",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -57,7 +57,14 @@
       "type": "shell",
       "command": "./waf --run \"iod-sim --config=${input:scenarioConfigurationFilepath}\"",
       "options": {
-        "cwd": "${workspaceFolder}/ns3"
+        "cwd": "${workspaceFolder}/ns3",
+        "env": {
+          "PGHOST": "localhost",
+          "PGPORT": "5432",
+          "PGDATABASE": "postgres",
+          "PGUSER": "postgres",
+          "PGPASSWORD": "iodsimrocks"
+        }
       },
       "group": "test"
     },

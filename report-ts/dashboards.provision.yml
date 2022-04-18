@@ -1,0 +1,10 @@
+# Provision of dashboards/ for Grafana
+apiVersion: 1
+
+providers:
+- name: dashboards
+  type: file
+  updateIntervalSeconds: 30
+  options:
+    path: /var/lib/grafana/dashboards
+    folderFromFilesStructure: true

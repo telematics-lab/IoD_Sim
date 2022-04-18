@@ -39,6 +39,8 @@
 #include <ns3/string.h>
 // IoD Sim Report Module
 #include <ns3/report.h>
+// IoD Sim Report-Ts Module
+#include <ns3/report-ts.h>
 // IoD Sim Components
 #include <ns3/drone-client-application.h>
 #include <ns3/drone-container.h>
@@ -147,6 +149,9 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 Scenario::Scenario (int argc, char **argv)
 {
   CONFIGURATOR->Initialize (argc, argv);
+
+  ReportTs::Get ()->Initialize ();
+
   m_drones.Create (CONFIGURATOR->GetDronesN ());
   m_zsps.Create (CONFIGURATOR->GetZspsN ());
   m_remoteNodes.Create(CONFIGURATOR->GetRemotesN ());

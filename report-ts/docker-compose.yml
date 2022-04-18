@@ -1,0 +1,27 @@
+version: "3.3"
+
+services:
+  tsdb:
+    # Check libpqxx supported version of PostgreSQL before bumping image release
+    image: docker.io/timescale/timescaledb:latest-pg13
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: iodsimrocks
+    volumes:
+    - db-data:/var/lib/postgresql/data
+    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  grafana:
+    image: docker.io/grafana/grafana-oss:8.4.6
+    ports:
+    - 3000:3000
+    environment:
+      GF_INSTALL_PLUGINS: ae3e-plotly-panel
+    volumes:
+    - ./dashboards:/var/lib/grafana/dashboards
+    - ./dashboards.provision.yml:/etc/grafana/provisioning/dashboards/dashboards.provision.yml
+    - ./datasources.provision.yml:/etc/grafana/provisioning/datasources/datasources.provision.yml
+
+volumes:
+  db-data:

@@ -1,0 +1,124 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "iteration": 1650278671867,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "config": "",
+        "data": "",
+        "layout": "",
+        "onclick": "console.log(data)\nwindow.updateVariables({query:{'var-project':'test'}, partial: true})",
+        "script": "console.log(data)\n\nfunction unique(value, index, self) {\n  return self.indexOf(value) === index\n}\n\nlet droneIds = data.series[0].fields[1].values.buffer\nlet drones = droneIds.filter(unique)\nlet nDrones = drones.length\nvar drones_pos_x = []\nvar drones_pos_y = []\nvar drones_pos_z = []\n\nfor (var i = 0; i < nDrones; i++) {\n  let droneId = drones[i];\n  var pos_x = []\n  var pos_y = []\n  var pos_z = []\n\n  for (var j = 0; j < droneIds.length; j++) {\n    if (droneIds[j] == droneId) {\n      pos_x.push(data.series[0].fields[2].values.buffer[j])\n      pos_y.push(data.series[0].fields[3].values.buffer[j])\n      pos_z.push(data.series[0].fields[4].values.buffer[j])\n    }\n  }\n\n  drones_pos_x.push(pos_x)\n  drones_pos_y.push(pos_y)\n  drones_pos_z.push(pos_z)\n}\n\nvar traces = []\nfor (var i = 0; i < nDrones; i++) {\n  traces.push({\n    x: drones_pos_x[i],\n    y: drones_pos_y[i],\n    z: drones_pos_z[i],\n    type: 'scatter3d',\n    mode: 'lines',\n    name: `Drone #${drones[i]}`,\n    opacity: 1,\n    line: {\n      width: 6,\n    }\n  })\n}\n\nreturn {data:traces,layout:{title:'Drone Trajectory'}};\n"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "U0rlR3U7z"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  time_real AS \"time\",\n  drone_id,\n  pos_x AS \"x\",\n  pos_y AS \"y\",\n  pos_z AS \"z\"\nFROM drones_position\nWHERE drone_id IN ($droneId)\nORDER BY time_real",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "time_sim"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "drones_position",
+          "timeColumn": "time_real",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Drone Trajectory",
+      "type": "ae3e-plotly-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 35,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "SELECT drone_id FROM drones_position",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "definition": "SELECT drone_id FROM drones_position ORDER BY drone_id;",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Drone #",
+        "multi": true,
+        "name": "droneId",
+        "options": [],
+        "query": "SELECT drone_id FROM drones_position ORDER BY drone_id;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "IoD Sim",
+  "uid": "rwHh7qU7z",
+  "version": 1,
+  "weekStart": ""
+}
