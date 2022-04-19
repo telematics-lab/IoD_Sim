@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source /etc/os-release
+if [ -z "$ID" ]; then
+  source /etc/os-release
+fi
 
 function install_debian_deps() {
   sudo apt update \
@@ -32,10 +34,7 @@ function install_fedora_deps() {
 }
 
 case "$ID" in
-  debian)
-    install_debian_deps
-    ;;
-  ubuntu)
+  debian | ubuntu)
     install_debian_deps
     ;;
   fedora)
