@@ -21,7 +21,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1650452010465,
+  "iteration": 1650533233739,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -80,7 +80,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  id,\n  name,\n  time_start,\n  time_end\nFROM scenario_executions\nWHERE\n  $__timeFilter(time_start)\n  AND time_end IS NOT NULL\nORDER BY time_start",
+          "rawSql": "SELECT\n  id,\n  name,\n  time_start,\n  time_end\nFROM scenario_executions\nWHERE\n  $__timeFilter(time_start)\n  AND time_end IS NOT NULL\nORDER BY time_start DESC",
           "refId": "A",
           "select": [
             [
@@ -104,7 +104,7 @@
           ]
         }
       ],
-      "title": "Panel Title",
+      "title": "Scenario Executions",
       "type": "table"
     },
     {
@@ -172,13 +172,13 @@
           "text": "fc5457aa-1244-4f91-8b51-f6df78f10931",
           "value": "fc5457aa-1244-4f91-8b51-f6df78f10931"
         },
-        "definition": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start;",
+        "definition": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start DESC;",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "scenarioId",
         "options": [],
-        "query": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start;",
+        "query": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start DESC;",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -222,6 +222,6 @@
   "timezone": "",
   "title": "IoD Sim",
   "uid": "rwHh7qU7z",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
