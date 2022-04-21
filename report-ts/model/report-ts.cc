@@ -20,6 +20,7 @@
 #include <ns3/config.h>
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
+#include <ns3/scenario-configuration-helper.h>
 #include <ns3/simulator.h>
 
 namespace ns3 {
@@ -36,6 +37,7 @@ ReportTs::Initialize ()
    *  In this way we don't pollute drone module with report-ts decoders.
   */
 
+  Simulator::ScheduleNow (&ReportTs::SimulationStarted, this);
   Simulator::ScheduleNow (&ReportTs::Probe, this);
   Simulator::ScheduleNow (&ReportTs::InitTraces, this);
 }
@@ -43,6 +45,17 @@ ReportTs::Initialize ()
 ReportTs::~ReportTs ()
 {
   NS_LOG_FUNCTION (this);
+
+  DbNotifyScenarioEnded (m_scenarioUid);
+}
+
+void
+ReportTs::SimulationStarted ()
+{
+  NS_LOG_FUNCTION (this);
+
+  const auto scenarioName = CONFIGURATOR->GetName ();
+  m_scenarioUid = DbRegisterScenarioExecution (scenarioName);
 }
 
 void
@@ -94,7 +107,7 @@ ReportTs::TraceDrones (Ptr<const MobilityModel> m)
   auto vel = m->GetVelocity ();
 
   NS_LOG_DEBUG ("Drone PosLine: " << time << " | " << droneId << " | " << pos << " | " << vel);
-  DbInsert (time, droneId, pos, vel);
+  DbInsertDroneLocation (time, droneId, pos, vel);
 }
 
 Ptr<const Drone>
@@ -115,27 +128,80 @@ ReportTs::GetReferenceDrone (Ptr<const Object> aggregate)
   NS_FATAL_ERROR ("Cannot find ns3::Drone aggregated to " << aggregate);
 }
 
-void
-ReportTs::DbInsert (const double time_sim, const uint32_t droneId, const Vector3D position, const Vector3D velocity)
+const std::string
+ReportTs::DbRegisterScenarioExecution (const std::string name)
 {
+  NS_LOG_FUNCTION (this << name);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream insertQuery;
+
+      insertQuery << "INSERT INTO scenario_executions"
+                  << " (name) VALUES ('" << name << "')"
+                  << " RETURNING (id)";
+      const auto res = w.exec (insertQuery, "Register new scenario execution");
+      w.commit ();
+
+      NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
+      NS_ASSERT (res.affected_rows () == 1);
+
+      const std::string uid {res[0][0].view ()};
+      NS_LOG_INFO ("Scenario UID: " << uid);
+      return uid;
+    }
+  catch (std::exception const &e)
+    {
+      NS_FATAL_ERROR ("An error occurred during the registration of new scenario execution.");
+    }
+}
+
+void
+ReportTs::DbNotifyScenarioEnded (const std::string uid)
+{
+  NS_LOG_FUNCTION (this << uid);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream sqlQuery;
+
+      sqlQuery << "UPDATE scenario_executions"
+               << " SET time_end = CURRENT_TIMESTAMP"
+               << " WHERE id = '" << uid << "'";
+      const auto res = w.exec (sqlQuery, "Notify scenario ended");
+      w.commit ();
+
+      NS_LOG_DEBUG ("UPDATEd " << res.affected_rows () << " row(s).");
+    }
+  catch (std::exception const &e)
+    {
+      NS_LOG_ERROR ("An error occurred during the notification of scenario ended: " << e.what());
+    }
+}
+
+void
+ReportTs::DbInsertDroneLocation (const double timeSim, const uint32_t droneId, const Vector3D position, const Vector3D velocity)
+{
+  NS_LOG_FUNCTION (this << timeSim << droneId << position << velocity);
   try
     {
       pqxx::work w {m_conn};
       std::stringstream insertQuery;
 
       insertQuery << "INSERT INTO drones_position"
-                  << " (time_sim, drone_id, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z)"
+                  << " (scenario_id, time_sim, drone_id, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z)"
                   << " VALUES"
-                  << " (" << time_sim << ","
-                          << droneId << ","
-                          << position.x << ","
-                          << position.y << ","
-                          << position.z << ","
-                          << velocity.x << ","
-                          << velocity.y << ","
-                          << velocity.z << ")";
-      auto res = w.exec(insertQuery, "Update drone position and its velocity");
-      w.commit();
+                  << " ('" << m_scenarioUid << "',"
+                           << timeSim << ","
+                           << droneId << ","
+                           << position.x << ","
+                           << position.y << ","
+                           << position.z << ","
+                           << velocity.x << ","
+                           << velocity.y << ","
+                           << velocity.z << ")";
+      auto res = w.exec (insertQuery, "Update drone position and its velocity");
+      w.commit ();
 
       NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
     }

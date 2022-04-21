@@ -21,15 +21,97 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1650278671867,
+  "iteration": 1650452010465,
   "links": [],
   "liveNow": false,
   "panels": [
     {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "8.4.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "U0rlR3U7z"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  id,\n  name,\n  time_start,\n  time_end\nFROM scenario_executions\nWHERE\n  $__timeFilter(time_start)\n  AND time_end IS NOT NULL\nORDER BY time_start",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "time_sim"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "drones_position",
+          "timeColumn": "time_real",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Panel Title",
+      "type": "table"
+    },
+    {
       "gridPos": {
         "h": 9,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 0
       },
       "id": 2,
@@ -85,6 +167,25 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": false,
+          "text": "fc5457aa-1244-4f91-8b51-f6df78f10931",
+          "value": "fc5457aa-1244-4f91-8b51-f6df78f10931"
+        },
+        "definition": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start;",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "scenarioId",
+        "options": [],
+        "query": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
         "allValue": "SELECT drone_id FROM drones_position",
         "current": {
           "selected": true,
@@ -95,14 +196,14 @@
             "$__all"
           ]
         },
-        "definition": "SELECT drone_id FROM drones_position ORDER BY drone_id;",
+        "definition": "SELECT drone_id \nFROM drones_position \nWHERE scenario_id = '$scenarioId'\nORDER BY drone_id;",
         "hide": 0,
         "includeAll": true,
         "label": "Drone #",
         "multi": true,
         "name": "droneId",
         "options": [],
-        "query": "SELECT drone_id FROM drones_position ORDER BY drone_id;",
+        "query": "SELECT drone_id \nFROM drones_position \nWHERE scenario_id = '$scenarioId'\nORDER BY drone_id;",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -115,7 +216,9 @@
     "from": "now-6h",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "hidden": false
+  },
   "timezone": "",
   "title": "IoD Sim",
   "uid": "rwHh7qU7z",

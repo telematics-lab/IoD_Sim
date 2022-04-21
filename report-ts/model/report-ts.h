@@ -34,14 +34,19 @@ public:
   ~ReportTs ();
 
 private:
+  void SimulationStarted ();
+  void SimulationEnded ();
   void Probe ();
   void InitTraces ();
   void TraceDrones (Ptr<const MobilityModel> model);
   Ptr<const Drone> GetReferenceDrone (Ptr<const Object> aggregate);
 
-  void DbInsert (const double time, const uint32_t droneId, const Vector3D position, const Vector3D velocity);
+  const std::string DbRegisterScenarioExecution (const std::string name);
+  void DbNotifyScenarioEnded (const std::string uid);
+  void DbInsertDroneLocation (const double time, const uint32_t droneId, const Vector3D position, const Vector3D velocity);
 
   pqxx::connection m_conn;
+  std::string m_scenarioUid;
 };
 
 } // namespace ns3
