@@ -21,7 +21,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1650533233739,
+  "iteration": 1650533233741,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -175,6 +175,7 @@
         "definition": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start DESC;",
         "hide": 0,
         "includeAll": false,
+        "label": "Scenario ID",
         "multi": false,
         "name": "scenarioId",
         "options": [],
