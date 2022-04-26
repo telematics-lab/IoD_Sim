@@ -1,0 +1,26 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+def build_errmsg(program_name):
+    return f'{program_name} is not installed. Please install {program_name} development libraries to build IoD_Sim.'
+
+def configure(conf):
+    conf.find_program('pkg-config', mandatory=True, errmsg=build_errmsg('pkg-config'))
+   # conf.check_cfg(package='RapidJSON', mandatory=True, errmsg=build_errmsg('rapidjson'))
+   # conf.check_cfg(package='gsl', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('gsl'))
+   # conf.check_cfg(package='libxml-2.0 >= 2.7', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('libxml2'))
+
+
+def build(bld):
+    module = bld.create_ns3_module('irs', [#deps])
+    module.source = [
+        #cc files
+        ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'irs'
+    headers.source = [
+       #h files
+        ]
+
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
