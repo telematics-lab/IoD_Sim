@@ -19,20 +19,67 @@
 #define IRS_UTILITIES_H
 
 #include <vector>
+#include <cmath>
+#include <ns3/vector.h>
+#include <ns3/pointer.h>
+#include <ns3/mobility-model.h>
 
 namespace ns3 {
 
-//ref: https://www.geeksforgeeks.org/program-to-find-equation-of-a-plane-passing-through-3-points/
 class IrsUtil
 {
 public:
-  static std::vector<double> director_coefficients(double x1, double y1,
-                    double z1, double x2,
-                    double y2, double z2,
-                    double x3, double y3, double z3)
+  static std::vector<double>
+  GetPlaneCoefficients (Vector P1, Vector P2, Vector P3)
   {
-    std::vector<double> coeff = {((y2 - y1) * (z3 - z1) - (y3 - y1) * (z2 - z1)), ((x3 - x1) * (z2 - z1) - (x2 - x1) * (z3 - z1)), ((x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1))};
+    double a = ((P2.y - P1.y) * (P3.z - P1.z) - (P3.y - P1.y) * (P2.z - P1.z));
+    double b = ((P3.x - P1.x) * (P2.z - P1.z) - (P2.x - P1.x) * (P3.z - P1.z));
+    double c = ((P2.x - P1.x) * (P3.y - P1.y) - (P2.y - P1.y) * (P3.x - P1.x));
+    double d = (-a * P1.x - b * P1.y - c * P1.z);
+    std::vector<double> coeff = {a, b, c, d}; //ax+by+cz+d=0
     return coeff;
+  }
+
+  static Vector
+  Calc2DCoordinate (int m, int n, int M_columns, int N_rows, double x_Side, double y_Side)
+  {
+    double x = x_Side * (m - (M_columns + 1) / 2);
+    double y = y_Side * (n - (N_rows + 1) / 2);
+    double z = 0;
+
+    return Vector (x, y, z);
+  }
+
+  static Vector
+  Rotate (Vector P, char axis, double angle)
+  {
+    double x, y, z;
+    switch (axis)
+      {
+      case 'x': //X=[1 0 0; 0 cos(angle) -sin(angle); 0 sin(angle) cos(angle)];
+        x = P.x;
+        y = P.y * cos (angle) - P.z * (sin (angle));
+        z = P.y * sin (angle) + P.z * (cos (angle));
+        break;
+      case 'y': //Y=[cos(angle) 0 sin(angle); 0 1 0; -sin(angle) 0 cos(angle)];
+        x = P.x * cos (angle) + P.z * (sin (angle));
+        y = P.y;
+        z = P.z * (cos (angle)) - P.x * sin (angle);
+        break;
+      case 'z': //Z=[cos(angle) -sin(angle) 0; sin(angle) cos(angle) 0; 0 0 1];
+        x = P.x * cos (angle) - P.y * (sin (angle));
+        y = P.x * sin (angle) + P.y * (cos (angle));
+        z = P.z;
+        break;
+      }
+    return Vector (x, y, z);
+  }
+
+  static Vector
+  Shift (Vector PR, Ptr<MobilityModel> MM)
+  {
+    Vector position = MM->GetPosition ();
+    return Vector (PR.x + position.x, PR.y + position.y, PR.z + position.z);
   }
 };
 

@@ -5,22 +5,23 @@ def build_errmsg(program_name):
 
 def configure(conf):
     conf.find_program('pkg-config', mandatory=True, errmsg=build_errmsg('pkg-config'))
-   # conf.check_cfg(package='RapidJSON', mandatory=True, errmsg=build_errmsg('rapidjson'))
-   # conf.check_cfg(package='gsl', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('gsl'))
-   # conf.check_cfg(package='libxml-2.0 >= 2.7', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('libxml2'))
+    conf.check_cfg(package='RapidJSON', mandatory=True, errmsg=build_errmsg('rapidjson'))
+    conf.check_cfg(package='gsl', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('gsl'))
+    conf.check_cfg(package='libxml-2.0 >= 2.7', args=['--cflags', '--libs'], mandatory=True, errmsg=build_errmsg('libxml2'))
 
 
 def build(bld):
-    module = bld.create_ns3_module('irs', [#deps])
+    module = bld.create_ns3_module('irs', ['core', 'network', 'applications', 'mobility', 'report', 'lte', 'wifi'])
     module.source = [
-        #cc files
+        'model/irs.cc',
         ]
 
     headers = bld(features='ns3header')
     headers.module = 'irs'
     headers.source = [
-       #h files
+       'helper/irs_utilities.h',
+       'model/irs.h',
         ]
 
-    if bld.env.ENABLE_EXAMPLES:
-        bld.recurse('examples')
+    #if bld.env.ENABLE_EXAMPLES:
+       # bld.recurse('examples')
