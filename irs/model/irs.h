@@ -106,7 +106,7 @@ public:
    *
    * \param a TODO
    */
-  void SetRotoAxis (double a);
+  void SetRotoAxis (std::vector<char> a);
 
   /**
    * \brief TODO

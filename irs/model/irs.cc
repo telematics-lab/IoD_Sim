@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include <irs.h>
+#include "irs.h"
 #include <ns3/irs_utilities.h>
 #include <vector>
 #include <cmath>
@@ -37,7 +37,7 @@ Irs::GetTypeId ()
        /*   .AddAttribute ("PowerConsumption", "The power consumption [J/s] of the peripheral, in OFF|IDLE|ON states",
                    DoubleVectorValue (),
                    MakeDoubleVectorAccessor (&DronePeripheral::SetPowerConsumptionStates),
-                   MakeDoubleVectorChecker ()*/)
+                   MakeDoubleVectorChecker ())*/;
   return tid;
 }
 
@@ -112,7 +112,7 @@ Irs::GetPruY () const
 }
 
 void
-Irs::SetRotoAxis (double a)
+Irs::SetRotoAxis (std::vector<char> a)
 {
   m_rotoAxis = a;
 }
@@ -147,14 +147,15 @@ Irs::GetRotoAngles () const
 Vector
 Irs::CalcPruPosition (int m, int n, Ptr<MobilityModel> MM) const
 {
-  Vector position = IrsUtil.Calc2DCoordinate (m, n, m_columns, m_rows, m_pruX, m_pruY);
+  Vector position = IrsUtil::Calc2DCoordinate (m, n, m_columns, m_rows, m_pruX, m_pruY);
   int i = 0;
   for (char axis : m_rotoAxis)
     {
-      position = IrsUtil.Rotate (position, axis, m_rotoAngles[i]);
+      position = IrsUtil::Rotate (position, axis, m_rotoAngles[i]);
       i++;
     }
-  position = IrsUtil.Shift (position, MM);
+  return IrsUtil::Shift (position, MM);
+
 }
 
 } //namespace ns3
