@@ -21,7 +21,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "iteration": 1650533233741,
+  "iteration": 1652104479263,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -158,6 +158,56 @@
       ],
       "title": "Drone Trajectory",
       "type": "ae3e-plotly-panel"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "onclick": "console.log(data)\nwindow.updateVariables({query:{'var-project':'test'}, partial: true})",
+        "script": "console.log(data)\n\nfunction unique(value, index, self) {\n  return self.indexOf(value) === index\n}\n\nlet droneIds = data.series[0].fields[1].values.buffer\nlet drones = droneIds.filter(unique)\nlet nDrones = drones.length\nvar drones_rssi = []\n\nfor (var i = 0; i < nDrones; i++) {\n  let droneId = drones[i];\n  var rssi = []\n\n  for (var j = 0; j < droneIds.length; j++) {\n    if (droneIds[j] == droneId) {\n      rssi.push(data.series[0].fields[2].values.buffer[j])\n    }\n  }\n\n  drones_rssi.push(rssi)\n}\n\nvar traces = []\nfor (var i = 0; i < nDrones; i++) {\n  traces.push({\n    y: drones_rssi[i],\n    type: 'line',\n    name: `Drone #${drones[i]}`,\n    opacity: 1,\n  })\n}\n\nreturn {data:traces,layout:{}};\n"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "U0rlR3U7z"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_real AS \"time\",\n  drone_id,\n  rssi\nFROM wifi_rssi\nWHERE\n  scenario_id = '$scenarioId'\n  AND drone_id IN ($droneId)\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "time_sim"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "drones_position",
+          "timeColumn": "time_real",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Drone RSSI",
+      "type": "ae3e-plotly-panel"
     }
   ],
   "refresh": "",
@@ -168,9 +218,9 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "fc5457aa-1244-4f91-8b51-f6df78f10931",
-          "value": "fc5457aa-1244-4f91-8b51-f6df78f10931"
+          "selected": true,
+          "text": "1a78f03a-b4ad-4b93-b50e-02dce7a6aa27",
+          "value": "1a78f03a-b4ad-4b93-b50e-02dce7a6aa27"
         },
         "definition": "SELECT id\nFROM scenario_executions\nWHERE time_end IS NOT NULL\nORDER BY time_start DESC;",
         "hide": 0,
@@ -223,6 +273,6 @@
   "timezone": "",
   "title": "IoD Sim",
   "uid": "rwHh7qU7z",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }

@@ -18,19 +18,27 @@
 #ifndef REPORT_TS_H
 #define REPORT_TS_H
 
-#include <ns3/drone.h>
-#include <ns3/mobility-model.h>
 #include <ns3/ptr.h>
 #include <ns3/singleton.h>
+#include <ns3/he-frame-exchange-manager.h> // TODO: hide in specialized obj
 
 #include <pqxx/pqxx>
+
+// Quick class declarations for private methods
+namespace ns3 { // TODO: hide in specialized obj
+  class Drone;
+  class MobilityModel;
+  class Object;
+  class Vector3D;
+  class WifiTxVector;
+}
 
 namespace ns3 {
 
 class ReportTs : public Singleton<ReportTs>
 {
 public:
-  void Initialize (/** TODO: configuration (object?) already decoded from JSON file */);
+  void Initialize (); // TODO: configuration (object?) already decoded from JSON file
   ~ReportTs ();
 
 private:
@@ -41,9 +49,34 @@ private:
   void TraceDrones (Ptr<const MobilityModel> model);
   Ptr<const Drone> GetReferenceDrone (Ptr<const Object> aggregate);
 
+  // Callback Utilities
+  void WifiPhyPsduTxBeginCallback (WifiConstPsduMap psduMap,
+                                   WifiTxVector txVector,
+                                   double txPowerW);
+  void WifiPhyRxBeginCallback (std::string callbackContext,
+                               Ptr<const Packet> pkt,
+                               RxPowerWattPerChannelBand rxPowersW);
+
+  // Utilities for information decoding
+  const std::optional<uint32_t> ExtractId (std::string ctx, const std::string& key);
+  const Mac48Address GetHostAddress (const uint32_t nodeId,
+                                     const uint32_t deviceId);
+  const bool IsDestinationHost (const Mac48Address& deviceHostAddress,
+                                const WifiMacHeader& rxPacketHeader);
+  const Mac48Address GetWifiSender (const WifiMacHeader& rxPacketHeader);
+  const double GetRssi (const RxPowerWattPerChannelBand& rxPowersW);
+
+  // Utilities to push information to TSDB
   const std::string DbRegisterScenarioExecution (const std::string name);
   void DbNotifyScenarioEnded (const std::string uid);
-  void DbInsertDroneLocation (const double time, const uint32_t droneId, const Vector3D position, const Vector3D velocity);
+  void DbInsertDroneLocation (const double time,
+                              const uint32_t droneId,
+                              const Vector3D position,
+                              const Vector3D velocity);
+  void DbInsertDroneRssi (const double time,
+                          const uint32_t rxId,
+                          const Mac48Address txAddr,
+                          const double rssi);
 
   pqxx::connection m_conn;
   std::string m_scenarioUid;
