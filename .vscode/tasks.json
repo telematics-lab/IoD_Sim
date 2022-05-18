@@ -16,7 +16,7 @@
     {
       "label": "3-Configure IoD Sim",
       "type": "shell",
-      "command": "./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone",
+      "command": "./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=drone",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -26,7 +26,7 @@
     {
       "label": "4-Build IoD Sim",
       "type": "shell",
-      "command": "./waf build -j$(grep -c ^processor /proc/cpuinfo)",
+      "command": "./ns3 build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
@@ -45,7 +45,7 @@
     {
       "label": "Cleanup Build",
       "type": "shell",
-      "command": "./waf clean",
+      "command": "./ns3 clean",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -55,7 +55,7 @@
     {
       "label": "Run IoD Sim",
       "type": "shell",
-      "command": "./waf --run \"iod-sim --config=${input:scenarioConfigurationFilepath}\"",
+      "command": "./ns3 run \"iod-sim --config=${input:scenarioConfigurationFilepath}\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
