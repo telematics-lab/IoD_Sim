@@ -42,6 +42,7 @@ WifiPhyLayerConfiguration::~WifiPhyLayerConfiguration()
 const enum WifiStandard
 WifiPhyLayerConfiguration::GetStandard ()
 {
+
   if (m_standard == "802.11a")
     return WIFI_STANDARD_80211a;
   else if (m_standard == "802.11b")
@@ -51,17 +52,17 @@ WifiPhyLayerConfiguration::GetStandard ()
   else if (m_standard == "802.11p")
     return WIFI_STANDARD_80211p;
   else if (m_standard == "802.11n-2.4GHz")
-    return WIFI_STANDARD_80211n_2_4GHZ;
+    return WIFI_STANDARD_80211n;
   else if (m_standard == "802.11n-5GHz")
-    return WIFI_STANDARD_80211n_5GHZ;
+    return WIFI_STANDARD_80211n;
   else if (m_standard == "802.11ac")
     return WIFI_STANDARD_80211ac;
   else if (m_standard == "802.11ax-2.4GHz")
-    return WIFI_STANDARD_80211ax_2_4GHZ;
+    return WIFI_STANDARD_80211ax;
   else if (m_standard == "802.11ax-5GHz")
-    return WIFI_STANDARD_80211ax_5GHZ;
+    return WIFI_STANDARD_80211ax;
   else if (m_standard == "802.11ax-6GHz")
-    return WIFI_STANDARD_80211ax_6GHZ;
+    return WIFI_STANDARD_80211ax;
   else
     NS_FATAL_ERROR ("Cannot decode Wifi Standard: " << m_standard);
 }

@@ -16,7 +16,8 @@ function install_debian_deps() {
     patch         \
     pkg-config    \
     python3       \
-    rapidjson-dev
+    rapidjson-dev \
+    cmake
 }
 
 function install_fedora_deps() {
@@ -30,7 +31,8 @@ function install_fedora_deps() {
     patch             \
     pkgconf           \
     python3           \
-    rapidjson-devel
+    rapidjson-devel   \
+    cmake
 }
 
 case "$ID" in
