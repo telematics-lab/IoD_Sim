@@ -16,7 +16,7 @@
     {
       "label": "3-Configure IoD Sim",
       "type": "shell",
-      "command": "./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=drone --verbose",
+      "command": "./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=drone",
       "options": {
         "cwd": "${workspaceFolder}/ns3/"
       },
