@@ -3,6 +3,6 @@
 # TODO: Shouldn't this be a proper Makefile?
 
 pushd ns3
-./waf configure --enable-examples --enable-mpi --disable-python --enable-modules=drone --enable-module=irs
-./waf build -j$(grep -c Processor /proc/cpuinfo)
+./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=drone
+./ns3 build -j$(grep -c Processor /proc/cpuinfo)
 popd
