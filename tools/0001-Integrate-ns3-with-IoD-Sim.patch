@@ -26,13 +26,5 @@ index 000000000..5f034e800
 @@ -0,0 +1 @@
 +../../report/
 \ No newline at end of file
-diff --git a/src/irs b/src/irs
-new file mode 120000
-index 000000000..885fe197e
---- /dev/null
-+++ b/src/irs
-@@ -0,0 +1 @@
-+../../irs
-\ No newline at end of file
 --
 2.25.1
