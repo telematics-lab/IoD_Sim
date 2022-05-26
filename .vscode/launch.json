@@ -29,7 +29,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "build",
+      "preLaunchTask": "4-Build IoD Sim",
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
