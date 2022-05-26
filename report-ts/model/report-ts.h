@@ -45,17 +45,43 @@ private:
   void SimulationStarted ();
   void SimulationEnded ();
   void Probe ();
+
   void InitTraces ();
-  void TraceDrones (Ptr<const MobilityModel> model);
+  template<typename ReturnT, typename... ArgT>
+  void InitTrace(const std::string& contextFilter, const Callback<ReturnT, ArgT...>& callback);
+
+  void TraceDroneTrajectory (std::string context, Ptr<const MobilityModel> droneMobility);
   Ptr<const Drone> GetReferenceDrone (Ptr<const Object> aggregate);
+  void ProbeDroneInitialPositions ();
+  const bool isDroneMobilityModel (const std::string& mobilityModelName);
 
   // Callback Utilities
-  void WifiPhyPsduTxBeginCallback (WifiConstPsduMap psduMap,
+  void WifiPhyPsduTxBeginCallback (std::string context,
+                                   WifiConstPsduMap psduMap,
                                    WifiTxVector txVector,
                                    double txPowerW);
   void WifiPhyRxBeginCallback (std::string callbackContext,
                                Ptr<const Packet> pkt,
                                RxPowerWattPerChannelBand rxPowersW);
+  void LteReportCurrentCellRsrpSinrCallback (std::string context,
+                                             uint16_t cellId,
+                                             uint16_t rnti,
+                                             double rsrp,
+                                             double sinr,
+                                             uint8_t componentCarrierId);
+  void LteReportUlPhyResourceBlocksCallback (std::string context,
+                                             uint16_t rnti,
+                                             const std::vector<int>& rbs);
+  void LteReportPowerSpectralDensityCallback (std::string context,
+                                              uint16_t rnti,
+                                              Ptr<SpectrumValue> psd);
+  void LteReportUeMeasurementsCallback (std::string context,
+                                        uint16_t rnti,
+                                        uint16_t cellId,
+                                        double rsrp,
+                                        double rsrq,
+                                        bool isServingCell,
+                                        uint8_t componentCarrierId);
 
   // Utilities for information decoding
   const std::optional<uint32_t> ExtractId (std::string ctx, const std::string& key);
@@ -77,6 +103,35 @@ private:
                           const uint32_t rxId,
                           const Mac48Address txAddr,
                           const double rssi);
+  void DbInsertLteCurrentCellRsrpSinr (const double time,
+                                       const uint32_t droneId,
+                                       const uint16_t cellId,
+                                       const uint16_t rnti,
+                                       const double rsrp,
+                                       const double sinr,
+                                       const uint8_t componentCarrierId);
+  void DbInsertLteUlPhyResourceBlocks (const double time,
+                                       const uint32_t droneId,
+                                       const uint16_t rnti,
+                                       const std::vector<int>& rbs);
+  void DbInsertLtePowerSpectralDensity (const double time,
+                                        const uint32_t droneId,
+                                        const uint16_t rnti,
+                                        Ptr<SpectrumValue> psd);
+  void DbInsertLteUeMeasurements (const double time,
+                                  const uint32_t droneId,
+                                  const uint16_t rnti,
+                                  const uint16_t cellId,
+                                  const double rsrp,
+                                  const double rsrq,
+                                  const bool isServingCell,
+                                  const uint8_t componentCarrierId);
+
+  // other SQL utils
+  const std::string ToSqlArray (const std::vector<int> arr);
+  const std::string ToSqlArray (const Ptr<SpectrumValue> arr);
+  const std::string ToSqlDouble (const double n);
+  const std::string ToSqlBoolean (const bool x);
 
   pqxx::connection m_conn;
   std::string m_scenarioUid;

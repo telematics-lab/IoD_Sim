@@ -455,19 +455,13 @@ Scenario::ConfigureEntityMobility (const std::string& entityKey,
   const auto mobilityType = mobilityConf.GetName (); // Configure Entity Mobility
   MobilityFactoryHelper::SetMobilityModel (mobility, mobilityConf);
 
-  // const auto initialPosition = mobilityConf.GetInitialPosition ();
-  // if (initialPosition)
-
-
-
   if (entityKey == "drones")
     {
       mobility.Install (m_drones.Get (entityId));
       std::ostringstream oss;
-      oss <<
-        "/NodeList/" << m_drones.Get (entityId)->GetId () <<
-        "/$ns3::MobilityModel/CourseChange";
-      Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange,this));
+      oss << "/NodeList/" << m_drones.Get (entityId)->GetId ()
+          << "/$ns3::MobilityModel/CourseChange";
+      Config::Connect (oss.str (), MakeCallback (&Scenario::CourseChange, this));
     }
   else if (entityKey == "ZSPs")
     {

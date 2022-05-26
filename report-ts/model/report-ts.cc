@@ -19,6 +19,7 @@
 
 #include <ns3/config.h>
 #include <ns3/drone.h>
+#include <ns3/drone-list.h>
 #include <ns3/log.h>
 #include <ns3/mobility-model.h>
 #include <ns3/node-list.h>
@@ -26,6 +27,8 @@
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/simulator.h>
 #include <ns3/wifi-phy.h>
+
+#include <cmath>
 
 namespace ns3 {
 
@@ -36,13 +39,12 @@ ReportTs::Initialize ()
 {
   NS_LOG_FUNCTION (this);
 
-  /** TODO:
+  /*  TODO:
    *  Can we "plug" into ScenarioConfigurationHelper by providing out decoders?
    *  In this way we don't pollute drone module with report-ts decoders.
   */
 
   Simulator::ScheduleNow (&ReportTs::SimulationStarted, this);
-  Simulator::ScheduleNow (&ReportTs::Probe, this);
   Simulator::ScheduleNow (&ReportTs::InitTraces, this);
 }
 
@@ -60,68 +62,56 @@ ReportTs::SimulationStarted ()
 
   const auto scenarioName = CONFIGURATOR->GetName ();
   m_scenarioUid = DbRegisterScenarioExecution (scenarioName);
-}
-
-void
-ReportTs::Probe ()
-{
-  NS_LOG_FUNCTION (this);
-
-  // Probe into the simulation at its start
-  for (uint32_t i = 0; i < Config::GetRootNamespaceObjectN (); i++)
-    {
-      auto obj = Config::GetRootNamespaceObject (i);
-      NS_LOG_DEBUG ("Discovered TypeId: " << obj->GetInstanceTypeId ());
-      auto oTid = obj->GetInstanceTypeId ();
-
-      //! I don't believe we can do a fully general solution due to missing interfaces. How can we be sure that X
-      //! has Y method with a predictable signature?
-      // lookup for trace sources
-      //auto nTraces = oTid.GetTraceSourceN ();
-      // TODO: for each trace... https://www.nsnam.org/doxygen/structns3_1_1_type_id_1_1_trace_source_information.html
-
-      // lookup inner attributes
-      for (uint32_t iAttr = 0; iAttr < oTid.GetAttributeN (); iAttr++)
-        {
-          NS_LOG_DEBUG ("Discovered attribute: " << oTid.GetAttribute (iAttr).name);
-        }
-    }
+  ProbeDroneInitialPositions ();
 }
 
 void
 ReportTs::InitTraces ()
 {
   NS_LOG_FUNCTION (this);
-  bool ret = false;
-
   // trace drones trajectory
-  ret = Config::ConnectWithoutContextFailSafe ("/DroneList/*/$ns3::MobilityModel/CourseChange", // TODO: isn't better /NodeList/ ?
-                                               MakeCallback (&ReportTs::TraceDrones, this));
-  if (!ret)
-    NS_LOG_WARN ("Could not register traces for drones. Ensure drones are correctly initialized in the simulation.");
+  InitTrace ("/NodeList/*/$ns3::MobilityModel/CourseChange",
+             MakeCallback (&ReportTs::TraceDroneTrajectory, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxPsduBegin",
+             MakeCallback (&ReportTs::WifiPhyPsduTxBeginCallback, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",
+             MakeCallback (&ReportTs::WifiPhyRxBeginCallback, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::LteUeNetDevice/ComponentCarrierMapUe/*/LteUePhy/ReportCurrentCellRsrpSinr",
+             MakeCallback (&ReportTs::LteReportCurrentCellRsrpSinrCallback, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::LteUeNetDevice/ComponentCarrierMapUe/*/LteUePhy/ReportUlPhyResourceBlocks",
+             MakeCallback (&ReportTs::LteReportUlPhyResourceBlocksCallback, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::LteUeNetDevice/ComponentCarrierMapUe/*/LteUePhy/ReportPowerSpectralDensity",
+             MakeCallback (&ReportTs::LteReportPowerSpectralDensityCallback, this));
+  InitTrace ("/NodeList/*/DeviceList/*/$ns3::LteUeNetDevice/ComponentCarrierMapUe/*/LteUePhy/ReportUeMeasurements",
+             MakeCallback (&ReportTs::LteReportUeMeasurementsCallback, this));
+}
 
-  ret = Config::ConnectWithoutContextFailSafe ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxPsduBegin",
-                                               MakeCallback (&ReportTs::WifiPhyPsduTxBeginCallback, this));
-  if (!ret)
-    NS_LOG_WARN ("Could not register traces for drones. Ensure drones are correctly initialized in the simulation.");
+template<typename ReturnT, typename... ArgT>
+void
+ReportTs::InitTrace(const std::string& ctx, const Callback<ReturnT, ArgT...>& cb)
+{
+  NS_LOG_FUNCTION (this << ctx);
 
-  ret = Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxBegin",
-                                 MakeCallback (&ReportTs::WifiPhyRxBeginCallback, this));
+  const bool ret = Config::ConnectFailSafe (ctx, cb);
   if (!ret)
-    NS_LOG_WARN ("Could not register traces for drones. Ensure drones are correctly initialized in the simulation.");
+    NS_LOG_WARN ("Could not register trace for " << ctx << "."
+                 << "Ensure drones are correctly initialized in the simulation.");
 }
 
 void
-ReportTs::TraceDrones (Ptr<const MobilityModel> m)
+ReportTs::TraceDroneTrajectory (std::string ctx, Ptr<const MobilityModel> m)
 {
-  NS_LOG_FUNCTION (this << m);
+  NS_LOG_FUNCTION (this << ctx << m);
 
   auto time = Simulator::Now ().GetSeconds ();
   auto droneId = GetReferenceDrone (m)->GetId ();
   auto pos = m->GetPosition ();
   auto vel = m->GetVelocity ();
 
-  NS_LOG_DEBUG ("Drone PosLine: " << time << " | " << droneId << " | " << pos << " | " << vel);
+  NS_LOG_DEBUG ("Drone PosLine: " << time
+                << " | " << droneId
+                << " | " << pos
+                << " | " << vel);
   DbInsertDroneLocation (time, droneId, pos, vel);
 }
 
@@ -144,19 +134,71 @@ ReportTs::GetReferenceDrone (Ptr<const Object> aggregate)
 }
 
 void
-ReportTs::WifiPhyPsduTxBeginCallback (WifiConstPsduMap psduMap, WifiTxVector txVector, double txPowerW)
+ReportTs::ProbeDroneInitialPositions ()
 {
-  NS_LOG_FUNCTION (this << psduMap << txVector << txPowerW);
+  NS_LOG_FUNCTION (this);
+  const auto time = Simulator::Now ().GetSeconds ();
 
+  for (auto it = DroneList::Begin (); it != DroneList::End (); it++)
+    {
+      Ptr<MobilityModel> mm = (*it)->GetObject<MobilityModel> ();
+
+      auto aggregates = mm->GetAggregateIterator ();
+      while (aggregates.HasNext ())
+        {
+          auto it = aggregates.Next ();
+          NS_LOG_DEBUG ("!! MM Agg: " << it->GetInstanceTypeId ().GetName ());
+        }
+
+      // Drone mobility models do not use postition allocators, which may result
+      // in the drone being wrongly placed at startup at [0,0,0]
+      if (isDroneMobilityModel (mm->GetInstanceTypeId ().GetName ()))
+        continue;
+
+      const auto droneId = (*it)->GetId ();
+      TypeId::AttributeInformation posAttrInfo, velAttrInfo;
+
+      mm->GetInstanceTypeId ().LookupAttributeByName ("Position", &posAttrInfo);
+      mm->GetInstanceTypeId ().LookupAttributeByName ("Velocity", &velAttrInfo);
+
+      auto pos = StaticCast<const Vector3DValue, const AttributeValue>
+                 (posAttrInfo.initialValue)->Get ();
+      auto vel = StaticCast<const Vector3DValue, const AttributeValue>
+                 (velAttrInfo.initialValue)->Get ();
+
+      NS_LOG_DEBUG ("Drone Initial Position: " << time
+                    << " | " << droneId
+                    << " | " << pos
+                    << " | " << vel);
+      DbInsertDroneLocation (time, droneId, pos, vel);
+    }
+}
+
+const bool
+ReportTs::isDroneMobilityModel (const std::string& mmName)
+{
+  NS_LOG_FUNCTION (this << mmName);
+  return mmName == "ns3::ConstantAccelerationDroneMobilityModel"
+      || mmName == "ns3::ParametricSpeedDroneMobilityModel";
 }
 
 void
-ReportTs::WifiPhyRxBeginCallback (std::string ctx, Ptr<const Packet> pkt, RxPowerWattPerChannelBand rxPowersW)
+ReportTs::WifiPhyPsduTxBeginCallback (std::string ctx,
+                                      WifiConstPsduMap psduMap,
+                                      WifiTxVector txVector,
+                                      double txPowerW)
+{
+  NS_LOG_FUNCTION (this << ctx << psduMap << txVector << txPowerW);
+}
+
+void
+ReportTs::WifiPhyRxBeginCallback (std::string ctx,
+                                  Ptr<const Packet> pkt,
+                                  RxPowerWattPerChannelBand rxPowersW)
 {
   NS_LOG_FUNCTION (this << ctx << pkt << rxPowersW);
 
   const auto nodeId = ExtractId (ctx, "NodeList/");
-  // we are in a shared medium, so STA can receive other signals
   if (!nodeId)
     return;
 
@@ -182,6 +224,73 @@ ReportTs::WifiPhyRxBeginCallback (std::string ctx, Ptr<const Packet> pkt, RxPowe
                          senderAddr,
                          rssi);
     }
+}
+
+void
+ReportTs::LteReportCurrentCellRsrpSinrCallback (std::string ctx,
+                                                uint16_t cellId,
+                                                uint16_t rnti,
+                                                double rsrp,
+                                                double sinr,
+                                                uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << ctx << cellId << rsrp << sinr << componentCarrierId);
+  const auto nodeId = *ExtractId (ctx, "NodeList/");
+  DbInsertLteCurrentCellRsrpSinr (Simulator::Now ().GetSeconds (),
+                                  nodeId,
+                                  cellId,
+                                  rnti,
+                                  rsrp,
+                                  sinr,
+                                  componentCarrierId);
+}
+
+void
+ReportTs::LteReportUlPhyResourceBlocksCallback (std::string ctx,
+                                                uint16_t rnti,
+                                                const std::vector<int>& rbs)
+{
+  NS_LOG_FUNCTION (this << ctx << rnti << rbs);
+  const auto nodeId = *ExtractId (ctx, "NodeList/");
+  DbInsertLteUlPhyResourceBlocks (Simulator::Now ().GetSeconds (),
+                                  nodeId,
+                                  rnti,
+                                  rbs);
+}
+
+void
+ReportTs::LteReportPowerSpectralDensityCallback (std::string ctx,
+                                                 uint16_t rnti,
+                                                 Ptr<SpectrumValue> psd)
+{
+  NS_LOG_FUNCTION (this << ctx << rnti << psd);
+  const auto nodeId = *ExtractId (ctx, "NodeList/");
+  DbInsertLtePowerSpectralDensity (Simulator::Now ().GetSeconds (),
+                                   nodeId,
+                                   rnti,
+                                   psd);
+}
+
+void
+ReportTs::LteReportUeMeasurementsCallback (std::string ctx,
+                                           uint16_t rnti,
+                                           uint16_t cellId,
+                                           double rsrp,
+                                           double rsrq,
+                                           bool isServingCell,
+                                           uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << ctx << rnti << cellId << rsrp << rsrq
+                        << isServingCell << componentCarrierId);
+  const auto nodeId = *ExtractId (ctx, "NodeList/");
+  DbInsertLteUeMeasurements (Simulator::Now ().GetSeconds (),
+                             nodeId,
+                             rnti,
+                             cellId,
+                             rsrp,
+                             rsrq,
+                             isServingCell,
+                             componentCarrierId);
 }
 
 const std::optional<uint32_t>
@@ -321,7 +430,7 @@ ReportTs::DbInsertDroneLocation (const double timeSim, const uint32_t droneId, c
                   << " (scenario_id, time_sim, drone_id, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z)"
                   << " VALUES"
                   << " ('" << m_scenarioUid << "',"
-                           << timeSim << ","
+                           << ToSqlDouble (timeSim) << ","
                            << droneId << ","
                            << position.x << ","
                            << position.y << ","
@@ -356,10 +465,10 @@ ReportTs::DbInsertDroneRssi (const double time,
                   << " (scenario_id, time_sim, drone_id, from_addr, rssi)"
                   << " VALUES"
                   << " ('" << m_scenarioUid << "',"
-                           << time << ","
+                           << ToSqlDouble (time) << ","
                            << rxId << ","
                   << "  '" << txAddr << "',"
-                           << rssi << ")";
+                           << ToSqlDouble (rssi) << ")";
       auto res = w.exec (insertQuery, "Update drone RSSI");
       w.commit ();
 
@@ -369,6 +478,205 @@ ReportTs::DbInsertDroneRssi (const double time,
     {
       NS_LOG_ERROR ("An error occurred during the insertion of new drone RSSI in DB: " << e.what());
     }
+}
+
+void
+ReportTs::DbInsertLteCurrentCellRsrpSinr (const double time,
+                                          const uint32_t droneId,
+                                          const uint16_t cellId,
+                                          const uint16_t rnti,
+                                          const double rsrp,
+                                          const double sinr,
+                                          const uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << time << droneId << cellId << rsrp << sinr
+                        << componentCarrierId);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream insertQuery;
+
+      insertQuery << "INSERT INTO lte_current_cell_rsrp_sinr"
+                  << " (scenario_id, time_sim, drone_id, cell_id, rsrp, rnti,"
+                  << "  sinr, component_carrier_id)"
+                  << " VALUES"
+                  << " ('" << m_scenarioUid << "',"
+                           << ToSqlDouble (time) << ","
+                           << droneId << ","
+                           << cellId << ","
+                           << ToSqlDouble (rnti) << ","
+                           << ToSqlDouble (rsrp) << ","
+                           << sinr << ","
+                           << (unsigned int) componentCarrierId << ")";
+      auto res = w.exec (insertQuery, "Update drone LTE CurrentCellRsrpSinr");
+      w.commit ();
+
+      NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
+    }
+  catch (std::exception const &e)
+    {
+      NS_LOG_ERROR ("An error occurred during the insertion of new drone LteCurrentCellRsrpSinr in DB: " << e.what());
+    }
+}
+
+void
+ReportTs::DbInsertLteUlPhyResourceBlocks (const double time,
+                                          const uint32_t droneId,
+                                          const uint16_t rnti,
+                                          const std::vector<int>& rbs)
+{
+  NS_LOG_FUNCTION (this << time << droneId << rnti << rbs);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream insertQuery;
+
+      insertQuery << "INSERT INTO lte_ul_phy_resource_blocks"
+                  << " (scenario_id, time_sim, drone_id, rnti, rbs)"
+                  << " VALUES"
+                  << " ('" << m_scenarioUid << "',"
+                           << ToSqlDouble (time) << ","
+                           << droneId << ","
+                           << rnti << ","
+                       "'" << ToSqlArray(rbs) << "')";
+      auto res = w.exec (insertQuery, "Update drone LTE UlPhyResourceBlocks");
+      w.commit ();
+
+      NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
+    }
+  catch (std::exception const &e)
+    {
+      NS_LOG_ERROR ("An error occurred during the insertion of new drone LteUlPhyResourceBlocks in DB: " << e.what());
+    }
+}
+
+void
+ReportTs::DbInsertLtePowerSpectralDensity (const double time,
+                                           const uint32_t droneId,
+                                           const uint16_t rnti,
+                                           Ptr<SpectrumValue> psd)
+{
+  NS_LOG_FUNCTION (this << time << droneId << rnti << psd);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream insertQuery;
+
+      insertQuery << "INSERT INTO lte_power_spectral_density"
+                  << " (scenario_id, time_sim, drone_id, rnti, psd)"
+                  << " VALUES"
+                  << " ('" << m_scenarioUid << "',"
+                           << ToSqlDouble (time) << ","
+                           << droneId << ","
+                           << rnti << ","
+                       "'" << ToSqlArray(psd) << "')";
+      auto res = w.exec (insertQuery, "Update drone LTE PowerSpectralDensity");
+      w.commit ();
+
+      NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
+    }
+  catch (std::exception const &e)
+    {
+      NS_LOG_ERROR ("An error occurred during the insertion of new drone LtePowerSpectralDensity in DB: " << e.what());
+    }
+}
+
+void
+ReportTs::DbInsertLteUeMeasurements (const double time,
+                                     const uint32_t droneId,
+                                     const uint16_t rnti,
+                                     const uint16_t cellId,
+                                     const double rsrp,
+                                     const double rsrq,
+                                     const bool isServingCell,
+                                     const uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << time << droneId << rnti << cellId << rsrp << rsrq
+                        << isServingCell << componentCarrierId);
+  try
+    {
+      pqxx::work w {m_conn};
+      std::stringstream insertQuery;
+
+      insertQuery << "INSERT INTO lte_ue_measurements"
+                  << " (scenario_id, time_sim, drone_id, rnti, cell_id, rsrp, "
+                  << "  rsrq, is_serving_cell, component_carrier_id)"
+                  << " VALUES"
+                  << " ('" << m_scenarioUid << "',"
+                           << ToSqlDouble (time) << ","
+                           << droneId << ","
+                           << rnti << ","
+                           << cellId << ","
+                           << ToSqlDouble (rsrp) << ","
+                           << ToSqlDouble (rsrq) << ","
+                           << ToSqlBoolean (isServingCell) << ","
+                           << (unsigned int) componentCarrierId << ")";
+      auto res = w.exec (insertQuery, "Update drone LTE UeMeasurements");
+      w.commit ();
+
+      NS_LOG_DEBUG ("INSERTed " << res.affected_rows () << " row(s).");
+    }
+  catch (std::exception const &e)
+    {
+      NS_LOG_ERROR ("An error occurred during the insertion of new drone LteUeMeasurements in DB: " << e.what());
+    }
+}
+
+const std::string
+ReportTs::ToSqlArray (const std::vector<int> arr)
+{
+  NS_LOG_FUNCTION (this << arr);
+  std::stringstream s;
+
+  s << "{";
+  for (auto it = arr.begin (); it != arr.end (); it++)
+    {
+      if (it != arr.begin ())
+        s << ",";
+
+      s << *it;
+    }
+  s << "}";
+
+  return s.str ();
+}
+
+const std::string
+ReportTs::ToSqlArray (const Ptr<SpectrumValue> arr)
+{
+  NS_LOG_FUNCTION (this << arr);
+  std::stringstream s;
+
+  s << "{";
+  for (auto it = arr->ValuesBegin (); it != arr->ValuesEnd (); it++)
+    {
+      if (it != arr->ValuesBegin ())
+        s << ",";
+
+      s << *it;
+    }
+  s << "}";
+
+  return s.str ();
+}
+
+const std::string
+ReportTs::ToSqlDouble (const double n)
+{
+  NS_LOG_FUNCTION (this << n);
+  if (std::isnan(n))
+    return "'NaN'";
+  else if (n == std::isinf(n))
+    return (n > 0) ? "'Infinity'" : "'-Infinity'";
+  else
+    return std::to_string (n);
+}
+
+const std::string
+ReportTs::ToSqlBoolean (const bool x)
+{
+  NS_LOG_FUNCTION (x);
+  return (x) ? "TRUE" : "FALSE";
 }
 
 std::ostream&

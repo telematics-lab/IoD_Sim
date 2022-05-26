@@ -94,7 +94,8 @@
         "locale": "cpp",
         "numbers": "cpp",
         "queue": "cpp",
-        "*.json": "jsonc"
+        "*.json": "jsonc",
+        "pqxx": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "git.ignoredRepositories": [

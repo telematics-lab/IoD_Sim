@@ -32,3 +32,54 @@ CREATE TABLE IF NOT EXISTS wifi_rssi (
   PRIMARY KEY (scenario_id, time_real)
 );
 SELECT create_hypertable('wifi_rssi', 'time_real');
+
+CREATE TABLE IF NOT EXISTS lte_current_cell_rsrp_sinr (
+  scenario_id UUID NOT NULL REFERENCES scenario_executions (id),
+  time_real TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  time_sim double PRECISION NOT NULL,
+  drone_id int NOT NULL,
+  cell_id int NOT NULL,
+  rnti int NOT NULL,
+  rsrp double PRECISION NOT NULL,
+  sinr double PRECISION NOT NULL,
+  component_carrier_id int NOT NULL,
+  PRIMARY KEY (scenario_id, time_real)
+);
+SELECT create_hypertable('lte_current_cell_rsrp_sinr', 'time_real');
+
+CREATE TABLE IF NOT EXISTS lte_ul_phy_resource_blocks (
+  scenario_id UUID NOT NULL REFERENCES scenario_executions (id),
+  time_real TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  time_sim double PRECISION NOT NULL, 
+  drone_id int NOT NULL,
+  rnti int NOT NULL,
+  rbs int ARRAY NOT NULL,
+  PRIMARY KEY (scenario_id, time_real)
+);
+SELECT create_hypertable('lte_ul_phy_resource_blocks', 'time_real');
+
+CREATE TABLE IF NOT EXISTS lte_power_spectral_density (
+  scenario_id UUID NOT NULL REFERENCES scenario_executions (id),
+  time_real TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  time_sim double PRECISION NOT NULL,
+  drone_id int NOT NULL,
+  rnti int NOT NULL,
+  psd double PRECISION ARRAY NOT NULL,
+  PRIMARY KEY (scenario_id, time_real)
+);
+SELECT create_hypertable('lte_power_spectral_density', 'time_real');
+
+CREATE TABLE IF NOT EXISTS lte_ue_measurements (
+  scenario_id UUID NOT NULL REFERENCES scenario_executions (id),
+  time_real TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  time_sim double PRECISION NOT NULL,
+  drone_id int NOT NULL,
+  rnti int NOT NULL,
+  cell_id int NOT NULL,
+  rsrp double PRECISION NOT NULL,
+  rsrq double PRECISION NOT NULL,
+  is_serving_cell boolean NOT NULL,
+  component_carrier_id int NOT NULL,
+  PRIMARY KEY (scenario_id, time_real)
+);
+SELECT create_hypertable('lte_ue_measurements', 'time_real');

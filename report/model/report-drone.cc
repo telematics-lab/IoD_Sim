@@ -176,7 +176,6 @@ ReportDrone::DoWrite (xmlTextWriterPtr h)
 
   rc = xmlTextWriterEndElement (h);
   NS_ASSERT (rc >= 0);
- //////
 
   rc = xmlTextWriterStartElement (h, BAD_CAST "cumulativeDataTx");
   NS_ASSERT (rc >= 0);
