@@ -14,7 +14,6 @@ function check_availability() {
 check_availability git
 check_availability patch
 
-
 git submodule update --init
 
 pushd ns3
