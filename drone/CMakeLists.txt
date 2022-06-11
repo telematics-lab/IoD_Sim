@@ -1,0 +1,168 @@
+set(source_files
+  helper/entity-configuration-helper.cc
+  helper/ipv4-simulation-helper.cc
+  helper/lte-phy-simulation-helper.cc
+  helper/lte-setup-helper.cc
+  helper/mac-layer-configuration-helper.cc
+  helper/mobility-factory-helper.cc
+  helper/model-configuration-helper.cc
+  helper/network-layer-configuration-helper.cc
+  helper/phy-layer-configuration-helper.cc
+  helper/scenario-configuration-helper.cc
+  helper/wifi-mac-factory-helper.cc
+  helper/wifi-mac-simulation-helper.cc
+  helper/wifi-phy-factory-helper.cc
+  helper/wifi-phy-simulation-helper.cc
+  helper/remote-configuration-helper.cc
+  model/constant-acceleration-drone-mobility-model.cc
+  model/constant-acceleration-flight.cc
+  model/constant-acceleration-param.cc
+  model/curve-point.cc
+  model/curve.cc
+  model/drone-client-application.cc
+  model/drone-communications.cc
+  model/drone-list.cc
+  model/drone-server-application.cc
+  model/entity-configuration.cc
+  model/flight-plan.cc
+  model/ipv4-network-layer-configuration.cc
+  model/lte-bearer-configuration.cc
+  model/lte-netdevice-configuration.cc
+  model/mac-layer-configuration.cc
+  model/model-configuration.cc
+  model/mobility-model-configuration.cc
+  model/netdevice-configuration.cc
+  model/network-layer-configuration.cc
+  model/parametric-speed-drone-mobility-model.cc
+  model/parametric-speed-flight.cc
+  model/parametric-speed-param.cc
+  model/phy-layer-configuration.cc
+  model/planner.cc
+  model/proto-point.cc
+  model/double-vector.cc
+  model/wifi-mac-layer-configuration.cc
+  model/wifi-phy-layer-configuration.cc
+  model/lte-phy-layer-configuration.cc
+  model/zsp-list.cc
+  model/drone-energy-model.cc
+  helper/drone-energy-model-helper.cc
+  model/drone-peripheral.cc
+  model/input-peripheral.cc
+  model/storage-peripheral.cc
+  model/drone-peripheral-container.cc
+  model/drone.cc
+  model/drone-container.cc
+  model/wifi-netdevice-configuration.cc
+  model/remote-configuration.cc
+  model/interest-region.cc
+  model/interest-region-container.cc
+  model/int-vector.cc
+  model/remote-list.cc
+  model/nat-application.cc
+  model/random-udp-application.cc
+  model/tcp-client-server-application.cc
+  model/tcp-echo-server-application.cc
+  model/tcp-storage-client-application.cc
+  model/tcp-stub-client-application.cc
+  model/udp-echo-client-application.cc
+)
+
+set(header_files
+  helper/entity-configuration-helper.h
+  helper/ipv4-simulation-helper.h
+  helper/lte-phy-simulation-helper.h
+  helper/lte-setup-helper.h
+  helper/mac-layer-configuration-helper.h
+  helper/mobility-factory-helper.h
+  helper/model-configuration-helper.h
+  helper/network-layer-configuration-helper.h
+  helper/phy-layer-configuration-helper.h
+  helper/scenario-configuration-helper.h
+  helper/wifi-mac-factory-helper.h
+  helper/wifi-mac-simulation-helper.h
+  helper/wifi-phy-factory-helper.h
+  helper/wifi-phy-simulation-helper.h
+  helper/remote-configuration-helper.h
+  model/constant-acceleration-drone-mobility-model.h
+  model/constant-acceleration-flight.h
+  model/constant-acceleration-param.h
+  model/curve-point.h
+  model/curve.h
+  model/drone-client-application.h
+  model/drone-communications.h
+  model/drone-list.h
+  model/drone-server-application.h
+  model/entity-configuration.h
+  model/flight-plan.h
+  model/ipv4-network-layer-configuration.h
+  model/lte-bearer-configuration.h
+  model/lte-netdevice-configuration.h
+  model/mac-layer-configuration.h
+  model/model-configuration.h
+  model/mobility-model-configuration.h
+  model/netdevice-configuration.h
+  model/network-layer-configuration.h
+  model/parametric-speed-drone-mobility-model.h
+  model/parametric-speed-flight.h
+  model/parametric-speed-param.h
+  model/phy-layer-configuration.h
+  model/planner.h
+  model/proto-point.h
+  model/double-vector.h
+  model/wifi-mac-layer-configuration.h
+  model/wifi-phy-layer-configuration.h
+  model/lte-phy-layer-configuration.h
+  model/zsp-list.h
+  model/drone-energy-model.h
+  helper/drone-energy-model-helper.h
+  model/drone-peripheral.h
+  model/input-peripheral.h
+  model/storage-peripheral.h
+  model/drone-peripheral-container.h
+  model/drone.h
+  model/drone-container.h
+  model/wifi-netdevice-configuration.h
+  model/remote-configuration.h
+  helper/debug-helper.h
+  model/interest-region.h
+  model/interest-region-container.h
+  model/int-vector.h
+  model/vector-type.h
+  model/remote-list.h
+  model/nat-application.h
+  model/random-udp-application.h
+  model/tcp-client-server-application.h
+  model/tcp-echo-server-application.h
+  model/tcp-storage-client-application.h
+  model/tcp-stub-client-application.h
+  model/udp-echo-client-application.h
+)
+
+include(FindPkgConfig)
+
+if (${PKG_CONFIG_FOUND})
+  pkg_check_modules(THIRD_PARTY RapidJSON REQUIRED)
+  pkg_check_modules(THIRD_PARTY gsl REQUIRED)
+  pkg_check_modules(THIRD_PARTY libxml-2.0 REQUIRED)
+
+  include_directories(${RapidJSON_INCLUDE_DIRS}
+                      ${gsl_INCLUDE_DIRS})
+
+  build_lib(
+    LIBNAME drone
+    SOURCE_FILES ${source_files}
+    HEADER_FILES ${header_files}
+    LIBRARIES_TO_LINK ${libcore}
+                      ${libnetwork}
+                      ${libapplications}
+                      ${libcore}
+                      ${libnetwork}
+                      ${libapplications}
+                      ${libreport}
+                      ${liblte}
+                      ${libwifi}
+                      ${libmobility}
+                      ${RapidJSON_LIBRARIES}
+                      ${gsl_LIBRARIES}
+  )
+endif()

@@ -7,6 +7,7 @@ fi
 function install_debian_deps() {
   sudo apt update \
   && sudo apt install -y --no-install-recommends \
+    cmake         \
     g++           \
     gdb           \
     gcc           \
@@ -21,6 +22,7 @@ function install_debian_deps() {
 
 function install_fedora_deps() {
   sudo dnf -y install \
+    cmake             \
     gdb               \
     gcc               \
     gcc-c++           \

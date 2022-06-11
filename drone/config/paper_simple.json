@@ -136,7 +136,7 @@
                     "value": 0.0
                 }
             ],
-            "standard": "802.11n-5GHz",
+            "standard": "802.11n",
             "type": "wifi"
         }
     ],

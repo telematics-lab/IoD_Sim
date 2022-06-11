@@ -33,7 +33,7 @@
     "phyLayer": [
         {
             "type": "wifi",
-            "standard": "802.11n-2.4GHz",
+            "standard": "802.11n",
             "attributes": [
                 {
                     "name": "RxGain",

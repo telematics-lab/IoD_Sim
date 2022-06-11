@@ -122,7 +122,7 @@
   "phyLayer": [
     {
         "type": "wifi",
-        "standard": "802.11ax-2.4GHz",
+        "standard": "802.11ax",
         "attributes": [
           {
             "name": "RxGain",
@@ -167,7 +167,7 @@
     },
     {
       "type": "wifi",
-      "standard": "802.11ax-2.4GHz",
+      "standard": "802.11ax",
       "attributes": [
           {
             "name": "RxGain",
@@ -212,7 +212,7 @@
     },
     {
         "type": "wifi",
-        "standard": "802.11ax-2.4GHz",
+        "standard": "802.11ax",
         "attributes": [
           {
             "name": "RxGain",
@@ -257,7 +257,7 @@
     },
     {
         "type": "wifi",
-        "standard": "802.11ax-2.4GHz",
+        "standard": "802.11ax",
         "attributes": [
           {
             "name": "RxGain",

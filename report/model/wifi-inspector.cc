@@ -47,25 +47,11 @@ WifiInspector::GetWifiStandard () const
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  const auto standard = m_phy->GetPhyStandard ();
+  std::stringstream standardStr;
+  const auto standard = m_phy->GetStandard ();
 
-  switch (standard)
-    {
-      case WIFI_PHY_STANDARD_80211a:
-        return "802.11a";
-      case WIFI_PHY_STANDARD_80211b:
-        return "802.11b";
-      case WIFI_PHY_STANDARD_80211g:
-        return "802.11g";
-      case WIFI_PHY_STANDARD_80211n:
-        return "802.11n";
-      case WIFI_PHY_STANDARD_80211ac:
-        return "802.11ac";
-      case WIFI_PHY_STANDARD_80211ax:
-        return "802.11ax";
-      default:
-        return "UNSUPPORTED";
-    }
+  standardStr << standard;
+  return standardStr.str ().c_str ();
 }
 
 const uint16_t
