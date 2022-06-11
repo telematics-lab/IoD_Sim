@@ -40,21 +40,12 @@ Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrie
 
 ## Getting Started
 
-This project is a module of the ns-3 software. To be able to compile, develop,
-and use it, please [build](docs/) or
-[read](https://telematics.poliba.it/iod-sim) the documentation.
-
-## Quick Start on Linux
-Be sure you satisfy [ns-3 dependencies](https://www.nsnam.org/wiki/Installation) and you have `rapidjson-dev` software package installed.
-
-```bash
-$ ./tools/prepare-ns3.sh
-$ cd ns3/
-$ ./waf configure --enable-examples
-$ ./waf build -j4
-```
-
-If you use Visual Studio Code, most of these commands are already provided as Tasks.
+This project can be quick started if opened as folder on Visual Studio Code.
+Tasks are already provided in sequence to:
+* Install dependencies
+* Download and integrate IoD Sim with third-party dependencies
+* Build IoD Sim
+* Execute IoD Sim scenarios
 
 ## License
 
