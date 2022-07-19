@@ -2,15 +2,15 @@
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/ns3/build/**",
-                "/usr/include/libxml2/**"
-            ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
-            "compileCommands": "${workspaceFolder}/ns3/build/compile_commands.json"
+            "intelliSenseMode": "linux-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/ns3/build/include/**"
+            ],
+            "compileCommands": "${workspaceFolder}/ns3/cmake-cache/compile_commands.json",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
