@@ -5,17 +5,10 @@ system-level simulator for the IoD ([Internet of
 Drones](https://ieeexplore.ieee.org/document/7423671)).
 
 Developed on top of the well-known [ns-3](https://www.nsnam.org/) (Network
-Simulator 3), it implements the key networking elements (drones, network access
-points, and Zone Service Provider), a standard-compliant communication stack
-based on the IEEE 802.11 technology, and scenarios with various mobility
-models.
-
-The source code presents the implementation of models and examples scripts,
-also known as _scenarios_, that use such models to simulate a variable number
-of drones that:
-* Move according to the mobility model associated to the reference scenario.
-* Exchange messages with network access points deployed on a generic and flat
-  3D space.
+Simulator 3), it implements a flexible simulation platform constisting on key
+networking elements, i.e., drones, network access points, and
+Zone Service Providers, peripherals, buildings, and an extensive configuration
+interface for high-level and low-code scenario design.
 
 The IoD_Sim repository is where this
 software is developed and there are many ways in which you can participate in
@@ -34,7 +27,8 @@ to use [Docker](https://www.docker.com/),
 (pseudo)virtualization platform that can provide you a stable Linux-based work
 environment. You are welcome to provide new compatibility solutions any time.
 
-For more details, a dedicated publication that describes the entire simulation platform is available on [arXiv](https://arxiv.org/abs/2203.13710).
+For more details, a dedicated publication that describes the entire simulation
+platform is available on [IEEE Internet of Things Journal](https://doi.org/10.1109/JIOT.2022.3207324), with its preprint freely downloadable from [arXiv](https://doi.org/10.48550/arXiv.2203.13710).
 
 Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrieco/IoD_Sim-airflow) is a Visual Programming Editor ad-hoc for IoD_Sim! It relies on [splash](https://github.com/GiovanniGrieco/IoD_Sim-splash) to transpile C++ models in Python visual blocks.
 
@@ -46,6 +40,49 @@ Tasks are already provided in sequence to:
 * Download and integrate IoD Sim with third-party dependencies
 * Build IoD Sim
 * Execute IoD Sim scenarios
+
+> Please note that the instructions provided hereby use the following notation. If a command line
+> starts with a $, that means that it should be executed as a normal user.
+> Otherwise, if a command is preceded by a #, that means that you should run
+> the command under elevated privileges, e.g. root and/or sudo.
+
+Given a Linux-based shell, ensure you have installed `git`. Then clone this
+repository through the following command:
+```
+$ git clone https://github.com/telematics-lab/IoD_Sim.git
+$ cd IoD_Sim/
+```
+If you have Visual Studio Code installed, just execute `code .` and follow the
+aforementioned tasks. Otherwise, execute the following sequence of commands to
+configure and build the project:
+```
+$ ./tools/install-dependencies.sh
+$ ./tools/prepare-ns3.sh
+$ cd ns3/
+$ ./ns3 configure --enable-examples \
+                  --disable-mpi     \
+                  --disable-python  \
+                  --enable-modules=drone
+$ ./ns3 build
+```
+
+## Cite as
+Please cite this work in the following manner:
+> G. Grieco, G. Iacovelli, P. Boccadoro and L. A. Grieco, "Internet of Drones Simulator: Design, Implementation, and Performance Evaluation," in IEEE Internet of Things Journal, 2022, doi: 10.1109/JIOT.2022.3207324.
+
+or through BibTeX:
+```
+@ARTICLE{9893879,
+  author  = {Grieco, Giovanni and Iacovelli, Giovanni and Boccadoro, Pietro and Grieco, Luigi Alfredo},
+  journal = {IEEE Internet of Things Journal},
+  title   = {Internet of Drones Simulator: Design, Implementation, and Performance Evaluation},
+  year    = {2022},
+  volume  = {},
+  number  = {},
+  pages   = {1-1},
+  doi     = {10.1109/JIOT.2022.3207324}
+}
+```
 
 ## License
 
