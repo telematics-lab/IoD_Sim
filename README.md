@@ -65,6 +65,12 @@ $ ./ns3 configure --enable-examples \
                   --enable-modules=drone
 $ ./ns3 build
 ```
+If build was successful, you can run a scenario through the following command:
+```
+./ns3 run \"iod-sim --config=../drone/config/simple_wifi.json\""
+```
+You can replace the config file path with any other JSON that describes a scenario.
+All the scenario data will be available under the `results/` directory.
 
 ## Cite as
 Please cite this work in the following manner:
