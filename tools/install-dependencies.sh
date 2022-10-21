@@ -14,6 +14,7 @@ function install_debian_deps() {
     git           \
     libgsl-dev    \
     libxml2-dev   \
+    make          \
     patch         \
     pkg-config    \
     python3       \
@@ -29,6 +30,7 @@ function install_fedora_deps() {
     git               \
     gsl-devel         \
     libxml2-devel     \
+    make              \
     patch             \
     pkgconf           \
     python3           \
