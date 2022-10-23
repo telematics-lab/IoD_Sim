@@ -20,12 +20,16 @@ the project, for example:
   typos to new content.
 
 IoD_Sim is primarily compatible with **Linux**-based operating systems. You can
-test it on macOS, altough we are not focused on providing first-class support
-for it. For macOS, Windows, or any other operating system, you are encouraged
-to use [Docker](https://www.docker.com/),
-[WSL](https://docs.microsoft.com/en-us/windows/wsl/about) or any other
+test it on macOS and Windows, although we are not focused on providing first-class support
+for it.
+For Windows you are encouraged to use [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about).
+For macOS it is sufficient to install [UTM](https://mac.getutm.app/), a
 (pseudo)virtualization platform that can provide you a stable Linux-based work
-environment. You are welcome to provide new compatibility solutions any time.
+environment. Please remember that on Apple processors you have to install a
+64-bit ARM version of Linux distribution.
+Alternatively, if you are used to container technology, [Docker](https://www.docker.com/)
+can be used to create an image for IoD Sim.
+You are welcome to provide new compatibility solutions any time.
 
 For more details, a dedicated publication that describes the entire simulation
 platform is available on [IEEE Internet of Things Journal](https://doi.org/10.1109/JIOT.2022.3207324), with its preprint freely downloadable from [arXiv](https://doi.org/10.48550/arXiv.2203.13710).
