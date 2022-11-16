@@ -428,7 +428,7 @@ ReportEntity::DoInitializeNetworkStacks ()
              "Mode", StringValue (inspector.GetWifiMode ()));
           auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
             ("Ipv4Address", StringValue (std::get<1>(ipv4AddressMask)),
-             "SubnetMask", StringValue (std::get<2>(ipv4AddressMask)));
+             "BroadcastAddress", StringValue (std::get<2>(ipv4AddressMask)));
           auto droneControlLayer = CreateObjectWithAttributes<DroneControlLayer>
             ("NotImplemented", StringValue ());
 
@@ -460,7 +460,7 @@ ReportEntity::DoInitializeNetworkStacks ()
 
           auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
             ("Ipv4Address", StringValue (std::get<1>(ipv4AddressMask)),
-             "SubnetMask", StringValue (std::get<2>(ipv4AddressMask)));
+             "BroadcastAddress", StringValue (std::get<2>(ipv4AddressMask)));
           ifaces.push_back (i);
           m_networkStacks[ifid].Add (layer);
           m_networkStacks[ifid].Add (phyLayer);
@@ -471,7 +471,7 @@ ReportEntity::DoInitializeNetworkStacks ()
 
           auto ipv4Layer = CreateObjectWithAttributes<Ipv4Layer>
             ("Ipv4Address", StringValue (std::get<1>(ipv4AddressMask)),
-             "SubnetMask", StringValue (std::get<2>(ipv4AddressMask)));
+             "BroadcastAddress", StringValue (std::get<2>(ipv4AddressMask)));
           ifaces.push_back (i);
           m_networkStacks[ifid].Add (layer);
           m_networkStacks[ifid].Add (ipv4Layer);

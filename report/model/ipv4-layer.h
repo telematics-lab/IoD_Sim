@@ -50,8 +50,8 @@ public:
    */
   virtual void Write (xmlTextWriterPtr handle);
 private:
-    std::string m_address;      /// IPv4 Address used
-    std::string m_subnetMask;   /// Network Mask related to the IPv4 address
+    std::string m_hostAddr;      /// IPv4 Address used
+    std::string m_broadcastAddr; /// Network broadcast address
 };
 
 } // namespace ns3

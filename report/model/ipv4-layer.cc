@@ -35,11 +35,11 @@ Ipv4Layer::GetTypeId ()
     .SetParent<ProtocolLayer> ()
     .AddAttribute ("Ipv4Address", "The IPv4 Address",
                    StringValue (),
-                   MakeStringAccessor (&Ipv4Layer::m_address),
+                   MakeStringAccessor (&Ipv4Layer::m_hostAddr),
                    MakeStringChecker ())
-    .AddAttribute ("SubnetMask", "Subnet Mask",
+    .AddAttribute ("BroadcastAddress", "Broadcast Address",
                    StringValue (),
-                   MakeStringAccessor (&Ipv4Layer::m_subnetMask),
+                   MakeStringAccessor (&Ipv4Layer::m_broadcastAddr),
                    MakeStringChecker ())
     ;
 
@@ -75,12 +75,12 @@ Ipv4Layer::Write (xmlTextWriterPtr h)
   /* Nested Elements */
   rc = xmlTextWriterWriteElement(h,
                                  BAD_CAST "address",
-                                 BAD_CAST m_address.c_str ());
+                                 BAD_CAST m_hostAddr.c_str ());
   NS_ASSERT (rc >= 0);
 
   rc = xmlTextWriterWriteElement(h,
-                                 BAD_CAST "subnetMask",
-                                 BAD_CAST m_subnetMask.c_str ());
+                                 BAD_CAST "broadcast",
+                                 BAD_CAST m_broadcastAddr.c_str ());
   NS_ASSERT (rc >= 0);
 
   rc = xmlTextWriterEndElement(h);
