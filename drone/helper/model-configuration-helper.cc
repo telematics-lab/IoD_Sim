@@ -148,6 +148,9 @@ ModelConfigurationHelper::DecodeModelAttribute (const TypeId& model, const rapid
       {
         const auto arr = el["value"].GetArray ();
 
+	if (arr.Size() <= 0)
+	    break;
+
         if (arr.Size () == 3 && arr[0].IsDouble ())
           {
             const Vector3D vec {arr[0].GetDouble (), arr[1].GetDouble (), arr[2].GetDouble ()};
