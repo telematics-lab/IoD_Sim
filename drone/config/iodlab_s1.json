@@ -1,18 +1,4 @@
-/* Scenario "Agrivideo"
- *
- * Dimensionate opportunamente uno scenario che presenti le seguenti
- * caratteristiche. Si deve ricostruire uno scenario di agricoltura di
- * precisione con un drone che analizza una striscia campo da 100m da
- * un’altezza di 20m. Il drone non può decollare né atterrare negli intorni di
- * 20m dal campo. Si ipotizzi che il dispositivo di acquisizione sia una
- * tradizionale camera in grado di acquisire immagini da 1920x1080 pixel a 60
- * fotogrammi al secondo. I dati immagazzinati devono essere salvati in un
- * dispositivo di memoria interno.
- * Nel mentre, il drone deve trasmettere telemetria mediante Wi-Fi ad un ZSP
- * posto ad un vertice del perimetro del campo. Ricavare e mostrare mediante
- * plot RSSI del canale uplink Wi-Fi, il consumo medio di potenza della
- * periferica e la memoria occupata sul dispositivo di archiviazione dati.
- */
+/* Scenario "Agrivideo" */
 {
   "name": "iodlab_s1",
   "resultsPath": "../results/",

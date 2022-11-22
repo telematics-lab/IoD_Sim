@@ -1,16 +1,4 @@
-/* Scenario "Agriput"
- *
- * Dimensionate opportunamente uno scenario che presenti le seguenti
- * caratteristiche. Si deve ricostruire uno scenario di agricoltura di
- * precisione con un drone che analizza un campo da 10.000mq da un’altezza di
- * 30m. Il drone non può decollare né atterrare negli intorni di 50m dal campo.
- * Il drone deve possedere una traiettoria a serpentina, sapendo che la
- * periferica di acquisizione cattura un piano da 20mq. Dimensionare
- * l’infrastruttura radio a terra utilizzando tecnologia LTE per far sì che il
- * drone possa trasmettere dati ad un remote server mediante trasporto TCP.
- * Dimostrare che la traiettoria del drone sia conforme alla richiesta ed il
- * throughput del canale di comunicazione sia di almeno 1.5Mbps.
- */
+/* Scenario "Agriput" */
 {
   "name": "iodlab_s2",
   "resultsPath": "../results/",
