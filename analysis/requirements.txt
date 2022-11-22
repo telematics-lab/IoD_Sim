@@ -1,3 +1,5 @@
 jstyleson
-numpy
 matplotlib
+numpy
+pandas
+plotly
