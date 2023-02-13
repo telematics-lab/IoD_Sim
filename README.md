@@ -78,19 +78,19 @@ All the scenario data will be available under the `results/` directory.
 
 ## Cite as
 Please cite this work in the following manner:
-> G. Grieco, G. Iacovelli, P. Boccadoro and L. A. Grieco, "Internet of Drones Simulator: Design, Implementation, and Performance Evaluation," in IEEE Internet of Things Journal, 2022, doi: 10.1109/JIOT.2022.3207324.
+> G. Grieco, G. Iacovelli, P. Boccadoro and L. A. Grieco, "Internet of Drones Simulator: Design, Implementation, and Performance Evaluation," in IEEE Internet of Things Journal, vol. 10, no. 2, pp. 1476-1498, 15 Jan.15, 2023, doi: 10.1109/JIOT.2022.3207324.
 
 or through BibTeX:
 ```
 @ARTICLE{9893879,
-  author  = {Grieco, Giovanni and Iacovelli, Giovanni and Boccadoro, Pietro and Grieco, Luigi Alfredo},
-  journal = {IEEE Internet of Things Journal},
-  title   = {Internet of Drones Simulator: Design, Implementation, and Performance Evaluation},
-  year    = {2022},
-  volume  = {},
-  number  = {},
-  pages   = {1-1},
-  doi     = {10.1109/JIOT.2022.3207324}
+  author={Grieco, Giovanni and Iacovelli, Giovanni and Boccadoro, Pietro and Grieco, Luigi Alfredo},
+  journal={IEEE Internet of Things Journal}, 
+  title={Internet of Drones Simulator: Design, Implementation, and Performance Evaluation}, 
+  year={2023},
+  volume={10},
+  number={2},
+  pages={1476-1498},
+  doi={10.1109/JIOT.2022.3207324}
 }
 ```
 
