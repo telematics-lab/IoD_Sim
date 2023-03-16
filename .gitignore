@@ -1,9 +1,9 @@
-# Ignore upstream repository
-ns3/src/drone/*
-ns3/src/report/*
+# Ignore build artifacts
+build/
 
-# Ignore third-party builds
-third_party/*
+# Ignore upstream repository
+ns3/build
+ns3/src/iodsim
 
 # Ignore user scenario results, but keep directory in place
 results/*
@@ -14,3 +14,6 @@ __pycache__
 
 # Ignore Python virtual environment
 .venv/
+
+# Ignore background scenario nohup outputs
+nohup.out

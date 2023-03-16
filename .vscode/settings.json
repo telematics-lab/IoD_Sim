@@ -9,6 +9,7 @@
     "editor.tabSize": 2,
     "workbench.tree.indent": 5,
     "files.associations": {
+        "*.json": "jsonc",
         "array": "cpp",
         "hash_map": "cpp",
         "string_view": "cpp",
@@ -94,11 +95,25 @@
         "locale": "cpp",
         "numbers": "cpp",
         "queue": "cpp",
-        "*.json": "jsonc"
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "git.ignoredRepositories": [
         "ns3"
     ],
-    "jupyter.jupyterServerType": "local"
+    "jupyter.jupyterServerType": "local",
+    "cmake.sourceDirectory": "${workspaceFolder}/ns3",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.hg/store/**": true,
+        "**/build": true,
+        "**/results": true,
+    },
+    "clang-tidy.buildPath": "ns3/cmake-cache",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true
 }

@@ -1,0 +1,30 @@
+diff --git a/src/spectrum/model/multi-model-spectrum-channel.h b/src/spectrum/model/multi-model-spectrum-channel.h
+index 6ace8abf5..8acddbb0c 100644
+--- a/src/spectrum/model/multi-model-spectrum-channel.h
++++ b/src/spectrum/model/multi-model-spectrum-channel.h
+@@ -122,7 +122,6 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+   protected:
+     void DoDispose() override;
+ 
+-  private:
+     /**
+      * This method checks if m_rxSpectrumModelInfoMap contains an entry
+      * for the given TX SpectrumModel. If such entry exists, it returns
+@@ -144,6 +143,17 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+      */
+     virtual void StartRx(Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver);
+ 
++    const TxSpectrumModelInfoMap_t& GetTxSpectrumModelInfoMap() const
++    {
++        return m_txSpectrumModelInfoMap;
++    }
++
++    const RxSpectrumModelInfoMap_t& GetRxSpectrumModelInfoMap() const
++    {
++        return m_rxSpectrumModelInfoMap;
++    }
++
++  private:
+     /**
+      * Data structure holding, for each TX SpectrumModel,  all the
+      * converters to any RX SpectrumModel, and all the corresponding
