@@ -1,67 +1,52 @@
-From 6ce44e7c49ab028b73d7e20dad804a340c89969a Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni.grieco@poliba.it>
-Date: Mon, 12 Jul 2021 08:52:59 +0000
-Subject: [PATCH] Add ns3 quirks for IoD Sim interoperability
-
----
- src/lte/helper/lte-helper.h           | 2 ++
- src/mobility/helper/mobility-helper.h | 2 ++
- src/wifi/helper/wifi-helper.h         | 2 ++
- src/wifi/helper/yans-wifi-helper.h    | 2 ++
- 4 files changed, 8 insertions(+)
-
-diff --git a/src/lte/helper/lte-helper.h b/src/lte/helper/lte-helper.h
-index 2731be7ab..a7cbe94cd 100644
---- a/src/lte/helper/lte-helper.h
-+++ b/src/lte/helper/lte-helper.h
-@@ -102,6 +102,8 @@ class SpectrumPropagationLossModel;
- class LteHelper : public Object
- {
- public:
-+  friend class LteSetupHelper;
-+
-   LteHelper (void);
-   virtual ~LteHelper (void);
- 
 diff --git a/src/mobility/helper/mobility-helper.h b/src/mobility/helper/mobility-helper.h
-index 0ea23a9f3..1cb8d7ec1 100644
+index d23f62213..3bfbe8158 100644
 --- a/src/mobility/helper/mobility-helper.h
 +++ b/src/mobility/helper/mobility-helper.h
-@@ -42,6 +42,8 @@ class MobilityModel;
+@@ -43,6 +43,8 @@ class MobilityModel;
  class MobilityHelper
  {
- public:
-+  friend class MobilityFactoryHelper;
+   public:
++    friend class MobilityFactoryHelper;
 +
-   /**
-    * Construct a Mobility Helper which is used to make life easier when working
-    * with mobility models.
+     /**
+      * Construct a Mobility Helper which is used to make life easier when working
+      * with mobility models.
+diff --git a/src/mobility/model/mobility-model.h b/src/mobility/model/mobility-model.h
+index ea39cf16a..645a18c08 100644
+--- a/src/mobility/model/mobility-model.h
++++ b/src/mobility/model/mobility-model.h
+@@ -39,6 +39,8 @@ namespace ns3
+ class MobilityModel : public Object
+ {
+   public:
++    friend class MobilityFactoryHelper;
++
+     /**
+      * Register this type with the TypeId system.
+      * \return the object TypeId
 diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
-index b15888e2f..d7f6ea4f8 100644
+index 5ad4a69d5..00b7078b2 100644
 --- a/src/wifi/helper/wifi-helper.h
 +++ b/src/wifi/helper/wifi-helper.h
-@@ -326,6 +326,8 @@ private:
+@@ -324,6 +324,8 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
  class WifiHelper
  {
- public:
-+  friend class WifiMacFactoryHelper;
+   public:
++    friend class WifiMacFactoryHelper;
 +
-   virtual ~WifiHelper ();
+     virtual ~WifiHelper();
  
-   /**
+     /**
 diff --git a/src/wifi/helper/yans-wifi-helper.h b/src/wifi/helper/yans-wifi-helper.h
-index 61193c80b..5d4324bc7 100644
+index 7dada22e1..34a855ae7 100644
 --- a/src/wifi/helper/yans-wifi-helper.h
 +++ b/src/wifi/helper/yans-wifi-helper.h
-@@ -36,6 +36,8 @@ namespace ns3 {
+@@ -38,6 +38,8 @@ namespace ns3
  class YansWifiChannelHelper
  {
- public:
-+  friend class WifiPhyFactoryHelper;
+   public:
++    friend class WifiPhyFactoryHelper;
 +
-   /**
-    * Create a channel helper without any parameter set. The user must set
-    * them all to be able to call Create later.
--- 
-2.25.1
-
+     /**
+      * Create a channel helper without any parameter set. The user must set
+      * them all to be able to call Create later.

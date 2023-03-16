@@ -10,22 +10,13 @@ Subject: [PATCH] Integrate ns3 with IoD Sim
  create mode 120000 src/drone
  create mode 120000 src/report
 
-diff --git a/src/drone b/src/drone
+diff --git a/src/iodsim b/src/iodsim
 new file mode 120000
 index 000000000..2b76d29a4
 --- /dev/null
-+++ b/src/drone
++++ b/src/iodsim
 @@ -0,0 +1 @@
-+../../drone
++../../src
 \ No newline at end of file
-diff --git a/src/report b/src/report
-new file mode 120000
-index 000000000..5f034e800
---- /dev/null
-+++ b/src/report
-@@ -0,0 +1 @@
-+../../report/
-\ No newline at end of file
--- 
+--
 2.25.1
-

@@ -16,10 +16,7 @@
     {
       "label": "3-Configure IoD Sim",
       "type": "shell",
-      "command": "./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=drone",
-      "options": {
-        "cwd": "${workspaceFolder}/ns3/"
-      },
+      "command": "./tools/configure-iodsim.sh",
       "group": "build",
       "problemMatcher": []
     },
@@ -55,11 +52,54 @@
     {
       "label": "Run IoD Sim",
       "type": "shell",
-      "command": "./ns3 run \"iod-sim --config=${input:scenarioConfigurationFilepath}\"",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} \"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
       "group": "test"
+    },
+    {
+      "label": "Generate 2D REM",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} --radioMap=1\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Generate 3D REM",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} --radioMap=2\"",
+      "options": {
+        "cwd": "${workspaceFolder}/ns3"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Test all IoD Sim scenarios",
+      "type": "shell",
+      "command": "CTEST_PARALLEL_LEVEL=$(nproc) make test",
+      "options": {
+        "cwd": "${workspaceFolder}/build",
+        "env": {
+          "CTEST_OUTPUT_ON_FAILURE": "1"
+        }
+      },
+      "problemMatcher": [],
+      "dependsOn": [
+        "4-Build IoD Sim",
+        "Clear all tests"
+      ]
+    },
+    {
+      "label": "Clear all tests",
+      "type": "shell",
+      "command": "rm -rf results",
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      },
+      "problemMatcher": []
     },
     {
       "label": "Profile IoD Sim",
@@ -150,13 +190,12 @@
       ]
     }
   ],
-
   "inputs": [
     {
       "id": "scenarioConfigurationFilepath",
       "type": "promptString",
       "description": "Path to configuration file for this scenario",
-      "default": "./src/drone/config/simple_wifi.json"
+      "default": "${workspaceFolder}/scenario/simple_wifi.json"
     }
   ]
 }

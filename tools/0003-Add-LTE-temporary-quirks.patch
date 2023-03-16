@@ -1,41 +1,46 @@
-From 1ff5d2f6ca07bcd2b382423ea3e25cf18ecef177 Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni.grieco@poliba.it>
-Date: Mon, 12 Jul 2021 08:53:34 +0000
-Subject: [PATCH] Add LTE temporary quirks
-
----
- src/lte/helper/no-backhaul-epc-helper.cc | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
+diff --git a/src/lte/helper/lte-helper.h b/src/lte/helper/lte-helper.h
+index 0bb8b1a6e..36d74a8bf 100644
+--- a/src/lte/helper/lte-helper.h
++++ b/src/lte/helper/lte-helper.h
+@@ -102,6 +102,8 @@ class SpectrumPropagationLossModel;
+ class LteHelper : public Object
+ {
+   public:
++    friend class LteSetupHelper;
++
+     LteHelper();
+     ~LteHelper() override;
+ 
 diff --git a/src/lte/helper/no-backhaul-epc-helper.cc b/src/lte/helper/no-backhaul-epc-helper.cc
-index adc9bfc23..b69de6097 100644
+index 98ce23bab..92dd4a1ad 100644
 --- a/src/lte/helper/no-backhaul-epc-helper.cc
 +++ b/src/lte/helper/no-backhaul-epc-helper.cc
-@@ -315,8 +315,11 @@ NoBackhaulEpcHelper::AddEnb (Ptr<Node> enb, Ptr<NetDevice> lteEnbNetDevice, uint
-   int retval;
+@@ -331,8 +331,11 @@ NoBackhaulEpcHelper::AddEnb(Ptr<Node> enb,
+     int retval;
  
-   // add an IPv4 stack to the previously created eNB
-+  if (enb->GetObject<Ipv4> () == nullptr)
+     // add an IPv4 stack to the previously created eNB
+-    InternetStackHelper internet;
+-    internet.Install(enb);
++    if (enb->GetObject<Ipv4>() == nullptr)
 +    {
-   InternetStackHelper internet;
-   internet.Install (enb);
++        InternetStackHelper internet;
++        internet.Install(enb);
 +    }
-   NS_LOG_LOGIC ("number of Ipv4 ifaces of the eNB after node creation: " << enb->GetObject<Ipv4> ()->GetNInterfaces ());
+     NS_LOG_LOGIC("number of Ipv4 ifaces of the eNB after node creation: "
+                  << enb->GetObject<Ipv4>()->GetNInterfaces());
  
-   // create LTE socket for the ENB 
-@@ -350,9 +353,9 @@ NoBackhaulEpcHelper::AddEnb (Ptr<Node> enb, Ptr<NetDevice> lteEnbNetDevice, uint
-   NS_LOG_INFO ("Create EpcEnbApplication");
-   Ptr<EpcEnbApplication> enbApp = CreateObject<EpcEnbApplication> (enbLteSocket, enbLteSocket6, cellId);
-   enb->AddApplication (enbApp);
--  NS_ASSERT (enb->GetNApplications () == 1);
--  NS_ASSERT_MSG (enb->GetApplication (0)->GetObject<EpcEnbApplication> () != 0, "cannot retrieve EpcEnbApplication");
--  NS_LOG_LOGIC ("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication (0));
-+  // NS_ASSERT (enb->GetNApplications () == 1);
-+  // NS_ASSERT_MSG (enb->GetApplication (0)->GetObject<EpcEnbApplication> () != 0, "cannot retrieve EpcEnbApplication");
-+  // NS_LOG_LOGIC ("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication (0));
+@@ -370,10 +373,10 @@ NoBackhaulEpcHelper::AddEnb(Ptr<Node> enb,
+     Ptr<EpcEnbApplication> enbApp =
+         CreateObject<EpcEnbApplication>(enbLteSocket, enbLteSocket6, cellIds.at(0));
+     enb->AddApplication(enbApp);
+-    NS_ASSERT(enb->GetNApplications() == 1);
+-    NS_ASSERT_MSG(enb->GetApplication(0)->GetObject<EpcEnbApplication>(),
+-                  "cannot retrieve EpcEnbApplication");
+-    NS_LOG_LOGIC("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication(0));
++    // NS_ASSERT(enb->GetNApplications() == 1);
++    // NS_ASSERT_MSG(enb->GetApplication(0)->GetObject<EpcEnbApplication>(),
++    //               "cannot retrieve EpcEnbApplication");
++    // NS_LOG_LOGIC("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication(0));
  
-   NS_LOG_INFO ("Create EpcX2 entity");
-   Ptr<EpcX2> x2 = CreateObject<EpcX2> ();
--- 
-2.25.1
-
+     NS_LOG_INFO("Create EpcX2 entity");
+     Ptr<EpcX2> x2 = CreateObject<EpcX2>();

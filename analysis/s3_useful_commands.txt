@@ -1,0 +1,8 @@
+Extract the length of the IP payloads for each drone:
+./analysis/pcap-get_ip.sh 25 ./results/<result_dir>/<pcap_name>.pcap
+
+Combining pcap of several simulations, useful for random cases:
+mergecap ./results/random_4_pc/s3_random_4*/internet-30-1.pcap -w ./<output_dir>/<output_pcap_name>.pcap
+
+Combining Uplink SINR file of several simulations, useful for random cases:
+tail -q -n +2 ./results/random_4_pc/*/lte-0-PhySinrUlStats.txt> ./<output_dir>/<output_txt_name>.txt
