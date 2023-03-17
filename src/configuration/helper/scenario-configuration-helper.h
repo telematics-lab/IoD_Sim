@@ -144,6 +144,11 @@ public:
   const double GetDuration () const;
 
   /**
+   * \return The number of entities in the given entityKey category.
+   */
+  std::size_t GetN(const char* entityKey) const;
+
+  /**
    * \return The number of plain nodes to be simulated.
    */
   std::size_t GetNodesN () const;

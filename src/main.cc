@@ -163,10 +163,10 @@ NS_LOG_COMPONENT_DEFINE ("Scenario");
 Scenario::Scenario (int argc, char **argv)
 {
   CONFIGURATOR->Initialize (argc, argv);
-  m_plainNodes.Create (CONFIGURATOR->GetNodesN ());
-  m_drones.Create (CONFIGURATOR->GetDronesN ());
-  m_zsps.Create (CONFIGURATOR->GetZspsN ());
-  m_remoteNodes.Create (CONFIGURATOR->GetRemotesN ());
+  m_plainNodes.Create (CONFIGURATOR->GetN ("nodes"));
+  m_drones.Create (CONFIGURATOR->GetN ("drones"));
+  m_zsps.Create (CONFIGURATOR->GetN ("ZSPs"));
+  m_remoteNodes.Create (CONFIGURATOR->GetN ("remotes"));
   m_backbone.Add (m_remoteNodes);
 
   // Register created entities in their lists

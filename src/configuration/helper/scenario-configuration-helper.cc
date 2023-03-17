@@ -302,6 +302,18 @@ ScenarioConfigurationHelper::GetDuration () const
 }
 
 std::size_t
+ScenarioConfigurationHelper::GetN(const char* ek) const
+{
+  if (!m_config.HasMember(ek))
+    return 0;
+
+  NS_ASSERT_MSG(m_config[ek].IsArray(),
+                "'" << ek << "' property in the configuration file must be an array of objects.");
+
+  return m_config[ek].Size();
+}
+
+std::size_t
 ScenarioConfigurationHelper::GetNodesN () const
 {
   // optional field
@@ -790,23 +802,10 @@ ScenarioConfigurationHelper::InitializeLogging (const bool &onFile)
   NS_LOG_INFO ("# Date: " << GetCurrentDateTime ());
   NS_LOG_INFO ("####");
 
-  NS_LOG_LOGIC ("Number of drones: " << GetDronesN ());
-  if (m_config.HasMember ("zsps"))
-    {
-      NS_LOG_LOGIC ("Number of ZSPs: " << GetZspsN ());
-    }
-  if (m_config.HasMember ("antennas"))
-    {
-      NS_LOG_LOGIC ("Number of antennas: " << GetAntennasN ());
-    }
-  if (m_config.HasMember ("nodes"))
-    {
-      NS_LOG_LOGIC ("Number of plain nodes: " << GetNodesN ());
-    }
-  if (m_config.HasMember ("remotes"))
-    {
-      NS_LOG_LOGIC ("Number of remotes: " << GetRemotesN ());
-    }
+  NS_LOG_LOGIC ("Number of drones: " << GetN ("drones"));
+  NS_LOG_LOGIC ("Number of ZSPs: " << GetN ("ZSPs"));
+  NS_LOG_LOGIC ("Number of plain nodes: " << GetN ("nodes"));
+  NS_LOG_LOGIC ("Number of remotes: " << GetN ("remotes"));
   NS_LOG_LOGIC ("Duration: " << GetDuration () << "s");
 }
 
