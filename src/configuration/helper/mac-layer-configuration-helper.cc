@@ -62,6 +62,7 @@ MacLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonMacLa
   else
     {
       NS_FATAL_ERROR ("MAC Layer of Type " << macType << " is not supported!");
+      std::terminate();
     }
 }
 
