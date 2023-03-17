@@ -59,6 +59,7 @@ NetworkLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
   else
     {
       NS_FATAL_ERROR ("Network Layer of Type " << type << " is not supported!");
+      std::terminate();
     }
 }
 

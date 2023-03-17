@@ -101,6 +101,7 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
   else
     {
       NS_FATAL_ERROR ("PHY Layer of Type " << phyType << " is not supported!");
+      std::terminate();
     }
 }
 
