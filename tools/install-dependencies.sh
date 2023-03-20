@@ -8,6 +8,7 @@ function install_debian_deps() {
   sudo apt update \
   && sudo apt install -y --no-install-recommends \
     clang-format      \
+    cmake             \
     g++               \
     gdb               \
     gcc               \
@@ -22,7 +23,6 @@ function install_debian_deps() {
     python3-pip       \
     python-is-python3 \
     rapidjson-dev
-  sudo pip install cmake
 }
 
 function install_fedora_deps() {
