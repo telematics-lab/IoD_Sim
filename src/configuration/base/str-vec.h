@@ -31,14 +31,14 @@ namespace ns3 {
 /**
  * \brief Definition of a new attribute type, in the form vector<std::string>.
  */
-class StringVector
+class StrVec
 {
 public:
   typedef std::vector<std::string>::const_iterator Iterator;
 
-  StringVector ();
-  StringVector (std::vector<std::string> coefficients);
-  StringVector (const StringVector &a);
+  StrVec ();
+  StrVec (std::vector<std::string> coefficients);
+  StrVec (const StrVec &a);
 
   Iterator Begin () const;
   Iterator begin () const;
@@ -59,12 +59,12 @@ private:
   std::vector<std::string> m_stringVector;
 };
 
-ATTRIBUTE_HELPER_HEADER (StringVector);
+ATTRIBUTE_HELPER_HEADER (StrVec);
 
 std::ostream & operator<< (std::ostream &os,
-                           const StringVector &StringVector);
+                           const StrVec &sv);
 std::istream & operator>> (std::istream &is,
-                           StringVector &StringVector);
+                           StrVec &sv);
 
 } // namespace ns3
 
