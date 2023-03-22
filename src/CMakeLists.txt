@@ -14,7 +14,7 @@ set(source_files
   configuration/base/model-configuration-matrix.cc
   configuration/base/model-configuration-vector.cc
   configuration/base/model-configuration.cc
-  configuration/base/string-vector.cc
+  configuration/base/str-vec.cc
   configuration/helper/drone-energy-model-helper.cc
   configuration/helper/entity-configuration-helper.cc
   configuration/helper/ipv4-simulation-helper.cc
@@ -110,7 +110,7 @@ set(header_files
   configuration/base/model-configuration-matrix.h
   configuration/base/model-configuration-vector.h
   configuration/base/model-configuration.h
-  configuration/base/string-vector.h
+  configuration/base/str-vec.h
   configuration/helper/drone-energy-model-helper.h
   configuration/helper/entity-configuration-helper.h
   configuration/helper/ipv4-simulation-helper.h

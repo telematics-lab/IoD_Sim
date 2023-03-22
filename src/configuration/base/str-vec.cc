@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "string-vector.h"
+#include "str-vec.h"
 
 #include <ns3/integer.h>
 #include <ns3/names.h>
@@ -23,86 +23,86 @@
 
 namespace ns3 {
 
-ATTRIBUTE_HELPER_CPP (StringVector);
+ATTRIBUTE_HELPER_CPP (StrVec);
 
-StringVector::StringVector ()
+StrVec::StrVec ()
 {
 }
 
-StringVector::StringVector (std::vector<std::string> strs)
+StrVec::StrVec (std::vector<std::string> strs)
 {
   for (auto s : strs)
     Add (s);
 }
 
-StringVector::StringVector (const StringVector &a)
+StrVec::StrVec (const StrVec &a)
 {
   for (auto c = a.Begin (); c != a.End (); c++)
     Add (*c);
 }
 
-StringVector::Iterator
-StringVector::Begin () const
+StrVec::Iterator
+StrVec::Begin () const
 {
   return m_stringVector.begin ();
 }
 
-StringVector::Iterator
-StringVector::begin () const
+StrVec::Iterator
+StrVec::begin () const
 {
   return m_stringVector.begin ();
 }
 
-StringVector::Iterator
-StringVector::End () const
+StrVec::Iterator
+StrVec::End () const
 {
   return m_stringVector.end ();
 }
 
-StringVector::Iterator
-StringVector::end () const
+StrVec::Iterator
+StrVec::end () const
 {
   return m_stringVector.end ();
 }
 
 uint32_t
-StringVector::GetN () const
+StrVec::GetN () const
 {
   return m_stringVector.size ();
 }
 
 std::vector<std::string>
-StringVector::Get () const
+StrVec::Get () const
 {
   return m_stringVector;
 }
 
 std::string
-StringVector::Get (const uint32_t i) const
+StrVec::Get (const uint32_t i) const
 {
   return m_stringVector[i];
 }
 
 std::string
-StringVector::GetFront () const
+StrVec::GetFront () const
 {
   return m_stringVector.front ();
 }
 
 std::string
-StringVector::GetBack () const
+StrVec::GetBack () const
 {
   return m_stringVector.back ();
 }
 
 void
-StringVector::Add (std::string s)
+StrVec::Add (std::string s)
 {
   m_stringVector.push_back (s);
 }
 
 std::ostream &
-operator<< (std::ostream &os, const StringVector &v)
+operator<< (std::ostream &os, const StrVec &v)
 {
   os << v.GetN () << ";";
 
@@ -117,7 +117,7 @@ operator<< (std::ostream &os, const StringVector &v)
 }
 
 std::istream &
-operator>> (std::istream &is, StringVector &v)
+operator>> (std::istream &is, StrVec &v)
 {
   char separator = '\0';
   uint32_t n;
@@ -143,4 +143,4 @@ operator>> (std::istream &is, StringVector &v)
   return is;
 }
 
-} // namespace ns3
+} // namespace iodsim

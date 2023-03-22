@@ -1,0 +1,169 @@
+From c0e40b0e83863acc52162cd4c959e8153c3bb024 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Tue, 21 Mar 2023 12:13:21 +0000
+Subject: [PATCH 1/2] Remove unnecessary includes for unlinked modules in
+ examples
+
+Fix #873
+---
+ examples/ipv6/fragmentation-ipv6-two-MTU.cc     | 1 -
+ examples/ipv6/fragmentation-ipv6.cc             | 1 -
+ examples/socket/socket-options-ipv4.cc          | 1 -
+ examples/socket/socket-options-ipv6.cc          | 1 -
+ src/dsdv/examples/dsdv-manet.cc                 | 1 -
+ src/fd-net-device/examples/fd-emu-onoff.cc      | 1 -
+ src/internet/examples/neighbor-cache-example.cc | 1 -
+ src/wimax/examples/wimax-ipv4.cc                | 1 -
+ src/wimax/examples/wimax-multicast.cc           | 1 -
+ src/wimax/examples/wimax-simple.cc              | 1 -
+ 10 files changed, 10 deletions(-)
+
+diff --git a/examples/ipv6/fragmentation-ipv6-two-MTU.cc b/examples/ipv6/fragmentation-ipv6-two-MTU.cc
+index a3205c008..8a58cb80c 100644
+--- a/examples/ipv6/fragmentation-ipv6-two-MTU.cc
++++ b/examples/ipv6/fragmentation-ipv6-two-MTU.cc
+@@ -32,7 +32,6 @@
+ #include "ns3/applications-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+-#include "ns3/internet-apps-module.h"
+ #include "ns3/internet-module.h"
+ #include "ns3/ipv6-routing-table-entry.h"
+ #include "ns3/ipv6-static-routing-helper.h"
+diff --git a/examples/ipv6/fragmentation-ipv6.cc b/examples/ipv6/fragmentation-ipv6.cc
+index 3cbd9f708..5708739a1 100644
+--- a/examples/ipv6/fragmentation-ipv6.cc
++++ b/examples/ipv6/fragmentation-ipv6.cc
+@@ -30,7 +30,6 @@
+ #include "ns3/applications-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+-#include "ns3/internet-apps-module.h"
+ #include "ns3/internet-module.h"
+ #include "ns3/ipv6-routing-table-entry.h"
+ #include "ns3/ipv6-static-routing-helper.h"
+diff --git a/examples/socket/socket-options-ipv4.cc b/examples/socket/socket-options-ipv4.cc
+index 417eaee9e..774a5876d 100644
+--- a/examples/socket/socket-options-ipv4.cc
++++ b/examples/socket/socket-options-ipv4.cc
+@@ -22,7 +22,6 @@
+ //
+ // - UDP flows from n0 to n1
+ 
+-#include "ns3/applications-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+ #include "ns3/internet-module.h"
+diff --git a/examples/socket/socket-options-ipv6.cc b/examples/socket/socket-options-ipv6.cc
+index dd2609a39..067e5d1fc 100644
+--- a/examples/socket/socket-options-ipv6.cc
++++ b/examples/socket/socket-options-ipv6.cc
+@@ -22,7 +22,6 @@
+ //
+ // - UDP flows from n0 to n1
+ 
+-#include "ns3/applications-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+ #include "ns3/internet-module.h"
+diff --git a/src/dsdv/examples/dsdv-manet.cc b/src/dsdv/examples/dsdv-manet.cc
+index 63ca9ef19..63b6bcca5 100644
+--- a/src/dsdv/examples/dsdv-manet.cc
++++ b/src/dsdv/examples/dsdv-manet.cc
+@@ -29,7 +29,6 @@
+  */
+ 
+ #include "ns3/applications-module.h"
+-#include "ns3/config-store-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/dsdv-helper.h"
+ #include "ns3/internet-module.h"
+diff --git a/src/fd-net-device/examples/fd-emu-onoff.cc b/src/fd-net-device/examples/fd-emu-onoff.cc
+index 8a8cd9056..4145263f8 100644
+--- a/src/fd-net-device/examples/fd-emu-onoff.cc
++++ b/src/fd-net-device/examples/fd-emu-onoff.cc
+@@ -103,7 +103,6 @@
+ //
+ 
+ #include "ns3/applications-module.h"
+-#include "ns3/config-store-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/fd-net-device-module.h"
+ #include "ns3/internet-module.h"
+diff --git a/src/internet/examples/neighbor-cache-example.cc b/src/internet/examples/neighbor-cache-example.cc
+index 8e92a6d34..6981b58fa 100644
+--- a/src/internet/examples/neighbor-cache-example.cc
++++ b/src/internet/examples/neighbor-cache-example.cc
+@@ -283,7 +283,6 @@
+ #include "ns3/csma-module.h"
+ #include "ns3/internet-module.h"
+ #include "ns3/network-module.h"
+-#include "ns3/point-to-point-module.h"
+ 
+ using namespace ns3;
+ 
+diff --git a/src/wimax/examples/wimax-ipv4.cc b/src/wimax/examples/wimax-ipv4.cc
+index 738bc5624..0afa3eac2 100644
+--- a/src/wimax/examples/wimax-ipv4.cc
++++ b/src/wimax/examples/wimax-ipv4.cc
+@@ -50,7 +50,6 @@
+ //       +-----+    +-----+    +-----+
+ 
+ #include "ns3/applications-module.h"
+-#include "ns3/config-store-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/global-route-manager.h"
+ #include "ns3/internet-module.h"
+diff --git a/src/wimax/examples/wimax-multicast.cc b/src/wimax/examples/wimax-multicast.cc
+index b4ad8b714..aeae8fa65 100644
+--- a/src/wimax/examples/wimax-multicast.cc
++++ b/src/wimax/examples/wimax-multicast.cc
+@@ -50,7 +50,6 @@
+ //       +-----+    +-----+    +-----+    +-----+    +-----+
+ 
+ #include "ns3/applications-module.h"
+-#include "ns3/config-store-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+ #include "ns3/global-route-manager.h"
+diff --git a/src/wimax/examples/wimax-simple.cc b/src/wimax/examples/wimax-simple.cc
+index e917ce313..d376e0727 100644
+--- a/src/wimax/examples/wimax-simple.cc
++++ b/src/wimax/examples/wimax-simple.cc
+@@ -42,7 +42,6 @@
+ //       +-----+
+ 
+ #include "ns3/applications-module.h"
+-#include "ns3/config-store-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/global-route-manager.h"
+ #include "ns3/internet-module.h"
+-- 
+2.39.2
+
+
+From bd19c049de33800dda1aab415df9f9a0e8080630 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Wed, 22 Mar 2023 15:46:02 +0000
+Subject: [PATCH 2/2] fixup! Remove unnecessary includes for unlinked modules
+ in examples
+
+---
+ examples/ipv6/fragmentation-ipv6-PMTU.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/examples/ipv6/fragmentation-ipv6-PMTU.cc b/examples/ipv6/fragmentation-ipv6-PMTU.cc
+index be64d391c..b25c2b0ab 100644
+--- a/examples/ipv6/fragmentation-ipv6-PMTU.cc
++++ b/examples/ipv6/fragmentation-ipv6-PMTU.cc
+@@ -33,7 +33,6 @@
+ #include "ns3/applications-module.h"
+ #include "ns3/core-module.h"
+ #include "ns3/csma-module.h"
+-#include "ns3/internet-apps-module.h"
+ #include "ns3/internet-module.h"
+ #include "ns3/ipv6-routing-table-entry.h"
+ #include "ns3/ipv6-static-routing-helper.h"
+-- 
+2.39.2
+

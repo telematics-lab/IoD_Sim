@@ -35,7 +35,7 @@
 #include <ns3/int-vector.h>
 #include <ns3/model-configuration-vector.h>
 #include <ns3/model-configuration-matrix.h>
-#include <ns3/string-vector.h>
+#include <ns3/str-vec.h>
 
 namespace ns3 {
 
@@ -207,13 +207,13 @@ ModelConfigurationHelper::DecodeAttributeValue (const std::string& modelName, co
       {
         const auto arr = jAttr.GetArray ();
 
-        if (arr[0].IsString ()) // StringVectorValue
+        if (arr[0].IsString()) // StrVecValue
           {
             std::vector<std::string> values;
             values.reserve (arr.Size ());
             for (auto& el : arr)
               values.push_back (el.GetString ());
-            attrValue = attrInfo.checker->CreateValidValue (StringVectorValue (values));
+            attrValue = attrInfo.checker->CreateValidValue(StrVecValue(values));
           }
         else if (arr.Size () == 3 && arr[0].IsDouble () && attrInfo.name == "Position")
           {
