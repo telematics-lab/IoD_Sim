@@ -20,52 +20,51 @@
 #include <ns3/assert.h>
 #include <ns3/double.h>
 #include <ns3/fatal-error.h>
+#include <ns3/ipv4-network-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
 
-#include <ns3/ipv4-network-layer-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 Ptr<NetworkLayerConfiguration>
-NetworkLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& json)
+NetworkLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
 {
-  NS_ASSERT_MSG (json.IsObject (),
-                 "Network Layer definition must be an object, got " << json.GetType ());
-  NS_ASSERT_MSG (json.HasMember ("type"),
-                 "Network Layer definition must have 'type' property.");
-  NS_ASSERT_MSG (json["type"].IsString (),
-                 "Network Layer 'type' property must be a string.");
+    NS_ASSERT_MSG(json.IsObject(),
+                  "Network Layer definition must be an object, got " << json.GetType());
+    NS_ASSERT_MSG(json.HasMember("type"), "Network Layer definition must have 'type' property.");
+    NS_ASSERT_MSG(json["type"].IsString(), "Network Layer 'type' property must be a string.");
 
-  const std::string type = json["type"].GetString ();
-  if (type == "ipv4")
-    {
-      NS_ASSERT_MSG (json.HasMember ("address"),
-                    "Network Layer definition must have 'address' property.");
-      NS_ASSERT_MSG (json["address"].IsString (),
-                    "Network Layer 'address' property must be a string.");
-      NS_ASSERT_MSG (json.HasMember ("mask"),
-                    "Network Layer definition must have 'mask' property.");
-      NS_ASSERT_MSG (json["mask"].IsString (),
-                    "Network Layer 'mask' property must be a string.");
-      NS_ASSERT_MSG (json["gateway"].IsString (),
-                    "Network Layer 'gateway' property must be a string.");
+    const std::string type = json["type"].GetString();
+    Ptr<NetworkLayerConfiguration> netConfig{nullptr};
 
-      return Create<Ipv4NetworkLayerConfiguration> (json["type"].GetString (),
-                                                    json["address"].GetString (),
-                                                    json["mask"].GetString (),
-                                                    json["gateway"].GetString ());
-    }
-  else
+    if (type == "ipv4")
     {
-      NS_FATAL_ERROR ("Network Layer of Type " << type << " is not supported!");
-      std::terminate();
+        NS_ASSERT_MSG(json.HasMember("address"),
+                      "Network Layer definition must have 'address' property.");
+        NS_ASSERT_MSG(json["address"].IsString(),
+                      "Network Layer 'address' property must be a string.");
+        NS_ASSERT_MSG(json.HasMember("mask"),
+                      "Network Layer definition must have 'mask' property.");
+        NS_ASSERT_MSG(json["mask"].IsString(), "Network Layer 'mask' property must be a string.");
+        NS_ASSERT_MSG(json["gateway"].IsString(),
+                      "Network Layer 'gateway' property must be a string.");
+
+        netConfig = Create<Ipv4NetworkLayerConfiguration>(json["type"].GetString(),
+                                                          json["address"].GetString(),
+                                                          json["mask"].GetString(),
+                                                          json["gateway"].GetString());
     }
+    else
+    {
+        NS_FATAL_ERROR("Network Layer of Type " << type << " is not supported!");
+    }
+
+    return netConfig;
 }
 
-NetworkLayerConfigurationHelper::NetworkLayerConfigurationHelper ()
+NetworkLayerConfigurationHelper::NetworkLayerConfigurationHelper()
 {
-
 }
 
 } // namespace ns3

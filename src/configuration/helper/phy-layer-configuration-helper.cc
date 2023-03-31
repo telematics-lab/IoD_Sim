@@ -41,6 +41,8 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
                  "PHY Layer 'type' property must be a string.");
 
   const std::string phyType = jsonPhyLayer["type"].GetString ();
+  Ptr<PhyLayerConfiguration> phyConfig{nullptr};
+
   if (phyType == "wifi")
     {
       NS_ASSERT_MSG (jsonPhyLayer.HasMember ("standard"),
@@ -93,7 +95,7 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
       const auto spectrumModel = ModelConfigurationHelper::Get (jsonPhyLayer["channel"]["spectrumModel"]);
       const auto propagationLossModel = ModelConfigurationHelper::GetOptional (jsonPhyLayer["channel"].GetObject (), "propagationLossModel");
 
-      return Create<LtePhyLayerConfiguration> (phyType,
+      phyConfig = Create<LtePhyLayerConfiguration> (phyType,
                                                phyAttributes,
                                                propagationLossModel,
                                                spectrumModel);
@@ -101,8 +103,9 @@ PhyLayerConfigurationHelper::GetConfiguration (const rapidjson::Value& jsonPhyLa
   else
     {
       NS_FATAL_ERROR ("PHY Layer of Type " << phyType << " is not supported!");
-      std::terminate();
     }
+
+  return phyConfig;
 }
 
 PhyLayerConfigurationHelper::PhyLayerConfigurationHelper ()
