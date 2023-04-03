@@ -17,30 +17,28 @@
  */
 #include "patch-configurator.h"
 
+#include <ns3/irs.h>
 #include <ns3/pointer.h>
 
-#include <ns3/irs.h>
-
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("PatchConfigurator");
-NS_OBJECT_ENSURE_REGISTERED (PatchConfigurator);
-
-PatchConfigurator::PatchConfigurator ()
+namespace ns3
 {
 
+NS_LOG_COMPONENT_DEFINE("PatchConfigurator");
+NS_OBJECT_ENSURE_REGISTERED(PatchConfigurator);
+
+PatchConfigurator::PatchConfigurator()
+{
 }
 
-PatchConfigurator::~PatchConfigurator ()
+PatchConfigurator::~PatchConfigurator()
 {
-
 }
 
 void
-PatchConfigurator::UpdateConfiguration (const ModelConfigurationVector& p)
+PatchConfigurator::UpdateConfiguration(const ModelConfigurationVector& c)
 {
-  Ptr<Irs> aggregatedIrs = GetObject<Irs> ();
-  aggregatedIrs->SetPatchVector (p);
+    Ptr<Irs> aggregatedIrs = GetObject<Irs>();
+    aggregatedIrs->SetPatchVector(c);
 }
 
-} //namespace ns3
+} // namespace ns3

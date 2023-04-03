@@ -18,37 +18,62 @@
 #ifndef DEFINED_PATCH_CONFIGURATOR_H
 #define DEFINED_PATCH_CONFIGURATOR_H
 
-#include <ns3/object.h>
-#include <ns3/pointer.h>
-
 #include <ns3/double-vector.h>
 #include <ns3/model-configuration-matrix.h>
+#include <ns3/object.h>
 #include <ns3/patch-configurator.h>
+#include <ns3/pointer.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates the patch configuration of an Irs during the simulation with defined periods.
+ * \ingroup irs
+ * Defines an object which, aggregated to an Irs, updates its patch organisation during the
+ * simulation. The different configurations are installed for a duration equal to that defined in
+ * m_periods vector.
  */
 class DefinedPatchConfigurator : public PatchConfigurator
 {
-public:
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * \brief Register this configurator as a type in ns-3 TypeId System.
+     */
+    static TypeId GetTypeId(void);
 
-  DefinedPatchConfigurator ();
-  ~DefinedPatchConfigurator ();
+    /**
+     * \brief Default constructor
+     */
+    DefinedPatchConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~DefinedPatchConfigurator();
 
-  void ScheduleUpdates ();
-  void SetPeriods(const DoubleVector &a);
-  void SetLifeTimes();
+    /**
+     * \brief When invoked, it schedules the patch organisation updates over time, following the
+     * periods defined in the m_periods vector
+     */
+    void ScheduleUpdates();
+    /**
+     * \brief Set the m_periods vector
+     * \param periods a DoubleVector containing the periods
+     */
+    void SetPeriods(const DoubleVector& periods);
+    /**
+     * \brief Set the LifeTime attribute for each patch of each configuration. It is used by
+     * each dinamic patch to schedule the update of nodes to be served
+     */
+    void SetLifeTimes();
 
-protected:
-  void DoDispose (void);
-  void DoInitialize (void);
+  protected:
+    void DoDispose(void);
+    void DoInitialize(void);
 
-private:
-  ModelConfigurationMatrix m_configurations;
-  std::vector<double> m_periods;
+  private:
+    ModelConfigurationMatrix
+        m_configurations; ///< Matrix of configurations (i.e. a vector of vector of patches)
+    std::vector<double> m_periods; ///< Vector of periods for which each configuration is valid
 };
 
 } // namespace ns3

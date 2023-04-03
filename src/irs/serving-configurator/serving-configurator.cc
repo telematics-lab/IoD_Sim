@@ -19,26 +19,25 @@
 
 #include <ns3/irs-patch.h>
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("ServingConfigurator");
-NS_OBJECT_ENSURE_REGISTERED (ServingConfigurator);
-
-ServingConfigurator::ServingConfigurator ()
+namespace ns3
 {
 
+NS_LOG_COMPONENT_DEFINE("ServingConfigurator");
+NS_OBJECT_ENSURE_REGISTERED(ServingConfigurator);
+
+ServingConfigurator::ServingConfigurator()
+{
 }
 
-ServingConfigurator::~ServingConfigurator ()
+ServingConfigurator::~ServingConfigurator()
 {
-
 }
 
 void
-ServingConfigurator::UpdateServingNodes (std::pair<std::string,std::string> servingnodes)
+ServingConfigurator::UpdateServingNodes(std::pair<std::string, std::string> servingnodes)
 {
-  Ptr<IrsPatch> aggregatePatch = GetObject<IrsPatch> ();
-  aggregatePatch->SetServingNodes (servingnodes.first, servingnodes.second);
+    Ptr<IrsPatch> aggregatePatch = GetObject<IrsPatch>();
+    aggregatePatch->SetServingNodes(servingnodes.first, servingnodes.second);
 }
 
-} //namespace ns3
+} // namespace ns3

@@ -18,38 +18,60 @@
 #ifndef RANDOM_SERVING_CONFIGURATOR_H
 #define RANDOM_SERVING_CONFIGURATOR_H
 
+#include <ns3/double-vector.h>
 #include <ns3/object.h>
 #include <ns3/pointer.h>
 #include <ns3/random-variable-stream.h>
-
-#include <ns3/double-vector.h>
 #include <ns3/serving-configurator.h>
 #include <ns3/str-vec.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates Serving Nodes of an Irs Patch with a fixed time frequency choosing a random pair.
+ * \ingroup irs
+ * Defines an object which, aggregated to an Irs Patch, updates the pair of nodes to be served
+ * during the patch life time. The update of the serving pair is performed with a round robin
+ * approach, choosing randomly a pair from the m_servingpairs vector
  */
 class RandomServingConfigurator : public ServingConfigurator
 {
-public:
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * \brief Register this configurator as a type in ns-3 TypeId System.
+     */
+    static TypeId GetTypeId(void);
 
-  RandomServingConfigurator ();
-  ~RandomServingConfigurator ();
+    /**
+     * \brief Default constructor
+     */
+    RandomServingConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~RandomServingConfigurator();
 
-  void ScheduleUpdates ();
-  void SetServingPairs(const StrVec& pairs);
+    /**
+     * \brief When invoked, it schedules the updates of the nodes to be served over time with a
+     * period of one m_timeslot, until the end of patch lifetime is reached
+     */
+    void ScheduleUpdates();
+    /**
+     * \brief Set the vector of pairs to be served using a string vector containing the path of the
+     * objects
+     * \param pairs a string vector containing the pairs to be served
+     */
+    void SetServingPairs(const StrVec& pairs);
 
-protected:
-  void DoDispose (void);
-  void DoInitialize (void);
+  protected:
+    void DoDispose(void);
+    void DoInitialize(void);
 
-private:
-  std::vector<std::pair<std::string, std::string>> m_servingpairs;
-  double m_timeslot;
-  Ptr<UniformRandomVariable> m_rng;
+  private:
+    std::vector<std::pair<std::string, std::string>>
+        m_servingpairs;               ///< Vector of pairs to be served
+    double m_timeslot;                ///< The duration of a time slot
+    Ptr<UniformRandomVariable> m_rng; ///< Random number generator used to choose the next pair
 };
 
 } // namespace ns3
