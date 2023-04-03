@@ -17,87 +17,89 @@
  */
 #include "tcp-stub-client-application.h"
 
+#include <ns3/drone.h>
+#include <ns3/nstime.h>
 #include <ns3/seq-ts-header.h>
 #include <ns3/simulator.h>
 #include <ns3/socket-factory.h>
 #include <ns3/tcp-socket-factory.h>
 #include <ns3/uinteger.h>
-#include <ns3/nstime.h>
 
-#include <ns3/drone.h>
+namespace ns3
+{
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("TcpStubClientApplication");
-NS_OBJECT_ENSURE_REGISTERED (TcpStubClientApplication);
+NS_LOG_COMPONENT_DEFINE("TcpStubClientApplication");
+NS_OBJECT_ENSURE_REGISTERED(TcpStubClientApplication);
 
 TypeId
-TcpStubClientApplication::GetTypeId ()
+TcpStubClientApplication::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::TcpStubClientApplication")
-    .SetParent<TcpStorageClientApplication> ()
-    .SetGroupName ("Applications")
-    .AddConstructor<TcpStubClientApplication> ()
-    .AddAttribute ("TxFrequency", "Transmission frequency for packets.",
-                   DoubleValue (1),
-                   MakeDoubleAccessor (&TcpStubClientApplication::m_txFrequency),
-                   MakeDoubleChecker<double> (0))
-    ;
+    static TypeId tid =
+        TypeId("ns3::TcpStubClientApplication")
+            .SetParent<TcpStorageClientApplication>()
+            .SetGroupName("Applications")
+            .AddConstructor<TcpStubClientApplication>()
+            .AddAttribute("TxFrequency",
+                          "Transmission frequency for packets.",
+                          DoubleValue(1),
+                          MakeDoubleAccessor(&TcpStubClientApplication::m_txFrequency),
+                          MakeDoubleChecker<double>(0));
 
-  return tid;
+    return tid;
 }
 
-TcpStubClientApplication::TcpStubClientApplication ()
+TcpStubClientApplication::TcpStubClientApplication()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-TcpStubClientApplication::~TcpStubClientApplication ()
+TcpStubClientApplication::~TcpStubClientApplication()
 {
-  NS_LOG_FUNCTION (this);
-}
-
-void
-TcpStubClientApplication::DoInitialize ()
-{
-  m_txInterval = Seconds (1.0 / m_txFrequency);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-TcpStubClientApplication::StartApplication ()
+TcpStubClientApplication::DoInitialize()
 {
-  NS_LOG_FUNCTION (this);
-  TcpClientServerApplication::StartApplication ();
+    m_txInterval = Seconds(1.0 / m_txFrequency);
+}
 
-  Simulator::ScheduleNow (&TcpStubClientApplication::Connect, this); // TODO: parametrize Seconds (0.5)
-  //Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+void
+TcpStubClientApplication::StartApplication()
+{
+    NS_LOG_FUNCTION(this);
+    TcpClientServerApplication::StartApplication();
+
+    Simulator::ScheduleNow(&TcpStubClientApplication::Connect,
+                           this); // TODO: parametrize Seconds (0.5)
+    // Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
 }
 
 bool
-TcpStubClientApplication::Connect ()
+TcpStubClientApplication::Connect()
 {
-  NS_LOG_FUNCTION (this);
-  const bool isConnected = TcpClientServerApplication::Connect ();
+    NS_LOG_FUNCTION(this);
+    const bool isConnected = TcpClientServerApplication::Connect();
 
-  if (isConnected)
+    if (isConnected)
     {
-      Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+        Simulator::Schedule(m_txInterval, &TcpStubClientApplication::SendPacket, this);
     }
-  else
+    else
     {
-      NS_LOG_LOGIC ("Connect will retry again later.");
-      Simulator::Schedule (Seconds (0.5), &TcpStubClientApplication::Connect, this);
+        NS_LOG_LOGIC("Connect will retry again later.");
+        Simulator::Schedule(Seconds(0.5), &TcpStubClientApplication::Connect, this);
     }
 
-  return isConnected;
+    return isConnected;
 }
 
 void
-TcpStubClientApplication::SendPacket ()
+TcpStubClientApplication::SendPacket()
 {
-  NS_LOG_FUNCTION (this << GetNode ()->GetId ());
-  DoSendPacket (GetPayloadSize ());
-  Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
+    NS_LOG_FUNCTION(this << GetNode()->GetId());
+    DoSendPacket(GetPayloadSize());
+    Simulator::Schedule(m_txInterval, &TcpStubClientApplication::SendPacket, this);
 }
 
 } // namespace ns3

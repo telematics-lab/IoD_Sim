@@ -19,39 +19,41 @@
  */
 #ifndef IPV4_LAYER_H
 #define IPV4_LAYER_H
-#include <libxml/xmlwriter.h>
-
 #include "protocol-layer.h"
 
-namespace ns3 {
+#include <libxml/xmlwriter.h>
+
+namespace ns3
+{
 
 class Ipv4Layer : public ProtocolLayer
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  Ipv4Layer ();
-  /**
-   * Default destructor
-   */
-  ~Ipv4Layer ();
+    /**
+     * Default constructor
+     */
+    Ipv4Layer();
+    /**
+     * Default destructor
+     */
+    ~Ipv4Layer();
 
-  /**
-   * Write IPv4 Layer report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  virtual void Write (xmlTextWriterPtr handle);
-private:
-    std::string m_address;      /// IPv4 Address used
-    std::string m_subnetMask;   /// Network Mask related to the IPv4 address
+    /**
+     * Write IPv4 Layer report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    virtual void Write(xmlTextWriterPtr handle);
+
+  private:
+    std::string m_address;    /// IPv4 Address used
+    std::string m_subnetMask; /// Network Mask related to the IPv4 address
 };
 
 } // namespace ns3

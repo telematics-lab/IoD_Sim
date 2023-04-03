@@ -17,131 +17,132 @@
  */
 #include "curve.h"
 
-#include <cmath>
-
-#include <vector>
-
 #include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
 #include <ns3/vector.h>
 
-namespace ns3 {
+#include <cmath>
+#include <vector>
 
-NS_LOG_COMPONENT_DEFINE ("Curve");
+namespace ns3
+{
+
+NS_LOG_COMPONENT_DEFINE("Curve");
 
 class CurvePriv
 {
-public:
-  /**
-   * Get virtual knots according to real knots' interest level.
-   */
-  static const FlightPlan GetVirtualKnots (const FlightPlan knots)
-  {
-    FlightPlan virtualKnots {};
+  public:
+    /**
+     * Get virtual knots according to real knots' interest level.
+     */
+    static const FlightPlan GetVirtualKnots(const FlightPlan knots)
+    {
+        FlightPlan virtualKnots{};
 
-    for (auto k = knots.Begin (); k != knots.End(); k++)
-      {
-        auto interestLevel = (*k)->GetInterest ();
+        for (auto k = knots.Begin(); k != knots.End(); k++)
+        {
+            auto interestLevel = (*k)->GetInterest();
 
-        if (interestLevel <= 1)
-          {
-            virtualKnots.Add (*k);
-          }
-        else
-          {
-            for (uint32_t i = 0; i < interestLevel; i++)
-              {
-                virtualKnots.Add (*k);
-              }
-          }
-      }
+            if (interestLevel <= 1)
+            {
+                virtualKnots.Add(*k);
+            }
+            else
+            {
+                for (uint32_t i = 0; i < interestLevel; i++)
+                {
+                    virtualKnots.Add(*k);
+                }
+            }
+        }
 
-    return virtualKnots;
-  }
+        return virtualKnots;
+    }
 };
 
-Curve::Curve (const FlightPlan knots,
-              const float step) :
-  m_knots {CurvePriv::GetVirtualKnots (knots)},
-  m_knotsN {knots.GetN ()},
-  m_step {step}
+Curve::Curve(const FlightPlan knots, const float step)
+    : m_knots{CurvePriv::GetVirtualKnots(knots)},
+      m_knotsN{knots.GetN()},
+      m_step{step}
 {
-  NS_LOG_FUNCTION (knots.GetN () << step);
+    NS_LOG_FUNCTION(knots.GetN() << step);
 }
 
-Curve::Curve (const FlightPlan knots) :
-  m_knots {CurvePriv::GetVirtualKnots (knots)},
-  m_knotsN {knots.GetN ()}
+Curve::Curve(const FlightPlan knots)
+    : m_knots{CurvePriv::GetVirtualKnots(knots)},
+      m_knotsN{knots.GetN()}
 {
-  NS_LOG_FUNCTION (knots.GetN ());
+    NS_LOG_FUNCTION(knots.GetN());
 }
 
-Curve::Curve () :
-  m_step {0.1}
+Curve::Curve()
+    : m_step{0.1}
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 }
 
-Curve::~Curve ()
+Curve::~Curve()
 {
 }
 
 const double
-Curve::Generate () const
+Curve::Generate() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  double absoluteDistance = 0.0;
+    double absoluteDistance = 0.0;
 
-  NS_LOG_LOGIC ("Constructing Bézier curve with " << m_knotsN << " knots.");
-  for (float t = 0.0; t < 1.0; t += m_step) {
-    const Vector point = GetPoint (t);
-    double relativeDistance = 0.0;
+    NS_LOG_LOGIC("Constructing Bézier curve with " << m_knotsN << " knots.");
+    for (float t = 0.0; t < 1.0; t += m_step)
+    {
+        const Vector point = GetPoint(t);
+        double relativeDistance = 0.0;
 
-    if (!m_curve.empty ())
-      {
-        relativeDistance = m_curve.back ().GetRelativeDistance (point);
-        absoluteDistance += relativeDistance;
-      }
+        if (!m_curve.empty())
+        {
+            relativeDistance = m_curve.back().GetRelativeDistance(point);
+            absoluteDistance += relativeDistance;
+        }
 
-    NS_LOG_LOGIC ("  NP:  " << point << " | t: " << t << " | rD: " << relativeDistance << " | aD: " << absoluteDistance);
-    m_curve.push_back ({point, t, relativeDistance, absoluteDistance});
-  }
+        NS_LOG_LOGIC("  NP:  " << point << " | t: " << t << " | rD: " << relativeDistance
+                               << " | aD: " << absoluteDistance);
+        m_curve.push_back({point, t, relativeDistance, absoluteDistance});
+    }
 
-  return absoluteDistance;
+    return absoluteDistance;
 }
 
 const Vector
-Curve::GetPoint (const float &t) const
+Curve::GetPoint(const float& t) const
 {
-  const uint32_t n = m_knots.GetN ();
-  const uint32_t r = n - 1;
+    const uint32_t n = m_knots.GetN();
+    const uint32_t r = n - 1;
 
-  Vector p {0.0, 0.0, 0.0};
+    Vector p{0.0, 0.0, 0.0};
 
-  const double fac_r = Factorial (r);
+    const double fac_r = Factorial(r);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      const double fact = fac_r / (Factorial (r - i) * Factorial (i));
-      const double pdiff = pow (1 - t, r - i);
-      const double power = pow (t, i);
-      const auto k = m_knots.Get (i)->GetPosition ();
+        const double fact = fac_r / (Factorial(r - i) * Factorial(i));
+        const double pdiff = pow(1 - t, r - i);
+        const double power = pow(t, i);
+        const auto k = m_knots.Get(i)->GetPosition();
 
-      p.x += fact * pdiff * power * k.x;
-      p.y += fact * pdiff * power * k.y;
-      p.z += fact * pdiff * power * k.z;
+        p.x += fact * pdiff * power * k.x;
+        p.y += fact * pdiff * power * k.y;
+        p.z += fact * pdiff * power * k.z;
     }
 
-  // NS_LOG_LOGIC ("Curve at t " << t << ": " << p);
-  return p;
+    // NS_LOG_LOGIC ("Curve at t " << t << ": " << p);
+    return p;
 }
 
 const double
-Curve::Factorial (const double x) const
+Curve::Factorial(const double x) const
 {
-  return (x == 0) || (x == 1) ? 1 : x * Factorial(x - 1);
+    return (x == 0) || (x == 1) ? 1 : x * Factorial(x - 1);
 }
 
 } // namespace ns3

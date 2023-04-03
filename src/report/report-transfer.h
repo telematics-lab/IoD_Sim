@@ -19,67 +19,66 @@
  */
 #ifndef REPORT_TRANSFER_H
 #define REPORT_TRANSFER_H
-#include <cstddef>
+#include "transfer-direction.h"
 
-#include <string>
-
+#include <ns3/drone-communications.h>
 #include <ns3/nstime.h>
 #include <ns3/object.h>
 
+#include <cstddef>
 #include <libxml/xmlwriter.h>
+#include <string>
 
-#include <ns3/drone-communications.h>
-
-#include "transfer-direction.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 class ReportTransfer : public Object
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportTransfer ();
-  /**
-   * Default destructor
-   */
-  ~ReportTransfer ();
+    /**
+     * Default constructor
+     */
+    ReportTransfer();
+    /**
+     * Default destructor
+     */
+    ~ReportTransfer();
 
-  int32_t GetIface();
-  /**
-   * Write Transfer report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  void Write (xmlTextWriterPtr handle);
-private:
-  /// entityid
-  uint32_t m_entityid;
-  /// netdevice id
-  int32_t m_iface;
-  /// the type of transfer
-  PacketType m_type;
-  /// the direction related to the monitored entity (Tx or Rx?)
-  TransferDirection m_direction;
-  /// time of transfer
-  Time m_time;
-  /// the sender of the packet
-  std::string m_sourceAddress;
-  /// the receiver of the packet
-  std::string m_destinationAddress;
-  /// the length of the payload
-  std::uint32_t m_length;
-  /// the sequence number of DCL payload
-  std::uint32_t m_sequenceNumber;
-  /// the full JSON, DCL payload, decoded in ASCII
-  std::string m_payload;
+    int32_t GetIface();
+    /**
+     * Write Transfer report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    void Write(xmlTextWriterPtr handle);
+
+  private:
+    /// entityid
+    uint32_t m_entityid;
+    /// netdevice id
+    int32_t m_iface;
+    /// the type of transfer
+    PacketType m_type;
+    /// the direction related to the monitored entity (Tx or Rx?)
+    TransferDirection m_direction;
+    /// time of transfer
+    Time m_time;
+    /// the sender of the packet
+    std::string m_sourceAddress;
+    /// the receiver of the packet
+    std::string m_destinationAddress;
+    /// the length of the payload
+    std::uint32_t m_length;
+    /// the sequence number of DCL payload
+    std::uint32_t m_sequenceNumber;
+    /// the full JSON, DCL payload, decoded in ASCII
+    std::string m_payload;
 };
 
 } // namespace ns3

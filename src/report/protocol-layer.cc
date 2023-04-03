@@ -22,53 +22,53 @@
 #include <ns3/log.h>
 #include <ns3/string.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("ProtocolLayer");
-NS_OBJECT_ENSURE_REGISTERED (ProtocolLayer);
+NS_LOG_COMPONENT_DEFINE("ProtocolLayer");
+NS_OBJECT_ENSURE_REGISTERED(ProtocolLayer);
 
 TypeId
-ProtocolLayer::GetTypeId ()
+ProtocolLayer::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::ProtocolLayer")
-    .AddConstructor<ProtocolLayer> ()
-    .SetParent<Object>()
-    .AddAttribute ("InstanceType", "The InstanceTypeId",
-                   StringValue (),
-                   MakeStringAccessor (&ProtocolLayer::m_instancetypeid),
-                   MakeStringChecker ())
-    ;
+    static TypeId tid = TypeId("ns3::ProtocolLayer")
+                            .AddConstructor<ProtocolLayer>()
+                            .SetParent<Object>()
+                            .AddAttribute("InstanceType",
+                                          "The InstanceTypeId",
+                                          StringValue(),
+                                          MakeStringAccessor(&ProtocolLayer::m_instancetypeid),
+                                          MakeStringChecker());
 
-  return tid;
+    return tid;
 }
 
-ProtocolLayer::ProtocolLayer ()
+ProtocolLayer::ProtocolLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ProtocolLayer::~ProtocolLayer ()
+ProtocolLayer::~ProtocolLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-ProtocolLayer::Write (xmlTextWriterPtr h)
+ProtocolLayer::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterWriteElement(h,
-                                 BAD_CAST "type",
-                                 BAD_CAST m_instancetypeid.c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "type", BAD_CAST m_instancetypeid.c_str());
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

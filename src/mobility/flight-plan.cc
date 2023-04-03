@@ -21,174 +21,167 @@
 #include <ns3/names.h>
 #include <ns3/object-factory.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-ATTRIBUTE_HELPER_CPP (FlightPlan);
+ATTRIBUTE_HELPER_CPP(FlightPlan);
 
-FlightPlan::FlightPlan ()
+FlightPlan::FlightPlan()
 {
 }
 
-FlightPlan::FlightPlan (Ptr<ProtoPoint> point)
+FlightPlan::FlightPlan(Ptr<ProtoPoint> point)
 {
-  m_protoPoints.push_back (point);
+    m_protoPoints.push_back(point);
 }
 
-FlightPlan::FlightPlan (const FlightPlan &a,
-                        const FlightPlan &b)
+FlightPlan::FlightPlan(const FlightPlan& a, const FlightPlan& b)
 {
-  Add (a);
-  Add (b);
+    Add(a);
+    Add(b);
 }
 
-FlightPlan::FlightPlan (const FlightPlan &a,
-                        const FlightPlan &b,
-                        const FlightPlan &c)
+FlightPlan::FlightPlan(const FlightPlan& a, const FlightPlan& b, const FlightPlan& c)
 {
-  Add (a);
-  Add (b);
-  Add (c);
+    Add(a);
+    Add(b);
+    Add(c);
 }
 
-FlightPlan::FlightPlan (const FlightPlan &a,
-                        const FlightPlan &b,
-                        const FlightPlan &c,
-                        const FlightPlan &d)
+FlightPlan::FlightPlan(const FlightPlan& a,
+                       const FlightPlan& b,
+                       const FlightPlan& c,
+                       const FlightPlan& d)
 {
-  Add (a);
-  Add (b);
-  Add (c);
-  Add (d);
+    Add(a);
+    Add(b);
+    Add(c);
+    Add(d);
 }
 
-FlightPlan::FlightPlan (const FlightPlan &a,
-                        const FlightPlan &b,
-                        const FlightPlan &c,
-                        const FlightPlan &d,
-                        const FlightPlan &e)
+FlightPlan::FlightPlan(const FlightPlan& a,
+                       const FlightPlan& b,
+                       const FlightPlan& c,
+                       const FlightPlan& d,
+                       const FlightPlan& e)
 {
-  Add (a);
-  Add (b);
-  Add (c);
-  Add (d);
-  Add (e);
-}
-
-FlightPlan::Iterator
-FlightPlan::Begin () const
-{
-  return m_protoPoints.begin ();
+    Add(a);
+    Add(b);
+    Add(c);
+    Add(d);
+    Add(e);
 }
 
 FlightPlan::Iterator
-FlightPlan::End () const
+FlightPlan::Begin() const
 {
-  return m_protoPoints.end ();
+    return m_protoPoints.begin();
+}
+
+FlightPlan::Iterator
+FlightPlan::End() const
+{
+    return m_protoPoints.end();
 }
 
 uint32_t
-FlightPlan::GetN () const
+FlightPlan::GetN() const
 {
-  return m_protoPoints.size ();
+    return m_protoPoints.size();
 }
 
 Ptr<ProtoPoint>
-FlightPlan::Get (const uint32_t i) const
+FlightPlan::Get(const uint32_t i) const
 {
-  return m_protoPoints[i];
+    return m_protoPoints[i];
 }
 
 Ptr<ProtoPoint>
-FlightPlan::GetFront () const
+FlightPlan::GetFront() const
 {
-  return m_protoPoints.front ();
+    return m_protoPoints.front();
 }
 
 Ptr<ProtoPoint>
-FlightPlan::GetBack () const
+FlightPlan::GetBack() const
 {
-  return m_protoPoints.back ();
+    return m_protoPoints.back();
 }
 
 void
-FlightPlan::Add (const FlightPlan other)
+FlightPlan::Add(const FlightPlan other)
 {
-  for (Iterator i = other.Begin (); i != other.End (); i++)
-    m_protoPoints.push_back(*i);
+    for (Iterator i = other.Begin(); i != other.End(); i++)
+        m_protoPoints.push_back(*i);
 }
 
 void
-FlightPlan::Add (const Ptr<ProtoPoint> point)
+FlightPlan::Add(const Ptr<ProtoPoint> point)
 {
-  m_protoPoints.push_back (point);
+    m_protoPoints.push_back(point);
 }
 
 void
-FlightPlan::Add (const std::string pointName)
+FlightPlan::Add(const std::string pointName)
 {
-  Ptr<ProtoPoint> point = Names::Find<ProtoPoint> (pointName);
+    Ptr<ProtoPoint> point = Names::Find<ProtoPoint>(pointName);
 
-  m_protoPoints.push_back (point);
+    m_protoPoints.push_back(point);
 }
 
-std::ostream &
-operator<< (std::ostream &os, const FlightPlan &prototrajectory)
+std::ostream&
+operator<<(std::ostream& os, const FlightPlan& prototrajectory)
 {
-  os << prototrajectory.GetN () << ";";
+    os << prototrajectory.GetN() << ";";
 
-  for (auto protoPoint = prototrajectory.Begin ();
-       protoPoint != prototrajectory.End ();
-       protoPoint++)
+    for (auto protoPoint = prototrajectory.Begin(); protoPoint != prototrajectory.End();
+         protoPoint++)
     {
-      os << (*protoPoint)->GetPosition () << "$"
-         << (*protoPoint)->GetInterest () << "$"
-         << (*protoPoint)->GetRestTime () << ";";
+        os << (*protoPoint)->GetPosition() << "$" << (*protoPoint)->GetInterest() << "$"
+           << (*protoPoint)->GetRestTime() << ";";
     }
 
-  return os;
+    return os;
 }
 
-std::istream &
-operator>> (std::istream &is, FlightPlan &prototrajectory)
+std::istream&
+operator>>(std::istream& is, FlightPlan& prototrajectory)
 {
-  char sepInPoint1 = '\0';
-  char sepInPoint2 = '\0';
-  char sepInPoint3 = '\0';
-  char sepInterPoint = '\0';
+    char sepInPoint1 = '\0';
+    char sepInPoint2 = '\0';
+    char sepInPoint3 = '\0';
+    char sepInterPoint = '\0';
 
-  uint32_t n;
-  Vector position;
-  uint32_t interest;
-  double restTime;
+    uint32_t n;
+    Vector position;
+    uint32_t interest;
+    double restTime;
 
-  is >> n >> sepInterPoint;
-  if (sepInterPoint != ';')
-    is.setstate (std::ios::failbit);
+    is >> n >> sepInterPoint;
+    if (sepInterPoint != ';')
+        is.setstate(std::ios::failbit);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      is >> position >> sepInPoint1
-         >> interest >> sepInPoint2
-         >> restTime >> sepInterPoint;
+        is >> position >> sepInPoint1 >> interest >> sepInPoint2 >> restTime >> sepInterPoint;
 
-      if (sepInPoint1 != '$'
-          || sepInPoint2 != '$'
-          || sepInPoint3 != '$'
-          || sepInterPoint != ';')
+        if (sepInPoint1 != '$' || sepInPoint2 != '$' || sepInPoint3 != '$' || sepInterPoint != ';')
         {
-          is.setstate (std::ios::failbit);
-          break;
+            is.setstate(std::ios::failbit);
+            break;
         }
 
-      auto protoPoint = CreateObjectWithAttributes<ProtoPoint>
-        ("Position", VectorValue (position),
-         "Interest", IntegerValue (interest),
-         "RestTime", TimeValue (Seconds (restTime)));
+        auto protoPoint = CreateObjectWithAttributes<ProtoPoint>("Position",
+                                                                 VectorValue(position),
+                                                                 "Interest",
+                                                                 IntegerValue(interest),
+                                                                 "RestTime",
+                                                                 TimeValue(Seconds(restTime)));
 
-      prototrajectory.Add (protoPoint);
+        prototrajectory.Add(protoPoint);
     }
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

@@ -22,43 +22,44 @@
 #include <ns3/socket.h>
 #include <ns3/traced-callback.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Base application for reliable TCP-based client-server communications.
  */
 class TcpClientServerApplication : public Application
 {
-public:
-  static TypeId GetTypeId ();
-  TcpClientServerApplication ();
-  virtual ~TcpClientServerApplication ();
+  public:
+    static TypeId GetTypeId();
+    TcpClientServerApplication();
+    virtual ~TcpClientServerApplication();
 
-protected:
-  virtual void StartApplication ();
-  virtual void StopApplication ();
-  virtual void Listen ();
-  virtual bool Connect ();
-  virtual void ReceivedDataCallback (Ptr<Socket> s);
+  protected:
+    virtual void StartApplication();
+    virtual void StopApplication();
+    virtual void Listen();
+    virtual bool Connect();
+    virtual void ReceivedDataCallback(Ptr<Socket> s);
 
-  const Ipv4Address& GetAddress () const;
-  const uint16_t& GetPort () const;
-  Ptr<Socket> GetSocket ();
+    const Ipv4Address& GetAddress() const;
+    const uint16_t& GetPort() const;
+    Ptr<Socket> GetSocket();
 
-private:
-  bool ConnectionRequestCallback (Ptr<Socket> s, const Address& a);
-  void ConnectionEstablishedCallback (Ptr<Socket> s, const Address& a);
-  void ConnectionSucceededCallback (Ptr<Socket> s);
-  void ConnectionFailedCallback (Ptr<Socket> s);
-  void NormalCloseCallback (Ptr<Socket> s);
-  void ErrorCloseCallback (Ptr<Socket> s);
+  private:
+    bool ConnectionRequestCallback(Ptr<Socket> s, const Address& a);
+    void ConnectionEstablishedCallback(Ptr<Socket> s, const Address& a);
+    void ConnectionSucceededCallback(Ptr<Socket> s);
+    void ConnectionFailedCallback(Ptr<Socket> s);
+    void NormalCloseCallback(Ptr<Socket> s);
+    void ErrorCloseCallback(Ptr<Socket> s);
 
-  Ipv4Address m_addr;
-  uint16_t m_port;
-  Ptr<Socket> m_socket;
+    Ipv4Address m_addr;
+    uint16_t m_port;
+    Ptr<Socket> m_socket;
 
-  TracedCallback<Ptr<const TcpClientServerApplication>, Ptr<Socket> > m_connectionEstablishedTrace;
-  TracedCallback<Ptr<const TcpClientServerApplication>, Ptr<Socket> > m_connectionClosedTrace;
+    TracedCallback<Ptr<const TcpClientServerApplication>, Ptr<Socket>> m_connectionEstablishedTrace;
+    TracedCallback<Ptr<const TcpClientServerApplication>, Ptr<Socket>> m_connectionClosedTrace;
 };
 
 } // namespace ns3

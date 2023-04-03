@@ -20,24 +20,25 @@
 
 #include "tcp-client-server-application.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Basic Server TCP application that echoes in case data is received.
  */
 class TcpEchoServerApplication : public TcpClientServerApplication
 {
-public:
-  static TypeId GetTypeId ();
-  TcpEchoServerApplication ();
-  virtual ~TcpEchoServerApplication ();
+  public:
+    static TypeId GetTypeId();
+    TcpEchoServerApplication();
+    virtual ~TcpEchoServerApplication();
 
-protected:
-  virtual void StartApplication ();
-  virtual void ReceivedDataCallback (Ptr<Socket> s);
+  protected:
+    virtual void StartApplication();
+    virtual void ReceivedDataCallback(Ptr<Socket> s);
 
-private:
-  TracedCallback<Ptr<const Packet>, const Address& > m_rxTrace;
+  private:
+    TracedCallback<Ptr<const Packet>, const Address&> m_rxTrace;
 };
 
 } // namespace ns3

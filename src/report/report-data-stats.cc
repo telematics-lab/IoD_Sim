@@ -22,60 +22,61 @@
 #include <ns3/integer.h>
 #include <ns3/log.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("ReportDataStats");
+NS_LOG_COMPONENT_DEFINE("ReportDataStats");
 
 TypeId
-ReportDataStats::GetTypeId ()
+ReportDataStats::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::ReportDataStats")
-    .AddConstructor<ReportDataStats> ()
-    .SetParent<Object> ()
-    .AddAttribute ("kind", "Type of data transfer",
-                   PacketTypeValue (),
-                   MakePacketTypeAccessor (&ReportDataStats::m_kind),
-                   MakePacketTypeChecker ())
-    .AddAttribute ("amount", "The amount of bytes transferred",
-                   IntegerValue (0),
-                   MakeIntegerAccessor (&ReportDataStats::m_bytes),
-                   MakeIntegerChecker<uint32_t> ())
-    ;
+    static TypeId tid = TypeId("ns3::ReportDataStats")
+                            .AddConstructor<ReportDataStats>()
+                            .SetParent<Object>()
+                            .AddAttribute("kind",
+                                          "Type of data transfer",
+                                          PacketTypeValue(),
+                                          MakePacketTypeAccessor(&ReportDataStats::m_kind),
+                                          MakePacketTypeChecker())
+                            .AddAttribute("amount",
+                                          "The amount of bytes transferred",
+                                          IntegerValue(0),
+                                          MakeIntegerAccessor(&ReportDataStats::m_bytes),
+                                          MakeIntegerChecker<uint32_t>());
 
-  return tid;
+    return tid;
 }
 
-ReportDataStats::ReportDataStats () :
-  m_kind {PacketType::UNKNOWN},
-  m_bytes {0}
+ReportDataStats::ReportDataStats()
+    : m_kind{PacketType::UNKNOWN},
+      m_bytes{0}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ReportDataStats::~ReportDataStats ()
+ReportDataStats::~ReportDataStats()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-ReportDataStats::Write (xmlTextWriterPtr h) const
+ReportDataStats::Write(xmlTextWriterPtr h) const
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  std::ostringstream bBytes;
-  int rc;
+    std::ostringstream bBytes;
+    int rc;
 
-  bBytes << m_bytes;
-  rc = xmlTextWriterWriteElement (h,
-                                  BAD_CAST m_kind.ToString (),
-                                  BAD_CAST bBytes.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    bBytes << m_bytes;
+    rc = xmlTextWriterWriteElement(h, BAD_CAST m_kind.ToString(), BAD_CAST bBytes.str().c_str());
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

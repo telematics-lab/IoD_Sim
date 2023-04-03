@@ -15,10 +15,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli
+ * <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_ZSP_H
 #define REPORT_ZSP_H
+
+#include "report-data-stats.h"
+#include "report-entity.h"
+#include "report-location.h"
+#include "report-protocol-stack.h"
+#include "report-transfer.h"
 
 #include <ns3/ipv4.h>
 #include <ns3/mobility-model.h>
@@ -27,13 +34,8 @@
 
 #include <libxml/xmlwriter.h>
 
-#include "report-data-stats.h"
-#include "report-entity.h"
-#include "report-location.h"
-#include "report-protocol-stack.h"
-#include "report-transfer.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Retrieve and store data about a ZSP, like its
@@ -44,45 +46,46 @@ namespace ns3 {
  */
 class ReportZsp : public ReportEntity
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportZsp ();
-  /**
-   * Default destructor
-   */
-  ~ReportZsp ();
-private:
-  /**
-   * Write Zsp report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  void DoWrite (xmlTextWriterPtr handle);
+    /**
+     * Default constructor
+     */
+    ReportZsp();
+    /**
+     * Default destructor
+     */
+    ~ReportZsp();
 
-  /**
-   * Get ZSP position
-   */
-  void DoInitializeTrajectoryMonitor ();
+  private:
+    /**
+     * Write Zsp report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    void DoWrite(xmlTextWriterPtr handle);
 
-  /**
-   * Placeholder, monitor nothing because the ZSP in fixed in space
-   *
-   * \params mobility the mobility model of the entity to inspect
-   */
-  void DoMonitorTrajectory (const Ptr<const MobilityModel> mobility);
+    /**
+     * Get ZSP position
+     */
+    void DoInitializeTrajectoryMonitor();
 
-  /// ZSP position
-  ReportLocation m_position;
-  /// abstract representation of the network stack
-  ReportProtocolStack m_stack;
+    /**
+     * Placeholder, monitor nothing because the ZSP in fixed in space
+     *
+     * \params mobility the mobility model of the entity to inspect
+     */
+    void DoMonitorTrajectory(const Ptr<const MobilityModel> mobility);
+
+    /// ZSP position
+    ReportLocation m_position;
+    /// abstract representation of the network stack
+    ReportProtocolStack m_stack;
 };
 
 } // namespace ns3

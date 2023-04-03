@@ -17,31 +17,30 @@
  */
 #include "remote-configuration.h"
 
-namespace ns3 {
-
-RemoteConfiguration::RemoteConfiguration (uint32_t netId,
-                                          std::vector<ModelConfiguration> applications) :
-  m_networkLayerId {netId},
-  m_applications {applications}
+namespace ns3
 {
 
+RemoteConfiguration::RemoteConfiguration(uint32_t netId,
+                                         std::vector<ModelConfiguration> applications)
+    : m_networkLayerId{netId},
+      m_applications{applications}
+{
 }
 
-RemoteConfiguration::~RemoteConfiguration ()
+RemoteConfiguration::~RemoteConfiguration()
 {
-
 }
 
 const uint32_t
-RemoteConfiguration::GetNetworkLayerId () const
+RemoteConfiguration::GetNetworkLayerId() const
 {
-  return m_networkLayerId;
+    return m_networkLayerId;
 }
 
 const std::vector<ModelConfiguration>&
-RemoteConfiguration::GetApplications () const
+RemoteConfiguration::GetApplications() const
 {
-  return m_applications;
+    return m_applications;
 }
 
 } // namespace ns3

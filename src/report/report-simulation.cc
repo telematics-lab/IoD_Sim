@@ -15,7 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli
+ * <giovanni.iacovelli@poliba.it>
  */
 #include "report-simulation.h"
 
@@ -26,119 +27,116 @@
 
 #include <libxml/xmlwriter.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("ReportSimulation");
-NS_OBJECT_ENSURE_REGISTERED (ReportSimulation);
+NS_LOG_COMPONENT_DEFINE("ReportSimulation");
+NS_OBJECT_ENSURE_REGISTERED(ReportSimulation);
 
 TypeId
-ReportSimulation::GetTypeId ()
+ReportSimulation::GetTypeId()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  static TypeId tid = TypeId ("ns3::ReportSimulation")
-    .AddConstructor<ReportSimulation> ()
-    .SetParent<Object> ()
+    static TypeId tid = TypeId("ns3::ReportSimulation")
+                            .AddConstructor<ReportSimulation>()
+                            .SetParent<Object>()
 
-    /* XML Attributes */
-    .AddAttribute ("Scenario", "The name of the scenario",
-                   StringValue ("unnamed"),
-                   MakeStringAccessor (&ReportSimulation::m_scenario),
-                   MakeStringChecker ())
-    .AddAttribute ("ExecutedAt", "The datetime of execution",
-                   StringValue (),
-                   MakeStringAccessor (&ReportSimulation::m_executedAt),
-                   MakeStringChecker ())
-    ;
+                            /* XML Attributes */
+                            .AddAttribute("Scenario",
+                                          "The name of the scenario",
+                                          StringValue("unnamed"),
+                                          MakeStringAccessor(&ReportSimulation::m_scenario),
+                                          MakeStringChecker())
+                            .AddAttribute("ExecutedAt",
+                                          "The datetime of execution",
+                                          StringValue(),
+                                          MakeStringAccessor(&ReportSimulation::m_executedAt),
+                                          MakeStringChecker());
 
-  return tid;
+    return tid;
 }
 
-ReportSimulation::ReportSimulation () :
-  m_drones {"Drones"},
-  m_zsps {"ZSPs"},
-  m_remotes {"Remotes"}
+ReportSimulation::ReportSimulation()
+    : m_drones{"Drones"},
+      m_zsps{"ZSPs"},
+      m_remotes{"Remotes"}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ReportSimulation::~ReportSimulation ()
+ReportSimulation::~ReportSimulation()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
 ReportSimulation::DoInitialize()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  // use schedule now to be sure we are probing during
-  // an active simulation
-  Simulator::ScheduleNow (&ReportSimulation::ProbeSimulation,
-                          this);
+    // use schedule now to be sure we are probing during
+    // an active simulation
+    Simulator::ScheduleNow(&ReportSimulation::ProbeSimulation, this);
 }
 
 void
-ReportSimulation::Write (xmlTextWriterPtr h) const
+ReportSimulation::Write(xmlTextWriterPtr h) const
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "simulation");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "simulation");
+    NS_ASSERT(rc >= 0);
 
-  /* Attributes */
-  xmlTextWriterWriteAttribute (h,
-                               BAD_CAST "scenario",
-                               BAD_CAST m_scenario.c_str ());
-  xmlTextWriterWriteAttribute (h,
-                               BAD_CAST "executedAt",
-                               BAD_CAST m_executedAt.c_str ());
+    /* Attributes */
+    xmlTextWriterWriteAttribute(h, BAD_CAST "scenario", BAD_CAST m_scenario.c_str());
+    xmlTextWriterWriteAttribute(h, BAD_CAST "executedAt", BAD_CAST m_executedAt.c_str());
 
-  /* Nested Elements */
-  m_duration.Write (h);
-  m_world.Write (h);
-  m_zsps.Write (h);
-  m_drones.Write (h);
-  m_remotes.Write (h);
+    /* Nested Elements */
+    m_duration.Write(h);
+    m_world.Write(h);
+    m_zsps.Write(h);
+    m_drones.Write(h);
+    m_remotes.Write(h);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 void
-ReportSimulation::ProbeSimulation ()
+ReportSimulation::ProbeSimulation()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  PopulateEntities ("/DroneList/*", &m_drones);
-  PopulateEntities ("/ZspList/*", &m_zsps);
-  PopulateEntities ("/RemoteList/*", &m_remotes);
+    PopulateEntities("/DroneList/*", &m_drones);
+    PopulateEntities("/ZspList/*", &m_zsps);
+    PopulateEntities("/RemoteList/*", &m_remotes);
 }
 
 template <class EntityContainer>
 void
-ReportSimulation::PopulateEntities (const std::string nodeQuery,
-                                    EntityContainer *entities)
+ReportSimulation::PopulateEntities(const std::string nodeQuery, EntityContainer* entities)
 {
-  NS_LOG_FUNCTION (nodeQuery << entities);
-  const auto eFound = Config::LookupMatches (nodeQuery);
+    NS_LOG_FUNCTION(nodeQuery << entities);
+    const auto eFound = Config::LookupMatches(nodeQuery);
 
-  for (auto i = eFound.Begin (); i != eFound.End (); i++)
+    for (auto i = eFound.Begin(); i != eFound.End(); i++)
     {
-      const auto node = DynamicCast<Node> (*i);
+        const auto node = DynamicCast<Node>(*i);
 
-      if (node != nullptr)
+        if (node != nullptr)
         {
-          const uint32_t uid = node->GetId ();
-          entities->Add (uid);
+            const uint32_t uid = node->GetId();
+            entities->Add(uid);
         }
     }
 }

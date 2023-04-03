@@ -19,56 +19,57 @@
  */
 #ifndef REPORT_PROTOCOL_STACK_H
 #define REPORT_PROTOCOL_STACK_H
-#include <vector>
-
-#include <libxml/xmlwriter.h>
-
 #include "protocol-layer.h"
 
-namespace ns3 {
+#include <libxml/xmlwriter.h>
+#include <vector>
+
+namespace ns3
+{
 
 class ReportProtocolStack
 {
-public:
-  /// Protocol Layers iterator
-  typedef std::vector<Ptr<ProtocolLayer>>::const_iterator Iterator;
+  public:
+    /// Protocol Layers iterator
+    typedef std::vector<Ptr<ProtocolLayer>>::const_iterator Iterator;
 
-  /**
-   * Create an empty ReportProtocolStack
-   */
-  ReportProtocolStack ();
+    /**
+     * Create an empty ReportProtocolStack
+     */
+    ReportProtocolStack();
 
-  /**
-   * Get an iterator which refers to the base Protocol Layer in the stack
-   */
-  Iterator Begin () const;
+    /**
+     * Get an iterator which refers to the base Protocol Layer in the stack
+     */
+    Iterator Begin() const;
 
-  /**
-   * Get an iterator which indicates past-the-top Protocol Layer in the stack
-   */
-  Iterator End () const;
+    /**
+     * Get an iterator which indicates past-the-top Protocol Layer in the stack
+     */
+    Iterator End() const;
 
-  /**
-   * Get the number of Ptr<ProtocolLayer> stored in the stack
-   */
-  uint32_t GetN () const;
+    /**
+     * Get the number of Ptr<ProtocolLayer> stored in the stack
+     */
+    uint32_t GetN() const;
 
-  /**
-   * Get the Ptr<ProtocolLayer> stored in the stack at the given index
-   */
-  Ptr<ProtocolLayer> Get (const uint32_t i) const;
+    /**
+     * Get the Ptr<ProtocolLayer> stored in the stack at the given index
+     */
+    Ptr<ProtocolLayer> Get(const uint32_t i) const;
 
-  /**
-   * Place a single Ptr<ProtocolLayer> to the top of the stack
-   */
-  void Add (Ptr<ProtocolLayer> layer);
+    /**
+     * Place a single Ptr<ProtocolLayer> to the top of the stack
+     */
+    void Add(Ptr<ProtocolLayer> layer);
 
-  /**
-   * Write Protocol Stack report data to a XML file with a given handler
-   */
-  void Write (xmlTextWriterPtr handle);
-private:
-  std::vector<Ptr<ProtocolLayer>> m_layers;   /// the stack
+    /**
+     * Write Protocol Stack report data to a XML file with a given handler
+     */
+    void Write(xmlTextWriterPtr handle);
+
+  private:
+    std::vector<Ptr<ProtocolLayer>> m_layers; /// the stack
 };
 
 } // namespace ns3

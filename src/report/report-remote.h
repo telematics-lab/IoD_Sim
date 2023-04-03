@@ -20,6 +20,12 @@
 #ifndef REPORT_REMOTE_H
 #define REPORT_REMOTE_H
 
+#include "report-data-stats.h"
+#include "report-entity.h"
+#include "report-location.h"
+#include "report-protocol-stack.h"
+#include "report-transfer.h"
+
 #include <ns3/ipv4.h>
 #include <ns3/mobility-model.h>
 #include <ns3/object.h>
@@ -27,13 +33,8 @@
 
 #include <libxml/xmlwriter.h>
 
-#include "report-data-stats.h"
-#include "report-entity.h"
-#include "report-location.h"
-#include "report-protocol-stack.h"
-#include "report-transfer.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Retrieve and store data about a Remote, like its
@@ -43,31 +44,32 @@ namespace ns3 {
  */
 class ReportRemote : public ReportEntity
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportRemote ();
-  /**
-   * Default destructor
-   */
-  ~ReportRemote ();
-private:
-  /**
-   * Write Remote report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  void DoWrite (xmlTextWriterPtr handle);
+    /**
+     * Default constructor
+     */
+    ReportRemote();
+    /**
+     * Default destructor
+     */
+    ~ReportRemote();
 
-  /// abstract representation of the network stack
-  ReportProtocolStack m_stack;
+  private:
+    /**
+     * Write Remote report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    void DoWrite(xmlTextWriterPtr handle);
+
+    /// abstract representation of the network stack
+    ReportProtocolStack m_stack;
 };
 
 } // namespace ns3

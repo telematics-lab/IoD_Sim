@@ -19,38 +19,39 @@
 
 #include <ns3/building-position-allocator.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 void
-MobilityFactoryHelper::SetMobilityModel (MobilityHelper& helper, const ModelConfiguration& modelConf)
+MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfiguration& modelConf)
 {
-  helper.m_mobility.SetTypeId (modelConf.GetName ());
+    helper.m_mobility.SetTypeId(modelConf.GetName());
 
-  if (modelConf.GetName () == "ns3::ConstantPositionMobilityModel")
+    if (modelConf.GetName() == "ns3::ConstantPositionMobilityModel")
     {
-      if (modelConf.GetAttributes ().size() == 0)
-        return;
+        if (modelConf.GetAttributes().size() == 0)
+            return;
 
-      auto positionAllocator = CreateObject<ListPositionAllocator> ();
-      Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue> (modelConf.GetAttributes ()[0].value)->Get();
-      positionAllocator->Add (initialPosition);
-      helper.SetPositionAllocator (positionAllocator);
+        auto positionAllocator = CreateObject<ListPositionAllocator>();
+        Vector3D initialPosition =
+            StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes()[0].value)->Get();
+        positionAllocator->Add(initialPosition);
+        helper.SetPositionAllocator(positionAllocator);
     }
-  else if (modelConf.GetName () == "ns3::RandomWalk2dOutdoorMobilityModel")
+    else if (modelConf.GetName() == "ns3::RandomWalk2dOutdoorMobilityModel")
     {
-      static auto positionAllocator = CreateObject<OutdoorPositionAllocator> ();
-      helper.SetPositionAllocator (positionAllocator);
+        static auto positionAllocator = CreateObject<OutdoorPositionAllocator>();
+        helper.SetPositionAllocator(positionAllocator);
     }
-  else
+    else
     {
-      for (auto& attr : modelConf.GetAttributes ())
-        helper.m_mobility.Set (attr.name, *attr.value);
+        for (auto& attr : modelConf.GetAttributes())
+            helper.m_mobility.Set(attr.name, *attr.value);
     }
 }
 
-MobilityFactoryHelper::MobilityFactoryHelper ()
+MobilityFactoryHelper::MobilityFactoryHelper()
 {
-
 }
 
 } // namespace ns3

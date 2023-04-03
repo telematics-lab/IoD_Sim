@@ -17,31 +17,30 @@
  */
 #include "netdevice-configuration.h"
 
-namespace ns3 {
-
-NetdeviceConfiguration::NetdeviceConfiguration (const std::string type,
-                                                const uint32_t networkLayerId) :
-  m_type {type},
-  m_networkLayerId {networkLayerId}
+namespace ns3
 {
 
+NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
+                                               const uint32_t networkLayerId)
+    : m_type{type},
+      m_networkLayerId{networkLayerId}
+{
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration ()
+NetdeviceConfiguration::~NetdeviceConfiguration()
 {
-
 }
 
 const std::string
-NetdeviceConfiguration::GetType () const
+NetdeviceConfiguration::GetType() const
 {
-  return m_type;
+    return m_type;
 }
 
 const uint32_t
-NetdeviceConfiguration::GetNetworkLayerId () const
+NetdeviceConfiguration::GetNetworkLayerId() const
 {
-  return m_networkLayerId;
+    return m_networkLayerId;
 }
 
 } // namespace ns3

@@ -15,21 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli
+ * <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_SIMULATION_H
 #define REPORT_SIMULATION_H
+
+#include "report-container.h"
+#include "report-world.h"
+#include "simulation-duration.h"
 
 #include <ns3/event-id.h>
 #include <ns3/object.h>
 
 #include <libxml/xmlwriter.h>
 
-#include "report-container.h"
-#include "simulation-duration.h"
-#include "report-world.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Report a simulation by constructing a tree of data during the simulation
@@ -41,59 +43,59 @@ namespace ns3 {
  */
 class ReportSimulation : public Object
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportSimulation ();
-  /**
-   * Default destructor
-   */
-  ~ReportSimulation ();
+    /**
+     * Default constructor
+     */
+    ReportSimulation();
+    /**
+     * Default destructor
+     */
+    ~ReportSimulation();
 
-  /**
-   * Write Zsp report data to a XML file with a given handler
-   *
-   * \param handle the handler to communicate data to the opened XML file
-   */
-  void Write (xmlTextWriterPtr handle) const;
+    /**
+     * Write Zsp report data to a XML file with a given handler
+     *
+     * \param handle the handler to communicate data to the opened XML file
+     */
+    void Write(xmlTextWriterPtr handle) const;
 
-protected:
-  /**
-   * Initialize this Object by acquiring simulation data
-   */
-  virtual void DoInitialize(void);
-private:
-  /**
-   * Probe Callback to retrieve simulation information
-   */
-  void ProbeSimulation();
+  protected:
+    /**
+     * Initialize this Object by acquiring simulation data
+     */
+    virtual void DoInitialize(void);
 
-  /**
-   * Generic function to populate simulated entities, which can be drones
-   * or ZSPs
-   *
-   * \param nodeQuery the query to perform to find simulated Nodes
-   * \param entities the container object to be populated
-   */
-  template <class EntityContainer>
-  void PopulateEntities (const std::string nodeQuery,
-                          EntityContainer *entities);
+  private:
+    /**
+     * Probe Callback to retrieve simulation information
+     */
+    void ProbeSimulation();
 
-  std::string m_scenario;                 /// The name of the scenario
-  std::string m_executedAt;               /// Datetime of execution
-  SimulationDuration m_duration;          /// Duration of the simulation
+    /**
+     * Generic function to populate simulated entities, which can be drones
+     * or ZSPs
+     *
+     * \param nodeQuery the query to perform to find simulated Nodes
+     * \param entities the container object to be populated
+     */
+    template <class EntityContainer>
+    void PopulateEntities(const std::string nodeQuery, EntityContainer* entities);
 
-  ReportContainer<ReportDrone> m_drones;  /// Report of drones
-  ReportContainer<ReportZsp>   m_zsps;    /// Report of ZSPs
-  ReportContainer<ReportRemote>   m_remotes;    /// Report of Remotes
-  ReportWorld m_world; /// Report of World
+    std::string m_scenario;        /// The name of the scenario
+    std::string m_executedAt;      /// Datetime of execution
+    SimulationDuration m_duration; /// Duration of the simulation
+
+    ReportContainer<ReportDrone> m_drones;   /// Report of drones
+    ReportContainer<ReportZsp> m_zsps;       /// Report of ZSPs
+    ReportContainer<ReportRemote> m_remotes; /// Report of Remotes
+    ReportWorld m_world;                     /// Report of World
 };
 
 } // namespace ns3

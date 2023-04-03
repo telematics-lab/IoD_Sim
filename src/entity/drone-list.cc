@@ -20,16 +20,16 @@
 #include "drone-list.h"
 
 #include <ns3/config.h>
+#include <ns3/drone.h>
 #include <ns3/log.h>
-#include <ns3/object.h>
 #include <ns3/object-vector.h>
+#include <ns3/object.h>
 #include <ns3/simulator.h>
 
-#include <ns3/drone.h>
+namespace ns3
+{
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("DroneList");
+NS_LOG_COMPONENT_DEFINE("DroneList");
 
 /**
  * \ingroup network
@@ -37,191 +37,190 @@ NS_LOG_COMPONENT_DEFINE ("DroneList");
  */
 class DroneListPriv : public Object
 {
-public:
-  /**
-   * \brief Get the type ID.
-   * \return the object TypeId.
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId.
+     */
+    static TypeId GetTypeId();
 
-  DroneListPriv ();
-  ~DroneListPriv ();
+    DroneListPriv();
+    ~DroneListPriv();
 
-  /**
-   * \param drone drone to add
-   * \returns index of drone in list
-   *
-   * This method should be called automatically from Drone::Drone at this time.
-   */
-  uint32_t Add (Ptr<Drone> drone);
+    /**
+     * \param drone drone to add
+     * \returns index of drone in list
+     *
+     * This method should be called automatically from Drone::Drone at this time.
+     */
+    uint32_t Add(Ptr<Drone> drone);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list.
-   */
-  DroneList::Iterator Begin () const;
+    /**
+     * \returns a C++ iterator located at the beginning of this list.
+     */
+    DroneList::Iterator Begin() const;
 
-  /**
-   * \returns a C++ iterator located at the end of this list.
-   */
-  DroneList::Iterator End () const;
+    /**
+     * \returns a C++ iterator located at the end of this list.
+     */
+    DroneList::Iterator End() const;
 
-  /**
-   * \param n index of requested Drone.
-   * \returns the Drone (Node) associated to index n.
-   */
-  Ptr<Drone> GetDrone (uint32_t n);
+    /**
+     * \param n index of requested Drone.
+     * \returns the Drone (Node) associated to index n.
+     */
+    Ptr<Drone> GetDrone(uint32_t n);
 
-  /**
-   * \returns the number of drones currently in the list.
-   */
-  uint32_t GetNDrones ();
+    /**
+     * \returns the number of drones currently in the list.
+     */
+    uint32_t GetNDrones();
 
-  /**
-   * \brief Get the drone list object
-   * \returns the drone list
-   */
-  static Ptr<DroneListPriv> Get ();
+    /**
+     * \brief Get the drone list object
+     * \returns the drone list
+     */
+    static Ptr<DroneListPriv> Get();
 
-private:
-  /**
-   * \brief Get the drone list object
-   * \returns the drone list
-   */
-  static Ptr<DroneListPriv> *DoGet ();
+  private:
+    /**
+     * \brief Get the drone list object
+     * \returns the drone list
+     */
+    static Ptr<DroneListPriv>* DoGet();
 
-  /**
-   * \brief Delete the drones list object
-   */
-  static void Delete ();
+    /**
+     * \brief Delete the drones list object
+     */
+    static void Delete();
 
-  /**
-   * \brief Dispose the drones in the list
-   */
-  virtual void DoDispose ();
+    /**
+     * \brief Dispose the drones in the list
+     */
+    virtual void DoDispose();
 
-  std::vector<Ptr<Drone>> m_drones; //!< drone objects container
+    std::vector<Ptr<Drone>> m_drones; //!< drone objects container
 };
 
 TypeId
-DroneListPriv::GetTypeId ()
+DroneListPriv::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::DroneListPriv")
-    .SetParent<Object> ()
-    .SetGroupName("Swarm")
-    .AddAttribute ("DroneList", "The list of all drones created during the simulation.",
-                   ObjectVectorValue (),
-                   MakeObjectVectorAccessor (&DroneListPriv::m_drones),
-                   MakeObjectVectorChecker<Drone> ())
-    ;
+    static TypeId tid = TypeId("ns3::DroneListPriv")
+                            .SetParent<Object>()
+                            .SetGroupName("Swarm")
+                            .AddAttribute("DroneList",
+                                          "The list of all drones created during the simulation.",
+                                          ObjectVectorValue(),
+                                          MakeObjectVectorAccessor(&DroneListPriv::m_drones),
+                                          MakeObjectVectorChecker<Drone>());
 
-  return tid;
+    return tid;
 }
 
 Ptr<DroneListPriv>
-DroneListPriv::Get ()
+DroneListPriv::Get()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return *DoGet ();
+    return *DoGet();
 }
 
-Ptr<DroneListPriv> *
-DroneListPriv::DoGet ()
+Ptr<DroneListPriv>*
+DroneListPriv::DoGet()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  static Ptr<DroneListPriv> ptr = 0;
-  if (ptr == nullptr)
+    static Ptr<DroneListPriv> ptr = 0;
+    if (ptr == nullptr)
     {
-      ptr = CreateObject<DroneListPriv> ();
-      Config::RegisterRootNamespaceObject (ptr);
-      Simulator::ScheduleDestroy (&DroneListPriv::Delete);
+        ptr = CreateObject<DroneListPriv>();
+        Config::RegisterRootNamespaceObject(ptr);
+        Simulator::ScheduleDestroy(&DroneListPriv::Delete);
     }
 
-  return &ptr;
+    return &ptr;
 }
 
 void
-DroneListPriv::Delete ()
+DroneListPriv::Delete()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  Config::UnregisterRootNamespaceObject (Get ());
-  (*DoGet ()) = 0;
+    Config::UnregisterRootNamespaceObject(Get());
+    (*DoGet()) = 0;
 }
 
-DroneListPriv::DroneListPriv ()
+DroneListPriv::DroneListPriv()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-DroneListPriv::~DroneListPriv ()
+DroneListPriv::~DroneListPriv()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-DroneListPriv::DoDispose ()
+DroneListPriv::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  for (auto drone = m_drones.begin ();
-       drone != m_drones.end ();
-       drone++)
+    for (auto drone = m_drones.begin(); drone != m_drones.end(); drone++)
     {
-      (*drone)->Dispose ();
+        (*drone)->Dispose();
     }
 
-  m_drones.erase (m_drones.begin (), m_drones.end ());
-  Object::DoDispose ();
+    m_drones.erase(m_drones.begin(), m_drones.end());
+    Object::DoDispose();
 }
 
 uint32_t
-DroneListPriv::Add (Ptr<Drone> drone)
+DroneListPriv::Add(Ptr<Drone> drone)
 {
-  NS_LOG_FUNCTION (this << drone);
+    NS_LOG_FUNCTION(this << drone);
 
-  uint32_t index = m_drones.size ();
+    uint32_t index = m_drones.size();
 
-  m_drones.push_back (drone);
-  Simulator::ScheduleWithContext (index, TimeStep (0), &Drone::Initialize, drone);
+    m_drones.push_back(drone);
+    Simulator::ScheduleWithContext(index, TimeStep(0), &Drone::Initialize, drone);
 
-  return index;
+    return index;
 }
 
 DroneList::Iterator
-DroneListPriv::Begin () const
+DroneListPriv::Begin() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_drones.begin ();
+    return m_drones.begin();
 }
 
 DroneList::Iterator
-DroneListPriv::End () const
+DroneListPriv::End() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_drones.end ();
+    return m_drones.end();
 }
 
 uint32_t
-DroneListPriv::GetNDrones ()
+DroneListPriv::GetNDrones()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_drones.size ();
+    return m_drones.size();
 }
 
 Ptr<Drone>
-DroneListPriv::GetDrone (uint32_t n)
+DroneListPriv::GetDrone(uint32_t n)
 {
-  NS_LOG_FUNCTION (this << n);
+    NS_LOG_FUNCTION(this << n);
 
-  NS_ASSERT_MSG (n < m_drones.size (), "Drone index " << n <<
-                 " is out of range (only have " << m_drones.size () << " drones).");
+    NS_ASSERT_MSG(n < m_drones.size(),
+                  "Drone index " << n << " is out of range (only have " << m_drones.size()
+                                 << " drones).");
 
-  return m_drones[n];
+    return m_drones[n];
 }
 
 } // namespace ns3
@@ -231,46 +230,47 @@ DroneListPriv::GetDrone (uint32_t n)
  * which calls into the private implementation though
  * the simulation of a singleton.
  */
-namespace ns3 {
+namespace ns3
+{
 
 uint32_t
-DroneList::Add (Ptr<Drone> drone)
+DroneList::Add(Ptr<Drone> drone)
 {
-  NS_LOG_FUNCTION (drone);
+    NS_LOG_FUNCTION(drone);
 
-  return DroneListPriv::Get ()->Add (drone);
+    return DroneListPriv::Get()->Add(drone);
 }
 
 DroneList::Iterator
-DroneList::Begin ()
+DroneList::Begin()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return DroneListPriv::Get ()->Begin ();
+    return DroneListPriv::Get()->Begin();
 }
 
 DroneList::Iterator
-DroneList::End ()
+DroneList::End()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return DroneListPriv::Get ()->End ();
+    return DroneListPriv::Get()->End();
 }
 
 Ptr<Drone>
-DroneList::GetDrone (uint32_t n)
+DroneList::GetDrone(uint32_t n)
 {
-  NS_LOG_FUNCTION (n);
+    NS_LOG_FUNCTION(n);
 
-  return DroneListPriv::Get ()->GetDrone (n);
+    return DroneListPriv::Get()->GetDrone(n);
 }
 
 uint32_t
-DroneList::GetNDrones ()
+DroneList::GetNDrones()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return DroneListPriv::Get ()->GetNDrones ();
+    return DroneListPriv::Get()->GetNDrones();
 }
 
 } // namespace ns3

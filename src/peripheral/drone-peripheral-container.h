@@ -18,15 +18,15 @@
 #ifndef DRONE_PERIPHERAL_CONTAINER_H
 #define DRONE_PERIPHERAL_CONTAINER_H
 
-#include <vector>
-
-#include <ns3/object-factory.h>
-
-#include <ns3/drone.h>
-
 #include "drone-peripheral.h"
 
-namespace ns3 {
+#include <ns3/drone.h>
+#include <ns3/object-factory.h>
+
+#include <vector>
+
+namespace ns3
+{
 
 class DronePeripheral;
 class Drone;
@@ -36,108 +36,109 @@ class Drone;
  */
 class DronePeripheralContainer : public Object
 {
-public:
+  public:
+    /**
+     * \brief Get the type ID.
+     *
+     * \returns the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * \brief Get the type ID.
-   *
-   * \returns the object TypeId
-   */
-  static TypeId GetTypeId (void);
+    DronePeripheralContainer()
+    {
+    }
 
-  DronePeripheralContainer(){}
+    /// Drone peripherals container iterator
+    typedef std::vector<Ptr<DronePeripheral>>::const_iterator Iterator;
 
-  /// Drone peripherals container iterator
-  typedef std::vector<Ptr<DronePeripheral> >::const_iterator Iterator;
+    /**
+     * \brief Sets the Peripheral TypeId in the ObjectFactory
+     *
+     * \param typeId String containing the Peripheral TypeId
+     */
+    void Add(const std::string typeId);
 
-  /**
-   * \brief Sets the Peripheral TypeId in the ObjectFactory
-   *
-   * \param typeId String containing the Peripheral TypeId
-   */
-  void Add (const std::string typeId);
+    /**
+     * \brief Sets Peripheral Attributes in the ObjectFactory.
+     *
+     * \param name String containing the Attribute name.
+     * \param v Value of the Attribute.
+     */
+    void Set(std::string name, const AttributeValue& v);
 
-  /**
-   * \brief Sets Peripheral Attributes in the ObjectFactory.
-   *
-   * \param name String containing the Attribute name.
-   * \param v Value of the Attribute.
-   */
-  void Set (std::string name, const AttributeValue &v);
+    /**
+     * \brief Creates the Peripheral Object and adds it to the container.
+     *
+     * \returns Pointer to the DronePeripheral created.
+     */
+    Ptr<DronePeripheral> Create();
 
-  /**
-   * \brief Creates the Peripheral Object and adds it to the container.
-   *
-   * \returns Pointer to the DronePeripheral created.
-   */
-  Ptr<DronePeripheral> Create();
+    /**
+     * \brief Gets an iterator which refers to the first DronePeripheral in the
+     * container.
+     *
+     * \returns an iterator which refers to the first DronePeripheral in the container.
+     */
+    Iterator Begin(void) const;
 
-  /**
-   * \brief Gets an iterator which refers to the first DronePeripheral in the
-   * container.
-   *
-   * \returns an iterator which refers to the first DronePeripheral in the container.
-   */
-  Iterator Begin (void) const;
+    /**
+     * \brief Gets an iterator which indicates past-the-last DronePeripheral in the
+     * container.
+     *
+     * \returns an iterator which indicates an ending condition for a loop.
+     */
+    Iterator End(void) const;
 
-  /**
-   * \brief Gets an iterator which indicates past-the-last DronePeripheral in the
-   * container.
-   *
-   * \returns an iterator which indicates an ending condition for a loop.
-   */
-  Iterator End (void) const;
+    /**
+     * \brief Sets the pointer of the drone.
+     *
+     * \param drone Pointer of the drone.
+     */
+    void SetDrone(Ptr<Drone> drone);
 
-  /**
-   * \brief Sets the pointer of the drone.
-   *
-   * \param drone Pointer of the drone.
-   */
-  void SetDrone (Ptr<Drone> drone);
+    /**
+     * \brief Get the number of Ptr<DronePeripheral> stored in this container.
+     *
+     * \returns the number of Ptr<DronePeripheral> stored in this container.
+     */
+    uint32_t GetN(void) const;
 
-  /**
-   * \brief Get the number of Ptr<DronePeripheral> stored in this container.
-   *
-   * \returns the number of Ptr<DronePeripheral> stored in this container.
-   */
-  uint32_t GetN (void) const;
+    /**
+     * \brief Get the Ptr<DronePeripheral> stored in this container at a given
+     * index.
+     *
+     * \param i the index of the requested drone peripheral pointer.
+     * \returns the requested drone peripheral pointer.
+     */
+    Ptr<DronePeripheral> Get(uint32_t i) const;
 
-  /**
-   * \brief Get the Ptr<DronePeripheral> stored in this container at a given
-   * index.
-   *
-   * \param i the index of the requested drone peripheral pointer.
-   * \returns the requested drone peripheral pointer.
-   */
-  Ptr<DronePeripheral> Get (uint32_t i) const;
+    /**
+     * \brief Installs drone peripherals on a drone and eventually links
+     * input peripherals to storage peripherals.
+     *
+     * \param drone Pointer to the drone.
+     */
+    void InstallAll(Ptr<Drone> drone);
 
-  /**
-   * \brief Installs drone peripherals on a drone and eventually links
-   * input peripherals to storage peripherals.
-   *
-   * \param drone Pointer to the drone.
-   */
-  void InstallAll(Ptr<Drone> drone);
+    /**
+     * \return the presence of storage peripheral
+     */
+    bool thereIsStorage();
 
-  /**
-   * \return the presence of storage peripheral
-   */
-  bool thereIsStorage();
+  protected:
+    void virtual DoInitialize(void);
+    void virtual DoDispose(void);
 
-protected:
-  void virtual DoInitialize (void);
-  void virtual DoDispose (void);
+  private:
+    /**
+     * \brief Moves the storage peripheral on the top of the container.
+     */
+    void PinStorage(void);
 
-private:
-  /**
-   * \brief Moves the storage peripheral on the top of the container.
-   */
-  void PinStorage(void);
-
-  std::vector<Ptr<DronePeripheral> > m_dronePeripherals; //!< Drone peripherals smart pointers
-  ObjectFactory m_dronePeripheralFactory;
-  Ptr<Drone> m_drone;
-  bool m_storage = false;
+    std::vector<Ptr<DronePeripheral>> m_dronePeripherals; //!< Drone peripherals smart pointers
+    ObjectFactory m_dronePeripheralFactory;
+    Ptr<Drone> m_drone;
+    bool m_storage = false;
 };
 
 } // namespace ns3

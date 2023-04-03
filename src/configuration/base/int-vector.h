@@ -18,51 +18,50 @@
 #ifndef INT_VECTOR_H
 #define INT_VECTOR_H
 
+#include <ns3/attribute-helper.h>
+#include <ns3/attribute.h>
+#include <ns3/integer.h>
+
 #include <istream>
 #include <ostream>
 #include <vector>
 
-#include <ns3/attribute.h>
-#include <ns3/attribute-helper.h>
-#include <ns3/integer.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Definition of a new attribute type, in the form vector<int>.
  */
 class IntVector
 {
-public:
-  typedef std::vector<int>::const_iterator Iterator;
+  public:
+    typedef std::vector<int>::const_iterator Iterator;
 
-  IntVector ();
-  IntVector (std::vector<int> coefficients);
-  IntVector (const IntVector &a);
+    IntVector();
+    IntVector(std::vector<int> coefficients);
+    IntVector(const IntVector& a);
 
-  Iterator Begin () const;
-  Iterator End () const;
+    Iterator Begin() const;
+    Iterator End() const;
 
-  uint32_t GetN () const;
+    uint32_t GetN() const;
 
-  std::vector<int> Get () const;
-  int Get (const uint32_t i) const;
+    std::vector<int> Get() const;
+    int Get(const uint32_t i) const;
 
-  int GetFront () const;
-  int GetBack () const;
+    int GetFront() const;
+    int GetBack() const;
 
-  void Add (int coefficient);
+    void Add(int coefficient);
 
-private:
-  std::vector<int> m_IntVector;
+  private:
+    std::vector<int> m_IntVector;
 };
 
-ATTRIBUTE_HELPER_HEADER (IntVector);
+ATTRIBUTE_HELPER_HEADER(IntVector);
 
-std::ostream & operator<< (std::ostream &os,
-                           const IntVector &IntVector);
-std::istream & operator>> (std::istream &is,
-                           IntVector &IntVector);
+std::ostream& operator<<(std::ostream& os, const IntVector& IntVector);
+std::istream& operator>>(std::istream& is, IntVector& IntVector);
 
 } // namespace ns3
 

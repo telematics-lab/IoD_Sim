@@ -19,53 +19,53 @@
 #define INTEREST_REGION_H
 
 #include <ns3/box.h>
+#include <ns3/double-vector.h>
 #include <ns3/object.h>
 #include <ns3/vector.h>
 
-#include <ns3/double-vector.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief A 3D region of interest modelled as a box
  */
 class InterestRegion : public Object
 {
-public:
-  /**
-   * \brief Get the type ID.
-   *
-   * \returns the object TypeId
-   */
-  static TypeId GetTypeId (void);
-  /**
-   * \brief default constructor
-   */
-  InterestRegion ();
-  /**
-   * \brief default destructor
-   */
-  virtual ~InterestRegion ();
-  /**
-   * \return the 3D coordinates of the box
-   */
-  const DoubleVector GetCoordinates () const;
-  /**
-   * \brief Sets the 3D coordinates of the box
-   *
-   * \param coords DoubleVector containing 3D coordinates of the box
-   */
-  void SetCoordinates (const DoubleVector &coords);
+  public:
+    /**
+     * \brief Get the type ID.
+     *
+     * \returns the object TypeId
+     */
+    static TypeId GetTypeId(void);
+    /**
+     * \brief default constructor
+     */
+    InterestRegion();
+    /**
+     * \brief default destructor
+     */
+    virtual ~InterestRegion();
+    /**
+     * \return the 3D coordinates of the box
+     */
+    const DoubleVector GetCoordinates() const;
+    /**
+     * \brief Sets the 3D coordinates of the box
+     *
+     * \param coords DoubleVector containing 3D coordinates of the box
+     */
+    void SetCoordinates(const DoubleVector& coords);
 
-  bool IsInside (const Vector &position) const;
+    bool IsInside(const Vector& position) const;
 
-protected:
-  virtual void DoDispose (void);
-  virtual void DoInitialize (void);
+  protected:
+    virtual void DoDispose(void);
+    virtual void DoInitialize(void);
 
-private:
-  Box m_box;
-  DoubleVector m_coordinates;
+  private:
+    Box m_box;
+    DoubleVector m_coordinates;
 };
 
 } // namespace ns3

@@ -17,71 +17,78 @@
  */
 #include "interest-region.h"
 
-#include <cmath>
-
+#include <ns3/double.h>
 #include <ns3/log.h>
 #include <ns3/vector.h>
-#include <ns3/double.h>
 
-namespace ns3 {
+#include <cmath>
 
-NS_LOG_COMPONENT_DEFINE ("InterestRegion");
-NS_OBJECT_ENSURE_REGISTERED (InterestRegion);
+namespace ns3
+{
+
+NS_LOG_COMPONENT_DEFINE("InterestRegion");
+NS_OBJECT_ENSURE_REGISTERED(InterestRegion);
 
 TypeId
-InterestRegion::GetTypeId (void)
+InterestRegion::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::InterestRegion")
-    .SetParent<Object> ()
-    .SetGroupName ("Scenario")
-    .AddConstructor<InterestRegion> ()
-    .AddAttribute ("Coordinates", "Box 3D coordinates, i.e., xMin|xMax|yMin|yMax|zMin|zMax|.",
-                  DoubleVectorValue (),
-                  MakeDoubleVectorAccessor (&InterestRegion::SetCoordinates),
-                  MakeDoubleVectorChecker ())
-  ;
-  return tid;
+    static TypeId tid =
+        TypeId("ns3::InterestRegion")
+            .SetParent<Object>()
+            .SetGroupName("Scenario")
+            .AddConstructor<InterestRegion>()
+            .AddAttribute("Coordinates",
+                          "Box 3D coordinates, i.e., xMin|xMax|yMin|yMax|zMin|zMax|.",
+                          DoubleVectorValue(),
+                          MakeDoubleVectorAccessor(&InterestRegion::SetCoordinates),
+                          MakeDoubleVectorChecker());
+    return tid;
 }
 
-InterestRegion::InterestRegion ()
-{
-}
-
-InterestRegion::~InterestRegion ()
+InterestRegion::InterestRegion()
 {
 }
 
-void
-InterestRegion::DoDispose ()
+InterestRegion::~InterestRegion()
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoDispose ();
 }
 
 void
-InterestRegion::DoInitialize (void)
+InterestRegion::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoInitialize ();
+    NS_LOG_FUNCTION(this);
+    Object::DoDispose();
+}
+
+void
+InterestRegion::DoInitialize(void)
+{
+    NS_LOG_FUNCTION(this);
+    Object::DoInitialize();
 }
 
 const DoubleVector
-InterestRegion::GetCoordinates () const
+InterestRegion::GetCoordinates() const
 {
-  return m_coordinates;
+    return m_coordinates;
 }
 
 void
-InterestRegion::SetCoordinates (const DoubleVector &coords)
+InterestRegion::SetCoordinates(const DoubleVector& coords)
 {
-  m_coordinates = coords;
-  m_box = Box(m_coordinates.Get(0),m_coordinates.Get(1),m_coordinates.Get(2),m_coordinates.Get(3),m_coordinates.Get(4),m_coordinates.Get(5));
+    m_coordinates = coords;
+    m_box = Box(m_coordinates.Get(0),
+                m_coordinates.Get(1),
+                m_coordinates.Get(2),
+                m_coordinates.Get(3),
+                m_coordinates.Get(4),
+                m_coordinates.Get(5));
 }
 
 bool
-InterestRegion::IsInside (const Vector &position) const
+InterestRegion::IsInside(const Vector& position) const
 {
-  return m_box.IsInside(position);
+    return m_box.IsInside(position);
 }
 
 } // namespace ns3

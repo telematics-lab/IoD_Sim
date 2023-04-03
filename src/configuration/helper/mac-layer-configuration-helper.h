@@ -18,30 +18,33 @@
 #ifndef MAC_LAYER_CONFIGURATION_HELPER_H
 #define MAC_LAYER_CONFIGURATION_HELPER_H
 
-#include <rapidjson/document.h>
-
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/model-configuration.h>
 
-namespace ns3 {
+#include <rapidjson/document.h>
+
+namespace ns3
+{
 
 /**
  * Helper to decode a MAC Layer from a JSON configuration file.
  */
 class MacLayerConfigurationHelper
 {
-public:
-  /**
-   * Parse a MAC Layer configuration from a given JSON tree and map it on a MacLayerConfiguration data class.
-   *
-   * \param jsonMacLayer The JSON tree to parse.
-   * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed data.
-   */
-  static Ptr<MacLayerConfiguration> GetConfiguration (const rapidjson::Value& jsonMacLayer);
+  public:
+    /**
+     * Parse a MAC Layer configuration from a given JSON tree and map it on a MacLayerConfiguration
+     * data class.
+     *
+     * \param jsonMacLayer The JSON tree to parse.
+     * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
+     * data.
+     */
+    static Ptr<MacLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonMacLayer);
 
-private:
-  MacLayerConfigurationHelper();
-  static const ModelConfiguration DecodeModelConfiguration (const rapidjson::Value& jsonModel);
+  private:
+    MacLayerConfigurationHelper();
+    static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& jsonModel);
 };
 
 } // namespace ns3

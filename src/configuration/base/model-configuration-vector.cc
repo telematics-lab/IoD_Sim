@@ -17,171 +17,172 @@
  */
 #include "model-configuration-vector.h"
 
-namespace ns3 {
+namespace ns3
+{
 
-ATTRIBUTE_HELPER_CPP (ModelConfigurationVector);
+ATTRIBUTE_HELPER_CPP(ModelConfigurationVector);
 
-ModelConfigurationVector::ModelConfigurationVector ()
+ModelConfigurationVector::ModelConfigurationVector()
 {
 }
 
-ModelConfigurationVector::ModelConfigurationVector (ModelConfiguration conf) :
-  m_confs {conf}
+ModelConfigurationVector::ModelConfigurationVector(ModelConfiguration conf)
+    : m_confs{conf}
 {
 }
 
-ModelConfigurationVector::ModelConfigurationVector (const std::vector<ModelConfiguration>& confs) :
-  m_confs {confs}
+ModelConfigurationVector::ModelConfigurationVector(const std::vector<ModelConfiguration>& confs)
+    : m_confs{confs}
 {
 }
 
-ModelConfigurationVector::ModelConfigurationVector (const ModelConfigurationVector& v1,
-                                                    const ModelConfigurationVector& v2)
+ModelConfigurationVector::ModelConfigurationVector(const ModelConfigurationVector& v1,
+                                                   const ModelConfigurationVector& v2)
 {
-  Add (v1);
-  Add (v2);
+    Add(v1);
+    Add(v2);
 }
 
-ModelConfigurationVector::ModelConfigurationVector (const ModelConfigurationVector& v1,
-                                                    const ModelConfigurationVector& v2,
-                                                    const ModelConfigurationVector& v3)
+ModelConfigurationVector::ModelConfigurationVector(const ModelConfigurationVector& v1,
+                                                   const ModelConfigurationVector& v2,
+                                                   const ModelConfigurationVector& v3)
 {
-  Add (v1);
-  Add (v2);
-  Add (v3);
+    Add(v1);
+    Add(v2);
+    Add(v3);
 }
 
-ModelConfigurationVector::ModelConfigurationVector (const ModelConfigurationVector& v1,
-                                                    const ModelConfigurationVector& v2,
-                                                    const ModelConfigurationVector& v3,
-                                                    const ModelConfigurationVector& v4)
+ModelConfigurationVector::ModelConfigurationVector(const ModelConfigurationVector& v1,
+                                                   const ModelConfigurationVector& v2,
+                                                   const ModelConfigurationVector& v3,
+                                                   const ModelConfigurationVector& v4)
 {
-  Add (v1);
-  Add (v2);
-  Add (v3);
-  Add (v4);
+    Add(v1);
+    Add(v2);
+    Add(v3);
+    Add(v4);
 }
 
-ModelConfigurationVector::ModelConfigurationVector (const ModelConfigurationVector& v1,
-                                                    const ModelConfigurationVector& v2,
-                                                    const ModelConfigurationVector& v3,
-                                                    const ModelConfigurationVector& v4,
-                                                    const ModelConfigurationVector& v5)
+ModelConfigurationVector::ModelConfigurationVector(const ModelConfigurationVector& v1,
+                                                   const ModelConfigurationVector& v2,
+                                                   const ModelConfigurationVector& v3,
+                                                   const ModelConfigurationVector& v4,
+                                                   const ModelConfigurationVector& v5)
 {
-  Add (v1);
-  Add (v2);
-  Add (v3);
-  Add (v4);
-  Add (v5);
-}
-
-ModelConfigurationVector::Iterator
-ModelConfigurationVector::Begin () const
-{
-  return m_confs.begin ();
+    Add(v1);
+    Add(v2);
+    Add(v3);
+    Add(v4);
+    Add(v5);
 }
 
 ModelConfigurationVector::Iterator
-ModelConfigurationVector::begin () const
+ModelConfigurationVector::Begin() const
 {
-  return Begin ();
+    return m_confs.begin();
+}
+
+ModelConfigurationVector::Iterator
+ModelConfigurationVector::begin() const
+{
+    return Begin();
 }
 
 ModelConfigurationVector::MutableIterator
-ModelConfigurationVector::MutableBegin ()
+ModelConfigurationVector::MutableBegin()
 {
-  return m_confs.begin ();
+    return m_confs.begin();
 }
 
 ModelConfigurationVector::Iterator
-ModelConfigurationVector::End () const
+ModelConfigurationVector::End() const
 {
-  return m_confs.end ();
+    return m_confs.end();
 }
 
 ModelConfigurationVector::Iterator
-ModelConfigurationVector::end () const
+ModelConfigurationVector::end() const
 {
-  return End ();
+    return End();
 }
 
 ModelConfigurationVector::MutableIterator
-ModelConfigurationVector::MutableEnd ()
+ModelConfigurationVector::MutableEnd()
 {
-  return m_confs.end ();
+    return m_confs.end();
 }
 
 uint32_t
-ModelConfigurationVector::GetN () const
+ModelConfigurationVector::GetN() const
 {
-  return m_confs.size ();
+    return m_confs.size();
 }
 
 ModelConfiguration
-ModelConfigurationVector::operator[] (uint32_t i) const
+ModelConfigurationVector::operator[](uint32_t i) const
 {
-  return m_confs[i];
+    return m_confs[i];
 }
 
 ModelConfiguration
-ModelConfigurationVector::Get (uint32_t i) const
+ModelConfigurationVector::Get(uint32_t i) const
 {
-  return m_confs[i];
+    return m_confs[i];
 }
 
 ModelConfiguration
-ModelConfigurationVector::GetFront () const
+ModelConfigurationVector::GetFront() const
 {
-  return m_confs.front ();
+    return m_confs.front();
 }
 
 ModelConfiguration
-ModelConfigurationVector::GetBack () const
+ModelConfigurationVector::GetBack() const
 {
-  return m_confs.back ();
+    return m_confs.back();
 }
 
 void
-ModelConfigurationVector::Add (const ModelConfigurationVector& v)
+ModelConfigurationVector::Add(const ModelConfigurationVector& v)
 {
-  for (auto i = v.Begin (); i != v.End (); ++i)
-    Add (*i);
+    for (auto i = v.Begin(); i != v.End(); ++i)
+        Add(*i);
 }
 
 void
-ModelConfigurationVector::Add (ModelConfiguration conf)
+ModelConfigurationVector::Add(ModelConfiguration conf)
 {
-  m_confs.push_back (conf);
+    m_confs.push_back(conf);
 }
 
 std::ostream&
-operator<< (std::ostream &os, const ModelConfigurationVector &vector)
+operator<<(std::ostream& os, const ModelConfigurationVector& vector)
 {
-  os << vector.GetN () << ";";
+    os << vector.GetN() << ";";
 
-  for (auto i = vector.Begin (); i != vector.End (); ++i)
-    os << *i << ";";
+    for (auto i = vector.Begin(); i != vector.End(); ++i)
+        os << *i << ";";
 
-  return os;
+    return os;
 }
 
 std::istream&
-operator>> (std::istream &is, ModelConfigurationVector &vector)
+operator>>(std::istream& is, ModelConfigurationVector& vector)
 {
-  uint32_t n;
-  is >> n;
-  is.ignore (1);
+    uint32_t n;
+    is >> n;
+    is.ignore(1);
 
-  for (uint32_t i = 0; i < n; ++i)
+    for (uint32_t i = 0; i < n; ++i)
     {
-      ModelConfiguration conf;
-      is >> conf;
-      vector.Add (conf);
+        ModelConfiguration conf;
+        is >> conf;
+        vector.Add(conf);
 
-      is.ignore (1);
+        is.ignore(1);
     }
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

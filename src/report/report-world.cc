@@ -23,99 +23,120 @@
 #include <ns3/building.h>
 #include <ns3/log.h>
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("ReportWorld");
-
-ReportWorld::ReportWorld ()
+namespace ns3
 {
-  NS_LOG_FUNCTION (this);
+
+NS_LOG_COMPONENT_DEFINE("ReportWorld");
+
+ReportWorld::ReportWorld()
+{
+    NS_LOG_FUNCTION(this);
 }
 
-ReportWorld::~ReportWorld ()
+ReportWorld::~ReportWorld()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-ReportWorld::Write (xmlTextWriterPtr h) const
+ReportWorld::Write(xmlTextWriterPtr h) const
 {
-  std::stringstream roistr;
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    std::stringstream roistr;
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "World");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "World");
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "Buildings");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "Buildings");
+    NS_ASSERT(rc >= 0);
 
-  for (auto bit = BuildingList::Begin (); bit != BuildingList::End (); ++bit)
-  {
-    rc = xmlTextWriterStartElement(h, BAD_CAST "Building");
-    NS_ASSERT (rc >= 0);
+    for (auto bit = BuildingList::Begin(); bit != BuildingList::End(); ++bit)
+    {
+        rc = xmlTextWriterStartElement(h, BAD_CAST "Building");
+        NS_ASSERT(rc >= 0);
 
-    xmlTextWriterWriteAttribute (h, BAD_CAST "id", BAD_CAST std::to_string((*bit)->GetId ()).c_str ());
+        xmlTextWriterWriteAttribute(h,
+                                    BAD_CAST "id",
+                                    BAD_CAST std::to_string((*bit)->GetId()).c_str());
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "Boundaries", BAD_CAST
-    ("["+std::to_string((*bit)->GetBoundaries ().xMin)+", "
-    + std::to_string((*bit)->GetBoundaries ().xMax)+", "
-    +std::to_string((*bit)->GetBoundaries ().yMin)+", "
-    + std::to_string((*bit)->GetBoundaries ().yMax)+", "
-    +std::to_string((*bit)->GetBoundaries ().zMin)+", "
-    + std::to_string((*bit)->GetBoundaries ().zMax)+"]").c_str ());
-    NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterWriteElement(
+            h,
+            BAD_CAST "Boundaries",
+            BAD_CAST("[" + std::to_string((*bit)->GetBoundaries().xMin) + ", " +
+                     std::to_string((*bit)->GetBoundaries().xMax) + ", " +
+                     std::to_string((*bit)->GetBoundaries().yMin) + ", " +
+                     std::to_string((*bit)->GetBoundaries().yMax) + ", " +
+                     std::to_string((*bit)->GetBoundaries().zMin) + ", " +
+                     std::to_string((*bit)->GetBoundaries().zMax) + "]")
+                .c_str());
+        NS_ASSERT(rc >= 0);
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "BuildingType", BAD_CAST std::to_string((*bit)->GetBuildingType ()).c_str ());
-    NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterWriteElement(h,
+                                       BAD_CAST "BuildingType",
+                                       BAD_CAST std::to_string((*bit)->GetBuildingType()).c_str());
+        NS_ASSERT(rc >= 0);
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "WallsType", BAD_CAST std::to_string((*bit)->GetExtWallsType ()).c_str ());
-    NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterWriteElement(h,
+                                       BAD_CAST "WallsType",
+                                       BAD_CAST std::to_string((*bit)->GetExtWallsType()).c_str());
+        NS_ASSERT(rc >= 0);
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "Floors", BAD_CAST std::to_string((*bit)->GetNFloors ()).c_str ());
-    NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterWriteElement(h,
+                                       BAD_CAST "Floors",
+                                       BAD_CAST std::to_string((*bit)->GetNFloors()).c_str());
+        NS_ASSERT(rc >= 0);
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "Rooms", BAD_CAST
-    ("["+std::to_string((*bit)->GetNRoomsX ())+","+ std::to_string((*bit)->GetNRoomsX())+"]").c_str ());
-    NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterWriteElement(h,
+                                       BAD_CAST "Rooms",
+                                       BAD_CAST("[" + std::to_string((*bit)->GetNRoomsX()) + "," +
+                                                std::to_string((*bit)->GetNRoomsX()) + "]")
+                                           .c_str());
+        NS_ASSERT(rc >= 0);
+
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
+    }
 
     rc = xmlTextWriterEndElement(h);
-    NS_ASSERT (rc >= 0);
-  }
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "InterestRegions");
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "InterestRegions");
-  NS_ASSERT (rc >= 0);
+    for (auto ir = irc->Begin(); ir != irc->End(); ir++)
+    {
+        xmlTextWriterWriteAttribute(h,
+                                    BAD_CAST "id",
+                                    BAD_CAST std::to_string(ir - irc->Begin()).c_str());
 
-  for (auto ir = irc->Begin (); ir != irc->End (); ir++)
-  {
-    xmlTextWriterWriteAttribute (h, BAD_CAST "id", BAD_CAST std::to_string(ir-irc->Begin ()).c_str ());
+        std::string irstr = "";
+        DoubleVector coords = (*ir)->GetCoordinates();
 
-    std::string irstr = "";
-    DoubleVector coords = (*ir)->GetCoordinates ();
+        for (uint32_t c = 0; c < coords.GetN(); c++)
+            irstr += std::to_string(coords.Get()[c]) + ", ";
+        irstr.pop_back();
+        irstr.pop_back();
 
-    for (uint32_t c = 0; c < coords.GetN(); c++) irstr+=std::to_string(coords.Get()[c])+", ";
-    irstr.pop_back();
-    irstr.pop_back();
+        rc = xmlTextWriterWriteElement(h,
+                                       BAD_CAST "Boundaries",
+                                       BAD_CAST("[" + irstr + "]").c_str());
+        NS_ASSERT(rc >= 0);
+    }
 
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "Boundaries", BAD_CAST ("["+irstr+"]").c_str ());
-    NS_ASSERT (rc >= 0);
-  }
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
-
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

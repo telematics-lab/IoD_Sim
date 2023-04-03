@@ -18,29 +18,32 @@
 #ifndef PHY_LAYER_CONFIGURATION_HELPER_H
 #define PHY_LAYER_CONFIGURATION_HELPER_H
 
-#include <rapidjson/document.h>
-
 #include <ns3/model-configuration.h>
 #include <ns3/phy-layer-configuration.h>
 
-namespace ns3 {
+#include <rapidjson/document.h>
+
+namespace ns3
+{
 
 /**
  * Helper to decode a PHY Layer from a JSON configuration file.
  */
 class PhyLayerConfigurationHelper
 {
-public:
-  /**
-   * Parse a PHY configuration from a given JSON tree and map it on a PhyLayerConfiguration data class.
-   *
-   * \param jsonPhyLayer The JSON tree to parse.
-   * \return The configuration as a pointer to PhyLayerConfiguration to easily retrieve parsed data.
-   */
-  static Ptr<PhyLayerConfiguration> GetConfiguration (const rapidjson::Value& jsonPhyLayer);
+  public:
+    /**
+     * Parse a PHY configuration from a given JSON tree and map it on a PhyLayerConfiguration data
+     * class.
+     *
+     * \param jsonPhyLayer The JSON tree to parse.
+     * \return The configuration as a pointer to PhyLayerConfiguration to easily retrieve parsed
+     * data.
+     */
+    static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonPhyLayer);
 
-private:
-  PhyLayerConfigurationHelper();
+  private:
+    PhyLayerConfigurationHelper();
 };
 
 } // namespace ns3

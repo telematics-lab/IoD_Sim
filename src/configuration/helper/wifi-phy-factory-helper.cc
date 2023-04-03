@@ -17,35 +17,37 @@
  */
 #include "wifi-phy-factory-helper.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 void
-WifiPhyFactoryHelper::SetPropagationDelay (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf)
+WifiPhyFactoryHelper::SetPropagationDelay(YansWifiChannelHelper& channelHelper,
+                                          const ModelConfiguration& modelConf)
 {
-  ObjectFactory factory;
+    ObjectFactory factory;
 
-  factory.SetTypeId (modelConf.GetName ());
-  for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.name, *attr.value);
+    factory.SetTypeId(modelConf.GetName());
+    for (auto& attr : modelConf.GetAttributes())
+        factory.Set(attr.name, *attr.value);
 
-  channelHelper.m_propagationDelay = factory;
+    channelHelper.m_propagationDelay = factory;
 }
 
 void
-WifiPhyFactoryHelper::AddPropagationLoss (YansWifiChannelHelper& channelHelper, const ModelConfiguration& modelConf)
+WifiPhyFactoryHelper::AddPropagationLoss(YansWifiChannelHelper& channelHelper,
+                                         const ModelConfiguration& modelConf)
 {
-  ObjectFactory factory;
+    ObjectFactory factory;
 
-  factory.SetTypeId (modelConf.GetName ());
-  for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.name, *attr.value);
+    factory.SetTypeId(modelConf.GetName());
+    for (auto& attr : modelConf.GetAttributes())
+        factory.Set(attr.name, *attr.value);
 
-  channelHelper.m_propagationLoss.push_back (factory);
+    channelHelper.m_propagationLoss.push_back(factory);
 }
 
-WifiPhyFactoryHelper::WifiPhyFactoryHelper ()
+WifiPhyFactoryHelper::WifiPhyFactoryHelper()
 {
-
 }
 
 } // namespace ns3

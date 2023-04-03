@@ -19,38 +19,40 @@
  */
 #ifndef DRONE_CONTROL_LAYER_H
 #define DRONE_CONTROL_LAYER_H
-#include <libxml/xmlwriter.h>
-
 #include "protocol-layer.h"
 
-namespace ns3 {
+#include <libxml/xmlwriter.h>
+
+namespace ns3
+{
 
 class DroneControlLayer : public ProtocolLayer
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  DroneControlLayer ();
-  /**
-   * Default destructor
-   */
-  ~DroneControlLayer ();
+    /**
+     * Default constructor
+     */
+    DroneControlLayer();
+    /**
+     * Default destructor
+     */
+    ~DroneControlLayer();
 
-  /**
-   * Write IPv4 Layer report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  virtual void Write (xmlTextWriterPtr handle);
-private:
-    std::string m_notImplemented;   /// coming soon! ;)
+    /**
+     * Write IPv4 Layer report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    virtual void Write(xmlTextWriterPtr handle);
+
+  private:
+    std::string m_notImplemented; /// coming soon! ;)
 };
 
 } // namespace ns3

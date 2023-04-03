@@ -17,23 +17,22 @@
  */
 #include "mac-layer-configuration.h"
 
-namespace ns3 {
-
-MacLayerConfiguration::MacLayerConfiguration (std::string type) :
-  m_type {type}
+namespace ns3
 {
 
+MacLayerConfiguration::MacLayerConfiguration(std::string type)
+    : m_type{type}
+{
 }
 
-MacLayerConfiguration::~MacLayerConfiguration ()
+MacLayerConfiguration::~MacLayerConfiguration()
 {
-
 }
 
 const std::string
-MacLayerConfiguration::GetType () const
+MacLayerConfiguration::GetType() const
 {
-  return m_type;
+    return m_type;
 }
 
 } // namespace ns3

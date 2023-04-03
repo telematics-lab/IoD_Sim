@@ -17,121 +17,128 @@
  */
 #include "input-peripheral.h"
 
-#include <ns3/integer.h>
 #include <ns3/boolean.h>
+#include <ns3/integer.h>
 #include <ns3/simulator.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("InputPeripheral");
-NS_OBJECT_ENSURE_REGISTERED (InputPeripheral);
+NS_LOG_COMPONENT_DEFINE("InputPeripheral");
+NS_OBJECT_ENSURE_REGISTERED(InputPeripheral);
 
 TypeId
-InputPeripheral::GetTypeId ()
+InputPeripheral::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::InputPeripheral")
-          .SetParent<DronePeripheral> ()
-          .SetGroupName ("Peripheral")
-          .AddConstructor<InputPeripheral> ()
-          .AddAttribute ("DataRate", "The acquisition data rate of the peripheral in bit",
-                         DoubleValue (0),
-                         MakeDoubleAccessor (&InputPeripheral::m_dataRate),
-                         MakeDoubleChecker<double> (0))
-          .AddAttribute ("DataAcquisitionTimeInterval", "The time interval occurring between any data acquisition",
-                         TimeValue (Seconds (1.0)),
-                         MakeTimeAccessor (&InputPeripheral::m_acquisitionTimeInterval),
-                         MakeTimeChecker ())
-          .AddAttribute ("HasStorage", "Acquired data are offloaded to the StoragePeripheral",
-                         BooleanValue (false),
-                         MakeBooleanAccessor (&InputPeripheral::m_hasStorage),
-                         MakeBooleanChecker ())
-          ;
-  return tid;
+    static TypeId tid =
+        TypeId("ns3::InputPeripheral")
+            .SetParent<DronePeripheral>()
+            .SetGroupName("Peripheral")
+            .AddConstructor<InputPeripheral>()
+            .AddAttribute("DataRate",
+                          "The acquisition data rate of the peripheral in bit",
+                          DoubleValue(0),
+                          MakeDoubleAccessor(&InputPeripheral::m_dataRate),
+                          MakeDoubleChecker<double>(0))
+            .AddAttribute("DataAcquisitionTimeInterval",
+                          "The time interval occurring between any data acquisition",
+                          TimeValue(Seconds(1.0)),
+                          MakeTimeAccessor(&InputPeripheral::m_acquisitionTimeInterval),
+                          MakeTimeChecker())
+            .AddAttribute("HasStorage",
+                          "Acquired data are offloaded to the StoragePeripheral",
+                          BooleanValue(false),
+                          MakeBooleanAccessor(&InputPeripheral::m_hasStorage),
+                          MakeBooleanChecker());
+    return tid;
 }
 
-InputPeripheral::InputPeripheral ()
+InputPeripheral::InputPeripheral()
 {
-}
-
-void
-InputPeripheral::DoInitialize (void)
-{
-  DronePeripheral::DoInitialize ();
 }
 
 void
-InputPeripheral::DoDispose (void)
+InputPeripheral::DoInitialize(void)
 {
-  DronePeripheral::DoDispose ();
+    DronePeripheral::DoInitialize();
 }
 
 void
-InputPeripheral::SetStorage (Ptr<StoragePeripheral> storage)
+InputPeripheral::DoDispose(void)
 {
-  NS_ASSERT (storage != NULL);
-  NS_ASSERT (storage->GetDrone () == this->GetDrone ());
-  m_storage = storage;
+    DronePeripheral::DoDispose();
 }
 
 void
-InputPeripheral::Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
+InputPeripheral::SetStorage(Ptr<StoragePeripheral> storage)
 {
-  SetDrone (drone);
-  if (storage != NULL)
+    NS_ASSERT(storage != NULL);
+    NS_ASSERT(storage->GetDrone() == this->GetDrone());
+    m_storage = storage;
+}
+
+void
+InputPeripheral::Install(Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
+{
+    SetDrone(drone);
+    if (storage != NULL)
     {
-      SetStorage (storage);
+        SetStorage(storage);
     }
 }
 
 void
-InputPeripheral::AcquireData (void)
+InputPeripheral::AcquireData(void)
 {
-  if (Simulator::IsFinished ())
-    return;
+    if (Simulator::IsFinished())
+        return;
 
-  m_dataAcquisitionEvent.Cancel ();
+    m_dataAcquisitionEvent.Cancel();
 
-  if (Simulator::Now ().GetMilliSeconds () >= m_acquisitionTimeInterval.GetMilliSeconds () && m_storage != NULL)
+    if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds() &&
+        m_storage != NULL)
     {
-      m_storage->Alloc (m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds () / 1000,
-                        StoragePeripheral::bit);
+        m_storage->Alloc(m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds() / 1000,
+                         StoragePeripheral::bit);
     }
-  if (GetState() == PeripheralState::ON) m_dataAcquisitionEvent = Simulator::Schedule (m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
+    if (GetState() == PeripheralState::ON)
+        m_dataAcquisitionEvent =
+            Simulator::Schedule(m_acquisitionTimeInterval, &InputPeripheral::AcquireData, this);
 }
 
 void
 InputPeripheral::OnChangeState(PeripheralState s)
 {
-  switch (s)
+    switch (s)
     {
-      case OFF:
-      break;
-      case IDLE:
+    case OFF:
         break;
-      case ON:
+    case IDLE:
+        break;
+    case ON:
         AcquireData();
-      break;
-      default:
-      break;
+        break;
+    default:
+        break;
     }
 }
 
 double
-InputPeripheral::GetDatarate ()
+InputPeripheral::GetDatarate()
 {
-  return m_dataRate;
+    return m_dataRate;
 }
 
 Time
-InputPeripheral::GetAcquisitionTimeInterval ()
+InputPeripheral::GetAcquisitionTimeInterval()
 {
-  return m_acquisitionTimeInterval;
+    return m_acquisitionTimeInterval;
 }
 
 bool
-InputPeripheral::HasStorage ()
+InputPeripheral::HasStorage()
 {
-  return m_hasStorage;
+    return m_hasStorage;
 }
 
 } // namespace ns3

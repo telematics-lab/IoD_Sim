@@ -20,11 +20,12 @@
 #ifndef ZSP_LIST_H
 #define ZSP_LIST_H
 
-#include <vector>
-
 #include <ns3/ptr.h>
 
-namespace ns3 {
+#include <vector>
+
+namespace ns3
+{
 
 class Node;
 class CallbackBase;
@@ -38,39 +39,39 @@ class CallbackBase;
  */
 class ZspList
 {
-public:
-  /// Zsp container iterator
-  typedef std::vector<Ptr<Node>>::const_iterator Iterator;
+  public:
+    /// Zsp container iterator
+    typedef std::vector<Ptr<Node>>::const_iterator Iterator;
 
-  /**
-   * \param zsp Zsp to add
-   * \returns index of Zsp in list
-   *
-   * This method must be called automatically in order to register
-   * a node as a Zsp
-   */
-  static uint32_t Add (Ptr<Node> zsp);
+    /**
+     * \param zsp Zsp to add
+     * \returns index of Zsp in list
+     *
+     * This method must be called automatically in order to register
+     * a node as a Zsp
+     */
+    static uint32_t Add(Ptr<Node> zsp);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list
-   */
-  static Iterator Begin ();
+    /**
+     * \returns a C++ iterator located at the beginning of this list
+     */
+    static Iterator Begin();
 
-  /**
-   * \returns a C++ iterator located at the end of this list
-   */
-  static Iterator End ();
+    /**
+     * \returns a C++ iterator located at the end of this list
+     */
+    static Iterator End();
 
-  /**
-   * \param n the index of requested node
-   * \returns the Zsp (Node) associated to index n
-   */
-  static Ptr<Node> GetZsp (uint32_t n);
+    /**
+     * \param n the index of requested node
+     * \returns the Zsp (Node) associated to index n
+     */
+    static Ptr<Node> GetZsp(uint32_t n);
 
-  /**
-   * \returns the number of Zsps currently in the list
-   */
-  static uint32_t GetNZsps ();
+    /**
+     * \returns the number of Zsps currently in the list
+     */
+    static uint32_t GetNZsps();
 };
 
 } // namespace ns3

@@ -22,13 +22,14 @@
 #include <ns3/config.h>
 #include <ns3/log.h>
 #include <ns3/node.h>
-#include <ns3/object.h>
 #include <ns3/object-vector.h>
+#include <ns3/object.h>
 #include <ns3/simulator.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("RemoteList");
+NS_LOG_COMPONENT_DEFINE("RemoteList");
 
 /**
  * \ingroup network
@@ -36,191 +37,190 @@ NS_LOG_COMPONENT_DEFINE ("RemoteList");
  */
 class RemoteListPriv : public Object
 {
-public:
-  /**
-   * \brief Get the type ID.
-   * \return the object TypeId.
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId.
+     */
+    static TypeId GetTypeId();
 
-  RemoteListPriv ();
-  ~RemoteListPriv ();
+    RemoteListPriv();
+    ~RemoteListPriv();
 
-  /**
-   * \param remote remote to add
-   * \returns index of remote in list
-   *
-   * This method should be called automatically from Node::Node at this time.
-   */
-  uint32_t Add (Ptr<Node> remote);
+    /**
+     * \param remote remote to add
+     * \returns index of remote in list
+     *
+     * This method should be called automatically from Node::Node at this time.
+     */
+    uint32_t Add(Ptr<Node> remote);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list.
-   */
-  RemoteList::Iterator Begin () const;
+    /**
+     * \returns a C++ iterator located at the beginning of this list.
+     */
+    RemoteList::Iterator Begin() const;
 
-  /**
-   * \returns a C++ iterator located at the end of this list.
-   */
-  RemoteList::Iterator End () const;
+    /**
+     * \returns a C++ iterator located at the end of this list.
+     */
+    RemoteList::Iterator End() const;
 
-  /**
-   * \param n index of requested node.
-   * \returns the remote (Node) associated to index n.
-   */
-  Ptr<Node> GetRemote (uint32_t n);
+    /**
+     * \param n index of requested node.
+     * \returns the remote (Node) associated to index n.
+     */
+    Ptr<Node> GetRemote(uint32_t n);
 
-  /**
-   * \returns the number of drones currently in the list.
-   */
-  uint32_t GetNRemotes ();
+    /**
+     * \returns the number of drones currently in the list.
+     */
+    uint32_t GetNRemotes();
 
-  /**
-   * \brief Get the remote list object
-   * \returns the remote list
-   */
-  static Ptr<RemoteListPriv> Get ();
+    /**
+     * \brief Get the remote list object
+     * \returns the remote list
+     */
+    static Ptr<RemoteListPriv> Get();
 
-private:
-  /**
-   * \brief Get the remote list object
-   * \returns the remote list
-   */
-  static Ptr<RemoteListPriv> *DoGet ();
+  private:
+    /**
+     * \brief Get the remote list object
+     * \returns the remote list
+     */
+    static Ptr<RemoteListPriv>* DoGet();
 
-  /**
-   * \brief Delete the drones list object
-   */
-  static void Delete ();
+    /**
+     * \brief Delete the drones list object
+     */
+    static void Delete();
 
-  /**
-   * \brief Dispose the drones in the list
-   */
-  virtual void DoDispose ();
+    /**
+     * \brief Dispose the drones in the list
+     */
+    virtual void DoDispose();
 
-  std::vector<Ptr<Node>> m_remotes; //!< remote objects container
+    std::vector<Ptr<Node>> m_remotes; //!< remote objects container
 };
 
 TypeId
-RemoteListPriv::GetTypeId ()
+RemoteListPriv::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::RemoteListPriv")
-    .SetParent<Object> ()
-    .SetGroupName("Remotes")
-    .AddAttribute ("RemoteList", "The list of all remotes created during the simulation.",
-                   ObjectVectorValue (),
-                   MakeObjectVectorAccessor (&RemoteListPriv::m_remotes),
-                   MakeObjectVectorChecker<Node> ())
-    ;
+    static TypeId tid = TypeId("ns3::RemoteListPriv")
+                            .SetParent<Object>()
+                            .SetGroupName("Remotes")
+                            .AddAttribute("RemoteList",
+                                          "The list of all remotes created during the simulation.",
+                                          ObjectVectorValue(),
+                                          MakeObjectVectorAccessor(&RemoteListPriv::m_remotes),
+                                          MakeObjectVectorChecker<Node>());
 
-  return tid;
+    return tid;
 }
 
 Ptr<RemoteListPriv>
-RemoteListPriv::Get ()
+RemoteListPriv::Get()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return *DoGet ();
+    return *DoGet();
 }
 
-Ptr<RemoteListPriv> *
-RemoteListPriv::DoGet ()
+Ptr<RemoteListPriv>*
+RemoteListPriv::DoGet()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  static Ptr<RemoteListPriv> ptr = 0;
-  if (ptr == nullptr)
+    static Ptr<RemoteListPriv> ptr = 0;
+    if (ptr == nullptr)
     {
-      ptr = CreateObject<RemoteListPriv> ();
-      Config::RegisterRootNamespaceObject (ptr);
-      Simulator::ScheduleDestroy (&RemoteListPriv::Delete);
+        ptr = CreateObject<RemoteListPriv>();
+        Config::RegisterRootNamespaceObject(ptr);
+        Simulator::ScheduleDestroy(&RemoteListPriv::Delete);
     }
 
-  return &ptr;
+    return &ptr;
 }
 
 void
-RemoteListPriv::Delete ()
+RemoteListPriv::Delete()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  Config::UnregisterRootNamespaceObject (Get ());
-  (*DoGet ()) = 0;
+    Config::UnregisterRootNamespaceObject(Get());
+    (*DoGet()) = 0;
 }
 
-RemoteListPriv::RemoteListPriv ()
+RemoteListPriv::RemoteListPriv()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-RemoteListPriv::~RemoteListPriv ()
+RemoteListPriv::~RemoteListPriv()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-RemoteListPriv::DoDispose ()
+RemoteListPriv::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  for (auto remote = m_remotes.begin ();
-       remote != m_remotes.end ();
-       remote++)
+    for (auto remote = m_remotes.begin(); remote != m_remotes.end(); remote++)
     {
-      (*remote)->Dispose ();
+        (*remote)->Dispose();
     }
 
-  m_remotes.erase (m_remotes.begin (), m_remotes.end ());
-  Object::DoDispose ();
+    m_remotes.erase(m_remotes.begin(), m_remotes.end());
+    Object::DoDispose();
 }
 
 uint32_t
-RemoteListPriv::Add (Ptr<Node> remote)
+RemoteListPriv::Add(Ptr<Node> remote)
 {
-  NS_LOG_FUNCTION (this << remote);
+    NS_LOG_FUNCTION(this << remote);
 
-  uint32_t index = m_remotes.size ();
+    uint32_t index = m_remotes.size();
 
-  m_remotes.push_back (remote);
-  Simulator::ScheduleWithContext (index, TimeStep (0), &Node::Initialize, remote);
+    m_remotes.push_back(remote);
+    Simulator::ScheduleWithContext(index, TimeStep(0), &Node::Initialize, remote);
 
-  return index;
+    return index;
 }
 
 RemoteList::Iterator
-RemoteListPriv::Begin () const
+RemoteListPriv::Begin() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_remotes.begin ();
+    return m_remotes.begin();
 }
 
 RemoteList::Iterator
-RemoteListPriv::End () const
+RemoteListPriv::End() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_remotes.end ();
+    return m_remotes.end();
 }
 
 uint32_t
-RemoteListPriv::GetNRemotes ()
+RemoteListPriv::GetNRemotes()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  return m_remotes.size ();
+    return m_remotes.size();
 }
 
 Ptr<Node>
-RemoteListPriv::GetRemote (uint32_t n)
+RemoteListPriv::GetRemote(uint32_t n)
 {
-  NS_LOG_FUNCTION (this << n);
+    NS_LOG_FUNCTION(this << n);
 
-  NS_ASSERT_MSG (n < m_remotes.size (), "remote index " << n <<
-                 " is out of range (only have " << m_remotes.size () << " drones).");
+    NS_ASSERT_MSG(n < m_remotes.size(),
+                  "remote index " << n << " is out of range (only have " << m_remotes.size()
+                                  << " drones).");
 
-  return m_remotes[n];
+    return m_remotes[n];
 }
 
 } // namespace ns3
@@ -230,46 +230,47 @@ RemoteListPriv::GetRemote (uint32_t n)
  * which calls into the private implementation though
  * the simulation of a singleton.
  */
-namespace ns3 {
+namespace ns3
+{
 
 uint32_t
-RemoteList::Add (Ptr<Node> remote)
+RemoteList::Add(Ptr<Node> remote)
 {
-  NS_LOG_FUNCTION (remote);
+    NS_LOG_FUNCTION(remote);
 
-  return RemoteListPriv::Get ()->Add (remote);
+    return RemoteListPriv::Get()->Add(remote);
 }
 
 RemoteList::Iterator
-RemoteList::Begin ()
+RemoteList::Begin()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return RemoteListPriv::Get ()->Begin ();
+    return RemoteListPriv::Get()->Begin();
 }
 
 RemoteList::Iterator
-RemoteList::End ()
+RemoteList::End()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return RemoteListPriv::Get ()->End ();
+    return RemoteListPriv::Get()->End();
 }
 
 Ptr<Node>
-RemoteList::GetRemote (uint32_t n)
+RemoteList::GetRemote(uint32_t n)
 {
-  NS_LOG_FUNCTION (n);
+    NS_LOG_FUNCTION(n);
 
-  return RemoteListPriv::Get ()->GetRemote (n);
+    return RemoteListPriv::Get()->GetRemote(n);
 }
 
 uint32_t
-RemoteList::GetNRemotes ()
+RemoteList::GetNRemotes()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return RemoteListPriv::Get ()->GetNRemotes ();
+    return RemoteListPriv::Get()->GetNRemotes();
 }
 
 } // namespace ns3

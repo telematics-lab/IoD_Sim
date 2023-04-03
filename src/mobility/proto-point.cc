@@ -20,76 +20,80 @@
 #include <ns3/integer.h>
 #include <ns3/vector.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_OBJECT_ENSURE_REGISTERED (ProtoPoint);
+NS_OBJECT_ENSURE_REGISTERED(ProtoPoint);
 
 TypeId
-ProtoPoint::GetTypeId ()
+ProtoPoint::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::ProtoPoint")
-    .SetParent<Object> ()
-    .SetGroupName ("ProtoTrajectory")
-    .AddConstructor<ProtoPoint> ()
-    .AddAttribute ("Position", "The current position of the point of interest.",
-                   VectorValue (Vector (0.0, 0.0, 0.0)),
-                   MakeVectorAccessor (&ProtoPoint::m_position),
-                   MakeVectorChecker ())
-    .AddAttribute ("Interest", "The grade of interest of this point. 0 for a point of destination.",
-                   IntegerValue (0),
-                   MakeIntegerAccessor (&ProtoPoint::m_interest),
-                   MakeIntegerChecker<uint32_t> ())
-    .AddAttribute ("RestTime", "The time to rest, if the point is a destination one.",
-                   TimeValue (Seconds (0)),
-                   MakeTimeAccessor (&ProtoPoint::m_restTime),
-                   MakeTimeChecker ())
-    ;
+    static TypeId tid =
+        TypeId("ns3::ProtoPoint")
+            .SetParent<Object>()
+            .SetGroupName("ProtoTrajectory")
+            .AddConstructor<ProtoPoint>()
+            .AddAttribute("Position",
+                          "The current position of the point of interest.",
+                          VectorValue(Vector(0.0, 0.0, 0.0)),
+                          MakeVectorAccessor(&ProtoPoint::m_position),
+                          MakeVectorChecker())
+            .AddAttribute("Interest",
+                          "The grade of interest of this point. 0 for a point of destination.",
+                          IntegerValue(0),
+                          MakeIntegerAccessor(&ProtoPoint::m_interest),
+                          MakeIntegerChecker<uint32_t>())
+            .AddAttribute("RestTime",
+                          "The time to rest, if the point is a destination one.",
+                          TimeValue(Seconds(0)),
+                          MakeTimeAccessor(&ProtoPoint::m_restTime),
+                          MakeTimeChecker());
 
-  return tid;
+    return tid;
 }
 
-ProtoPoint::ProtoPoint ()
+ProtoPoint::ProtoPoint()
 {
 }
 
-ProtoPoint::~ProtoPoint ()
+ProtoPoint::~ProtoPoint()
 {
 }
 
 void
-ProtoPoint::SetPosition (const Vector &position)
+ProtoPoint::SetPosition(const Vector& position)
 {
-  m_position = position;
+    m_position = position;
 }
 
 const Vector
-ProtoPoint::GetPosition () const
+ProtoPoint::GetPosition() const
 {
-  return m_position;
+    return m_position;
 }
 
 void
-ProtoPoint::SetInterest (const uint32_t &interest)
+ProtoPoint::SetInterest(const uint32_t& interest)
 {
-  m_interest = interest;
+    m_interest = interest;
 }
 
 const uint32_t
-ProtoPoint::GetInterest () const
+ProtoPoint::GetInterest() const
 {
-  return m_interest;
+    return m_interest;
 }
 
 void
-ProtoPoint::SetRestTime (const Time &seconds)
+ProtoPoint::SetRestTime(const Time& seconds)
 {
-  m_restTime = seconds;
+    m_restTime = seconds;
 }
 
 const Time
-ProtoPoint::GetRestTime () const
+ProtoPoint::GetRestTime() const
 {
-  return m_restTime;
+    return m_restTime;
 }
 
 } // namespace ns3

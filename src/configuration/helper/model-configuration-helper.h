@@ -18,15 +18,14 @@
 #ifndef MODEL_CONFIGURATION_HELPER_H
 #define MODEL_CONFIGURATION_HELPER_H
 
-#include <optional>
-
+#include <ns3/model-configuration.h>
 #include <ns3/type-id.h>
 
+#include <optional>
 #include <rapidjson/document.h>
 
-#include <ns3/model-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 using JsonArray = rapidjson::Value::ConstArray;
 using JsonObject = rapidjson::Value::ConstObject;
@@ -39,46 +38,42 @@ using JsonValue = rapidjson::Value;
  */
 class ModelConfigurationHelper
 {
-public:
-  /**
-   * Parse a model configuration from a given JSON tree and map it on an ModelConfiguration data class.
-   *
-   * \param json The JSON tree to parse.
-   * \return The configuration as a pointer to ModelConfiguration to easily retrieve parsed data.
-   */
-  static const ModelConfiguration Get (const JsonValue &json);
+  public:
+    /**
+     * Parse a model configuration from a given JSON tree and map it on an ModelConfiguration data
+     * class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to ModelConfiguration to easily retrieve parsed data.
+     */
+    static const ModelConfiguration Get(const JsonValue& json);
 
-  static const std::optional<ModelConfiguration>
-  GetOptional (const JsonObject &jsonObject,
-               const std::string &key);
+    static const std::optional<ModelConfiguration> GetOptional(const JsonObject& jsonObject,
+                                                               const std::string& key);
 
-  static const std::optional<ModelConfiguration>
-  GetOptionalCoaleshed (const JsonObject &jsonObject,
-                        const std::string &key,
-                        const ns3::TypeId &tid);
+    static const std::optional<ModelConfiguration> GetOptionalCoaleshed(
+        const JsonObject& jsonObject,
+        const std::string& key,
+        const ns3::TypeId& tid);
 
-  static const std::vector<ModelConfiguration::Attribute>
-  GetAttributes (const TypeId &model,
-                 const JsonArray &jAttrs);
+    static const std::vector<ModelConfiguration::Attribute> GetAttributes(const TypeId& model,
+                                                                          const JsonArray& jAttrs);
 
-private:
-  ModelConfigurationHelper ();
+  private:
+    ModelConfigurationHelper();
 
-  static const ModelConfiguration::Attribute
-  DecodeModelAttribute (const TypeId &model,
-                        const JsonValue &jAttr);
+    static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
+                                                                    const JsonValue& jAttr);
 
-  static const std::vector<ModelConfiguration>
-  DecodeModelAggregates (const JsonArray &jAggs);
+    static const std::vector<ModelConfiguration> DecodeModelAggregates(const JsonArray& jAggs);
 
-  static const ModelConfiguration
-  DecodeCoaleshedModel (const ns3::TypeId &model,
-                        const JsonObject &jAttrs);
+    static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,
+                                                         const JsonObject& jAttrs);
 
-  static const Ptr<AttributeValue>
-  DecodeAttributeValue (const std::string &modelName,
-                        const JsonValue &jAttr,
-                        const TypeId::AttributeInformation &checker);
+    static const Ptr<AttributeValue> DecodeAttributeValue(
+        const std::string& modelName,
+        const JsonValue& jAttr,
+        const TypeId::AttributeInformation& checker);
 };
 
 } // namespace ns3

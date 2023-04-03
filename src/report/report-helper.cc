@@ -17,12 +17,14 @@
  */
 #include "report-helper.h"
 
-namespace ns3 {
-
-void ReportHelper::SetScenarioName (std::string scenarioName)
+namespace ns3
 {
-    //auto r = ReportSimulation::Get();
-    //r->SetScenarioName (scenarioName);
+
+void
+ReportHelper::SetScenarioName(std::string scenarioName)
+{
+    // auto r = ReportSimulation::Get();
+    // r->SetScenarioName (scenarioName);
 }
 
 } // namespace ns3

@@ -17,70 +17,70 @@
  */
 #include "lte-netdevice-configuration.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 class LteNetdeviceConfigurationPriv
 {
-public:
-  static const LteRole ParseRole (const std::string rawRole)
-  {
-    if (rawRole == "UE")
-      return LteRole::UE;
-    else if (rawRole == "eNB")
-      return LteRole::eNB;
-    else
-      NS_FATAL_ERROR ("Unsupported LTE Role: " << rawRole);
-  }
+  public:
+    static const LteRole ParseRole(const std::string rawRole)
+    {
+        if (rawRole == "UE")
+            return LteRole::UE;
+        else if (rawRole == "eNB")
+            return LteRole::eNB;
+        else
+            NS_FATAL_ERROR("Unsupported LTE Role: " << rawRole);
+    }
 };
 
-LteNetdeviceConfiguration::LteNetdeviceConfiguration (const std::string type,
-                                                      const std::string rawRole,
-                                                      const std::vector<LteBearerConfiguration> bearers,
-                                                      const uint32_t networkLayerId,
-                                                      const std::optional<ModelConfiguration> antennaModel,
-						                                          const std::optional<ModelConfiguration> phyModel) :
-  NetdeviceConfiguration {type, networkLayerId},
-  m_role {LteNetdeviceConfigurationPriv::ParseRole (rawRole)},
-  m_bearers {bearers},
-  m_antennaModel {antennaModel},
-  m_phyModel {phyModel}
+LteNetdeviceConfiguration::LteNetdeviceConfiguration(
+    const std::string type,
+    const std::string rawRole,
+    const std::vector<LteBearerConfiguration> bearers,
+    const uint32_t networkLayerId,
+    const std::optional<ModelConfiguration> antennaModel,
+    const std::optional<ModelConfiguration> phyModel)
+    : NetdeviceConfiguration{type, networkLayerId},
+      m_role{LteNetdeviceConfigurationPriv::ParseRole(rawRole)},
+      m_bearers{bearers},
+      m_antennaModel{antennaModel},
+      m_phyModel{phyModel}
 {
-
 }
 
-LteNetdeviceConfiguration::~LteNetdeviceConfiguration ()
+LteNetdeviceConfiguration::~LteNetdeviceConfiguration()
 {
-
 }
 
 const LteRole
-LteNetdeviceConfiguration::GetRole () const
+LteNetdeviceConfiguration::GetRole() const
 {
-  return m_role;
+    return m_role;
 }
 
 const std::vector<LteBearerConfiguration>
-LteNetdeviceConfiguration::GetBearers () const
+LteNetdeviceConfiguration::GetBearers() const
 {
-  return m_bearers;
+    return m_bearers;
 }
 
 const uint32_t
-LteNetdeviceConfiguration::GetNetworkLayerId () const
+LteNetdeviceConfiguration::GetNetworkLayerId() const
 {
-  return NetdeviceConfiguration::GetNetworkLayerId ();
+    return NetdeviceConfiguration::GetNetworkLayerId();
 }
 
 const std::optional<ModelConfiguration>
-LteNetdeviceConfiguration::GetAntennaModel () const
+LteNetdeviceConfiguration::GetAntennaModel() const
 {
-  return m_antennaModel;
+    return m_antennaModel;
 }
 
 const std::optional<ModelConfiguration>
-LteNetdeviceConfiguration::GetPhyModel () const
+LteNetdeviceConfiguration::GetPhyModel() const
 {
-  return m_phyModel;
+    return m_phyModel;
 }
 
 } // namespace ns3

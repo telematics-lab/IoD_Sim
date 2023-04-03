@@ -20,38 +20,40 @@
 #ifndef LTE_UE_PHY_LAYER_H
 #define LTE_UE_PHY_LAYER_H
 
-#include <libxml/xmlwriter.h>
-
 #include "protocol-layer.h"
 
-namespace ns3 {
+#include <libxml/xmlwriter.h>
+
+namespace ns3
+{
 
 class LteUEPhyLayer : public ProtocolLayer
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  LteUEPhyLayer ();
-  /**
-   * Default destructor
-   */
-  ~LteUEPhyLayer ();
+    /**
+     * Default constructor
+     */
+    LteUEPhyLayer();
+    /**
+     * Default destructor
+     */
+    ~LteUEPhyLayer();
 
-  /**
-   * Write LTE Phy Layer report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  virtual void Write (xmlTextWriterPtr handle);
-private:
-  std::string m_imsi,m_pldl,m_dlearfnc,m_dlband,m_plul,m_ulearfnc,m_ulband;
+    /**
+     * Write LTE Phy Layer report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    virtual void Write(xmlTextWriterPtr handle);
+
+  private:
+    std::string m_imsi, m_pldl, m_dlearfnc, m_dlband, m_plul, m_ulearfnc, m_ulband;
 };
 
 } // namespace ns3

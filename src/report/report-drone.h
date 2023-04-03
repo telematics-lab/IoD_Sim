@@ -15,18 +15,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>, Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
+ * Authors: Giovanni Grieco <giovanni.grieco@poliba.it>,
+ *          Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
 #ifndef REPORT_DRONE_H
 #define REPORT_DRONE_H
-
-#include <vector>
-
-#include <ns3/ipv4.h>
-#include <ns3/mobility-model.h>
-#include <ns3/node.h>
-
-#include <libxml/xmlwriter.h>
 
 #include "report-data-stats.h"
 #include "report-entity.h"
@@ -35,7 +28,15 @@
 #include "report-protocol-stack.h"
 #include "report-transfer.h"
 
-namespace ns3 {
+#include <ns3/ipv4.h>
+#include <ns3/mobility-model.h>
+#include <ns3/node.h>
+
+#include <libxml/xmlwriter.h>
+#include <vector>
+
+namespace ns3
+{
 
 /**
  * Retrieve and store data about a drone, like its
@@ -46,55 +47,54 @@ namespace ns3 {
  */
 class ReportDrone : public ReportEntity
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportDrone ();
-  /**
-   * Default destructor
-   */
-  ~ReportDrone ();
+    /**
+     * Default constructor
+     */
+    ReportDrone();
+    /**
+     * Default destructor
+     */
+    ~ReportDrone();
 
-protected:
-  void DoInitialize();
+  protected:
+    void DoInitialize();
 
-private:
-  /**
-   * Write internal interface
-   *
-   * \param handle the XML handler to write data on
-   */
-  void DoWrite (xmlTextWriterPtr h);
+  private:
+    /**
+     * Write internal interface
+     *
+     * \param handle the XML handler to write data on
+     */
+    void DoWrite(xmlTextWriterPtr h);
 
-  /**
-   * Initialize probe to get trajectory data
-   */
-  void DoInitializeTrajectoryMonitor ();
+    /**
+     * Initialize probe to get trajectory data
+     */
+    void DoInitializeTrajectoryMonitor();
 
-  /**
-   * Callback to monitor drone trajectory
-   *
-   * \params mobility the mobility model of the drone to inspect
-   */
-  void DoMonitorTrajectory (const Ptr<const MobilityModel> mobility);
+    /**
+     * Callback to monitor drone trajectory
+     *
+     * \params mobility the mobility model of the drone to inspect
+     */
+    void DoMonitorTrajectory(const Ptr<const MobilityModel> mobility);
 
-  /**
-   * Initialize Peripherals
-   */
-  void DoInitializePeripherals ();
+    /**
+     * Initialize Peripherals
+     */
+    void DoInitializePeripherals();
 
-
-  /// drone trajectory
-  std::vector<ReportLocation> m_trajectory;
-  std::vector<int> m_roi;
-  std::vector<ReportPeripheral> m_peripherals;
+    /// drone trajectory
+    std::vector<ReportLocation> m_trajectory;
+    std::vector<int> m_roi;
+    std::vector<ReportPeripheral> m_peripherals;
 };
 
 } // namespace ns3

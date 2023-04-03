@@ -19,29 +19,29 @@
 #define WIFI_MAC_SIMULATION_HELPER_H
 
 #include <ns3/object.h>
-
 #include <ns3/wifi-mac-helper.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * A data class to store information about a WiFi MAC layer configuration for a simulation.
  */
 class WifiMacSimulationHelper : public Object
 {
-public:
-  /** Default constructor */
-  WifiMacSimulationHelper ();
-  /** Default destructor */
-  ~WifiMacSimulationHelper ();
+  public:
+    /** Default constructor */
+    WifiMacSimulationHelper();
+    /** Default destructor */
+    ~WifiMacSimulationHelper();
 
-  /**
-   * \return The WiFi MAC Helper used to configure this layer.
-   */
-  WifiMacHelper& GetMacHelper ();
+    /**
+     * \return The WiFi MAC Helper used to configure this layer.
+     */
+    WifiMacHelper& GetMacHelper();
 
-private:
-  WifiMacHelper m_macHelper;
+  private:
+    WifiMacHelper m_macHelper;
 };
 
 } // namespace ns3

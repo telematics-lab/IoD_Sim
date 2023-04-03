@@ -22,122 +22,131 @@
 #include <ns3/object-vector.h>
 #include <ns3/simulator.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("ConstantAccelerationDroneMobilityModel");
-NS_OBJECT_ENSURE_REGISTERED (ConstantAccelerationDroneMobilityModel);
+NS_LOG_COMPONENT_DEFINE("ConstantAccelerationDroneMobilityModel");
+NS_OBJECT_ENSURE_REGISTERED(ConstantAccelerationDroneMobilityModel);
 
 TypeId
-ConstantAccelerationDroneMobilityModel::GetTypeId ()
+ConstantAccelerationDroneMobilityModel::GetTypeId()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  static TypeId tid = TypeId ("ns3::ConstantAccelerationDroneMobilityModel")
-    .SetParent<MobilityModel> ()
-    .SetGroupName ("Mobility")
-    .AddConstructor<ConstantAccelerationDroneMobilityModel> ()
-    .AddAttribute ("Acceleration", "The constant acceleration of the drone, in m/s^2",
-                   DoubleValue (2.0),
-                   MakeDoubleAccessor (&ConstantAccelerationDroneMobilityModel::m_acceleration),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("MaxSpeed", "Max speed of the drone, in m/s.",
-                   DoubleValue (10.0),
-                   MakeDoubleAccessor (&ConstantAccelerationDroneMobilityModel::m_maxSpeed),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("FlightPlan", "The ideal trajectory that the drone should run across.",
-                   FlightPlanValue (),
-                   MakeFlightPlanAccessor (&ConstantAccelerationDroneMobilityModel::m_flightPlan),
-                   MakeFlightPlanChecker ())
-    .AddAttribute ("CurveStep", "The step of the curve to generate. Lower step means more points generated, hence higher resolution.",
-                   DoubleValue (0.001),
-                   MakeDoubleAccessor (&ConstantAccelerationDroneMobilityModel::m_curveStep),
-                   MakeDoubleChecker<float> ())
-    ;
+    static TypeId tid =
+        TypeId("ns3::ConstantAccelerationDroneMobilityModel")
+            .SetParent<MobilityModel>()
+            .SetGroupName("Mobility")
+            .AddConstructor<ConstantAccelerationDroneMobilityModel>()
+            .AddAttribute(
+                "Acceleration",
+                "The constant acceleration of the drone, in m/s^2",
+                DoubleValue(2.0),
+                MakeDoubleAccessor(&ConstantAccelerationDroneMobilityModel::m_acceleration),
+                MakeDoubleChecker<double>())
+            .AddAttribute("MaxSpeed",
+                          "Max speed of the drone, in m/s.",
+                          DoubleValue(10.0),
+                          MakeDoubleAccessor(&ConstantAccelerationDroneMobilityModel::m_maxSpeed),
+                          MakeDoubleChecker<double>())
+            .AddAttribute(
+                "FlightPlan",
+                "The ideal trajectory that the drone should run across.",
+                FlightPlanValue(),
+                MakeFlightPlanAccessor(&ConstantAccelerationDroneMobilityModel::m_flightPlan),
+                MakeFlightPlanChecker())
+            .AddAttribute("CurveStep",
+                          "The step of the curve to generate. Lower step means more points "
+                          "generated, hence higher resolution.",
+                          DoubleValue(0.001),
+                          MakeDoubleAccessor(&ConstantAccelerationDroneMobilityModel::m_curveStep),
+                          MakeDoubleChecker<float>());
 
-  return tid;
+    return tid;
 }
 
-ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel () :
-  m_flightParams {m_acceleration, m_maxSpeed},
-  m_lastUpdate {-1}
+ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel()
+    : m_flightParams{m_acceleration, m_maxSpeed},
+      m_lastUpdate{-1}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ConstantAccelerationDroneMobilityModel::~ConstantAccelerationDroneMobilityModel ()
+ConstantAccelerationDroneMobilityModel::~ConstantAccelerationDroneMobilityModel()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-ConstantAccelerationDroneMobilityModel::Update () const
+ConstantAccelerationDroneMobilityModel::Update() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  const Time t = Simulator::Now ();
-  if (t.Compare (m_lastUpdate) <= 0)
+    const Time t = Simulator::Now();
+    if (t.Compare(m_lastUpdate) <= 0)
     {
-      NS_LOG_LOGIC ("Update is being suppressed.");
-      return;
+        NS_LOG_LOGIC("Update is being suppressed.");
+        return;
     }
 
-  m_lastUpdate = t;
+    m_lastUpdate = t;
 
-  m_planner.Update (t);
-  m_position = m_planner.GetPosition ();
-  m_velocity = m_planner.GetVelocity ();
+    m_planner.Update(t);
+    m_position = m_planner.GetPosition();
+    m_velocity = m_planner.GetVelocity();
 
-  NotifyCourseChange ();
+    NotifyCourseChange();
 }
 
 Vector
-ConstantAccelerationDroneMobilityModel::DoGetPosition () const
+ConstantAccelerationDroneMobilityModel::DoGetPosition() const
 {
-  NS_LOG_FUNCTION (this);
-  NS_LOG_LOGIC ("position: " << m_position);
+    NS_LOG_FUNCTION(this);
+    NS_LOG_LOGIC("position: " << m_position);
 
-  Update ();
-  return m_position;
+    Update();
+    return m_position;
 }
 
 void
-ConstantAccelerationDroneMobilityModel::DoSetPosition (const Vector &position)
+ConstantAccelerationDroneMobilityModel::DoSetPosition(const Vector& position)
 {
-  NS_LOG_FUNCTION (this << position);
+    NS_LOG_FUNCTION(this << position);
 
-  m_position = position;
+    m_position = position;
 }
 
 Vector
-ConstantAccelerationDroneMobilityModel::DoGetVelocity () const
+ConstantAccelerationDroneMobilityModel::DoGetVelocity() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  Update ();
+    Update();
 
-  NS_LOG_LOGIC ("velocity: " << m_velocity);
-  return m_velocity;
+    NS_LOG_LOGIC("velocity: " << m_velocity);
+    return m_velocity;
 }
 
 void
-ConstantAccelerationDroneMobilityModel::DoInitialize ()
+ConstantAccelerationDroneMobilityModel::DoInitialize()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  m_flightParams = { m_acceleration, m_maxSpeed };
+    m_flightParams = {m_acceleration, m_maxSpeed};
 
-  m_planner = Planner<ConstantAccelerationParam, ConstantAccelerationFlight>
-    (m_flightPlan, m_flightParams, m_curveStep);
+    m_planner = Planner<ConstantAccelerationParam, ConstantAccelerationFlight>(m_flightPlan,
+                                                                               m_flightParams,
+                                                                               m_curveStep);
 
-  MobilityModel::DoInitialize ();
+    MobilityModel::DoInitialize();
 }
 
 void
-ConstantAccelerationDroneMobilityModel::DoDispose ()
+ConstantAccelerationDroneMobilityModel::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  MobilityModel::DoDispose ();
+    MobilityModel::DoDispose();
 }
 
-} // ns3 namespace
+} // namespace ns3

@@ -23,97 +23,98 @@
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("ReportContainer");
+NS_LOG_COMPONENT_DEFINE("ReportContainer");
 
 template <class T>
-ReportContainer<T>::ReportContainer (const std::string groupName) :
-  m_groupName {groupName}
+ReportContainer<T>::ReportContainer(const std::string groupName)
+    : m_groupName{groupName}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 template <class T>
 typename ReportContainer<T>::Iterator
-ReportContainer<T>::Begin () const
+ReportContainer<T>::Begin() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_entities.begin ();
+    return m_entities.begin();
 }
 
 template <class T>
 typename ReportContainer<T>::Iterator
-ReportContainer<T>::End () const
+ReportContainer<T>::End() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_entities.end ();
+    return m_entities.end();
 }
 
 template <class T>
 uint32_t
-ReportContainer<T>::GetN () const
+ReportContainer<T>::GetN() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_entities.size ();
+    return m_entities.size();
 }
 
 template <class T>
 Ptr<T>
-ReportContainer<T>::Get (const uint32_t i) const
+ReportContainer<T>::Get(const uint32_t i) const
 {
-  NS_LOG_FUNCTION (i);
+    NS_LOG_FUNCTION(i);
 
-  return m_entities[i];
+    return m_entities[i];
 }
 
 template <class T>
 void
-ReportContainer<T>::Add (Ptr<T> entity)
+ReportContainer<T>::Add(Ptr<T> entity)
 {
-  NS_LOG_FUNCTION (entity);
+    NS_LOG_FUNCTION(entity);
 
-  m_entities.push_back (entity);
+    m_entities.push_back(entity);
 }
 
 template <class T>
 void
-ReportContainer<T>::Add (uint32_t entityUid)
+ReportContainer<T>::Add(uint32_t entityUid)
 {
-  NS_LOG_FUNCTION (entityUid);
-  auto entityReport = CreateObjectWithAttributes<T>
-    ("Reference", IntegerValue(entityUid));
+    NS_LOG_FUNCTION(entityUid);
+    auto entityReport = CreateObjectWithAttributes<T>("Reference", IntegerValue(entityUid));
 
-  entityReport->Initialize ();
-  Add (entityReport);
+    entityReport->Initialize();
+    Add(entityReport);
 }
 
 template <class T>
 void
-ReportContainer<T>::Write (xmlTextWriterPtr h) const
+ReportContainer<T>::Write(xmlTextWriterPtr h) const
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST m_groupName.c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST m_groupName.c_str());
+    NS_ASSERT(rc >= 0);
 
-  /* Nested Elements */
-  for (auto entity = Begin(); entity != End (); entity++)
-    (*entity)->Write (h);
+    /* Nested Elements */
+    for (auto entity = Begin(); entity != End(); entity++)
+        (*entity)->Write(h);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 }; // namespace ns3

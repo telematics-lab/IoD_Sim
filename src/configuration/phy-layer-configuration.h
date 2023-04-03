@@ -18,14 +18,14 @@
 #ifndef PHY_LAYER_CONFIGURATION_H
 #define PHY_LAYER_CONFIGURATION_H
 
+#include <ns3/model-configuration.h>
+#include <ns3/object.h>
+
 #include <string>
 #include <vector>
 
-#include <ns3/object.h>
-
-#include <ns3/model-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Data class to store information about the PHY Layer of a Scenario.
@@ -33,30 +33,30 @@ namespace ns3 {
  */
 class PhyLayerConfiguration : public Object
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param type The type of the PHY Layer to be configured.
-   */
-  PhyLayerConfiguration (std::string type, std::vector<ModelConfiguration::Attribute> attributes);
-  /** Default destructor */
-  virtual ~PhyLayerConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param type The type of the PHY Layer to be configured.
+     */
+    PhyLayerConfiguration(std::string type, std::vector<ModelConfiguration::Attribute> attributes);
+    /** Default destructor */
+    virtual ~PhyLayerConfiguration();
 
-  /**
-   * \brief The type of the decoded PHY Layer
-   */
-  virtual const std::string GetType () const;
-  /**
-   * \brief The attributes of the decoded PHY Layer
-   */
-  virtual const std::vector<ModelConfiguration::Attribute> GetAttributes () const;
+    /**
+     * \brief The type of the decoded PHY Layer
+     */
+    virtual const std::string GetType() const;
+    /**
+     * \brief The attributes of the decoded PHY Layer
+     */
+    virtual const std::vector<ModelConfiguration::Attribute> GetAttributes() const;
 
-private:
-  const std::string m_type;                  /// PHY Layer type
-  const std::vector<ModelConfiguration::Attribute> m_attributes; /// PHY Layer Attributes
+  private:
+    const std::string m_type;                                      /// PHY Layer type
+    const std::vector<ModelConfiguration::Attribute> m_attributes; /// PHY Layer Attributes
 };
 
-} // ns3 namespace
+} // namespace ns3
 
 #endif /* PHY_LAYER_CONFIGURATION_H */

@@ -18,153 +18,157 @@
 
 #include "drone-peripheral-container.h"
 
-#include <ns3/irs.h>
-#include <ns3/irs-list.h>
-
 #include "drone-peripheral.h"
 #include "input-peripheral.h"
 #include "storage-peripheral.h"
 
-namespace ns3 {
+#include <ns3/irs-list.h>
+#include <ns3/irs.h>
 
-NS_LOG_COMPONENT_DEFINE ("DronePeripheralContainer");
+namespace ns3
+{
 
-NS_OBJECT_ENSURE_REGISTERED (DronePeripheralContainer);
+NS_LOG_COMPONENT_DEFINE("DronePeripheralContainer");
+
+NS_OBJECT_ENSURE_REGISTERED(DronePeripheralContainer);
 
 TypeId
-DronePeripheralContainer::GetTypeId (void)
+DronePeripheralContainer::GetTypeId(void)
 {
-  static TypeId tid = TypeId ("ns3::DronePeripheralContainer")
-    .SetParent<Object> ()
-    .SetGroupName("Network")
-    .AddConstructor<DronePeripheralContainer> ()
-    ;
-  return tid;
+    static TypeId tid = TypeId("ns3::DronePeripheralContainer")
+                            .SetParent<Object>()
+                            .SetGroupName("Network")
+                            .AddConstructor<DronePeripheralContainer>();
+    return tid;
 }
 
 void
-DronePeripheralContainer::Add (const std::string typeId)
+DronePeripheralContainer::Add(const std::string typeId)
 {
-  m_dronePeripheralFactory.SetTypeId(typeId);
+    m_dronePeripheralFactory.SetTypeId(typeId);
 }
 
 void
-DronePeripheralContainer::Set (std::string name, const AttributeValue &v)
+DronePeripheralContainer::Set(std::string name, const AttributeValue& v)
 {
-  m_dronePeripheralFactory.Set (name, v);
+    m_dronePeripheralFactory.Set(name, v);
 }
 
 void
-DronePeripheralContainer::SetDrone (Ptr<Drone> drone)
+DronePeripheralContainer::SetDrone(Ptr<Drone> drone)
 {
-  NS_LOG_FUNCTION (this << drone);
-  NS_ASSERT (drone != NULL);
-  m_drone = drone;
+    NS_LOG_FUNCTION(this << drone);
+    NS_ASSERT(drone != NULL);
+    m_drone = drone;
 }
 
 Ptr<DronePeripheral>
-DronePeripheralContainer::Create ()
+DronePeripheralContainer::Create()
 {
-  auto peripheral = m_dronePeripheralFactory.Create<DronePeripheral> ();
-  NS_ASSERT (peripheral != nullptr);
+    auto peripheral = m_dronePeripheralFactory.Create<DronePeripheral>();
+    NS_ASSERT(peripheral != nullptr);
 
-  peripheral->Initialize ();
-  //if there are no trigger regions, this peripheral is always ON
-  if (peripheral->GetNRoI () == 0)
-    peripheral->SetState (DronePeripheral::PeripheralState::ON);
+    peripheral->Initialize();
+    // if there are no trigger regions, this peripheral is always ON
+    if (peripheral->GetNRoI() == 0)
+        peripheral->SetState(DronePeripheral::PeripheralState::ON);
 
-  peripheral->SetDrone (m_drone);
-  m_dronePeripherals.push_back (peripheral);
+    peripheral->SetDrone(m_drone);
+    m_dronePeripherals.push_back(peripheral);
 
-  return peripheral;
+    return peripheral;
 }
 
 uint32_t
-DronePeripheralContainer::GetN (void) const
+DronePeripheralContainer::GetN(void) const
 {
-  return m_dronePeripherals.size ();
+    return m_dronePeripherals.size();
 }
 
 Ptr<DronePeripheral>
-DronePeripheralContainer::Get (uint32_t i) const
+DronePeripheralContainer::Get(uint32_t i) const
 {
-  return m_dronePeripherals[i];
+    return m_dronePeripherals[i];
 }
 
 DronePeripheralContainer::Iterator
-DronePeripheralContainer::Begin (void) const
+DronePeripheralContainer::Begin(void) const
 {
-  return m_dronePeripherals.begin ();
+    return m_dronePeripherals.begin();
 }
 
 DronePeripheralContainer::Iterator
-DronePeripheralContainer::End (void) const
+DronePeripheralContainer::End(void) const
 {
-  return m_dronePeripherals.end ();
+    return m_dronePeripherals.end();
 }
 
 void
-DronePeripheralContainer::DoInitialize (void)
+DronePeripheralContainer::DoInitialize(void)
 {
-  Object::DoInitialize();
+    Object::DoInitialize();
 }
 
 void
-DronePeripheralContainer::DoDispose (void)
+DronePeripheralContainer::DoDispose(void)
 {
-  for (std::vector<ns3::Ptr<ns3::DronePeripheral>>::iterator i = m_dronePeripherals.begin (); i != m_dronePeripherals.end (); i++)
+    for (std::vector<ns3::Ptr<ns3::DronePeripheral>>::iterator i = m_dronePeripherals.begin();
+         i != m_dronePeripherals.end();
+         i++)
     {
-      Ptr<DronePeripheral> peripheral = *i;
-      peripheral->Dispose ();
-      *i = 0;
+        Ptr<DronePeripheral> peripheral = *i;
+        peripheral->Dispose();
+        *i = 0;
     }
-  m_dronePeripherals.clear();
-  Object::DoDispose();
+    m_dronePeripherals.clear();
+    Object::DoDispose();
 }
 
 void
 DronePeripheralContainer::InstallAll(Ptr<Drone> drone)
 {
-  PinStorage();
+    PinStorage();
 
-  for (auto peripheral: m_dronePeripherals)
+    for (auto peripheral : m_dronePeripherals)
     {
-      //peripheral->SetDrone(drone);
-      auto value = BooleanValue(false);
-      if (peripheral->GetAttributeFailSafe("HasStorage", value) && value)
+        // peripheral->SetDrone(drone);
+        auto value = BooleanValue(false);
+        if (peripheral->GetAttributeFailSafe("HasStorage", value) && value)
         {
-          auto newperipheral = StaticCast<InputPeripheral, DronePeripheral>(peripheral);
-          auto storageperipheral = StaticCast<StoragePeripheral, DronePeripheral>(m_dronePeripherals[0]);
-          newperipheral->SetStorage(storageperipheral);
+            auto newperipheral = StaticCast<InputPeripheral, DronePeripheral>(peripheral);
+            auto storageperipheral =
+                StaticCast<StoragePeripheral, DronePeripheral>(m_dronePeripherals[0]);
+            newperipheral->SetStorage(storageperipheral);
         }
         IntegerValue rows;
         if (peripheral->GetAttributeFailSafe("Rows", rows))
         {
-          auto irs = StaticCast<Irs, DronePeripheral>(peripheral);
-          IrsList::Add(irs);
+            auto irs = StaticCast<Irs, DronePeripheral>(peripheral);
+            IrsList::Add(irs);
         }
-      NS_LOG_DEBUG("DronePeripheralContainer: Peripheral Installed on Drone #"<<drone->GetId()<<" with State "<< peripheral->GetState());
+        NS_LOG_DEBUG("DronePeripheralContainer: Peripheral Installed on Drone #"
+                     << drone->GetId() << " with State " << peripheral->GetState());
     }
 }
 
 void
 DronePeripheralContainer::PinStorage(void)
 {
-  for (uint32_t i=0; i<GetN(); i++)
-  {
-    if (m_dronePeripherals[i]->GetInstanceTypeId() == StoragePeripheral::GetTypeId())
+    for (uint32_t i = 0; i < GetN(); i++)
     {
-      std::swap(m_dronePeripherals[0], m_dronePeripherals[i]);
-      m_storage = true;
-      break;
+        if (m_dronePeripherals[i]->GetInstanceTypeId() == StoragePeripheral::GetTypeId())
+        {
+            std::swap(m_dronePeripherals[0], m_dronePeripherals[i]);
+            m_storage = true;
+            break;
+        }
     }
-  }
 }
 
 bool
 DronePeripheralContainer::thereIsStorage(void)
 {
-  return m_storage;
+    return m_storage;
 }
 
 } // namespace ns3

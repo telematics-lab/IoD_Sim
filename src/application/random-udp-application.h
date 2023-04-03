@@ -22,63 +22,67 @@
 #include <ns3/socket.h>
 #include <ns3/traced-callback.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Application that sends random packets with Seq.Num. and Timestamp to a remote server
  */
 class RandomUdpApplication : public Application
 {
-public:
-  /**
-   * \brief Register this application as a type in ns-3 TypeId System
-   */
-  static TypeId GetTypeId ();
-  /**
-   * \brief Default constructor
-   */
-  RandomUdpApplication ();
-  /**
-   * \brief Default destructor
-   */
-  virtual ~RandomUdpApplication ();
+  public:
+    /**
+     * \brief Register this application as a type in ns-3 TypeId System
+     */
+    static TypeId GetTypeId();
+    /**
+     * \brief Default constructor
+     */
+    RandomUdpApplication();
+    /**
+     * \brief Default destructor
+     */
+    virtual ~RandomUdpApplication();
 
-protected:
-  /**
-   * \brief Initialize the Object registered as TypeId
-   */
-  virtual void DoInitialize ();
+  protected:
+    /**
+     * \brief Initialize the Object registered as TypeId
+     */
+    virtual void DoInitialize();
 
-private:
-  /**
-   * \brief Start endpoint to conform with the Application Interface
-   */
-  virtual void StartApplication ();
-  /**
-   * \brief Stop endpoint to conform with the Application Interface
-   */
-  virtual void StopApplication ();
+  private:
+    /**
+     * \brief Start endpoint to conform with the Application Interface
+     */
+    virtual void StartApplication();
+    /**
+     * \brief Stop endpoint to conform with the Application Interface
+     */
+    virtual void StopApplication();
 
-  /**
-   * \brief Send a random packet
-   */
-  void SendPacket ();
-  /**
-   * \brief Create the payload to be sent
-   */
-  Ptr<Packet> CreatePacket (uint32_t size) const;
+    /**
+     * \brief Send a random packet
+     */
+    void SendPacket();
+    /**
+     * \brief Create the payload to be sent
+     */
+    Ptr<Packet> CreatePacket(uint32_t size) const;
 
-  Ipv4Address m_destAddr;      /// Remote Server Address - FIXME: Ipv6Address needs an additional parameter
-  uint16_t m_destPort;         /// UDP Port
-  uint32_t m_txFreq;           /// Transmission frequency
-  uint16_t m_packetSize;       /// Packet size in bytes - 16 bits are given as limit due to UDP header field
-  TracedCallback<Ptr<const Packet>> m_txTrace;  /// Trace to signal the transmission of packets from application-level
+    Ipv4Address
+        m_destAddr; /// Remote Server Address - FIXME: Ipv6Address needs an additional parameter
+    uint16_t m_destPort; /// UDP Port
+    uint32_t m_txFreq;   /// Transmission frequency
+    uint16_t
+        m_packetSize; /// Packet size in bytes - 16 bits are given as limit due to UDP header field
+    TracedCallback<Ptr<const Packet>>
+        m_txTrace; /// Trace to signal the transmission of packets from application-level
 
-  EventId m_sendEvent;         /// Event of a packet being sent
-  Ptr<Socket> m_socket;        /// The socket to be used for communications
-  uint32_t m_seqNum;           /// Packet Sequence Number
-  uint16_t m_payloadSize;      /// Payload size, excluding L3,4 header sizes
-  double m_packetInterval;     /// Packet Tx interval, the inverse of m_txFreq, in Seconds
+    EventId m_sendEvent;     /// Event of a packet being sent
+    Ptr<Socket> m_socket;    /// The socket to be used for communications
+    uint32_t m_seqNum;       /// Packet Sequence Number
+    uint16_t m_payloadSize;  /// Payload size, excluding L3,4 header sizes
+    double m_packetInterval; /// Packet Tx interval, the inverse of m_txFreq, in Seconds
 };
 
 } // namespace ns3

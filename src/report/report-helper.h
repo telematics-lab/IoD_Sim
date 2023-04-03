@@ -20,11 +20,12 @@
 #ifndef REPORT_HELPER_H
 #define REPORT_HELPER_H
 
-namespace ns3 {
+namespace ns3
+{
 
 class ReportHelper
 {
-    void SetScenarioName (std::string);
+    void SetScenarioName(std::string);
 };
 
 } // namespace ns3

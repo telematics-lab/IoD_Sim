@@ -22,50 +22,50 @@
 #include <ns3/socket.h>
 #include <ns3/stats-module.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-enum
-ServerState
-  {
-   SERVER_CLOSED,
-   SERVER_LISTEN
-  };
+enum ServerState
+{
+    SERVER_CLOSED,
+    SERVER_LISTEN
+};
 
 class DroneServerApplication : public Application
 {
-public:
-  static TypeId GetTypeId ();
+  public:
+    static TypeId GetTypeId();
 
-  DroneServerApplication ();
-  virtual ~DroneServerApplication ();
+    DroneServerApplication();
+    virtual ~DroneServerApplication();
 
-protected:
-  virtual void DoDispose ();
+  protected:
+    virtual void DoDispose();
 
-private:
-  virtual void StartApplication ();
-  virtual void StopApplication ();
+  private:
+    virtual void StartApplication();
+    virtual void StopApplication();
 
-  void ReceivePacket (const Ptr<Socket> socket) const;
-  void SendHelloAck (const Ptr<Socket> socket,
-                     const Ipv4Address senderAddr,
-                     const uint32_t senderPort) const;
-  void SendUpdateAck (const Ptr<Socket> socket,
+    void ReceivePacket(const Ptr<Socket> socket) const;
+    void SendHelloAck(const Ptr<Socket> socket,
                       const Ipv4Address senderAddr,
                       const uint32_t senderPort) const;
-  void SendUpdateBroadcast () const;
+    void SendUpdateAck(const Ptr<Socket> socket,
+                       const Ipv4Address senderAddr,
+                       const uint32_t senderPort) const;
+    void SendUpdateBroadcast() const;
 
-  Ptr<Socket> m_socket;
-  Ipv4Address m_address;
-  Ipv4Mask    m_subnetMask;
-  uint32_t    m_port;
-  ServerState m_state;
+    Ptr<Socket> m_socket;
+    Ipv4Address m_address;
+    Ipv4Mask m_subnetMask;
+    uint32_t m_port;
+    ServerState m_state;
 
-  mutable EventId m_sendEvent;
-  TracedCallback<Ptr<const Packet>> m_txTrace;
+    mutable EventId m_sendEvent;
+    TracedCallback<Ptr<const Packet>> m_txTrace;
 
-  mutable int32_t m_sequenceNumber; // correlated with the node, not the connection
-  bool m_storage = false;
+    mutable int32_t m_sequenceNumber; // correlated with the node, not the connection
+    bool m_storage = false;
 };
 
 } // namespace ns3

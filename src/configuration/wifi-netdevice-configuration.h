@@ -18,41 +18,41 @@
 #ifndef WIFI_NETDEVICE_CONFIGURATION_H
 #define WIFI_NETDEVICE_CONFIGURATION_H
 
-#include <ns3/object.h>
-
-#include <ns3/model-configuration.h>
-
 #include "netdevice-configuration.h"
 
-namespace ns3 {
+#include <ns3/model-configuration.h>
+#include <ns3/object.h>
+
+namespace ns3
+{
 
 /**
  * Data class to recnognize and configure a Network Device for an entity to be simulated.
  */
 class WifiNetdeviceConfiguration : public NetdeviceConfiguration
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param type The type of the network device (e.g., "wifi" to use the underlying WiFi Protocol Stack).
-   * \param macLayer The configuration of the MAC Layer to be simulated for this network device.
-   * \param networkLayerId The identifier for the Network Layer that has been defined for this simulation.
-   *                       It must be compatible with the given type and macLayer.
-   */
-  WifiNetdeviceConfiguration (const std::string type,
-                          const ModelConfiguration macLayer,
-                          const uint32_t networkLayerId);
-  /** Default destructor */
-  ~WifiNetdeviceConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param type The type of the network device (e.g., "wifi" to use the underlying WiFi Protocol
+     * Stack). \param macLayer The configuration of the MAC Layer to be simulated for this network
+     * device. \param networkLayerId The identifier for the Network Layer that has been defined for
+     * this simulation. It must be compatible with the given type and macLayer.
+     */
+    WifiNetdeviceConfiguration(const std::string type,
+                               const ModelConfiguration macLayer,
+                               const uint32_t networkLayerId);
+    /** Default destructor */
+    ~WifiNetdeviceConfiguration();
 
-  /**
-   * \return The MAC Layer configuration.
-   */
-  const ModelConfiguration GetMacLayer () const;
+    /**
+     * \return The MAC Layer configuration.
+     */
+    const ModelConfiguration GetMacLayer() const;
 
-private:
-  const ModelConfiguration m_macLayer;
+  private:
+    const ModelConfiguration m_macLayer;
 };
 
 } // namespace ns3

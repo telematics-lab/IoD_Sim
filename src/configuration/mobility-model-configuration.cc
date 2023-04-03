@@ -17,32 +17,31 @@
  */
 #include "mobility-model-configuration.h"
 
-namespace ns3 {
-
-MobilityModelConfiguration::MobilityModelConfiguration (const std::string name,
-                                                        const std::vector<ModelConfiguration::Attribute> attributes,
-                                                        const std::optional<Vector> initialPosition) :
-  ModelConfiguration (name, attributes),
-  m_initialPosition {initialPosition}
+namespace ns3
 {
 
+MobilityModelConfiguration::MobilityModelConfiguration(
+    const std::string name,
+    const std::vector<ModelConfiguration::Attribute> attributes,
+    const std::optional<Vector> initialPosition)
+    : ModelConfiguration(name, attributes),
+      m_initialPosition{initialPosition}
+{
 }
 
-MobilityModelConfiguration::MobilityModelConfiguration () :
-  ModelConfiguration ()
+MobilityModelConfiguration::MobilityModelConfiguration()
+    : ModelConfiguration()
 {
-
 }
 
-MobilityModelConfiguration::~MobilityModelConfiguration ()
+MobilityModelConfiguration::~MobilityModelConfiguration()
 {
-
 }
 
 const std::optional<Vector>
-MobilityModelConfiguration::GetInitialPosition () const
+MobilityModelConfiguration::GetInitialPosition() const
 {
-  return m_initialPosition;
+    return m_initialPosition;
 }
 
 } // namespace ns3

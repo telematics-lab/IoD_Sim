@@ -17,23 +17,24 @@
  */
 #include "wifi-mac-factory-helper.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 void
-WifiMacFactoryHelper::SetRemoteStationManager (WifiHelper& helper, const ModelConfiguration& modelConf)
+WifiMacFactoryHelper::SetRemoteStationManager(WifiHelper& helper,
+                                              const ModelConfiguration& modelConf)
 {
-  ObjectFactory factory;
+    ObjectFactory factory;
 
-  factory.SetTypeId (modelConf.GetName ());
-  for (auto& attr : modelConf.GetAttributes ())
-    factory.Set (attr.name, *attr.value);
+    factory.SetTypeId(modelConf.GetName());
+    for (auto& attr : modelConf.GetAttributes())
+        factory.Set(attr.name, *attr.value);
 
-  helper.m_stationManager[0] = factory;
+    helper.m_stationManager[0] = factory;
 }
 
-WifiMacFactoryHelper::WifiMacFactoryHelper ()
+WifiMacFactoryHelper::WifiMacFactoryHelper()
 {
-
 }
 
 } // namespace ns3

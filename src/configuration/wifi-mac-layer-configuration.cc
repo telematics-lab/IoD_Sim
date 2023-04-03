@@ -19,33 +19,33 @@
 
 #include <ns3/abort.h>
 
-namespace ns3 {
-
-WifiMacLayerConfiguration::WifiMacLayerConfiguration(std::string macType,
-                                                     std::string ssid,
-                                                     ModelConfiguration remoteStationManagerConfiguration) :
-  MacLayerConfiguration {macType},
-  m_ssid {ssid},
-  m_remoteStationManagerConfiguration {remoteStationManagerConfiguration}
+namespace ns3
 {
 
+WifiMacLayerConfiguration::WifiMacLayerConfiguration(
+    std::string macType,
+    std::string ssid,
+    ModelConfiguration remoteStationManagerConfiguration)
+    : MacLayerConfiguration{macType},
+      m_ssid{ssid},
+      m_remoteStationManagerConfiguration{remoteStationManagerConfiguration}
+{
 }
 
 WifiMacLayerConfiguration::~WifiMacLayerConfiguration()
 {
-
 }
 
 const std::string
-WifiMacLayerConfiguration::GetSsid () const
+WifiMacLayerConfiguration::GetSsid() const
 {
-  return m_ssid;
+    return m_ssid;
 }
 
 const ModelConfiguration
-WifiMacLayerConfiguration::GetRemoteStationManagerConfiguration () const
+WifiMacLayerConfiguration::GetRemoteStationManagerConfiguration() const
 {
-  return m_remoteStationManagerConfiguration;
+    return m_remoteStationManagerConfiguration;
 }
 
 } // namespace ns3

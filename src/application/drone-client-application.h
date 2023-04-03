@@ -19,49 +19,48 @@
 #define DRONE_CLIENT_APPLICATION_H
 
 #include <ns3/application.h>
+#include <ns3/mobility-module.h>
 #include <ns3/socket.h>
 #include <ns3/stats-module.h>
-#include <ns3/mobility-module.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief the client states
  */
-enum
-ClientState
-  {
-   CLOSED,     /// the client has no sockets open
-   HELLO_SENT, /// the client has sent a HELLO packet in broadcast
-   CONNECTED   /// the client has received a HELLO_ACK packet from a ZSP
-  };
+enum ClientState
+{
+    CLOSED,     /// the client has no sockets open
+    HELLO_SENT, /// the client has sent a HELLO packet in broadcast
+    CONNECTED   /// the client has received a HELLO_ACK packet from a ZSP
+};
 
 /**
  * \brief the intent of a packet
  */
-enum
-Intent
-  {
-   NEW,  /// this packet contains new information
-   ACK   /// this packet represents an acknowledgement of a previous one
-  };
+enum Intent
+{
+    NEW, /// this packet contains new information
+    ACK  /// this packet represents an acknowledgement of a previous one
+};
 
 /**
  * \brief Helper function to translate an Intent to a string, useful
  *        for debugging purposes and serialization.
  */
 inline const std::string
-ToString (Intent i)
+ToString(Intent i)
 {
-  switch (i)
+    switch (i)
     {
     case NEW:
-      return std::string("NEW");
+        return std::string("NEW");
     case ACK:
-      return std::string("ACK");
+        return std::string("ACK");
     }
 
-  return std::string("UNKNOWN");
+    return std::string("UNKNOWN");
 }
 
 /**
@@ -70,79 +69,75 @@ ToString (Intent i)
  */
 class DroneClientApplication : public Application
 {
-public:
-  /**
-   * \brief Register this application as a type in ns-3 TypeId System.
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * \brief Register this application as a type in ns-3 TypeId System.
+     */
+    static TypeId GetTypeId(void);
 
-  /**
-   * \brief default constructor
-   */
-  DroneClientApplication ();
-  /**
-   * \brief default destructor
-   */
-  virtual ~DroneClientApplication ();
+    /**
+     * \brief default constructor
+     */
+    DroneClientApplication();
+    /**
+     * \brief default destructor
+     */
+    virtual ~DroneClientApplication();
 
-protected:
-  /**
-   * \brief Destructor implementation for the ns-3 TypeId System.
-   */
-  virtual void DoDispose ();
+  protected:
+    /**
+     * \brief Destructor implementation for the ns-3 TypeId System.
+     */
+    virtual void DoDispose();
 
-private:
-  /**
-   * \brief Start endpoint to conform with the Application Interface
-   */
-  virtual void StartApplication ();
-  /**
-   * \brief Stop endpoint to conform with the Application Interface
-   */
-  virtual void StopApplication ();
+  private:
+    /**
+     * \brief Start endpoint to conform with the Application Interface
+     */
+    virtual void StartApplication();
+    /**
+     * \brief Stop endpoint to conform with the Application Interface
+     */
+    virtual void StopApplication();
 
-  /**
-   * \brief Send a packet to a given address in the IoD.
-   *
-   * \param i the intent of the packet to be sent.
-   * \param s the socket to be used.
-   * \param a the target address.
-   */
-  void SendPacket (const Intent i,
-                   const Ptr<Socket> s,
-                   const Ipv4Address a) const;
+    /**
+     * \brief Send a packet to a given address in the IoD.
+     *
+     * \param i the intent of the packet to be sent.
+     * \param s the socket to be used.
+     * \param a the target address.
+     */
+    void SendPacket(const Intent i, const Ptr<Socket> s, const Ipv4Address a) const;
 
-  /**
-   * \brief Callback to detect a new packet arrival.
-   *
-   * \param s the socket to be listened.
-   */
-  void ReceivePacket (const Ptr<Socket> s);
+    /**
+     * \brief Callback to detect a new packet arrival.
+     *
+     * \param s the socket to be listened.
+     */
+    void ReceivePacket(const Ptr<Socket> s);
 
-  /**
-   * \brief Callback to detect a variation in the mobility model and get
-   *        new position and velocity vectors.
-   *
-   * \param context the context of the simulation
-   * \param mobility the mobility model
-   */
-  void CourseChange (const std::string context,
-                     const Ptr<const MobilityModel> mobility) const;
+    /**
+     * \brief Callback to detect a variation in the mobility model and get
+     *        new position and velocity vectors.
+     *
+     * \param context the context of the simulation
+     * \param mobility the mobility model
+     */
+    void CourseChange(const std::string context, const Ptr<const MobilityModel> mobility) const;
 
-  Ipv4Address m_destAddr;
-  uint32_t m_destPort;
-  double m_interval;
-  bool m_initialHandshakeEnable;
+    Ipv4Address m_destAddr;
+    uint32_t m_destPort;
+    double m_interval;
+    bool m_initialHandshakeEnable;
 
-  Ptr<Socket> m_socket; /// socket to be used for communications.
-  EventId m_sendEvent; /// event scheduled to send a new packet.
+    Ptr<Socket> m_socket; /// socket to be used for communications.
+    EventId m_sendEvent;  /// event scheduled to send a new packet.
 
-  mutable int32_t m_sequenceNumber;
-  mutable ClientState m_state;
+    mutable int32_t m_sequenceNumber;
+    mutable ClientState m_state;
 
-
-  TracedCallback<Ptr<const Packet>> m_txTrace;
-  bool m_storage = false;
+    TracedCallback<Ptr<const Packet>> m_txTrace;
+    bool m_storage = false;
 };
 
 } // namespace ns3

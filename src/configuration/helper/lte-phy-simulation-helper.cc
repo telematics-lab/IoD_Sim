@@ -18,30 +18,30 @@
 #include "lte-phy-simulation-helper.h"
 
 #include <ns3/boolean.h>
+#include <ns3/scenario-configuration-helper.h>
 #include <ns3/string.h>
 
-#include <ns3/scenario-configuration-helper.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 class LtePhySimulationHelperPriv
 {
-public:
-  static std::string GetS1uLinkPcapPrefix (const size_t stackId)
-  {
-    std::stringstream prefixBuilder;
-    prefixBuilder << CONFIGURATOR->GetResultsPath () << "lte-" << stackId << "-s1u";
+  public:
+    static std::string GetS1uLinkPcapPrefix(const size_t stackId)
+    {
+        std::stringstream prefixBuilder;
+        prefixBuilder << CONFIGURATOR->GetResultsPath() << "lte-" << stackId << "-s1u";
 
-    return prefixBuilder.str ();
-  }
+        return prefixBuilder.str();
+    }
 
-  static std::string GetX2LinkPcapPrefix (const size_t stackId)
-  {
-    std::stringstream prefixBuilder;
-    prefixBuilder << CONFIGURATOR->GetResultsPath () << "lte-" << stackId << "-x2";
+    static std::string GetX2LinkPcapPrefix(const size_t stackId)
+    {
+        std::stringstream prefixBuilder;
+        prefixBuilder << CONFIGURATOR->GetResultsPath() << "lte-" << stackId << "-x2";
 
-    return prefixBuilder.str ();
-  }
+        return prefixBuilder.str();
+    }
 };
 
 LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
@@ -56,24 +56,23 @@ LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
           "X2LinkPcapPrefix",
           StringValue(LtePhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))}
 {
-  m_lte->SetEpcHelper(m_epc);
+    m_lte->SetEpcHelper(m_epc);
 }
 
-LtePhySimulationHelper::~LtePhySimulationHelper ()
+LtePhySimulationHelper::~LtePhySimulationHelper()
 {
-
 }
 
 Ptr<LteHelper>
-LtePhySimulationHelper::GetLteHelper ()
+LtePhySimulationHelper::GetLteHelper()
 {
-  return m_lte;
+    return m_lte;
 }
 
 Ptr<PointToPointEpcHelper>
-LtePhySimulationHelper::GetEpcHelper ()
+LtePhySimulationHelper::GetEpcHelper()
 {
-  return m_epc;
+    return m_epc;
 }
 
 } // namespace ns3

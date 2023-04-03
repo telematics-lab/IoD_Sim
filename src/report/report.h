@@ -20,15 +20,15 @@
 #ifndef REPORT_H
 #define REPORT_H
 
-#include <string>
+#include "report-simulation.h"
 
 #include <ns3/singleton.h>
 
 #include <libxml/xmlwriter.h>
+#include <string>
 
-#include "report-simulation.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * The Report module is made to agglomerate useful data and output all of it in
@@ -43,57 +43,57 @@ namespace ns3 {
  */
 class Report : public Singleton<Report>
 {
-public:
-  /**
-   * Initialize Reporting Infrastructure.
-   * This method should be called only once. It has guards for it and it prints
-   * a warning message if it is called multiple times.
-   *
-   * \param scenarioName Name of the scenario
-   * \param executedAt   Datetime of scenario execution
-   * \param resultsPath  Base path on which the XML file is saved
-   */
-  void Initialize (const std::string scenarioName,
-                   const std::string executedAt,
-                   const std::string resultsPath);
+  public:
+    /**
+     * Initialize Reporting Infrastructure.
+     * This method should be called only once. It has guards for it and it prints
+     * a warning message if it is called multiple times.
+     *
+     * \param scenarioName Name of the scenario
+     * \param executedAt   Datetime of scenario execution
+     * \param resultsPath  Base path on which the XML file is saved
+     */
+    void Initialize(const std::string scenarioName,
+                    const std::string executedAt,
+                    const std::string resultsPath);
 
-  /**
-   * Base destructor.
-   * End of simulation, write data to file and clean the environment.
-   */
-  ~Report();
+    /**
+     * Base destructor.
+     * End of simulation, write data to file and clean the environment.
+     */
+    ~Report();
 
-  /**
-   * Save all data to the summary file.
-   */
-  void Save ();
+    /**
+     * Save all data to the summary file.
+     */
+    void Save();
 
-private:
-  /**
-   * Open the summary file.
-   */
-  void Open ();
+  private:
+    /**
+     * Open the summary file.
+     */
+    void Open();
 
-  /**
-   * Close the summary file.
-   */
-  void Close ();
+    /**
+     * Close the summary file.
+     */
+    void Close();
 
-  /**
-   * Explore the tree and write on the summary file.
-   */
-  void Write () const;
+    /**
+     * Explore the tree and write on the summary file.
+     */
+    void Write() const;
 
-  /**
-   * Generate the destination file name summary.xml
-   *
-   * \return Destination file name.
-   */
-  const std::string GetFilename() const;
+    /**
+     * Generate the destination file name summary.xml
+     *
+     * \return Destination file name.
+     */
+    const std::string GetFilename() const;
 
-  std::string m_resultsPath;             /// Results directory path
-  xmlTextWriterPtr m_writer;             /// XML file handler
-  Ptr<ReportSimulation> m_dataTreeRoot;  /// Root of accumulated data
+    std::string m_resultsPath;            /// Results directory path
+    xmlTextWriterPtr m_writer;            /// XML file handler
+    Ptr<ReportSimulation> m_dataTreeRoot; /// Root of accumulated data
 };
 
 } // namespace ns3

@@ -5,7 +5,8 @@
 
 #include <libxml/xmlwriter.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Store real and virtual time, useful when it is required to
@@ -14,42 +15,43 @@ namespace ns3 {
  */
 class SimulationDuration
 {
-public:
-  /**
-   * Construct the object with the given values.
-   *
-   * \params realDuration the real time
-   * \param virtualDuration the virtual time
-   */
-  SimulationDuration (const Time& realDuration, const Time& virtualDuration);
-  /**
-   * Default constructor, useful for higher-level object initialization
-   */
-  SimulationDuration ();
-  /**
-   * Default destructor
-   */
-  ~SimulationDuration ();
+  public:
+    /**
+     * Construct the object with the given values.
+     *
+     * \params realDuration the real time
+     * \param virtualDuration the virtual time
+     */
+    SimulationDuration(const Time& realDuration, const Time& virtualDuration);
+    /**
+     * Default constructor, useful for higher-level object initialization
+     */
+    SimulationDuration();
+    /**
+     * Default destructor
+     */
+    ~SimulationDuration();
 
-  /**
-   * Write SimulationDuration report data to a XML file with a given handler
-   *
-   * \param handle the handler to communicate data to the opened XML file
-   */
-  void Write (xmlTextWriterPtr handle) const;
-private:
-  /**
-   * Get current real time
-   */
-  static Time GetRealTime ();
+    /**
+     * Write SimulationDuration report data to a XML file with a given handler
+     *
+     * \param handle the handler to communicate data to the opened XML file
+     */
+    void Write(xmlTextWriterPtr handle) const;
 
-  /**
-   * Get current virtual time
-   */
-  static Time GetVirtualTime ();
+  private:
+    /**
+     * Get current real time
+     */
+    static Time GetRealTime();
 
-  Time m_realDuration;      /// the duration measured by the computer
-  Time m_virtualDuration;   /// the duration relative to the simulator time
+    /**
+     * Get current virtual time
+     */
+    static Time GetVirtualTime();
+
+    Time m_realDuration;    /// the duration measured by the computer
+    Time m_virtualDuration; /// the duration relative to the simulator time
 };
 
 } // namespace ns3

@@ -18,15 +18,15 @@
 #ifndef IRS_LIST_H
 #define IRS_LIST_H
 
-#include <vector>
-
 #include <ns3/ptr.h>
 
-namespace ns3 {
+#include <vector>
+
+namespace ns3
+{
 
 class Irs;
 class CallbackBase;
-
 
 /**
  * \ingroup Irs
@@ -37,40 +37,40 @@ class CallbackBase;
  */
 class IrsList
 {
-public:
-  /// Irs container iterator
-  typedef std::vector< Ptr<Irs> >::const_iterator Iterator;
+  public:
+    /// Irs container iterator
+    typedef std::vector<Ptr<Irs>>::const_iterator Iterator;
 
-   /**
-   * \param irs drone to add
-   * \returns index of the Irs in list
-   *
-   * This method must be called automatically in order to register
-   * a node as a Irs
-   */
-  static uint32_t Add (Ptr<Irs> irs);
+    /**
+     * \param irs drone to add
+     * \returns index of the Irs in list
+     *
+     * This method must be called automatically in order to register
+     * a node as a Irs
+     */
+    static uint32_t Add(Ptr<Irs> irs);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list
-   */
-  static Iterator Begin ();
-  static Iterator begin();
+    /**
+     * \returns a C++ iterator located at the beginning of this list
+     */
+    static Iterator Begin();
+    static Iterator begin();
 
-  /**
-   * \returns a C++ iterator located at the end of this list
-   */
-  static Iterator End ();
-  static Iterator end();
+    /**
+     * \returns a C++ iterator located at the end of this list
+     */
+    static Iterator End();
+    static Iterator end();
 
-  /**
-   * \param n the index of requested Irs
-   * \returns the Irs (Node) associated to index n
-   */
+    /**
+     * \param n the index of requested Irs
+     * \returns the Irs (Node) associated to index n
+     */
     static Ptr<Irs> Get(uint32_t n);
 
-  /**
-   * \returns the number of Irs currently in the list
-   */
+    /**
+     * \returns the number of Irs currently in the list
+     */
     static uint32_t GetN();
 };
 

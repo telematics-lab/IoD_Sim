@@ -20,76 +20,78 @@
 #ifndef WIFI_PHY_LAYER_H
 #define WIFI_PHY_LAYER_H
 
-#include <libxml/xmlwriter.h>
+#include "protocol-layer.h"
 
 #include <ns3/mac48-address.h>
 #include <ns3/packet.h>
 #include <ns3/wifi-phy.h>
 #include <ns3/wifi-tx-vector.h>
 
-#include "protocol-layer.h"
+#include <libxml/xmlwriter.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 class WifiPhyLayer : public ProtocolLayer
 {
-public:
-  typedef std::tuple<double /* Sim Time */, Mac48Address /* Signal From */, double /* dBm */> RssiSample;
+  public:
+    typedef std::tuple<double /* Sim Time */, Mac48Address /* Signal From */, double /* dBm */>
+        RssiSample;
 
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  WifiPhyLayer ();
-  /**
-   * Default destructor
-   */
-  ~WifiPhyLayer ();
+    /**
+     * Default constructor
+     */
+    WifiPhyLayer();
+    /**
+     * Default destructor
+     */
+    ~WifiPhyLayer();
 
-  /**
-   * Write Protocol Stack report data to a XML file with a given handler
-   *
-   * \param handle the XML handler to write data on
-   */
-  virtual void Write (xmlTextWriterPtr handle);
+    /**
+     * Write Protocol Stack report data to a XML file with a given handler
+     *
+     * \param handle the XML handler to write data on
+     */
+    virtual void Write(xmlTextWriterPtr handle);
 
-protected:
-  /**
-   * Private initialization of the object
-   */
-  virtual void DoInitialize ();
+  protected:
+    /**
+     * Private initialization of the object
+     */
+    virtual void DoInitialize();
 
-private:
-  /**
-   * Retrieve device MAC Address.
-   */
-  Mac48Address GetDeviceAddress ();
-  /**
-   * Initialize RSSI monitor in order to build a history of the RSSI for
-   * the current entity with the current network device
-   */
-  void DoInitializeRssiMonitor ();
+  private:
+    /**
+     * Retrieve device MAC Address.
+     */
+    Mac48Address GetDeviceAddress();
+    /**
+     * Initialize RSSI monitor in order to build a history of the RSSI for
+     * the current entity with the current network device
+     */
+    void DoInitializeRssiMonitor();
 
-  /**
-   * Handle the arrival of new RSSI data
-   */
-  void DoMonitorRssi (Ptr<const Packet> packet, RxPowerWattPerChannelBand rxPowersW);
+    /**
+     * Handle the arrival of new RSSI data
+     */
+    void DoMonitorRssi(Ptr<const Packet> packet, RxPowerWattPerChannelBand rxPowersW);
 
-  uint32_t m_droneReference;            /// ID of the drone
-  uint32_t m_netdevReference;           /// ID of the network device
+    uint32_t m_droneReference;  /// ID of the drone
+    uint32_t m_netdevReference; /// ID of the network device
 
-  std::vector<RssiSample> m_rssi;       /// RSSI history of the device
+    std::vector<RssiSample> m_rssi; /// RSSI history of the device
 
-  double m_frequency;                   /// the carrier frequency set
-  Mac48Address m_address;               /// Device MAC Address
-  std::string m_standard;               /// the wifi standard used
-  std::string m_propagationDelayModel;  /// the prop. delay model set
-  std::string m_propagationLossModel;   /// the prop. loss model set
+    double m_frequency;                  /// the carrier frequency set
+    Mac48Address m_address;              /// Device MAC Address
+    std::string m_standard;              /// the wifi standard used
+    std::string m_propagationDelayModel; /// the prop. delay model set
+    std::string m_propagationLossModel;  /// the prop. loss model set
 };
 
 } // namespace ns3

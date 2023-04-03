@@ -18,51 +18,50 @@
 #ifndef DOUBLE_VECTOR_H
 #define DOUBLE_VECTOR_H
 
+#include <ns3/attribute-helper.h>
+#include <ns3/attribute.h>
+#include <ns3/double.h>
+
 #include <istream>
 #include <ostream>
 #include <vector>
 
-#include <ns3/attribute.h>
-#include <ns3/attribute-helper.h>
-#include <ns3/double.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Definition of a new attribute type, in the form vector<double>.
  */
 class DoubleVector
 {
-public:
-  typedef std::vector<double>::const_iterator Iterator;
+  public:
+    typedef std::vector<double>::const_iterator Iterator;
 
-  DoubleVector ();
-  DoubleVector (std::vector<double> coefficients);
-  DoubleVector (const DoubleVector &a);
+    DoubleVector();
+    DoubleVector(std::vector<double> coefficients);
+    DoubleVector(const DoubleVector& a);
 
-  Iterator Begin () const;
-  Iterator End () const;
+    Iterator Begin() const;
+    Iterator End() const;
 
-  uint32_t GetN () const;
+    uint32_t GetN() const;
 
-  std::vector<double> Get () const;
-  double Get (const uint32_t i) const;
+    std::vector<double> Get() const;
+    double Get(const uint32_t i) const;
 
-  double GetFront () const;
-  double GetBack () const;
+    double GetFront() const;
+    double GetBack() const;
 
-  void Add (double coefficient);
+    void Add(double coefficient);
 
-private:
-  std::vector<double> m_DoubleVector;
+  private:
+    std::vector<double> m_DoubleVector;
 };
 
-ATTRIBUTE_HELPER_HEADER (DoubleVector);
+ATTRIBUTE_HELPER_HEADER(DoubleVector);
 
-std::ostream & operator<< (std::ostream &os,
-                           const DoubleVector &DoubleVector);
-std::istream & operator>> (std::istream &is,
-                           DoubleVector &DoubleVector);
+std::ostream& operator<<(std::ostream& os, const DoubleVector& DoubleVector);
+std::istream& operator>>(std::istream& is, DoubleVector& DoubleVector);
 
 } // namespace ns3
 

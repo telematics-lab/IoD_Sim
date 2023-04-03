@@ -23,19 +23,20 @@
 
 #include <libxml/xmlwriter.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 class ReportPeripheral
 {
-public:
+  public:
     /**
      * Initialize a report peripheral with a given power consumptions and regions of interest
      */
-    ReportPeripheral (std::string, std::vector<double>, std::vector<int>);
+    ReportPeripheral(std::string, std::vector<double>, std::vector<int>);
     /**
      * Default destructor
      */
-    ~ReportPeripheral ();
+    ~ReportPeripheral();
     /**
      * \param a tuple containing the name and the value (string) of an additional attribute
      */
@@ -45,11 +46,12 @@ public:
      *
      * \param handle the XML handler to write data on
      */
-    void Write (xmlTextWriterPtr handle);
-private:
+    void Write(xmlTextWriterPtr handle);
+
+  private:
     std::string m_tid;
     std::vector<double> m_powerConsumptionStates; //!< Power consumptions for each state
-    std::vector<int> m_roi; //!< Regions of interest indexes
+    std::vector<int> m_roi;                       //!< Regions of interest indexes
     std::vector<std::tuple<std::string, std::string>> m_otherAttributes;
 };
 

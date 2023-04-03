@@ -17,30 +17,29 @@
  */
 #include "wifi-phy-simulation-helper.h"
 
-namespace ns3 {
-
-WifiPhySimulationHelper::WifiPhySimulationHelper () :
-  m_wifi {},
-  m_wifiPhy {}
+namespace ns3
 {
 
+WifiPhySimulationHelper::WifiPhySimulationHelper()
+    : m_wifi{},
+      m_wifiPhy{}
+{
 }
 
-WifiPhySimulationHelper::~WifiPhySimulationHelper ()
+WifiPhySimulationHelper::~WifiPhySimulationHelper()
 {
-
 }
 
 WifiHelper*
-WifiPhySimulationHelper::GetWifiHelper ()
+WifiPhySimulationHelper::GetWifiHelper()
 {
-  return &m_wifi;
+    return &m_wifi;
 }
 
 YansWifiPhyHelper*
-WifiPhySimulationHelper::GetWifiPhyHelper ()
+WifiPhySimulationHelper::GetWifiPhyHelper()
 {
-  return &m_wifiPhy;
+    return &m_wifiPhy;
 }
 
 } // namespace ns3

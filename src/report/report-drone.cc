@@ -19,25 +19,6 @@
  */
 #include "report-drone.h"
 
-#include <ns3/config.h>
-#include <ns3/integer.h>
-#include <ns3/ipv4-l3-protocol.h>
-#include <ns3/log.h>
-#include <ns3/node.h>
-#include <ns3/node-list.h>
-#include <ns3/simulator.h>
-#include <ns3/string.h>
-#include <ns3/udp-header.h>
-
-#include <rapidjson/document.h>
-
-#include <ns3/drone-communications.h>
-#include <ns3/drone-list.h>
-#include <ns3/drone.h>
-#include <ns3/input-peripheral.h>
-#include <ns3/interest-region-container.h>
-#include <ns3/storage-peripheral.h>
-
 #include "drone-control-layer.h"
 #include "ipv4-layer.h"
 #include "report-helper.h"
@@ -45,214 +26,247 @@
 #include "wifi-mac-layer.h"
 #include "wifi-phy-layer.h"
 
-namespace ns3 {
+#include <ns3/config.h>
+#include <ns3/drone-communications.h>
+#include <ns3/drone-list.h>
+#include <ns3/drone.h>
+#include <ns3/input-peripheral.h>
+#include <ns3/integer.h>
+#include <ns3/interest-region-container.h>
+#include <ns3/ipv4-l3-protocol.h>
+#include <ns3/log.h>
+#include <ns3/node-list.h>
+#include <ns3/node.h>
+#include <ns3/simulator.h>
+#include <ns3/storage-peripheral.h>
+#include <ns3/string.h>
+#include <ns3/udp-header.h>
 
-NS_LOG_COMPONENT_DEFINE ("ReportDrone");
-NS_OBJECT_ENSURE_REGISTERED (ReportDrone);
+#include <rapidjson/document.h>
+
+namespace ns3
+{
+
+NS_LOG_COMPONENT_DEFINE("ReportDrone");
+NS_OBJECT_ENSURE_REGISTERED(ReportDrone);
 
 TypeId
-ReportDrone::GetTypeId ()
+ReportDrone::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::ReportDrone")
-    .AddConstructor<ReportDrone> ()
-    .SetParent<ReportEntity> ()
-    ;
+    static TypeId tid =
+        TypeId("ns3::ReportDrone").AddConstructor<ReportDrone>().SetParent<ReportEntity>();
 
-  return tid;
+    return tid;
 }
 
-ReportDrone::ReportDrone ()
+ReportDrone::ReportDrone()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ReportDrone::~ReportDrone ()
+ReportDrone::~ReportDrone()
 {
-  NS_LOG_FUNCTION (this);
-}
-
-void ReportDrone::DoInitialize()
-{
-  DoInitializePeripherals();
-  ReportEntity::DoInitialize();
+    NS_LOG_FUNCTION(this);
 }
 
 void
-ReportDrone::DoWrite (xmlTextWriterPtr h)
+ReportDrone::DoInitialize()
 {
-  NS_LOG_FUNCTION (this << h);
-  if (h == nullptr)
+    DoInitializePeripherals();
+    ReportEntity::DoInitialize();
+}
+
+void
+ReportDrone::DoWrite(xmlTextWriterPtr h)
+{
+    NS_LOG_FUNCTION(this << h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "Drone");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "Drone");
+    NS_ASSERT(rc >= 0);
 
-  /* Nested Elements */
-  rc = xmlTextWriterStartElement (h, BAD_CAST "trajectory");
-  NS_ASSERT (rc >= 0);
+    /* Nested Elements */
+    rc = xmlTextWriterStartElement(h, BAD_CAST "trajectory");
+    NS_ASSERT(rc >= 0);
 
-  for (auto& location : m_trajectory)
-    location.Write (h);
-
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
-
-  rc = xmlTextWriterStartElement (h, BAD_CAST "Peripherals");
-  NS_ASSERT (rc >= 0);
-
-  for (auto p : m_peripherals)
-    p.Write (h);
-
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
-
-  rc = xmlTextWriterStartElement (h, BAD_CAST "NetDevices");
-  NS_ASSERT (rc >= 0);
-
-  for (int nid = 0; nid < (int) m_networkStacks.size(); nid++)
-  {
-    rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevice");
-    NS_ASSERT (rc >= 0);
-
-    m_networkStacks[nid].Write (h);
-
-    rc = xmlTextWriterStartElement (h, BAD_CAST "dataTx");
-    NS_ASSERT (rc >= 0);
-
-    for (auto rid=m_dataTx.begin(); rid !=m_dataTx.end();)
-    {
-      if ((*rid)->GetIface() == nid)
-      {
-        (*rid)->Write (h);
-        m_dataTx.erase(rid);
-      } else {
-        rid++;
-      }
-    }
-    rc = xmlTextWriterEndElement (h);
-    NS_ASSERT (rc >= 0);
-
-    rc = xmlTextWriterStartElement (h, BAD_CAST "dataRx");
-    NS_ASSERT (rc >= 0);
-
-    for (auto rid=m_dataRx.begin(); rid !=m_dataRx.end();)
-    {
-      if ((*rid)->GetIface() == nid)
-      {
-        (*rid)->Write (h);
-        m_dataRx.erase(rid);
-      } else {
-        rid++;
-      }
-    }
-
-    rc = xmlTextWriterEndElement (h);
-    NS_ASSERT (rc >= 0);
+    for (auto& location : m_trajectory)
+        location.Write(h);
 
     rc = xmlTextWriterEndElement(h);
-    NS_ASSERT (rc >= 0);
-  }
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "dataTx");
-  //broadcast
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "Peripherals");
+    NS_ASSERT(rc >= 0);
 
-  for (auto rid=m_dataTx.begin(); rid !=m_dataTx.end();rid++) (*rid)->Write (h);
+    for (auto p : m_peripherals)
+        p.Write(h);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "dataRx");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevices");
+    NS_ASSERT(rc >= 0);
 
-  for (auto rid=m_dataRx.begin(); rid !=m_dataRx.end();rid++) (*rid)->Write (h);
+    for (int nid = 0; nid < (int)m_networkStacks.size(); nid++)
+    {
+        rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevice");
+        NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
- //////
+        m_networkStacks[nid].Write(h);
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "cumulativeDataTx");
-  NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterStartElement(h, BAD_CAST "dataTx");
+        NS_ASSERT(rc >= 0);
 
-  for (auto& dataStatsTx : m_cumulativeDataTx)
-    dataStatsTx->Write (h);
+        for (auto rid = m_dataTx.begin(); rid != m_dataTx.end();)
+        {
+            if ((*rid)->GetIface() == nid)
+            {
+                (*rid)->Write(h);
+                m_dataTx.erase(rid);
+            }
+            else
+            {
+                rid++;
+            }
+        }
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterStartElement(h, BAD_CAST "dataRx");
+        NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "cumulativeDataRx");
-  NS_ASSERT (rc >= 0);
+        for (auto rid = m_dataRx.begin(); rid != m_dataRx.end();)
+        {
+            if ((*rid)->GetIface() == nid)
+            {
+                (*rid)->Write(h);
+                m_dataRx.erase(rid);
+            }
+            else
+            {
+                rid++;
+            }
+        }
 
-  for (auto& dataStatsRx : m_cumulativeDataRx)
-    dataStatsRx->Write (h);
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
+    }
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "dataTx");
+    // broadcast
+    NS_ASSERT(rc >= 0);
+
+    for (auto rid = m_dataTx.begin(); rid != m_dataTx.end(); rid++)
+        (*rid)->Write(h);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
+
+    rc = xmlTextWriterStartElement(h, BAD_CAST "dataRx");
+    NS_ASSERT(rc >= 0);
+
+    for (auto rid = m_dataRx.begin(); rid != m_dataRx.end(); rid++)
+        (*rid)->Write(h);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
+    //////
+
+    rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataTx");
+    NS_ASSERT(rc >= 0);
+
+    for (auto& dataStatsTx : m_cumulativeDataTx)
+        dataStatsTx->Write(h);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
+
+    rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataRx");
+    NS_ASSERT(rc >= 0);
+
+    for (auto& dataStatsRx : m_cumulativeDataRx)
+        dataStatsRx->Write(h);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
+
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 void
-ReportDrone::DoInitializeTrajectoryMonitor ()
+ReportDrone::DoInitializeTrajectoryMonitor()
 {
-  NS_LOG_FUNCTION (this);
-  /* set CourseChange callback using ns-3 XPath addressing system */
-  std::stringstream xPathCallback;
+    NS_LOG_FUNCTION(this);
+    /* set CourseChange callback using ns-3 XPath addressing system */
+    std::stringstream xPathCallback;
 
-  xPathCallback << "/NodeList/" << m_reference
-                << "/$ns3::MobilityModel/CourseChange";
-  Config::ConnectWithoutContext (xPathCallback.str (),
-                                 MakeCallback (&ReportDrone::DoMonitorTrajectory, this));
+    xPathCallback << "/NodeList/" << m_reference << "/$ns3::MobilityModel/CourseChange";
+    Config::ConnectWithoutContext(xPathCallback.str(),
+                                  MakeCallback(&ReportDrone::DoMonitorTrajectory, this));
 }
 
 void
-ReportDrone::DoMonitorTrajectory (const Ptr<const MobilityModel> mobility)
+ReportDrone::DoMonitorTrajectory(const Ptr<const MobilityModel> mobility)
 {
-  NS_LOG_FUNCTION (this << mobility);
-  Ptr<Node> drone = NodeList::GetNode(m_reference);
-  Vector position = mobility->GetPosition ();
+    NS_LOG_FUNCTION(this << mobility);
+    Ptr<Node> drone = NodeList::GetNode(m_reference);
+    Vector position = mobility->GetPosition();
 
-  if (m_trajectory.size() == 0 || m_trajectory.back().GetPosition() != position)
-  {
-    m_trajectory.push_back (ReportLocation (position, Simulator::Now (), irc->IsInRegions(position)));
-    m_roi.push_back (irc->IsInRegions(position));
-  }
+    if (m_trajectory.size() == 0 || m_trajectory.back().GetPosition() != position)
+    {
+        m_trajectory.push_back(
+            ReportLocation(position, Simulator::Now(), irc->IsInRegions(position)));
+        m_roi.push_back(irc->IsInRegions(position));
+    }
 }
 
 void
-ReportDrone::DoInitializePeripherals ()
+ReportDrone::DoInitializePeripherals()
 {
-  NS_LOG_FUNCTION (this);
-  auto nodeRef = NodeList::GetNode (m_reference);
-  auto drone = StaticCast<Drone, Node> (nodeRef);
-  auto percont = drone->getPeripherals ();
+    NS_LOG_FUNCTION(this);
+    auto nodeRef = NodeList::GetNode(m_reference);
+    auto drone = StaticCast<Drone, Node>(nodeRef);
+    auto percont = drone->getPeripherals();
 
-  for (auto p = percont->Begin (); p != percont->End (); p++)
-  {
-    m_peripherals.push_back (ReportPeripheral ((*p)->GetInstanceTypeId ().GetName (), (*p)->GetPowerConsumptionStates (), (*p)->GetRegionsOfInterest ()));
+    for (auto p = percont->Begin(); p != percont->End(); p++)
+    {
+        m_peripherals.push_back(ReportPeripheral((*p)->GetInstanceTypeId().GetName(),
+                                                 (*p)->GetPowerConsumptionStates(),
+                                                 (*p)->GetRegionsOfInterest()));
 
-    auto pName = (*p)->GetInstanceTypeId ().GetName ();
-    if (pName == "ns3::StoragePeripheral")
-      {
-        m_peripherals.back ().AddAttribute ({ "Capacity", std::to_string (StaticCast<StoragePeripheral,DronePeripheral> ((*p))->GetCapacity ()) });
-      }
-    else if (pName == "ns3::InputPeripheral")
-      {
-        Ptr<InputPeripheral> inper = StaticCast<InputPeripheral,DronePeripheral> ((*p));
-        m_peripherals.back ().AddAttribute ({ "DataRate", std::to_string (inper->GetDatarate ()) });
-        m_peripherals.back ().AddAttribute ({ "DataAcquisitionTimeInterval", std::to_string (inper->GetAcquisitionTimeInterval ().GetSeconds ()) });
-        m_peripherals.back ().AddAttribute ({ "HasStorage", inper->HasStorage () ? "true" : "false" });
-      }
-  }
+        auto pName = (*p)->GetInstanceTypeId().GetName();
+        if (pName == "ns3::StoragePeripheral")
+        {
+            m_peripherals.back().AddAttribute(
+                {"Capacity",
+                 std::to_string(
+                     StaticCast<StoragePeripheral, DronePeripheral>((*p))->GetCapacity())});
+        }
+        else if (pName == "ns3::InputPeripheral")
+        {
+            Ptr<InputPeripheral> inper = StaticCast<InputPeripheral, DronePeripheral>((*p));
+            m_peripherals.back().AddAttribute({"DataRate", std::to_string(inper->GetDatarate())});
+            m_peripherals.back().AddAttribute(
+                {"DataAcquisitionTimeInterval",
+                 std::to_string(inper->GetAcquisitionTimeInterval().GetSeconds())});
+            m_peripherals.back().AddAttribute(
+                {"HasStorage", inper->HasStorage() ? "true" : "false"});
+        }
+    }
 }
 
 } // namespace ns3

@@ -17,30 +17,30 @@
  */
 #include "phy-layer-configuration.h"
 
-namespace ns3 {
-
-PhyLayerConfiguration::PhyLayerConfiguration (std::string type, std::vector<ModelConfiguration::Attribute> attributes) :
-  m_type {type},
-  m_attributes {attributes}
+namespace ns3
 {
 
+PhyLayerConfiguration::PhyLayerConfiguration(std::string type,
+                                             std::vector<ModelConfiguration::Attribute> attributes)
+    : m_type{type},
+      m_attributes{attributes}
+{
 }
 
-PhyLayerConfiguration::~PhyLayerConfiguration ()
+PhyLayerConfiguration::~PhyLayerConfiguration()
 {
-
 }
 
 const std::string
-PhyLayerConfiguration::GetType () const
+PhyLayerConfiguration::GetType() const
 {
-  return m_type;
+    return m_type;
 }
 
 const std::vector<ModelConfiguration::Attribute>
-PhyLayerConfiguration::GetAttributes () const
+PhyLayerConfiguration::GetAttributes() const
 {
-  return m_attributes;
+    return m_attributes;
 }
 
 } // namespace ns3

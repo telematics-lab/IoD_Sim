@@ -21,85 +21,87 @@
 
 #include <ns3/log.h>
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("ReportLocation");
-
-ReportLocation::ReportLocation (Vector position, Time instant, int roi) :
-  m_position {position},
-  m_instant {instant},
-  m_roi {roi}
+namespace ns3
 {
-  NS_LOG_FUNCTION (this << position << instant);
+
+NS_LOG_COMPONENT_DEFINE("ReportLocation");
+
+ReportLocation::ReportLocation(Vector position, Time instant, int roi)
+    : m_position{position},
+      m_instant{instant},
+      m_roi{roi}
+{
+    NS_LOG_FUNCTION(this << position << instant);
 }
 
-ReportLocation::ReportLocation (Vector position, Time instant) :
-  m_position {position},
-  m_instant {instant},
-  m_roi {-2}
+ReportLocation::ReportLocation(Vector position, Time instant)
+    : m_position{position},
+      m_instant{instant},
+      m_roi{-2}
 {
-  NS_LOG_FUNCTION (this << position << instant);
+    NS_LOG_FUNCTION(this << position << instant);
 }
 
-ReportLocation::ReportLocation ()
+ReportLocation::ReportLocation()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-ReportLocation::~ReportLocation ()
+ReportLocation::~ReportLocation()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 Vector
 ReportLocation::GetPosition()
 {
-  return m_position;
+    return m_position;
 }
 
 void
-ReportLocation::Write (xmlTextWriterPtr h)
+ReportLocation::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "position");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "position");
+    NS_ASSERT(rc >= 0);
 
-  /* Nested Elements */
-  std::stringstream bX, bY, bZ, bT;
-  bX << m_position.x;
-  bY << m_position.y;
-  bZ << m_position.z;
-  bT << m_instant.GetNanoSeconds ();
+    /* Nested Elements */
+    std::stringstream bX, bY, bZ, bT;
+    bX << m_position.x;
+    bY << m_position.y;
+    bZ << m_position.z;
+    bT << m_instant.GetNanoSeconds();
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "x", BAD_CAST bX.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "x", BAD_CAST bX.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "y", BAD_CAST bY.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "y", BAD_CAST bY.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "z", BAD_CAST bZ.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "z", BAD_CAST bZ.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "t", BAD_CAST bT.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "t", BAD_CAST bT.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  if (m_roi != -2)
-  {
-    rc = xmlTextWriterWriteElement (h, BAD_CAST "RoI", BAD_CAST std::to_string(m_roi).c_str ());
-    NS_ASSERT (rc >= 0);
-  }
+    if (m_roi != -2)
+    {
+        rc = xmlTextWriterWriteElement(h, BAD_CAST "RoI", BAD_CAST std::to_string(m_roi).c_str());
+        NS_ASSERT(rc >= 0);
+    }
 
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

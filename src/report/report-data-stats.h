@@ -19,45 +19,48 @@
  */
 #ifndef REPORT_DATA_STATS_H
 #define REPORT_DATA_STATS_H
-#include <cstddef>
-
+#include <ns3/drone-communications.h>
 #include <ns3/object.h>
 
+#include <cstddef>
 #include <libxml/xmlwriter.h>
 
-#include <ns3/drone-communications.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 class ReportDataStats : public Object
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  /**
-   * Default constructor
-   */
-  ReportDataStats ();
-  /**
-   * Default destructor
-   */
-  ~ReportDataStats ();
+    /**
+     * Default constructor
+     */
+    ReportDataStats();
+    /**
+     * Default destructor
+     */
+    ~ReportDataStats();
 
-  constexpr void Add (const uint32_t bytes) { m_bytes += bytes; }
+    constexpr void Add(const uint32_t bytes)
+    {
+        m_bytes += bytes;
+    }
 
-  /**
-   * Write report data statistics to a XML file with a given handler
-   *
-   * \param handle the handler to communicate data to the opened XML file
-   */
-  void Write (xmlTextWriterPtr handle) const;
-private:
-  PacketType m_kind;              /// the kind of data packet that is monitored
-  mutable std::uint32_t m_bytes;  /// the amount of bytes transferred
+    /**
+     * Write report data statistics to a XML file with a given handler
+     *
+     * \param handle the handler to communicate data to the opened XML file
+     */
+    void Write(xmlTextWriterPtr handle) const;
+
+  private:
+    PacketType m_kind;             /// the kind of data packet that is monitored
+    mutable std::uint32_t m_bytes; /// the amount of bytes transferred
 };
 
 } // namespace ns3

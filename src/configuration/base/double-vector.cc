@@ -21,125 +21,124 @@
 #include <ns3/names.h>
 #include <ns3/object-factory.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-ATTRIBUTE_HELPER_CPP (DoubleVector);
+ATTRIBUTE_HELPER_CPP(DoubleVector);
 
-DoubleVector::DoubleVector ()
+DoubleVector::DoubleVector()
 {
 }
 
-DoubleVector::DoubleVector (std::vector<double> coeffs)
+DoubleVector::DoubleVector(std::vector<double> coeffs)
 {
-  for (auto c : coeffs)
+    for (auto c : coeffs)
     {
-      Add (c);
+        Add(c);
     }
 }
 
-DoubleVector::DoubleVector (const DoubleVector &a)
+DoubleVector::DoubleVector(const DoubleVector& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      Add (*c);
+        Add(*c);
     }
 }
 
 DoubleVector::Iterator
-DoubleVector::Begin () const
+DoubleVector::Begin() const
 {
-  return m_DoubleVector.begin ();
+    return m_DoubleVector.begin();
 }
 
 DoubleVector::Iterator
-DoubleVector::End () const
+DoubleVector::End() const
 {
-  return m_DoubleVector.end ();
+    return m_DoubleVector.end();
 }
 
 uint32_t
-DoubleVector::GetN () const
+DoubleVector::GetN() const
 {
-  return m_DoubleVector.size ();
+    return m_DoubleVector.size();
 }
 
 std::vector<double>
-DoubleVector::Get () const
+DoubleVector::Get() const
 {
-  std::vector<double> v;
+    std::vector<double> v;
 
-  for (auto c : m_DoubleVector)
+    for (auto c : m_DoubleVector)
     {
-      v.push_back (c);
+        v.push_back(c);
     }
 
-  return v;
+    return v;
 }
 
 double
-DoubleVector::Get (const uint32_t i) const
+DoubleVector::Get(const uint32_t i) const
 {
-  return m_DoubleVector[i];
+    return m_DoubleVector[i];
 }
 
 double
-DoubleVector::GetFront () const
+DoubleVector::GetFront() const
 {
-  return m_DoubleVector.front ();
+    return m_DoubleVector.front();
 }
 
 double
-DoubleVector::GetBack () const
+DoubleVector::GetBack() const
 {
-  return m_DoubleVector.back ();
+    return m_DoubleVector.back();
 }
 
 void
-DoubleVector::Add (double coeff)
+DoubleVector::Add(double coeff)
 {
-  m_DoubleVector.push_back (coeff);
+    m_DoubleVector.push_back(coeff);
 }
 
-std::ostream &
-operator<< (std::ostream &os, const DoubleVector &coeffs)
+std::ostream&
+operator<<(std::ostream& os, const DoubleVector& coeffs)
 {
-  os << coeffs.GetN () << ";";
+    os << coeffs.GetN() << ";";
 
-  for (auto coeff = coeffs.Begin ();
-       coeff != coeffs.End ();
-       coeff++)
+    for (auto coeff = coeffs.Begin(); coeff != coeffs.End(); coeff++)
     {
-      os << (*coeff) << ";";
+        os << (*coeff) << ";";
     }
 
-  return os;
+    return os;
 }
 
-std::istream &
-operator>> (std::istream &is, DoubleVector &coeffs)
+std::istream&
+operator>>(std::istream& is, DoubleVector& coeffs)
 {
-  char separator = '\0';
-  uint32_t n;
-  double coeff;
+    char separator = '\0';
+    uint32_t n;
+    double coeff;
 
-  is >> n >> separator;
-  if (separator != ';')
-    is.setstate (std::ios::failbit);
+    is >> n >> separator;
+    if (separator != ';')
+        is.setstate(std::ios::failbit);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      is >> coeff >> separator;
+        is >> coeff >> separator;
 
-      if (separator != ';')
+        if (separator != ';')
         {
-          is.setstate (std::ios::failbit);
-          break;
+            is.setstate(std::ios::failbit);
+            break;
         }
 
-      coeffs.Add (coeff);
+        coeffs.Add(coeff);
     }
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

@@ -22,64 +22,67 @@
 #include <ns3/log.h>
 #include <ns3/string.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("WifiMacLayer");
-NS_OBJECT_ENSURE_REGISTERED (WifiMacLayer);
+NS_LOG_COMPONENT_DEFINE("WifiMacLayer");
+NS_OBJECT_ENSURE_REGISTERED(WifiMacLayer);
 
 TypeId
-WifiMacLayer::GetTypeId ()
+WifiMacLayer::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::WifiMacLayer")
-    .AddConstructor<WifiMacLayer> ()
-    .SetParent<ProtocolLayer> ()
-    .AddAttribute ("Ssid", "The SSID of the BSS",
-                   StringValue (),
-                   MakeStringAccessor (&WifiMacLayer::m_ssid),
-                   MakeStringChecker ())
-    .AddAttribute ("Mode", "The mode of the Wifi",
-                   StringValue (),
-                   MakeStringAccessor (&WifiMacLayer::m_mode),
-                   MakeStringChecker ())
-    ;
+    static TypeId tid = TypeId("ns3::WifiMacLayer")
+                            .AddConstructor<WifiMacLayer>()
+                            .SetParent<ProtocolLayer>()
+                            .AddAttribute("Ssid",
+                                          "The SSID of the BSS",
+                                          StringValue(),
+                                          MakeStringAccessor(&WifiMacLayer::m_ssid),
+                                          MakeStringChecker())
+                            .AddAttribute("Mode",
+                                          "The mode of the Wifi",
+                                          StringValue(),
+                                          MakeStringAccessor(&WifiMacLayer::m_mode),
+                                          MakeStringChecker());
 
-  return tid;
+    return tid;
 }
 
-WifiMacLayer::WifiMacLayer ()
+WifiMacLayer::WifiMacLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-WifiMacLayer::~WifiMacLayer ()
+WifiMacLayer::~WifiMacLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-WifiMacLayer::Write (xmlTextWriterPtr h)
+WifiMacLayer::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "mac");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "mac");
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement(h, BAD_CAST "ssid", BAD_CAST m_ssid.c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "ssid", BAD_CAST m_ssid.c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement(h, BAD_CAST "mode", BAD_CAST m_mode.c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "mode", BAD_CAST m_mode.c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3
