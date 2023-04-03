@@ -63,7 +63,7 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonMacLay
     }
     else
     {
-        NS_FATAL_ERROR("Unknown MAC Layer type: " << macType);
+        NS_FATAL_ERROR("MAC Layer of Type " << macType << " is not supported!");
     }
 
     return macConfig;

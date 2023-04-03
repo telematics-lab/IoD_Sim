@@ -13,6 +13,10 @@ plydata = PlyData.read(ply_file_path)
 # Extract vertex data
 vertices = np.array(plydata['vertex'].data.tolist())
 
+if (vertices.size == 0):
+  print("Operation aborted: no data found for this channel.", file=sys.stderr)
+  exit(1)
+
 # Extract point positions
 positions = vertices[:, 0:3]
 

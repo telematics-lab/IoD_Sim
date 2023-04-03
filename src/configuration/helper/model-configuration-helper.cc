@@ -33,6 +33,7 @@
 
 #include <ns3/flight-plan.h>
 #include <ns3/int-vector.h>
+#include <ns3/irs-patch.h>
 #include <ns3/model-configuration-vector.h>
 #include <ns3/model-configuration-matrix.h>
 #include <ns3/str-vec.h>
@@ -270,6 +271,40 @@ ModelConfigurationHelper::DecodeAttributeValue (const std::string& modelName, co
             auto rect = Rectangle (arr[0].GetDouble (), arr[1].GetDouble (),
                                    arr[2].GetDouble (), arr[3].GetDouble ());
             attrValue = attrInfo.checker->CreateValidValue (RectangleValue (rect));
+          }
+        else if (attrInfo.name == "Patches" && arr[0].IsObject ())
+          {
+            std::vector<ModelConfiguration> patches;
+            patches.reserve (arr.Size ());
+
+            for (auto& p : arr)
+              {
+                const auto patchConfiguration = DecodeCoaleshedModel (IrsPatch::GetTypeId (), p.GetObject ());
+                patches.push_back (patchConfiguration);
+              }
+
+            attrValue = attrInfo.checker->CreateValidValue (ModelConfigurationVectorValue (patches));
+          }
+        else if (attrInfo.name == "Configurations" && arr[0].IsArray () && arr[0].GetArray ()[0].IsObject ())
+          {
+            std::vector<ModelConfigurationVector> configurations;
+            configurations.reserve (arr.Size ());
+
+            for (auto& c : arr)
+              {
+                const auto patches = c.GetArray ();
+                ModelConfigurationVector patchesConfiguration;
+
+                for (auto& p : patches)
+                  {
+                    const auto patchConfiguration = DecodeCoaleshedModel (IrsPatch::GetTypeId (), p.GetObject ());
+                    patchesConfiguration.Add (patchConfiguration);
+                  }
+
+                configurations.push_back(patchesConfiguration);
+              }
+
+            attrValue = attrInfo.checker->CreateValidValue (ModelConfigurationMatrixValue (configurations));
           }
         else if (arr[0].IsInt ())
           {

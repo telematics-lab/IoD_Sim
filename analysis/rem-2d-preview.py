@@ -26,7 +26,8 @@ minimum = values.min()
 maximum = values.max()
 
 def normalize(x):
-  return 100*(10*np.log10(x) - minimum)/(maximum-minimum)
+  return np.zeros(x.shape) if (x.mean() == 0 and maximum - minimum == 0) \
+      else 100 * (10 * np.log10(x) - minimum) / (maximum - minimum)
 
 values = normalize(values)
 

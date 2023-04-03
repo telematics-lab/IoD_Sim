@@ -18,6 +18,9 @@
 
 #include "drone-peripheral-container.h"
 
+#include <ns3/irs.h>
+#include <ns3/irs-list.h>
+
 #include "drone-peripheral.h"
 #include "input-peripheral.h"
 #include "storage-peripheral.h"
@@ -133,6 +136,12 @@ DronePeripheralContainer::InstallAll(Ptr<Drone> drone)
           auto newperipheral = StaticCast<InputPeripheral, DronePeripheral>(peripheral);
           auto storageperipheral = StaticCast<StoragePeripheral, DronePeripheral>(m_dronePeripherals[0]);
           newperipheral->SetStorage(storageperipheral);
+        }
+        IntegerValue rows;
+        if (peripheral->GetAttributeFailSafe("Rows", rows))
+        {
+          auto irs = StaticCast<Irs, DronePeripheral>(peripheral);
+          IrsList::Add(irs);
         }
       NS_LOG_DEBUG("DronePeripheralContainer: Peripheral Installed on Drone #"<<drone->GetId()<<" with State "<< peripheral->GetState());
     }

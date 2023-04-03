@@ -1,0 +1,2777 @@
+{
+  "name": "irs_paper_s3-random_4_uncov",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 75,
+  "dryRun": false,
+  "staticNs3Config": [
+    {
+      // Set it when UEs are too many to handle with default SrsPeriodicity value
+      "name": "ns3::LteEnbRrc::SrsPeriodicity",
+      "value": 80
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "400",
+      "Y": "400",
+      "Z": "100"
+    },
+    "buildings": [
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          50.0,
+          150.0,
+          300.0,
+          350.0,
+          0.0,
+          25.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      },
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          75.0,
+          125.0,
+          75.0,
+          125.0,
+          0.0,
+          20.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      },
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          200.0,
+          350.0,
+          300.0,
+          350.0,
+          0.0,
+          25.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      },
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          50.0,
+          150.0,
+          175.0,
+          275.0,
+          0.0,
+          25.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      },
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          275.0,
+          350.0,
+          150.0,
+          275.0,
+          0.0,
+          25.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      },
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          275.0,
+          350.0,
+          50.0,
+          125.0,
+          0.0,
+          25.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      }
+    ]
+  },
+  "phyLayer": [
+    {
+      "type": "lte",
+      "attributes": [],
+      "channel": {
+        "spectrumModel": {
+          "name": "ns3::IrsAssistedSpectrumChannel",
+          "attributes": [
+            {
+              "name": "KMin",
+              "value": 6.0
+            },
+            {
+              "name": "KMax",
+              "value": 10.0
+            },
+            {
+              "name": "AlphaLoss",
+              "value": 3.0
+            },
+            {
+              "name": "KNlos",
+              "value": 0.0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "lte"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "10.1.0.0",
+      "mask": "255.255.255.0",
+      "gateway": "10.1.0.1"
+    }
+  ],
+  "nodes": [
+    //1
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              40.0,
+              40.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //2
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              40.0,
+              120.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //3
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              40.0,
+              200.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //4
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              40.0,
+              280.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //5
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              40.0,
+              360.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //6
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              120.0,
+              40.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //7
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              120.0,
+              120.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //8
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              120.0,
+              200.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //9
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              120.0,
+              280.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //10
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              120.0,
+              360.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //11
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              40.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //12
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              120.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //13
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              200.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //14
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              280.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //15
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              360.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //16
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              280.0,
+              40.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //17
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              280.0,
+              120.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //18
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              280.0,
+              200.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //19
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              280.0,
+              280.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //20
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              280.0,
+              360.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //21
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              360.0,
+              40.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //22
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              360.0,
+              120.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //23
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              360.0,
+              200.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //24
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              360.0,
+              280.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    },
+    //25
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              360.0,
+              360.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 75.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
+            },
+            {
+              "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
+              "value": 0.03
+            },
+            {
+              "name": "PacketSize", //65507 = 65535 - 20 (IPv4 Header) - 8 (UDP Header)
+              "value": 65499
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drones": [
+    {
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              100.0,
+              200.0,
+              50.0
+            ]
+          }
+        ]
+      },
+      "applications": [],
+      "mechanics": {
+        "name": "ns3::Drone",
+        "attributes": [
+          {
+            "name": "Mass",
+            "value": 0.75
+          },
+          {
+            "name": "RotorDiskArea",
+            "value": 0.18
+          },
+          {
+            "name": "DragCoefficient",
+            "value": 0.08
+          }
+        ]
+      },
+      "battery": {
+        "name": "ns3::LiIonEnergySource",
+        "attributes": [
+          {
+            "name": "LiIonEnergySourceInitialEnergyJ",
+            "value": 200.0
+          },
+          {
+            "name": "LiIonEnergyLowBatteryThreshold",
+            "value": 0.2
+          }
+        ]
+      },
+      "peripherals": [
+        {
+          "name": "ns3::Irs",
+          "attributes": [
+            {
+              "name": "Rows",
+              "value": 100
+            },
+            {
+              "name": "Columns",
+              "value": 100
+            },
+            {
+              "name": "PruX",
+              "value": 0.01
+            },
+            {
+              "name": "PruY",
+              "value": 0.01
+            },
+            {
+              "name": "RotoAxis",
+              "value": [
+                "X_AXIS"
+              ]
+            },
+            {
+              "name": "RotoAngles",
+              "value": [
+                180.0
+              ]
+            },
+            {
+              "name": "Patches",
+              "value": [
+                {
+                  "Size": [
+                    0,
+                    99,
+                    0,
+                    99
+                  ],
+                  "aggregates": [
+                    {
+                      "name": "ns3::RandomServingConfigurator",
+                      "attributes": [
+                        {
+                          "name": "ServingPairs",
+                          "value": [
+                            "/NodeList/3",
+                            "/ZspList/0",
+                            "/NodeList/4",
+                            "/ZspList/0",
+                            "/NodeList/8",
+                            "/ZspList/0",
+                            "/NodeList/9",
+                            "/ZspList/0",
+                            "/NodeList/13",
+                            "/ZspList/0",
+                            "/NodeList/14",
+                            "/ZspList/0",
+                            "/NodeList/16",
+                            "/ZspList/0",
+                            "/NodeList/17",
+                            "/ZspList/0",
+                            "/NodeList/18",
+                            "/ZspList/0",
+                            "/NodeList/19",
+                            "/ZspList/0",
+                            "/NodeList/20",
+                            "/ZspList/0",
+                            "/NodeList/21",
+                            "/ZspList/0",
+                            "/NodeList/22",
+                            "/ZspList/0",
+                            "/NodeList/23",
+                            "/ZspList/0",
+                            "/NodeList/24",
+                            "/ZspList/0"
+                          ]
+                        },
+                        {
+                          "name": "Timeslot",
+                          "value": 0.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PowerConsumption",
+              "value": [
+                0,
+                1.0,
+                3.3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              300.0,
+              50.0
+            ]
+          }
+        ]
+      },
+      "applications": [],
+      "mechanics": {
+        "name": "ns3::Drone",
+        "attributes": [
+          {
+            "name": "Mass",
+            "value": 0.75
+          },
+          {
+            "name": "RotorDiskArea",
+            "value": 0.18
+          },
+          {
+            "name": "DragCoefficient",
+            "value": 0.08
+          }
+        ]
+      },
+      "battery": {
+        "name": "ns3::LiIonEnergySource",
+        "attributes": [
+          {
+            "name": "LiIonEnergySourceInitialEnergyJ",
+            "value": 200.0
+          },
+          {
+            "name": "LiIonEnergyLowBatteryThreshold",
+            "value": 0.2
+          }
+        ]
+      },
+      "peripherals": [
+        {
+          "name": "ns3::Irs",
+          "attributes": [
+            {
+              "name": "Rows",
+              "value": 100
+            },
+            {
+              "name": "Columns",
+              "value": 100
+            },
+            {
+              "name": "PruX",
+              "value": 0.01
+            },
+            {
+              "name": "PruY",
+              "value": 0.01
+            },
+            {
+              "name": "RotoAxis",
+              "value": [
+                "X_AXIS"
+              ]
+            },
+            {
+              "name": "RotoAngles",
+              "value": [
+                180.0
+              ]
+            },
+            {
+              "name": "Patches",
+              "value": [
+                {
+                  "Size": [
+                    0,
+                    99,
+                    0,
+                    99
+                  ],
+                  "aggregates": [
+                    {
+                      "name": "ns3::RandomServingConfigurator",
+                      "attributes": [
+                        {
+                          "name": "ServingPairs",
+                          "value": [
+                            "/NodeList/3",
+                            "/ZspList/0",
+                            "/NodeList/4",
+                            "/ZspList/0",
+                            "/NodeList/8",
+                            "/ZspList/0",
+                            "/NodeList/9",
+                            "/ZspList/0",
+                            "/NodeList/13",
+                            "/ZspList/0",
+                            "/NodeList/14",
+                            "/ZspList/0",
+                            "/NodeList/16",
+                            "/ZspList/0",
+                            "/NodeList/17",
+                            "/ZspList/0",
+                            "/NodeList/18",
+                            "/ZspList/0",
+                            "/NodeList/19",
+                            "/ZspList/0",
+                            "/NodeList/20",
+                            "/ZspList/0",
+                            "/NodeList/21",
+                            "/ZspList/0",
+                            "/NodeList/22",
+                            "/ZspList/0",
+                            "/NodeList/23",
+                            "/ZspList/0",
+                            "/NodeList/24",
+                            "/ZspList/0"
+                          ]
+                        },
+                        {
+                          "name": "Timeslot",
+                          "value": 0.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PowerConsumption",
+              "value": [
+                0,
+                1.0,
+                3.3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              300.0,
+              200.0,
+              50.0
+            ]
+          }
+        ]
+      },
+      "applications": [],
+      "mechanics": {
+        "name": "ns3::Drone",
+        "attributes": [
+          {
+            "name": "Mass",
+            "value": 0.75
+          },
+          {
+            "name": "RotorDiskArea",
+            "value": 0.18
+          },
+          {
+            "name": "DragCoefficient",
+            "value": 0.08
+          }
+        ]
+      },
+      "battery": {
+        "name": "ns3::LiIonEnergySource",
+        "attributes": [
+          {
+            "name": "LiIonEnergySourceInitialEnergyJ",
+            "value": 200.0
+          },
+          {
+            "name": "LiIonEnergyLowBatteryThreshold",
+            "value": 0.2
+          }
+        ]
+      },
+      "peripherals": [
+        {
+          "name": "ns3::Irs",
+          "attributes": [
+            {
+              "name": "Rows",
+              "value": 100
+            },
+            {
+              "name": "Columns",
+              "value": 100
+            },
+            {
+              "name": "PruX",
+              "value": 0.01
+            },
+            {
+              "name": "PruY",
+              "value": 0.01
+            },
+            {
+              "name": "RotoAxis",
+              "value": [
+                "X_AXIS"
+              ]
+            },
+            {
+              "name": "RotoAngles",
+              "value": [
+                180.0
+              ]
+            },
+            {
+              "name": "Patches",
+              "value": [
+                {
+                  "Size": [
+                    0,
+                    99,
+                    0,
+                    99
+                  ],
+                  "aggregates": [
+                    {
+                      "name": "ns3::RandomServingConfigurator",
+                      "attributes": [
+                        {
+                          "name": "ServingPairs",
+                          "value": [
+                            "/NodeList/3",
+                            "/ZspList/0",
+                            "/NodeList/4",
+                            "/ZspList/0",
+                            "/NodeList/8",
+                            "/ZspList/0",
+                            "/NodeList/9",
+                            "/ZspList/0",
+                            "/NodeList/13",
+                            "/ZspList/0",
+                            "/NodeList/14",
+                            "/ZspList/0",
+                            "/NodeList/16",
+                            "/ZspList/0",
+                            "/NodeList/17",
+                            "/ZspList/0",
+                            "/NodeList/18",
+                            "/ZspList/0",
+                            "/NodeList/19",
+                            "/ZspList/0",
+                            "/NodeList/20",
+                            "/ZspList/0",
+                            "/NodeList/21",
+                            "/ZspList/0",
+                            "/NodeList/22",
+                            "/ZspList/0",
+                            "/NodeList/23",
+                            "/ZspList/0",
+                            "/NodeList/24",
+                            "/ZspList/0"
+                          ]
+                        },
+                        {
+                          "name": "Timeslot",
+                          "value": 0.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PowerConsumption",
+              "value": [
+                0,
+                1.0,
+                3.3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              200.0,
+              100.0,
+              50.0
+            ]
+          }
+        ]
+      },
+      "applications": [],
+      "mechanics": {
+        "name": "ns3::Drone",
+        "attributes": [
+          {
+            "name": "Mass",
+            "value": 0.75
+          },
+          {
+            "name": "RotorDiskArea",
+            "value": 0.18
+          },
+          {
+            "name": "DragCoefficient",
+            "value": 0.08
+          }
+        ]
+      },
+      "battery": {
+        "name": "ns3::LiIonEnergySource",
+        "attributes": [
+          {
+            "name": "LiIonEnergySourceInitialEnergyJ",
+            "value": 200.0
+          },
+          {
+            "name": "LiIonEnergyLowBatteryThreshold",
+            "value": 0.2
+          }
+        ]
+      },
+      "peripherals": [
+        {
+          "name": "ns3::Irs",
+          "attributes": [
+            {
+              "name": "Rows",
+              "value": 100
+            },
+            {
+              "name": "Columns",
+              "value": 100
+            },
+            {
+              "name": "PruX",
+              "value": 0.01
+            },
+            {
+              "name": "PruY",
+              "value": 0.01
+            },
+            {
+              "name": "RotoAxis",
+              "value": [
+                "X_AXIS"
+              ]
+            },
+            {
+              "name": "RotoAngles",
+              "value": [
+                180.0
+              ]
+            },
+            {
+              "name": "Patches",
+              "value": [
+                {
+                  "Size": [
+                    0,
+                    99,
+                    0,
+                    99
+                  ],
+                  "aggregates": [
+                    {
+                      "name": "ns3::RandomServingConfigurator",
+                      "attributes": [
+                        {
+                          "name": "ServingPairs",
+                          "value": [
+                            "/NodeList/3",
+                            "/ZspList/0",
+                            "/NodeList/4",
+                            "/ZspList/0",
+                            "/NodeList/8",
+                            "/ZspList/0",
+                            "/NodeList/9",
+                            "/ZspList/0",
+                            "/NodeList/13",
+                            "/ZspList/0",
+                            "/NodeList/14",
+                            "/ZspList/0",
+                            "/NodeList/16",
+                            "/ZspList/0",
+                            "/NodeList/17",
+                            "/ZspList/0",
+                            "/NodeList/18",
+                            "/ZspList/0",
+                            "/NodeList/19",
+                            "/ZspList/0",
+                            "/NodeList/20",
+                            "/ZspList/0",
+                            "/NodeList/21",
+                            "/ZspList/0",
+                            "/NodeList/22",
+                            "/ZspList/0",
+                            "/NodeList/23",
+                            "/ZspList/0",
+                            "/NodeList/24",
+                            "/ZspList/0"
+                          ]
+                        },
+                        {
+                          "name": "Timeslot",
+                          "value": 0.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PowerConsumption",
+              "value": [
+                0,
+                1.0,
+                3.3
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "role": "eNB",
+          "networkLayer": 0,
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                },
+                "maximum": {
+                  "downlink": 20000000.0,
+                  "uplink": 5000000.0
+                }
+              }
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          },
+          "phy": {
+            "TxPower": 49.0 // Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              100.0,
+              100.0,
+              30.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::DroneServerApplication",
+          "attributes": []
+        }
+      ]
+    }
+  ],
+  "radioMapParameters": [
+    "XMin",
+    "0",
+    "XMax",
+    "400",
+    "XRes",
+    "400",
+    "YMin",
+    "0",
+    "YMax",
+    "400",
+    "YRes",
+    "400",
+    "Z",
+    "0",
+    //"ZMin", "30",
+    //"ZMax", "170",
+    //"ZRes", "280",
+    //"Threshold", "40000",
+    "ChannelPath",
+    "/ChannelList/2"
+  ],
+  "logComponents": [
+    "DroneServerApplication",
+    "DroneClientApplication",
+    "Drone",
+    "Scenario",
+    "LteHelper",
+    "NoBackhaulEpcHelper",
+    "LteEnbNetDevice"
+  ]
+}

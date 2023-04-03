@@ -52,6 +52,16 @@ set(source_files
   entity/remote-list.cc
   entity/zsp-list.cc
   helper/three-dimensional-rem-helper.cc
+  irs/patch-configurator/defined-patch-configurator.cc
+  irs/patch-configurator/patch-configurator.cc
+  irs/serving-configurator/defined-serving-configurator.cc
+  irs/serving-configurator/periodic-serving-configurator.cc
+  irs/serving-configurator/random-serving-configurator.cc
+  irs/serving-configurator/serving-configurator.cc
+  irs/irs-assisted-spectrum-channel.cc
+  irs/irs-list.cc
+  irs/irs-patch.cc
+  irs/irs.cc
   mobility/constant-acceleration/constant-acceleration-drone-mobility-model.cc
   mobility/constant-acceleration/constant-acceleration-flight.cc
   mobility/constant-acceleration/constant-acceleration-param.cc
@@ -149,6 +159,16 @@ set(header_files
   entity/zsp-list.h
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.h
+  irs/patch-configurator/defined-patch-configurator.h
+  irs/patch-configurator/patch-configurator.h
+  irs/serving-configurator/defined-serving-configurator.h
+  irs/serving-configurator/periodic-serving-configurator.h
+  irs/serving-configurator/random-serving-configurator.h
+  irs/serving-configurator/serving-configurator.h
+  irs/irs-assisted-spectrum-channel.h
+  irs/irs-list.h
+  irs/irs-patch.h
+  irs/irs.h
   mobility/constant-acceleration/constant-acceleration-drone-mobility-model.h
   mobility/constant-acceleration/constant-acceleration-flight.h
   mobility/constant-acceleration/constant-acceleration-param.h
