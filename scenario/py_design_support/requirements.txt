@@ -1,0 +1,5 @@
+kaleido
+nbformat
+pandas
+plotly
+scipy
