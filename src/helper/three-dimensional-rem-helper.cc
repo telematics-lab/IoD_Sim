@@ -139,9 +139,9 @@ ThreeDimensionalRemHelper::GetTypeId()
                           MakeUintegerAccessor(&ThreeDimensionalRemHelper::m_zRes),
                           MakeUintegerChecker<uint32_t>(2, std::numeric_limits<uint16_t>::max()))
             .AddAttribute("Threshold",
-                          "The SINR threshold under wich the point isn't plotted.",
+                          "The SINR threshold, in dB, under which the point isn't plotted.",
                           DoubleValue(0.0),
-                          MakeDoubleAccessor(&ThreeDimensionalRemHelper::m_threshold),
+                          MakeDoubleAccessor(&ThreeDimensionalRemHelper::SetThresholdDb),
                           MakeDoubleChecker<double>())
             .AddAttribute(
                 "StopWhenDone",
@@ -187,6 +187,12 @@ ThreeDimensionalRemHelper::GetTypeId()
                           MakeIntegerAccessor(&ThreeDimensionalRemHelper::m_rbId),
                           MakeIntegerChecker<int32_t>());
     return tid;
+}
+
+double
+ThreeDimensionalRemHelper::dbToLinear(double db)
+{
+    return std::pow(10., db / 10.);
 }
 
 uint16_t
@@ -239,7 +245,7 @@ ThreeDimensionalRemHelper::Install()
     m_outFile.open(m_outputFile.c_str());
     if (!m_outFile.is_open())
     {
-        NS_FATAL_ERROR("Can't open file " << (m_outputFile));
+        NS_FATAL_ERROR("Can't open file " << m_outputFile);
         return;
     }
 
@@ -391,6 +397,13 @@ ThreeDimensionalRemHelper::Finalize()
     {
         Simulator::Stop();
     }
+}
+
+void
+ThreeDimensionalRemHelper::SetThresholdDb(double threshDb)
+{
+    NS_LOG_FUNCTION(this << threshDb);
+    m_threshold = dbToLinear(threshDb);
 }
 
 } // namespace ns3
