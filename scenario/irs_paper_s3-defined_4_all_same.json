@@ -2961,7 +2961,7 @@
     //"ZMin", "30",
     //"ZMax", "170",
     //"ZRes", "280",
-    //"Threshold", "40000",
+    //"Threshold", "46.02059991327963", // "40000" in linear scale
     "ChannelPath",
     "/ChannelList/2"
   ],

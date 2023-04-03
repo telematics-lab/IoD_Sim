@@ -55,6 +55,11 @@ class ThreeDimensionalRemHelper : public Object
     static TypeId GetTypeId();
 
     /**
+     * \return the data converted from dB to linear scale.
+     */
+    static double dbToLinear(double db);
+
+    /**
      * \return the bandwidth (in num of RBs) over which SINR is calculated
      */
     uint16_t GetBandwidth() const;
@@ -103,6 +108,9 @@ class ThreeDimensionalRemHelper : public Object
 
     /// Called when the map generation procedure has been completed.
     void Finalize();
+
+    /// Set threshold parameter in dB
+    void SetThresholdDb(double threshDb);
 
     /// A complete Radio Environment Map is composed of many of this structure.
     struct RemPoint
