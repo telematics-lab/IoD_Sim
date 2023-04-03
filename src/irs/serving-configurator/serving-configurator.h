@@ -20,24 +20,41 @@
 
 #include <ns3/object.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates Serving Nodes of an Irs Patch during the simulation, in Patch lifetime.
+ * \ingroup irs
+ * Defines the base object for Serving Configurators. Such a configurator updates Serving Nodes of
+ * an Irs Patch during the simulation, in Patch lifetime.
  */
 class ServingConfigurator : public Object
 {
-public:
+  public:
+    /**
+     * \brief Default constructor
+     */
+    ServingConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~ServingConfigurator();
 
-  ServingConfigurator ();
-  ~ServingConfigurator ();
+    /**
+     * \brief This method schedule the updates of nodes to serve over time, according to a certain
+     * logic. It must be implemented by child classes
+     */
+    virtual void ScheduleUpdates() = 0;
+    /**
+     * \brief It sets a new pair of nodes to be served by the Irs Patch to which the configurator is
+     * aggregated
+     * \param servingnodes the pair of nodes to be served by the patch
+     */
+    void UpdateServingNodes(std::pair<std::string, std::string> servingnodes);
 
-  virtual void ScheduleUpdates () = 0;
-  void UpdateServingNodes (std::pair<std::string,std::string> servingnodes);
-
-protected:
-  virtual void DoDispose (void) = 0;
-  virtual void DoInitialize (void) = 0;
+  protected:
+    virtual void DoDispose(void) = 0;
+    virtual void DoInitialize(void) = 0;
 };
 
 } // namespace ns3

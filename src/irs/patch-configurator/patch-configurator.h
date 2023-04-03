@@ -18,28 +18,42 @@
 #ifndef PATCH_CONFIGURATOR_H
 #define PATCH_CONFIGURATOR_H
 
+#include <ns3/model-configuration-vector.h>
 #include <ns3/object.h>
 
-#include <ns3/model-configuration-vector.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates the patch configuration of an Irs during the simulation
+ * \ingroup irs
+ * Defines the base object for Patch Configurators. Such a configurator updates the patch
+ * organisation of an Irs during the simulation
  */
 class PatchConfigurator : public Object
 {
-public:
+  public:
+    /**
+     * \brief Default constructor
+     */
+    PatchConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~PatchConfigurator();
 
-  PatchConfigurator ();
-  ~PatchConfigurator ();
+    /**
+     * \brief This method schedule patch updates over time according to a certain logic. It must be
+     * implemented by child classes
+     */
+    virtual void ScheduleUpdates() = 0;
+    /**
+     * \brief It sets a new patch configuration to the Irs to which the configurator is aggregated
+     */
+    void UpdateConfiguration(const ModelConfigurationVector& c);
 
-  virtual void ScheduleUpdates () = 0;
-  void UpdateConfiguration (const ModelConfigurationVector& p);
-
-protected:
-  virtual void DoDispose (void) = 0;
-  virtual void DoInitialize (void) = 0;
+  protected:
+    virtual void DoDispose(void) = 0;
+    virtual void DoInitialize(void) = 0;
 };
 
 } // namespace ns3

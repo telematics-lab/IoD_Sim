@@ -18,36 +18,57 @@
 #ifndef PERIODIC_SERVING_CONFIGURATOR_H
 #define PERIODIC_SERVING_CONFIGURATOR_H
 
-#include <ns3/object.h>
-
 #include <ns3/double-vector.h>
+#include <ns3/object.h>
 #include <ns3/serving-configurator.h>
 #include <ns3/str-vec.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates Serving Nodes of an Irs Patch with a fixed time frequency.
+ * \ingroup irs
+ * Defines an object which, aggregated to an Irs Patch, updates the pair of nodes to be served
+ * during the patch life time. The update of the serving pair is performed with a round robin
+ * approach, following the order in which the nodes are contained in m_servingpairs vector
  */
 class PeriodicServingConfigurator : public ServingConfigurator
 {
-public:
+  public:
+    /**
+     * \brief Register this configurator as a type in ns-3 TypeId System.
+     */
+    static TypeId GetTypeId(void);
 
-  static TypeId GetTypeId (void);
+    /**
+     * \brief Default constructor
+     */
+    PeriodicServingConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~PeriodicServingConfigurator();
 
-  PeriodicServingConfigurator ();
-  ~PeriodicServingConfigurator ();
+    /**
+     * \brief When invoked, it schedules the updates of the nodes to be served over time with a
+     * period of one m_timeslot, until the end of patch lifetime is reached
+     */
+    void ScheduleUpdates();
+    /**
+     * \brief Set the vector of pairs to be served using a string vector containing the path of the
+     * objects
+     * \param pairs a string vector containing the pairs to be served
+     */
+    void SetServingPairs(const StrVec& pairs);
 
- void ScheduleUpdates ();
+  protected:
+    void DoDispose(void);
+    void DoInitialize(void);
 
-  void SetServingPairs(const StrVec& pairs);
-
-protected:
-  void DoDispose (void);
-  void DoInitialize (void);
-private:
-  std::vector<std::pair<std::string,std::string>> m_servingpairs;
-  double m_timeslot;
+  private:
+    std::vector<std::pair<std::string, std::string>>
+        m_servingpairs; ///< Vector of pairs to be served
+    double m_timeslot;  ///< The duration of a time slot
 };
 
 } // namespace ns3

@@ -17,107 +17,112 @@
  */
 #include "defined-patch-configurator.h"
 
-#include <ns3/pointer.h>
-#include <ns3/simulator.h>
-
 #include <ns3/irs.h>
 #include <ns3/model-configuration-matrix.h>
 #include <ns3/model-configuration.h>
+#include <ns3/pointer.h>
+#include <ns3/simulator.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("DefinedPatchConfigurator");
-NS_OBJECT_ENSURE_REGISTERED (DefinedPatchConfigurator);
+NS_LOG_COMPONENT_DEFINE("DefinedPatchConfigurator");
+NS_OBJECT_ENSURE_REGISTERED(DefinedPatchConfigurator);
 
 TypeId
-DefinedPatchConfigurator::GetTypeId ()
+DefinedPatchConfigurator::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::DefinedPatchConfigurator")
-    .SetParent<PatchConfigurator> ()
-    .SetGroupName ("Irs")
-    .AddConstructor<DefinedPatchConfigurator> ()
-    .AddAttribute ("Periods",
-                   "List of validity periods for each configuration",
-                   DoubleVectorValue (),
-                   MakeDoubleVectorAccessor (&DefinedPatchConfigurator::SetPeriods),
-                   MakeDoubleVectorChecker ())
-    .AddAttribute ("Configurations",
-                   "List of configurations to be applied to the Irs during the simulation",
-                   ModelConfigurationMatrixValue (),
-                   MakeModelConfigurationMatrixAccessor (&DefinedPatchConfigurator::m_configurations),
-                   MakeModelConfigurationMatrixChecker ())
-    ;
-  return tid;
+    static TypeId tid =
+        TypeId("ns3::DefinedPatchConfigurator")
+            .SetParent<PatchConfigurator>()
+            .SetGroupName("Irs")
+            .AddConstructor<DefinedPatchConfigurator>()
+            .AddAttribute("Periods",
+                          "List of validity periods for each configuration",
+                          DoubleVectorValue(),
+                          MakeDoubleVectorAccessor(&DefinedPatchConfigurator::SetPeriods),
+                          MakeDoubleVectorChecker())
+            .AddAttribute(
+                "Configurations",
+                "List of configurations to be applied to the Irs during the simulation",
+                ModelConfigurationMatrixValue(),
+                MakeModelConfigurationMatrixAccessor(&DefinedPatchConfigurator::m_configurations),
+                MakeModelConfigurationMatrixChecker());
+    return tid;
 }
 
-DefinedPatchConfigurator::DefinedPatchConfigurator ()
+DefinedPatchConfigurator::DefinedPatchConfigurator()
 {
-
 }
 
-DefinedPatchConfigurator::~DefinedPatchConfigurator ()
+DefinedPatchConfigurator::~DefinedPatchConfigurator()
 {
-
-}
-void
-DefinedPatchConfigurator::DoDispose ()
-{
-  NS_LOG_FUNCTION (this);
-  Object::DoDispose ();
 }
 
 void
-DefinedPatchConfigurator::DoInitialize (void)
+DefinedPatchConfigurator::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoInitialize ();
-  SetLifeTimes();
-  ScheduleUpdates ();
+    NS_LOG_FUNCTION(this);
+    Object::DoDispose();
 }
 
 void
-DefinedPatchConfigurator::ScheduleUpdates ()
+DefinedPatchConfigurator::DoInitialize(void)
 {
-  //You need to run this method at the beginning of the simulation since Simulator::Schedule(...)
-  //accepts as parameter the delay from now
-  if (Simulator::Now ().GetSeconds () > 0.0)
-    NS_LOG_WARN ("ScheduleUpdates has been executed during the simulation, the timing could be shifted");
+    NS_LOG_FUNCTION(this);
+    Object::DoInitialize();
+    SetLifeTimes();
+    ScheduleUpdates();
+}
 
-  double nextupdate = 0;
-  for (uint32_t i = 0; i < m_periods.size(); i++)
+void
+DefinedPatchConfigurator::ScheduleUpdates()
+{
+    // You need to run this method at the beginning of the simulation since Simulator::Schedule(...)
+    // accepts as parameter the delay from now
+    if (Simulator::Now().GetSeconds() > 0.0)
+        NS_LOG_WARN(
+            "ScheduleUpdates has been executed during the simulation, the timing could be shifted");
+
+    double nextupdate = 0;
+    for (uint32_t i = 0; i < m_periods.size(); i++)
     {
-      Simulator::Schedule(Seconds(nextupdate), &DefinedPatchConfigurator::UpdateConfiguration, this, m_configurations.Get(i));
-      nextupdate += m_periods.at(i);
-    }
-
-}
-
-void
-DefinedPatchConfigurator::SetPeriods (const DoubleVector &a)
-{
-  for (auto c = a.Begin (); c != a.End (); c++)
-    {
-      m_periods.push_back (*c);
+        Simulator::Schedule(Seconds(nextupdate),
+                            &DefinedPatchConfigurator::UpdateConfiguration,
+                            this,
+                            m_configurations.Get(i));
+        nextupdate += m_periods.at(i);
     }
 }
 
 void
-DefinedPatchConfigurator::SetLifeTimes ()
+DefinedPatchConfigurator::SetPeriods(const DoubleVector& periods)
 {
-  uint32_t periodsIdx = 0;
-  NS_ASSERT_MSG (m_periods.size () == m_configurations.GetN (), "The number of periods and configurations must be equal");
-
-  for (auto confIt = m_configurations.MutableBegin (); confIt != m_configurations.MutableEnd (); confIt++)
+    for (auto c = periods.Begin(); c != periods.End(); c++)
     {
-      for (auto patchIt = confIt->MutableBegin (); patchIt != confIt->MutableEnd (); patchIt++)
+        m_periods.push_back(*c);
+    }
+}
+
+void
+DefinedPatchConfigurator::SetLifeTimes()
+{
+    uint32_t periodsIdx = 0;
+    NS_ASSERT_MSG(m_periods.size() == m_configurations.GetN(),
+                  "The number of periods and configurations must be equal");
+
+    for (auto confIt = m_configurations.MutableBegin(); confIt != m_configurations.MutableEnd();
+         confIt++)
+    {
+        for (auto patchIt = confIt->MutableBegin(); patchIt != confIt->MutableEnd(); patchIt++)
         {
-          auto lifeTimeValue = DoubleValue (m_periods.at (periodsIdx));
-          Ptr<AttributeValue> attr = MakeDoubleChecker<double> ()->CreateValidValue (lifeTimeValue);
-          patchIt->SetAttribute ("LifeTime", attr);
+            auto lifeTimeValue = DoubleValue(m_periods.at(periodsIdx));
+            Ptr<AttributeValue> attr = MakeDoubleChecker<double>()->CreateValidValue(lifeTimeValue);
+            patchIt->SetAttribute("LifeTime", attr);
         }
 
-      periodsIdx++;
+        periodsIdx++;
     }
 }
 
-} //namespace ns3
+} // namespace ns3

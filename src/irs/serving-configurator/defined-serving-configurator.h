@@ -18,37 +18,62 @@
 #ifndef DEFINED_SERVING_CONFIGURATOR_H
 #define DEFINED_SERVING_CONFIGURATOR_H
 
-#include <ns3/object.h>
-
 #include <ns3/double-vector.h>
+#include <ns3/object.h>
 #include <ns3/serving-configurator.h>
 #include <ns3/str-vec.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * \brief Defines the base object that updates Serving Nodes of an Irs Patch with defined periods.
+ * \ingroup irs
+ * Defines an object which, aggregated to an Irs Patch, updates the pair of nodes to be served
+ * during the patch life time. The different pairs are used for a duration equal to
+ * the one defined in m_periods vector.
  */
 class DefinedServingConfigurator : public ServingConfigurator
 {
-public:
+  public:
+    /**
+     * \brief Register this configurator as a type in ns-3 TypeId System.
+     */
+    static TypeId GetTypeId(void);
 
-  static TypeId GetTypeId (void);
+    /**
+     * \brief Default constructor
+     */
+    DefinedServingConfigurator();
+    /**
+     * \brief Default destructor
+     */
+    ~DefinedServingConfigurator();
 
-  DefinedServingConfigurator ();
-  ~DefinedServingConfigurator ();
+    /**
+     * \brief When invoked, it schedules the updates of the nodes to be served over time, following
+     * the periods defined in the m_periods vector
+     */
+    void ScheduleUpdates();
+    /**
+     * \brief Set the m_periods vector
+     * \param periods a DoubleVector containing the periods
+     */
+    void SetPeriods(const DoubleVector& periods);
+    /**
+     * \brief Set the vector of pairs to be served using a string vector containing the path of the
+     * objects
+     * \param pairs a string vector containing the pairs to be served
+     */
+    void SetServingPairs(const StrVec& pairs);
 
- void ScheduleUpdates ();
-void SetPeriods(const DoubleVector &a);
+  protected:
+    void DoDispose(void);
+    void DoInitialize(void);
 
-  void SetServingPairs(const StrVec& pairs);
-
-protected:
-  void DoDispose (void);
-  void DoInitialize (void);
-private:
-  std::vector<std::pair<std::string,std::string>> m_servingpairs;
-  std::vector<double> m_periods;
+  private:
+    std::vector<std::pair<std::string, std::string>>
+        m_servingpairs;            ///< Vector of pairs to be served
+    std::vector<double> m_periods; ///< Vector of periods for which each pair is valid
 };
 
 } // namespace ns3

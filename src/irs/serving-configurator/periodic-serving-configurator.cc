@@ -17,102 +17,107 @@
  */
 #include "periodic-serving-configurator.h"
 
-#include <ns3/simulator.h>
-
 #include <ns3/irs-patch.h>
+#include <ns3/simulator.h>
 #include <ns3/str-vec.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("PeriodicServingConfigurator");
-NS_OBJECT_ENSURE_REGISTERED (PeriodicServingConfigurator);
+NS_LOG_COMPONENT_DEFINE("PeriodicServingConfigurator");
+NS_OBJECT_ENSURE_REGISTERED(PeriodicServingConfigurator);
 
 TypeId
-PeriodicServingConfigurator::GetTypeId ()
+PeriodicServingConfigurator::GetTypeId()
 {
-  static TypeId tid =
-      TypeId ("ns3::PeriodicServingConfigurator")
-          .SetParent<ServingConfigurator> ()
-          .SetGroupName ("Irs")
-          .AddConstructor<PeriodicServingConfigurator> ()
-          .AddAttribute (
-              "Timeslot",
-              "Size in seconds of the timeslot in wich is used the same serving nodes pair",
-              DoubleValue (0.1), MakeDoubleAccessor (&PeriodicServingConfigurator::m_timeslot),
-              MakeDoubleChecker<double> ())
-          .AddAttribute (
-              "ServingPairs",
-              "List of serving nodes pairs to be applied to the Irs Patch during the simulation",
+    static TypeId tid =
+        TypeId("ns3::PeriodicServingConfigurator")
+            .SetParent<ServingConfigurator>()
+            .SetGroupName("Irs")
+            .AddConstructor<PeriodicServingConfigurator>()
+            .AddAttribute(
+                "Timeslot",
+                "Duration in seconds of the timeslot in which is used the same serving nodes pair",
+                DoubleValue(0.1),
+                MakeDoubleAccessor(&PeriodicServingConfigurator::m_timeslot),
+                MakeDoubleChecker<double>())
+            .AddAttribute(
+                "ServingPairs",
+                "List of serving nodes pairs to be applied to the Irs Patch during the simulation",
                 StrVecValue(),
                 MakeStrVecAccessor(&PeriodicServingConfigurator::SetServingPairs),
                 MakeStrVecChecker());
-  return tid;
+    return tid;
 }
 
-PeriodicServingConfigurator::PeriodicServingConfigurator ()
+PeriodicServingConfigurator::PeriodicServingConfigurator()
 {
 }
 
-PeriodicServingConfigurator::~PeriodicServingConfigurator ()
+PeriodicServingConfigurator::~PeriodicServingConfigurator()
 {
-}
-void
-PeriodicServingConfigurator::DoDispose ()
-{
-  NS_LOG_FUNCTION (this);
-  Object::DoDispose ();
 }
 
 void
-PeriodicServingConfigurator::DoInitialize (void)
+PeriodicServingConfigurator::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoInitialize ();
-  ScheduleUpdates ();
+    NS_LOG_FUNCTION(this);
+    Object::DoDispose();
 }
 
 void
-PeriodicServingConfigurator::ScheduleUpdates ()
+PeriodicServingConfigurator::DoInitialize(void)
 {
-  double lifetime = GetObject<IrsPatch> ()->GetLifeTime ();
-  double nextupdate = 0;
-  double periodstart = Simulator::Now ().GetSeconds ();
-  double periodend = periodstart + lifetime;
-  uint32_t j = 0;
-  while (true)
+    NS_LOG_FUNCTION(this);
+    Object::DoInitialize();
+    ScheduleUpdates();
+}
+
+void
+PeriodicServingConfigurator::ScheduleUpdates()
+{
+    double lifetime = GetObject<IrsPatch>()->GetLifeTime();
+    double nextupdate = 0;
+    double periodstart = Simulator::Now().GetSeconds();
+    double periodend = periodstart + lifetime;
+    uint32_t j = 0;
+    while (true)
     {
-      if (periodend <= periodstart + nextupdate)
+        if (periodend <= periodstart + nextupdate)
         {
-          //TODO: schedule patch and serving configurator destruction?
-          //Simulator::Schedule (Seconds (nextupdate), &PeriodicServingConfigurator::DoDispose, this);
-          break; //we have reached the end of the period, no need to continue
+            // TODO: schedule patch and serving configurator destruction?
+            // Simulator::Schedule (Seconds (nextupdate), &PeriodicServingConfigurator::DoDispose,
+            // this);
+            break; // we have reached the end of the period, no need to continue
         }
-      if (nextupdate > 0)
+        if (nextupdate > 0)
         {
-          Simulator::Schedule (Seconds (nextupdate),
-                               &PeriodicServingConfigurator::UpdateServingNodes, this,
-                               m_servingpairs.at (j % m_servingpairs.size ()));
+            Simulator::Schedule(Seconds(nextupdate),
+                                &PeriodicServingConfigurator::UpdateServingNodes,
+                                this,
+                                m_servingpairs.at(j % m_servingpairs.size()));
         }
-      else
+        else
         {
-          UpdateServingNodes (m_servingpairs.at (j % m_servingpairs.size ()));
+            UpdateServingNodes(m_servingpairs.at(j % m_servingpairs.size()));
         }
-      nextupdate += m_timeslot;
-      j++;
+        nextupdate += m_timeslot;
+        j++;
     }
 }
 
 void
 PeriodicServingConfigurator::SetServingPairs(const StrVec& pairs)
 {
-  //The string vector containing the pairs of serving nodes must have as its length an even number
-  NS_ASSERT_MSG ((pairs.GetN () % 2 == 0),
-                 "Length of the vector wich contains serving nodes is not a multiple of 2");
-  m_servingpairs.clear ();
-  for (uint32_t i = 0; i < pairs.GetN (); i += 2)
+    // The string vector containing the pairs of serving nodes must have as its length an even
+    // number
+    NS_ASSERT_MSG((pairs.GetN() % 2 == 0),
+                  "Length of the vector wich contains serving nodes is not a multiple of 2");
+    m_servingpairs.clear();
+    for (uint32_t i = 0; i < pairs.GetN(); i += 2)
     {
-      m_servingpairs.push_back (std::make_pair (pairs.Get (i), pairs.Get (i + 1)));
+        m_servingpairs.push_back(std::make_pair(pairs.Get(i), pairs.Get(i + 1)));
     }
 }
 
-} //namespace ns3
+} // namespace ns3
