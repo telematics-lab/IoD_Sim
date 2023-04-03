@@ -276,8 +276,11 @@ Scenario::operator() ()
   ShowProgress progressStdout {Seconds (PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
   Simulator::Run ();
-  // Report Module needs the simulator context alive to introspect it
-  Report::Get ()->Save ();
+  if (CONFIGURATOR->GetLogOnFile())
+  {
+    // Report Module needs the simulator context alive to introspect it
+    Report::Get()->Save();
+  }
   Simulator::Destroy ();
     }
 }
@@ -454,7 +457,8 @@ Scenario::ConfigureNetwork ()
           ipv4Sim->GetIpv4Helper ().SetBase (Ipv4Address (ipv4Conf->GetAddress ().c_str ()),
                                              Ipv4Mask (ipv4Conf->GetMask ().c_str ()));
 
-          EnableIpv4RoutingTableReporting ();
+          if (CONFIGURATOR->GetLogOnFile())
+            EnableIpv4RoutingTableReporting ();
 
           m_protocolStacks[NET_LAYER].push_back (ipv4Sim);
         }
@@ -612,25 +616,27 @@ Scenario::ConfigureEntityWifiStack (const std::string entityKey,
                                                                         wifiMac->GetMacHelper (),
                                                                         entityNode);
 
-  // Configure WiFi PHY Logging
-  std::stringstream phyTraceLog;
-  std::stringstream pcapLog;
-  AsciiTraceHelper  ascii;
+  if (CONFIGURATOR->GetLogOnFile())
+  {
+    // Configure WiFi PHY Logging
+    std::stringstream phyTraceLog;
+    std::stringstream pcapLog;
+    AsciiTraceHelper ascii;
 
-  // Configure WiFi TXT PHY Logging
-  phyTraceLog << CONFIGURATOR->GetResultsPath ()
-              << "wifi-phy-" << netId
-              << "-" << entityKey
-              << "-host-" << entityId
-              << "-" << deviceId
-              << ".log";
-  wifiPhy->GetWifiPhyHelper ()->EnableAscii (ascii.CreateFileStream (phyTraceLog.str ()),
+    // Configure WiFi TXT PHY Logging
+    phyTraceLog << CONFIGURATOR->GetResultsPath() << "wifi-phy-" << netId << "-" << entityKey
+                << "-host-" << entityId << "-" << deviceId << ".log";
+    wifiPhy->GetWifiPhyHelper()->EnableAscii(ascii.CreateFileStream(phyTraceLog.str()),
                                              entityNode->GetId(),
                                              devContainer.Get(0)->GetIfIndex());
 
-  // Configure WiFi PCAP Logging
-  pcapLog << CONFIGURATOR->GetResultsPath () << "wifi-phy-" << netId << "-" << entityKey <<  "-host";
-  wifiPhy->GetWifiPhyHelper ()->EnablePcap (pcapLog.str (), entityNode->GetId(), devContainer.Get(0)->GetIfIndex());
+    // Configure WiFi PCAP Logging
+    pcapLog << CONFIGURATOR->GetResultsPath() << "wifi-phy-" << netId << "-" << entityKey
+            << "-host";
+    wifiPhy->GetWifiPhyHelper()->EnablePcap(pcapLog.str(),
+                                            entityNode->GetId(),
+                                            devContainer.Get(0)->GetIfIndex());
+  }
 
   return devContainer;
 }
@@ -963,18 +969,23 @@ Scenario::ConfigureInternetBackbone ()
         }
     }
 
-  std::stringstream logFilePathBuilder;
-  logFilePathBuilder << CONFIGURATOR->GetResultsPath () << "internet";
-  const auto logFilePath = logFilePathBuilder.str ();
+    if (CONFIGURATOR->GetLogOnFile())
+    {
+        std::stringstream logFilePathBuilder;
+        logFilePathBuilder << CONFIGURATOR->GetResultsPath() << "internet";
+        const auto logFilePath = logFilePathBuilder.str();
 
-  csma.EnablePcapAll (logFilePath, true);
-  csma.EnableAsciiAll (logFilePath);
+        csma.EnablePcapAll(logFilePath, true);
+        csma.EnableAsciiAll(logFilePath);
+    }
 }
 
 void
 Scenario::EnablePhyLteTraces ()
 {
   NS_LOG_FUNCTION_NOARGS ();
+  if (!CONFIGURATOR->GetLogOnFile())
+        return;
 
   for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
     {
@@ -1091,10 +1102,13 @@ Scenario::ConfigureSimulator ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  // Enable Report
-  Report::Get ()->Initialize (CONFIGURATOR->GetName (),
-                              CONFIGURATOR->GetCurrentDateTime (),
-                              CONFIGURATOR->GetResultsPath ());
+  if (CONFIGURATOR->GetLogOnFile())
+  {
+    // Enable Report
+    Report::Get()->Initialize(CONFIGURATOR->GetName(),
+                              CONFIGURATOR->GetCurrentDateTime(),
+                              CONFIGURATOR->GetResultsPath());
+  }
 
   Simulator::Stop (Seconds (CONFIGURATOR->GetDuration ()));
 }

@@ -125,6 +125,21 @@ ScenarioConfigurationHelper::GetResultsPath ()
   return path.str ();
 }
 
+const bool
+ScenarioConfigurationHelper::GetLogOnFile() const
+{
+  // this is an optional parameter. Default to false if not specified.
+  if (m_config.HasMember("logOnFile"))
+  {
+      NS_ASSERT_MSG(m_config["logOnFile"].IsBool(), "'logOnFile' property must be boolean.");
+      return m_config["logOnFile"].GetBool();
+  }
+  else
+  {
+      return false;
+  }
+}
+
 const std::string
 ScenarioConfigurationHelper::GetLoggingFilePath ()
 {
@@ -814,22 +829,6 @@ ScenarioConfigurationHelper::DisposeLogging ()
 {
   std::clog.rdbuf (std::cout.rdbuf ());
   m_out.close ();
-}
-
-const bool
-ScenarioConfigurationHelper::GetLogOnFile () const
-{
-  // this is an optional parameter. Default to false if not specified.
-  if (m_config.HasMember ("logOnFile"))
-    {
-      NS_ASSERT_MSG (m_config["logOnFile"].IsBool (),
-                     "'logOnFile' property must be boolean.");
-      return m_config["logOnFile"].GetBool ();
-    }
-  else
-    {
-      return false;
-    }
 }
 
 void

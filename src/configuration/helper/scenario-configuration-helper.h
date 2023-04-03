@@ -92,6 +92,11 @@ public:
   const std::string GetResultsPath ();
 
   /**
+   * \brief Check if the user wants to save trace results or not.
+   */
+  const bool GetLogOnFile() const;
+
+  /**
    * \return The file path of the logging file.
    */
   const std::string GetLoggingFilePath ();
@@ -466,10 +471,6 @@ private:
    * \brief recover previous state of clog output buffer and closes any log file opened.
    */
   void DisposeLogging ();
-  /**
-   * \return optional parameter to be fed to `InitializeLogging()`
-   */
-  const bool GetLogOnFile () const;
   /**
    * \brief Optional array of log components to be enabled for the simulation.
    */
