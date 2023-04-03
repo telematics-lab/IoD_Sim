@@ -21,40 +21,40 @@
 
 #include <cstring>
 
-namespace ns3 {
-
-ATTRIBUTE_VALUE_IMPLEMENT (TransferDirection);
-ATTRIBUTE_CHECKER_IMPLEMENT (TransferDirection);
-
-TransferDirection::TransferDirection (const char *a)
+namespace ns3
 {
-  for (uint32_t i = 0; i < numValues; i++)
+
+ATTRIBUTE_VALUE_IMPLEMENT(TransferDirection);
+ATTRIBUTE_CHECKER_IMPLEMENT(TransferDirection);
+
+TransferDirection::TransferDirection(const char* a)
+{
+    for (uint32_t i = 0; i < numValues; i++)
     {
-      if (std::strcmp (a, stringValue[i]) == 0)
+        if (std::strcmp(a, stringValue[i]) == 0)
         {
-          m_value = Value (i);
-          return;
+            m_value = Value(i);
+            return;
         }
     }
 
-  NS_FATAL_ERROR ("Cannot decode transfer direction correctly: " << a);
+    NS_FATAL_ERROR("Cannot decode transfer direction correctly: " << a);
 }
 
-TransferDirection::TransferDirection (const std::string a) :
-  TransferDirection (a.c_str ())
+TransferDirection::TransferDirection(const std::string a)
+    : TransferDirection(a.c_str())
 {
-
 }
 
-std::istream &
-operator >> (std::istream &is, TransferDirection &td)
+std::istream&
+operator>>(std::istream& is, TransferDirection& td)
 {
-  std::string tdString;
+    std::string tdString;
 
-  is >> tdString;
-  td = TransferDirection (tdString);
+    is >> tdString;
+    td = TransferDirection(tdString);
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

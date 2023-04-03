@@ -17,16 +17,16 @@
  */
 #include "tcp-storage-client-application.h"
 
+#include <ns3/drone.h>
+#include <ns3/nstime.h>
 #include <ns3/seq-ts-header.h>
 #include <ns3/simulator.h>
-#include <ns3/nstime.h>
 
-#include <ns3/drone.h>
+namespace ns3
+{
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("TcpStorageClientApplication");
-NS_OBJECT_ENSURE_REGISTERED (TcpStorageClientApplication);
+NS_LOG_COMPONENT_DEFINE("TcpStorageClientApplication");
+NS_OBJECT_ENSURE_REGISTERED(TcpStorageClientApplication);
 
 constexpr uint16_t IPv4_HDR_SZ = 24;  /// Header size of IPv4 Header, in bytes.
 constexpr uint16_t TCP_HDR_SZ = 28;   /// Max Header size of TCP Header, in bytes.
@@ -34,165 +34,177 @@ constexpr uint16_t SEQTS_HDR_SZ = 12; /// Header size of SeqTsHeader, in bytes.
 constexpr uint16_t HDR_SZ = IPv4_HDR_SZ + TCP_HDR_SZ + SEQTS_HDR_SZ;
 
 TypeId
-TcpStorageClientApplication::GetTypeId ()
+TcpStorageClientApplication::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::TcpStorageClientApplication")
-    .SetParent<TcpClientServerApplication> ()
-    .SetGroupName ("Applications")
-    .AddConstructor<TcpStorageClientApplication> ()
-    .AddAttribute ("PayloadSize", "Size of the payload, in bytes.",
-                   UintegerValue (std::numeric_limits<uint16_t>::max () - HDR_SZ - 1),
-                   MakeUintegerAccessor (&TcpStorageClientApplication::m_payloadSize),
-                   MakeUintegerChecker<uint16_t> (1, std::numeric_limits<uint16_t>::max () - HDR_SZ - 1))
-    .AddTraceSource ("Tx", "A new packet is created and sent",
-                     MakeTraceSourceAccessor (&TcpStorageClientApplication::m_txTrace),
-                     "ns3::Packet::TracedCallback")
-    ;
+    static TypeId tid =
+        TypeId("ns3::TcpStorageClientApplication")
+            .SetParent<TcpClientServerApplication>()
+            .SetGroupName("Applications")
+            .AddConstructor<TcpStorageClientApplication>()
+            .AddAttribute(
+                "PayloadSize",
+                "Size of the payload, in bytes.",
+                UintegerValue(std::numeric_limits<uint16_t>::max() - HDR_SZ - 1),
+                MakeUintegerAccessor(&TcpStorageClientApplication::m_payloadSize),
+                MakeUintegerChecker<uint16_t>(1, std::numeric_limits<uint16_t>::max() - HDR_SZ - 1))
+            .AddTraceSource("Tx",
+                            "A new packet is created and sent",
+                            MakeTraceSourceAccessor(&TcpStorageClientApplication::m_txTrace),
+                            "ns3::Packet::TracedCallback");
 
-  return tid;
+    return tid;
 }
 
-TcpStorageClientApplication::TcpStorageClientApplication () :
-  m_seqNum {0}
+TcpStorageClientApplication::TcpStorageClientApplication()
+    : m_seqNum{0}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-TcpStorageClientApplication::~TcpStorageClientApplication ()
+TcpStorageClientApplication::~TcpStorageClientApplication()
 {
-  NS_LOG_FUNCTION (this);
-}
-
-void
-TcpStorageClientApplication::DoInitialize ()
-{
-  NS_LOG_FUNCTION (this);
-  TcpClientServerApplication::DoInitialize ();
-
-  m_storage = FindStorage ();
+    NS_LOG_FUNCTION(this);
 }
 
 void
-TcpStorageClientApplication::StartApplication ()
+TcpStorageClientApplication::DoInitialize()
 {
-  NS_LOG_FUNCTION (this);
-  TcpClientServerApplication::StartApplication ();
-  Connect ();
+    NS_LOG_FUNCTION(this);
+    TcpClientServerApplication::DoInitialize();
 
-  m_storage->TraceConnectWithoutContext ("RemainingCapacity",
-                                         MakeCallback (&TcpStorageClientApplication::StorageUpdateCallback, this));
+    m_storage = FindStorage();
+}
+
+void
+TcpStorageClientApplication::StartApplication()
+{
+    NS_LOG_FUNCTION(this);
+    TcpClientServerApplication::StartApplication();
+    Connect();
+
+    m_storage->TraceConnectWithoutContext(
+        "RemainingCapacity",
+        MakeCallback(&TcpStorageClientApplication::StorageUpdateCallback, this));
 }
 
 bool
-TcpStorageClientApplication::DoSendPacket (const uint16_t payloadSize)
+TcpStorageClientApplication::DoSendPacket(const uint16_t payloadSize)
 {
-  NS_LOG_FUNCTION (this << payloadSize);
-  const auto sock = GetSocket ();
+    NS_LOG_FUNCTION(this << payloadSize);
+    const auto sock = GetSocket();
 
-  if (sock == nullptr)
-    return false;
+    if (sock == nullptr)
+        return false;
 
-  SeqTsHeader seqTs;
-  auto p = CreatePacket (payloadSize);
+    SeqTsHeader seqTs;
+    auto p = CreatePacket(payloadSize);
 
-  seqTs.SetSeq (m_seqNum++);
-  p->AddHeader (seqTs);
+    seqTs.SetSeq(m_seqNum++);
+    p->AddHeader(seqTs);
 
-  if (sock->Send (p) >= 0)
+    if (sock->Send(p) >= 0)
     {
-      m_txTrace (p);
-      return true;
+        m_txTrace(p);
+        return true;
     }
-  else
+    else
     {
-      std::stringstream addrStr;
-      const auto addr = GetAddress ();
+        std::stringstream addrStr;
+        const auto addr = GetAddress();
 
-      if (Ipv4Address::IsMatchingType (addr))
-        addrStr << Ipv4Address::ConvertFrom (addr);
-      else if (Ipv6Address::IsMatchingType (addr))
-        addrStr << Ipv6Address::ConvertFrom (addr);
-      else
-        addrStr << addr;
+        if (Ipv4Address::IsMatchingType(addr))
+            addrStr << Ipv4Address::ConvertFrom(addr);
+        else if (Ipv6Address::IsMatchingType(addr))
+            addrStr << Ipv6Address::ConvertFrom(addr);
+        else
+            addrStr << addr;
 
-      NS_LOG_WARN ("Error while sending " << m_payloadSize << " bytes to " << addrStr.str () << "."
-                   << " ErrNo=" << sock->GetErrno ());
+        NS_LOG_WARN("Error while sending " << m_payloadSize << " bytes to " << addrStr.str() << "."
+                                           << " ErrNo=" << sock->GetErrno());
 
-      return false;
+        return false;
     }
 }
 
 const uint16_t
-TcpStorageClientApplication::GetPayloadSize ()
+TcpStorageClientApplication::GetPayloadSize()
 {
-  NS_LOG_FUNCTION (this);
-  return m_payloadSize;
+    NS_LOG_FUNCTION(this);
+    return m_payloadSize;
 }
 
 void
-TcpStorageClientApplication::SendPacket (const uint16_t payloadSize)
+TcpStorageClientApplication::SendPacket(const uint16_t payloadSize)
 {
-  NS_LOG_FUNCTION (this << payloadSize << GetNode ()->GetId ());
+    NS_LOG_FUNCTION(this << payloadSize << GetNode()->GetId());
 
-  if (DoSendPacket (payloadSize))
-    Simulator::ScheduleNow (&StoragePeripheral::Free, m_storage,
-                            (uint64_t) payloadSize, StoragePeripheral::byte);
+    if (DoSendPacket(payloadSize))
+        Simulator::ScheduleNow(&StoragePeripheral::Free,
+                               m_storage,
+                               (uint64_t)payloadSize,
+                               StoragePeripheral::byte);
 }
 
 Ptr<Packet>
-TcpStorageClientApplication::CreatePacket (uint32_t size) const
+TcpStorageClientApplication::CreatePacket(uint32_t size) const
 {
-  NS_LOG_FUNCTION (this << size);
+    NS_LOG_FUNCTION(this << size);
 
-  Ptr<Packet> p;
-  uint8_t* buf = new uint8_t[size];
-  uint16_t* buf16 = (uint16_t*) (buf);
+    Ptr<Packet> p;
+    uint8_t* buf = new uint8_t[size];
+    uint16_t* buf16 = (uint16_t*)(buf);
 
-  for (uint32_t i = 0; i < size / 2; i++)
-    buf16[i] = i;
+    for (uint32_t i = 0; i < size / 2; i++)
+        buf16[i] = i;
 
-  p = Create<Packet> (buf, size);
+    p = Create<Packet>(buf, size);
 
     delete[] buf;
-  return p;
+    return p;
 }
 
 Ptr<StoragePeripheral>
-TcpStorageClientApplication::FindStorage () const
+TcpStorageClientApplication::FindStorage() const
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 
-  auto drone = StaticCast <Drone, Node> (GetNode ());
-  NS_ASSERT_MSG (drone != nullptr, "This application must be installed on a drone.");
+    auto drone = StaticCast<Drone, Node>(GetNode());
+    NS_ASSERT_MSG(drone != nullptr, "This application must be installed on a drone.");
 
-  auto peripherals = drone->getPeripherals ();
-  NS_ASSERT_MSG (peripherals->thereIsStorage (), "Drone must be equipped with a storage peripheral");
+    auto peripherals = drone->getPeripherals();
+    NS_ASSERT_MSG(peripherals->thereIsStorage(),
+                  "Drone must be equipped with a storage peripheral");
 
-  // Drone storage is always the first one in the container
-  auto storage = StaticCast<StoragePeripheral, DronePeripheral> (peripherals->Get (0));
-  NS_ASSERT_MSG (storage != nullptr, "Drone must be equipped with a storage peripheral.");
+    // Drone storage is always the first one in the container
+    auto storage = StaticCast<StoragePeripheral, DronePeripheral>(peripherals->Get(0));
+    NS_ASSERT_MSG(storage != nullptr, "Drone must be equipped with a storage peripheral.");
 
-  return storage;
+    return storage;
 }
 
 void
-TcpStorageClientApplication::StorageUpdateCallback (const uint64_t oldValBits, const uint64_t newValBits)
+TcpStorageClientApplication::StorageUpdateCallback(const uint64_t oldValBits,
+                                                   const uint64_t newValBits)
 {
-  NS_LOG_FUNCTION (this << oldValBits << newValBits);
+    NS_LOG_FUNCTION(this << oldValBits << newValBits);
 
-  const uint64_t maxPayloadSizeBits = m_payloadSize * StoragePeripheral::byte;
-  const uint64_t occupiedStorageBits = m_storage->GetCapacity () - newValBits;
+    const uint64_t maxPayloadSizeBits = m_payloadSize * StoragePeripheral::byte;
+    const uint64_t occupiedStorageBits = m_storage->GetCapacity() - newValBits;
 
-  if (occupiedStorageBits == 0)
-    return;
+    if (occupiedStorageBits == 0)
+        return;
 
-  NS_LOG_LOGIC ("Occupied memory in bits: " << occupiedStorageBits << " | MaxPayloadSize bits " << maxPayloadSizeBits);
+    NS_LOG_LOGIC("Occupied memory in bits: " << occupiedStorageBits << " | MaxPayloadSize bits "
+                                             << maxPayloadSizeBits);
 
-  uint16_t nextPayloadSizeBytes = (occupiedStorageBits >= maxPayloadSizeBits)
-			                            ? m_payloadSize
-                                  : occupiedStorageBits / StoragePeripheral::byte;
+    uint16_t nextPayloadSizeBytes = (occupiedStorageBits >= maxPayloadSizeBits)
+                                        ? m_payloadSize
+                                        : occupiedStorageBits / StoragePeripheral::byte;
 
-  Simulator::Schedule (Seconds(0.1), &TcpStorageClientApplication::SendPacket, this, nextPayloadSizeBytes);
+    Simulator::Schedule(Seconds(0.1),
+                        &TcpStorageClientApplication::SendPacket,
+                        this,
+                        nextPayloadSizeBytes);
 }
 
 } // namespace ns3

@@ -17,18 +17,19 @@
  */
 #include "lte-setup-helper.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 Ptr<NetDevice>
-LteSetupHelper::InstallSingleEnbDevice (Ptr<LteHelper> helper, Ptr<Node> n)
+LteSetupHelper::InstallSingleEnbDevice(Ptr<LteHelper> helper, Ptr<Node> n)
 {
-  return helper->InstallSingleEnbDevice (n);
+    return helper->InstallSingleEnbDevice(n);
 }
 
 Ptr<NetDevice>
-LteSetupHelper::InstallSingleUeDevice (Ptr<LteHelper> helper, Ptr<Node> n)
+LteSetupHelper::InstallSingleUeDevice(Ptr<LteHelper> helper, Ptr<Node> n)
 {
-  return helper->InstallSingleUeDevice (n);
+    return helper->InstallSingleUeDevice(n);
 }
 
 } // namespace ns3

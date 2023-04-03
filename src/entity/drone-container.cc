@@ -15,52 +15,53 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include <ns3/double.h>
-#include <ns3/li-ion-energy-source-helper.h>
-
-#include <ns3/drone-energy-model-helper.h>
-#include <ns3/input-peripheral.h>
-
 #include "drone-container.h"
+
 #include "drone-energy-model.h"
 
-namespace ns3 {
+#include <ns3/double.h>
+#include <ns3/drone-energy-model-helper.h>
+#include <ns3/input-peripheral.h>
+#include <ns3/li-ion-energy-source-helper.h>
+
+namespace ns3
+{
 
 void
-DroneContainer::Create (uint32_t n)
+DroneContainer::Create(uint32_t n)
 {
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      auto drone = CreateObject<Drone> ();
-      drone->getPeripherals()->SetDrone(drone);
-      m_drones.push_back (drone);
-      auto nativenode = StaticCast<Node, Drone> (drone);
-      NodeContainer::Add (nativenode);
+        auto drone = CreateObject<Drone>();
+        drone->getPeripherals()->SetDrone(drone);
+        m_drones.push_back(drone);
+        auto nativenode = StaticCast<Node, Drone>(drone);
+        NodeContainer::Add(nativenode);
     }
 }
 
 uint32_t
-DroneContainer::GetN (void) const
+DroneContainer::GetN(void) const
 {
-  return m_drones.size ();
+    return m_drones.size();
 }
 
 Ptr<Drone>
-DroneContainer::Get (uint32_t i) const
+DroneContainer::Get(uint32_t i) const
 {
-  return m_drones[i];
+    return m_drones[i];
 }
 
 DroneContainer::Iterator
-DroneContainer::Begin (void) const
+DroneContainer::Begin(void) const
 {
-  return m_drones.begin ();
+    return m_drones.begin();
 }
 
 DroneContainer::Iterator
-DroneContainer::End (void) const
+DroneContainer::End(void) const
 {
-  return m_drones.end ();
+    return m_drones.end();
 }
 
 } // namespace ns3

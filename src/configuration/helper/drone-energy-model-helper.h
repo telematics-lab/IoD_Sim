@@ -21,7 +21,8 @@
 #include <ns3/drone.h>
 #include <ns3/energy-model-helper.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \ingroup energy
@@ -29,31 +30,31 @@ namespace ns3 {
  */
 class DroneEnergyModelHelper : public DeviceEnergyModelHelper
 {
-public:
-  DroneEnergyModelHelper ();
+  public:
+    DroneEnergyModelHelper();
 
-  /**
-   * \param name Name of attribute to set.
-   * \param v Value of the attribute.
-   *
-   * Sets one of the attributes of underlying DroneEnergyModel.
-   */
-  virtual void Set (std::string name, const AttributeValue &v);
+    /**
+     * \param name Name of attribute to set.
+     * \param v Value of the attribute.
+     *
+     * Sets one of the attributes of underlying DroneEnergyModel.
+     */
+    virtual void Set(std::string name, const AttributeValue& v);
 
-  /**
-   * \param drone Pointer to the Drone to install DroneEnergyModel.
-   * \param source The EnergySource the DroneEnergyModel will be using.
-   * \returns The resultant DeviceEnergyModel.
-   *
-   * Installs a DroneEnergyModel with a specified EnergySource onto a
-   * Drone.
-   */
-  Ptr<DeviceEnergyModel> Install (Ptr<Drone> drone, Ptr<EnergySource> source);
+    /**
+     * \param drone Pointer to the Drone to install DroneEnergyModel.
+     * \param source The EnergySource the DroneEnergyModel will be using.
+     * \returns The resultant DeviceEnergyModel.
+     *
+     * Installs a DroneEnergyModel with a specified EnergySource onto a
+     * Drone.
+     */
+    Ptr<DeviceEnergyModel> Install(Ptr<Drone> drone, Ptr<EnergySource> source);
 
-private:
-  Ptr<DeviceEnergyModel> DoInstall (Ptr<NetDevice> device, Ptr<EnergySource> source) const;
+  private:
+    Ptr<DeviceEnergyModel> DoInstall(Ptr<NetDevice> device, Ptr<EnergySource> source) const;
 
-  ObjectFactory m_droneEnergyModel;
+    ObjectFactory m_droneEnergyModel;
 };
 
 } // namespace ns3

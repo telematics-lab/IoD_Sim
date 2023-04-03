@@ -18,44 +18,43 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
-#include <utility>
-#include <vector>
+#include "flight-plan.h"
 
 #include <ns3/vector.h>
 
-#include "flight-plan.h"
+#include <utility>
+#include <vector>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Plan trajectories
  **/
-template<typename FlightParam, typename FlightType>
+template <typename FlightParam, typename FlightType>
 class Planner
 {
-public:
-  Planner (FlightPlan flightPlan,
-           FlightParam flightParam,
-           float step);
-  Planner ();
-  virtual ~Planner ();
+  public:
+    Planner(FlightPlan flightPlan, FlightParam flightParam, float step);
+    Planner();
+    virtual ~Planner();
 
-  void Update (const Time t) const;
+    void Update(const Time t) const;
 
-  const Vector GetPosition () const;
-  const Vector GetVelocity () const;
-  const int32_t GetTimeWindow (const Time t) const;
+    const Vector GetPosition() const;
+    const Vector GetVelocity() const;
+    const int32_t GetTimeWindow(const Time t) const;
 
-private:
-  mutable Vector m_currentVelocity;
-  mutable Vector m_currentPosition;
+  private:
+    mutable Vector m_currentVelocity;
+    mutable Vector m_currentPosition;
 
-  float m_step;
+    float m_step;
 
-  std::vector<FlightParam> m_flightParams;
-  std::vector<FlightPlan> m_flightPlans;
-  std::vector<FlightType> m_flights;
-  std::vector<std::pair<Time, Time>> m_timeWindows; /// Time windows for each flight plan
+    std::vector<FlightParam> m_flightParams;
+    std::vector<FlightPlan> m_flightPlans;
+    std::vector<FlightType> m_flights;
+    std::vector<std::pair<Time, Time>> m_timeWindows; /// Time windows for each flight plan
 };
 
 } // namespace ns3

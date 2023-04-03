@@ -17,26 +17,25 @@
  */
 #include "wifi-netdevice-configuration.h"
 
-namespace ns3 {
-
-WifiNetdeviceConfiguration::WifiNetdeviceConfiguration (const std::string type,
-                                                        const ModelConfiguration macLayer,
-                                                        const uint32_t networkLayerId) :
-  NetdeviceConfiguration {type, networkLayerId},
-  m_macLayer {macLayer}
+namespace ns3
 {
 
+WifiNetdeviceConfiguration::WifiNetdeviceConfiguration(const std::string type,
+                                                       const ModelConfiguration macLayer,
+                                                       const uint32_t networkLayerId)
+    : NetdeviceConfiguration{type, networkLayerId},
+      m_macLayer{macLayer}
+{
 }
 
-WifiNetdeviceConfiguration::~WifiNetdeviceConfiguration ()
+WifiNetdeviceConfiguration::~WifiNetdeviceConfiguration()
 {
-
 }
 
 const ModelConfiguration
-WifiNetdeviceConfiguration::GetMacLayer () const
+WifiNetdeviceConfiguration::GetMacLayer() const
 {
-  return m_macLayer;
+    return m_macLayer;
 }
 
 } // namespace ns3

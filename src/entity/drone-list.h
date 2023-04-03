@@ -20,11 +20,12 @@
 #ifndef DRONE_LIST_H
 #define DRONE_LIST_H
 
-#include <vector>
-
 #include <ns3/ptr.h>
 
-namespace ns3 {
+#include <vector>
+
+namespace ns3
+{
 
 class Drone;
 class CallbackBase;
@@ -38,39 +39,39 @@ class CallbackBase;
  */
 class DroneList
 {
-public:
-  /// Drone container iterator
-  typedef std::vector<Ptr<Drone>>::const_iterator Iterator;
+  public:
+    /// Drone container iterator
+    typedef std::vector<Ptr<Drone>>::const_iterator Iterator;
 
-  /**
-   * \param drone drone to add
-   * \returns index of drone in list
-   *
-   * This method must be called automatically in order to register
-   * a node as a Drone
-   */
-  static uint32_t Add (Ptr<Drone> drone);
+    /**
+     * \param drone drone to add
+     * \returns index of drone in list
+     *
+     * This method must be called automatically in order to register
+     * a node as a Drone
+     */
+    static uint32_t Add(Ptr<Drone> drone);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list
-   */
-  static Iterator Begin ();
+    /**
+     * \returns a C++ iterator located at the beginning of this list
+     */
+    static Iterator Begin();
 
-  /**
-   * \returns a C++ iterator located at the end of this list
-   */
-  static Iterator End ();
+    /**
+     * \returns a C++ iterator located at the end of this list
+     */
+    static Iterator End();
 
-  /**
-   * \param n the index of requested Drone
-   * \returns the drone (Node) associated to index n
-   */
-  static Ptr<Drone> GetDrone (uint32_t n);
+    /**
+     * \param n the index of requested Drone
+     * \returns the drone (Node) associated to index n
+     */
+    static Ptr<Drone> GetDrone(uint32_t n);
 
-  /**
-   * \returns the number of drones currently in the list
-   */
-  static uint32_t GetNDrones ();
+    /**
+     * \returns the number of drones currently in the list
+     */
+    static uint32_t GetNDrones();
 };
 
 } // namespace ns3

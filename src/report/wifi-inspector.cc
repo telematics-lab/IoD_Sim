@@ -24,184 +24,185 @@
 #include <ns3/ssid.h>
 #include <ns3/wifi-phy.h>
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("WifiInspector");
-
-WifiInspector::WifiInspector (Ptr<NetDevice> device) :
-  m_dev {InitializeNetDevice (device)},
-  m_phy {InitializePhy (m_dev)},
-  m_channel {InitializeChannel (m_dev)},
-  m_mac {InitializeMac (m_dev)}
+namespace ns3
 {
-  NS_LOG_FUNCTION (this << device);
+
+NS_LOG_COMPONENT_DEFINE("WifiInspector");
+
+WifiInspector::WifiInspector(Ptr<NetDevice> device)
+    : m_dev{InitializeNetDevice(device)},
+      m_phy{InitializePhy(m_dev)},
+      m_channel{InitializeChannel(m_dev)},
+      m_mac{InitializeMac(m_dev)}
+{
+    NS_LOG_FUNCTION(this << device);
 }
 
-WifiInspector::~WifiInspector ()
+WifiInspector::~WifiInspector()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 const char*
-WifiInspector::GetWifiStandard () const
+WifiInspector::GetWifiStandard() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  const auto standard = m_phy->GetStandard ();
+    const auto standard = m_phy->GetStandard();
 
-  switch (standard)
+    switch (standard)
     {
-      case WIFI_STANDARD_80211a:
+    case WIFI_STANDARD_80211a:
         return "802.11a";
-      case WIFI_STANDARD_80211b:
+    case WIFI_STANDARD_80211b:
         return "802.11b";
-      case WIFI_STANDARD_80211g:
+    case WIFI_STANDARD_80211g:
         return "802.11g";
-      case WIFI_STANDARD_80211n:
+    case WIFI_STANDARD_80211n:
         return "802.11n";
-      case WIFI_STANDARD_80211ac:
+    case WIFI_STANDARD_80211ac:
         return "802.11ac";
-      case WIFI_STANDARD_80211ax:
+    case WIFI_STANDARD_80211ax:
         return "802.11ax";
-      default:
+    default:
         return "UNSUPPORTED";
     }
 }
 
 const uint16_t
-WifiInspector::GetCarrierFrequency () const
+WifiInspector::GetCarrierFrequency() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_phy->GetFrequency ();
+    return m_phy->GetFrequency();
 }
 
 const std::string
-WifiInspector::GetPropagationLossModel () const
+WifiInspector::GetPropagationLossModel() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  const TypeId channelTid = m_channel->GetInstanceTypeId ();
-  TypeId::AttributeInformation info;
-  PointerValue attribute;
+    NS_LOG_FUNCTION_NOARGS();
+    const TypeId channelTid = m_channel->GetInstanceTypeId();
+    TypeId::AttributeInformation info;
+    PointerValue attribute;
 
-  if (!channelTid.LookupAttributeByName ("PropagationLossModel", &info))
-    NS_FATAL_ERROR ("Wifi Channel was expected to have PropagationLossModel as "
-                    "attribute, but instead it does not exist!");
+    if (!channelTid.LookupAttributeByName("PropagationLossModel", &info))
+        NS_FATAL_ERROR("Wifi Channel was expected to have PropagationLossModel as "
+                       "attribute, but instead it does not exist!");
 
-  m_channel->GetAttribute (info.name, attribute);
+    m_channel->GetAttribute(info.name, attribute);
 
-  return attribute.GetObject ()->GetInstanceTypeId ().GetName ();
+    return attribute.GetObject()->GetInstanceTypeId().GetName();
 }
 
 const std::string
-WifiInspector::GetPropagationDelayModel () const
+WifiInspector::GetPropagationDelayModel() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  const TypeId channelTid = m_channel->GetInstanceTypeId ();
-  TypeId::AttributeInformation info;
-  PointerValue attribute;
+    NS_LOG_FUNCTION_NOARGS();
+    const TypeId channelTid = m_channel->GetInstanceTypeId();
+    TypeId::AttributeInformation info;
+    PointerValue attribute;
 
-  if (!channelTid.LookupAttributeByName ("PropagationDelayModel", &info))
-    NS_FATAL_ERROR ("Wifi Channel was expected to have PropagationDelayModel as "
-                    "attribute, but instead it does not exist!");
+    if (!channelTid.LookupAttributeByName("PropagationDelayModel", &info))
+        NS_FATAL_ERROR("Wifi Channel was expected to have PropagationDelayModel as "
+                       "attribute, but instead it does not exist!");
 
-  m_channel->GetAttribute (info.name, attribute);
+    m_channel->GetAttribute(info.name, attribute);
 
-  return attribute.GetObject ()->GetInstanceTypeId ().GetName ();
+    return attribute.GetObject()->GetInstanceTypeId().GetName();
 }
 
 const std::string
-WifiInspector::GetWifiSsid () const
+WifiInspector::GetWifiSsid() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_mac->GetSsid ().PeekString ();
+    return m_mac->GetSsid().PeekString();
 }
 
 const std::string
-WifiInspector::GetWifiMode () const
+WifiInspector::GetWifiMode() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_dev->GetRemoteStationManager ()->GetDefaultMode ().GetUniqueName ();
+    return m_dev->GetRemoteStationManager()->GetDefaultMode().GetUniqueName();
 }
 
 Ptr<WifiNetDevice>
-WifiInspector::InitializeNetDevice (Ptr<NetDevice> dev)
+WifiInspector::InitializeNetDevice(Ptr<NetDevice> dev)
 {
-  NS_LOG_FUNCTION (dev);
-  Ptr<WifiNetDevice> wifiNetDevice = DynamicCast<WifiNetDevice> (dev);
+    NS_LOG_FUNCTION(dev);
+    Ptr<WifiNetDevice> wifiNetDevice = DynamicCast<WifiNetDevice>(dev);
 
-  if (wifiNetDevice == nullptr)
-    NS_FATAL_ERROR ("Cannot inspect an object that is not a WifiNetDevice");
+    if (wifiNetDevice == nullptr)
+        NS_FATAL_ERROR("Cannot inspect an object that is not a WifiNetDevice");
 
-  return wifiNetDevice;
+    return wifiNetDevice;
 }
 
 Ptr<WifiPhy>
-WifiInspector::InitializePhy (Ptr<WifiNetDevice> dev)
+WifiInspector::InitializePhy(Ptr<WifiNetDevice> dev)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  const TypeId devTid = dev->GetInstanceTypeId ();
-  TypeId::AttributeInformation info;
-  PointerValue attribute;
-  Ptr<WifiPhy> phy;
+    NS_LOG_FUNCTION_NOARGS();
+    const TypeId devTid = dev->GetInstanceTypeId();
+    TypeId::AttributeInformation info;
+    PointerValue attribute;
+    Ptr<WifiPhy> phy;
 
-  if (!devTid.LookupAttributeByName ("Phy", &info))
-    NS_FATAL_ERROR ("Wifi Device was expected to have Phy as attribute, but "
-                    "instead it does not exist!");
+    if (!devTid.LookupAttributeByName("Phy", &info))
+        NS_FATAL_ERROR("Wifi Device was expected to have Phy as attribute, but "
+                       "instead it does not exist!");
 
-  dev->GetAttribute (info.name, attribute);
-  phy = DynamicCast<WifiPhy> (attribute.GetObject ());
-  if (phy == nullptr)
-    NS_FATAL_ERROR ("Cannot inspect and object that is not a WifiPhy.");
+    dev->GetAttribute(info.name, attribute);
+    phy = DynamicCast<WifiPhy>(attribute.GetObject());
+    if (phy == nullptr)
+        NS_FATAL_ERROR("Cannot inspect and object that is not a WifiPhy.");
 
-  return phy;
+    return phy;
 }
 
 Ptr<YansWifiChannel>
-WifiInspector::InitializeChannel (Ptr<WifiNetDevice> dev)
+WifiInspector::InitializeChannel(Ptr<WifiNetDevice> dev)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  const TypeId devTid = dev->GetInstanceTypeId ();
-  TypeId channelTid;
-  TypeId::AttributeInformation info;
-  PointerValue attribute;
-  Ptr<Object> channelObject;
+    NS_LOG_FUNCTION_NOARGS();
+    const TypeId devTid = dev->GetInstanceTypeId();
+    TypeId channelTid;
+    TypeId::AttributeInformation info;
+    PointerValue attribute;
+    Ptr<Object> channelObject;
 
-  if (!devTid.LookupAttributeByName ("Channel", &info))
-    NS_FATAL_ERROR ("Device was expected to have Channel as attribute, but "
-                    "instead it does not exist!");
+    if (!devTid.LookupAttributeByName("Channel", &info))
+        NS_FATAL_ERROR("Device was expected to have Channel as attribute, but "
+                       "instead it does not exist!");
 
-  dev->GetAttribute (info.name, attribute);
-  channelObject = attribute.GetObject ();
-  channelTid = channelObject->GetInstanceTypeId ();
+    dev->GetAttribute(info.name, attribute);
+    channelObject = attribute.GetObject();
+    channelTid = channelObject->GetInstanceTypeId();
 
-  if (channelTid.GetName () != "ns3::YansWifiChannel")
-    NS_FATAL_ERROR ("Unsupported channel type " << channelTid.GetName ());
+    if (channelTid.GetName() != "ns3::YansWifiChannel")
+        NS_FATAL_ERROR("Unsupported channel type " << channelTid.GetName());
 
-  return DynamicCast<YansWifiChannel> (channelObject);
+    return DynamicCast<YansWifiChannel>(channelObject);
 }
 
 Ptr<WifiMac>
-WifiInspector::InitializeMac (Ptr<WifiNetDevice> dev)
+WifiInspector::InitializeMac(Ptr<WifiNetDevice> dev)
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  const TypeId devTid = dev->GetInstanceTypeId ();
-  TypeId::AttributeInformation info;
-  PointerValue attribute;
-  Ptr<WifiMac> mac;
+    NS_LOG_FUNCTION_NOARGS();
+    const TypeId devTid = dev->GetInstanceTypeId();
+    TypeId::AttributeInformation info;
+    PointerValue attribute;
+    Ptr<WifiMac> mac;
 
-  if (!devTid.LookupAttributeByName ("Mac", &info))
-    NS_FATAL_ERROR ("Wifi Device was expected to have Mac as attribute, but "
-                    "instead it does not exist!");
+    if (!devTid.LookupAttributeByName("Mac", &info))
+        NS_FATAL_ERROR("Wifi Device was expected to have Mac as attribute, but "
+                       "instead it does not exist!");
 
-  dev->GetAttribute (info.name, attribute);
-  mac = DynamicCast<WifiMac> (attribute.GetObject ());
-  if (mac == nullptr)
-    NS_FATAL_ERROR ("Cannot inspect and object that is not a WifiMac.");
+    dev->GetAttribute(info.name, attribute);
+    mac = DynamicCast<WifiMac>(attribute.GetObject());
+    if (mac == nullptr)
+        NS_FATAL_ERROR("Cannot inspect and object that is not a WifiMac.");
 
-  return mac;
+    return mac;
 }
 
 } // namespace ns3

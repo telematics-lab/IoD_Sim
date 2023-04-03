@@ -17,23 +17,22 @@
  */
 #include "network-layer-configuration.h"
 
-namespace ns3 {
-
-NetworkLayerConfiguration::NetworkLayerConfiguration (std::string type) :
-  m_type {type}
+namespace ns3
 {
 
+NetworkLayerConfiguration::NetworkLayerConfiguration(std::string type)
+    : m_type{type}
+{
 }
 
-NetworkLayerConfiguration::~NetworkLayerConfiguration ()
+NetworkLayerConfiguration::~NetworkLayerConfiguration()
 {
-
 }
 
 const std::string
-NetworkLayerConfiguration::GetType () const
+NetworkLayerConfiguration::GetType() const
 {
-  return m_type;
+    return m_type;
 }
 
 } // namespace ns3

@@ -17,189 +17,205 @@
  */
 #include "irs.h"
 
-#include <cmath>
-
-#include <vector>
-
 #include <ns3/str-vec.h>
 
-namespace ns3 {
+#include <cmath>
+#include <vector>
 
-NS_LOG_COMPONENT_DEFINE ("Irs");
+namespace ns3
+{
 
-NS_OBJECT_ENSURE_REGISTERED (Irs);
+NS_LOG_COMPONENT_DEFINE("Irs");
+
+NS_OBJECT_ENSURE_REGISTERED(Irs);
 
 TypeId
-Irs::GetTypeId ()
+Irs::GetTypeId()
 {
-  static TypeId tid =
-      TypeId ("ns3::Irs")
-          .SetParent<DronePeripheral> ()
-          .SetGroupName ("Irs")
-          .AddConstructor<Irs> ()
-          .AddAttribute ("Rows", "N, the number of rows", IntegerValue (1),
-                         MakeIntegerAccessor (&Irs::m_rows), MakeIntegerChecker<int> ())
-          .AddAttribute ("Columns", "M, the number of columns", IntegerValue (1),
-                         MakeIntegerAccessor (&Irs::m_columns), MakeIntegerChecker<int> ())
-          .AddAttribute ("PruX", "X-side dimension of the Passive Reflective Unit (in meter)",
-                         DoubleValue (0.01), MakeDoubleAccessor (&Irs::m_pruX),
-                         MakeDoubleChecker<double> ())
-          .AddAttribute ("PruY", "Y-side dimension of the Passive Reflective Unit (in meter)",
-                         DoubleValue (0.01), MakeDoubleAccessor (&Irs::m_pruY),
-                         MakeDoubleChecker<double> ())
-          .AddAttribute (
-              "RotoAxis",
-              "Well-ordered list of axis used to set IRS rotation (or to BackRotate other points)",
-              StrVecValue (), MakeStrVecAccessor (&Irs::SetRotoAxis),
-              MakeStrVecChecker ())
-          .AddAttribute (
-              "RotoAngles",
-              "List of angles (in radians) used to rotate the IRS, the n-th angles refers to n-th "
-              "axis defined in m_rotoAxis (or to BackRotate other points)",
-              DoubleVectorValue (), MakeDoubleVectorAccessor (&Irs::SetRotoAnglesDegrees),
-              MakeDoubleVectorChecker ())
-          .AddAttribute ("Patches", "List of patches used to build the IRS",
-                         ModelConfigurationVectorValue (),
-                         MakeModelConfigurationVectorAccessor (&Irs::SetPatchVector),
-                         MakeModelConfigurationVectorChecker ());
-  return tid;
+    static TypeId tid =
+        TypeId("ns3::Irs")
+            .SetParent<DronePeripheral>()
+            .SetGroupName("Irs")
+            .AddConstructor<Irs>()
+            .AddAttribute("Rows",
+                          "N, the number of rows",
+                          IntegerValue(1),
+                          MakeIntegerAccessor(&Irs::m_rows),
+                          MakeIntegerChecker<int>())
+            .AddAttribute("Columns",
+                          "M, the number of columns",
+                          IntegerValue(1),
+                          MakeIntegerAccessor(&Irs::m_columns),
+                          MakeIntegerChecker<int>())
+            .AddAttribute("PruX",
+                          "X-side dimension of the Passive Reflective Unit (in meter)",
+                          DoubleValue(0.01),
+                          MakeDoubleAccessor(&Irs::m_pruX),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("PruY",
+                          "Y-side dimension of the Passive Reflective Unit (in meter)",
+                          DoubleValue(0.01),
+                          MakeDoubleAccessor(&Irs::m_pruY),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("RotoAxis",
+                          "Well-ordered list of axis used to set IRS rotation (or to BackRotate "
+                          "other points)",
+                          StrVecValue(),
+                          MakeStrVecAccessor(&Irs::SetRotoAxis),
+                          MakeStrVecChecker())
+            .AddAttribute("RotoAngles",
+                          "List of angles (in radians) used to rotate the IRS, the n-th angles "
+                          "refers to n-th "
+                          "axis defined in m_rotoAxis (or to BackRotate other points)",
+                          DoubleVectorValue(),
+                          MakeDoubleVectorAccessor(&Irs::SetRotoAnglesDegrees),
+                          MakeDoubleVectorChecker())
+            .AddAttribute("Patches",
+                          "List of patches used to build the IRS",
+                          ModelConfigurationVectorValue(),
+                          MakeModelConfigurationVectorAccessor(&Irs::SetPatchVector),
+                          MakeModelConfigurationVectorChecker());
+    return tid;
 }
 
-Irs::Irs ()
+Irs::Irs()
 {
 }
 
 void
-Irs::DoDispose ()
+Irs::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoDispose ();
+    NS_LOG_FUNCTION(this);
+    Object::DoDispose();
 }
 
 void
-Irs::DoInitialize (void)
+Irs::DoInitialize(void)
 {
-  NS_LOG_FUNCTION (this);
-  Object::DoInitialize ();
+    NS_LOG_FUNCTION(this);
+    Object::DoInitialize();
 }
 
 double
-Irs::GetPruX () const
+Irs::GetPruX() const
 {
-  return m_pruX;
+    return m_pruX;
 }
 
 double
-Irs::GetPruY () const
+Irs::GetPruY() const
 {
-  return m_pruY;
+    return m_pruY;
 }
 
 void
 Irs::SetRotoAxis(const StrVec& v)
 {
-  for (auto &x : v)
+    for (auto& x : v)
     {
-      if (x == "X_AXIS")
-        m_rotoAxis.push_back (RotoAxisType::X_AXIS);
-      else if (x == "Y_AXIS")
-        m_rotoAxis.push_back (RotoAxisType::Y_AXIS);
-      else if (x == "Z_AXIS")
-        m_rotoAxis.push_back (RotoAxisType::Z_AXIS);
-      else
-        NS_ABORT_MSG ("Cannot convert input \""
-                      << x
-                      << "\" to any of the "
-                         "following values: [\"X_AXIS\", \"Y_AXIS\", \"Z_AXIS\"]");
+        if (x == "X_AXIS")
+            m_rotoAxis.push_back(RotoAxisType::X_AXIS);
+        else if (x == "Y_AXIS")
+            m_rotoAxis.push_back(RotoAxisType::Y_AXIS);
+        else if (x == "Z_AXIS")
+            m_rotoAxis.push_back(RotoAxisType::Z_AXIS);
+        else
+            NS_ABORT_MSG("Cannot convert input \""
+                         << x
+                         << "\" to any of the "
+                            "following values: [\"X_AXIS\", \"Y_AXIS\", \"Z_AXIS\"]");
     }
 }
 
-const std::vector<RotoAxisType> &
-Irs::GetRotoAxis () const
+const std::vector<RotoAxisType>&
+Irs::GetRotoAxis() const
 {
-  return m_rotoAxis;
+    return m_rotoAxis;
 }
 
 void
-Irs::SetRotoAnglesDegrees (const DoubleVector &a)
+Irs::SetRotoAnglesDegrees(const DoubleVector& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      m_rotoAngles.push_back (*c / 180 * M_PI);
+        m_rotoAngles.push_back(*c / 180 * M_PI);
     }
 }
 
 std::vector<double>
-Irs::GetRotoAngles () const
+Irs::GetRotoAngles() const
 {
-  return m_rotoAngles;
+    return m_rotoAngles;
 }
 
 std::vector<Ptr<IrsPatch>>
-Irs::GetPatchVector () const
+Irs::GetPatchVector() const
 {
-  return m_patches;
+    return m_patches;
 }
 
 void
-Irs::SetPatchVector (ModelConfigurationVector patchConfs)
+Irs::SetPatchVector(ModelConfigurationVector patchConfs)
 {
-  NS_LOG_FUNCTION (patchConfs);
-  ObjectFactory factory;
+    NS_LOG_FUNCTION(patchConfs);
+    ObjectFactory factory;
 
-  for (uint32_t i = 0; i < m_patches.size (); i++)
+    for (uint32_t i = 0; i < m_patches.size(); i++)
     {
-      m_patches[i]->Dispose ();
+        m_patches[i]->Dispose();
     }
-  m_patches.clear ();
+    m_patches.clear();
 
-  for (auto c = patchConfs.Begin (); c != patchConfs.End (); c++)
+    for (auto c = patchConfs.Begin(); c != patchConfs.End(); c++)
     {
-      factory = ObjectFactory{"ns3::IrsPatch"};
-      for (auto attrIt = c->AttributesBegin (); attrIt != c->AttributesEnd (); attrIt++)
-        factory.Set (attrIt->name, *attrIt->value);
+        factory = ObjectFactory{"ns3::IrsPatch"};
+        for (auto attrIt = c->AttributesBegin(); attrIt != c->AttributesEnd(); attrIt++)
+            factory.Set(attrIt->name, *attrIt->value);
 
-      auto patch = factory.Create<IrsPatch> ();
+        auto patch = factory.Create<IrsPatch>();
 
-      for (auto aggIt = c->AggregatesBegin (); aggIt != c->AggregatesEnd (); aggIt++)
+        for (auto aggIt = c->AggregatesBegin(); aggIt != c->AggregatesEnd(); aggIt++)
         {
-          factory = ObjectFactory{aggIt->GetName ()};
-          for (auto attrIt = aggIt->AttributesBegin (); attrIt != aggIt->AttributesEnd (); attrIt++)
-            factory.Set (attrIt->name, *attrIt->value);
+            factory = ObjectFactory{aggIt->GetName()};
+            for (auto attrIt = aggIt->AttributesBegin(); attrIt != aggIt->AttributesEnd(); attrIt++)
+                factory.Set(attrIt->name, *attrIt->value);
 
-          auto obj = factory.Create<Object> ();
-          obj->AggregateObject (patch);
-          obj->Initialize ();
+            auto obj = factory.Create<Object>();
+            obj->AggregateObject(patch);
+            obj->Initialize();
         }
 
-      NS_ABORT_MSG_IF (!AddPatch (patch),
-                       "Error while adding patch to the IRS, as there is overlapping.");
+        NS_ABORT_MSG_IF(!AddPatch(patch),
+                        "Error while adding patch to the IRS, as there is overlapping.");
     }
 }
 
 bool
-Irs::AddPatch (Ptr<IrsPatch> p)
+Irs::AddPatch(Ptr<IrsPatch> p)
 {
-  for (auto &installedPatch : m_patches)
-    if (IsOverlapped (p->GetSize (), installedPatch->GetSize ()))
-      return false;
+    for (auto& installedPatch : m_patches)
+        if (IsOverlapped(p->GetSize(), installedPatch->GetSize()))
+            return false;
 
-  m_patches.push_back (p);
-  return true;
+    m_patches.push_back(p);
+    return true;
 }
 
 const bool
-Irs::IsOverlapped (const uint32_t aStart, const uint32_t aEnd, const uint32_t bStart, const uint32_t bEnd)
+Irs::IsOverlapped(const uint32_t aStart,
+                  const uint32_t aEnd,
+                  const uint32_t bStart,
+                  const uint32_t bEnd)
 {
-  return (aStart <= bStart && aEnd >= bEnd) || (bStart <= aStart && aStart <= bEnd) ||
-         (bStart <= aEnd && aEnd <= bEnd);
+    return (aStart <= bStart && aEnd >= bEnd) || (bStart <= aStart && aStart <= bEnd) ||
+           (bStart <= aEnd && aEnd <= bEnd);
 }
 
 const bool
-Irs::IsOverlapped (const IrsPatch::Size &a, const IrsPatch::Size &b)
+Irs::IsOverlapped(const IrsPatch::Size& a, const IrsPatch::Size& b)
 {
-  return IsOverlapped (a.startColIdx, a.endColIdx, b.startColIdx, b.endColIdx) &&
-         IsOverlapped (a.startRowIdx, a.endRowIdx, b.startRowIdx, b.endRowIdx);
+    return IsOverlapped(a.startColIdx, a.endColIdx, b.startColIdx, b.endColIdx) &&
+           IsOverlapped(a.startRowIdx, a.endRowIdx, b.startRowIdx, b.endRowIdx);
 }
 
-} //namespace ns3
+} // namespace ns3

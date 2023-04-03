@@ -17,29 +17,29 @@
  */
 #include "constant-acceleration-param.h"
 
-namespace ns3 {
+namespace ns3
+{
 
-ConstantAccelerationParam::ConstantAccelerationParam (double acceleration,
-                                                      double maxSpeed) :
-  m_acceleration {acceleration},
-  m_maxSpeed {maxSpeed}
+ConstantAccelerationParam::ConstantAccelerationParam(double acceleration, double maxSpeed)
+    : m_acceleration{acceleration},
+      m_maxSpeed{maxSpeed}
 {
 }
 
-ConstantAccelerationParam::~ConstantAccelerationParam ()
+ConstantAccelerationParam::~ConstantAccelerationParam()
 {
-}
-
-const double
-ConstantAccelerationParam::GetAcceleration () const
-{
-  return m_acceleration;
 }
 
 const double
-ConstantAccelerationParam::GetMaxSpeed () const
+ConstantAccelerationParam::GetAcceleration() const
 {
-  return m_maxSpeed;
+    return m_acceleration;
+}
+
+const double
+ConstantAccelerationParam::GetMaxSpeed() const
+{
+    return m_maxSpeed;
 }
 
 } // namespace ns3

@@ -18,45 +18,47 @@
 #ifndef WIFI_MAC_LAYER_CONFIGURATION_H
 #define WIFI_MAC_LAYER_CONFIGURATION_H
 
-#include <string>
+#include "mac-layer-configuration.h"
 
 #include <ns3/model-configuration.h>
 
-#include "mac-layer-configuration.h"
+#include <string>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Data class to store information about the WiFi MAC Layer of a Scenario.
  */
 class WifiMacLayerConfiguration : public MacLayerConfiguration
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param macType The type of the MAC Layer to be configured. It should be "wifi".
-   * \param ssid The name of the ssid to configure the BSS.
-   * \param remoteStationManagerConfiguration The configuration of the Remote Station Manager to set up the BSS.
-   */
-  WifiMacLayerConfiguration (std::string macType,
-                             std::string ssid,
-                             ModelConfiguration remoteStationManagerConfiguration);
-  /** Default destructor */
-  ~WifiMacLayerConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param macType The type of the MAC Layer to be configured. It should be "wifi".
+     * \param ssid The name of the ssid to configure the BSS.
+     * \param remoteStationManagerConfiguration The configuration of the Remote Station Manager to
+     * set up the BSS.
+     */
+    WifiMacLayerConfiguration(std::string macType,
+                              std::string ssid,
+                              ModelConfiguration remoteStationManagerConfiguration);
+    /** Default destructor */
+    ~WifiMacLayerConfiguration();
 
-  /**
-   * \return The configured SSID.
-   */
-  const std::string GetSsid () const;
-  /**
-   * \return The Remote Station Manager model configuration.
-   */
-  const ModelConfiguration GetRemoteStationManagerConfiguration () const;
+    /**
+     * \return The configured SSID.
+     */
+    const std::string GetSsid() const;
+    /**
+     * \return The Remote Station Manager model configuration.
+     */
+    const ModelConfiguration GetRemoteStationManagerConfiguration() const;
 
-private:
-  const std::string m_ssid;
-  const ModelConfiguration m_remoteStationManagerConfiguration;
+  private:
+    const std::string m_ssid;
+    const ModelConfiguration m_remoteStationManagerConfiguration;
 };
 
 } // namespace ns3

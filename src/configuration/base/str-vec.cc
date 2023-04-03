@@ -21,126 +21,125 @@
 #include <ns3/names.h>
 #include <ns3/object-factory.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-ATTRIBUTE_HELPER_CPP (StrVec);
+ATTRIBUTE_HELPER_CPP(StrVec);
 
-StrVec::StrVec ()
+StrVec::StrVec()
 {
 }
 
-StrVec::StrVec (std::vector<std::string> strs)
+StrVec::StrVec(std::vector<std::string> strs)
 {
-  for (auto s : strs)
-    Add (s);
+    for (auto s : strs)
+        Add(s);
 }
 
-StrVec::StrVec (const StrVec &a)
+StrVec::StrVec(const StrVec& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
-    Add (*c);
-}
-
-StrVec::Iterator
-StrVec::Begin () const
-{
-  return m_stringVector.begin ();
+    for (auto c = a.Begin(); c != a.End(); c++)
+        Add(*c);
 }
 
 StrVec::Iterator
-StrVec::begin () const
+StrVec::Begin() const
 {
-  return m_stringVector.begin ();
+    return m_stringVector.begin();
 }
 
 StrVec::Iterator
-StrVec::End () const
+StrVec::begin() const
 {
-  return m_stringVector.end ();
+    return m_stringVector.begin();
 }
 
 StrVec::Iterator
-StrVec::end () const
+StrVec::End() const
 {
-  return m_stringVector.end ();
+    return m_stringVector.end();
+}
+
+StrVec::Iterator
+StrVec::end() const
+{
+    return m_stringVector.end();
 }
 
 uint32_t
-StrVec::GetN () const
+StrVec::GetN() const
 {
-  return m_stringVector.size ();
+    return m_stringVector.size();
 }
 
 std::vector<std::string>
-StrVec::Get () const
+StrVec::Get() const
 {
-  return m_stringVector;
+    return m_stringVector;
 }
 
 std::string
-StrVec::Get (const uint32_t i) const
+StrVec::Get(const uint32_t i) const
 {
-  return m_stringVector[i];
+    return m_stringVector[i];
 }
 
 std::string
-StrVec::GetFront () const
+StrVec::GetFront() const
 {
-  return m_stringVector.front ();
+    return m_stringVector.front();
 }
 
 std::string
-StrVec::GetBack () const
+StrVec::GetBack() const
 {
-  return m_stringVector.back ();
+    return m_stringVector.back();
 }
 
 void
-StrVec::Add (std::string s)
+StrVec::Add(std::string s)
 {
-  m_stringVector.push_back (s);
+    m_stringVector.push_back(s);
 }
 
-std::ostream &
-operator<< (std::ostream &os, const StrVec &v)
+std::ostream&
+operator<<(std::ostream& os, const StrVec& v)
 {
-  os << v.GetN () << ";";
+    os << v.GetN() << ";";
 
-  for (auto s = v.Begin ();
-       s != v.End ();
-       s++)
+    for (auto s = v.Begin(); s != v.End(); s++)
     {
-      os << (*s) << ";";
+        os << (*s) << ";";
     }
 
-  return os;
+    return os;
 }
 
-std::istream &
-operator>> (std::istream &is, StrVec &v)
+std::istream&
+operator>>(std::istream& is, StrVec& v)
 {
-  char separator = '\0';
-  uint32_t n;
-  std::string s;
+    char separator = '\0';
+    uint32_t n;
+    std::string s;
 
-  is >> n >> separator;
-  if (separator != ';')
-    is.setstate (std::ios::failbit);
+    is >> n >> separator;
+    if (separator != ';')
+        is.setstate(std::ios::failbit);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      is >> s >> separator;
+        is >> s >> separator;
 
-      if (separator != ';')
+        if (separator != ';')
         {
-          is.setstate (std::ios::failbit);
-          break;
+            is.setstate(std::ios::failbit);
+            break;
         }
 
-      v.Add (s);
+        v.Add(s);
     }
 
-  return is;
+    return is;
 }
 
-} // namespace iodsim
+} // namespace ns3

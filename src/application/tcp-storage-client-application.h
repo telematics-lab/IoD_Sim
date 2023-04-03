@@ -22,43 +22,44 @@
 
 #include <ns3/storage-peripheral.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * TCP client that transmits data to a remote server to free as much memory as possible on the storage peripheral
- * attached to the same node.
+ * TCP client that transmits data to a remote server to free as much memory as possible on the
+ * storage peripheral attached to the same node.
  */
 class TcpStorageClientApplication : public TcpClientServerApplication
 {
-public:
-  static TypeId GetTypeId ();
-  TcpStorageClientApplication ();
-  virtual ~TcpStorageClientApplication ();
+  public:
+    static TypeId GetTypeId();
+    TcpStorageClientApplication();
+    virtual ~TcpStorageClientApplication();
 
-protected:
-  virtual void DoInitialize ();
-  virtual void StartApplication ();
-  /// \brief Send a random packet of a given size.
-  virtual bool DoSendPacket (const uint16_t payloadSize);
+  protected:
+    virtual void DoInitialize();
+    virtual void StartApplication();
+    /// \brief Send a random packet of a given size.
+    virtual bool DoSendPacket(const uint16_t payloadSize);
 
-  const uint16_t GetPayloadSize ();
+    const uint16_t GetPayloadSize();
 
-private:
-  /// \brief Send a packet and, if successful, free storage memory.
-  void SendPacket (const uint16_t payloadSize);
-  /// \brief Create the payload to be sent.
-  Ptr<Packet> CreatePacket (uint32_t size) const;
-  /// \brief Find storage in drone.
-  Ptr<StoragePeripheral> FindStorage () const;
-  /// \brief Callback when the underlying drone storage receives data updates.
-  void StorageUpdateCallback (const uint64_t oldvalue, const uint64_t newvalue);
+  private:
+    /// \brief Send a packet and, if successful, free storage memory.
+    void SendPacket(const uint16_t payloadSize);
+    /// \brief Create the payload to be sent.
+    Ptr<Packet> CreatePacket(uint32_t size) const;
+    /// \brief Find storage in drone.
+    Ptr<StoragePeripheral> FindStorage() const;
+    /// \brief Callback when the underlying drone storage receives data updates.
+    void StorageUpdateCallback(const uint64_t oldvalue, const uint64_t newvalue);
 
-  uint16_t m_payloadSize;           /// Payload size in bytes.
-  uint32_t m_seqNum;                /// Packet Sequence Number.
-  Ptr<StoragePeripheral> m_storage; /// Reference to drone storage peripheral.
+    uint16_t m_payloadSize;           /// Payload size in bytes.
+    uint32_t m_seqNum;                /// Packet Sequence Number.
+    Ptr<StoragePeripheral> m_storage; /// Reference to drone storage peripheral.
 
-  /// Trace to signal the transmission of packets from application-level.
-  TracedCallback<Ptr<const Packet> > m_txTrace;
+    /// Trace to signal the transmission of packets from application-level.
+    TracedCallback<Ptr<const Packet>> m_txTrace;
 };
 
 } // namespace ns3

@@ -20,20 +20,21 @@
 
 #include <vector>
 
-namespace ns3 {
+namespace ns3
+{
 
 class ParametricSpeedParam
 {
-public:
-  ParametricSpeedParam (std::vector<double> speedCoefficients);
-  virtual ~ParametricSpeedParam ();
+  public:
+    ParametricSpeedParam(std::vector<double> speedCoefficients);
+    virtual ~ParametricSpeedParam();
 
-  const std::vector<double> GetSpeedCoefficients () const;
+    const std::vector<double> GetSpeedCoefficients() const;
 
-  void Add (double coefficient);
+    void Add(double coefficient);
 
-private:
-  std::vector<double> m_speedCoefficients;
+  private:
+    std::vector<double> m_speedCoefficients;
 };
 
 } // namespace ns3

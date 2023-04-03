@@ -18,53 +18,53 @@
 #ifndef CONSTANT_ACCELERATION_DRONE_MOBILITY_MODEL_H
 #define CONSTANT_ACCELERATION_DRONE_MOBILITY_MODEL_H
 
-#include <ns3/mobility-model.h>
-#include <ns3/vector.h>
-
-#include <ns3/flight-plan.h>
-#include <ns3/planner.h>
-#include <ns3/proto-point.h>
-
 #include "constant-acceleration-flight.h"
 #include "constant-acceleration-param.h"
 
-namespace ns3 {
+#include <ns3/flight-plan.h>
+#include <ns3/mobility-model.h>
+#include <ns3/planner.h>
+#include <ns3/proto-point.h>
+#include <ns3/vector.h>
+
+namespace ns3
+{
 
 class ConstantAccelerationDroneMobilityModel : public MobilityModel
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  ConstantAccelerationDroneMobilityModel ();
-  ~ConstantAccelerationDroneMobilityModel ();
+    ConstantAccelerationDroneMobilityModel();
+    ~ConstantAccelerationDroneMobilityModel();
 
-private:
-  virtual void DoInitialize ();
-  virtual void DoDispose ();
+  private:
+    virtual void DoInitialize();
+    virtual void DoDispose();
 
-  virtual void Update () const;
-  virtual void DoSetPosition (const Vector &position);
-  virtual Vector DoGetPosition () const;
-  virtual Vector DoGetVelocity () const;
+    virtual void Update() const;
+    virtual void DoSetPosition(const Vector& position);
+    virtual Vector DoGetPosition() const;
+    virtual Vector DoGetVelocity() const;
 
-protected:
-  mutable Vector m_position;
-  mutable Vector m_velocity;
+  protected:
+    mutable Vector m_position;
+    mutable Vector m_velocity;
 
-  double m_acceleration;
-  double m_maxSpeed;
+    double m_acceleration;
+    double m_maxSpeed;
 
-  FlightPlan m_flightPlan;
-  ConstantAccelerationParam m_flightParams;
-  Planner<ConstantAccelerationParam, ConstantAccelerationFlight> m_planner;
+    FlightPlan m_flightPlan;
+    ConstantAccelerationParam m_flightParams;
+    Planner<ConstantAccelerationParam, ConstantAccelerationFlight> m_planner;
 
-  mutable Time m_lastUpdate;
+    mutable Time m_lastUpdate;
 
-  float m_curveStep;
+    float m_curveStep;
 };
 
 } // namespace ns3

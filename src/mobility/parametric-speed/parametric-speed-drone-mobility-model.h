@@ -18,55 +18,56 @@
 #ifndef PARAMETRIC_SPEED_DRONE_MOBILITY_MODEL_H
 #define PARAMETRIC_SPEED_DRONE_MOBILITY_MODEL_H
 
-#include <ns3/mobility-model.h>
-#include <ns3/vector.h>
-
-#include <ns3/double-vector.h>
-#include <ns3/flight-plan.h>
-#include <ns3/planner.h>
-#include <ns3/proto-point.h>
-
 #include "parametric-speed-flight.h"
 #include "parametric-speed-param.h"
 
-namespace ns3 {
+#include <ns3/double-vector.h>
+#include <ns3/flight-plan.h>
+#include <ns3/mobility-model.h>
+#include <ns3/planner.h>
+#include <ns3/proto-point.h>
+#include <ns3/vector.h>
+
+namespace ns3
+{
 
 class ParametricSpeedDroneMobilityModel : public MobilityModel
 {
-public:
-  /**
-   * Register the type using ns-3 TypeId System.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
+  public:
+    /**
+     * Register the type using ns-3 TypeId System.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
 
-  ParametricSpeedDroneMobilityModel ();
-  ~ParametricSpeedDroneMobilityModel ();
+    ParametricSpeedDroneMobilityModel();
+    ~ParametricSpeedDroneMobilityModel();
 
-private:
-  virtual void DoInitialize ();
-  virtual void DoDispose ();
+  private:
+    virtual void DoInitialize();
+    virtual void DoDispose();
 
-  virtual void Update () const;
-  virtual void DoSetPosition (const Vector &position);
-  virtual Vector DoGetPosition () const;
-  virtual Vector DoGetVelocity () const;
+    virtual void Update() const;
+    virtual void DoSetPosition(const Vector& position);
+    virtual Vector DoGetPosition() const;
+    virtual Vector DoGetVelocity() const;
 
-  void SetSpeedCoefficients (const DoubleVector &a);
-protected:
-  mutable Vector m_position;
-  mutable Vector m_velocity;
+    void SetSpeedCoefficients(const DoubleVector& a);
 
-  double m_acceleration;
-  double m_maxSpeed;
+  protected:
+    mutable Vector m_position;
+    mutable Vector m_velocity;
 
-  FlightPlan m_flightPlan;
-  ParametricSpeedParam m_flightParams;
-  Planner<ParametricSpeedParam, ParametricSpeedFlight> m_planner;
+    double m_acceleration;
+    double m_maxSpeed;
 
-  mutable Time m_lastUpdate;
+    FlightPlan m_flightPlan;
+    ParametricSpeedParam m_flightParams;
+    Planner<ParametricSpeedParam, ParametricSpeedFlight> m_planner;
 
-  float m_curveStep;
+    mutable Time m_lastUpdate;
+
+    float m_curveStep;
 };
 
 } // namespace ns3

@@ -21,69 +21,71 @@
 
 #include <ns3/log.h>
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("ReportProtocolStack");
-
-ReportProtocolStack::ReportProtocolStack ()
+namespace ns3
 {
-  NS_LOG_FUNCTION (this);
+
+NS_LOG_COMPONENT_DEFINE("ReportProtocolStack");
+
+ReportProtocolStack::ReportProtocolStack()
+{
+    NS_LOG_FUNCTION(this);
 }
 
 ReportProtocolStack::Iterator
-ReportProtocolStack::Begin () const
+ReportProtocolStack::Begin() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_layers.begin ();
+    return m_layers.begin();
 }
 
 ReportProtocolStack::Iterator
-ReportProtocolStack::End () const
+ReportProtocolStack::End() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_layers.end ();
+    return m_layers.end();
 }
 
 uint32_t
-ReportProtocolStack::GetN () const
+ReportProtocolStack::GetN() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return m_layers.size ();
+    return m_layers.size();
 }
 
 Ptr<ProtocolLayer>
-ReportProtocolStack::Get (const uint32_t i) const
+ReportProtocolStack::Get(const uint32_t i) const
 {
-  NS_LOG_FUNCTION (i);
+    NS_LOG_FUNCTION(i);
 
-  return m_layers[i];
+    return m_layers[i];
 }
 
 void
-ReportProtocolStack::Add (Ptr<ProtocolLayer> layer)
+ReportProtocolStack::Add(Ptr<ProtocolLayer> layer)
 {
-  NS_LOG_FUNCTION (layer);
+    NS_LOG_FUNCTION(layer);
 
-  m_layers.push_back (layer);
+    m_layers.push_back(layer);
 }
 
 void
-ReportProtocolStack::Write (xmlTextWriterPtr h)
+ReportProtocolStack::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  /* Nested Elements */
-  for (auto& layer : m_layers)
-    layer->Write (h);
+    /* Nested Elements */
+    for (auto& layer : m_layers)
+        layer->Write(h);
 }
 
 } // namespace ns3

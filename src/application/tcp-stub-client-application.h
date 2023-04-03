@@ -25,30 +25,31 @@
 #include <ns3/storage-peripheral.h>
 #include <ns3/traced-callback.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Application that sends random packets with Seq.Num. and Timestamp to a remote server
  */
 class TcpStubClientApplication : public TcpStorageClientApplication
 {
-public:
-  static TypeId GetTypeId ();
-  TcpStubClientApplication ();
-  virtual ~TcpStubClientApplication ();
+  public:
+    static TypeId GetTypeId();
+    TcpStubClientApplication();
+    virtual ~TcpStubClientApplication();
 
-protected:
-  virtual void DoInitialize ();
-  virtual void StartApplication ();
+  protected:
+    virtual void DoInitialize();
+    virtual void StartApplication();
 
-private:
-  /// \brief Schedule intial handshake with remote server
-  bool Connect ();
-  /// \brief Send a random packet of a given size
-  void SendPacket ();
+  private:
+    /// \brief Schedule intial handshake with remote server
+    bool Connect();
+    /// \brief Send a random packet of a given size
+    void SendPacket();
 
-  double m_txFrequency;   /// Transmission frequency
-  ns3::Time m_txInterval; /// Frequency inverse
+    double m_txFrequency;   /// Transmission frequency
+    ns3::Time m_txInterval; /// Frequency inverse
 };
 
 } // namespace ns3

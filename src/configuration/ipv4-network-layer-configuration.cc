@@ -19,41 +19,40 @@
 
 #include <ns3/abort.h>
 
-namespace ns3 {
-
-Ipv4NetworkLayerConfiguration::Ipv4NetworkLayerConfiguration (std::string type,
-                                                              std::string address,
-                                                              std::string mask,
-                                                              std::string gatewayAddress):
-  NetworkLayerConfiguration {type},
-  m_address {address},
-  m_mask {mask},
-  m_gatewayAddress {gatewayAddress}
+namespace ns3
 {
 
+Ipv4NetworkLayerConfiguration::Ipv4NetworkLayerConfiguration(std::string type,
+                                                             std::string address,
+                                                             std::string mask,
+                                                             std::string gatewayAddress)
+    : NetworkLayerConfiguration{type},
+      m_address{address},
+      m_mask{mask},
+      m_gatewayAddress{gatewayAddress}
+{
 }
 
-Ipv4NetworkLayerConfiguration::~Ipv4NetworkLayerConfiguration ()
+Ipv4NetworkLayerConfiguration::~Ipv4NetworkLayerConfiguration()
 {
-
-}
-
-const std::string
-Ipv4NetworkLayerConfiguration::GetAddress () const
-{
-  return m_address;
 }
 
 const std::string
-Ipv4NetworkLayerConfiguration::GetMask () const
+Ipv4NetworkLayerConfiguration::GetAddress() const
 {
-  return m_mask;
+    return m_address;
 }
 
 const std::string
-Ipv4NetworkLayerConfiguration::GetGatewayAddress () const
+Ipv4NetworkLayerConfiguration::GetMask() const
 {
-  return m_gatewayAddress;
+    return m_mask;
+}
+
+const std::string
+Ipv4NetworkLayerConfiguration::GetGatewayAddress() const
+{
+    return m_gatewayAddress;
 }
 
 } // namespace ns3

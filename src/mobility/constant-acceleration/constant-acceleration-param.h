@@ -18,21 +18,21 @@
 #ifndef CONSTANT_ACCELERATION_PARAM_H
 #define CONSTANT_ACCELERATION_PARAM_H
 
-namespace ns3 {
+namespace ns3
+{
 
 class ConstantAccelerationParam
 {
-public:
-  ConstantAccelerationParam (double acceleration,
-                             double maxSpeed);
-  virtual ~ConstantAccelerationParam ();
+  public:
+    ConstantAccelerationParam(double acceleration, double maxSpeed);
+    virtual ~ConstantAccelerationParam();
 
-  const double GetAcceleration () const;
-  const double GetMaxSpeed () const;
+    const double GetAcceleration() const;
+    const double GetMaxSpeed() const;
 
-private:
-  double m_acceleration;
-  double m_maxSpeed;
+  private:
+    double m_acceleration;
+    double m_maxSpeed;
 };
 
 } // namespace ns3

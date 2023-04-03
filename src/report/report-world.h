@@ -19,31 +19,31 @@
  */
 #ifndef REPORT_WORLD_H
 #define REPORT_WORLD_H
+#include <ns3/interest-region-container.h>
 #include <ns3/vector.h>
 
 #include <libxml/xmlwriter.h>
 
-#include <ns3/interest-region-container.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 class ReportWorld
 {
-public:
+  public:
     /**
      * Initialize a world report
      */
-    ReportWorld ();
+    ReportWorld();
     /**
      * Default destructor
      */
-    ~ReportWorld ();
+    ~ReportWorld();
     /**
      * Write Zsp report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on
      */
-    void Write (xmlTextWriterPtr handle) const;
+    void Write(xmlTextWriterPtr handle) const;
 };
 
 } // namespace ns3

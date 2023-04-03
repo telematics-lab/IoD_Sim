@@ -18,75 +18,77 @@
 #ifndef STORAGE_PERIPHERAL_H
 #define STORAGE_PERIPHERAL_H
 
-#include <ns3/traced-value.h>
-
 #include "drone-peripheral.h"
 
-namespace ns3 {
+#include <ns3/traced-value.h>
+
+namespace ns3
+{
 /**
  * \brief This class describes a generic storage peripheral.
  */
 class StoragePeripheral : public DronePeripheral
 {
-public:
-  /**
-  * \brief Multipliers to ease the conversion among units of measure.
-  */
-  enum unit {
-    bit = 1,
-    kbit = 1024,
-    mbit = 1024 * 1024,
-    byte = 8,
-    kbyte = 8 * 1024,
-    mbyte = 8 * 1024 * 1024
-  };
+  public:
+    /**
+     * \brief Multipliers to ease the conversion among units of measure.
+     */
+    enum unit
+    {
+        bit = 1,
+        kbit = 1024,
+        mbit = 1024 * 1024,
+        byte = 8,
+        kbyte = 8 * 1024,
+        mbyte = 8 * 1024 * 1024
+    };
 
-  /**
-   * \brief Get the type ID.
-   *
-   * \returns the object TypeId
-   */
-  static TypeId GetTypeId (void);
+    /**
+     * \brief Get the type ID.
+     *
+     * \returns the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  StoragePeripheral ();
+    StoragePeripheral();
 
-  /**
-   * \brief Sets the capacity of the drive.
-   *
-   * \param cap Capacity of the drive in bits.
-   */
-  void SetCapacity (uint64_t cap);
+    /**
+     * \brief Sets the capacity of the drive.
+     *
+     * \param cap Capacity of the drive in bits.
+     */
+    void SetCapacity(uint64_t cap);
 
-  /**
-   * \brief Returns the capacity of the drive.
-   *
-   * \returns Capacity of the drive in bits.
-   */
-  uint64_t GetCapacity (void) const;
+    /**
+     * \brief Returns the capacity of the drive.
+     *
+     * \returns Capacity of the drive in bits.
+     */
+    uint64_t GetCapacity(void) const;
 
-  /**
-   * \brief Allocates a certain amount of data to the drive.
-   *
-   * \param amount Amount of data.
-   * \param amountUnit Unit of measure.
-   */
-  bool Alloc (uint64_t amount, unit amountUnit);
+    /**
+     * \brief Allocates a certain amount of data to the drive.
+     *
+     * \param amount Amount of data.
+     * \param amountUnit Unit of measure.
+     */
+    bool Alloc(uint64_t amount, unit amountUnit);
 
-  /**
-   * \brief Frees a certain amount of data from the drive.
-   *
-   * \param amount Amount of data.
-   * \param amountUnit Unit of measure.
-   */
-  bool Free (uint64_t amount, unit amountUnit);
+    /**
+     * \brief Frees a certain amount of data from the drive.
+     *
+     * \param amount Amount of data.
+     * \param amountUnit Unit of measure.
+     */
+    bool Free(uint64_t amount, unit amountUnit);
 
-protected:
-  void DoInitialize (void);
-  void DoDispose (void);
+  protected:
+    void DoInitialize(void);
+    void DoDispose(void);
 
-private:
-  uint64_t m_capacity;
-  TracedValue<uint64_t> m_remainingCapacity;
+  private:
+    uint64_t m_capacity;
+    TracedValue<uint64_t> m_remainingCapacity;
 };
 
 } // namespace ns3

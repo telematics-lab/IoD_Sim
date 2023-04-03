@@ -18,63 +18,64 @@
 #ifndef DRONE_CONTAINER_H
 #define DRONE_CONTAINER_H
 
-#include <ns3/node-container.h>
-
 #include "drone.h"
 
-namespace ns3 {
+#include <ns3/node-container.h>
+
+namespace ns3
+{
 
 /**
  * \brief Keeps track of a set of drones pointers.
  */
 class DroneContainer : public NodeContainer
 {
-public:
-  /// Drone container iterator
-  typedef std::vector<Ptr<Drone>>::const_iterator Iterator;
+  public:
+    /// Drone container iterator
+    typedef std::vector<Ptr<Drone>>::const_iterator Iterator;
 
-  /**
-   * \brief Create n drones and append pointers to them to the end of this
-   * DroneContainer.
-   *
-   * \param n The number of Drones to create
-   */
-  void Create (uint32_t n);
+    /**
+     * \brief Create n drones and append pointers to them to the end of this
+     * DroneContainer.
+     *
+     * \param n The number of Drones to create
+     */
+    void Create(uint32_t n);
 
-  /**
-   * \brief Get an iterator which refers to the first Drone in the
-   * container.
-   *
-   * \returns an iterator which refers to the first Drone in the container.
-   */
-  Iterator Begin (void) const;
+    /**
+     * \brief Get an iterator which refers to the first Drone in the
+     * container.
+     *
+     * \returns an iterator which refers to the first Drone in the container.
+     */
+    Iterator Begin(void) const;
 
-  /**
-   * \brief Get an iterator which indicates past-the-last Drone in the
-   * container.
-   *
-   * \returns an iterator which indicates an ending condition for a loop.
-   */
-  Iterator End (void) const;
+    /**
+     * \brief Get an iterator which indicates past-the-last Drone in the
+     * container.
+     *
+     * \returns an iterator which indicates an ending condition for a loop.
+     */
+    Iterator End(void) const;
 
-  /**
-   * \brief Get the number of Ptr<Drone> stored in this container.
-   *
-   * \returns the number of Ptr<Drone> stored in this container.
-   */
-  uint32_t GetN (void) const;
+    /**
+     * \brief Get the number of Ptr<Drone> stored in this container.
+     *
+     * \returns the number of Ptr<Drone> stored in this container.
+     */
+    uint32_t GetN(void) const;
 
-  /**
-   * \brief Get the Ptr<Drone> stored in this container at a given
-   * index.
-   *
-   * \param i the index of the requested drone pointer.
-   * \returns the requested drone pointer.
-   */
-  Ptr<Drone> Get (uint32_t i) const;
+    /**
+     * \brief Get the Ptr<Drone> stored in this container at a given
+     * index.
+     *
+     * \param i the index of the requested drone pointer.
+     * \returns the requested drone pointer.
+     */
+    Ptr<Drone> Get(uint32_t i) const;
 
-private:
-  std::vector<Ptr<Drone>> m_drones; //!< Drones smart pointers
+  private:
+    std::vector<Ptr<Drone>> m_drones; //!< Drones smart pointers
 };
 
 } // namespace ns3

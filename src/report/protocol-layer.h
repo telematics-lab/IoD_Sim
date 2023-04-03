@@ -17,7 +17,6 @@
  *
  * Authors: Giovanni Iacovelli <giovanni.iacovelli@poliba.it>
  */
-
 #ifndef PROTOCOL_LAYER_H
 #define PROTOCOL_LAYER_H
 
@@ -25,11 +24,12 @@
 
 #include <libxml/xmlwriter.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 class ProtocolLayer : public Object
 {
-public:
+  public:
     /*
      * Pure virtual declarations
      * or very common methods/properties
@@ -40,24 +40,29 @@ public:
      * Register the type using ns-3 TypeId System.
      * \return the object TypeId
      */
-    static TypeId GetTypeId ();
+    static TypeId GetTypeId();
 
-    ProtocolLayer ();
+    ProtocolLayer();
 
-    ~ProtocolLayer ();
+    ~ProtocolLayer();
     /**
      * Write Stack Layer report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on
      */
-    virtual void Write (xmlTextWriterPtr handle);
-protected:
+    virtual void Write(xmlTextWriterPtr handle);
+
+  protected:
     /**
      * Object internal initialization
      */
-    virtual void DoInitialize () { Object::DoInitialize (); };
-private:
-std::string m_instancetypeid;
+    virtual void DoInitialize()
+    {
+        Object::DoInitialize();
+    };
+
+  private:
+    std::string m_instancetypeid;
 };
 
 } // namespace ns3

@@ -18,28 +18,31 @@
 #ifndef NETWORK_LAYER_CONFIGURATION_HELPER_H
 #define NETWORK_LAYER_CONFIGURATION_HELPER_H
 
-#include <rapidjson/document.h>
-
 #include <ns3/network-layer-configuration.h>
 
-namespace ns3 {
+#include <rapidjson/document.h>
+
+namespace ns3
+{
 
 /**
  * Helper to decode a Network Layer from a JSON configuration file.
  */
 class NetworkLayerConfigurationHelper
 {
-public:
-  /**
-   * Parse a Network configuration from a given JSON tree and map it on a NetworkLayerConfiguration data class.
-   *
-   * \param json The JSON tree to parse.
-   * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve parsed data.
-   */
-  static Ptr<NetworkLayerConfiguration> GetConfiguration (const rapidjson::Value& json);
+  public:
+    /**
+     * Parse a Network configuration from a given JSON tree and map it on a
+     * NetworkLayerConfiguration data class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve parsed
+     * data.
+     */
+    static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidjson::Value& json);
 
-private:
-  NetworkLayerConfigurationHelper();
+  private:
+    NetworkLayerConfigurationHelper();
 };
 
 } // namespace ns3

@@ -18,50 +18,50 @@
 #ifndef LTE_PHY_LAYER_CONFIGURATION_H
 #define LTE_PHY_LAYER_CONFIGURATION_H
 
+#include "phy-layer-configuration.h"
+
+#include <ns3/model-configuration.h>
+#include <ns3/wifi-phy.h>
+
 #include <optional>
 #include <string>
 #include <vector>
 
-#include <ns3/wifi-phy.h>
-
-#include <ns3/model-configuration.h>
-
-#include "phy-layer-configuration.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Data class to store information about the WiFi PHY Layer of a Scenario.
  */
 class LtePhyLayerConfiguration : public PhyLayerConfiguration
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param phyType The type of the PHY Layer to be configured. It should be "wifi".
-   * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
-   * \param channelSpectrumModel The Spectrum Model type to be used.
-   */
-  LtePhyLayerConfiguration (std::string phyType,
-                            std::vector<ModelConfiguration::Attribute> attributes,
-                            std::optional<ModelConfiguration> channelPropagationLossModel,
-                            ModelConfiguration channelSpectrumModel);
-  /** Default destructor */
-  ~LtePhyLayerConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param phyType The type of the PHY Layer to be configured. It should be "wifi".
+     * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
+     * \param channelSpectrumModel The Spectrum Model type to be used.
+     */
+    LtePhyLayerConfiguration(std::string phyType,
+                             std::vector<ModelConfiguration::Attribute> attributes,
+                             std::optional<ModelConfiguration> channelPropagationLossModel,
+                             ModelConfiguration channelSpectrumModel);
+    /** Default destructor */
+    ~LtePhyLayerConfiguration();
 
-  /**
-   * \return The Propagation Loss Model configuration.
-   */
-  const std::optional<ModelConfiguration> GetChannelPropagationLossModel ();
-  /**
-   * \return The Propagation Loss Model configuration.
-   */
-  const ModelConfiguration GetChannelSpectrumModel ();
+    /**
+     * \return The Propagation Loss Model configuration.
+     */
+    const std::optional<ModelConfiguration> GetChannelPropagationLossModel();
+    /**
+     * \return The Propagation Loss Model configuration.
+     */
+    const ModelConfiguration GetChannelSpectrumModel();
 
-private:
-  const std::optional<ModelConfiguration> m_channelPropagationLossModel;
-  const ModelConfiguration m_channelSpectrumModel;
+  private:
+    const std::optional<ModelConfiguration> m_channelPropagationLossModel;
+    const ModelConfiguration m_channelSpectrumModel;
 };
 
 } // namespace ns3

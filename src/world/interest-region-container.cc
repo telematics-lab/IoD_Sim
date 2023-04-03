@@ -18,73 +18,84 @@
 
 #include "interest-region-container.h"
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("InterestRegionContainer");
+NS_LOG_COMPONENT_DEFINE("InterestRegionContainer");
 
-InterestRegionContainer::InterestRegionContainer(){}
+InterestRegionContainer::InterestRegionContainer()
+{
+}
 
-InterestRegionContainer::~InterestRegionContainer(){
-  for (std::vector<ns3::Ptr<ns3::InterestRegion>>::iterator i = m_interestRegions.begin (); i != m_interestRegions.end (); i++)
-      {
+InterestRegionContainer::~InterestRegionContainer()
+{
+    for (std::vector<ns3::Ptr<ns3::InterestRegion>>::iterator i = m_interestRegions.begin();
+         i != m_interestRegions.end();
+         i++)
+    {
         Ptr<InterestRegion> region = *i;
-        region->Dispose ();
+        region->Dispose();
         *i = 0;
-      }
+    }
     m_interestRegions.clear();
 }
 
 const Ptr<InterestRegion>
-InterestRegionContainer::Create(const DoubleVector &coords)
+InterestRegionContainer::Create(const DoubleVector& coords)
 {
-  auto region = CreateObjectWithAttributes<InterestRegion>("Coordinates",DoubleVectorValue(coords));
-  m_interestRegions.push_back(region);
-  return region;
+    auto region =
+        CreateObjectWithAttributes<InterestRegion>("Coordinates", DoubleVectorValue(coords));
+    m_interestRegions.push_back(region);
+    return region;
 }
 
 uint32_t
-InterestRegionContainer::GetN (void) const
+InterestRegionContainer::GetN(void) const
 {
-  return m_interestRegions.size ();
+    return m_interestRegions.size();
 }
 
 Ptr<InterestRegion>
-InterestRegionContainer::GetRoI (uint32_t i)
+InterestRegionContainer::GetRoI(uint32_t i)
 {
-  return m_interestRegions[i];
+    return m_interestRegions[i];
 }
 
 InterestRegionContainer::Iterator
-InterestRegionContainer::Begin (void) const
+InterestRegionContainer::Begin(void) const
 {
-  return m_interestRegions.begin ();
+    return m_interestRegions.begin();
 }
 
 InterestRegionContainer::Iterator
-InterestRegionContainer::End (void) const
+InterestRegionContainer::End(void) const
 {
-  return m_interestRegions.end ();
+    return m_interestRegions.end();
 }
 
 int
-InterestRegionContainer::IsInRegions(std::vector<int> indexes, Vector &position)
+InterestRegionContainer::IsInRegions(std::vector<int> indexes, Vector& position)
 {
-  if (m_interestRegions.size() == 0) return -2;
-  for (auto index : indexes)
-  {
-    if (m_interestRegions[index]->IsInside(position)) return index;
-  }
-  return -1;
+    if (m_interestRegions.size() == 0)
+        return -2;
+    for (auto index : indexes)
+    {
+        if (m_interestRegions[index]->IsInside(position))
+            return index;
+    }
+    return -1;
 }
 
 int
-InterestRegionContainer::IsInRegions(Vector &position)
+InterestRegionContainer::IsInRegions(Vector& position)
 {
-  if (m_interestRegions.size() == 0) return -2;
-  for (int index=0;index< (int) m_interestRegions.size();index++)
-  {
-    if (m_interestRegions[index]->IsInside(position)) return index;
-  }
-  return -1;
+    if (m_interestRegions.size() == 0)
+        return -2;
+    for (int index = 0; index < (int)m_interestRegions.size(); index++)
+    {
+        if (m_interestRegions[index]->IsInside(position))
+            return index;
+    }
+    return -1;
 }
 } // namespace ns3

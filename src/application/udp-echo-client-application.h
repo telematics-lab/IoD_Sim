@@ -20,12 +20,13 @@
 #define UDP_ECHO_CLIENT_APPLICATION_H
 
 #include <ns3/application.h>
-#include <ns3/ipv4-address.h>
 #include <ns3/event-id.h>
+#include <ns3/ipv4-address.h>
 #include <ns3/nstime.h>
 #include <ns3/socket.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \ingroup udpclientserver
@@ -36,56 +37,55 @@ namespace ns3 {
  */
 class UdpEchoClientApplication : public Application
 {
-public:
-  /**
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  UdpEchoClientApplication ();
+    UdpEchoClientApplication();
 
-  virtual ~UdpEchoClientApplication ();
+    virtual ~UdpEchoClientApplication();
 
-  /**
-   * \brief set the remote address and port
-   * \param ip remote IP address
-   * \param port remote port
-   */
-  void SetRemote (Ipv4Address ip, uint16_t port);
-  /**
-   * \brief set the remote address
-   * \param addr remote address
-   */
-  void SetRemote (Ipv4Address addr);
+    /**
+     * \brief set the remote address and port
+     * \param ip remote IP address
+     * \param port remote port
+     */
+    void SetRemote(Ipv4Address ip, uint16_t port);
+    /**
+     * \brief set the remote address
+     * \param addr remote address
+     */
+    void SetRemote(Ipv4Address addr);
 
-  /**
-   * \return the total bytes sent by this app
-   */
-  uint64_t GetTotalTx () const;
+    /**
+     * \return the total bytes sent by this app
+     */
+    uint64_t GetTotalTx() const;
 
-protected:
-  virtual void DoDispose (void);
+  protected:
+    virtual void DoDispose(void);
 
-private:
+  private:
+    virtual void StartApplication(void);
+    virtual void StopApplication(void);
 
-  virtual void StartApplication (void);
-  virtual void StopApplication (void);
+    /**
+     * \brief Send a packet
+     */
+    void Send(void);
 
-  /**
-   * \brief Send a packet
-   */
-  void Send (void);
+    Time m_interval; //!< Packet inter-send time
+    uint32_t m_size; //!< Size of the sent packet (including the SeqTsHeader)
 
-  Time m_interval; //!< Packet inter-send time
-  uint32_t m_size; //!< Size of the sent packet (including the SeqTsHeader)
-
-  uint32_t m_sent; //!< Counter for sent packets
-  uint64_t m_totalTx; //!< Total bytes sent
-  Ptr<Socket> m_socket; //!< Socket
-  Ipv4Address m_peerAddress; //!< Remote peer address
-  uint16_t m_peerPort; //!< Remote peer port
-  EventId m_sendEvent; //!< Event to send the next packet
+    uint32_t m_sent;           //!< Counter for sent packets
+    uint64_t m_totalTx;        //!< Total bytes sent
+    Ptr<Socket> m_socket;      //!< Socket
+    Ipv4Address m_peerAddress; //!< Remote peer address
+    uint16_t m_peerPort;       //!< Remote peer port
+    EventId m_sendEvent;       //!< Event to send the next packet
 };
 
 } // namespace ns3

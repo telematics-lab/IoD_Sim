@@ -17,100 +17,99 @@
  */
 #include "lte-bearer-configuration.h"
 
-namespace ns3 {
+namespace ns3
+{
 
 class LteBearerConfigurationPriv
 {
-public:
-  static const EpsBearer::Qci ParseBearerType (const std::string t)
-  {
-    if (t == "GBR_CONV_VOICE")
-      return EpsBearer::Qci::GBR_CONV_VOICE;
-    else if (t == "GBR_CONV_VIDEO")
-      return EpsBearer::Qci::GBR_CONV_VIDEO;
-    else if (t == "GBR_GAMING")
-      return EpsBearer::Qci::GBR_GAMING;
-    else if (t == "GBR_NON_CONV_VIDEO")
-      return EpsBearer::Qci::GBR_NON_CONV_VIDEO;
-    else if (t == "GBR_MC_PUSH_TO_TALK")
-      return EpsBearer::Qci::GBR_MC_PUSH_TO_TALK;
-    else if (t == "GBR_NMC_PUSH_TO_TALK")
-      return EpsBearer::Qci::GBR_NMC_PUSH_TO_TALK;
-    else if (t == "GBR_MC_VIDEO")
-      return EpsBearer::Qci::GBR_MC_VIDEO;
-    else if (t == "GBR_V2X")
-      return EpsBearer::Qci::GBR_V2X;
-    else if (t == "NGBR_IMS")
-      return EpsBearer::Qci::NGBR_IMS;
-    else if (t == "NGBR_VIDEO_TCP_OPERATOR")
-      return EpsBearer::Qci::NGBR_VIDEO_TCP_OPERATOR;
-    else if (t == "NGBR_VOICE_VIDEO_GAMING")
-      return EpsBearer::Qci::NGBR_VOICE_VIDEO_GAMING;
-    else if (t == "NGBR_VIDEO_TCP_PREMIUM")
-      return EpsBearer::Qci::NGBR_VIDEO_TCP_PREMIUM;
-    else if (t == "NGBR_VIDEO_TCP_DEFAULT")
-      return EpsBearer::Qci::NGBR_VIDEO_TCP_DEFAULT;
-    else if (t == "NGBR_MC_DELAY_SIGNAL")
-      return EpsBearer::Qci::NGBR_MC_DELAY_SIGNAL;
-    else if (t == "NGBR_MC_DATA")
-      return EpsBearer::Qci::NGBR_MC_DATA;
-    else if (t == "NGBR_V2X")
-      return EpsBearer::Qci::NGBR_V2X;
-    else if (t == "NGBR_LOW_LAT_EMBB")
-      return EpsBearer::Qci::NGBR_LOW_LAT_EMBB;
-    else if (t == "DGBR_DISCRETE_AUT_SMALL")
-      return EpsBearer::Qci::DGBR_DISCRETE_AUT_SMALL;
-    else if (t == "DGBR_DISCRETE_AUT_LARGE")
-      return EpsBearer::Qci::DGBR_DISCRETE_AUT_LARGE;
-    else if (t == "DGBR_ITS")
-      return EpsBearer::Qci::DGBR_ITS;
-    else if (t == "DGBR_ELECTRICITY")
-      return EpsBearer::Qci::DGBR_ELECTRICITY;
-    else
-      NS_FATAL_ERROR ("Unsupported LTE Bearer QCI of type " << t);
-  }
+  public:
+    static const EpsBearer::Qci ParseBearerType(const std::string t)
+    {
+        if (t == "GBR_CONV_VOICE")
+            return EpsBearer::Qci::GBR_CONV_VOICE;
+        else if (t == "GBR_CONV_VIDEO")
+            return EpsBearer::Qci::GBR_CONV_VIDEO;
+        else if (t == "GBR_GAMING")
+            return EpsBearer::Qci::GBR_GAMING;
+        else if (t == "GBR_NON_CONV_VIDEO")
+            return EpsBearer::Qci::GBR_NON_CONV_VIDEO;
+        else if (t == "GBR_MC_PUSH_TO_TALK")
+            return EpsBearer::Qci::GBR_MC_PUSH_TO_TALK;
+        else if (t == "GBR_NMC_PUSH_TO_TALK")
+            return EpsBearer::Qci::GBR_NMC_PUSH_TO_TALK;
+        else if (t == "GBR_MC_VIDEO")
+            return EpsBearer::Qci::GBR_MC_VIDEO;
+        else if (t == "GBR_V2X")
+            return EpsBearer::Qci::GBR_V2X;
+        else if (t == "NGBR_IMS")
+            return EpsBearer::Qci::NGBR_IMS;
+        else if (t == "NGBR_VIDEO_TCP_OPERATOR")
+            return EpsBearer::Qci::NGBR_VIDEO_TCP_OPERATOR;
+        else if (t == "NGBR_VOICE_VIDEO_GAMING")
+            return EpsBearer::Qci::NGBR_VOICE_VIDEO_GAMING;
+        else if (t == "NGBR_VIDEO_TCP_PREMIUM")
+            return EpsBearer::Qci::NGBR_VIDEO_TCP_PREMIUM;
+        else if (t == "NGBR_VIDEO_TCP_DEFAULT")
+            return EpsBearer::Qci::NGBR_VIDEO_TCP_DEFAULT;
+        else if (t == "NGBR_MC_DELAY_SIGNAL")
+            return EpsBearer::Qci::NGBR_MC_DELAY_SIGNAL;
+        else if (t == "NGBR_MC_DATA")
+            return EpsBearer::Qci::NGBR_MC_DATA;
+        else if (t == "NGBR_V2X")
+            return EpsBearer::Qci::NGBR_V2X;
+        else if (t == "NGBR_LOW_LAT_EMBB")
+            return EpsBearer::Qci::NGBR_LOW_LAT_EMBB;
+        else if (t == "DGBR_DISCRETE_AUT_SMALL")
+            return EpsBearer::Qci::DGBR_DISCRETE_AUT_SMALL;
+        else if (t == "DGBR_DISCRETE_AUT_LARGE")
+            return EpsBearer::Qci::DGBR_DISCRETE_AUT_LARGE;
+        else if (t == "DGBR_ITS")
+            return EpsBearer::Qci::DGBR_ITS;
+        else if (t == "DGBR_ELECTRICITY")
+            return EpsBearer::Qci::DGBR_ELECTRICITY;
+        else
+            NS_FATAL_ERROR("Unsupported LTE Bearer QCI of type " << t);
+    }
 
-  static const GbrQosInformation BuildQosInformation (const uint64_t gbrDl,
-                                                      const uint64_t gbrUl,
-                                                      const uint64_t mbrDl,
-                                                      const uint64_t mbrUl)
-  {
-    auto qosInfo = GbrQosInformation ();
-    qosInfo.gbrDl = gbrDl;
-    qosInfo.gbrUl = gbrUl;
-    qosInfo.mbrDl = mbrDl;
-    qosInfo.mbrUl = mbrUl;
+    static const GbrQosInformation BuildQosInformation(const uint64_t gbrDl,
+                                                       const uint64_t gbrUl,
+                                                       const uint64_t mbrDl,
+                                                       const uint64_t mbrUl)
+    {
+        auto qosInfo = GbrQosInformation();
+        qosInfo.gbrDl = gbrDl;
+        qosInfo.gbrUl = gbrUl;
+        qosInfo.mbrDl = mbrDl;
+        qosInfo.mbrUl = mbrUl;
 
-    return qosInfo;
-  }
+        return qosInfo;
+    }
 };
 
-LteBearerConfiguration::LteBearerConfiguration (const std::string type,
-                                                const uint64_t gbrDl,
-                                                const uint64_t gbrUl,
-                                                const uint64_t mbrDl,
-                                                const uint64_t mbrUl) :
-  m_type {LteBearerConfigurationPriv::ParseBearerType (type)},
-  m_qos {LteBearerConfigurationPriv::BuildQosInformation (gbrDl, gbrUl, mbrDl, mbrUl)}
+LteBearerConfiguration::LteBearerConfiguration(const std::string type,
+                                               const uint64_t gbrDl,
+                                               const uint64_t gbrUl,
+                                               const uint64_t mbrDl,
+                                               const uint64_t mbrUl)
+    : m_type{LteBearerConfigurationPriv::ParseBearerType(type)},
+      m_qos{LteBearerConfigurationPriv::BuildQosInformation(gbrDl, gbrUl, mbrDl, mbrUl)}
 {
-
 }
 
-LteBearerConfiguration::~LteBearerConfiguration ()
+LteBearerConfiguration::~LteBearerConfiguration()
 {
-
 }
 
 const EpsBearer::Qci
-LteBearerConfiguration::GetType () const
+LteBearerConfiguration::GetType() const
 {
-  return m_type;
+    return m_type;
 }
 
 const GbrQosInformation
-LteBearerConfiguration::GetQos () const
+LteBearerConfiguration::GetQos() const
 {
-  return m_qos;
+    return m_qos;
 }
 
 } // namespace ns3

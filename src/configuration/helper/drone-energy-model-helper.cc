@@ -19,35 +19,36 @@
 
 #include <ns3/drone-energy-model.h>
 
-namespace ns3 {
-
-DroneEnergyModelHelper::DroneEnergyModelHelper ()
+namespace ns3
 {
-  m_droneEnergyModel.SetTypeId ("ns3::DroneEnergyModel");
+
+DroneEnergyModelHelper::DroneEnergyModelHelper()
+{
+    m_droneEnergyModel.SetTypeId("ns3::DroneEnergyModel");
 }
 
 void
-DroneEnergyModelHelper::Set (std::string name, const AttributeValue &v)
+DroneEnergyModelHelper::Set(std::string name, const AttributeValue& v)
 {
-  m_droneEnergyModel.Set (name, v);
+    m_droneEnergyModel.Set(name, v);
 }
 
 Ptr<DeviceEnergyModel>
-DroneEnergyModelHelper::Install (Ptr<Drone> drone, Ptr<EnergySource> source)
+DroneEnergyModelHelper::Install(Ptr<Drone> drone, Ptr<EnergySource> source)
 {
-  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel> ();
-  model->SetDrone (drone);
-  model->SetEnergySource (source);
-  source->AppendDeviceEnergyModel (model);
-  source->SetNode (drone);
-  return model;
+    Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
+    model->SetDrone(drone);
+    model->SetEnergySource(source);
+    source->AppendDeviceEnergyModel(model);
+    source->SetNode(drone);
+    return model;
 }
 
 Ptr<DeviceEnergyModel>
-DroneEnergyModelHelper::DoInstall (Ptr<NetDevice> device, Ptr<EnergySource> source) const
+DroneEnergyModelHelper::DoInstall(Ptr<NetDevice> device, Ptr<EnergySource> source) const
 {
-  Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel> ();
-  return model;
+    Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
+    return model;
 }
 
 } // namespace ns3

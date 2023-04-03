@@ -18,77 +18,79 @@
 #ifndef NAT_APPLICATION_H
 #define NAT_APPLICATION_H
 
-#include <unordered_map>
-
 #include <ns3/application.h>
 #include <ns3/inet-socket-address.h>
 #include <ns3/net-device.h>
 #include <ns3/ptr.h>
 
-namespace ns3 {
+#include <unordered_map>
+
+namespace ns3
+{
 
 class NatApplication : public Application
 {
-public:
-  /**
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId ();
-  // virtual void DoDispose ();
-
-  NatApplication ();
-  virtual ~NatApplication ();
-
-  bool RecvPktFromIntNetDev (Ptr<NetDevice> netdev,
-                             Ptr<const Packet> pkt,
-                             uint16_t protocol,
-                             const Address& sender,
-                             const Address& receiver,
-                             enum NetDevice::PacketType pktType);
-
-  bool RecvPktFromExtNetDev (Ptr<NetDevice> netdev,
-                             Ptr<const Packet> pkt,
-                             uint16_t protocol,
-                             const Address& sender);
-
-  bool RecvPktFromNetDev (Ptr<NetDevice> netdev,
-                          Ptr<const Packet> pkt,
-                          uint16_t protocol,
-                          const Address& sender,
-                          const Address& receiver,
-                          enum NetDevice::PacketType pktType);
-
-  typedef struct __NatEntry {
-    Ipv4Address ipv4Addr;
-    uint32_t port;
-    Address macAddr;
-  } NatEntry;
-
-protected:
-  virtual void DoInitialize (void);
-
-private:
-  class NatEntryHash
-  {
   public:
-    size_t operator() (NatEntry const &x) const;
-  };
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+    // virtual void DoDispose ();
 
-  typedef std::unordered_map<NatEntry, uint16_t, NatEntryHash> NatTable;
-  typedef std::unordered_map<NatEntry, uint16_t, NatEntryHash>::iterator NatTableI;
+    NatApplication();
+    virtual ~NatApplication();
 
-  NatTableI InverseLookup (uint16_t port);
+    bool RecvPktFromIntNetDev(Ptr<NetDevice> netdev,
+                              Ptr<const Packet> pkt,
+                              uint16_t protocol,
+                              const Address& sender,
+                              const Address& receiver,
+                              enum NetDevice::PacketType pktType);
 
-  uint32_t m_intNetDevId;
-  uint32_t m_extNetDevId;
-  Ptr<NetDevice> m_intNetDev;
-  Ptr<NetDevice> m_extNetDev;
-  NatTable m_natTable;
-  uint16_t m_curNatPort;
+    bool RecvPktFromExtNetDev(Ptr<NetDevice> netdev,
+                              Ptr<const Packet> pkt,
+                              uint16_t protocol,
+                              const Address& sender);
+
+    bool RecvPktFromNetDev(Ptr<NetDevice> netdev,
+                           Ptr<const Packet> pkt,
+                           uint16_t protocol,
+                           const Address& sender,
+                           const Address& receiver,
+                           enum NetDevice::PacketType pktType);
+
+    typedef struct __NatEntry
+    {
+        Ipv4Address ipv4Addr;
+        uint32_t port;
+        Address macAddr;
+    } NatEntry;
+
+  protected:
+    virtual void DoInitialize(void);
+
+  private:
+    class NatEntryHash
+    {
+      public:
+        size_t operator()(const NatEntry& x) const;
+    };
+
+    typedef std::unordered_map<NatEntry, uint16_t, NatEntryHash> NatTable;
+    typedef std::unordered_map<NatEntry, uint16_t, NatEntryHash>::iterator NatTableI;
+
+    NatTableI InverseLookup(uint16_t port);
+
+    uint32_t m_intNetDevId;
+    uint32_t m_extNetDevId;
+    Ptr<NetDevice> m_intNetDev;
+    Ptr<NetDevice> m_extNetDev;
+    NatTable m_natTable;
+    uint16_t m_curNatPort;
 };
 
-bool operator== (const NatApplication::NatEntry x, const NatApplication::NatEntry y);
+bool operator==(const NatApplication::NatEntry x, const NatApplication::NatEntry y);
 
 } // namespace ns3
 

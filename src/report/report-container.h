@@ -20,78 +20,79 @@
 #ifndef REPORT_CONTAINER_H
 #define REPORT_CONTAINER_H
 
-#include <string>
-#include <vector>
+#include "report-drone.h"
+#include "report-remote.h"
+#include "report-zsp.h"
 
 #include <ns3/ptr.h>
 
 #include <libxml/xmlwriter.h>
+#include <string>
+#include <vector>
 
-#include "report-drone.h"
-#include "report-zsp.h"
-#include "report-remote.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * A container to easily keep pointers
  */
-template<class ReportType>
+template <class ReportType>
 class ReportContainer
 {
-public:
-  /// Container iterator
-  typedef typename std::vector<Ptr<ReportType>>::const_iterator Iterator;
+  public:
+    /// Container iterator
+    typedef typename std::vector<Ptr<ReportType>>::const_iterator Iterator;
 
-  /**
-   * Create an empty ReportContainer
-   *
-   * \param groupName name of entities group
-   */
-  ReportContainer (const std::string groupName);
+    /**
+     * Create an empty ReportContainer
+     *
+     * \param groupName name of entities group
+     */
+    ReportContainer(const std::string groupName);
 
-  /**
-   * Get an iterator which refers to the first entity in the container
-   */
-  Iterator Begin () const;
+    /**
+     * Get an iterator which refers to the first entity in the container
+     */
+    Iterator Begin() const;
 
-  /**
-   * Get an iterator which indicates past-the-last entity in the container
-   */
-  Iterator End () const;
+    /**
+     * Get an iterator which indicates past-the-last entity in the container
+     */
+    Iterator End() const;
 
-  /**
-   * Get the number of Ptr<ReportType> stored in this container
-   */
-  uint32_t GetN () const;
+    /**
+     * Get the number of Ptr<ReportType> stored in this container
+     */
+    uint32_t GetN() const;
 
-  /**
-   * Get the Ptr<ReportType> stored in this container at a given index
-   */
-  Ptr<ReportType> Get (const uint32_t i) const;
+    /**
+     * Get the Ptr<ReportType> stored in this container at a given index
+     */
+    Ptr<ReportType> Get(const uint32_t i) const;
 
-  /**
-   * Append a single Ptr<ReportType> to this container
-   */
-  void Add (Ptr<ReportType> entity);
+    /**
+     * Append a single Ptr<ReportType> to this container
+     */
+    void Add(Ptr<ReportType> entity);
 
-  /**
-   * Append a new Ptr<ReportType> to this container initializing with
-   * an entity UID.
-   *
-   * \param entityUid The entity unique identifier
-   */
-  void Add (uint32_t entityUid);
+    /**
+     * Append a new Ptr<ReportType> to this container initializing with
+     * an entity UID.
+     *
+     * \param entityUid The entity unique identifier
+     */
+    void Add(uint32_t entityUid);
 
-  /**
-   * Write entity report data to a XML file with a given handler
-   *
-   * \param handle the handler to communicate data to the opened XML file
-   */
-  void Write (xmlTextWriterPtr handle) const;
-private:
-  const std::string m_groupName;           /// name of entities group
-  std::vector<Ptr<ReportType>> m_entities; /// smart pointers
+    /**
+     * Write entity report data to a XML file with a given handler
+     *
+     * \param handle the handler to communicate data to the opened XML file
+     */
+    void Write(xmlTextWriterPtr handle) const;
+
+  private:
+    const std::string m_groupName;           /// name of entities group
+    std::vector<Ptr<ReportType>> m_entities; /// smart pointers
 };
 
 /*

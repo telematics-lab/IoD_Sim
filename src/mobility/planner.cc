@@ -17,69 +17,65 @@
  */
 #include "planner.h"
 
-#include <ns3/log.h>
-
 #include <ns3/constant-acceleration-flight.h>
 #include <ns3/constant-acceleration-param.h>
+#include <ns3/log.h>
 #include <ns3/parametric-speed-flight.h>
 #include <ns3/parametric-speed-param.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE_MASK ("Planner", LOG_PREFIX_ALL);
+NS_LOG_COMPONENT_DEFINE_MASK("Planner", LOG_PREFIX_ALL);
 
-template<typename FlightParam, typename FlightType>
-Planner<FlightParam, FlightType>::Planner ()
+template <typename FlightParam, typename FlightType>
+Planner<FlightParam, FlightType>::Planner()
 {
 }
 
-template<typename FlightParam, typename FlightType>
-Planner<FlightParam, FlightType>::Planner (FlightPlan flightPlan,
-                                           FlightParam flightParam,
-                                           float step) :
-  m_step {step},
-  m_flightParams {flightParam}
+template <typename FlightParam, typename FlightType>
+Planner<FlightParam, FlightType>::Planner(FlightPlan flightPlan,
+                                          FlightParam flightParam,
+                                          float step)
+    : m_step{step},
+      m_flightParams{flightParam}
 {
-  for (auto point = flightPlan.Begin (); point != flightPlan.End (); point++)
+    for (auto point = flightPlan.Begin(); point != flightPlan.End(); point++)
     {
-      if ((*point)->GetInterest () == 0)
+        if ((*point)->GetInterest() == 0)
         {
-          if (!m_flightPlans.empty ())
+            if (!m_flightPlans.empty())
             {
-              m_flightPlans.back ().Add (*point);
+                m_flightPlans.back().Add(*point);
             }
-          m_flightPlans.push_back (FlightPlan (*point)); // Flight Plan to hover on the point
-          m_flightPlans.push_back (FlightPlan ());
+            m_flightPlans.push_back(FlightPlan(*point)); // Flight Plan to hover on the point
+            m_flightPlans.push_back(FlightPlan());
         }
-      m_flightPlans.back ().Add (*point);
+        m_flightPlans.back().Add(*point);
     }
 
-  for (auto flightPlan : m_flightPlans)
+    for (auto flightPlan : m_flightPlans)
     {
-      // push new trajectory
-      m_flights.push_back (FlightType (flightPlan,
-                                       flightParam,
-                                       step));
-      // estimate timeWindow
-      const Time time = m_flights.back ().GetTime ();
-      const Time startTime = (m_timeWindows.size () == 0)
-                             ? Seconds (0)
-                             : m_timeWindows.back ().second;
+        // push new trajectory
+        m_flights.push_back(FlightType(flightPlan, flightParam, step));
+        // estimate timeWindow
+        const Time time = m_flights.back().GetTime();
+        const Time startTime =
+            (m_timeWindows.size() == 0) ? Seconds(0) : m_timeWindows.back().second;
 
-      m_timeWindows.push_back ({startTime,
-                                startTime + time});
+        m_timeWindows.push_back({startTime, startTime + time});
 
-      NS_LOG_LOGIC ("Added flight " << flightPlan);
-      NS_LOG_LOGIC ("TimeWindow: start at " << startTime << " for " << time);
+        NS_LOG_LOGIC("Added flight " << flightPlan);
+        NS_LOG_LOGIC("TimeWindow: start at " << startTime << " for " << time);
     }
 
-  NS_LOG_LOGIC ("Summary TimeWindow: " << m_timeWindows.size ());
-  for (auto tw : m_timeWindows)
-    NS_LOG_LOGIC ("    #: " << tw.first << "; " << tw.second);
+    NS_LOG_LOGIC("Summary TimeWindow: " << m_timeWindows.size());
+    for (auto tw : m_timeWindows)
+        NS_LOG_LOGIC("    #: " << tw.first << "; " << tw.second);
 }
 
-template<typename FlightParam, typename FlightType>
-Planner<FlightParam, FlightType>::~Planner ()
+template <typename FlightParam, typename FlightType>
+Planner<FlightParam, FlightType>::~Planner()
 {
 }
 
@@ -87,64 +83,63 @@ Planner<FlightParam, FlightType>::~Planner ()
  * Find and update the Trip corresponding to the correct timeWindow,
  * otherwise do not update
  **/
-template<typename FlightParam, typename FlightType>
+template <typename FlightParam, typename FlightType>
 void
-Planner<FlightParam, FlightType>::Update (const Time time) const
+Planner<FlightParam, FlightType>::Update(const Time time) const
 {
-  NS_LOG_FUNCTION (time);
+    NS_LOG_FUNCTION(time);
 
-  const auto flightIndex = GetTimeWindow (time);
-  if (flightIndex == -1)
+    const auto flightIndex = GetTimeWindow(time);
+    if (flightIndex == -1)
     {
-      NS_LOG_WARN ("flightIndex got -1 from GetTimeWindow (" << time << ")");
-      return;
+        NS_LOG_WARN("flightIndex got -1 from GetTimeWindow (" << time << ")");
+        return;
     }
 
-  const double timeOffset = (time - m_timeWindows[flightIndex].first).GetSeconds ();
+    const double timeOffset = (time - m_timeWindows[flightIndex].first).GetSeconds();
 
-  NS_LOG_LOGIC ("flightIndex: " << flightIndex << "; timeOffset: " << timeOffset);
+    NS_LOG_LOGIC("flightIndex: " << flightIndex << "; timeOffset: " << timeOffset);
 
-  m_flights[flightIndex].Update (timeOffset);
+    m_flights[flightIndex].Update(timeOffset);
 
-  m_currentPosition = m_flights[flightIndex].GetPosition ();
-  m_currentVelocity = m_flights[flightIndex].GetVelocity ();
+    m_currentPosition = m_flights[flightIndex].GetPosition();
+    m_currentVelocity = m_flights[flightIndex].GetVelocity();
 
-  NS_LOG_LOGIC ("Drone updated to pos " << m_currentPosition
-                << "; vel " << m_currentVelocity);
+    NS_LOG_LOGIC("Drone updated to pos " << m_currentPosition << "; vel " << m_currentVelocity);
 }
 
-template<typename FlightParam, typename FlightType>
+template <typename FlightParam, typename FlightType>
 const Vector
-Planner<FlightParam, FlightType>::GetPosition () const
+Planner<FlightParam, FlightType>::GetPosition() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  return m_currentPosition;
+    NS_LOG_FUNCTION_NOARGS();
+    return m_currentPosition;
 }
 
-template<typename FlightParam, typename FlightType>
+template <typename FlightParam, typename FlightType>
 const Vector
-Planner<FlightParam, FlightType>::GetVelocity () const
+Planner<FlightParam, FlightType>::GetVelocity() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  return m_currentVelocity;
+    NS_LOG_FUNCTION_NOARGS();
+    return m_currentVelocity;
 }
 
-template<typename FlightParam, typename FlightType>
+template <typename FlightParam, typename FlightType>
 const int32_t
-Planner<FlightParam, FlightType>::GetTimeWindow (const Time time) const
+Planner<FlightParam, FlightType>::GetTimeWindow(const Time time) const
 {
-  NS_LOG_FUNCTION (time);
+    NS_LOG_FUNCTION(time);
 
-  for (uint32_t i = 0; i < m_timeWindows.size (); i++)
+    for (uint32_t i = 0; i < m_timeWindows.size(); i++)
     {
-      NS_LOG_LOGIC ("Checking if " << time << " < " << m_timeWindows[i].second);
-      if (time.Compare(m_timeWindows[i].second) == -1)
+        NS_LOG_LOGIC("Checking if " << time << " < " << m_timeWindows[i].second);
+        if (time.Compare(m_timeWindows[i].second) == -1)
         {
-          return i;
+            return i;
         }
     }
 
-  return -1;
+    return -1;
 }
 
 template class Planner<ConstantAccelerationParam, ConstantAccelerationFlight>;

@@ -17,22 +17,21 @@
  */
 #include "wifi-mac-simulation-helper.h"
 
-namespace ns3 {
-
-WifiMacSimulationHelper::WifiMacSimulationHelper ()
+namespace ns3
 {
 
+WifiMacSimulationHelper::WifiMacSimulationHelper()
+{
 }
 
-WifiMacSimulationHelper::~WifiMacSimulationHelper ()
+WifiMacSimulationHelper::~WifiMacSimulationHelper()
 {
-
 }
 
 WifiMacHelper&
-WifiMacSimulationHelper::GetMacHelper ()
+WifiMacSimulationHelper::GetMacHelper()
 {
-  return m_macHelper;
+    return m_macHelper;
 }
 
 } // namespace ns3

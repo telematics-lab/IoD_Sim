@@ -18,30 +18,32 @@
 #ifndef WIFI_MAC_FACTORY_HELPER_H
 #define WIFI_MAC_FACTORY_HELPER_H
 
+#include <ns3/model-configuration.h>
 #include <ns3/wifi-helper.h>
 
-#include <ns3/model-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Helper to enhance ns-3 WifiHelper functionalities with additional
  * features, without modifying objects external to IoD_Sim.
  */
-class WifiMacFactoryHelper {
-public:
-  /**
-   * Set the wifi model to be used from a ModelConfiguration data class.
-   *
-   * \param helper The WifiHelper instance.
-   * \param modelConf The configuration data class that defines the WiFi model to be used and its configuration.
-   */
-  static void SetRemoteStationManager (WifiHelper& helper, const ModelConfiguration& modelConf);
+class WifiMacFactoryHelper
+{
+  public:
+    /**
+     * Set the wifi model to be used from a ModelConfiguration data class.
+     *
+     * \param helper The WifiHelper instance.
+     * \param modelConf The configuration data class that defines the WiFi model to be used and its
+     * configuration.
+     */
+    static void SetRemoteStationManager(WifiHelper& helper, const ModelConfiguration& modelConf);
 
-private:
-  WifiMacFactoryHelper ();
+  private:
+    WifiMacFactoryHelper();
 };
 
-}
+} // namespace ns3
 
 #endif /* WIFI_MAC_FACTORY_HELPER_H */

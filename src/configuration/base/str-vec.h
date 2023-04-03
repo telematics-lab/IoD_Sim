@@ -18,53 +18,52 @@
 #ifndef STRING_VECTOR_H
 #define STRING_VECTOR_H
 
+#include <ns3/attribute-helper.h>
+#include <ns3/attribute.h>
+
 #include <istream>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <ns3/attribute.h>
-#include <ns3/attribute-helper.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Definition of a new attribute type, in the form vector<std::string>.
  */
 class StrVec
 {
-public:
-  typedef std::vector<std::string>::const_iterator Iterator;
+  public:
+    typedef std::vector<std::string>::const_iterator Iterator;
 
-  StrVec ();
-  StrVec (std::vector<std::string> coefficients);
-  StrVec (const StrVec &a);
+    StrVec();
+    StrVec(std::vector<std::string> coefficients);
+    StrVec(const StrVec& a);
 
-  Iterator Begin () const;
-  Iterator begin () const;
-  Iterator End () const;
-  Iterator end () const;
+    Iterator Begin() const;
+    Iterator begin() const;
+    Iterator End() const;
+    Iterator end() const;
 
-  uint32_t GetN () const;
+    uint32_t GetN() const;
 
-  std::vector<std::string> Get () const;
-  std::string Get (const uint32_t i) const;
+    std::vector<std::string> Get() const;
+    std::string Get(const uint32_t i) const;
 
-  std::string GetFront () const;
-  std::string GetBack () const;
+    std::string GetFront() const;
+    std::string GetBack() const;
 
-  void Add (std::string str);
+    void Add(std::string str);
 
-private:
-  std::vector<std::string> m_stringVector;
+  private:
+    std::vector<std::string> m_stringVector;
 };
 
-ATTRIBUTE_HELPER_HEADER (StrVec);
+ATTRIBUTE_HELPER_HEADER(StrVec);
 
-std::ostream & operator<< (std::ostream &os,
-                           const StrVec &sv);
-std::istream & operator>> (std::istream &is,
-                           StrVec &sv);
+std::ostream& operator<<(std::ostream& os, const StrVec& sv);
+std::istream& operator>>(std::istream& is, StrVec& sv);
 
 } // namespace ns3
 

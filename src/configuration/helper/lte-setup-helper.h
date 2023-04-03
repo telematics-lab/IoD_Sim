@@ -20,34 +20,36 @@
 
 #include <ns3/lte-helper.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * Helper to enhance ns-3 LteHelper functionalities with additional
  * features, without modifying objects external to IoD_Sim.
  */
-class LteSetupHelper {
-public:
-  /**
-   * Create an eNodeB device (LteEnbNetDevice) on the given node.
-   * \param helper A pre-inizialized instance of the Lte Helper.
-   * \param n the node where the device is to be installed
-   * \return pointer to the created device
-   */
-  static Ptr<NetDevice> InstallSingleEnbDevice (Ptr<LteHelper> helper, Ptr<Node> n);
+class LteSetupHelper
+{
+  public:
+    /**
+     * Create an eNodeB device (LteEnbNetDevice) on the given node.
+     * \param helper A pre-inizialized instance of the Lte Helper.
+     * \param n the node where the device is to be installed
+     * \return pointer to the created device
+     */
+    static Ptr<NetDevice> InstallSingleEnbDevice(Ptr<LteHelper> helper, Ptr<Node> n);
 
-  /**
-   * Create a User Equipment device (LteUeNetDevice) on the given node.
-   * \param helper A pre-inizialized instance of the Lte Helper.
-   * \param n Target node to install the LTE device.
-   * \return pointer to the created device.
-   */
-  static Ptr<NetDevice> InstallSingleUeDevice (Ptr<LteHelper> helper, Ptr<Node> n);
+    /**
+     * Create a User Equipment device (LteUeNetDevice) on the given node.
+     * \param helper A pre-inizialized instance of the Lte Helper.
+     * \param n Target node to install the LTE device.
+     * \return pointer to the created device.
+     */
+    static Ptr<NetDevice> InstallSingleUeDevice(Ptr<LteHelper> helper, Ptr<Node> n);
 
-private:
-  LteSetupHelper ();
+  private:
+    LteSetupHelper();
 };
 
-}
+} // namespace ns3
 
 #endif /* LTE_SETUP_HELPER_H */

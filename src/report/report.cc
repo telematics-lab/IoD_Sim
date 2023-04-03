@@ -19,114 +19,116 @@
  */
 #include "report.h"
 
+#include "report-simulation.h"
+
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
 #include <ns3/string.h>
 
-#include "report-simulation.h"
+namespace ns3
+{
 
-namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("Report");
+NS_LOG_COMPONENT_DEFINE("Report");
 
 void
-Report::Initialize (const std::string scenarioName,
-                    const std::string executedAt,
-                    const std::string resultsPath)
+Report::Initialize(const std::string scenarioName,
+                   const std::string executedAt,
+                   const std::string resultsPath)
 {
-  NS_LOG_FUNCTION (this);
-  if (m_dataTreeRoot != nullptr)
+    NS_LOG_FUNCTION(this);
+    if (m_dataTreeRoot != nullptr)
     {
-      NS_LOG_WARN ("Report is already being populated at " << m_dataTreeRoot
-                   << ". There is no need to reinitialize it.");
-      return;
+        NS_LOG_WARN("Report is already being populated at "
+                    << m_dataTreeRoot << ". There is no need to reinitialize it.");
+        return;
     }
 
-  m_resultsPath = resultsPath;
+    m_resultsPath = resultsPath;
 
-  m_dataTreeRoot = CreateObjectWithAttributes<ReportSimulation>
-    ("Scenario",   StringValue (scenarioName),
-     "ExecutedAt", StringValue (executedAt));
+    m_dataTreeRoot = CreateObjectWithAttributes<ReportSimulation>("Scenario",
+                                                                  StringValue(scenarioName),
+                                                                  "ExecutedAt",
+                                                                  StringValue(executedAt));
 
-  m_dataTreeRoot->Initialize ();
+    m_dataTreeRoot->Initialize();
 
-  /*
-   * File early opening is to check that a new file can be created and
-   * written to before starting a simulation that can last minutes, hours,
-   * days, whatever.
-   * Lazy opening is discouraged here to not lose data and time.
-   */
-  Open ();
+    /*
+     * File early opening is to check that a new file can be created and
+     * written to before starting a simulation that can last minutes, hours,
+     * days, whatever.
+     * Lazy opening is discouraged here to not lose data and time.
+     */
+    Open();
 }
 
-Report::~Report ()
+Report::~Report()
 {
-  NS_LOG_FUNCTION (this);
-}
-
-void
-Report::Save ()
-{
-  NS_LOG_FUNCTION_NOARGS ();
-
-  Write ();
-  Close ();
+    NS_LOG_FUNCTION(this);
 }
 
 void
-Report::Open ()
+Report::Save()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  if (m_writer != nullptr)
-    return;
+    NS_LOG_FUNCTION_NOARGS();
 
-  int rc;
-
-  m_writer = xmlNewTextWriterFilename (GetFilename ().c_str (), 0);
-  NS_ASSERT (m_writer != nullptr);
-
-  rc = xmlTextWriterSetIndent (m_writer, 4);
-  NS_ASSERT (rc == 0);
-
-  rc = xmlTextWriterStartDocument (m_writer, nullptr, "utf-8", nullptr);
-  NS_ASSERT (rc >= 0);
-
-  rc = xmlTextWriterWriteComment (m_writer, BAD_CAST "IoD_Sim Report Summary");
-  NS_ASSERT (rc >= 0);
+    Write();
+    Close();
 }
 
 void
-Report::Close ()
+Report::Open()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  if (m_writer == nullptr)
-    return;
+    NS_LOG_FUNCTION_NOARGS();
+    if (m_writer != nullptr)
+        return;
 
-  const int rc = xmlTextWriterEndDocument (m_writer);
-  NS_ASSERT (rc >= 0);
+    int rc;
 
-  xmlFreeTextWriter (m_writer);
-  m_writer = nullptr;
+    m_writer = xmlNewTextWriterFilename(GetFilename().c_str(), 0);
+    NS_ASSERT(m_writer != nullptr);
+
+    rc = xmlTextWriterSetIndent(m_writer, 4);
+    NS_ASSERT(rc == 0);
+
+    rc = xmlTextWriterStartDocument(m_writer, nullptr, "utf-8", nullptr);
+    NS_ASSERT(rc >= 0);
+
+    rc = xmlTextWriterWriteComment(m_writer, BAD_CAST "IoD_Sim Report Summary");
+    NS_ASSERT(rc >= 0);
 }
 
 void
-Report::Write () const
+Report::Close()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  NS_ASSERT (m_writer != nullptr);
+    NS_LOG_FUNCTION_NOARGS();
+    if (m_writer == nullptr)
+        return;
 
-  m_dataTreeRoot->Write (m_writer);
+    const int rc = xmlTextWriterEndDocument(m_writer);
+    NS_ASSERT(rc >= 0);
+
+    xmlFreeTextWriter(m_writer);
+    m_writer = nullptr;
+}
+
+void
+Report::Write() const
+{
+    NS_LOG_FUNCTION_NOARGS();
+    NS_ASSERT(m_writer != nullptr);
+
+    m_dataTreeRoot->Write(m_writer);
 }
 
 const std::string
-Report::GetFilename () const
+Report::GetFilename() const
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  std::ostringstream bFilename;
+    NS_LOG_FUNCTION_NOARGS();
+    std::ostringstream bFilename;
 
-  bFilename << m_resultsPath << "summary.xml";
+    bFilename << m_resultsPath << "summary.xml";
 
-  return bFilename.str ();
+    return bFilename.str();
 }
 
 } // namespace ns3

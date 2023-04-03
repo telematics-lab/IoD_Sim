@@ -19,99 +19,113 @@
 
 #include <ns3/integer.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("StoragePeripheral");
+NS_LOG_COMPONENT_DEFINE("StoragePeripheral");
 
-NS_OBJECT_ENSURE_REGISTERED (StoragePeripheral);
+NS_OBJECT_ENSURE_REGISTERED(StoragePeripheral);
 
 TypeId
-StoragePeripheral::GetTypeId ()
+StoragePeripheral::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::StoragePeripheral")
-          .SetParent<DronePeripheral> ()
-          .SetGroupName ("Peripheral")
-          .AddConstructor<StoragePeripheral> ()
-          .AddAttribute ("Capacity", "The capacity of the disk in bit",
-                         UintegerValue (8000000), //1MByte
-                         MakeUintegerAccessor (&StoragePeripheral::SetCapacity,
+    static TypeId tid =
+        TypeId("ns3::StoragePeripheral")
+            .SetParent<DronePeripheral>()
+            .SetGroupName("Peripheral")
+            .AddConstructor<StoragePeripheral>()
+            .AddAttribute("Capacity",
+                          "The capacity of the disk in bit",
+                          UintegerValue(8000000), // 1MByte
+                          MakeUintegerAccessor(&StoragePeripheral::SetCapacity,
                                                &StoragePeripheral::GetCapacity),
-                         MakeUintegerChecker<uint64_t> ())
-          .AddAttribute ("InitialRemainingCapacity", "The initial capacity of the disk in bit",
-                         UintegerValue (8000000), //1MByte
-                         MakeUintegerAccessor (&StoragePeripheral::m_remainingCapacity),
-                         MakeUintegerChecker<uint64_t> ())
-          .AddTraceSource ("RemainingCapacity", "Remaining Capacity at Storage Peripheral.",
-                           MakeTraceSourceAccessor (&StoragePeripheral::m_remainingCapacity),
-                           "ns3::TracedValueCallback::Uint64")
-          ;
-  return tid;
+                          MakeUintegerChecker<uint64_t>())
+            .AddAttribute("InitialRemainingCapacity",
+                          "The initial capacity of the disk in bit",
+                          UintegerValue(8000000), // 1MByte
+                          MakeUintegerAccessor(&StoragePeripheral::m_remainingCapacity),
+                          MakeUintegerChecker<uint64_t>())
+            .AddTraceSource("RemainingCapacity",
+                            "Remaining Capacity at Storage Peripheral.",
+                            MakeTraceSourceAccessor(&StoragePeripheral::m_remainingCapacity),
+                            "ns3::TracedValueCallback::Uint64");
+    return tid;
 }
 
-StoragePeripheral::StoragePeripheral ()
+StoragePeripheral::StoragePeripheral()
 {
 }
 
 void
-StoragePeripheral::SetCapacity (uint64_t cap)
+StoragePeripheral::SetCapacity(uint64_t cap)
 {
-  m_capacity = cap;
-  m_remainingCapacity = m_capacity;
+    m_capacity = cap;
+    m_remainingCapacity = m_capacity;
 }
 
 uint64_t
-StoragePeripheral::GetCapacity () const
+StoragePeripheral::GetCapacity() const
 {
-  return m_capacity;
+    return m_capacity;
 }
 
 void
-StoragePeripheral::DoInitialize (void)
+StoragePeripheral::DoInitialize(void)
 {
-  DronePeripheral::DoInitialize ();
+    DronePeripheral::DoInitialize();
 }
 
 void
-StoragePeripheral::DoDispose ()
+StoragePeripheral::DoDispose()
 {
-  DronePeripheral::DoDispose ();
+    DronePeripheral::DoDispose();
 }
 
 bool
-StoragePeripheral::Alloc (uint64_t amount, unit amountUnit)
+StoragePeripheral::Alloc(uint64_t amount, unit amountUnit)
 {
-  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Alloc opeation not possible."); return false;}
-  NS_LOG_FUNCTION (this << amount * amountUnit);
-  if (amount * amountUnit <= m_remainingCapacity)
+    if (GetState() != ON)
     {
-      m_remainingCapacity -= amount * amountUnit;
-      NS_LOG_DEBUG ("StoragePeripheral:Stored memory on Drone #"
-                    << GetDrone ()->GetId () << ": " << m_capacity - m_remainingCapacity << " bits");
-      return true;
+        NS_LOG_DEBUG("StoragePeripheral: Alloc opeation not possible.");
+        return false;
     }
-  else
+    NS_LOG_FUNCTION(this << amount * amountUnit);
+    if (amount * amountUnit <= m_remainingCapacity)
     {
-      NS_LOG_INFO ("StoragePeripheral:Not enough memory on Drone #" << GetDrone ()->GetId ());
-      return false;
+        m_remainingCapacity -= amount * amountUnit;
+        NS_LOG_DEBUG("StoragePeripheral:Stored memory on Drone #"
+                     << GetDrone()->GetId() << ": " << m_capacity - m_remainingCapacity << " bits");
+        return true;
+    }
+    else
+    {
+        NS_LOG_INFO("StoragePeripheral:Not enough memory on Drone #" << GetDrone()->GetId());
+        return false;
     }
 }
 
 bool
-StoragePeripheral::Free (uint64_t amount, unit amountUnit)
+StoragePeripheral::Free(uint64_t amount, unit amountUnit)
 {
-  if (GetState() != ON) {NS_LOG_DEBUG ("StoragePeripheral: Free opeation not possible."); return false;}
-  NS_LOG_FUNCTION (this << amount * amountUnit);
-  if (amount * amountUnit <= m_capacity - m_remainingCapacity)
-  {
-    m_remainingCapacity += amount * amountUnit;
-    NS_LOG_DEBUG ("StoragePeripheral:Stored memory on Drone #"
-                    << GetDrone ()->GetId () << ": " << m_capacity - m_remainingCapacity << " bits");
-    return true;
-  } else {
-    NS_LOG_INFO ("StoragePeripheral:Impossible to free more memory than occupied on Drone #"
-                 << GetDrone ()->GetId ());
-    return false;
-  }
+    if (GetState() != ON)
+    {
+        NS_LOG_DEBUG("StoragePeripheral: Free opeation not possible.");
+        return false;
+    }
+    NS_LOG_FUNCTION(this << amount * amountUnit);
+    if (amount * amountUnit <= m_capacity - m_remainingCapacity)
+    {
+        m_remainingCapacity += amount * amountUnit;
+        NS_LOG_DEBUG("StoragePeripheral:Stored memory on Drone #"
+                     << GetDrone()->GetId() << ": " << m_capacity - m_remainingCapacity << " bits");
+        return true;
+    }
+    else
+    {
+        NS_LOG_INFO("StoragePeripheral:Impossible to free more memory than occupied on Drone #"
+                    << GetDrone()->GetId());
+        return false;
+    }
 }
 
 } // namespace ns3

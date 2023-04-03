@@ -18,11 +18,12 @@
 #ifndef NETWORK_LAYER_CONFIGURATION_H
 #define NETWORK_LAYER_CONFIGURATION_H
 
-#include <string>
-
 #include <ns3/object.h>
 
-namespace ns3 {
+#include <string>
+
+namespace ns3
+{
 
 /**
  * Data class to store information about the Network Layer of a Scenario.
@@ -30,25 +31,25 @@ namespace ns3 {
  */
 class NetworkLayerConfiguration : public Object
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param type The type of the Network Layer to be configured.
-   */
-  NetworkLayerConfiguration (std::string type);
-  /** Default destructor */
-  virtual ~NetworkLayerConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param type The type of the Network Layer to be configured.
+     */
+    NetworkLayerConfiguration(std::string type);
+    /** Default destructor */
+    virtual ~NetworkLayerConfiguration();
 
-  /**
-   * \return The type of the decoded Network Layer
-   */
-  virtual const std::string GetType () const;
+    /**
+     * \return The type of the decoded Network Layer
+     */
+    virtual const std::string GetType() const;
 
-private:
-  const std::string m_type; /// Network Layer type
+  private:
+    const std::string m_type; /// Network Layer type
 };
 
-} // ns3 namespace
+} // namespace ns3
 
 #endif /* NETWORK_LAYER_CONFIGURATION_H */

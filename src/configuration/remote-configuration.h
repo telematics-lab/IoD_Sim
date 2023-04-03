@@ -18,11 +18,11 @@
 #ifndef REMOTE_CONFIGURATION_H
 #define REMOTE_CONFIGURATION_H
 
+#include <ns3/model-configuration.h>
 #include <ns3/object.h>
 
-#include <ns3/model-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Describe the configuration of a remote to be simulated.
@@ -30,19 +30,17 @@ namespace ns3 {
 class RemoteConfiguration : public Object
 {
   public:
-    RemoteConfiguration (uint32_t networkLayerId,
-                         std::vector<ModelConfiguration> m_applications);
-    ~RemoteConfiguration ();
+    RemoteConfiguration(uint32_t networkLayerId, std::vector<ModelConfiguration> m_applications);
+    ~RemoteConfiguration();
 
-  const uint32_t GetNetworkLayerId () const;
-  const std::vector<ModelConfiguration>& GetApplications () const;
+    const uint32_t GetNetworkLayerId() const;
+    const std::vector<ModelConfiguration>& GetApplications() const;
 
-private:
-  const uint32_t m_networkLayerId;
-  const std::vector<ModelConfiguration> m_applications;
+  private:
+    const uint32_t m_networkLayerId;
+    const std::vector<ModelConfiguration> m_applications;
 };
 
 } // namespace ns3
-
 
 #endif /* REMOTE_CONFIGURATION_H */

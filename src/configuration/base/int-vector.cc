@@ -21,125 +21,124 @@
 #include <ns3/names.h>
 #include <ns3/object-factory.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-ATTRIBUTE_HELPER_CPP (IntVector);
+ATTRIBUTE_HELPER_CPP(IntVector);
 
-IntVector::IntVector ()
+IntVector::IntVector()
 {
 }
 
-IntVector::IntVector (std::vector<int> coeffs)
+IntVector::IntVector(std::vector<int> coeffs)
 {
-  for (auto c : coeffs)
+    for (auto c : coeffs)
     {
-      Add (c);
+        Add(c);
     }
 }
 
-IntVector::IntVector (const IntVector &a)
+IntVector::IntVector(const IntVector& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      Add (*c);
+        Add(*c);
     }
 }
 
 IntVector::Iterator
-IntVector::Begin () const
+IntVector::Begin() const
 {
-  return m_IntVector.begin ();
+    return m_IntVector.begin();
 }
 
 IntVector::Iterator
-IntVector::End () const
+IntVector::End() const
 {
-  return m_IntVector.end ();
+    return m_IntVector.end();
 }
 
 uint32_t
-IntVector::GetN () const
+IntVector::GetN() const
 {
-  return m_IntVector.size ();
+    return m_IntVector.size();
 }
 
 std::vector<int>
-IntVector::Get () const
+IntVector::Get() const
 {
-  std::vector<int> v;
+    std::vector<int> v;
 
-  for (auto c : m_IntVector)
+    for (auto c : m_IntVector)
     {
-      v.push_back (c);
+        v.push_back(c);
     }
 
-  return v;
+    return v;
 }
 
 int
-IntVector::Get (const uint32_t i) const
+IntVector::Get(const uint32_t i) const
 {
-  return m_IntVector[i];
+    return m_IntVector[i];
 }
 
 int
-IntVector::GetFront () const
+IntVector::GetFront() const
 {
-  return m_IntVector.front ();
+    return m_IntVector.front();
 }
 
 int
-IntVector::GetBack () const
+IntVector::GetBack() const
 {
-  return m_IntVector.back ();
+    return m_IntVector.back();
 }
 
 void
-IntVector::Add (int coeff)
+IntVector::Add(int coeff)
 {
-  m_IntVector.push_back (coeff);
+    m_IntVector.push_back(coeff);
 }
 
-std::ostream &
-operator<< (std::ostream &os, const IntVector &coeffs)
+std::ostream&
+operator<<(std::ostream& os, const IntVector& coeffs)
 {
-  os << coeffs.GetN () << ";";
+    os << coeffs.GetN() << ";";
 
-  for (auto coeff = coeffs.Begin ();
-       coeff != coeffs.End ();
-       coeff++)
+    for (auto coeff = coeffs.Begin(); coeff != coeffs.End(); coeff++)
     {
-      os << (*coeff) << ";";
+        os << (*coeff) << ";";
     }
 
-  return os;
+    return os;
 }
 
-std::istream &
-operator>> (std::istream &is, IntVector &coeffs)
+std::istream&
+operator>>(std::istream& is, IntVector& coeffs)
 {
-  char separator = '\0';
-  uint32_t n;
-  int coeff;
+    char separator = '\0';
+    uint32_t n;
+    int coeff;
 
-  is >> n >> separator;
-  if (separator != ';')
-    is.setstate (std::ios::failbit);
+    is >> n >> separator;
+    if (separator != ';')
+        is.setstate(std::ios::failbit);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      is >> coeff >> separator;
+        is >> coeff >> separator;
 
-      if (separator != ';')
+        if (separator != ';')
         {
-          is.setstate (std::ios::failbit);
-          break;
+            is.setstate(std::ios::failbit);
+            break;
         }
 
-      coeffs.Add (coeff);
+        coeffs.Add(coeff);
     }
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

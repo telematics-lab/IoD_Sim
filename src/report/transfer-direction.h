@@ -22,52 +22,69 @@
 
 #include <ns3/attribute-helper.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 class TransferDirection
 {
-public:
-  enum Value : uint8_t
-  {
-    Received,
-    Transmitted
-  };
+  public:
+    enum Value : uint8_t
+    {
+        Received,
+        Transmitted
+    };
 
-  constexpr static const uint32_t numValues = 2;
+    constexpr static const uint32_t numValues = 2;
 
-  const char *stringValue[numValues] = {
-    "Rx",
-    "Tx"
-  };
+    const char* stringValue[numValues] = {"Rx", "Tx"};
 
-  TransferDirection () = default;
-  constexpr TransferDirection (Value aDirection) : m_value {aDirection} {}
-  /**
-   * From C String
-   */
-  TransferDirection (const char *a);
-  /**
-   * From C++ String
-   */
-  TransferDirection (const std::string a);
+    TransferDirection() = default;
 
-  operator Value () const { return m_value; }
-  explicit operator bool () = delete;
+    constexpr TransferDirection(Value aDirection)
+        : m_value{aDirection}
+    {
+    }
 
-  constexpr bool operator == (Value a) { return m_value == a; }
-  constexpr bool operator != (Value a) { return m_value == a; }
+    /**
+     * From C String
+     */
+    TransferDirection(const char* a);
+    /**
+     * From C++ String
+     */
+    TransferDirection(const std::string a);
 
-  constexpr const char * ToString () const { return stringValue[m_value]; }
+    operator Value() const
+    {
+        return m_value;
+    }
 
-private:
-  Value m_value;
+    explicit operator bool() = delete;
+
+    constexpr bool operator==(Value a)
+    {
+        return m_value == a;
+    }
+
+    constexpr bool operator!=(Value a)
+    {
+        return m_value == a;
+    }
+
+    constexpr const char* ToString() const
+    {
+        return stringValue[m_value];
+    }
+
+  private:
+    Value m_value;
 };
 
-ATTRIBUTE_VALUE_DEFINE (TransferDirection);
-ATTRIBUTE_ACCESSOR_DEFINE (TransferDirection);
-ATTRIBUTE_CHECKER_DEFINE (TransferDirection);
+ATTRIBUTE_VALUE_DEFINE(TransferDirection);
+ATTRIBUTE_ACCESSOR_DEFINE(TransferDirection);
+ATTRIBUTE_CHECKER_DEFINE(TransferDirection);
 
-std::istream & operator >> (std::istream &is, TransferDirection &td);
+std::istream& operator>>(std::istream& is, TransferDirection& td);
 
 } // namespace ns3
 

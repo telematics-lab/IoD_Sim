@@ -18,11 +18,12 @@
 #ifndef REMOTE_CONFIGURATION_HELPER_H
 #define REMOTE_CONFIGURATION_HELPER_H
 
-#include <rapidjson/document.h>
-
 #include <ns3/remote-configuration.h>
 
-namespace ns3 {
+#include <rapidjson/document.h>
+
+namespace ns3
+{
 
 using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
 
@@ -33,22 +34,24 @@ using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
  */
 class RemoteConfigurationHelper
 {
-public:
-  /**
-   * Parse an entity configuration from a given JSON tree and map it on an RemoteConfiguration data class.
-   *
-   * \param json The JSON tree to parse.
-   * \return The configuration as a pointer to RemoteConfiguration to easily retrieve parsed data.
-   */
-  static Ptr<RemoteConfiguration> GetConfiguration (const rapidjson::Value& json);
+  public:
+    /**
+     * Parse an entity configuration from a given JSON tree and map it on an RemoteConfiguration
+     * data class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to RemoteConfiguration to easily retrieve parsed data.
+     */
+    static Ptr<RemoteConfiguration> GetConfiguration(const rapidjson::Value& json);
 
-private:
-  RemoteConfigurationHelper ();
+  private:
+    RemoteConfigurationHelper();
 
-  static const uint32_t DecodeNetworkLayerId (const rapidjson::Value& json);
-  static const std::vector<ModelConfiguration> DecodeApplicationConfigurations (const rapidjson::Value& json);
+    static const uint32_t DecodeNetworkLayerId(const rapidjson::Value& json);
+    static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
+        const rapidjson::Value& json);
 };
 
-}
+} // namespace ns3
 
 #endif /* REMOTE_CONFIGURATION_HELPER_H */

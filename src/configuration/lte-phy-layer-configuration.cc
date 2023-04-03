@@ -19,34 +19,34 @@
 
 #include <ns3/abort.h>
 
-namespace ns3 {
-
-LtePhyLayerConfiguration::LtePhyLayerConfiguration(std::string phyType,
-                                                   std::vector<ModelConfiguration::Attribute> attributes,
-                                                   std::optional<ModelConfiguration> channelPropagationLossModel,
-                                                   ModelConfiguration channelSpectrumModel) :
-  PhyLayerConfiguration {phyType, attributes},
-  m_channelPropagationLossModel {channelPropagationLossModel},
-  m_channelSpectrumModel {channelSpectrumModel}
+namespace ns3
 {
 
+LtePhyLayerConfiguration::LtePhyLayerConfiguration(
+    std::string phyType,
+    std::vector<ModelConfiguration::Attribute> attributes,
+    std::optional<ModelConfiguration> channelPropagationLossModel,
+    ModelConfiguration channelSpectrumModel)
+    : PhyLayerConfiguration{phyType, attributes},
+      m_channelPropagationLossModel{channelPropagationLossModel},
+      m_channelSpectrumModel{channelSpectrumModel}
+{
 }
 
 LtePhyLayerConfiguration::~LtePhyLayerConfiguration()
 {
-
 }
 
 const std::optional<ModelConfiguration>
-LtePhyLayerConfiguration::GetChannelPropagationLossModel ()
+LtePhyLayerConfiguration::GetChannelPropagationLossModel()
 {
-  return m_channelPropagationLossModel;
+    return m_channelPropagationLossModel;
 }
 
 const ModelConfiguration
-LtePhyLayerConfiguration::GetChannelSpectrumModel ()
+LtePhyLayerConfiguration::GetChannelSpectrumModel()
 {
-  return m_channelSpectrumModel;
+    return m_channelSpectrumModel;
 }
 
 } // namespace ns3

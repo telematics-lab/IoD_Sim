@@ -18,51 +18,51 @@
 #ifndef CONSTANT_ACCELERATION_FLIGHT_H
 #define CONSTANT_ACCELERATION_FLIGHT_H
 
-#include <ns3/vector.h>
+#include "constant-acceleration-param.h"
 
 #include <ns3/curve.h>
 #include <ns3/flight-plan.h>
+#include <ns3/vector.h>
 
-#include "constant-acceleration-param.h"
-
-namespace ns3 {
+namespace ns3
+{
 
 class ConstantAccelerationFlight : public Curve
 {
-public:
-  ConstantAccelerationFlight (FlightPlan flightPlan,
-                              ConstantAccelerationParam flightParam,
-                              double step);
-  ~ConstantAccelerationFlight ();
+  public:
+    ConstantAccelerationFlight(FlightPlan flightPlan,
+                               ConstantAccelerationParam flightParam,
+                               double step);
+    ~ConstantAccelerationFlight();
 
-  void Generate ();
-  void Update (const double &time) const;
+    void Generate();
+    void Update(const double& time) const;
 
-  Time   GetTime ()     const;
-  Vector GetPosition () const;
-  Vector GetVelocity () const;
+    Time GetTime() const;
+    Vector GetPosition() const;
+    Vector GetVelocity() const;
 
-protected:
-  void UpdatePosition () const;
-  void UpdateVelocity () const;
+  protected:
+    void UpdatePosition() const;
+    void UpdateVelocity() const;
 
-  double m_length;         /// Total length of the trajectory
-  Time   m_time;           /// Total time the drone would take to complete it
+    double m_length; /// Total length of the trajectory
+    Time m_time;     /// Total time the drone would take to complete it
 
-  double m_acceleration;   // m/s^2
-  double m_maxSpeed;       // m/s
-  bool m_isHovering;
+    double m_acceleration; // m/s^2
+    double m_maxSpeed;     // m/s
+    bool m_isHovering;
 
-  double m_accelerationZoneLength;
-  double m_accelerationZoneTime;
+    double m_accelerationZoneLength;
+    double m_accelerationZoneTime;
 
-  mutable CurvePoint m_currentPosition;
-  mutable CurvePoint m_pastPosition;
-  mutable double     m_currentDistance;
-  mutable double m_currentT;
+    mutable CurvePoint m_currentPosition;
+    mutable CurvePoint m_pastPosition;
+    mutable double m_currentDistance;
+    mutable double m_currentT;
 
-  mutable Vector m_currentVelocity;
-  mutable double m_currentSpeed;
+    mutable Vector m_currentVelocity;
+    mutable double m_currentSpeed;
 };
 
 } // namespace ns3

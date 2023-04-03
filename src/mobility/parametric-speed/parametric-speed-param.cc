@@ -17,27 +17,28 @@
  */
 #include "parametric-speed-param.h"
 
-namespace ns3 {
+namespace ns3
+{
 
-ParametricSpeedParam::ParametricSpeedParam (std::vector<double> speedCoefficients) :
-  m_speedCoefficients {speedCoefficients}
+ParametricSpeedParam::ParametricSpeedParam(std::vector<double> speedCoefficients)
+    : m_speedCoefficients{speedCoefficients}
 {
 }
 
-ParametricSpeedParam::~ParametricSpeedParam ()
+ParametricSpeedParam::~ParametricSpeedParam()
 {
 }
 
 const std::vector<double>
-ParametricSpeedParam::GetSpeedCoefficients () const
+ParametricSpeedParam::GetSpeedCoefficients() const
 {
-  return m_speedCoefficients;
+    return m_speedCoefficients;
 }
 
 void
-ParametricSpeedParam::Add (double c)
+ParametricSpeedParam::Add(double c)
 {
-  m_speedCoefficients.push_back (c);
+    m_speedCoefficients.push_back(c);
 }
 
 } // namespace ns3

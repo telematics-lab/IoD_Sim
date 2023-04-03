@@ -17,48 +17,47 @@
  */
 #include "ipv4-simulation-helper.h"
 
-namespace ns3 {
-
-Ipv4SimulationHelper::Ipv4SimulationHelper (const std::string mask, const std::string gatewayAddress) :
-  m_mask {mask},
-  m_gatewayAddress {gatewayAddress.c_str ()}
+namespace ns3
 {
 
+Ipv4SimulationHelper::Ipv4SimulationHelper(const std::string mask, const std::string gatewayAddress)
+    : m_mask{mask},
+      m_gatewayAddress{gatewayAddress.c_str()}
+{
 }
 
-Ipv4SimulationHelper::~Ipv4SimulationHelper ()
+Ipv4SimulationHelper::~Ipv4SimulationHelper()
 {
-
 }
 
 Ipv4InterfaceContainer&
-Ipv4SimulationHelper::GetIpv4Interfaces ()
+Ipv4SimulationHelper::GetIpv4Interfaces()
 {
- return m_ifacesIps;
+    return m_ifacesIps;
 }
 
 InternetStackHelper&
-Ipv4SimulationHelper::GetInternetHelper ()
+Ipv4SimulationHelper::GetInternetHelper()
 {
-  return m_internetHelper;
+    return m_internetHelper;
 }
 
 Ipv4AddressHelper&
-Ipv4SimulationHelper::GetIpv4Helper ()
+Ipv4SimulationHelper::GetIpv4Helper()
 {
-  return m_ipv4Helper;
+    return m_ipv4Helper;
 }
 
 const std::string&
-Ipv4SimulationHelper::GetMask ()
+Ipv4SimulationHelper::GetMask()
 {
-  return m_mask;
+    return m_mask;
 }
 
 const Ipv4Address&
-Ipv4SimulationHelper::GetGatewayAddress ()
+Ipv4SimulationHelper::GetGatewayAddress()
 {
-  return m_gatewayAddress;
+    return m_gatewayAddress;
 }
 
 } // namespace ns3

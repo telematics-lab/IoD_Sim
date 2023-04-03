@@ -19,145 +19,150 @@
 
 #include <ns3/integer.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("DronePeripheral");
+NS_LOG_COMPONENT_DEFINE("DronePeripheral");
 
-NS_OBJECT_ENSURE_REGISTERED (DronePeripheral);
+NS_OBJECT_ENSURE_REGISTERED(DronePeripheral);
 
 TypeId
-DronePeripheral::GetTypeId ()
+DronePeripheral::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::DronePeripheral")
-          .SetParent<Object> ()
-          .SetGroupName ("Peripheral")
-          .AddConstructor<DronePeripheral> ()
-          .AddAttribute ("PowerConsumption", "The power consumption [J/s] of the peripheral, in OFF|IDLE|ON states",
-                   DoubleVectorValue (),
-                   MakeDoubleVectorAccessor (&DronePeripheral::SetPowerConsumptionStates),
-                   MakeDoubleVectorChecker ())
-          .AddAttribute ("RoITrigger", "Indexes of Regions of Interest",
-                   IntVectorValue (),
-                   MakeIntVectorAccessor (&DronePeripheral::SetRegionsOfInterest),
-                   MakeIntVectorChecker ())
-          ;
-  return tid;
+    static TypeId tid =
+        TypeId("ns3::DronePeripheral")
+            .SetParent<Object>()
+            .SetGroupName("Peripheral")
+            .AddConstructor<DronePeripheral>()
+            .AddAttribute("PowerConsumption",
+                          "The power consumption [J/s] of the peripheral, in OFF|IDLE|ON states",
+                          DoubleVectorValue(),
+                          MakeDoubleVectorAccessor(&DronePeripheral::SetPowerConsumptionStates),
+                          MakeDoubleVectorChecker())
+            .AddAttribute("RoITrigger",
+                          "Indexes of Regions of Interest",
+                          IntVectorValue(),
+                          MakeIntVectorAccessor(&DronePeripheral::SetRegionsOfInterest),
+                          MakeIntVectorChecker());
+    return tid;
 }
 
-DronePeripheral::DronePeripheral ()
+DronePeripheral::DronePeripheral()
 {
-  m_state = OFF;
-  m_powerConsumption = 0;
-}
-
-void
-DronePeripheral::DoDispose ()
-{
-  NS_LOG_FUNCTION (this);
-  Object::DoDispose ();
+    m_state = OFF;
+    m_powerConsumption = 0;
 }
 
 void
-DronePeripheral::DoInitialize (void)
+DronePeripheral::DoDispose()
 {
-  NS_LOG_FUNCTION (this);
-  SetState(IDLE);
-  Object::DoInitialize ();
+    NS_LOG_FUNCTION(this);
+    Object::DoDispose();
 }
 
 void
-DronePeripheral::SetDrone (Ptr<Drone> drone)
+DronePeripheral::DoInitialize(void)
 {
-  NS_LOG_FUNCTION (this << drone);
-  NS_ASSERT (drone != NULL);
-  m_drone = drone;
+    NS_LOG_FUNCTION(this);
+    SetState(IDLE);
+    Object::DoInitialize();
+}
+
+void
+DronePeripheral::SetDrone(Ptr<Drone> drone)
+{
+    NS_LOG_FUNCTION(this << drone);
+    NS_ASSERT(drone != NULL);
+    m_drone = drone;
 }
 
 Ptr<Drone>
-DronePeripheral::GetDrone (void)
+DronePeripheral::GetDrone(void)
 {
-  return m_drone;
+    return m_drone;
 }
 
 double
-DronePeripheral::GetPowerConsumption (void)
+DronePeripheral::GetPowerConsumption(void)
 {
-  NS_LOG_FUNCTION (this);
-  return m_powerConsumption;
+    NS_LOG_FUNCTION(this);
+    return m_powerConsumption;
 }
+
 void
 DronePeripheral::SetPowerConsumption(double pc)
 {
-  NS_LOG_FUNCTION (this);
-  m_powerConsumption = pc;
+    NS_LOG_FUNCTION(this);
+    m_powerConsumption = pc;
 }
 
 DronePeripheral::PeripheralState
 DronePeripheral::GetState(void)
 {
-  return m_state;
+    return m_state;
 }
 
 void
 DronePeripheral::SetState(PeripheralState s)
 {
-  m_state = s;
-  switch (s)
+    m_state = s;
+    switch (s)
     {
-      case OFF:
+    case OFF:
         SetPowerConsumption(GetPowerConsumptionStates()[0]);
-      break;
-      case IDLE:
+        break;
+    case IDLE:
         SetPowerConsumption(GetPowerConsumptionStates()[1]);
-      break;
-      case ON:
+        break;
+    case ON:
         SetPowerConsumption(GetPowerConsumptionStates()[2]);
-      break;
+        break;
     }
-  if (GetDrone () != NULL) NS_LOG_DEBUG ("DronePeripheral on Drone #" << GetDrone ()->GetId ()<< ": changing peripheral state to "<<GetState());
-  OnChangeState(s);
+    if (GetDrone() != NULL)
+        NS_LOG_DEBUG("DronePeripheral on Drone #"
+                     << GetDrone()->GetId() << ": changing peripheral state to " << GetState());
+    OnChangeState(s);
 }
 
 void
 DronePeripheral::OnChangeState(PeripheralState ocs)
 {
-
 }
 
 void
-DronePeripheral::SetPowerConsumptionStates (const DoubleVector &a)
+DronePeripheral::SetPowerConsumptionStates(const DoubleVector& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      m_powerConsumptionStates.push_back(*c);
+        m_powerConsumptionStates.push_back(*c);
     }
 }
 
 std::vector<double>
-DronePeripheral::GetPowerConsumptionStates (void)
+DronePeripheral::GetPowerConsumptionStates(void)
 {
-  return m_powerConsumptionStates;
+    return m_powerConsumptionStates;
 }
 
 void
-DronePeripheral::SetRegionsOfInterest (const IntVector &a)
+DronePeripheral::SetRegionsOfInterest(const IntVector& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      m_roi.push_back(*c);
+        m_roi.push_back(*c);
     }
 }
 
 std::vector<int>
-DronePeripheral::GetRegionsOfInterest (void)
+DronePeripheral::GetRegionsOfInterest(void)
 {
-  return m_roi;
+    return m_roi;
 }
 
 int
-DronePeripheral::GetNRoI (void)
+DronePeripheral::GetNRoI(void)
 {
-  return m_roi.size();
+    return m_roi.size();
 }
 
-} //namespace ns3
+} // namespace ns3

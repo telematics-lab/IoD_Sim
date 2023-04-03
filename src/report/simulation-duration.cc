@@ -19,98 +19,94 @@
  */
 #include "simulation-duration.h"
 
-#include <chrono>
-#include <iomanip>
-
 #include <ns3/log.h>
 #include <ns3/simulator.h>
 
-namespace ns3 {
+#include <chrono>
+#include <iomanip>
 
-NS_LOG_COMPONENT_DEFINE ("SimulationDuration");
-
-SimulationDuration::SimulationDuration (const Time& realDuration,
-                                        const Time& virtualDuration) :
-  m_realDuration {realDuration},
-  m_virtualDuration {virtualDuration}
+namespace ns3
 {
-  NS_LOG_FUNCTION (this << m_realDuration << m_virtualDuration);
+
+NS_LOG_COMPONENT_DEFINE("SimulationDuration");
+
+SimulationDuration::SimulationDuration(const Time& realDuration, const Time& virtualDuration)
+    : m_realDuration{realDuration},
+      m_virtualDuration{virtualDuration}
+{
+    NS_LOG_FUNCTION(this << m_realDuration << m_virtualDuration);
 }
 
-SimulationDuration::SimulationDuration () :
-  m_realDuration {GetRealTime ()},
-  m_virtualDuration {GetVirtualTime ()}
+SimulationDuration::SimulationDuration()
+    : m_realDuration{GetRealTime()},
+      m_virtualDuration{GetVirtualTime()}
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-SimulationDuration::~SimulationDuration ()
+SimulationDuration::~SimulationDuration()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-SimulationDuration::Write (xmlTextWriterPtr h) const
+SimulationDuration::Write(xmlTextWriterPtr h) const
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
-  // use stream facilities to ease output conversion
-  std::ostringstream bRealDuration,
-                     bVirtualDuration;
+    int rc;
+    // use stream facilities to ease output conversion
+    std::ostringstream bRealDuration, bVirtualDuration;
 
-  const Time real = GetRealTime () - m_realDuration;
-  const Time virt = Simulator::Now () - m_virtualDuration;
+    const Time real = GetRealTime() - m_realDuration;
+    const Time virt = Simulator::Now() - m_virtualDuration;
 
-  bRealDuration << real.GetSeconds ();
-  bVirtualDuration << virt.GetSeconds ();
+    bRealDuration << real.GetSeconds();
+    bVirtualDuration << virt.GetSeconds();
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "duration");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "duration");
+    NS_ASSERT(rc >= 0);
 
-  /* Nested Elements */
-  rc = xmlTextWriterWriteElement (h,
-                                  BAD_CAST "real",
-                                  BAD_CAST bRealDuration.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    /* Nested Elements */
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "real", BAD_CAST bRealDuration.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement (h,
-                                  BAD_CAST "virtual",
-                                  BAD_CAST bVirtualDuration.str ().c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "virtual", BAD_CAST bVirtualDuration.str().c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 Time
-SimulationDuration::GetRealTime ()
+SimulationDuration::GetRealTime()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  const auto now = std::chrono::system_clock::now ();
-  const auto epoch = now.time_since_epoch ();
-  const auto seconds = std::chrono::duration_cast<std::chrono::seconds> (epoch);
-  const uint64_t duration = seconds.count ();
+    const auto now = std::chrono::system_clock::now();
+    const auto epoch = now.time_since_epoch();
+    const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(epoch);
+    const uint64_t duration = seconds.count();
 
-  std::ostringstream bTime;
-  bTime << duration << "s";
+    std::ostringstream bTime;
+    bTime << duration << "s";
 
-  return Time (bTime.str ());
+    return Time(bTime.str());
 }
 
 Time
-SimulationDuration::GetVirtualTime ()
+SimulationDuration::GetVirtualTime()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+    NS_LOG_FUNCTION_NOARGS();
 
-  return Simulator::Now ();
+    return Simulator::Now();
 }
 
 } // namespace ns3

@@ -18,11 +18,12 @@
 #ifndef MAC_LAYER_CONFIGURATION_H
 #define MAC_LAYER_CONFIGURATION_H
 
-#include <string>
-
 #include <ns3/object.h>
 
-namespace ns3 {
+#include <string>
+
+namespace ns3
+{
 
 /**
  * Data class to store information about the MAC Layer of a Scenario.
@@ -30,25 +31,25 @@ namespace ns3 {
  */
 class MacLayerConfiguration : public Object
 {
-public:
-  /**
-   * Create a new object instance.
-   *
-   * \param type The type of the MAC Layer Configuration.
-   */
-  MacLayerConfiguration (std::string type);
-  /** Default destructor */
-  virtual ~MacLayerConfiguration ();
+  public:
+    /**
+     * Create a new object instance.
+     *
+     * \param type The type of the MAC Layer Configuration.
+     */
+    MacLayerConfiguration(std::string type);
+    /** Default destructor */
+    virtual ~MacLayerConfiguration();
 
-  /**
-   * \return The type of the decoded MAC Layer.
-   */
-  virtual const std::string GetType () const;
+    /**
+     * \return The type of the decoded MAC Layer.
+     */
+    virtual const std::string GetType() const;
 
-private:
-  const std::string m_type; /// MAC Layer type
+  private:
+    const std::string m_type; /// MAC Layer type
 };
 
-} // ns3 namespace
+} // namespace ns3
 
 #endif /* MAC_LAYER_CONFIGURATION_H */

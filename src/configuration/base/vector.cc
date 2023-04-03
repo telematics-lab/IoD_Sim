@@ -19,12 +19,14 @@
 
 #include <sstream>
 
-namespace ns3 {
+namespace ns3
+{
 
 // This internal namespace is used to implement the templated methods of VectorChecker
 // that is instanciated in MakePairChecker. The non-templated base ns3::VectorChecker
 // is returned in that function. This is the same pattern as ObjectPtrContainer.
-namespace internal {
+namespace internal
+{
 
 /**
  * Internal checker class templated to each AttributeChecker
@@ -33,81 +35,82 @@ namespace internal {
 template <class T>
 class VectorChecker : public AttributeChecker
 {
-public:
-  /** Default Ctor */
-  VectorChecker ();
-  /**
-   * Construct from an AttributeChecker
-   * \param [in] checker The AttributeChecker that will be copied in.
-   */
-  VectorChecker (const AttributeChecker &checker);
-  void SetChecker (Ptr<const AttributeChecker> checker);
-  Ptr<const AttributeChecker> GetChecker () const;
+  public:
+    /** Default Ctor */
+    VectorChecker();
+    /**
+     * Construct from an AttributeChecker
+     * \param [in] checker The AttributeChecker that will be copied in.
+     */
+    VectorChecker(const AttributeChecker& checker);
+    void SetChecker(Ptr<const AttributeChecker> checker);
+    Ptr<const AttributeChecker> GetChecker() const;
 
-private:
-  /** The checker for each entry in the vector */
-  Ptr<const AttributeChecker> m_checker;
+  private:
+    /** The checker for each entry in the vector */
+    Ptr<const AttributeChecker> m_checker;
 };
 
 template <class T>
-VectorChecker<T>::VectorChecker () :
-  m_checker {0}
-{}
+VectorChecker<T>::VectorChecker()
+    : m_checker{0}
+{
+}
 
 template <class T>
-VectorChecker<T>::VectorChecker (Ptr<const AttributeChecker> &checker) :
-  m_checker {checker}
-{}
+VectorChecker<T>::VectorChecker(Ptr<const AttributeChecker>& checker)
+    : m_checker{checker}
+{
+}
 
 template <class T>
 void
-VectorChecker<T>::SetChecker (Ptr<const AttributeChecker> checker)
+VectorChecker<T>::SetChecker(Ptr<const AttributeChecker> checker)
 {
-  m_checker = checker;
+    m_checker = checker;
 }
 
 template <class T>
 Ptr<const AttributeChecker>
-VectorChecker<T>::GetChecker () const
+VectorChecker<T>::GetChecker() const
 {
-  return m_checker;
+    return m_checker;
 }
 
 } // namespace internal
 
 template <class T>
 Ptr<const AttributeChecker>
-MakeVectorChecker (const VectorValue<T>& value)
+MakeVectorChecker(const VectorValue<T>& value)
 {
-  return MakeVectorChecker<T> ();
+    return MakeVectorChecker<T>();
 }
 
 template <class T>
 Ptr<const AttributeChecker>
-MakeVectorChecker ()
+MakeVectorChecker()
 {
-  std::string pairName;
-  std::string underlyingType;
-  std::string typeName = typeid (T).name ();
+    std::string pairName;
+    std::string underlyingType;
+    std::string typeName = typeid(T).name();
 
-  {
-    std::ostringstream oss;
-    oss << "ns3::VectorValue<" << typeName << ">";
-    pairName = oss.str ();
-  }
+    {
+        std::ostringstream oss;
+        oss << "ns3::VectorValue<" << typeName << ">";
+        pairName = oss.str();
+    }
 
-  {
-    std::ostringstream oss;
-
-  }
-
+    {
+        std::ostringstream oss;
+    }
 }
 
 } // namespace ns3
 
 template <typename T>
 Ptr<const AttributeChecker>
-MakeVectorChecker (void)
+MakeVectorChecker(void)
 {
-  return MakeSimpleAttributeChecker<VectorValue<T>, VectorChecker<T>> ("VectorValue", "std::vector");
+    return MakeSimpleAttributeChecker<VectorValue<T>, VectorChecker<T>>("VectorValue",
+                                                                        "std::vector");
 }

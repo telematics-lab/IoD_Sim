@@ -22,57 +22,59 @@
 #include <ns3/log.h>
 #include <ns3/string.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("DroneControlLayer");
-NS_OBJECT_ENSURE_REGISTERED (DroneControlLayer);
+NS_LOG_COMPONENT_DEFINE("DroneControlLayer");
+NS_OBJECT_ENSURE_REGISTERED(DroneControlLayer);
 
 TypeId
-DroneControlLayer::GetTypeId ()
+DroneControlLayer::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::DroneControlLayer")
-    .AddConstructor<DroneControlLayer> ()
-    .SetParent<ProtocolLayer> ()
-    .AddAttribute ("NotImplemented", "This is a placeholder for future developments.",
-                   StringValue (),
-                   MakeStringAccessor (&DroneControlLayer::m_notImplemented),
-                   MakeStringChecker ())
-    ;
+    static TypeId tid = TypeId("ns3::DroneControlLayer")
+                            .AddConstructor<DroneControlLayer>()
+                            .SetParent<ProtocolLayer>()
+                            .AddAttribute("NotImplemented",
+                                          "This is a placeholder for future developments.",
+                                          StringValue(),
+                                          MakeStringAccessor(&DroneControlLayer::m_notImplemented),
+                                          MakeStringChecker());
 
-  return tid;
+    return tid;
 }
 
-DroneControlLayer::DroneControlLayer ()
+DroneControlLayer::DroneControlLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-DroneControlLayer::~DroneControlLayer ()
+DroneControlLayer::~DroneControlLayer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-DroneControlLayer::Write (xmlTextWriterPtr h)
+DroneControlLayer::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement (h, BAD_CAST "dcl");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "dcl");
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement (h, BAD_CAST "notImplemented", BAD_CAST "");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "notImplemented", BAD_CAST "");
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement (h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

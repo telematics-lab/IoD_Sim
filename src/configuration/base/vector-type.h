@@ -20,11 +20,11 @@
 #ifndef VECTOR_TYPE_H
 #define VECTOR_TYPE_H
 
-#include <stdint.h>
-#include <limits>
-
-#include <ns3/attribute.h>
 #include <ns3/attribute-helper.h>
+#include <ns3/attribute.h>
+
+#include <limits>
+#include <stdint.h>
 
 /**
  * \file
@@ -32,18 +32,19 @@
  * ns3::VectorTypeValue attribute value declarations and template implementations.
  */
 
-namespace ns3 {
+namespace ns3
+{
 
 //  Additional docs for class VectorTypeValue:
 /**
  * This class can be used to hold variables of floating point type
  * such as 'std::vector<double>' or 'float'. The internal format is 'std::vector<double>'.
  */
-ATTRIBUTE_VALUE_DEFINE_WITH_NAME (std::vector<double>, VectorType);
-ATTRIBUTE_ACCESSOR_DEFINE (VectorType);
+ATTRIBUTE_VALUE_DEFINE_WITH_NAME(std::vector<double>, VectorType);
+ATTRIBUTE_ACCESSOR_DEFINE(VectorType);
 
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (void);
+Ptr<const AttributeChecker> MakeVectorTypeChecker(void);
 
 /**
  * Make a checker with a minimum value.
@@ -55,7 +56,7 @@ Ptr<const AttributeChecker> MakeVectorTypeChecker (void);
  * \see AttributeChecker
  */
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min);
+Ptr<const AttributeChecker> MakeVectorTypeChecker(std::vector<double> min);
 
 /**
  * Make a checker with a minimum and a maximum value.
@@ -68,11 +69,9 @@ Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min);
  * \see AttributeChecker
  */
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min, std::vector<double> max);
-
+Ptr<const AttributeChecker> MakeVectorTypeChecker(std::vector<double> min, std::vector<double> max);
 
 } // namespace ns3
-
 
 /***************************************************************
  *  Implementation of the templates declared above.
@@ -80,36 +79,39 @@ Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min, std:
 
 #include <ns3/type-name.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-namespace internal {
+namespace internal
+{
 
-Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min, std::vector<double> max, std::string name);
+Ptr<const AttributeChecker> MakeVectorTypeChecker(std::vector<double> min,
+                                                  std::vector<double> max,
+                                                  std::string name);
 
 } // namespace internal
 
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (void)
+Ptr<const AttributeChecker>
+MakeVectorTypeChecker(void)
 {
-  return internal::MakeVectorTypeChecker (-std::numeric_limits<T>::max (),
-                                          std::numeric_limits<T>::max (),
-                                          TypeNameGet<T> ());
+    return internal::MakeVectorTypeChecker(-std::numeric_limits<T>::max(),
+                                           std::numeric_limits<T>::max(),
+                                           TypeNameGet<T>());
 }
 
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min)
+Ptr<const AttributeChecker>
+MakeVectorTypeChecker(std::vector<double> min)
 {
-  return internal::MakeVectorTypeChecker (min,
-                                          std::numeric_limits<T>::max (),
-                                          TypeNameGet<T> ());
+    return internal::MakeVectorTypeChecker(min, std::numeric_limits<T>::max(), TypeNameGet<T>());
 }
 
 template <typename T>
-Ptr<const AttributeChecker> MakeVectorTypeChecker (std::vector<double> min, std::vector<double> max)
+Ptr<const AttributeChecker>
+MakeVectorTypeChecker(std::vector<double> min, std::vector<double> max)
 {
-  return internal::MakeVectorTypeChecker (min,
-                                          max,
-                                          TypeNameGet<T> ());
+    return internal::MakeVectorTypeChecker(min, max, TypeNameGet<T>());
 }
 
 } // namespace ns3

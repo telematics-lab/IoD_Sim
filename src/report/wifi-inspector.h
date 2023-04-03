@@ -19,75 +19,76 @@
  */
 #ifndef WIFI_INSPECTOR_H
 #define WIFI_INSPECTOR_H
-#include <string>
-
 #include <ns3/net-device.h>
 #include <ns3/wifi-mac.h>
 #include <ns3/wifi-net-device.h>
 #include <ns3/wifi-phy.h>
 #include <ns3/yans-wifi-channel.h>
 
-namespace ns3 {
+#include <string>
+
+namespace ns3
+{
 
 class WifiInspector
 {
-public:
-  /**
-   * Initialize the inspector with a given Network Device
-   */
-  WifiInspector (Ptr<NetDevice> device);
-  /**
-   * Default destructor
-   */
-  ~WifiInspector ();
+  public:
+    /**
+     * Initialize the inspector with a given Network Device
+     */
+    WifiInspector(Ptr<NetDevice> device);
+    /**
+     * Default destructor
+     */
+    ~WifiInspector();
 
-  /**
-   * Get a string representation of the Wifi Standard in use
-   */
-  const char* GetWifiStandard () const;
-  /**
-   * Get the carrier frequency used
-   */
-  const uint16_t GetCarrierFrequency () const;
-  /**
-   * Get the propagation loss model that has been set
-   */
-  const std::string GetPropagationLossModel () const;
-  /**
-   * Get the propagation delay model that has been set
-   */
-  const std::string GetPropagationDelayModel () const;
-  /**
-   * Get the wifi ssid that the device is connected to
-   */
-  const std::string GetWifiSsid () const;
-  /**
-   * Get the wifi mode of the device
-   */
-  const std::string GetWifiMode () const;
+    /**
+     * Get a string representation of the Wifi Standard in use
+     */
+    const char* GetWifiStandard() const;
+    /**
+     * Get the carrier frequency used
+     */
+    const uint16_t GetCarrierFrequency() const;
+    /**
+     * Get the propagation loss model that has been set
+     */
+    const std::string GetPropagationLossModel() const;
+    /**
+     * Get the propagation delay model that has been set
+     */
+    const std::string GetPropagationDelayModel() const;
+    /**
+     * Get the wifi ssid that the device is connected to
+     */
+    const std::string GetWifiSsid() const;
+    /**
+     * Get the wifi mode of the device
+     */
+    const std::string GetWifiMode() const;
 
-private:
-  /**
-   * Internal helper to treat a NetDevice as a WifiNetDevice
-   */
-  static Ptr<WifiNetDevice> InitializeNetDevice (Ptr<NetDevice> dev);
-  /**
-   * Internal helper to get the Phy Layer of a given WifiNetDevice
-   */
-  static Ptr<WifiPhy> InitializePhy (Ptr<WifiNetDevice> dev);
-  /**
-   * Internal helper to get the Wifi Channel of a given WifiNetDevice
-   */
-  static Ptr<YansWifiChannel> InitializeChannel (Ptr<WifiNetDevice> dev);
-  /**
-   * Internal helper to get the MAC Layer of a given WifiNetDevice
-   */
-  static Ptr<WifiMac> InitializeMac (Ptr<WifiNetDevice> dev);
+  private:
+    /**
+     * Internal helper to treat a NetDevice as a WifiNetDevice
+     */
+    static Ptr<WifiNetDevice> InitializeNetDevice(Ptr<NetDevice> dev);
+    /**
+     * Internal helper to get the Phy Layer of a given WifiNetDevice
+     */
+    static Ptr<WifiPhy> InitializePhy(Ptr<WifiNetDevice> dev);
+    /**
+     * Internal helper to get the Wifi Channel of a given WifiNetDevice
+     */
+    static Ptr<YansWifiChannel> InitializeChannel(Ptr<WifiNetDevice> dev);
+    /**
+     * Internal helper to get the MAC Layer of a given WifiNetDevice
+     */
+    static Ptr<WifiMac> InitializeMac(Ptr<WifiNetDevice> dev);
 
-  Ptr<WifiNetDevice> m_dev;       /// Wifi Network Device to be inspected
-  Ptr<WifiPhy> m_phy;             /// Wifi Phy Device, as cache
-  Ptr<YansWifiChannel> m_channel; /// Wifi Channel, as cache
-  Ptr<WifiMac> m_mac;             /// Wifi Mac, as cache
+    Ptr<WifiNetDevice> m_dev;       /// Wifi Network Device to be inspected
+    Ptr<WifiPhy> m_phy;             /// Wifi Phy Device, as cache
+    Ptr<YansWifiChannel> m_channel; /// Wifi Channel, as cache
+    Ptr<WifiMac> m_mac;             /// Wifi Mac, as cache
 };
 
 } // namespace ns3

@@ -16,133 +16,132 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "int-vector.h"
+
 #include <ns3/integer.h>
 #include <ns3/names.h>
 #include <ns3/object-factory.h>
 
-#include "int-vector.h"
+namespace ns3
+{
 
-namespace ns3 {
+ATTRIBUTE_HELPER_CPP(VectorType<T>);
 
-ATTRIBUTE_HELPER_CPP (VectorType<T>);
-
-template<typename T>
-VectorType ()
+template <typename T>
+VectorType()
 {
 }
 
-template<typename T>
-VectorType::VectorType (std::vector<int> coeffs)
+template <typename T>
+VectorType::VectorType(std::vector<int> coeffs)
 {
-  for (auto c : coeffs)
+    for (auto c : coeffs)
     {
-      Add (c);
+        Add(c);
     }
 }
 
-VectorType::VectorType (const VectorType &a)
+VectorType::VectorType(const VectorType& a)
 {
-  for (auto c = a.Begin (); c != a.End (); c++)
+    for (auto c = a.Begin(); c != a.End(); c++)
     {
-      Add (*c);
+        Add(*c);
     }
 }
 
 VectorType::Iterator
-VectorType::Begin () const
+VectorType::Begin() const
 {
-  return m_VectorType.begin ();
+    return m_VectorType.begin();
 }
 
 VectorType::Iterator
-VectorType::End () const
+VectorType::End() const
 {
-  return m_VectorType.end ();
+    return m_VectorType.end();
 }
 
 uint32_t
-VectorType::GetN () const
+VectorType::GetN() const
 {
-  return m_VectorType.size ();
+    return m_VectorType.size();
 }
 
 std::vector<int>
-VectorType::Get () const
+VectorType::Get() const
 {
-  std::vector<int> v;
+    std::vector<int> v;
 
-  for (auto c : m_VectorType)
+    for (auto c : m_VectorType)
     {
-      v.push_back (c);
+        v.push_back(c);
     }
 
-  return v;
+    return v;
 }
 
 int
-VectorType::Get (const uint32_t i) const
+VectorType::Get(const uint32_t i) const
 {
-  return m_VectorType[i];
+    return m_VectorType[i];
 }
 
 int
-VectorType::GetFront () const
+VectorType::GetFront() const
 {
-  return m_VectorType.front ();
+    return m_VectorType.front();
 }
 
 int
-VectorType::GetBack () const
+VectorType::GetBack() const
 {
-  return m_VectorType.back ();
+    return m_VectorType.back();
 }
 
 void
-VectorType::Add (int coeff)
+VectorType::Add(int coeff)
 {
-  m_VectorType.push_back (coeff);
+    m_VectorType.push_back(coeff);
 }
 
-std::ostream &
-operator<< (std::ostream &os, const VectorType &coeffs)
+std::ostream&
+operator<<(std::ostream& os, const VectorType& coeffs)
 {
-  os << coeffs.GetN () << ";";
+    os << coeffs.GetN() << ";";
 
-  for (auto coeff = coeffs.Begin ();
-       coeff != coeffs.End ();
-       coeff++)
+    for (auto coeff = coeffs.Begin(); coeff != coeffs.End(); coeff++)
     {
-      os << (*coeff) << ";";
+        os << (*coeff) << ";";
     }
 
-  return os;
+    return os;
 }
 
-std::istream &
-operator>> (std::istream &is, VectorType &coeffs)
+std::istream&
+operator>>(std::istream& is, VectorType& coeffs)
 {
-  char separator = '\0';
-  uint32_t n;
-  int coeff;
+    char separator = '\0';
+    uint32_t n;
+    int coeff;
 
-  is >> n >> separator;
-  if (separator != ';')
-    is.setstate (std::ios::failbit);
+    is >> n >> separator;
+    if (separator != ';')
+        is.setstate(std::ios::failbit);
 
-  for (uint32_t i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
     {
-      is >> coeff >> separator;
+        is >> coeff >> separator;
 
-      if (separator != ';')
+        if (separator != ';')
         {
-          is.setstate (std::ios::failbit);
-          break;
+            is.setstate(std::ios::failbit);
+            break;
         }
 
-      coeffs.Add (coeff);
+        coeffs.Add(coeff);
     }
 
-  return is;
+    return is;
 }
 
 } // namespace ns3

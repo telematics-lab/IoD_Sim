@@ -18,13 +18,13 @@
 #ifndef ENTITY_CONFIGURATION_H
 #define ENTITY_CONFIGURATION_H
 
+#include <ns3/mobility-model-configuration.h>
+#include <ns3/model-configuration.h>
+#include <ns3/netdevice-configuration.h>
 #include <ns3/object.h>
 
-#include <ns3/model-configuration.h>
-#include <ns3/mobility-model-configuration.h>
-#include <ns3/netdevice-configuration.h>
-
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief Describe the configuration of a generic entity to be simulated.
@@ -32,42 +32,41 @@ namespace ns3 {
 class EntityConfiguration : public Object
 {
   public:
-    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         MobilityModelConfiguration m_mobility,
-                         std::vector<ModelConfiguration> m_applications);
+    EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                        MobilityModelConfiguration m_mobility,
+                        std::vector<ModelConfiguration> m_applications);
 
-    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         MobilityModelConfiguration m_mobility,
-                         std::vector<ModelConfiguration> m_applications,
-                         ModelConfiguration m_mechanics,
-                         ModelConfiguration m_battery);
+    EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                        MobilityModelConfiguration m_mobility,
+                        std::vector<ModelConfiguration> m_applications,
+                        ModelConfiguration m_mechanics,
+                        ModelConfiguration m_battery);
 
-    EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
-                         MobilityModelConfiguration m_mobility,
-                         std::vector<ModelConfiguration> m_applications,
-                         ModelConfiguration m_mechanics,
-                         ModelConfiguration m_battery,
-                         std::vector<ModelConfiguration> m_peripherals);
+    EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
+                        MobilityModelConfiguration m_mobility,
+                        std::vector<ModelConfiguration> m_applications,
+                        ModelConfiguration m_mechanics,
+                        ModelConfiguration m_battery,
+                        std::vector<ModelConfiguration> m_peripherals);
 
-    ~EntityConfiguration ();
+    ~EntityConfiguration();
 
-  const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices () const;
-  const MobilityModelConfiguration& GetMobilityModel () const;
-  const std::vector<ModelConfiguration>& GetApplications () const;
-  const ModelConfiguration& GetMechanics () const;
-  const ModelConfiguration& GetBattery () const;
-  const std::vector<ModelConfiguration>& GetPeripherals () const;
+    const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices() const;
+    const MobilityModelConfiguration& GetMobilityModel() const;
+    const std::vector<ModelConfiguration>& GetApplications() const;
+    const ModelConfiguration& GetMechanics() const;
+    const ModelConfiguration& GetBattery() const;
+    const std::vector<ModelConfiguration>& GetPeripherals() const;
 
-private:
-  const std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
-  const MobilityModelConfiguration m_mobility;
-  const std::vector<ModelConfiguration> m_applications;
-  const ModelConfiguration m_mechanics;
-  const ModelConfiguration m_battery;
-  const std::vector<ModelConfiguration> m_peripherals;
+  private:
+    const std::vector<Ptr<NetdeviceConfiguration>> m_netDevices;
+    const MobilityModelConfiguration m_mobility;
+    const std::vector<ModelConfiguration> m_applications;
+    const ModelConfiguration m_mechanics;
+    const ModelConfiguration m_battery;
+    const std::vector<ModelConfiguration> m_peripherals;
 };
 
 } // namespace ns3
-
 
 #endif /* ENTITY_CONFIGURATION_H */

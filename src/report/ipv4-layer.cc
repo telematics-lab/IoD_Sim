@@ -22,69 +22,68 @@
 #include <ns3/log.h>
 #include <ns3/string.h>
 
-namespace ns3 {
+namespace ns3
+{
 
-NS_LOG_COMPONENT_DEFINE ("Ipv4Layer");
-NS_OBJECT_ENSURE_REGISTERED (Ipv4Layer);
+NS_LOG_COMPONENT_DEFINE("Ipv4Layer");
+NS_OBJECT_ENSURE_REGISTERED(Ipv4Layer);
 
 TypeId
-Ipv4Layer::GetTypeId ()
+Ipv4Layer::GetTypeId()
 {
-  static TypeId tid = TypeId ("ns3::Ipv4Layer")
-    .AddConstructor<Ipv4Layer> ()
-    .SetParent<ProtocolLayer> ()
-    .AddAttribute ("Ipv4Address", "The IPv4 Address",
-                   StringValue (),
-                   MakeStringAccessor (&Ipv4Layer::m_address),
-                   MakeStringChecker ())
-    .AddAttribute ("SubnetMask", "Subnet Mask",
-                   StringValue (),
-                   MakeStringAccessor (&Ipv4Layer::m_subnetMask),
-                   MakeStringChecker ())
-    ;
+    static TypeId tid = TypeId("ns3::Ipv4Layer")
+                            .AddConstructor<Ipv4Layer>()
+                            .SetParent<ProtocolLayer>()
+                            .AddAttribute("Ipv4Address",
+                                          "The IPv4 Address",
+                                          StringValue(),
+                                          MakeStringAccessor(&Ipv4Layer::m_address),
+                                          MakeStringChecker())
+                            .AddAttribute("SubnetMask",
+                                          "Subnet Mask",
+                                          StringValue(),
+                                          MakeStringAccessor(&Ipv4Layer::m_subnetMask),
+                                          MakeStringChecker());
 
-  return tid;
+    return tid;
 }
 
-Ipv4Layer::Ipv4Layer ()
+Ipv4Layer::Ipv4Layer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
-Ipv4Layer::~Ipv4Layer ()
+Ipv4Layer::~Ipv4Layer()
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
 }
 
 void
-Ipv4Layer::Write (xmlTextWriterPtr h)
+Ipv4Layer::Write(xmlTextWriterPtr h)
 {
-  NS_LOG_FUNCTION (h);
-  if (h == nullptr)
+    NS_LOG_FUNCTION(h);
+    if (h == nullptr)
     {
-      NS_LOG_WARN ("Passed handler is not valid: " << h << ". "
-                   "Data will be discarded.");
-      return;
+        NS_LOG_WARN("Passed handler is not valid: " << h
+                                                    << ". "
+                                                       "Data will be discarded.");
+        return;
     }
 
-  int rc;
+    int rc;
 
-  rc = xmlTextWriterStartElement(h, BAD_CAST "ipv4");
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterStartElement(h, BAD_CAST "ipv4");
+    NS_ASSERT(rc >= 0);
 
-  /* Nested Elements */
-  rc = xmlTextWriterWriteElement(h,
-                                 BAD_CAST "address",
-                                 BAD_CAST m_address.c_str ());
-  NS_ASSERT (rc >= 0);
+    /* Nested Elements */
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "address", BAD_CAST m_address.c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterWriteElement(h,
-                                 BAD_CAST "subnetMask",
-                                 BAD_CAST m_subnetMask.c_str ());
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterWriteElement(h, BAD_CAST "subnetMask", BAD_CAST m_subnetMask.c_str());
+    NS_ASSERT(rc >= 0);
 
-  rc = xmlTextWriterEndElement(h);
-  NS_ASSERT (rc >= 0);
+    rc = xmlTextWriterEndElement(h);
+    NS_ASSERT(rc >= 0);
 }
 
 } // namespace ns3

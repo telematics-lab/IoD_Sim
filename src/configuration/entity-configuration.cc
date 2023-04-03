@@ -17,87 +17,84 @@
  */
 #include "entity-configuration.h"
 
-namespace ns3 {
-
-EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          MobilityModelConfiguration mobility,
-                                          std::vector<ModelConfiguration> applications) :
-  m_netDevices {netDevices},
-  m_mobility {mobility},
-  m_applications {applications}
+namespace ns3
 {
 
+EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                         MobilityModelConfiguration mobility,
+                                         std::vector<ModelConfiguration> applications)
+    : m_netDevices{netDevices},
+      m_mobility{mobility},
+      m_applications{applications}
+{
 }
 
-EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          MobilityModelConfiguration mobility,
-                                          std::vector<ModelConfiguration> applications,
-                                          ModelConfiguration mechanics,
-                                          ModelConfiguration battery) :
-  m_netDevices {netDevices},
-  m_mobility {mobility},
-  m_applications {applications},
-  m_mechanics {mechanics},
-  m_battery {battery}
+EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                         MobilityModelConfiguration mobility,
+                                         std::vector<ModelConfiguration> applications,
+                                         ModelConfiguration mechanics,
+                                         ModelConfiguration battery)
+    : m_netDevices{netDevices},
+      m_mobility{mobility},
+      m_applications{applications},
+      m_mechanics{mechanics},
+      m_battery{battery}
 {
-
 }
 
-EntityConfiguration::EntityConfiguration (std::vector<Ptr<NetdeviceConfiguration>> netDevices,
-                                          MobilityModelConfiguration mobility,
-                                          std::vector<ModelConfiguration> applications,
-                                          ModelConfiguration mechanics,
-                                          ModelConfiguration battery,
-                                          std::vector<ModelConfiguration> peripherals) :
-  m_netDevices {netDevices},
-  m_mobility {mobility},
-  m_applications {applications},
-  m_mechanics {mechanics},
-  m_battery {battery},
-  m_peripherals {peripherals}
+EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> netDevices,
+                                         MobilityModelConfiguration mobility,
+                                         std::vector<ModelConfiguration> applications,
+                                         ModelConfiguration mechanics,
+                                         ModelConfiguration battery,
+                                         std::vector<ModelConfiguration> peripherals)
+    : m_netDevices{netDevices},
+      m_mobility{mobility},
+      m_applications{applications},
+      m_mechanics{mechanics},
+      m_battery{battery},
+      m_peripherals{peripherals}
 {
-
 }
 
-EntityConfiguration::~EntityConfiguration ()
+EntityConfiguration::~EntityConfiguration()
 {
-
 }
 
 const std::vector<Ptr<NetdeviceConfiguration>>&
-EntityConfiguration::GetNetDevices () const
+EntityConfiguration::GetNetDevices() const
 {
-  return m_netDevices;
+    return m_netDevices;
 }
 
 const MobilityModelConfiguration&
-EntityConfiguration::GetMobilityModel () const
+EntityConfiguration::GetMobilityModel() const
 {
-  return m_mobility;
+    return m_mobility;
 }
 
 const std::vector<ModelConfiguration>&
-EntityConfiguration::GetApplications () const
+EntityConfiguration::GetApplications() const
 {
-  return m_applications;
+    return m_applications;
 }
 
 const ModelConfiguration&
-EntityConfiguration::GetMechanics () const
+EntityConfiguration::GetMechanics() const
 {
-  return m_mechanics;
+    return m_mechanics;
 }
 
 const ModelConfiguration&
-EntityConfiguration::GetBattery () const
+EntityConfiguration::GetBattery() const
 {
-  return m_battery;
+    return m_battery;
 }
 
 const std::vector<ModelConfiguration>&
-EntityConfiguration::GetPeripherals () const
+EntityConfiguration::GetPeripherals() const
 {
-  return m_peripherals;
+    return m_peripherals;
 }
 
 } // namespace ns3

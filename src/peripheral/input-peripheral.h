@@ -18,13 +18,14 @@
 #ifndef INPUT_PERIPHERAL_H
 #define INPUT_PERIPHERAL_H
 
-#include <ns3/nstime.h>
-#include <ns3/event-id.h>
-
 #include "drone-peripheral.h"
 #include "storage-peripheral.h"
 
-namespace ns3 {
+#include <ns3/event-id.h>
+#include <ns3/nstime.h>
+
+namespace ns3
+{
 
 /**
  * \brief This class describes a generic input peripheral with a constant
@@ -33,67 +34,67 @@ namespace ns3 {
  */
 class InputPeripheral : public DronePeripheral
 {
-public:
-  /**
-   * \brief Get the type ID.
-   *
-   * \returns the object TypeId
-   */
-  static TypeId GetTypeId (void);
+  public:
+    /**
+     * \brief Get the type ID.
+     *
+     * \returns the object TypeId
+     */
+    static TypeId GetTypeId(void);
 
-  InputPeripheral ();
+    InputPeripheral();
 
-  /**
-   * \brief Simulates the data acquisition.
-   *
-   * This methods schedules every m_acquisitionTimeInterval an event that allocates
-   * m_dataRate * m_acquisitionTimeInterval bits to the linked StoragePeripheral.
-   */
-  void AcquireData (void);
+    /**
+     * \brief Simulates the data acquisition.
+     *
+     * This methods schedules every m_acquisitionTimeInterval an event that allocates
+     * m_dataRate * m_acquisitionTimeInterval bits to the linked StoragePeripheral.
+     */
+    void AcquireData(void);
 
-  /**
-   * \brief Sets the pointer to a StoragePeripheral.
-   *
-   * \param storage Pointer to a StoragePeripheral.
-   *
-   * Input and storage peripherals have to be on the same drone.
-   */
-  void SetStorage (Ptr<StoragePeripheral> storage);
+    /**
+     * \brief Sets the pointer to a StoragePeripheral.
+     *
+     * \param storage Pointer to a StoragePeripheral.
+     *
+     * Input and storage peripherals have to be on the same drone.
+     */
+    void SetStorage(Ptr<StoragePeripheral> storage);
 
-  /**
-   * \brief Installs an InputPeripheral on a Drone and links it to the StoragePeripheral.
-   *
-   * This method must be called if the InputPeripheral has the Attribute "HasStorage"
-   * set to true.
-   *
-   * \param storage Pointer to a StoragePeripheral.
-   * \param drone Pointer to a Drone.
-   */
-  void Install (Ptr<StoragePeripheral> storage, Ptr<Drone> drone);
+    /**
+     * \brief Installs an InputPeripheral on a Drone and links it to the StoragePeripheral.
+     *
+     * This method must be called if the InputPeripheral has the Attribute "HasStorage"
+     * set to true.
+     *
+     * \param storage Pointer to a StoragePeripheral.
+     * \param drone Pointer to a Drone.
+     */
+    void Install(Ptr<StoragePeripheral> storage, Ptr<Drone> drone);
 
-  /**
-   * \brief Executes custom operations on state transition.
-   *
-   * \param ocs new state.
-   */
-  virtual void OnChangeState(PeripheralState ocs);
+    /**
+     * \brief Executes custom operations on state transition.
+     *
+     * \param ocs new state.
+     */
+    virtual void OnChangeState(PeripheralState ocs);
 
-  double GetDatarate ();
+    double GetDatarate();
 
-  Time GetAcquisitionTimeInterval ();
+    Time GetAcquisitionTimeInterval();
 
-  bool HasStorage ();
+    bool HasStorage();
 
-protected:
-  void DoInitialize (void);
-  void DoDispose (void);
+  protected:
+    void DoInitialize(void);
+    void DoDispose(void);
 
-private:
-  Time m_acquisitionTimeInterval;
-  double m_dataRate;
-  bool m_hasStorage;
-  EventId m_dataAcquisitionEvent;
-  Ptr<StoragePeripheral> m_storage;
+  private:
+    Time m_acquisitionTimeInterval;
+    double m_dataRate;
+    bool m_hasStorage;
+    EventId m_dataAcquisitionEvent;
+    Ptr<StoragePeripheral> m_storage;
 };
 
 } // namespace ns3

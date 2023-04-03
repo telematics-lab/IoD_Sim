@@ -20,11 +20,12 @@
 #ifndef REMOTE_LIST_H
 #define REMOTE_LIST_H
 
-#include <vector>
-
 #include <ns3/ptr.h>
 
-namespace ns3 {
+#include <vector>
+
+namespace ns3
+{
 
 class Node;
 class CallbackBase;
@@ -38,39 +39,39 @@ class CallbackBase;
  */
 class RemoteList
 {
-public:
-  /// Remote container iterator
-  typedef std::vector<Ptr<Node>>::const_iterator Iterator;
+  public:
+    /// Remote container iterator
+    typedef std::vector<Ptr<Node>>::const_iterator Iterator;
 
-  /**
-   * \param remote Remote to add
-   * \returns index of Remote in list
-   *
-   * This method must be called automatically in order to register
-   * a node as a Remote
-   */
-  static uint32_t Add (Ptr<Node> remote);
+    /**
+     * \param remote Remote to add
+     * \returns index of Remote in list
+     *
+     * This method must be called automatically in order to register
+     * a node as a Remote
+     */
+    static uint32_t Add(Ptr<Node> remote);
 
-  /**
-   * \returns a C++ iterator located at the beginning of this list
-   */
-  static Iterator Begin ();
+    /**
+     * \returns a C++ iterator located at the beginning of this list
+     */
+    static Iterator Begin();
 
-  /**
-   * \returns a C++ iterator located at the end of this list
-   */
-  static Iterator End ();
+    /**
+     * \returns a C++ iterator located at the end of this list
+     */
+    static Iterator End();
 
-  /**
-   * \param n the index of requested node
-   * \returns the Remote (Node) associated to index n
-   */
-  static Ptr<Node> GetRemote (uint32_t n);
+    /**
+     * \param n the index of requested node
+     * \returns the Remote (Node) associated to index n
+     */
+    static Ptr<Node> GetRemote(uint32_t n);
 
-  /**
-   * \returns the number of Remotes currently in the list
-   */
-  static uint32_t GetNRemotes ();
+    /**
+     * \returns the number of Remotes currently in the list
+     */
+    static uint32_t GetNRemotes();
 };
 
 } // namespace ns3

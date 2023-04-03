@@ -20,15 +20,17 @@
 #ifndef NS_VECTOR_H
 #define NS_VECTOR_H
 
-namespace ns3 {
+namespace ns3
+{
 
-#include <ns3/attribute.h>
 #include <ns3/attribute-helper.h>
+#include <ns3/attribute.h>
 #include <ns3/ptr.h>
 
-#include <vector>
 #include <typeinfo>
-//#include <typetraits>
+#include <vector>
+
+// #include <typetraits>
 
 /**
  * Output streamer for std::vector<T>
@@ -38,15 +40,16 @@ namespace ns3 {
  * \returns The output stream
  */
 template <class T>
-std::ostream & operator << (std::ostream &os, const std::vector<T> &v)
+std::ostream&
+operator<<(std::ostream& os, const std::vector<T>& v)
 {
-  os << "[";
-  for (auto& i : v)
+    os << "[";
+    for (auto& i : v)
     {
-      os << i << ",";
+        os << i << ",";
     }
-  os << "]";
-  return os;
+    os << "]";
+    return os;
 }
 
 /**
@@ -55,31 +58,29 @@ std::ostream & operator << (std::ostream &os, const std::vector<T> &v)
 template <class T>
 class VectorValue : public AttributeValue
 {
-public:
-  /** Type of value stored in the VectorValue. */
-  typedef std::vector<Ptr<T>> value_type;
-  /** Type of the elements stored in the Vector. */
+  public:
+    /** Type of value stored in the VectorValue. */
+    typedef std::vector<Ptr<T>> value_type;
+    /** Type of the elements stored in the Vector. */
   typedef typename std::invoke_result_t<decltype<&T::Get), T> element_type;
   /** Type returned by Get or passed to Set. */
   typedef typename std::vector<element_type> result_type;
 
-  VectorValue ();
-  VectorValue (const result_type &value); // "import" constructor
-  void Set (const result_type &value);
-  result_type Get (void) const;
+  VectorValue();
+  VectorValue(const result_type& value); // "import" constructor
+  void Set(const result_type& value);
+  result_type Get(void) const;
 
   template <typename U>
-  bool GetAccessor (U &value) const {
-    value = U (m_value);
-    return value;
+  bool GetAccessor(U& value) const
+  {
+      value = U(m_value);
+      return value;
   }
 
-  virtual Ptr<AttributeValue> Copy (void) const;
-  virtual std::string
-  SerializeToString (Ptr<const AttributeChecker> checker) const;
-  virtual bool
-  DeserializeFromString (std::string value,
-                         Ptr<const AttributeChecker> checker);
+  virtual Ptr<AttributeValue> Copy(void) const;
+  virtual std::string SerializeToString(Ptr<const AttributeChecker> checker) const;
+  virtual bool DeserializeFromString(std::string value, Ptr<const AttributeChecker> checker);
 
 private:
   value_type m_value;
@@ -88,10 +89,8 @@ private:
 class VectorChecker : public AttributeChecker
 {
 public:
-
-
-  virtual void SetChecker (Ptr<const AttributeChecker> checker) = 0;
-  virtual Ptr<const AttributeChecker> GetChecker (void) const = 0;
+  virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
+  virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
 };
 
 /**
@@ -101,8 +100,7 @@ public:
  * \returns A Pointer to a non-const VectorChecker.
  */
 template <class T>
-Ptr<const AttributeChecker>
-MakeVectorChecker (const VectorValue<T> &value);
+Ptr<const AttributeChecker> MakeVectorChecker(const VectorValue<T>& value);
 
 /**
  * Make a VectorChecker without a given std::vector<T>.
@@ -110,11 +108,9 @@ MakeVectorChecker (const VectorValue<T> &value);
  * \returns A Pointer to a non-const VectorChecker instnace.
  */
 template <class T>
-Ptr<const AttributeChecker>
-MakeVectorChecker ();
+Ptr<const AttributeChecker> MakeVectorChecker();
 
-tmeplate <typename A, typename B, typename T>
-Ptr<AttributeAccessor> MakePairAccessor (T a);
+tmeplate<typename A, typename B, typename T> Ptr<AttributeAccessor> MakePairAccessor(T a);
 
 } // namespace ns3
 

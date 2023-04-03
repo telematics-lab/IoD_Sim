@@ -18,31 +18,31 @@
 #ifndef MOBILITY_MODEL_CONFIGURATION_H
 #define MOBILITY_MODEL_CONFIGURATION_H
 
-#include <optional>
-
+#include <ns3/model-configuration.h>
 #include <ns3/vector.h>
 
-#include <ns3/model-configuration.h>
+#include <optional>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
- * Data class specific for Mobility Models configuration, which may set nodes to an initial position through a
- * position allocator.
+ * Data class specific for Mobility Models configuration, which may set nodes to an initial position
+ * through a position allocator.
  */
 class MobilityModelConfiguration : public ModelConfiguration
 {
-public:
-  MobilityModelConfiguration (const std::string modelName,
-                              const std::vector<ModelConfiguration::Attribute> modelAttributes,
-                              const std::optional<Vector> initialPosition);
-  MobilityModelConfiguration ();
-  ~MobilityModelConfiguration ();
+  public:
+    MobilityModelConfiguration(const std::string modelName,
+                               const std::vector<ModelConfiguration::Attribute> modelAttributes,
+                               const std::optional<Vector> initialPosition);
+    MobilityModelConfiguration();
+    ~MobilityModelConfiguration();
 
-  const std::optional<Vector> GetInitialPosition () const;
+    const std::optional<Vector> GetInitialPosition() const;
 
-private:
-  const std::optional<Vector> m_initialPosition;
+  private:
+    const std::optional<Vector> m_initialPosition;
 };
 
 } // namespace ns3

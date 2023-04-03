@@ -20,7 +20,8 @@
 
 #include <ns3/vector.h>
 
-namespace ns3 {
+namespace ns3
+{
 
 /**
  * \brief A point constructed during curve generation with the position
@@ -28,87 +29,83 @@ namespace ns3 {
  */
 class CurvePoint
 {
-public:
-  /**
-   * \brief constructor used by the curve generator.
-   *
-   * \param position         position in space.
-   * \param t                parameter used by the curve for the generation
-   *                         of the point. t is a float number between 0 and 1.
-   * \param relativeDistance the euclidean distance relative to the point
-   *                         preceding this one on the curve.
-   * \param absoluteDistance the total length of the curve from the origin to
-   *                         this point.
-   */
-  CurvePoint (const Vector position,
-              float t,
-              double relativeDistance,
-              double absoluteDistance);
+  public:
+    /**
+     * \brief constructor used by the curve generator.
+     *
+     * \param position         position in space.
+     * \param t                parameter used by the curve for the generation
+     *                         of the point. t is a float number between 0 and 1.
+     * \param relativeDistance the euclidean distance relative to the point
+     *                         preceding this one on the curve.
+     * \param absoluteDistance the total length of the curve from the origin to
+     *                         this point.
+     */
+    CurvePoint(const Vector position, float t, double relativeDistance, double absoluteDistance);
 
-  CurvePoint (const Vector position);
+    CurvePoint(const Vector position);
 
-  /**
-   * \brief default constructor
-   */
-  CurvePoint ();
-  /**
-   * \brief default destructor
-   */
-  virtual ~CurvePoint ();
+    /**
+     * \brief default constructor
+     */
+    CurvePoint();
+    /**
+     * \brief default destructor
+     */
+    virtual ~CurvePoint();
 
+    /**
+     * \brief get the distance vector relative to a given point
+     *
+     * \param point the second point to calculate the distance vector
+     * \return the distance vector
+     */
+    const Vector GetRelativeDistanceVector(const Vector& point) const;
+    /**
+     * \brief get the distance vector relative to a given point of the curve
+     *
+     * \param point the second point to calculate the distance vector
+     * \return the distance vector
+     */
+    const Vector GetRelativeDistanceVector(const CurvePoint& point) const;
+    /**
+     * \brief get the distance relative to a given point
+     *
+     * \param point the second point to calculate the distance
+     * \return the scalar value of the euclidean distance
+     */
+    const double GetRelativeDistance(const Vector& point) const;
+    /**
+     * \brief get the distance relative to a given point point of the curve
+     *
+     * \param point the second point to calculate the distance
+     * \return the scalar value of the euclidean distance
+     */
+    const double GetRelativeDistance(const CurvePoint& point) const;
 
-  /**
-   * \brief get the distance vector relative to a given point
-   *
-   * \param point the second point to calculate the distance vector
-   * \return the distance vector
-   */
-  const Vector GetRelativeDistanceVector (const Vector &point) const;
-  /**
-   * \brief get the distance vector relative to a given point of the curve
-   *
-   * \param point the second point to calculate the distance vector
-   * \return the distance vector
-   */
-  const Vector GetRelativeDistanceVector (const CurvePoint &point) const;
-  /**
-   * \brief get the distance relative to a given point
-   *
-   * \param point the second point to calculate the distance
-   * \return the scalar value of the euclidean distance
-   */
-  const double GetRelativeDistance (const Vector &point) const;
-  /**
-   * \brief get the distance relative to a given point point of the curve
-   *
-   * \param point the second point to calculate the distance
-   * \return the scalar value of the euclidean distance
-   */
-  const double GetRelativeDistance (const CurvePoint &point) const;
+    /**
+     * \brief get the length of the curve up to the point of the curve
+     *
+     * \return the length of the curve up to this point of the curve
+     */
+    const double GetAbsoluteDistance() const;
 
-  /**
-   * \brief get the length of the curve up to the point of the curve
-   *
-   * \return the length of the curve up to this point of the curve
-   */
-  const double GetAbsoluteDistance () const;
+    /**
+     * \return the location of this point in space
+     */
+    const Vector GetPosition() const;
 
-  /**
-   * \return the location of this point in space
-   */
-  const Vector GetPosition () const;
+    bool operator!=(const CurvePoint& b) const;
 
-  bool operator!= (const CurvePoint& b) const;
-
-private:
-  Vector m_position;          /// Location of this point in space.
-  float  m_t;                 /// Parameter used by the curve for the
-                              /// generation of the point. t is a float
-                              /// Number between 0 and 1.
-  double m_relativeDistance;  /// The euclidean distance relative to the point
-                              /// preceding this one on the curve.
-  double m_absoluteDistance;  /// The total length of the curve from the origin
-                              /// to this point.
+  private:
+    Vector m_position;         /// Location of this point in space.
+    float m_t;                 /// Parameter used by the curve for the
+                               /// generation of the point. t is a float
+                               /// Number between 0 and 1.
+    double m_relativeDistance; /// The euclidean distance relative to the point
+                               /// preceding this one on the curve.
+    double m_absoluteDistance; /// The total length of the curve from the origin
+                               /// to this point.
 };
 
 } // namespace ns3
