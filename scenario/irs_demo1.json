@@ -1,0 +1,392 @@
+// Demo of an IRS split in half to serve two ground nodes
+{
+  "name": "irs_demo1",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 10,
+  "dryRun": false,
+  "staticNs3Config": [],
+  "world": {
+    "size": {
+      "X": "1000",
+      "Y": "1000",
+      "Z": "200"
+    },
+    "buildings": [
+      {
+        "type": "residential",
+        "walls": "concreteWithoutWindows",
+        "boundaries": [
+          495.0,
+          505.0,
+          495.0,
+          505.0,
+          0.0,
+          30.0
+        ], //p1x, p2x, p1y, p2y, p1z, p2z
+        "floors": 13,
+        "rooms": [
+          10,
+          10
+        ]
+      }
+    ]
+  },
+  "phyLayer": [
+    {
+      "type": "lte",
+      "attributes": [],
+      "channel": {
+        "spectrumModel": {
+          "name": "ns3::IrsAssistedSpectrumChannel",
+          "attributes": []
+        }
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "lte"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "10.1.0.0",
+      "mask": "255.255.255.0",
+      "gateway": "10.1.0.1"
+    }
+  ],
+  "nodes": [
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                },
+                "maximum": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                }
+              }
+            }
+          ],
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          },
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              560.0,
+              530.0,
+              5.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 499.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "Interval",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                },
+                "maximum": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                }
+              }
+            }
+          ],
+          "phy": {
+            "TxPower": 24.0,
+            "EnableUplinkPowerControl": "false"
+          },
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              560.0,
+              470.0,
+              5.0
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpEchoClientApplication",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 499.0
+            },
+            {
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "Interval",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drones": [
+    {
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              500.0,
+              500.0,
+              60.0
+            ]
+          }
+        ]
+      },
+      "applications": [],
+      "mechanics": {
+        "name": "ns3::Drone",
+        "attributes": [
+          {
+            "name": "Mass",
+            "value": 0.750
+          },
+          {
+            "name": "RotorDiskArea",
+            "value": 0.18
+          },
+          {
+            "name": "DragCoefficient",
+            "value": 0.08
+          }
+        ]
+      },
+      "battery": {
+        "name": "ns3::LiIonEnergySource",
+        "attributes": [
+          {
+            "name": "LiIonEnergySourceInitialEnergyJ",
+            "value": 200.0
+          },
+          {
+            "name": "LiIonEnergyLowBatteryThreshold",
+            "value": 0.2
+          }
+        ]
+      },
+      "peripherals": [
+        {
+          //Test 1
+          //PatchConfigurator: NO
+          //ServingConfigurator: NO
+          "name": "ns3::Irs",
+          "attributes": [
+            {
+              "name": "Rows",
+              "value": 100
+            },
+            {
+              "name": "Columns",
+              "value": 100
+            },
+            {
+              "name": "PruX",
+              "value": 0.01
+            },
+            {
+              "name": "PruY",
+              "value": 0.01
+            },
+            {
+              "name": "RotoAxis",
+              "value": [
+                "X_AXIS"
+              ]
+            },
+            {
+              "name": "RotoAngles",
+              "value": [
+                180.0
+              ]
+            },
+            {
+              "name": "Patches",
+              "value": [
+                {
+                  "Size": [
+                    0,
+                    69,
+                    0,
+                    99
+                  ],
+                  "PhaseX": 0.0,
+                  "PhaseY": 0.0,
+                  "ServingNodes": [
+                    "/NodeList/1",
+                    "/ZspList/0"
+                  ]
+                },
+                {
+                  "Size": [
+                    70,
+                    99,
+                    0,
+                    99
+                  ],
+                  "PhaseX": 0.0,
+                  "PhaseY": 0.0,
+                  "ServingNodes": [
+                    "/NodeList/0",
+                    "/ZspList/0"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PowerConsumption",
+              "value": [
+                0,
+                1.0,
+                3.3
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "lte",
+          "role": "eNB",
+          "networkLayer": 0,
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO",
+              "bitrate": {
+                "guaranteed": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                },
+                "maximum": {
+                  "downlink": 20e6,
+                  "uplink": 5e6
+                }
+              }
+            }
+          ],
+          "phy": {
+            "TxPower": 49.0
+          },
+          "antennaModel": {
+            "name": "ns3::IsotropicAntennaModel",
+            "attributes": []
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              440.0,
+              500.0,
+              5.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::DroneServerApplication",
+          "attributes": []
+        }
+      ]
+    }
+  ],
+  "logComponents": [
+    "DroneServerApplication",
+    "DroneClientApplication",
+    "Drone",
+    "Scenario",
+    "LteHelper",
+    "NoBackhaulEpcHelper",
+    "LteEnbNetDevice"
+  ]
+}

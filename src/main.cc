@@ -229,15 +229,15 @@ Scenario::operator() ()
                                     .c_str());
             if (plyRet == -1)
             {
-                NS_ABORT_MSG("Something goes wrong while generating the ply file");
+                NS_ABORT_MSG("Something went wrong while generating the ply file");
             }
              int plotRet =
                 system(("python ../analysis/rem-3d-preview.py " + CONFIGURATOR->GetResultsPath() +
                         CONFIGURATOR->GetName() + "-3D-REM.ply")
                            .c_str());
-            if (plotRet == -1)
-            {
-                NS_ABORT_MSG("Something goes wrong while generating the plot");
+             if (plotRet != 0)
+             {
+                NS_ABORT_MSG("Something went wrong while generating the plot");
             }
         }
         else if (CONFIGURATOR->RadioMap() == 1)
@@ -248,19 +248,18 @@ Scenario::operator() ()
             int plyRet = system(("python ../analysis/txt2ply.py " + CONFIGURATOR->GetResultsPath() +
                                  CONFIGURATOR->GetName() + "-2D-REM.txt")
                                     .c_str());
-            if (plyRet == -1)
+            if (plyRet != 0)
             {
-                NS_ABORT_MSG("Something goes wrong while generating the ply file");
+                NS_ABORT_MSG("Something went wrong while generating the ply file");
             }
             int plotRet =
                 system(("python ../analysis/rem-2d-preview.py " + CONFIGURATOR->GetResultsPath() +
                         CONFIGURATOR->GetName() + "-2D-REM.txt")
                            .c_str());
-            if (plotRet == -1)
+            if (plotRet != 0)
             {
-                NS_ABORT_MSG("Something goes wrong while generating the plot");
+                NS_ABORT_MSG("Something went wrong while generating the plot");
             }
-            // TODO: remove useless files like .pcap, summary, etc.
         }
     }
   else
