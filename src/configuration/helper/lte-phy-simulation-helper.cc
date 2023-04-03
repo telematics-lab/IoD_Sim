@@ -44,12 +44,17 @@ public:
   }
 };
 
-LtePhySimulationHelper::LtePhySimulationHelper (const size_t stackId) :
-  m_lte {CreateObject<LteHelper> ()},
-  m_epc {CreateObjectWithAttributes<PointToPointEpcHelper> ("S1uLinkEnablePcap", BooleanValue (true),
-                                                            "S1uLinkPcapPrefix", StringValue (LtePhySimulationHelperPriv::GetS1uLinkPcapPrefix (stackId)),
-                                                            "X2LinkEnablePcap", BooleanValue (true),
-                                                            "X2LinkPcapPrefix" , StringValue (LtePhySimulationHelperPriv::GetX2LinkPcapPrefix (stackId)))}
+LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
+    : m_lte{CreateObject<LteHelper>()},
+      m_epc{CreateObjectWithAttributes<PointToPointEpcHelper>(
+          "S1uLinkEnablePcap",
+          BooleanValue(CONFIGURATOR->GetLogOnFile()),
+          "S1uLinkPcapPrefix",
+          StringValue(LtePhySimulationHelperPriv::GetS1uLinkPcapPrefix(stackId)),
+          "X2LinkEnablePcap",
+          BooleanValue(CONFIGURATOR->GetLogOnFile()),
+          "X2LinkPcapPrefix",
+          StringValue(LtePhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))}
 {
   m_lte->SetEpcHelper(m_epc);
 }
