@@ -1,4 +1,5 @@
 [submodule "ns3"]
 	path = ns3
-	url = https://gitlab.com/nsnam/ns-3-dev.git
+	branch = ntn-dev
+	url = https://gitlab.com/mattiasandri/ns-3-ntn.git
 	ignore = dirty
