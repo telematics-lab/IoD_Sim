@@ -146,12 +146,15 @@ ScenarioConfigurationHelper::GetStaticConfig()
 {
     if (m_staticConfig.empty())
     {
-        NS_ASSERT_MSG(m_config.HasMember("staticNs3Config"),
-                      "Please define 'staticNs3Config' in configuration file.");
+        if (!m_config.HasMember("staticNs3Config"))
+            return {};
+
         NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
                       "'staticNs3Config' property must be an array.");
 
-        std::vector<std::pair<std::string, std::string>> staticConfigsDecoded = {};
+        auto decoded = std::vector<std::pair<std::string, std::string>> {};
+        decoded.reserve(m_config["staticNs3Config"].Size());
+
         const auto staticConfigsArr = m_config["staticNs3Config"].GetArray();
         for (auto& sc : staticConfigsArr)
         {
@@ -176,10 +179,10 @@ ScenarioConfigurationHelper::GetStaticConfig()
             else if (obj["value"].IsString())
                 value << obj["value"].GetString();
 
-            staticConfigsDecoded.push_back({obj["name"].GetString(), value.str()});
+            decoded.push_back({obj["name"].GetString(), value.str()});
         }
 
-        m_staticConfig = staticConfigsDecoded;
+        m_staticConfig = decoded;
     }
 
     return m_staticConfig;
