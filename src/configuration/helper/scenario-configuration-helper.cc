@@ -964,22 +964,21 @@ ScenarioConfigurationHelper::GetBuildings() const
 {
     NS_LOG_FUNCTION_NOARGS();
 
+    if (!m_config.HasMember("world"))
+        return {};
+
     std::vector<Ptr<Building>> buildings;
 
-    NS_ASSERT_MSG(m_config.HasMember("world"), "'world' definition is missing from the JSON file.");
     NS_ASSERT_MSG(m_config["world"].IsObject(),
                   "'world' defined in the JSON configuration must be an object.");
 
-    if (m_config["world"].HasMember("buildings") == false)
-    {
-        return buildings;
-    }
+    if (!m_config["world"].HasMember("buildings"))
+        return {};
 
     NS_ASSERT_MSG(m_config["world"]["buildings"].IsArray(),
                   "'buildings' needs to be an array of objects, check the configuration file.");
 
     auto arr = m_config["world"]["buildings"].GetArray();
-
     for (auto b = arr.Begin(); b != arr.End(); ++b)
     {
         Ptr<Building> building = CreateObject<Building>();
