@@ -164,6 +164,8 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 attrValue = attrInfo.checker->CreateValidValue(IntegerValue(attrValueInt));
             else if (acceptedType == "ns3::UintegerValue")
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
+            else if (acceptedType == "ns3::TimeValue")
+                attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueInt)));
             else
                 NS_FATAL_ERROR("The attribute value for property "
                                << attrInfo.name << " defined in model " << modelName
