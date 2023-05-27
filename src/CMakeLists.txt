@@ -1,3 +1,5 @@
+find_package(OpenSSL REQUIRED)
+
 set(source_files
   application/drone-client-application.cc
   application/drone-communications.cc
@@ -90,6 +92,8 @@ set(source_files
   report/wifi-inspector.cc
   report/wifi-mac-layer.cc
   report/wifi-phy-layer.cc
+  security/aes.cc
+  security/x509_certificate.cc
   world/interest-region-container.cc
   world/interest-region.cc
 )
@@ -188,6 +192,8 @@ set(header_files
   report/wifi-inspector.h
   report/wifi-mac-layer.h
   report/wifi-phy-layer.h
+  security/aes.h
+  security/x509_certificate.h
   world/interest-region-container.h
   world/interest-region.h
 )
@@ -202,6 +208,7 @@ build_lib(
                     ${liblte}
                     ${libwifi}
                     ${libmobility}
+                    ${OPENSSL_SSL_LIBRARIES}
 )
 
 build_example(
@@ -214,4 +221,5 @@ build_example(
                     ${libnetwork}
                     ${libwifi}
                     ${libinternet}
+                    ${OPENSSL_SSL_LIBRARIES}
 )
