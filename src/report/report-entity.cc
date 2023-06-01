@@ -167,8 +167,8 @@ ReportEntity::DoMonitorRxTraffic(Ptr<const Packet> packet, Ptr<Ipv4> ipv4, uint3
     constexpr const char* direction = "Rx";
     std::stringstream builderIpv4Src, builderIpv4Dst;
     std::string ipv4Src, ipv4Dst;
-    std::uint32_t payloadSize = 0;
-    std::uint32_t sequenceNumber = 0;
+    uint32_t payloadSize = 0;
+    uint32_t sequenceNumber = 0;
     PacketType packetType;
 
     constexpr const uint8_t bufferLength = 128;
@@ -258,8 +258,8 @@ ReportEntity::DoMonitorTxTraffic(Ptr<const Packet> packet, Ptr<Ipv4> ipv4, uint3
     constexpr const char* direction = "Tx";
     std::stringstream builderIpv4Src, builderIpv4Dst;
     std::string ipv4Src, ipv4Dst;
-    std::uint32_t payloadSize = 0;
-    std::uint32_t sequenceNumber = 0;
+    uint32_t payloadSize = 0;
+    uint32_t sequenceNumber = 0;
     PacketType packetType;
 
     constexpr const uint8_t bufferLength = 128;

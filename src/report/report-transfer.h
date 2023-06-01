@@ -74,9 +74,9 @@ class ReportTransfer : public Object
     /// the receiver of the packet
     std::string m_destinationAddress;
     /// the length of the payload
-    std::uint32_t m_length;
+    uint32_t m_length;
     /// the sequence number of DCL payload
-    std::uint32_t m_sequenceNumber;
+    uint32_t m_sequenceNumber;
     /// the full JSON, DCL payload, decoded in ASCII
     std::string m_payload;
 };
