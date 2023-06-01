@@ -43,12 +43,12 @@ ReportTransfer::GetTypeId()
                           "The id of entity",
                           IntegerValue(),
                           MakeIntegerAccessor(&ReportTransfer::m_entityid),
-                          MakeIntegerChecker<std::uint32_t>())
+                          MakeIntegerChecker<uint32_t>())
             .AddAttribute("Interface",
                           "The ipv4 interface number",
                           IntegerValue(),
                           MakeIntegerAccessor(&ReportTransfer::m_iface),
-                          MakeIntegerChecker<std::int32_t>())
+                          MakeIntegerChecker<int32_t>())
             .AddAttribute("PacketType",
                           "The Type of the Packet",
                           PacketTypeValue(),
@@ -78,12 +78,12 @@ ReportTransfer::GetTypeId()
                           "The length of the payload",
                           IntegerValue(),
                           MakeIntegerAccessor(&ReportTransfer::m_length),
-                          MakeIntegerChecker<std::uint32_t>())
+                          MakeIntegerChecker<uint32_t>())
             .AddAttribute("SequenceNumber",
                           "The sequence number of the DCL packet",
                           IntegerValue(),
                           MakeIntegerAccessor(&ReportTransfer::m_sequenceNumber),
-                          MakeIntegerChecker<std::uint32_t>())
+                          MakeIntegerChecker<uint32_t>())
             .AddAttribute("Payload",
                           "The payload content",
                           StringValue(),
