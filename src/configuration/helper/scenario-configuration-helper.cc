@@ -152,7 +152,7 @@ ScenarioConfigurationHelper::GetStaticConfig()
         NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
                       "'staticNs3Config' property must be an array.");
 
-        auto decoded = std::vector<std::pair<std::string, std::string>> {};
+        auto decoded = std::vector<std::pair<std::string, std::string>>{};
         decoded.reserve(m_config["staticNs3Config"].Size());
 
         const auto staticConfigsArr = m_config["staticNs3Config"].GetArray();
@@ -227,8 +227,9 @@ ScenarioConfigurationHelper::GetMacLayers() const
 const std::vector<Ptr<NetworkLayerConfiguration>>
 ScenarioConfigurationHelper::GetNetworkLayers() const
 {
-    NS_ASSERT_MSG(m_config.HasMember("networkLayer"),
-                  "Please define 'networkLayer' in your JSON configuration.");
+    if (!m_config.HasMember("networkLayer"))
+        return {};
+
     NS_ASSERT_MSG(m_config["networkLayer"].IsArray(), "'networkLayer' property must be an array.");
 
     const auto arr = m_config["networkLayer"].GetArray();

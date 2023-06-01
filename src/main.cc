@@ -47,6 +47,8 @@
 #include <ns3/nat-application.h>
 #include <ns3/net-device-container.h>
 #include <ns3/node-list.h>
+#include <ns3/null-ntn-demo-mac-layer-configuration.h>
+#include <ns3/null-ntn-demo-mac-layer-simulation-helper.h>
 #include <ns3/object-factory.h>
 #include <ns3/ptr.h>
 #include <ns3/radio-environment-map-helper.h>
@@ -54,9 +56,12 @@
 #include <ns3/report.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/show-progress.h>
+#include <ns3/simple-net-device.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
 #include <ns3/three-dimensional-rem-helper.h>
+#include <ns3/three-gpp-phy-layer-configuration.h>
+#include <ns3/three-gpp-phy-simulation-helper.h>
 #include <ns3/trace-source-accessor.h>
 #include <ns3/traced-value.h>
 #include <ns3/wifi-mac-factory-helper.h>
@@ -400,6 +405,48 @@ Scenario::ConfigurePhy()
 
             m_protocolStacks[PHY_LAYER].push_back(lteSim);
         }
+        else if (phyLayerConf->GetType() == "3GPP")
+        {
+            const auto conf =
+                StaticCast<ThreeGppPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
+
+            auto channelCond = [conf]() -> Ptr<ThreeGppChannelConditionModel> {
+                ObjectFactory factory;
+
+                factory.SetTypeId(conf->GetConditionModel().GetName());
+                for (auto& attr : conf->GetConditionModel().GetAttributes())
+                    factory.Set(attr.name, *attr.value);
+
+                return factory.Create<ThreeGppChannelConditionModel>();
+            }();
+            auto propagationLoss = [conf, channelCond]() -> Ptr<ThreeGppPropagationLossModel> {
+                ObjectFactory factory;
+
+                factory.SetTypeId(conf->GetPropagationLossModel().GetName());
+                for (auto& attr : conf->GetPropagationLossModel().GetAttributes())
+                    factory.Set(attr.name, *attr.value);
+
+                auto model = factory.Create<ThreeGppPropagationLossModel>();
+                model->SetChannelConditionModel(channelCond);
+
+                return model;
+            }();
+            auto spectrumLoss = [conf, channelCond]() -> Ptr<ThreeGppSpectrumPropagationLossModel> {
+                auto model = CreateObject<ThreeGppSpectrumPropagationLossModel>();
+                model->SetChannelModelAttribute("ChannelConditionModel", PointerValue(channelCond));
+
+                for (auto& attr : conf->GetAttributes())
+                    model->SetChannelModelAttribute(attr.name, *attr.value);
+
+                return model;
+            }();
+
+            auto simHelper = CreateObject<ThreeGppPhySimulationHelper>(phyId,
+                                                                       channelCond,
+                                                                       propagationLoss,
+                                                                       spectrumLoss);
+            m_protocolStacks[PHY_LAYER].push_back(simHelper);
+        }
         else
         {
             NS_FATAL_ERROR("Unsupported PHY Layer Type: " << phyLayerConf->GetType());
@@ -439,12 +486,26 @@ Scenario::ConfigureMac()
             // NO OPERATION NEEDED HERE
             m_protocolStacks[MAC_LAYER].push_back(nullptr);
         }
+        else if (macLayerConf->GetType() == "NullNtnDemo")
+        {
+            const auto phy =
+                StaticCast<ThreeGppPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][i]);
+            const auto macConf =
+                StaticCast<NullNtnDemoMacLayerConfiguration, MacLayerConfiguration>(macLayerConf);
+            const auto mac = CreateObject<NullNtnDemoMacLayerSimulationHelper>(macConf, phy);
+
+            Simulator::ScheduleNow(&NullNtnDemoMacLayerSimulationHelper::Setup,
+                                   mac,
+                                   CONFIGURATOR->GetDuration());
+
+            m_protocolStacks[MAC_LAYER].push_back(mac);
+        }
         else
         {
             NS_FATAL_ERROR("Unsupported MAC Layer Type: " << macLayerConf->GetType());
         }
 
-        i++;
+        ++i;
     }
 }
 
@@ -517,17 +578,21 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
 
             if (entityNetDev->GetType() == "wifi")
             {
+                NS_ASSERT_MSG(netId, "Wifi NetDevice must have a Network Layer ID");
+
                 auto devContainer = ConfigureEntityWifiStack(entityKey,
                                                              entityNetDev,
                                                              entityNode,
                                                              entityId,
                                                              deviceId,
-                                                             netId);
-                InstallEntityIpv4(entityNode, devContainer, netId);
-                ConfigureEntityIpv4(entityNode, devContainer, deviceId, netId);
+                                                             *netId);
+                InstallEntityIpv4(entityNode, devContainer, *netId);
+                ConfigureEntityIpv4(entityNode, devContainer, deviceId, *netId);
             }
             else if (entityNetDev->GetType() == "lte")
             {
+                NS_ASSERT_MSG(netId, "LTE NetDevice must have a Network Layer ID");
+
                 const auto entityLteDevConf =
                     StaticCast<LteNetdeviceConfiguration, NetdeviceConfiguration>(entityNetDev);
                 const auto role = entityLteDevConf->GetRole();
@@ -537,12 +602,12 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 switch (role)
                 {
                 case eNB:
-                    ConfigureLteEnb(entityNode, netId, antennaModel, phyConf);
+                    ConfigureLteEnb(entityNode, *netId, antennaModel, phyConf);
                     break;
                 case UE:
                     ConfigureLteUe(entityNode,
                                    entityLteDevConf->GetBearers(),
-                                   netId,
+                                   *netId,
                                    antennaModel,
                                    phyConf);
                     break;
@@ -550,13 +615,32 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     NS_FATAL_ERROR("Unrecognized LTE role for entity ID " << entityId);
                 }
             }
+            else if (entityNetDev->GetType() == "simple")
+            {
+                auto netDevice = CreateObject<SimpleNetDevice>();
+                const auto antennaConf = entityNetDev->GetAntennaModel();
+
+                if (antennaConf)
+                {
+                    ObjectFactory factory;
+                    factory.SetTypeId(antennaConf->GetName());
+                    for (auto& attr : antennaConf->GetAttributes())
+                        factory.Set(attr.name, *attr.value);
+
+                    auto antenna = factory.Create();
+                    netDevice->AggregateObject(antenna);
+                }
+
+                entityNode->AddDevice(netDevice);
+                netDevice->SetNode(entityNode);
+            }
             else
             {
                 NS_FATAL_ERROR(
                     "Unsupported Drone Network Device Type: " << entityNetDev->GetType());
             }
 
-            deviceId++;
+            ++deviceId;
         }
 
         ConfigureEntityApplications(entityKey, entityConf, entityId);
@@ -573,7 +657,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
             ConfigureEntityPeripherals(entityKey, entityConf, entityId);
         }
 
-        entityId++;
+        ++entityId;
     }
 
     BuildingsHelper::Install(nodes);
