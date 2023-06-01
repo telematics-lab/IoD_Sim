@@ -24,6 +24,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/string.h>
+#include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/type-id.h>
 #include <ns3/wifi-phy-layer-configuration.h>
 
@@ -109,6 +110,39 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                                                      phyAttributes,
                                                      propagationLossModel,
                                                      spectrumModel);
+    }
+    else if (phyType == "3GPP")
+    {
+        NS_ASSERT_MSG(jsonPhyLayer.HasMember("attributes"),
+                      "3GPP PHY Layer definition must have 'attributes' property.");
+        NS_ASSERT_MSG(jsonPhyLayer["attributes"].IsArray(),
+                      "3GPP PHY Layer 'attributes' must be an object.");
+        NS_ASSERT_MSG(jsonPhyLayer.HasMember("channel"),
+                      "3GPP PHY Layer definition must have 'channel' property.");
+        NS_ASSERT_MSG(jsonPhyLayer["channel"].IsObject(),
+                      "3GPP PHY Layer 'mode' property must be an object.");
+        NS_ASSERT_MSG(
+            jsonPhyLayer["channel"].HasMember("propagationLossModel"),
+            "3GPP PHY Layer channel definition must have 'propagationLossModel' property.");
+        NS_ASSERT_MSG(jsonPhyLayer["channel"]["propagationLossModel"].IsObject(),
+                      "3GPP PHY Layer channel 'propagationLossModel' must be an object");
+        NS_ASSERT_MSG(jsonPhyLayer["channel"].HasMember("conditionModel"),
+                      "3GPP PHY Layer channel definition must have 'conditionModel' property.");
+        NS_ASSERT_MSG(jsonPhyLayer["channel"]["conditionModel"].IsObject(),
+                      "3GPP PHY Layer channel 'conditionModel' must be an object");
+
+        const auto phyAttributes = ModelConfigurationHelper::GetAttributes(
+            TypeId::LookupByName("ns3::ThreeGppChannelModel"),
+            jsonPhyLayer["attributes"].GetArray());
+        const auto propagationLossModel =
+            ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["propagationLossModel"]);
+        const auto conditionModel =
+            ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["conditionModel"]);
+
+        phyConfig = Create<ThreeGppPhyLayerConfiguration>(phyType,
+                                                          phyAttributes,
+                                                          propagationLossModel,
+                                                          conditionModel);
     }
     else
     {

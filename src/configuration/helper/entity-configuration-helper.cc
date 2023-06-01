@@ -44,14 +44,20 @@ EntityConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
     NS_ASSERT_MSG(json.IsObject(), "Entity configuration must be an object.");
     NS_ASSERT_MSG(json.HasMember("mobilityModel"),
                   "Entity configuration must have 'mobilityModel'property.");
-    NS_ASSERT_MSG(json.HasMember("applications"),
-                  "Entity configuration must have 'applications' property defined.");
 
     const auto netDevices = json.HasMember("netDevices")
                                 ? DecodeNetdeviceConfigurations(json["netDevices"])
                                 : std::vector<Ptr<NetdeviceConfiguration>>();
     const auto mobilityModel = DecodeMobilityConfiguration(json["mobilityModel"]);
-    const auto applications = DecodeApplicationConfigurations(json["applications"]);
+
+    const auto applications = [&json]() -> std::vector<ModelConfiguration> {
+        if (json.HasMember("applications"))
+        {
+            return DecodeApplicationConfigurations(json["applications"]);
+        }
+
+        return std::vector<ModelConfiguration>();
+    }();
 
     if (json.HasMember("mechanics") && json.HasMember("battery"))
     {
@@ -103,12 +109,19 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
 
         const std::string type = netdev["type"].GetString();
 
-        NS_ASSERT_MSG(netdev.HasMember("networkLayer"),
-                      "Entity Network Device must have 'networkLayer' property defined.");
-        NS_ASSERT_MSG(netdev["networkLayer"].IsUint(),
-                      "Entity Network Device 'networkLayer' property must be an unsigned integer.");
+        auto networkLayerId = [&netdev]() -> std::optional<uint32_t> {
+            if (netdev.HasMember("networkLayer"))
+            {
+                NS_ASSERT_MSG(netdev["networkLayer"].IsUint(),
+                              "Entity Network Device 'networkLayer' property must be an unsigned "
+                              "integer.");
+                return netdev["networkLayer"].GetUint();
+            }
 
-        const uint32_t networkLayerId = netdev["networkLayer"].GetUint();
+            return std::nullopt;
+        }();
+
+        const auto antennaModel = ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antenna");
 
         if (type == "wifi")
         {
@@ -120,7 +133,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
             const auto macLayer = ModelConfigurationHelper::Get(netdev["macLayer"]);
 
             confs.push_back(
-                CreateObject<WifiNetdeviceConfiguration>(type, macLayer, networkLayerId));
+                CreateObject<WifiNetdeviceConfiguration>(type, macLayer, networkLayerId, antennaModel));
         }
         else if (type == "lte")
         {
@@ -137,8 +150,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
                           "Entity LTE Network Device 'bearers' must be an array.");
 
             const auto bearers = DecodeLteBearerConfigurations(netdev["bearers"].GetArray());
-            const auto antennaModel =
-                ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
+
             const auto phyTid = (role == "eNB") ? LteEnbPhy::GetTypeId() : LteUePhy::GetTypeId();
             const std::optional<ModelConfiguration> phyModel =
                 ModelConfigurationHelper::GetOptionalCoaleshed(netdev.GetObject(), "phy", phyTid);
@@ -149,6 +161,10 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
                                                                     networkLayerId,
                                                                     antennaModel,
                                                                     phyModel));
+        }
+        else if (type == "simple")
+        {
+            confs.push_back(CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel));
         }
         else
         {

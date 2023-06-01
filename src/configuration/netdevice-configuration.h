@@ -21,6 +21,9 @@
 #include <ns3/model-configuration.h>
 #include <ns3/object.h>
 
+#include <optional>
+#include <vector>
+
 namespace ns3
 {
 
@@ -38,22 +41,23 @@ class NetdeviceConfiguration : public Object
      * device. \param networkLayerId The identifier for the Network Layer that has been defined for
      * this simulation. It must be compatible with the given type and macLayer.
      */
-    NetdeviceConfiguration(const std::string type, const uint32_t networkLayerId);
+    NetdeviceConfiguration(const std::string type,
+                           const std::optional<uint32_t> networkLayerId,
+                           const std::optional<ModelConfiguration> antennaModel);
     /** Default destructor */
     ~NetdeviceConfiguration();
 
-    /**
-     * \return The type of the Network Device.
-     */
+    /** \return The type of the Network Device. */
     const std::string GetType() const;
-    /**
-     * \return The reference network layer identifier.
-     */
-    virtual const uint32_t GetNetworkLayerId() const;
+    /** \return The reference network layer identifier. */
+    virtual const std::optional<uint32_t> GetNetworkLayerId() const;
+    /** \return The antenna model configuration for the Network Device. */
+    std::optional<ModelConfiguration> GetAntennaModel() const;
 
   private:
     const std::string m_type;
-    const uint32_t m_networkLayerId;
+    const std::optional<uint32_t> m_networkLayerId;
+    const std::optional<ModelConfiguration> m_antennaModel;
 };
 
 } // namespace ns3

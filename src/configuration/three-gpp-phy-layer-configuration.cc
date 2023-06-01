@@ -15,40 +15,38 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "netdevice-configuration.h"
+#include "three-gpp-phy-layer-configuration.h"
+
+#include <ns3/abort.h>
 
 namespace ns3
 {
 
-NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
-                                               const std::optional<uint32_t> networkLayerId,
-                                               const std::optional<ModelConfiguration> antennaModel)
-    : m_type{type},
-      m_networkLayerId{networkLayerId},
-      m_antennaModel{antennaModel}
+ThreeGppPhyLayerConfiguration::ThreeGppPhyLayerConfiguration(
+    std::string phyType,
+    std::vector<ModelConfiguration::Attribute> attributes,
+    ModelConfiguration propagationLossModel,
+    ModelConfiguration conditionModel)
+    : PhyLayerConfiguration{phyType, attributes},
+      m_propagationLossModel{propagationLossModel},
+      m_conditionModel{conditionModel}
 {
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration()
+ThreeGppPhyLayerConfiguration::~ThreeGppPhyLayerConfiguration()
 {
 }
 
-const std::string
-NetdeviceConfiguration::GetType() const
+const ModelConfiguration
+ThreeGppPhyLayerConfiguration::GetPropagationLossModel()
 {
-    return m_type;
+    return m_propagationLossModel;
 }
 
-const std::optional<uint32_t>
-NetdeviceConfiguration::GetNetworkLayerId() const
+const ModelConfiguration
+ThreeGppPhyLayerConfiguration::GetConditionModel()
 {
-    return m_networkLayerId;
-}
-
-std::optional<ModelConfiguration>
-NetdeviceConfiguration::GetAntennaModel() const
-{
-    return m_antennaModel;
+    return m_conditionModel;
 }
 
 } // namespace ns3

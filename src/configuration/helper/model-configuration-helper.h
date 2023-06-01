@@ -74,6 +74,8 @@ class ModelConfigurationHelper
         const std::string& modelName,
         const JsonValue& jAttr,
         const TypeId::AttributeInformation& checker);
+
+    static const std::string ToString(rapidjson::Type t);
 };
 
 } // namespace ns3

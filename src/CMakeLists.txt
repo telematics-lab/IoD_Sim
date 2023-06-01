@@ -24,9 +24,11 @@ set(source_files
   configuration/helper/mobility-factory-helper.cc
   configuration/helper/model-configuration-helper.cc
   configuration/helper/network-layer-configuration-helper.cc
+  configuration/helper/null-ntn-demo-mac-layer-simulation-helper.cc
   configuration/helper/phy-layer-configuration-helper.cc
   configuration/helper/remote-configuration-helper.cc
   configuration/helper/scenario-configuration-helper.cc
+  configuration/helper/three-gpp-phy-simulation-helper.cc
   configuration/helper/wifi-mac-factory-helper.cc
   configuration/helper/wifi-mac-simulation-helper.cc
   configuration/helper/wifi-phy-factory-helper.cc
@@ -40,8 +42,10 @@ set(source_files
   configuration/mobility-model-configuration.cc
   configuration/netdevice-configuration.cc
   configuration/network-layer-configuration.cc
+  configuration/null-ntn-demo-mac-layer-configuration.cc
   configuration/phy-layer-configuration.cc
   configuration/remote-configuration.cc
+  configuration/three-gpp-phy-layer-configuration.cc
   configuration/wifi-mac-layer-configuration.cc
   configuration/wifi-netdevice-configuration.cc
   configuration/wifi-phy-layer-configuration.cc
@@ -130,9 +134,11 @@ set(header_files
   configuration/helper/mobility-factory-helper.h
   configuration/helper/model-configuration-helper.h
   configuration/helper/network-layer-configuration-helper.h
+  configuration/helper/null-ntn-demo-mac-layer-simulation-helper.h
   configuration/helper/phy-layer-configuration-helper.h
   configuration/helper/remote-configuration-helper.h
   configuration/helper/scenario-configuration-helper.h
+  configuration/helper/three-gpp-phy-simulation-helper.h
   configuration/helper/wifi-mac-factory-helper.h
   configuration/helper/wifi-mac-simulation-helper.h
   configuration/helper/wifi-phy-factory-helper.h
@@ -146,8 +152,10 @@ set(header_files
   configuration/mobility-model-configuration.h
   configuration/netdevice-configuration.h
   configuration/network-layer-configuration.h
+  configuration/null-ntn-demo-mac-layer-configuration.h
   configuration/phy-layer-configuration.h
   configuration/remote-configuration.h
+  configuration/three-gpp-phy-layer-configuration.h
   configuration/wifi-mac-layer-configuration.h
   configuration/wifi-netdevice-configuration.h
   configuration/wifi-phy-layer-configuration.h

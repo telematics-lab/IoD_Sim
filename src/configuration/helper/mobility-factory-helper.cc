@@ -27,7 +27,7 @@ MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfi
 {
     helper.m_mobility.SetTypeId(modelConf.GetName());
 
-    if (modelConf.GetName() == "ns3::ConstantPositionMobilityModel")
+    if (modelConf.GetName().find("ConstantPositionMobilityModel") != std::string::npos)
     {
         if (modelConf.GetAttributes().size() == 0)
             return;
