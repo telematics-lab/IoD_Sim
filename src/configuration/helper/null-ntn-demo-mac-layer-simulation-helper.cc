@@ -99,7 +99,7 @@ NullNtnDemoMacLayerSimulationHelper::Setup(const double simDuration) const
          i < (decltype(i))floor(simDuration / m_configuration->GetTimeResolution());
          ++i)
     {
-        Simulator::Schedule(MilliSeconds(m_configuration->GetTimeResolution() * i),
+        Simulator::Schedule(Seconds(m_configuration->GetTimeResolution() * i),
                             &NullNtnDemoMacLayerSimulationHelper::ComputeSnr,
                             this,
                             ComputeSnrParams(txMob,
