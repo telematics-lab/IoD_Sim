@@ -79,7 +79,19 @@ FlightPlan::Begin() const
 }
 
 FlightPlan::Iterator
+FlightPlan::begin() const
+{
+    return m_protoPoints.begin();
+}
+
+FlightPlan::Iterator
 FlightPlan::End() const
+{
+    return m_protoPoints.end();
+}
+
+FlightPlan::Iterator
+FlightPlan::end() const
 {
     return m_protoPoints.end();
 }
