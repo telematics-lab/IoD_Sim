@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# TODO: Shouldn't this be a proper Makefile?
+set -e
 
 pushd ns3
-./ns3 configure --enable-examples --enable-mpi --disable-python --enable-modules=drone
-./ns3 build -j$(grep -c Processor /proc/cpuinfo)
+./ns3 configure --enable-examples --disable-python --enable-modules=iodsim
+./ns3 build
 popd
