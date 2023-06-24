@@ -202,8 +202,8 @@ WifiPhyLayer::DoMonitorRssi(Ptr<const Packet> packet, RxPowerWattPerChannelBand 
     auto it = std::max_element(
         rxPowersW.begin(),
         rxPowersW.end(),
-        [](const std::pair<WifiSpectrumBand, double>& p1,
-           const std::pair<WifiSpectrumBand, double>& p2) { return p1.second < p2.second; });
+        [](const RxPowerWattPerChannelBand::value_type& p1,
+           const RxPowerWattPerChannelBand::value_type& p2) { return p1 < p2; });
     auto rssi = 10 * log(it->second / 1e-3 /* to mW */);
 
     WifiMacHeader hdr;
