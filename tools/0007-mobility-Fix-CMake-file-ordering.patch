@@ -1,0 +1,55 @@
+From 26c61622bd02423a1fd4db5bc60de80d69ed5cbf Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Sun, 25 Jun 2023 07:30:32 +0000
+Subject: [PATCH] mobility: Fix CMake file ordering
+
+---
+ src/mobility/CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
+index 71fb8f4e0..3675c9273 100644
+--- a/src/mobility/CMakeLists.txt
++++ b/src/mobility/CMakeLists.txt
+@@ -10,6 +10,7 @@ build_lib(
+     model/constant-velocity-helper.cc
+     model/constant-velocity-mobility-model.cc
+     model/gauss-markov-mobility-model.cc
++    model/geocentric-constant-position-mobility-model.cc
+     model/geographic-positions.cc
+     model/hierarchical-mobility-model.cc
+     model/mobility-model.cc
+@@ -21,7 +22,6 @@ build_lib(
+     model/steady-state-random-waypoint-mobility-model.cc
+     model/waypoint-mobility-model.cc
+     model/waypoint.cc
+-    model/geocentric-constant-position-mobility-model.cc
+   HEADER_FILES
+     helper/group-mobility-helper.h
+     helper/mobility-helper.h
+@@ -32,6 +32,7 @@ build_lib(
+     model/constant-velocity-helper.h
+     model/constant-velocity-mobility-model.h
+     model/gauss-markov-mobility-model.h
++    model/geocentric-constant-position-mobility-model.h
+     model/geographic-positions.h
+     model/hierarchical-mobility-model.h
+     model/mobility-model.h
+@@ -43,7 +44,6 @@ build_lib(
+     model/steady-state-random-waypoint-mobility-model.h
+     model/waypoint-mobility-model.h
+     model/waypoint.h
+-    model/geocentric-constant-position-mobility-model.h
+   LIBRARIES_TO_LINK ${libnetwork}
+   TEST_SOURCES
+     test/box-line-intersection-test.cc
+@@ -54,4 +54,4 @@ build_lib(
+     test/rand-cart-around-geo-test.cc
+     test/steady-state-random-waypoint-mobility-model-test.cc
+     test/waypoint-mobility-model-test.cc
+-)
++)
+\ No newline at end of file
+-- 
+2.40.1
+
