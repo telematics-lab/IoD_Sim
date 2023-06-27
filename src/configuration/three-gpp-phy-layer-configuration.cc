@@ -26,10 +26,12 @@ ThreeGppPhyLayerConfiguration::ThreeGppPhyLayerConfiguration(
     std::string phyType,
     std::vector<ModelConfiguration::Attribute> attributes,
     ModelConfiguration propagationLossModel,
-    ModelConfiguration conditionModel)
+    ModelConfiguration conditionModel,
+    std::string environment)
     : PhyLayerConfiguration{phyType, attributes},
       m_propagationLossModel{propagationLossModel},
-      m_conditionModel{conditionModel}
+      m_conditionModel{conditionModel},
+      m_environment{environment}
 {
 }
 
@@ -37,16 +39,22 @@ ThreeGppPhyLayerConfiguration::~ThreeGppPhyLayerConfiguration()
 {
 }
 
-const ModelConfiguration
-ThreeGppPhyLayerConfiguration::GetPropagationLossModel()
+ModelConfiguration
+ThreeGppPhyLayerConfiguration::GetPropagationLossModel() const
 {
     return m_propagationLossModel;
 }
 
-const ModelConfiguration
-ThreeGppPhyLayerConfiguration::GetConditionModel()
+ModelConfiguration
+ThreeGppPhyLayerConfiguration::GetConditionModel() const
 {
     return m_conditionModel;
+}
+
+std::string
+ThreeGppPhyLayerConfiguration::GetEnvironment() const
+{
+    return m_environment;
 }
 
 } // namespace ns3

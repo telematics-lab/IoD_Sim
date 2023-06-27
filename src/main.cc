@@ -435,6 +435,12 @@ Scenario::ConfigurePhy()
                 auto model = CreateObject<ThreeGppSpectrumPropagationLossModel>();
                 model->SetChannelModelAttribute("ChannelConditionModel", PointerValue(channelCond));
 
+                // propagate PropagationLoss Frequency to SpectrumLoss ChannelModel to ensure
+                // property alignment
+                model->SetChannelModelAttribute("Frequency",
+                                                DoubleValue(propagationLoss->GetFrequency()));
+                model->SetChannelModelAttribute("Scenario", StringValue(conf->GetEnvironment()));
+
                 for (auto& attr : conf->GetAttributes())
                     model->SetChannelModelAttribute(attr.name, *attr.value);
 
