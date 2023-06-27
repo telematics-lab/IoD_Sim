@@ -3,6 +3,29 @@
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
+  "staticNs3Config": [
+    // TODO: staticNs3Config does not support array types
+    /*{
+      // Given that GeoSat and Ground Node are in the same position,
+      // we can set the reference point to the same position.
+      // This allows topocentric coordinates to be more manageable.
+      "name": "ns3::GeocentricMobilityModel::CoordinateTranslationReferencePoint",
+      // Padova without altitude
+      "value": [45.40869, 11.89448, 0.0]
+    }*/
+    {
+      "name": "ns3::RandomVariableStream::Stream",
+      "value": "1"
+    }
+    // TODO: Need to set GlobalValue RngSeedManager
+    /*
+    {
+      "type": "static" | "global",
+      "name": "...",
+      "value": "..."
+    }
+    */
+  ],
   "phyLayer": [
     {
       "type": "3GPP",
@@ -92,7 +115,7 @@
                     },
                     {
                       "name": "AntennaInclination",
-                      "value": 3.14 // 180.0
+                      "value": 3.1415926535897931 // 180.0
                     }
                   ]
                 }
@@ -108,6 +131,10 @@
             "name": "Position",
             // Padova coordinates
             "value": [45.40869, 11.89448, 35786000.0]
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [45.40869, 11.89448, 0.0]
           }
         ]
       }
@@ -140,11 +167,11 @@
                   "attributes": [
                     {
                       "name": "AntennaMaxGainDb",
-                      "value": 58.5
+                      "value": 39.7
                     },
                     {
                       "name": "AntennaCircularApertureRadius",
-                      "value": 2.5
+                      "value": 0.3
                     },
                     {
                       "name": "OperatingFrequency",
@@ -152,7 +179,7 @@
                     },
                     {
                       "name": "AntennaInclination",
-                      "value": 3.14 // 180.0
+                      "value": 0.0 // 0 deg
                     }
                   ]
                 }
@@ -168,10 +195,20 @@
             "name": "Position",
             // Padova coordinates
             "value": [45.40869, 11.89448, 14.0]
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [45.40869, 11.89448, 0.0]
           }
         ]
       }
     }
   ],
-  "logComponents": ["Scenario", "ThreeGppPropagationLossModel", "ChannelConditionModel"]
+  "logComponents": [
+    "Scenario",
+    "ThreeGppSpectrumPropagationLossModel",
+    "ThreeGppPropagationLossModel",
+    "ChannelConditionModel",
+    "NullNtnDemoMacLayerSimulationHelper"
+  ]
 }
