@@ -410,7 +410,7 @@ Scenario::ConfigurePhy()
             const auto conf =
                 StaticCast<ThreeGppPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
 
-            auto channelCond = [conf]() -> Ptr<ThreeGppChannelConditionModel> {
+            auto channelCond = [&conf]() -> Ptr<ThreeGppChannelConditionModel> {
                 ObjectFactory factory;
 
                 factory.SetTypeId(conf->GetConditionModel().GetName());
@@ -419,7 +419,7 @@ Scenario::ConfigurePhy()
 
                 return factory.Create<ThreeGppChannelConditionModel>();
             }();
-            auto propagationLoss = [conf, channelCond]() -> Ptr<ThreeGppPropagationLossModel> {
+            auto propagationLoss = [&conf, &channelCond]() -> Ptr<ThreeGppPropagationLossModel> {
                 ObjectFactory factory;
 
                 factory.SetTypeId(conf->GetPropagationLossModel().GetName());
@@ -431,7 +431,9 @@ Scenario::ConfigurePhy()
 
                 return model;
             }();
-            auto spectrumLoss = [conf, channelCond]() -> Ptr<ThreeGppSpectrumPropagationLossModel> {
+            auto spectrumLoss = [&conf,
+                                 &channelCond,
+                                 &propagationLoss]() -> Ptr<ThreeGppSpectrumPropagationLossModel> {
                 auto model = CreateObject<ThreeGppSpectrumPropagationLossModel>();
                 model->SetChannelModelAttribute("ChannelConditionModel", PointerValue(channelCond));
 
