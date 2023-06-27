@@ -130,6 +130,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                       "3GPP PHY Layer channel definition must have 'conditionModel' property.");
         NS_ASSERT_MSG(jsonPhyLayer["channel"]["conditionModel"].IsObject(),
                       "3GPP PHY Layer channel 'conditionModel' must be an object");
+        NS_ASSERT_MSG(jsonPhyLayer.HasMember("environment"),
+                      "3GPP PHY Layer definition must have 'environment' property.");
 
         const auto phyAttributes = ModelConfigurationHelper::GetAttributes(
             TypeId::LookupByName("ns3::ThreeGppChannelModel"),
@@ -138,11 +140,13 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["propagationLossModel"]);
         const auto conditionModel =
             ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["conditionModel"]);
+        const auto environment = jsonPhyLayer["environment"].GetString();
 
         phyConfig = Create<ThreeGppPhyLayerConfiguration>(phyType,
                                                           phyAttributes,
                                                           propagationLossModel,
-                                                          conditionModel);
+                                                          conditionModel,
+                                                          environment);
     }
     else
     {

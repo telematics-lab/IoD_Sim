@@ -46,22 +46,22 @@ class ThreeGppPhyLayerConfiguration : public PhyLayerConfiguration
     ThreeGppPhyLayerConfiguration(std::string phyType,
                                   std::vector<ModelConfiguration::Attribute> attributes,
                                   ModelConfiguration propagationLossModel,
-                                  ModelConfiguration conditionModel);
-    /** Default destructor */
+                                  ModelConfiguration conditionModel,
+                                  std::string environment);
+    /// Default destructor
     ~ThreeGppPhyLayerConfiguration();
 
-    /**
-     * \return The Propagation Loss Model configuration.
-     */
-    const ModelConfiguration GetPropagationLossModel();
-    /**
-     * \return The Propagation Loss Model configuration.
-     */
-    const ModelConfiguration GetConditionModel();
+    /// \return The Propagation Loss Model configuration.
+    ModelConfiguration GetPropagationLossModel() const;
+    /// \return The Propagation Loss Model configuration.
+    ModelConfiguration GetConditionModel() const;
+    /// \return The 3GPP environment to be simulated.
+    std::string GetEnvironment() const;
 
   private:
     const ModelConfiguration m_propagationLossModel;
     const ModelConfiguration m_conditionModel;
+    const std::string m_environment;
 };
 
 } // namespace ns3
