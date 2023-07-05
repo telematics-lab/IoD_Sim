@@ -18,8 +18,5 @@ check_availability patch
 git submodule update --init
 
 pushd ns3 > /dev/null
-for patchfile in ../tools/*.patch
-do
-  patch -s -p1 < $patchfile
-done
+git am ../tools/*.patch
 popd > /dev/null
