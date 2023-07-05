@@ -22,7 +22,8 @@
 #include "constant-acceleration-param.h"
 
 #include <ns3/flight-plan.h>
-#include <ns3/mobility-model.h>
+#include <ns3/geocentric-mobility-model.h>
+#include <ns3/geographic-positions.h>
 #include <ns3/planner.h>
 #include <ns3/proto-point.h>
 #include <ns3/vector.h>
@@ -30,7 +31,7 @@
 namespace ns3
 {
 
-class ConstantAccelerationDroneMobilityModel : public MobilityModel
+class ConstantAccelerationDroneMobilityModel : public GeocentricMobilityModel
 {
   public:
     /**
@@ -42,14 +43,24 @@ class ConstantAccelerationDroneMobilityModel : public MobilityModel
     ConstantAccelerationDroneMobilityModel();
     ~ConstantAccelerationDroneMobilityModel();
 
+    static FlightPlan ProjectedToGeographicCoordinates(const FlightPlan& flightPlan,
+                                                       GeographicPositions::EarthSpheroidType earthType);
+    static FlightPlan GeographicToProjectedCoordinates(const FlightPlan& flightPlan,
+                                                       GeographicPositions::EarthSpheroidType earthType);
+
   private:
+    /// Initizalize the object instance.
     virtual void DoInitialize();
+    /// Destroy the object instance.
     virtual void DoDispose();
 
-    virtual void Update() const;
-    virtual void DoSetPosition(const Vector& position);
-    virtual Vector DoGetPosition() const;
+    virtual Vector DoGetPosition(PositionType type) const;
+    virtual void DoSetPosition(Vector position, PositionType type);
     virtual Vector DoGetVelocity() const;
+
+    virtual void Update() const;
+    FlightPlan GetFlightPlan() const;
+    void SetFlightPlan(const FlightPlan& flightPlan);
 
   protected:
     mutable Vector m_position;
@@ -65,6 +76,7 @@ class ConstantAccelerationDroneMobilityModel : public MobilityModel
     mutable Time m_lastUpdate;
 
     float m_curveStep;
+    bool m_useGeodedicSystem;
 };
 
 } // namespace ns3
