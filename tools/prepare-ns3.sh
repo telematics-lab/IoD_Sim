@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 check_availability() {
   PRG_NAME=$1
 
