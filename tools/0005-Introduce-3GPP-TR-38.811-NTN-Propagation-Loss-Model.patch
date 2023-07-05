@@ -1,6 +1,6 @@
-From fe1b34c001eb847a2072db2ba733cf5ae784548b Mon Sep 17 00:00:00 2001
+From 8c668e5d26f3061bb1f7309714e07a7a3d9dcd12 Mon Sep 17 00:00:00 2001
 From: mattiasandri <mattia_sandri@hotmail.it>
-Date: Thu, 13 Oct 2022 11:41:26 +0200
+Date: Wed, 5 Jul 2023 10:14:45 +0000
 Subject: [PATCH] Introduce 3GPP TR 38.811 NTN Propagation Loss Model
 
 ---
@@ -2181,7 +2181,7 @@ index a6ee23243..99a340a99 100644
  
  #endif /* CHANNEL_CONDITION_MODEL_H */
 diff --git a/src/propagation/model/three-gpp-propagation-loss-model.cc b/src/propagation/model/three-gpp-propagation-loss-model.cc
-index dcdab6494..ae353784e 100644
+index 7f2855a7e..7e4ddd9c3 100644
 --- a/src/propagation/model/three-gpp-propagation-loss-model.cc
 +++ b/src/propagation/model/three-gpp-propagation-loss-model.cc
 @@ -21,6 +21,7 @@
@@ -2192,7 +2192,7 @@ index dcdab6494..ae353784e 100644
  #include "ns3/log.h"
  #include "ns3/mobility-model.h"
  #include "ns3/node.h"
-@@ -158,17 +159,8 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
+@@ -164,17 +165,8 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
      NS_ASSERT_MSG(m_channelConditionModel, "First set the channel condition model");
      Ptr<ChannelCondition> cond = m_channelConditionModel->GetChannelCondition(a, b);
  
@@ -2211,7 +2211,7 @@ index dcdab6494..ae353784e 100644
  
      if (m_shadowingEnabled)
      {
-@@ -198,25 +190,23 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
+@@ -213,25 +205,23 @@ ThreeGppPropagationLossModel::DoCalcRxPower(double txPowerDbm,
  
  double
  ThreeGppPropagationLossModel::GetLoss(Ptr<ChannelCondition> cond,
@@ -2242,7 +2242,7 @@ index dcdab6494..ae353784e 100644
      }
      else
      {
-@@ -369,10 +359,7 @@ ThreeGppPropagationLossModel::GetO2iHighPenetrationLoss(
+@@ -401,10 +391,7 @@ ThreeGppPropagationLossModel::DoIsO2iLowPenetrationLoss(Ptr<const ChannelConditi
  }
  
  double
@@ -2254,7 +2254,7 @@ index dcdab6494..ae353784e 100644
  {
      NS_LOG_FUNCTION(this);
      NS_FATAL_ERROR("Unsupported channel condition (NLOSv)");
-@@ -548,15 +535,27 @@ ThreeGppRmaPropagationLossModel::GetO2iDistance2dIn() const
+@@ -589,15 +576,27 @@ ThreeGppRmaPropagationLossModel::DoIsO2iLowPenetrationLoss(Ptr<const ChannelCond
  }
  
  double
@@ -2286,7 +2286,7 @@ index dcdab6494..ae353784e 100644
      // check if hBS and hUT are within the specified validity range
      if (hUt < 1.0 || hUt > 10.0)
      {
-@@ -612,15 +611,27 @@ ThreeGppRmaPropagationLossModel::GetLossLos(double distance2D,
+@@ -653,15 +652,27 @@ ThreeGppRmaPropagationLossModel::GetLossLos(double distance2D,
  }
  
  double
@@ -2318,7 +2318,7 @@ index dcdab6494..ae353784e 100644
      // check if hBs and hUt are within the validity range
      if (hUt < 1.0 || hUt > 10.0)
      {
-@@ -657,7 +668,7 @@ ThreeGppRmaPropagationLossModel::GetLossNlos(double distance2D,
+@@ -698,7 +709,7 @@ ThreeGppRmaPropagationLossModel::GetLossNlos(double distance2D,
                      (43.42 - 3.1 * log10(hBs)) * (log10(distance3D) - 3.0) +
                      20.0 * log10(m_frequency / 1e9) - (3.2 * pow(log10(11.75 * hUt), 2) - 4.97);
  
@@ -2327,7 +2327,7 @@ index dcdab6494..ae353784e 100644
  
      NS_LOG_DEBUG("Loss " << loss);
  
-@@ -808,13 +819,25 @@ ThreeGppUmaPropagationLossModel::GetBpDistance(double hUt, double hBs, double di
+@@ -849,13 +860,25 @@ ThreeGppUmaPropagationLossModel::GetBpDistance(double hUt, double hBs, double di
  }
  
  double
@@ -2357,7 +2357,7 @@ index dcdab6494..ae353784e 100644
      // check if hBS and hUT are within the validity range
      if (hUt < 1.5 || hUt > 22.5)
      {
-@@ -876,13 +899,25 @@ ThreeGppUmaPropagationLossModel::GetO2iDistance2dIn() const
+@@ -917,13 +940,25 @@ ThreeGppUmaPropagationLossModel::GetO2iDistance2dIn() const
  }
  
  double
@@ -2387,7 +2387,7 @@ index dcdab6494..ae353784e 100644
      // check if hBS and hUT are within the vaalidity range
      if (hUt < 1.5 || hUt > 22.5)
      {
-@@ -915,7 +950,7 @@ ThreeGppUmaPropagationLossModel::GetLossNlos(double distance2D,
+@@ -956,7 +991,7 @@ ThreeGppUmaPropagationLossModel::GetLossNlos(double distance2D,
      // compute the pathloss
      double plNlos =
          13.54 + 39.08 * log10(distance3D) + 20.0 * log10(m_frequency / 1e9) - 0.6 * (hUt - 1.5);
@@ -2396,7 +2396,7 @@ index dcdab6494..ae353784e 100644
      NS_LOG_DEBUG("Loss " << loss);
  
      return loss;
-@@ -1032,13 +1067,26 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetO2iDistance2dIn() const
+@@ -1073,13 +1108,26 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetO2iDistance2dIn() const
  }
  
  double
@@ -2427,7 +2427,7 @@ index dcdab6494..ae353784e 100644
      // check if hBS and hUT are within the validity range
      if (hUt < 1.5 || hUt >= 10.0)
      {
-@@ -1093,13 +1141,26 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos(double distance2D,
+@@ -1134,13 +1182,26 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossLos(double distance2D,
  }
  
  double
@@ -2458,7 +2458,7 @@ index dcdab6494..ae353784e 100644
      // check if hBS and hUT are within the validity range
      if (hUt < 1.5 || hUt >= 10.0)
      {
-@@ -1133,7 +1194,7 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossNlos(double distance2D,
+@@ -1174,7 +1235,7 @@ ThreeGppUmiStreetCanyonPropagationLossModel::GetLossNlos(double distance2D,
      // compute the pathloss
      double plNlos =
          22.4 + 35.3 * log10(distance3D) + 21.3 * log10(m_frequency / 1e9) - 0.3 * (hUt - 1.5);
@@ -2467,7 +2467,7 @@ index dcdab6494..ae353784e 100644
      NS_LOG_DEBUG("Loss " << loss);
  
      return loss;
-@@ -1253,13 +1314,13 @@ ThreeGppIndoorOfficePropagationLossModel::GetO2iDistance2dIn() const
+@@ -1294,13 +1355,13 @@ ThreeGppIndoorOfficePropagationLossModel::GetO2iDistance2dIn() const
  }
  
  double
@@ -2485,7 +2485,7 @@ index dcdab6494..ae353784e 100644
      // check if the distance is outside the validity range
      if (distance3D < 1.0 || distance3D > 150.0)
      {
-@@ -1277,13 +1338,13 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossLos(double /* distance2D */,
+@@ -1318,13 +1379,13 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossLos(double /* distance2D */,
  }
  
  double
@@ -2503,7 +2503,7 @@ index dcdab6494..ae353784e 100644
      // check if the distance is outside the validity range
      if (distance3D < 1.0 || distance3D > 150.0)
      {
-@@ -1294,7 +1355,7 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossNlos(double distance2D,
+@@ -1335,7 +1396,7 @@ ThreeGppIndoorOfficePropagationLossModel::GetLossNlos(double distance2D,
  
      // compute the pathloss
      double plNlos = 17.3 + 38.3 * log10(distance3D) + 24.9 * log10(m_frequency / 1e9);
@@ -2512,7 +2512,7 @@ index dcdab6494..ae353784e 100644
  
      NS_LOG_DEBUG("Loss " << loss);
  
-@@ -1351,4 +1412,1294 @@ ThreeGppIndoorOfficePropagationLossModel::GetShadowingCorrelationDistance(
+@@ -1392,4 +1453,1294 @@ ThreeGppIndoorOfficePropagationLossModel::GetShadowingCorrelationDistance(
      return correlationDistance;
  }
  
@@ -3808,10 +3808,10 @@ index dcdab6494..ae353784e 100644
 +
  } // namespace ns3
 diff --git a/src/propagation/model/three-gpp-propagation-loss-model.h b/src/propagation/model/three-gpp-propagation-loss-model.h
-index be8617cd8..720efa9b0 100644
+index c664fafcc..951eeae18 100644
 --- a/src/propagation/model/three-gpp-propagation-loss-model.h
 +++ b/src/propagation/model/three-gpp-propagation-loss-model.h
-@@ -92,36 +92,34 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
+@@ -100,36 +100,34 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
                           Ptr<MobilityModel> a,
                           Ptr<MobilityModel> b) const override;
  
@@ -3864,9 +3864,9 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the minimum of the two independently generated distances
-@@ -173,41 +171,15 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
-                                              Ptr<MobilityModel> b,
-                                              ChannelCondition::LosConditionValue cond) const;
+@@ -195,41 +193,15 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
+      */
+     virtual bool DoIsO2iLowPenetrationLoss(Ptr<const ChannelCondition> cond) const;
  
 -    /**
 -     * \brief Computes the pathloss between a and b considering that the line of
@@ -3909,7 +3909,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Retrieves the shadowing value by looking at m_shadowingMap.
-@@ -279,6 +251,16 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
+@@ -301,6 +273,16 @@ class ThreeGppPropagationLossModel : public PropagationLossModel
       */
      static double Calculate2dDistance(Vector a, Vector b);
  
@@ -3926,7 +3926,7 @@ index be8617cd8..720efa9b0 100644
      Ptr<ChannelConditionModel> m_channelConditionModel; //!< pointer to the channel condition model
      double m_frequency;                                 //!< operating frequency in Hz
      bool m_shadowingEnabled;                            //!< enable/disable shadowing
-@@ -352,13 +334,11 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
+@@ -374,13 +356,11 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is not obstructed
@@ -3943,7 +3943,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the minimum of the two independently generated distances
-@@ -377,13 +357,11 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
+@@ -407,13 +387,11 @@ class ThreeGppRmaPropagationLossModel : public ThreeGppPropagationLossModel
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is obstructed
@@ -3960,7 +3960,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the shadow fading standard deviation
-@@ -461,13 +439,11 @@ class ThreeGppUmaPropagationLossModel : public ThreeGppPropagationLossModel
+@@ -491,13 +469,11 @@ class ThreeGppUmaPropagationLossModel : public ThreeGppPropagationLossModel
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is not obstructed
@@ -3977,7 +3977,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the minimum of the two independently generated distances
-@@ -486,13 +462,11 @@ class ThreeGppUmaPropagationLossModel : public ThreeGppPropagationLossModel
+@@ -516,13 +492,11 @@ class ThreeGppUmaPropagationLossModel : public ThreeGppPropagationLossModel
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is obstructed.
@@ -3994,7 +3994,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the shadow fading standard deviation
-@@ -560,13 +534,11 @@ class ThreeGppUmiStreetCanyonPropagationLossModel : public ThreeGppPropagationLo
+@@ -590,13 +564,11 @@ class ThreeGppUmiStreetCanyonPropagationLossModel : public ThreeGppPropagationLo
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is not obstructed
@@ -4011,7 +4011,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the minimum of the two independently generated distances
-@@ -585,13 +557,11 @@ class ThreeGppUmiStreetCanyonPropagationLossModel : public ThreeGppPropagationLo
+@@ -615,13 +587,11 @@ class ThreeGppUmiStreetCanyonPropagationLossModel : public ThreeGppPropagationLo
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is obstructed.
@@ -4028,7 +4028,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the shadow fading standard deviation
-@@ -664,13 +634,11 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
+@@ -694,13 +664,11 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is not obstructed
@@ -4045,7 +4045,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the minimum of the two independently generated distances
-@@ -689,13 +657,11 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
+@@ -719,13 +687,11 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
      /**
       * \brief Computes the pathloss between a and b considering that the line of
       *        sight is obstructed
@@ -4062,7 +4062,7 @@ index be8617cd8..720efa9b0 100644
  
      /**
       * \brief Returns the shadow fading standard deviation
-@@ -716,6 +682,380 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
+@@ -746,6 +712,380 @@ class ThreeGppIndoorOfficePropagationLossModel : public ThreeGppPropagationLossM
      double GetShadowingCorrelationDistance(ChannelCondition::LosConditionValue cond) const override;
  };
  
@@ -5967,7 +5967,7 @@ index 000000000..8ee604bfb
 +    return 0;
 +}
 diff --git a/src/spectrum/model/three-gpp-channel-model.cc b/src/spectrum/model/three-gpp-channel-model.cc
-index 384870454..9c25c1880 100644
+index 9c84934a5..1c6572c5f 100644
 --- a/src/spectrum/model/three-gpp-channel-model.cc
 +++ b/src/spectrum/model/three-gpp-channel-model.cc
 @@ -22,6 +22,7 @@
@@ -8121,5 +8121,5 @@ index 49ddc3bad..a3bdb0f56 100644
  } // namespace ns3
  
 -- 
-2.40.1
+2.41.0
 
