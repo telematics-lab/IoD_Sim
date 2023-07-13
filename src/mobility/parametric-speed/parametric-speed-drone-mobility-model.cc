@@ -17,8 +17,10 @@
  */
 #include "parametric-speed-drone-mobility-model.h"
 
+#include <ns3/boolean.h>
 #include <ns3/double-vector.h>
 #include <ns3/double.h>
+#include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/object-vector.h>
 #include <ns3/simulator.h>
@@ -36,20 +38,29 @@ ParametricSpeedDroneMobilityModel::GetTypeId()
 
     static TypeId tid =
         TypeId("ns3::ParametricSpeedDroneMobilityModel")
-            .SetParent<MobilityModel>()
+            .SetParent<GeocentricMobilityModel>()
             .SetGroupName("Mobility")
             .AddConstructor<ParametricSpeedDroneMobilityModel>()
+            .AddAttribute(
+                "UseGeodedicSystem",
+                "Enable the use of Earth geographic coordinate system, instead of the classical "
+                "cartesian one.",
+                BooleanValue(false),
+                MakeBooleanAccessor(&ParametricSpeedDroneMobilityModel::m_useGeodedicSystem),
+                MakeBooleanChecker())
             .AddAttribute(
                 "SpeedCoefficients",
                 "Coefficients to construct speed curve.",
                 DoubleVectorValue(),
                 MakeDoubleVectorAccessor(&ParametricSpeedDroneMobilityModel::SetSpeedCoefficients),
                 MakeDoubleVectorChecker())
-            .AddAttribute("FlightPlan",
-                          "The ideal trajectory that the drone should run across.",
-                          FlightPlanValue(),
-                          MakeFlightPlanAccessor(&ParametricSpeedDroneMobilityModel::m_flightPlan),
-                          MakeFlightPlanChecker())
+            .AddAttribute(
+                "FlightPlan",
+                "The ideal trajectory that the drone should run across.",
+                FlightPlanValue(),
+                MakeFlightPlanAccessor(&ParametricSpeedDroneMobilityModel::GetFlightPlan,
+                                       &ParametricSpeedDroneMobilityModel::SetFlightPlan),
+                MakeFlightPlanChecker())
             .AddAttribute("CurveStep",
                           "The step of the curve to generate. Lower step means more points "
                           "generated, hence higher resolution.",
@@ -62,7 +73,8 @@ ParametricSpeedDroneMobilityModel::GetTypeId()
 
 ParametricSpeedDroneMobilityModel::ParametricSpeedDroneMobilityModel()
     : m_flightParams{{}},
-      m_lastUpdate{-1}
+      m_lastUpdate{-1},
+      m_useGeodedicSystem{false}
 {
     NS_LOG_FUNCTION(this);
 }
@@ -71,54 +83,56 @@ ParametricSpeedDroneMobilityModel::~ParametricSpeedDroneMobilityModel()
 {
 }
 
-void
-ParametricSpeedDroneMobilityModel::Update() const
+FlightPlan
+ParametricSpeedDroneMobilityModel::ProjectedToGeographicCoordinates(
+    const FlightPlan& flightPlan,
+    GeographicPositions::EarthSpheroidType earthType)
 {
-    NS_LOG_FUNCTION(this);
+    NS_LOG_FUNCTION(flightPlan << earthType);
 
-    const Time t = Simulator::Now();
-    if (t.Compare(m_lastUpdate) <= 0)
+    FlightPlan fpOut;
+    for (const auto& point : flightPlan)
     {
-        NS_LOG_LOGIC("Update is being suppressed.");
-        return;
+        const auto geographicPosition =
+            GeographicPositions::ProjectedToGeographicCoordinates(point->GetPosition(), earthType);
+        NS_LOG_LOGIC("Translated position from Projected "
+                     << point->GetPosition() << " to Geographic " << geographicPosition);
+        auto p = CreateObjectWithAttributes<ProtoPoint>("Position",
+                                                        VectorValue(geographicPosition),
+                                                        "Interest",
+                                                        IntegerValue(point->GetInterest()),
+                                                        "RestTime",
+                                                        TimeValue(point->GetRestTime()));
+        fpOut.Add(p);
     }
 
-    m_lastUpdate = t;
-
-    m_planner.Update(t);
-    m_position = m_planner.GetPosition();
-    m_velocity = m_planner.GetVelocity();
-
-    NotifyCourseChange();
+    return fpOut;
 }
 
-Vector
-ParametricSpeedDroneMobilityModel::DoGetPosition() const
+FlightPlan
+ParametricSpeedDroneMobilityModel::GeographicToProjectedCoordinates(
+    const FlightPlan& flightPlan,
+    GeographicPositions::EarthSpheroidType earthType)
 {
-    NS_LOG_FUNCTION(this);
-    NS_LOG_LOGIC("position: " << m_position);
+    NS_LOG_FUNCTION(flightPlan << earthType);
 
-    Update();
-    return m_position;
-}
+    FlightPlan fpOut;
+    for (const auto& point : flightPlan)
+    {
+        const auto projectedPosition =
+            GeographicPositions::GeographicToProjectedCoordinates(point->GetPosition(), earthType);
+        NS_LOG_LOGIC("Translated position from Geographic "
+                     << point->GetPosition() << " to Projected " << projectedPosition);
+        auto p = CreateObjectWithAttributes<ProtoPoint>("Position",
+                                                        VectorValue(projectedPosition),
+                                                        "Interest",
+                                                        IntegerValue(point->GetInterest()),
+                                                        "RestTime",
+                                                        TimeValue(point->GetRestTime()));
+        fpOut.Add(p);
+    }
 
-void
-ParametricSpeedDroneMobilityModel::DoSetPosition(const Vector& position)
-{
-    NS_LOG_FUNCTION(position);
-
-    m_position = position;
-}
-
-Vector
-ParametricSpeedDroneMobilityModel::DoGetVelocity() const
-{
-    NS_LOG_FUNCTION(this);
-
-    Update();
-
-    NS_LOG_LOGIC("velocity: " << m_velocity);
-    return m_velocity;
+    return fpOut;
 }
 
 void
@@ -139,6 +153,127 @@ ParametricSpeedDroneMobilityModel::DoDispose()
     NS_LOG_FUNCTION(this);
 
     MobilityModel::DoDispose();
+}
+
+Vector
+ParametricSpeedDroneMobilityModel::DoGetPosition(PositionType type) const
+{
+    NS_LOG_FUNCTION(this);
+    NS_LOG_LOGIC("position before update: " << m_position);
+    Update();
+    NS_LOG_LOGIC("position after update: " << m_position);
+
+    switch (type)
+    {
+    case PositionType::TOPOCENTRIC:
+        return GeographicPositions::GeographicToTopocentricCoordinates(
+            m_position,
+            GetCoordinateTranslationReferencePoint(),
+            GetEarthSpheroidType());
+    case PositionType::GEOCENTRIC:
+        return GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
+                                                                     m_position.y,
+                                                                     m_position.z,
+                                                                     GetEarthSpheroidType());
+    case PositionType::PROJECTED:
+        return GeographicPositions::GeographicToProjectedCoordinates(m_position,
+                                                                     GetEarthSpheroidType());
+    case PositionType::GEOGRAPHIC:
+    default:
+        return m_position;
+    }
+
+    return m_position;
+}
+
+void
+ParametricSpeedDroneMobilityModel::DoSetPosition(Vector position, PositionType type)
+{
+    NS_LOG_FUNCTION(this << position << type);
+
+    switch (type)
+    {
+    case PositionType::TOPOCENTRIC:
+        m_position = GeographicPositions::TopocentricToGeographicCoordinates(
+            position,
+            GetCoordinateTranslationReferencePoint(),
+            GetEarthSpheroidType());
+        break;
+    case PositionType::GEOCENTRIC:
+        m_position =
+            GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
+        break;
+    case PositionType::PROJECTED:
+        m_position =
+            GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
+        break;
+    case PositionType::GEOGRAPHIC:
+    default:
+        m_position = position;
+        break;
+    }
+
+    NS_ASSERT_MSG((m_position.x >= -90) && (m_position.x <= 90),
+                  "Latitude must be between -90 deg and +90 deg");
+    NS_ASSERT_MSG((m_position.y >= -180) && (m_position.y <= 180),
+                  "Longitude must be between -180 deg and +180 deg");
+    NS_ASSERT_MSG(m_position.z >= 0, "Altitude must be higher or equal 0 meters");
+
+    NotifyCourseChange();
+}
+
+Vector
+ParametricSpeedDroneMobilityModel::DoGetVelocity() const
+{
+    NS_LOG_FUNCTION(this);
+
+    Update();
+
+    NS_LOG_LOGIC("velocity: " << m_velocity);
+    return m_velocity;
+}
+
+void
+ParametricSpeedDroneMobilityModel::Update() const
+{
+    NS_LOG_FUNCTION(this);
+
+    const Time t = Simulator::Now();
+    if (t.Compare(m_lastUpdate) <= 0)
+    {
+        NS_LOG_LOGIC("Update is being suppressed.");
+        return;
+    }
+
+    m_lastUpdate = t;
+
+    m_planner.Update(t);
+    m_position =
+        (m_useGeodedicSystem)
+            ? GeographicPositions::ProjectedToGeographicCoordinates(m_planner.GetPosition(),
+                                                                    GetEarthSpheroidType())
+            : m_planner.GetPosition();
+    m_velocity = m_planner.GetVelocity();
+
+    NotifyCourseChange();
+}
+
+FlightPlan
+ParametricSpeedDroneMobilityModel::GetFlightPlan() const
+{
+    NS_LOG_FUNCTION(this);
+    return (m_useGeodedicSystem)
+               ? ProjectedToGeographicCoordinates(m_flightPlan, GetEarthSpheroidType())
+               : m_flightPlan;
+}
+
+void
+ParametricSpeedDroneMobilityModel::SetFlightPlan(const FlightPlan& flightPlan)
+{
+    NS_LOG_FUNCTION(this << flightPlan);
+    m_flightPlan = (m_useGeodedicSystem)
+                       ? GeographicToProjectedCoordinates(flightPlan, GetEarthSpheroidType())
+                       : flightPlan;
 }
 
 void
