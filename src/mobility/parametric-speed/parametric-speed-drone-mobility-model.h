@@ -23,7 +23,7 @@
 
 #include <ns3/double-vector.h>
 #include <ns3/flight-plan.h>
-#include <ns3/mobility-model.h>
+#include <ns3/geocentric-mobility-model.h>
 #include <ns3/planner.h>
 #include <ns3/proto-point.h>
 #include <ns3/vector.h>
@@ -31,7 +31,7 @@
 namespace ns3
 {
 
-class ParametricSpeedDroneMobilityModel : public MobilityModel
+class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
 {
   public:
     /**
@@ -43,23 +43,33 @@ class ParametricSpeedDroneMobilityModel : public MobilityModel
     ParametricSpeedDroneMobilityModel();
     ~ParametricSpeedDroneMobilityModel();
 
+    // TODO: Put into generic Utility object
+    static FlightPlan ProjectedToGeographicCoordinates(
+        const FlightPlan& flightPlan,
+        GeographicPositions::EarthSpheroidType earthType);
+    static FlightPlan GeographicToProjectedCoordinates(
+        const FlightPlan& flightPlan,
+        GeographicPositions::EarthSpheroidType earthType);
+
   private:
+    /// Initialize the object instance.
     virtual void DoInitialize();
+    /// Destroy the object instance.
     virtual void DoDispose();
 
-    virtual void Update() const;
-    virtual void DoSetPosition(const Vector& position);
-    virtual Vector DoGetPosition() const;
+    virtual Vector DoGetPosition(PositionType type) const;
+    virtual void DoSetPosition(Vector position, PositionType type);
     virtual Vector DoGetVelocity() const;
+
+    virtual void Update() const;
+    FlightPlan GetFlightPlan() const;
+    void SetFlightPlan(const FlightPlan& fp);
 
     void SetSpeedCoefficients(const DoubleVector& a);
 
   protected:
     mutable Vector m_position;
     mutable Vector m_velocity;
-
-    double m_acceleration;
-    double m_maxSpeed;
 
     FlightPlan m_flightPlan;
     ParametricSpeedParam m_flightParams;
@@ -68,6 +78,7 @@ class ParametricSpeedDroneMobilityModel : public MobilityModel
     mutable Time m_lastUpdate;
 
     float m_curveStep;
+    bool m_useGeodedicSystem;
 };
 
 } // namespace ns3
