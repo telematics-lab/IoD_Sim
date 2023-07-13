@@ -78,7 +78,8 @@ ConstantAccelerationDroneMobilityModel::GetTypeId()
 
 ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel()
     : m_flightParams{m_acceleration, m_maxSpeed},
-      m_lastUpdate{-1}
+      m_lastUpdate{-1},
+      m_useGeodedicSystem{false}
 {
     NS_LOG_FUNCTION(this);
 }
