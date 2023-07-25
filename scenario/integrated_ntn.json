@@ -135,6 +135,10 @@
           {
             "name": "CoordinateTranslationReferencePoint",
             "value": [45.40869, 11.89448, 0.0]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
           }
         ]
       }
@@ -199,6 +203,10 @@
           {
             "name": "CoordinateTranslationReferencePoint",
             "value": [45.40869, 11.89448, 0.0]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
           }
         ]
       }
@@ -209,6 +217,7 @@
     "ThreeGppSpectrumPropagationLossModel",
     "ThreeGppPropagationLossModel",
     "ChannelConditionModel",
-    "NullNtnDemoMacLayerSimulationHelper"
+    "NullNtnDemoMacLayerSimulationHelper",
+    "GeographicPositions"
   ]
 }
