@@ -219,7 +219,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 values.push_back(el.GetString());
             attrValue = attrInfo.checker->CreateValidValue(StrVecValue(values));
         }
-        else if (arr.Size() == 3 && arr[0].IsDouble() && attrInfo.name == "Position")
+        else if (arr.Size() == 3 && arr[0].IsDouble())
         {
             const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
             attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
