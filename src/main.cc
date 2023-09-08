@@ -54,6 +54,7 @@
 #include <ns3/radio-environment-map-helper.h>
 #include <ns3/remote-list.h>
 #include <ns3/report.h>
+#include <ns3/rng-seed-manager.h>
 #include <ns3/scenario-configuration-helper.h>
 #include <ns3/show-progress.h>
 #include <ns3/simple-net-device.h>
@@ -162,6 +163,14 @@ NS_LOG_COMPONENT_DEFINE("Scenario");
 
 Scenario::Scenario(int argc, char** argv)
 {
+    RngSeedManager::SetRun(1);
+    RngSeedManager::SetSeed(33);
+    Config::SetDefault("ns3::RandomVariableStream::Stream", IntegerValue(1));
+    Config::SetDefault("ns3::ThreeGppChannelModel::UpdatePeriod",
+                       TimeValue(MilliSeconds(1))); // update the channel at each iteration
+    Config::SetDefault("ns3::ThreeGppChannelConditionModel::UpdatePeriod",
+                       TimeValue(MilliSeconds(1))); // do not update the channel condition
+
     CONFIGURATOR->Initialize(argc, argv);
     m_plainNodes.Create(CONFIGURATOR->GetN("nodes"));
     m_drones.Create(CONFIGURATOR->GetN("drones"));
