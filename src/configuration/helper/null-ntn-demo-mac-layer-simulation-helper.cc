@@ -21,6 +21,7 @@
 #include "null-ntn-demo-mac-layer-simulation-helper.h"
 
 #include <ns3/circular-aperture-antenna-model.h>
+#include <ns3/geocentric-mobility-model.h>
 #include <ns3/log.h>
 #include <ns3/mobility-model.h>
 #include <ns3/node-list.h>
@@ -315,13 +316,62 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
     // compute the SNR
     NS_LOG_DEBUG("Average SNR " << 10 * log10(Sum(*rxPsd) / Sum(*noisePsd)) << " dB");
 
-    // print the SNR and pathloss values in the ntn-snr-trace.txt file
-    std::ofstream f;
+    auto txMobPtr = DynamicCast<GeocentricMobilityModel, MobilityModel>(params.txMob);
+    auto rxMobPtr = DynamicCast<GeocentricMobilityModel, MobilityModel>(params.rxMob);
+
+    // compute geocentric distance between nodes
+    auto txMobGeocentric = txMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC);
+    auto rxMobGeocentric = rxMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC);
+    double geocentricDistance = CalculateDistance(txMobGeocentric, rxMobGeocentric);
+
+    auto getProjectedPositionFailsafe = [](Ptr<GeocentricMobilityModel> mm) -> Vector {
+        if (mm->GetEarthSpheroidType() == GeographicPositions::EarthSpheroidType::WGS84)
+        {
+            return mm->GetPosition(GeocentricMobilityModel::PositionType::PROJECTED);
+        }
+        else
+        {
+            // fallback to Topocentric
+            // TODO: need a threshold to understand if we can simplify to
+            //       Topocentric, or it is better to use a projection
+            return mm->GetPosition(GeocentricMobilityModel::PositionType::TOPOCENTRIC);
+        }
+    };
+
+    auto poiA = GeographicPositions::GeographicToProjectedCoordinates(
+        {35.7074505, 51.1498211, 20e3},
+        GeographicPositions::EarthSpheroidType::WGS84);
+    auto poiB = GeographicPositions::GeographicToProjectedCoordinates(
+        {0.04, -4.95, 20e3},
+        GeographicPositions::EarthSpheroidType::WGS84);
+    auto poiC = GeographicPositions::GeographicToProjectedCoordinates(
+        {64.133542, -21.9348416, 20e3},
+        GeographicPositions::EarthSpheroidType::WGS84);
+    auto satellite = GeographicPositions::GeographicToCartesianCoordinates(
+        0.04,
+        -4.95,
+        35770.88e3,
+        GeographicPositions::EarthSpheroidType::WGS84);
+
+    auto txMobProjected = getProjectedPositionFailsafe(txMobPtr);
+    auto rxMobProjected = getProjectedPositionFailsafe(rxMobPtr);
+    double projectedDistance = CalculateDistance(txMobProjected, rxMobProjected);
+
+    double poiADist = CalculateDistance(rxMobProjected, poiA);
+    double poiBDist = CalculateDistance(rxMobProjected, poiB);
+    double poiCDist = CalculateDistance(rxMobProjected, poiC);
+    double satDistGeocentric =
+        CalculateDistance(rxMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC),
+                          satellite);
+
+        // print the SNR and pathloss values in the ntn-snr-trace.txt file
+        std::ofstream f;
     std::ostringstream snrFilePath;
     snrFilePath << CONFIGURATOR->GetResultsPath() << "ntn-snr-trace.txt";
     f.open(snrFilePath.str(), std::ios::out | std::ios::app);
     f << Simulator::Now().GetSeconds() << " " << 10 * log10(Sum(*rxPsd) / Sum(*noisePsd)) << " "
-      << propagationGainDb << std::endl;
+      << propagationGainDb << " " << geocentricDistance << " " << projectedDistance << " "
+      << poiADist << " " << poiBDist << " " << poiCDist << " " << satDistGeocentric << std::endl;
     f.close();
 }
 
