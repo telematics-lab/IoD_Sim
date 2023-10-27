@@ -172,6 +172,9 @@ ConstantAccelerationDroneMobilityModel::DoGetPosition(PositionType type) const
     Update();
     NS_LOG_LOGIC("Position after update: " << m_position);
 
+    if (!m_useGeodedicSystem)
+        return m_position;
+
     switch (type)
     {
     case PositionType::TOPOCENTRIC:
@@ -198,33 +201,40 @@ ConstantAccelerationDroneMobilityModel::DoSetPosition(Vector position, PositionT
 {
     NS_LOG_FUNCTION(this << position << type);
 
-    switch (type)
+    if (m_useGeodedicSystem)
     {
-    case PositionType::TOPOCENTRIC:
-        m_position = GeographicPositions::TopocentricToGeographicCoordinates(
-            position,
-            GetCoordinateTranslationReferencePoint(),
-            GetEarthSpheroidType());
-        break;
-    case PositionType::GEOCENTRIC:
-        m_position =
-            GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
-        break;
-    case PositionType::PROJECTED:
-        m_position =
-            GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
-        break;
-    case PositionType::GEOGRAPHIC:
-    default:
-        m_position = position;
-        break;
-    }
+        switch (type)
+        {
+        case PositionType::TOPOCENTRIC:
+            m_position = GeographicPositions::TopocentricToGeographicCoordinates(
+                position,
+                GetCoordinateTranslationReferencePoint(),
+                GetEarthSpheroidType());
+            break;
+        case PositionType::GEOCENTRIC:
+            m_position =
+                GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
+            break;
+        case PositionType::PROJECTED:
+            m_position =
+                GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
+            break;
+        case PositionType::GEOGRAPHIC:
+        default:
+            m_position = position;
+            break;
+        }
 
-    NS_ASSERT_MSG((m_position.x >= -90) && (m_position.x <= 90),
+        NS_ASSERT_MSG((m_position.x >= -90) && (m_position.x <= 90),
                   "Latitude must be between -90 deg and +90 deg");
-    NS_ASSERT_MSG((m_position.y >= -180) && (m_position.y <= 180),
-                  "Longitude must be between -180 deg and +180 deg");
-    NS_ASSERT_MSG(m_position.z >= 0, "Altitude must be higher or equal 0 meters");
+        NS_ASSERT_MSG((m_position.y >= -180) && (m_position.y <= 180),
+                    "Longitude must be between -180 deg and +180 deg");
+        NS_ASSERT_MSG(m_position.z >= 0, "Altitude must be higher or equal 0 meters");
+    }
+    else
+    {
+        m_position = position;
+    }
 
     NotifyCourseChange();
 }
