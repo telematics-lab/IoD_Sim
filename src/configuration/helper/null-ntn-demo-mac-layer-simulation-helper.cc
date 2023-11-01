@@ -370,7 +370,7 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
     snrFilePath << CONFIGURATOR->GetResultsPath() << "ntn-snr-trace.txt";
     f.open(snrFilePath.str(), std::ios::out | std::ios::app);
     f << Simulator::Now().GetSeconds() << " " << 10 * log10(Sum(*rxPsd) / Sum(*noisePsd)) << " "
-      << propagationGainDb << std::endl;
+      << geocentricDistance << std::endl;
     f.close();
 }
 
