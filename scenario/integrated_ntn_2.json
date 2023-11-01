@@ -1,0 +1,221 @@
+{
+  "name": "integrated_ntn_2",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 100,
+  "staticNs3Config": [
+    {
+      "name": "ns3::RandomVariableStream::Stream",
+      "value": "1"
+    }
+  ],
+  "phyLayer": [
+    {
+      "type": "3GPP",
+      "environment": "NTN-Suburban",
+      "attributes": [
+        {
+          "name": "UpdatePeriod",
+          "value": 1e-3
+        }
+      ],
+      "channel": {
+        "propagationLossModel": {
+          "name": "ns3::ThreeGppNTNSuburbanPropagationLossModel",
+          "attributes": [
+            {
+              "name": "Frequency",
+              "value": 20e9
+            },
+            {
+              "name": "ShadowingEnabled",
+              "value": true
+            }
+          ]
+        },
+        "conditionModel": {
+          "name": "ns3::ThreeGppNTNSuburbanChannelConditionModel",
+          "attributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "NullNtnDemo",
+      "timeResolution": 10,
+      "bandwidth": 400e6,
+      "rbBandwidth": 120e3,
+      "satEirpDensity": 40,
+      "ueAntennaNoiseFigure": 1.2
+      // here we can do beamforming and compute the SNR every time
+    }
+  ],
+  "nodes": [
+    {
+      // LEO Satellite
+      "type": "LeoSat",
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 58.5
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 2.5
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 3.1415926535897931 // 180.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeocentricConstantVelocityMobilityModel",
+        "attributes": [
+          {
+            "name": "StartingPosition",
+            // Politecnico di Bari
+            "value": [
+              41.1094344759006,
+              16.877170530078637,
+              600
+            ]
+          },
+          {
+            "name": "Inclination",
+            "value": 41.1094344759006
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [
+              41.1094344759006,
+              16.877170530078637,
+              0.0
+            ]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
+          }
+        ]
+      }
+    },
+    {
+      // Ground Node
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 39.7
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 0.5
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 0.0 // 0 deg
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeocentricConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            // Politecnico di Bari
+            "value": [
+              41.1094344759006,
+              16.877170530078637,
+              14.0
+            ]
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [
+              41.1094344759006,
+              16.877170530078637,
+              0.0
+            ]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
+          }
+        ]
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "ThreeGppSpectrumPropagationLossModel",
+    "ThreeGppPropagationLossModel",
+    "ChannelConditionModel",
+    "NullNtnDemoMacLayerSimulationHelper",
+    "GeographicPositions",
+    "GeocentricConstantVelocityMobilityModel"
+  ]
+}
