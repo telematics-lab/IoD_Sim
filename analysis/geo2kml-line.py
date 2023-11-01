@@ -2,7 +2,7 @@
 import os
 
 def main():
-    os.system('grep -i \'Position after update\' scenario.log | awk \'{print $1\",\"$8}\' | uniq > pos.csv')
+    os.system('grep -i \'Geographic position\' scenario.log | awk \'{print $1\",\"$7}\' | uniq > pos.csv')
 
     fcsv = open('pos.csv', 'r')
     fkml = open('pos.kml', 'w')

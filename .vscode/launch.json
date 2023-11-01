@@ -8,9 +8,9 @@
       "name": "IoD Sim",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/ns3/build/examples/ns3.38-iodsim-debug",
+      "program": "${workspaceFolder}/ns3/build/examples/ns3-dev-iodsim-debug",
       "args": [
-        "--config=${workspaceFolder}/scenario/simple_wifi.json"
+        "--config=${workspaceFolder}/scenario/integrated_ntn_2.json"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/ns3/",
