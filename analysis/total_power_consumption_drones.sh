@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -z "$1" ] || [ "$1" == '-h' ]; then
   echo "Usage: $0 <debug_log_file>"
