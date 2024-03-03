@@ -1,14 +1,14 @@
-From 26c61622bd02423a1fd4db5bc60de80d69ed5cbf Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni.grieco@poliba.it>
-Date: Sun, 25 Jun 2023 07:30:32 +0000
-Subject: [PATCH] mobility: Fix CMake file ordering
+From e2f20a580b9b809396419f180ce366717f6601d2 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni@grieco.dev>
+Date: Sun, 3 Mar 2024 17:26:41 +0100
+Subject: [PATCH] mobility: Fix file ordering
 
 ---
- src/mobility/CMakeLists.txt | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ src/mobility/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
-index 71fb8f4e0..3675c9273 100644
+index f200b1b29..075bd53f8 100644
 --- a/src/mobility/CMakeLists.txt
 +++ b/src/mobility/CMakeLists.txt
 @@ -10,6 +10,7 @@ build_lib(
@@ -43,13 +43,6 @@ index 71fb8f4e0..3675c9273 100644
    LIBRARIES_TO_LINK ${libnetwork}
    TEST_SOURCES
      test/box-line-intersection-test.cc
-@@ -54,4 +54,4 @@ build_lib(
-     test/rand-cart-around-geo-test.cc
-     test/steady-state-random-waypoint-mobility-model-test.cc
-     test/waypoint-mobility-model-test.cc
--)
-+)
-\ No newline at end of file
 -- 
-2.40.1
+2.42.0
 
