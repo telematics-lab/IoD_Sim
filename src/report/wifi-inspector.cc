@@ -133,7 +133,7 @@ WifiInspector::InitializeNetDevice(Ptr<NetDevice> dev)
     NS_LOG_FUNCTION(dev);
     Ptr<WifiNetDevice> wifiNetDevice = DynamicCast<WifiNetDevice>(dev);
 
-    if (wifiNetDevice == nullptr)
+    if (!wifiNetDevice)
         NS_FATAL_ERROR("Cannot inspect an object that is not a WifiNetDevice");
 
     return wifiNetDevice;
@@ -154,7 +154,7 @@ WifiInspector::InitializePhy(Ptr<WifiNetDevice> dev)
 
     dev->GetAttribute(info.name, attribute);
     phy = DynamicCast<WifiPhy>(attribute.GetObject());
-    if (phy == nullptr)
+    if (!phy)
         NS_FATAL_ERROR("Cannot inspect and object that is not a WifiPhy.");
 
     return phy;
@@ -199,7 +199,7 @@ WifiInspector::InitializeMac(Ptr<WifiNetDevice> dev)
 
     dev->GetAttribute(info.name, attribute);
     mac = DynamicCast<WifiMac>(attribute.GetObject());
-    if (mac == nullptr)
+    if (!mac)
         NS_FATAL_ERROR("Cannot inspect and object that is not a WifiMac.");
 
     return mac;

@@ -1,18 +1,18 @@
-From 74ab0ecd2c5263cd89ad6be3ae27a6ef9e0f795d Mon Sep 17 00:00:00 2001
+From f458a99c68e6476bf75a951876152ab4a4249398 Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni.grieco@poliba.it>
 Date: Sun, 25 Jun 2023 11:00:52 +0000
-Subject: [PATCH] propagation: check lower-bound frequency according to 3GPP TR
- 38.811
+Subject: [PATCH 2/3] propagation: check lower-bound frequency according to
+ 3GPP TR 38.811
 
 ---
  .../model/three-gpp-propagation-loss-model.cc    | 16 ++++++++--------
  1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/src/propagation/model/three-gpp-propagation-loss-model.cc b/src/propagation/model/three-gpp-propagation-loss-model.cc
-index 14ed3e074..b9bc93229 100644
+index 9d26b6cee..3c31536fb 100644
 --- a/src/propagation/model/three-gpp-propagation-loss-model.cc
 +++ b/src/propagation/model/three-gpp-propagation-loss-model.cc
-@@ -1594,7 +1594,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -1604,7 +1604,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
                                                        Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -21,7 +21,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
  
      double elev_angle = 0;
-@@ -1664,7 +1664,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+@@ -1677,7 +1677,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
                                                         Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -30,7 +30,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
  
      double elev_angle = 0;
-@@ -1871,7 +1871,7 @@ double
+@@ -1885,7 +1885,7 @@ double
  ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -39,7 +39,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
  
      double elev_angle = 0;
-@@ -1940,7 +1940,7 @@ double
+@@ -1957,7 +1957,7 @@ double
  ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -48,7 +48,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
      double elev_angle = 0;
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-@@ -2151,7 +2151,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -2170,7 +2170,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
                                                      Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -57,7 +57,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
  
      double elev_angle = 0;
-@@ -2223,7 +2223,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+@@ -2244,7 +2244,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
                                                       Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -66,7 +66,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
      double elev_angle = 0;
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-@@ -2433,7 +2433,7 @@ double
+@@ -2456,7 +2456,7 @@ double
  ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -75,7 +75,7 @@ index 14ed3e074..b9bc93229 100644
                    "NTN communications are valid for frequencies between 0.5 and 100 GHz.");
  
      double elev_angle = 0;
-@@ -2504,7 +2504,7 @@ double
+@@ -2530,7 +2530,7 @@ double
  ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
  {
      NS_LOG_FUNCTION(this);
@@ -85,5 +85,5 @@ index 14ed3e074..b9bc93229 100644
      double elev_angle = 0;
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
 -- 
-2.40.1
+2.42.0
 

@@ -58,7 +58,7 @@ void
 DronePeripheralContainer::SetDrone(Ptr<Drone> drone)
 {
     NS_LOG_FUNCTION(this << drone);
-    NS_ASSERT(drone != NULL);
+    NS_ASSERT(drone);
     m_drone = drone;
 }
 
@@ -66,7 +66,7 @@ Ptr<DronePeripheral>
 DronePeripheralContainer::Create()
 {
     auto peripheral = m_dronePeripheralFactory.Create<DronePeripheral>();
-    NS_ASSERT(peripheral != nullptr);
+    NS_ASSERT(peripheral);
 
     peripheral->Initialize();
     // if there are no trigger regions, this peripheral is always ON

@@ -72,7 +72,7 @@ InputPeripheral::DoDispose(void)
 void
 InputPeripheral::SetStorage(Ptr<StoragePeripheral> storage)
 {
-    NS_ASSERT(storage != NULL);
+    NS_ASSERT(storage);
     NS_ASSERT(storage->GetDrone() == this->GetDrone());
     m_storage = storage;
 }
@@ -81,7 +81,7 @@ void
 InputPeripheral::Install(Ptr<StoragePeripheral> storage, Ptr<Drone> drone)
 {
     SetDrone(drone);
-    if (storage != NULL)
+    if (storage)
     {
         SetStorage(storage);
     }
@@ -95,8 +95,7 @@ InputPeripheral::AcquireData(void)
 
     m_dataAcquisitionEvent.Cancel();
 
-    if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds() &&
-        m_storage != NULL)
+    if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds() && m_storage)
     {
         m_storage->Alloc(m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds() / 1000,
                          StoragePeripheral::bit);

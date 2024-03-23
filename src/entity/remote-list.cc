@@ -131,7 +131,7 @@ RemoteListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<RemoteListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<RemoteListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

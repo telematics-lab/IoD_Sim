@@ -130,7 +130,7 @@ IrsListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<IrsListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<IrsListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

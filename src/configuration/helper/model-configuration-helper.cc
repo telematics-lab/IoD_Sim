@@ -372,7 +372,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         break;
     }
 
-    NS_ABORT_MSG_IF(attrValue == nullptr,
+    NS_ABORT_MSG_IF(!attrValue,
                     "The attribute value for property "
                         << attrInfo.name << " defined in model " << modelName
                         << " was not accepted. "

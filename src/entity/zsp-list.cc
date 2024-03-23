@@ -131,7 +131,7 @@ ZspListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<ZspListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<ZspListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

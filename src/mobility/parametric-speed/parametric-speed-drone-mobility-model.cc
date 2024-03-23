@@ -170,7 +170,7 @@ ParametricSpeedDroneMobilityModel::DoGetPosition(PositionType type) const
     case PositionType::TOPOCENTRIC:
         return GeographicPositions::GeographicToTopocentricCoordinates(
             m_position,
-            GetCoordinateTranslationReferencePoint(),
+            GetGeographicReferencePoint(),
             GetEarthSpheroidType());
     case PositionType::GEOCENTRIC:
         return GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
@@ -189,7 +189,7 @@ ParametricSpeedDroneMobilityModel::DoGetPosition(PositionType type) const
 }
 
 void
-ParametricSpeedDroneMobilityModel::DoSetPosition(Vector position, PositionType type)
+ParametricSpeedDroneMobilityModel::DoSetPosition(const Vector& position, PositionType type)
 {
     NS_LOG_FUNCTION(this << position << type);
 
@@ -200,7 +200,7 @@ ParametricSpeedDroneMobilityModel::DoSetPosition(Vector position, PositionType t
         case PositionType::TOPOCENTRIC:
             m_position = GeographicPositions::TopocentricToGeographicCoordinates(
                 position,
-                GetCoordinateTranslationReferencePoint(),
+                GetGeographicReferencePoint(),
                 GetEarthSpheroidType());
             break;
         case PositionType::GEOCENTRIC:

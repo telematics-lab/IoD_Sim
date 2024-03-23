@@ -72,7 +72,7 @@ void
 DronePeripheral::SetDrone(Ptr<Drone> drone)
 {
     NS_LOG_FUNCTION(this << drone);
-    NS_ASSERT(drone != NULL);
+    NS_ASSERT(drone);
     m_drone = drone;
 }
 
@@ -118,7 +118,7 @@ DronePeripheral::SetState(PeripheralState s)
         SetPowerConsumption(GetPowerConsumptionStates()[2]);
         break;
     }
-    if (GetDrone() != NULL)
+    if (GetDrone())
         NS_LOG_DEBUG("DronePeripheral on Drone #"
                      << GetDrone()->GetId() << ": changing peripheral state to " << GetState());
     OnChangeState(s);

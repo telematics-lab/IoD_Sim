@@ -116,8 +116,8 @@ IrsAssistedSpectrumChannel::GetTypeId(void)
                           "simulated multipath interference between direct and "
                           "reflected links",
                           EnumValue(MultipathInterferenceType::SIMULATED),
-                          MakeEnumAccessor(&IrsAssistedSpectrumChannel::m_multipathType),
-                          MakeEnumChecker(MultipathInterferenceType::DESTRUCTIVE,
+                          MakeEnumAccessor<MultipathInterferenceType>(&IrsAssistedSpectrumChannel::m_multipathType),
+                          MakeEnumChecker<MultipathInterferenceType>(MultipathInterferenceType::DESTRUCTIVE,
                                           "DESTRUCTIVE",
                                           MultipathInterferenceType::SIMULATED,
                                           "SIMULATED",
@@ -253,7 +253,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                 const auto& chCondTxNodeIrs =
                     condModel->GetChannelCondition(txMobility, irsDroneMM)->GetLosCondition();
 
-                if (rxParams->txAntenna != nullptr)
+                if (rxParams->txAntenna)
                 {
                     Irs2TxGain = rxParams->txAntenna->GetGainDb(Angles(IrsPosition, TxPosition));
                     if (std::isinf(Irs2TxGain))
@@ -267,7 +267,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     F_BRG *= 1.;
                 }
 
-                if (rxAntenna != nullptr)
+                if (rxAntenna)
                 {
                     Irs2RxGain = rxAntenna->GetGainDb(Angles(IrsPosition, RxPosition));
                     if (std::isinf(Irs2RxGain))
@@ -321,7 +321,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
             }
             etav.push_back(etav_tmp);
 
-            if (rxParams->txAntenna != nullptr)
+            if (rxParams->txAntenna)
             {
                 Rx2TxGain = rxParams->txAntenna->GetGainDb(Angles(RxPosition, TxPosition));
                 if (std::isinf(Rx2TxGain))
@@ -335,7 +335,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                 F_BG *= 1.;
             }
 
-            if (rxAntenna != nullptr)
+            if (rxAntenna)
             {
                 Tx2RxGain = rxAntenna->GetGainDb(Angles(TxPosition, RxPosition));
                 if (std::isinf(Tx2RxGain))

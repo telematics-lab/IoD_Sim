@@ -131,7 +131,7 @@ DroneListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<DroneListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<DroneListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

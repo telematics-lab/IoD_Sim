@@ -180,7 +180,7 @@ ConstantAccelerationDroneMobilityModel::DoGetPosition(PositionType type) const
     case PositionType::TOPOCENTRIC:
         return GeographicPositions::GeographicToTopocentricCoordinates(
             m_position,
-            GetCoordinateTranslationReferencePoint(),
+            GetGeographicReferencePoint(),
             GetEarthSpheroidType());
     case PositionType::GEOCENTRIC:
         return GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
@@ -197,7 +197,7 @@ ConstantAccelerationDroneMobilityModel::DoGetPosition(PositionType type) const
 }
 
 void
-ConstantAccelerationDroneMobilityModel::DoSetPosition(Vector position, PositionType type)
+ConstantAccelerationDroneMobilityModel::DoSetPosition(const Vector& position, PositionType type)
 {
     NS_LOG_FUNCTION(this << position << type);
 
@@ -208,7 +208,7 @@ ConstantAccelerationDroneMobilityModel::DoSetPosition(Vector position, PositionT
         case PositionType::TOPOCENTRIC:
             m_position = GeographicPositions::TopocentricToGeographicCoordinates(
                 position,
-                GetCoordinateTranslationReferencePoint(),
+                GetGeographicReferencePoint(),
                 GetEarthSpheroidType());
             break;
         case PositionType::GEOCENTRIC:
