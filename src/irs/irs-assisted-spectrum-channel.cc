@@ -111,18 +111,20 @@ IrsAssistedSpectrumChannel::GetTypeId(void)
                           BooleanValue(false),
                           MakeBooleanAccessor(&IrsAssistedSpectrumChannel::m_noIrsLink),
                           MakeBooleanChecker())
-            .AddAttribute("MultipathInterference",
-                          "Assume a perfect destructive, constructive, or "
-                          "simulated multipath interference between direct and "
-                          "reflected links",
-                          EnumValue(MultipathInterferenceType::SIMULATED),
-                          MakeEnumAccessor<MultipathInterferenceType>(&IrsAssistedSpectrumChannel::m_multipathType),
-                          MakeEnumChecker<MultipathInterferenceType>(MultipathInterferenceType::DESTRUCTIVE,
-                                          "DESTRUCTIVE",
-                                          MultipathInterferenceType::SIMULATED,
-                                          "SIMULATED",
-                                          MultipathInterferenceType::CONSTRUCTIVE,
-                                          "CONSTRUCTIVE"));
+            .AddAttribute(
+                "MultipathInterference",
+                "Assume a perfect destructive, constructive, or "
+                "simulated multipath interference between direct and "
+                "reflected links",
+                EnumValue(MultipathInterferenceType::SIMULATED),
+                MakeEnumAccessor<MultipathInterferenceType>(
+                    &IrsAssistedSpectrumChannel::m_multipathType),
+                MakeEnumChecker<MultipathInterferenceType>(MultipathInterferenceType::DESTRUCTIVE,
+                                                           "DESTRUCTIVE",
+                                                           MultipathInterferenceType::SIMULATED,
+                                                           "SIMULATED",
+                                                           MultipathInterferenceType::CONSTRUCTIVE,
+                                                           "CONSTRUCTIVE"));
     return tid;
 }
 

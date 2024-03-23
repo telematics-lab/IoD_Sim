@@ -18,9 +18,10 @@
 #ifndef ENTITY_CONFIGURATION_H
 #define ENTITY_CONFIGURATION_H
 
-#include <ns3/mobility-model-configuration.h>
+#include "mobility-model-configuration.h"
+#include "netdevice-configuration.h"
+
 #include <ns3/model-configuration.h>
-#include <ns3/netdevice-configuration.h>
 #include <ns3/object.h>
 
 namespace ns3

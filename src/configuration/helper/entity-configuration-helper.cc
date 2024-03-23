@@ -121,7 +121,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
             return std::nullopt;
         }();
 
-        const auto antennaModel = ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antenna");
+        const auto antennaModel =
+            ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antenna");
 
         if (type == "wifi")
         {
@@ -132,8 +133,10 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
 
             const auto macLayer = ModelConfigurationHelper::Get(netdev["macLayer"]);
 
-            confs.push_back(
-                CreateObject<WifiNetdeviceConfiguration>(type, macLayer, networkLayerId, antennaModel));
+            confs.push_back(CreateObject<WifiNetdeviceConfiguration>(type,
+                                                                     macLayer,
+                                                                     networkLayerId,
+                                                                     antennaModel));
         }
         else if (type == "lte")
         {
@@ -164,7 +167,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
         }
         else if (type == "simple")
         {
-            confs.push_back(CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel));
+            confs.push_back(
+                CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel));
         }
         else
         {

@@ -18,8 +18,9 @@
  */
 #include "irs-list.h"
 
+#include "irs.h"
+
 #include <ns3/config.h>
-#include <ns3/irs.h>
 #include <ns3/log.h>
 #include <ns3/object-vector.h>
 #include <ns3/object.h>

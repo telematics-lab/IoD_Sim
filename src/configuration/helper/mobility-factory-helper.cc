@@ -38,8 +38,7 @@ MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfi
             {
                 auto positionAllocator = CreateObject<ListPositionAllocator>();
                 Vector3D initialPosition =
-                    StaticCast<Vector3DValue, AttributeValue>(attr.value)
-                        ->Get();
+                    StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
                 positionAllocator->Add(initialPosition);
                 helper.SetPositionAllocator(positionAllocator);
             }

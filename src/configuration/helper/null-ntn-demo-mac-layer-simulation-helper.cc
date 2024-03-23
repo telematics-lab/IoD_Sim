@@ -20,6 +20,8 @@
 
 #include "null-ntn-demo-mac-layer-simulation-helper.h"
 
+#include "scenario-configuration-helper.h"
+
 #include <ns3/circular-aperture-antenna-model.h>
 #include <ns3/geocentric-mobility-model.h>
 #include <ns3/log.h>
@@ -27,7 +29,6 @@
 #include <ns3/node-list.h>
 #include <ns3/node.h>
 #include <ns3/phased-array-model.h>
-#include <ns3/scenario-configuration-helper.h>
 #include <ns3/simulator.h>
 #include <ns3/spectrum-signal-parameters.h>
 #include <ns3/three-gpp-propagation-loss-model.h>
@@ -305,12 +306,13 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
         ConstCast<AntennaModel, const AntennaModel>(params.txAntenna->GetAntennaElement());
 
     // apply the fast fading and the beamforming gain
-    rxPsd = m_phyHelper->GetSpectrumPropagationLossModel()->CalcRxPowerSpectralDensity(
-        rxSsp,
-        params.txMob,
-        params.rxMob,
-        params.txAntenna,
-        params.rxAntenna)->psd;
+    rxPsd = m_phyHelper->GetSpectrumPropagationLossModel()
+                ->CalcRxPowerSpectralDensity(rxSsp,
+                                             params.txMob,
+                                             params.rxMob,
+                                             params.txAntenna,
+                                             params.rxAntenna)
+                ->psd;
     NS_LOG_DEBUG("Average rx power " << 10 * log10(Sum(*rxPsd) * params.bandwidth) << " dB");
 
     // compute the SNR
@@ -364,8 +366,8 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
         CalculateDistance(rxMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC),
                           satellite);
 
-        // print the SNR and pathloss values in the ntn-snr-trace.txt file
-        std::ofstream f;
+    // print the SNR and pathloss values in the ntn-snr-trace.txt file
+    std::ofstream f;
     std::ostringstream snrFilePath;
     snrFilePath << CONFIGURATOR->GetResultsPath() << "ntn-snr-trace.txt";
     f.open(snrFilePath.str(), std::ios::out | std::ios::app);

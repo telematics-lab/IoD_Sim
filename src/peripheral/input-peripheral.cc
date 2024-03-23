@@ -95,7 +95,8 @@ InputPeripheral::AcquireData(void)
 
     m_dataAcquisitionEvent.Cancel();
 
-    if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds() && m_storage)
+    if (Simulator::Now().GetMilliSeconds() >= m_acquisitionTimeInterval.GetMilliSeconds() &&
+        m_storage)
     {
         m_storage->Alloc(m_dataRate * m_acquisitionTimeInterval.GetMilliSeconds() / 1000,
                          StoragePeripheral::bit);

@@ -73,8 +73,9 @@ void
 TcpClientServerApplication::StartApplication()
 {
     NS_LOG_FUNCTION(this);
-    NS_ABORT_MSG_IF(m_socket,
-                    "Application was called for startup, but the socket has been already initialized!");
+    NS_ABORT_MSG_IF(
+        m_socket,
+        "Application was called for startup, but the socket has been already initialized!");
 
     Ptr<SocketFactory> socketFactory =
         GetNode()->GetObject<SocketFactory>(TcpSocketFactory::GetTypeId());
