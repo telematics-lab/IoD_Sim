@@ -17,8 +17,9 @@
  */
 #include "lte-phy-simulation-helper.h"
 
+#include "scenario-configuration-helper.h"
+
 #include <ns3/boolean.h>
-#include <ns3/scenario-configuration-helper.h>
 #include <ns3/string.h>
 
 namespace ns3

@@ -18,9 +18,10 @@
 #ifndef SCENARIO_CONFIGURATION_HELPER_H
 #define SCENARIO_CONFIGURATION_HELPER_H
 
+#include "entity-configuration-helper.h"
+
 #include <ns3/building.h>
 #include <ns3/double-vector.h>
-#include <ns3/entity-configuration-helper.h>
 #include <ns3/flight-plan.h>
 #include <ns3/log.h>
 #include <ns3/mac-layer-configuration.h>

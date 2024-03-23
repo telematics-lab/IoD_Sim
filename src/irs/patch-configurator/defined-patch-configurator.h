@@ -18,10 +18,11 @@
 #ifndef DEFINED_PATCH_CONFIGURATOR_H
 #define DEFINED_PATCH_CONFIGURATOR_H
 
+#include "patch-configurator.h"
+
 #include <ns3/double-vector.h>
 #include <ns3/model-configuration-matrix.h>
 #include <ns3/object.h>
-#include <ns3/patch-configurator.h>
 #include <ns3/pointer.h>
 
 namespace ns3

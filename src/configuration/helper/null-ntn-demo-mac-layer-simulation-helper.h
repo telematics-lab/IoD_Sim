@@ -18,13 +18,14 @@
 #ifndef NULL_NTN_DEMO_MAC_LAYER_HELPER_H
 #define NULL_NTN_DEMO_MAC_LAYER_HELPER_H
 
+#include "three-gpp-phy-simulation-helper.h"
+
 #include <ns3/mobility-model.h>
 #include <ns3/net-device.h>
 #include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/object.h>
 #include <ns3/phased-array-model.h>
 #include <ns3/spectrum-value.h>
-#include <ns3/three-gpp-phy-simulation-helper.h>
 
 namespace ns3
 {

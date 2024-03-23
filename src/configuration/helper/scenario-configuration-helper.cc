@@ -17,14 +17,15 @@
  */
 #include "scenario-configuration-helper.h"
 
+#include "mac-layer-configuration-helper.h"
+#include "network-layer-configuration-helper.h"
+#include "phy-layer-configuration-helper.h"
+#include "remote-configuration-helper.h"
+
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
-#include <ns3/mac-layer-configuration-helper.h>
-#include <ns3/network-layer-configuration-helper.h>
 #include <ns3/object-factory.h>
-#include <ns3/phy-layer-configuration-helper.h>
-#include <ns3/remote-configuration-helper.h>
 #include <ns3/system-path.h>
 
 #include <chrono>

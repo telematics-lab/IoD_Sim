@@ -59,7 +59,7 @@ class ReportDataStats : public Object
     void Write(xmlTextWriterPtr handle) const;
 
   private:
-    PacketType m_kind;             /// the kind of data packet that is monitored
+    PacketType m_kind;        /// the kind of data packet that is monitored
     mutable uint32_t m_bytes; /// the amount of bytes transferred
 };
 

@@ -43,10 +43,12 @@ class ConstantAccelerationDroneMobilityModel : public GeocentricMobilityModel
     ConstantAccelerationDroneMobilityModel();
     ~ConstantAccelerationDroneMobilityModel();
 
-    static FlightPlan ProjectedToGeographicCoordinates(const FlightPlan& flightPlan,
-                                                       GeographicPositions::EarthSpheroidType earthType);
-    static FlightPlan GeographicToProjectedCoordinates(const FlightPlan& flightPlan,
-                                                       GeographicPositions::EarthSpheroidType earthType);
+    static FlightPlan ProjectedToGeographicCoordinates(
+        const FlightPlan& flightPlan,
+        GeographicPositions::EarthSpheroidType earthType);
+    static FlightPlan GeographicToProjectedCoordinates(
+        const FlightPlan& flightPlan,
+        GeographicPositions::EarthSpheroidType earthType);
 
   private:
     /// Initizalize the object instance.

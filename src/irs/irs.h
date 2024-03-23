@@ -18,9 +18,10 @@
 #ifndef IRS_H
 #define IRS_H
 
+#include "irs-patch.h"
+
 #include <ns3/drone-peripheral.h>
 #include <ns3/drone.h>
-#include <ns3/irs-patch.h>
 #include <ns3/model-configuration-vector.h>
 #include <ns3/pointer.h>
 #include <ns3/str-vec.h>

@@ -213,11 +213,13 @@ ConstantAccelerationDroneMobilityModel::DoSetPosition(const Vector& position, Po
             break;
         case PositionType::GEOCENTRIC:
             m_position =
-                GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
+                GeographicPositions::CartesianToGeographicCoordinates(position,
+                                                                      GetEarthSpheroidType());
             break;
         case PositionType::PROJECTED:
             m_position =
-                GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
+                GeographicPositions::ProjectedToGeographicCoordinates(position,
+                                                                      GetEarthSpheroidType());
             break;
         case PositionType::GEOGRAPHIC:
         default:
@@ -226,9 +228,9 @@ ConstantAccelerationDroneMobilityModel::DoSetPosition(const Vector& position, Po
         }
 
         NS_ASSERT_MSG((m_position.x >= -90) && (m_position.x <= 90),
-                  "Latitude must be between -90 deg and +90 deg");
+                      "Latitude must be between -90 deg and +90 deg");
         NS_ASSERT_MSG((m_position.y >= -180) && (m_position.y <= 180),
-                    "Longitude must be between -180 deg and +180 deg");
+                      "Longitude must be between -180 deg and +180 deg");
         NS_ASSERT_MSG(m_position.z >= 0, "Altitude must be higher or equal 0 meters");
     }
     else
