@@ -72,13 +72,13 @@ NullNtnDemoMacLayerSimulationHelper::Setup(const double simDuration) const
     auto rxDev = rxNode->GetDevice(0);
 
     auto txAntenna = txDev->GetObject<PhasedArrayModel>();
-    NS_ASSERT_MSG(txAntenna != nullptr, "Antenna not found in Node 0");
+    NS_ASSERT_MSG(txAntenna, "Antenna not found in Node 0");
     auto rxAntenna = rxDev->GetObject<PhasedArrayModel>();
-    NS_ASSERT_MSG(txAntenna != nullptr, "Antenna not found in Node 1");
+    NS_ASSERT_MSG(txAntenna, "Antenna not found in Node 1");
     auto txMob = txNode->GetObject<MobilityModel>();
-    NS_ASSERT_MSG(txMob != nullptr, "Mobility Model not found in Node 0");
+    NS_ASSERT_MSG(txMob, "Mobility Model not found in Node 0");
     auto rxMob = rxNode->GetObject<MobilityModel>();
-    NS_ASSERT_MSG(rxMob != nullptr, "Mobility Model not found in Node 1");
+    NS_ASSERT_MSG(rxMob, "Mobility Model not found in Node 1");
 
     // get tx antenna max gain
     const double txGainDb = [&txAntenna]() -> double {
@@ -240,7 +240,7 @@ NullNtnDemoMacLayerSimulationHelper::DoBeamforming(Ptr<NetDevice> thisDevice,
     double vAngleRadian = completeAngle.GetInclination(); // the elevation angle
 
     // retrieve the number of antenna elements and resize the vector
-    uint64_t totNoArrayElements = thisAntenna->GetNumberOfElements();
+    uint64_t totNoArrayElements = thisAntenna->GetNumElems();
     PhasedArrayModel::ComplexVector antennaWeights(totNoArrayElements);
 
     // the total power is divided equally among the antenna elements
@@ -310,7 +310,7 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
         params.txMob,
         params.rxMob,
         params.txAntenna,
-        params.rxAntenna);
+        params.rxAntenna)->psd;
     NS_LOG_DEBUG("Average rx power " << 10 * log10(Sum(*rxPsd) * params.bandwidth) << " dB");
 
     // compute the SNR

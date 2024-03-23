@@ -102,7 +102,7 @@ UdpEchoClientApplication::StartApplication(void)
 {
     NS_LOG_FUNCTION(this);
 
-    if (m_socket == nullptr)
+    if (!m_socket)
     {
         TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
         m_socket = Socket::CreateSocket(GetNode(), tid);

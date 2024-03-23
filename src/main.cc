@@ -875,7 +875,7 @@ Scenario::InstallEntityIpv4(Ptr<Node> entityNode, Ptr<NetDevice> netDevice, cons
 
     auto ipv4Obj = entityNode->GetObject<Ipv4>();
 
-    if (ipv4Obj == nullptr)
+    if (!ipv4Obj)
     {
         auto netLayer =
             StaticCast<Ipv4SimulationHelper, Object>(m_protocolStacks[NET_LAYER][netId]);

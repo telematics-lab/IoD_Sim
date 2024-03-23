@@ -232,7 +232,7 @@ build_lib(
                     ${libmobility}
 )
 
-build_example(
+build_lib_example(
   NAME iodsim
   SOURCE_FILES main.cc
   LIBRARIES_TO_LINK ${libiodsim}

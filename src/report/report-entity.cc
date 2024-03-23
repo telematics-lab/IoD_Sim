@@ -176,7 +176,7 @@ ReportEntity::DoMonitorRxTraffic(Ptr<const Packet> packet, Ptr<Ipv4> ipv4, uint3
     auto pCopy = packet->Copy();
     uint8_t* buf = (uint8_t*)calloc(bufferLength, sizeof(uint8_t));
 
-    if (buf == nullptr)
+    if (!buf)
         NS_FATAL_ERROR("Cannot allocate " << bufferLength
                                           << " bytes "
                                              "to manage packet payload.");
@@ -267,7 +267,7 @@ ReportEntity::DoMonitorTxTraffic(Ptr<const Packet> packet, Ptr<Ipv4> ipv4, uint3
     auto pCopy = packet->Copy();
     uint8_t* buf = (uint8_t*)calloc(bufferLength, sizeof(uint8_t));
 
-    if (buf == nullptr)
+    if (!buf)
         NS_FATAL_ERROR("Cannot allocate " << bufferLength
                                           << " bytes "
                                              "to manage packet payload.");
@@ -352,7 +352,7 @@ ReportEntity::GetIpv4Address(Ptr<const NetDevice> dev)
     const auto node = NodeList::GetNode(m_reference);
     const auto nodeIpv4 = node->GetObject<Ipv4>();
 
-    if (nodeIpv4 == nullptr)
+    if (!nodeIpv4)
         return std::tuple<const int32_t, const std::string, const std::string>{-2, "", ""};
 
     const auto ifid = nodeIpv4->GetInterfaceForDevice(dev);
@@ -418,7 +418,7 @@ ReportEntity::DoInitializeNetworkStacks()
     Ptr<Node> node = NodeList::GetNode(m_reference);
     std::vector<uint32_t> ifaces; // ifaces that needs to be registered
 
-    if (node == nullptr)
+    if (!node)
         NS_FATAL_ERROR("Report is trying to monitor NodeId " << m_reference
                                                              << ", "
                                                                 "but the object is null!");

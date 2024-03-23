@@ -746,7 +746,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
 
     // open configuration file and decode JSON data
     m_configFilePtr = fopen(configFilePath.c_str(), "rb");
-    if (m_configFilePtr == nullptr)
+    if (!m_configFilePtr)
     {
         NS_FATAL_ERROR("Cannot open " << configFilePath << ": " << std::strerror(errno));
     }
@@ -766,7 +766,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
 void
 ScenarioConfigurationHelper::DisposeConfiguration()
 {
-    if (m_configFilePtr != nullptr)
+    if (m_configFilePtr)
     {
         std::fclose(m_configFilePtr);
     }
@@ -1315,14 +1315,14 @@ ScenarioConfigurationHelper::MakePath(const std::string& path, uint32_t index) c
 bool
 ScenarioConfigurationHelper::CheckPath(const std::string& path) const
 {
-    return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config) != nullptr;
+    return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
 }
 
 const std::pair<bool, int32_t>
 ScenarioConfigurationHelper::GetInt(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, int32_t>(false, 0);
     }
@@ -1336,7 +1336,7 @@ const std::pair<bool, uint32_t>
 ScenarioConfigurationHelper::GetUint(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, uint32_t>(false, 0);
     }
@@ -1350,7 +1350,7 @@ const std::pair<bool, double>
 ScenarioConfigurationHelper::GetDouble(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, double>(false, 0.0);
     }
@@ -1364,7 +1364,7 @@ const std::pair<bool, bool>
 ScenarioConfigurationHelper::GetBool(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, bool>(false, false);
     }
@@ -1378,7 +1378,7 @@ const std::pair<bool, std::string>
 ScenarioConfigurationHelper::GetString(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, std::string>(false, "");
     }

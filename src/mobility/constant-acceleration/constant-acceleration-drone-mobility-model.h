@@ -55,7 +55,7 @@ class ConstantAccelerationDroneMobilityModel : public GeocentricMobilityModel
     virtual void DoDispose();
 
     virtual Vector DoGetPosition(PositionType type) const;
-    virtual void DoSetPosition(Vector position, PositionType type);
+    virtual void DoSetPosition(const Vector& position, PositionType type);
     virtual Vector DoGetVelocity() const;
 
     virtual void Update() const;

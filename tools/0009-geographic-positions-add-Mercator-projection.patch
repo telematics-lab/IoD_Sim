@@ -1,7 +1,7 @@
-From 0cb903988d5c36ce5cb758ffbd281007156c08a8 Mon Sep 17 00:00:00 2001
+From ac769eb61150c8ab813dd9e433810edc8196bcff Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni.grieco@poliba.it>
 Date: Wed, 5 Jul 2023 10:27:09 +0000
-Subject: [PATCH 1/2] geographic-positions: add Mercator projection
+Subject: [PATCH 3/3] geographic-positions: add Mercator projection
 
 ---
  ...entric-constant-position-mobility-model.cc |  7 ++++
@@ -12,10 +12,10 @@ Subject: [PATCH 1/2] geographic-positions: add Mercator projection
  5 files changed, 98 insertions(+), 1 deletion(-)
 
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-index 677368c4c..76441edac 100644
+index 7623e808c..288ad7ee0 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-@@ -62,6 +62,9 @@ GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
+@@ -75,6 +75,9 @@ GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
                                                                       m_position.y,
                                                                       m_position.z,
                                                                       GetEarthSpheroidType());
@@ -25,7 +25,7 @@ index 677368c4c..76441edac 100644
      case PositionType::GEOGRAPHIC:
      default:
          return m_position;
-@@ -83,6 +86,10 @@ GeocentricConstantPositionMobilityModel::DoSetPosition(Vector position, Position
+@@ -96,6 +99,10 @@ GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position, P
          m_position =
              GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
          break;
@@ -37,10 +37,10 @@ index 677368c4c..76441edac 100644
      default:
          m_position = position;
 diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
-index 740f60341..bed9b8cae 100644
+index 7dd6f0efd..dfb4318ce 100644
 --- a/src/mobility/model/geocentric-mobility-model.cc
 +++ b/src/mobility/model/geocentric-mobility-model.cc
-@@ -165,4 +165,28 @@ GeocentricMobilityModel::DoGetCoordinateTranslationReferencePoint() const
+@@ -171,4 +171,28 @@ GeocentricMobilityModel::DoGetGeographicReferencePoint() const
      return m_geographicReferencePoint;
  }
  
@@ -70,7 +70,7 @@ index 740f60341..bed9b8cae 100644
 +
  } // namespace ns3
 diff --git a/src/mobility/model/geocentric-mobility-model.h b/src/mobility/model/geocentric-mobility-model.h
-index 8b6a0d8ba..5859475ef 100644
+index 483b6c340..394252992 100644
 --- a/src/mobility/model/geocentric-mobility-model.h
 +++ b/src/mobility/model/geocentric-mobility-model.h
 @@ -43,7 +43,8 @@ class GeocentricMobilityModel : public MobilityModel
@@ -93,10 +93,10 @@ index 8b6a0d8ba..5859475ef 100644
  
  #endif /* GEOCENTRIC_MOBILITY_MODEL_H */
 diff --git a/src/mobility/model/geographic-positions.cc b/src/mobility/model/geographic-positions.cc
-index e04d7120c..855b3dd60 100644
+index 529a5d079..42631b5fa 100644
 --- a/src/mobility/model/geographic-positions.cc
 +++ b/src/mobility/model/geographic-positions.cc
-@@ -284,6 +284,44 @@ GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
+@@ -285,6 +285,44 @@ GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
      return geographicCoordinates;
  }
  
@@ -142,7 +142,7 @@ index e04d7120c..855b3dd60 100644
  GeographicPositions::RandCartesianPointsAroundGeographicPoint(double originLatitude,
                                                                double originLongitude,
 diff --git a/src/mobility/model/geographic-positions.h b/src/mobility/model/geographic-positions.h
-index 07221074d..9756c67ec 100644
+index ddb814f76..012b9923a 100644
 --- a/src/mobility/model/geographic-positions.h
 +++ b/src/mobility/model/geographic-positions.h
 @@ -129,6 +129,31 @@ class GeographicPositions
@@ -178,5 +178,5 @@ index 07221074d..9756c67ec 100644
       * Generates uniformly distributed random points (in ECEF Cartesian
       * coordinates) within a given altitude above earth's surface centered around
 -- 
-2.41.0
+2.42.0
 
