@@ -337,9 +337,8 @@ Scenario::ApplyStaticConfig()
 {
     NS_LOG_FUNCTION_NOARGS();
 
-    const auto staticConfig = CONFIGURATOR->GetStaticConfig();
-    for (auto& param : staticConfig)
-        Config::SetDefault(param.first, StringValue(param.second));
+    for (auto& param : CONFIGURATOR->GetStaticConfig())
+	Config::SetDefault(param.first, *param.second);
 }
 
 void
