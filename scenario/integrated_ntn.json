@@ -1,0 +1,223 @@
+{
+  "name": "integrated_ntn",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1,
+  "staticNs3Config": [
+    // TODO: staticNs3Config does not support array types
+    /*{
+      // Given that GeoSat and Ground Node are in the same position,
+      // we can set the reference point to the same position.
+      // This allows topocentric coordinates to be more manageable.
+      "name": "ns3::GeocentricMobilityModel::CoordinateTranslationReferencePoint",
+      // Padova without altitude
+      "value": [45.40869, 11.89448, 0.0]
+    }*/
+    {
+      "name": "ns3::RandomVariableStream::Stream",
+      "value": "1"
+    }
+    // TODO: Need to set GlobalValue RngSeedManager
+    /*
+    {
+      "type": "static" | "global",
+      "name": "...",
+      "value": "..."
+    }
+    */
+  ],
+  "phyLayer": [
+    {
+      "type": "3GPP",
+      "environment": "NTN-Suburban",
+      "attributes": [
+        {
+          "name": "UpdatePeriod",
+          "value": 1e-3
+        }
+      ],
+      "channel": {
+        "propagationLossModel": {
+          "name": "ns3::ThreeGppNTNSuburbanPropagationLossModel",
+          "attributes": [
+            {
+              "name": "Frequency",
+              "value": 20e9
+            },
+            {
+              "name": "ShadowingEnabled",
+              "value": true
+            }
+          ]
+        },
+        "conditionModel": {
+          "name": "ns3::ThreeGppNTNSuburbanChannelConditionModel",
+          "attributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "NullNtnDemo",
+      "timeResolution": 10e-3,
+      "bandwidth": 400e6,
+      "rbBandwidth": 120e3,
+      "satEirpDensity": 40,
+      "ueAntennaNoiseFigure": 1.2
+      // here we can do beamforming and compute the SNR every time
+    }
+  ],
+  "nodes": [
+    {
+      // GEO Satellite
+      "type": "GeoSat",
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          // TODO: What's the relation between netDevices and antennas?
+          // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
+          // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 58.5
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 2.5
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 3.1415926535897931 // 180.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeocentricConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            // Padova coordinates
+            "value": [45.40869, 11.89448, 35786000.0]
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [45.40869, 11.89448, 0.0]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
+          }
+        ]
+      }
+    },
+    {
+      // Ground Node
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          // TODO: What's the relation between netDevices and antennas?
+          // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
+          // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 39.7
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 0.3
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 0.0 // 0 deg
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeocentricConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            // Padova coordinates
+            "value": [45.40869, 11.89448, 14.0]
+          },
+          {
+            "name": "CoordinateTranslationReferencePoint",
+            "value": [45.40869, 11.89448, 0.0]
+          },
+          {
+            "name": "EarthSpheroidType",
+            "value": "WGS84"
+          }
+        ]
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "ThreeGppSpectrumPropagationLossModel",
+    "ThreeGppPropagationLossModel",
+    "ChannelConditionModel",
+    "NullNtnDemoMacLayerSimulationHelper",
+    "GeographicPositions"
+  ]
+}

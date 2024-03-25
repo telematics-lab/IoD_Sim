@@ -126,6 +126,7 @@ class FlightPlan
      * \return an iterator which refers to the first ProtoPoint in the container.
      */
     Iterator Begin() const;
+    Iterator begin() const;
     /**
      * \brief Get an iterator which refers to the past-the-last ProtoPoint in the
      * container.
@@ -146,6 +147,7 @@ class FlightPlan
      * \return an iterator which indicates an ending condition for a loop.
      */
     Iterator End() const;
+    Iterator end() const;
 
     /**
      * \brief Get the number of Ptr<ProtoPoint> stored in this container.

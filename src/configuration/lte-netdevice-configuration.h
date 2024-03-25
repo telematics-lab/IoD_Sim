@@ -52,7 +52,7 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
     LteNetdeviceConfiguration(const std::string type,
                               const std::string rawRole,
                               const std::vector<LteBearerConfiguration> bearers,
-                              const uint32_t networkLayerId,
+                              const std::optional<uint32_t> networkLayerId,
                               const std::optional<ModelConfiguration> antennaModel,
                               const std::optional<ModelConfiguration> phyModel);
     /** Default destructor */
@@ -66,20 +66,12 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
      * \return The bearers configuration for the Network Device.
      */
     const std::vector<LteBearerConfiguration> GetBearers() const;
-    /**
-     * \brief Network Layer IDs are valid only in case of UEs, not eNBs.
-     * \return The network layer ID configured for the Network Device.
-     */
-    const uint32_t GetNetworkLayerId() const override;
-    /** \return The antenna model configuration for the Network Device. */
-    const std::optional<ModelConfiguration> GetAntennaModel() const;
     /** \return The phy model configuration for the Network Device. */
     const std::optional<ModelConfiguration> GetPhyModel() const;
 
   private:
     const LteRole m_role;
     const std::vector<LteBearerConfiguration> m_bearers;
-    const std::optional<ModelConfiguration> m_antennaModel;
     const std::optional<ModelConfiguration> m_phyModel;
 };
 

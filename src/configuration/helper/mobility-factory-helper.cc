@@ -27,16 +27,26 @@ MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfi
 {
     helper.m_mobility.SetTypeId(modelConf.GetName());
 
-    if (modelConf.GetName() == "ns3::ConstantPositionMobilityModel")
+    if (modelConf.GetName().find("ConstantPositionMobilityModel") != std::string::npos)
     {
         if (modelConf.GetAttributes().size() == 0)
             return;
 
-        auto positionAllocator = CreateObject<ListPositionAllocator>();
-        Vector3D initialPosition =
-            StaticCast<Vector3DValue, AttributeValue>(modelConf.GetAttributes()[0].value)->Get();
-        positionAllocator->Add(initialPosition);
-        helper.SetPositionAllocator(positionAllocator);
+        for (auto& attr : modelConf.GetAttributes())
+        {
+            if (attr.name == "Position")
+            {
+                auto positionAllocator = CreateObject<ListPositionAllocator>();
+                Vector3D initialPosition =
+                    StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
+                positionAllocator->Add(initialPosition);
+                helper.SetPositionAllocator(positionAllocator);
+            }
+            else
+            {
+                helper.m_mobility.Set(attr.name, *attr.value);
+            }
+        }
     }
     else if (modelConf.GetName() == "ns3::RandomWalk2dOutdoorMobilityModel")
     {

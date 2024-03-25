@@ -68,7 +68,7 @@ void
 ReportZsp::DoWrite(xmlTextWriterPtr h)
 {
     NS_LOG_FUNCTION(h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "
@@ -189,7 +189,7 @@ ReportZsp::DoInitializeTrajectoryMonitor()
     NS_ASSERT(matches.GetN() == 1);
 
     Ptr<MobilityModel> obj = DynamicCast<MobilityModel>(matches.Get(0));
-    if (obj == nullptr)
+    if (!obj)
         NS_FATAL_ERROR("Expected a MobilityModel on node id " << m_reference
                                                               << ","
                                                                  " but none was found!");

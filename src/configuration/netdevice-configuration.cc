@@ -21,9 +21,11 @@ namespace ns3
 {
 
 NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
-                                               const uint32_t networkLayerId)
+                                               const std::optional<uint32_t> networkLayerId,
+                                               const std::optional<ModelConfiguration> antennaModel)
     : m_type{type},
-      m_networkLayerId{networkLayerId}
+      m_networkLayerId{networkLayerId},
+      m_antennaModel{antennaModel}
 {
 }
 
@@ -37,10 +39,16 @@ NetdeviceConfiguration::GetType() const
     return m_type;
 }
 
-const uint32_t
+const std::optional<uint32_t>
 NetdeviceConfiguration::GetNetworkLayerId() const
 {
     return m_networkLayerId;
+}
+
+std::optional<ModelConfiguration>
+NetdeviceConfiguration::GetAntennaModel() const
+{
+    return m_antennaModel;
 }
 
 } // namespace ns3

@@ -100,7 +100,7 @@ RandomUdpApplication::StartApplication()
 {
     NS_LOG_FUNCTION(this);
 
-    if (m_socket == NULL)
+    if (m_socket)
     {
         Ptr<SocketFactory> socketFactory =
             GetNode()->GetObject<SocketFactory>(UdpSocketFactory::GetTypeId());
@@ -122,7 +122,7 @@ RandomUdpApplication::StopApplication()
     NS_LOG_FUNCTION(this);
 
     Simulator::Cancel(m_sendEvent);
-    if (m_socket != NULL)
+    if (!m_socket)
         m_socket->Close();
 }
 

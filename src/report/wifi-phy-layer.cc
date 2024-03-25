@@ -92,7 +92,7 @@ void
 WifiPhyLayer::Write(xmlTextWriterPtr h)
 {
     NS_LOG_FUNCTION(h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "
@@ -199,11 +199,11 @@ void
 WifiPhyLayer::DoMonitorRssi(Ptr<const Packet> packet, RxPowerWattPerChannelBand rxPowersW)
 {
     // The total RX power corresponds to the maximum over all the bands
-    auto it = std::max_element(
-        rxPowersW.begin(),
-        rxPowersW.end(),
-        [](const std::pair<WifiSpectrumBand, double>& p1,
-           const std::pair<WifiSpectrumBand, double>& p2) { return p1.second < p2.second; });
+    auto it =
+        std::max_element(rxPowersW.begin(),
+                         rxPowersW.end(),
+                         [](const RxPowerWattPerChannelBand::value_type& p1,
+                            const RxPowerWattPerChannelBand::value_type& p2) { return p1 < p2; });
     auto rssi = 10 * log(it->second / 1e-3 /* to mW */);
 
     WifiMacHeader hdr;

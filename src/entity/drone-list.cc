@@ -19,8 +19,9 @@
  */
 #include "drone-list.h"
 
+#include "drone.h"
+
 #include <ns3/config.h>
-#include <ns3/drone.h>
 #include <ns3/log.h>
 #include <ns3/object-vector.h>
 #include <ns3/object.h>
@@ -131,7 +132,7 @@ DroneListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<DroneListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<DroneListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

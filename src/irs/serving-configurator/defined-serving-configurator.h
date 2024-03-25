@@ -18,9 +18,10 @@
 #ifndef DEFINED_SERVING_CONFIGURATOR_H
 #define DEFINED_SERVING_CONFIGURATOR_H
 
+#include "serving-configurator.h"
+
 #include <ns3/double-vector.h>
 #include <ns3/object.h>
-#include <ns3/serving-configurator.h>
 #include <ns3/str-vec.h>
 
 namespace ns3

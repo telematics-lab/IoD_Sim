@@ -77,7 +77,7 @@ DroneServerApplication::DoDispose()
 {
     NS_LOG_FUNCTION_NOARGS();
 
-    if (m_socket != NULL)
+    if (m_socket)
         m_socket->Close();
 
     m_state = SERVER_CLOSED;
@@ -92,7 +92,7 @@ DroneServerApplication::StartApplication()
 
     if (m_state == SERVER_CLOSED)
     {
-        if (m_socket == NULL)
+        if (!m_socket)
         {
             Ptr<SocketFactory> socketFactory =
                 GetNode()->GetObject<SocketFactory>(UdpSocketFactory::GetTypeId());
@@ -120,7 +120,7 @@ DroneServerApplication::StopApplication()
 {
     NS_LOG_FUNCTION_NOARGS();
 
-    if (m_socket != NULL && m_state == SERVER_LISTEN)
+    if (m_socket && m_state == SERVER_LISTEN)
     {
         NS_LOG_LOGIC("[Node " << GetNode()->GetId() << "] Closing server socket");
         m_socket->Close();

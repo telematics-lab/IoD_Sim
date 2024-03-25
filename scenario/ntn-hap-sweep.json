@@ -1,0 +1,211 @@
+{
+  "name": "ntn_hap-sweep",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 100000,
+  // Seeds: 1 6 7 16 22 25 30 42
+  "phyLayer": [
+    {
+      "type": "3GPP",
+      "environment": "NTN-Rural",
+      "attributes": [
+        {
+          "name": "UpdatePeriod",
+          "value": 1
+        }
+      ],
+      "channel": {
+        "propagationLossModel": {
+          "name": "ns3::ThreeGppNTNRuralPropagationLossModel",
+          "attributes": [
+            {
+              "name": "Frequency",
+              "value": 20e9
+            },
+            {
+              "name": "ShadowingEnabled",
+              "value": true
+            }
+          ]
+        },
+        "conditionModel": {
+          "name": "ns3::ThreeGppNTNRuralChannelConditionModel",
+          "attributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "NullNtnDemo",
+      "timeResolution": 500,
+      "bandwidth": 400e6,
+      "rbBandwidth": 120e3,
+      "satEirpDensity": 40,
+      "ueAntennaNoiseFigure": 1.2
+      // here we can do beamforming and compute the SNR every time
+    }
+  ],
+  "nodes": [
+    {
+      // GEO Satellite
+      "type": "GeoSat",
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          // TODO: What's the relation between netDevices and antennas?
+          // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
+          // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 58.5
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 2.5
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 3.1415926535897931 // 180.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeocentricConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            // Eutelsat 5 West B: https://www.n2yo.com/?s=44624
+            "value": [0.04, -4.95, 35770.88e3]
+          }
+        ]
+      }
+    },
+    {
+      // HAP
+      "netDevices": [
+        {
+          "type": "simple",
+          "name": "ns3::SimpleNetDevice",
+          "attributes": [],
+          // TODO: What's the relation between netDevices and antennas?
+          // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
+          // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
+          "antenna": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumColumns",
+                "value": 1
+              },
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "AntennaElement",
+                "value": {
+                  "name": "ns3::CircularApertureAntennaModel",
+                  "attributes": [
+                    {
+                      "name": "AntennaMaxGainDb",
+                      "value": 39.7
+                    },
+                    {
+                      "name": "AntennaCircularApertureRadius",
+                      "value": 0.3
+                    },
+                    {
+                      "name": "OperatingFrequency",
+                      "value": 20e9
+                    },
+                    {
+                      "name": "AntennaInclination",
+                      "value": 0.0 // 0 deg
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        // Start from Grottaglie Spaceport at [40.51579, 17.40314, Z], where Z = [20e3,35e3,50e3]
+        // Circle trajectory that passes to
+        // - [40.51579, 17.40314, 20e3] at east
+        "name": "ns3::ConstantAccelerationDroneMobilityModel",
+        "attributes": [
+          {
+            "name": "Acceleration",
+            "value": 2.0 // TODO
+          },
+          {
+            "name": "MaxSpeed",
+            "value": 24.0 // TODO
+          },
+          {
+            "name": "UseGeodedicSystem",
+            "value": true
+          },
+          {
+            "name": "FlightPlan",
+            "value": [
+              {
+                "position": [80.0, 0.0, 20e3],
+                "interest": 0,
+                "restTime": 3.0
+              },
+              {
+                "position": [-80.0, 0.0, 20e3],
+                "interest": 0,
+                "restTime": 3.0
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "ThreeGppSpectrumPropagationLossModel",
+    "ThreeGppPropagationLossModel",
+    "ChannelConditionModel",
+    "NullNtnDemoMacLayerSimulationHelper",
+    "ConstantAccelerationDroneMobilityModel",
+    "Planner"
+  ]
+}

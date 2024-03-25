@@ -43,7 +43,7 @@ ReportWorld::Write(xmlTextWriterPtr h) const
 {
     std::stringstream roistr;
     NS_LOG_FUNCTION(h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "

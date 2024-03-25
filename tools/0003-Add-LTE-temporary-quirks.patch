@@ -1,5 +1,15 @@
+From 5554b4e9fe7bf8931dc846c7e021811df8f9e326 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Wed, 5 Jul 2023 09:38:31 +0000
+Subject: [PATCH] Add LTE temporary quirks
+
+---
+ src/lte/helper/lte-helper.h              |  2 ++
+ src/lte/helper/no-backhaul-epc-helper.cc | 15 +++++++++------
+ 2 files changed, 11 insertions(+), 6 deletions(-)
+
 diff --git a/src/lte/helper/lte-helper.h b/src/lte/helper/lte-helper.h
-index 0bb8b1a6e..36d74a8bf 100644
+index 560a2d73e..92fb9265f 100644
 --- a/src/lte/helper/lte-helper.h
 +++ b/src/lte/helper/lte-helper.h
 @@ -102,6 +102,8 @@ class SpectrumPropagationLossModel;
@@ -12,7 +22,7 @@ index 0bb8b1a6e..36d74a8bf 100644
      ~LteHelper() override;
  
 diff --git a/src/lte/helper/no-backhaul-epc-helper.cc b/src/lte/helper/no-backhaul-epc-helper.cc
-index 98ce23bab..92dd4a1ad 100644
+index 0c7648bef..82cd7793c 100644
 --- a/src/lte/helper/no-backhaul-epc-helper.cc
 +++ b/src/lte/helper/no-backhaul-epc-helper.cc
 @@ -331,8 +331,11 @@ NoBackhaulEpcHelper::AddEnb(Ptr<Node> enb,
@@ -44,3 +54,6 @@ index 98ce23bab..92dd4a1ad 100644
  
      NS_LOG_INFO("Create EpcX2 entity");
      Ptr<EpcX2> x2 = CreateObject<EpcX2>();
+-- 
+2.41.0
+

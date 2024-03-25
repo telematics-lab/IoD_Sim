@@ -18,9 +18,10 @@
 #ifndef SCENARIO_CONFIGURATION_HELPER_H
 #define SCENARIO_CONFIGURATION_HELPER_H
 
+#include "entity-configuration-helper.h"
+
 #include <ns3/building.h>
 #include <ns3/double-vector.h>
-#include <ns3/entity-configuration-helper.h>
 #include <ns3/flight-plan.h>
 #include <ns3/log.h>
 #include <ns3/mac-layer-configuration.h>
@@ -105,7 +106,7 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
      *
      * \return Static configuration defined in the configuration file.
      */
-    const std::vector<std::pair<std::string, std::string>> GetStaticConfig();
+    const std::vector<std::pair<std::string, Ptr<AttributeValue>>> GetStaticConfig();
 
     /**
      * \brief Retrieve the list of PHY Layers defined for this simulation.
@@ -483,7 +484,7 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
     std::ofstream m_out;          /// output stream for clog
     std::string m_name;           /// name of the simulation
     std::string m_dateTime;       /// cache for the current datetime
-    std::vector<std::pair<std::string, std::string>>
+    std::vector<std::pair<std::string, Ptr<AttributeValue>>>
         m_staticConfig;  /// cache for ns-3 static config params
     uint32_t m_radioMap; /// a code for radio map generation options
 };

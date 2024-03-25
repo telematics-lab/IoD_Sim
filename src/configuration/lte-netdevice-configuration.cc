@@ -38,13 +38,12 @@ LteNetdeviceConfiguration::LteNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,
     const std::vector<LteBearerConfiguration> bearers,
-    const uint32_t networkLayerId,
+    const std::optional<uint32_t> networkLayerId,
     const std::optional<ModelConfiguration> antennaModel,
     const std::optional<ModelConfiguration> phyModel)
-    : NetdeviceConfiguration{type, networkLayerId},
+    : NetdeviceConfiguration{type, networkLayerId, antennaModel},
       m_role{LteNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
-      m_antennaModel{antennaModel},
       m_phyModel{phyModel}
 {
 }
@@ -63,18 +62,6 @@ const std::vector<LteBearerConfiguration>
 LteNetdeviceConfiguration::GetBearers() const
 {
     return m_bearers;
-}
-
-const uint32_t
-LteNetdeviceConfiguration::GetNetworkLayerId() const
-{
-    return NetdeviceConfiguration::GetNetworkLayerId();
-}
-
-const std::optional<ModelConfiguration>
-LteNetdeviceConfiguration::GetAntennaModel() const
-{
-    return m_antennaModel;
 }
 
 const std::optional<ModelConfiguration>

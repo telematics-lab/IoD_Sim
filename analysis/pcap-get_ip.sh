@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Given a pcap file, for each drone connected to the LTE network extrapolate ip packet length and export everything in CSV
 # This can be useful to evaluate throughput

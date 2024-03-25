@@ -31,6 +31,7 @@
 #include <ns3/nstime.h>
 #include <ns3/object-factory.h>
 #include <ns3/object-vector.h>
+#include <ns3/pointer.h>
 #include <ns3/rectangle.h>
 #include <ns3/str-vec.h>
 #include <ns3/string.h>
@@ -151,7 +152,19 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
     {
     case rapidjson::Type::kStringType: {
         const auto attrValueString = jAttr.GetString();
-        attrValue = attrInfo.checker->CreateValidValue(StringValue(attrValueString));
+        const auto acceptedType = attrInfo.checker->GetValueTypeName();
+
+	if (acceptedType == "ns3::TimeValue")
+	{
+	    TimeValue tv;
+	    NS_ABORT_MSG_IF(!tv.DeserializeFromString(attrValueString, MakeTimeChecker()),
+			    "Invalid TimeValue string passed: " << attrValueString);
+	    attrValue = attrInfo.checker->CreateValidValue(tv);
+	}
+	else
+	{
+            attrValue = attrInfo.checker->CreateValidValue(StringValue(attrValueString));
+	}
     }
     break;
     case rapidjson::Type::kNumberType: {
@@ -164,6 +177,8 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 attrValue = attrInfo.checker->CreateValidValue(IntegerValue(attrValueInt));
             else if (acceptedType == "ns3::UintegerValue")
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
+            else if (acceptedType == "ns3::TimeValue")
+                attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueInt)));
             else
                 NS_FATAL_ERROR("The attribute value for property "
                                << attrInfo.name << " defined in model " << modelName
@@ -192,8 +207,9 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             else if (attrInfo.checker->Check(TimeValue(Seconds(attrValueDouble))))
                 attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueDouble)));
             else
-                NS_FATAL_ERROR("Cannot read attribute " << attrInfo.name << " for model "
-                                                        << modelName);
+                NS_FATAL_ERROR("Attribute "
+                               << attrInfo.name << " for model " << modelName
+                               << " has incompatible value type or it is out of range.");
         }
         else
         {
@@ -215,7 +231,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 values.push_back(el.GetString());
             attrValue = attrInfo.checker->CreateValidValue(StrVecValue(values));
         }
-        else if (arr.Size() == 3 && arr[0].IsDouble() && attrInfo.name == "Position")
+        else if (arr.Size() == 3 && arr[0].IsDouble())
         {
             const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
             attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
@@ -341,15 +357,34 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         attrValue = attrInfo.checker->CreateValidValue(BooleanValue(attrValueBool));
     }
     break;
-    case rapidjson::Type::kNullType:
     case rapidjson::Type::kObjectType:
+        if (attrInfo.checker->GetValueTypeName() == "ns3::PointerValue")
+        {
+            ObjectFactory factory;
+            const auto objConf = Get(jAttr);
+
+            factory.SetTypeId(objConf.GetName());
+            for (auto& attr : objConf.GetAttributes())
+                factory.Set(attr.name, *attr.value);
+
+            auto obj = factory.Create<Object>();
+            attrValue = attrInfo.checker->CreateValidValue(PointerValue(obj));
+        }
+        else
+        {
+            NS_FATAL_ERROR("Unsupported attribute value type of object "
+                           << attrInfo.name << ": " << attrInfo.checker->GetValueTypeName());
+        }
+        break;
+    case rapidjson::Type::kNullType:
     default:
-        NS_FATAL_ERROR("Cannot determine attribute value type of "
+        NS_FATAL_ERROR("Cannot determine how to map JSON type "
+                       << ToString(jAttr.GetType()) << " to an attribute value type of "
                        << attrInfo.name << ": " << attrInfo.checker->GetValueTypeName());
         break;
     }
 
-    NS_ABORT_MSG_IF(attrValue == nullptr,
+    NS_ABORT_MSG_IF(!attrValue,
                     "The attribute value for property "
                         << attrInfo.name << " defined in model " << modelName
                         << " was not accepted. "
@@ -391,6 +426,30 @@ ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidj
 
     auto attrValue = DecodeAttributeValue(model.GetName(), el["value"], attrInfo);
     return ModelConfiguration::Attribute(attrName, attrValue);
+}
+
+const std::string
+ModelConfigurationHelper::ToString(rapidjson::Type t)
+{
+    switch (t)
+    {
+    case rapidjson::Type::kNullType:
+        return "null";
+    case rapidjson::Type::kFalseType:
+        return "false";
+    case rapidjson::Type::kTrueType:
+        return "true";
+    case rapidjson::Type::kObjectType:
+        return "object";
+    case rapidjson::Type::kArrayType:
+        return "array";
+    case rapidjson::Type::kStringType:
+        return "string";
+    case rapidjson::Type::kNumberType:
+        return "number";
+    default:
+        return "unknown";
+    }
 }
 
 } // namespace ns3

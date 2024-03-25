@@ -1,5 +1,17 @@
+From e9a50086bc8dce897a09ef7254f4fb04807657d9 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni.grieco@poliba.it>
+Date: Wed, 5 Jul 2023 09:37:01 +0000
+Subject: [PATCH] Add ns3 quirks for IoD Sim compatibility
+
+---
+ src/mobility/helper/mobility-helper.h | 2 ++
+ src/mobility/model/mobility-model.h   | 2 ++
+ src/wifi/helper/wifi-helper.h         | 2 ++
+ src/wifi/helper/yans-wifi-helper.h    | 2 ++
+ 4 files changed, 8 insertions(+)
+
 diff --git a/src/mobility/helper/mobility-helper.h b/src/mobility/helper/mobility-helper.h
-index d23f62213..3bfbe8158 100644
+index 5b2082660..aadb82c3f 100644
 --- a/src/mobility/helper/mobility-helper.h
 +++ b/src/mobility/helper/mobility-helper.h
 @@ -43,6 +43,8 @@ class MobilityModel;
@@ -25,10 +37,10 @@ index ea39cf16a..645a18c08 100644
       * Register this type with the TypeId system.
       * \return the object TypeId
 diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
-index 5ad4a69d5..00b7078b2 100644
+index b934ee0dd..35dbffd05 100644
 --- a/src/wifi/helper/wifi-helper.h
 +++ b/src/wifi/helper/wifi-helper.h
-@@ -324,6 +324,8 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
+@@ -323,6 +323,8 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
  class WifiHelper
  {
    public:
@@ -50,3 +62,6 @@ index 7dada22e1..34a855ae7 100644
      /**
       * Create a channel helper without any parameter set. The user must set
       * them all to be able to call Create later.
+-- 
+2.41.0
+

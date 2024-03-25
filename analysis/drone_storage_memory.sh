@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Parse storage memory from debug log file and output a CSV file per drone
 

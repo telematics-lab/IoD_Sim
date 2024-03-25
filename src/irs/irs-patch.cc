@@ -152,7 +152,7 @@ IrsPatch::SetServingNodes(uint32_t nid1, uint32_t nid2)
 void
 IrsPatch::SetServingNodes(Ptr<Node> n1, Ptr<Node> n2)
 {
-    NS_ASSERT_MSG(n1 != nullptr && n2 != nullptr, "ServingNodes must be set with two valid nodes.");
+    NS_ASSERT_MSG(n1 && n2, "ServingNodes must be set with two valid nodes.");
     m_isServing = true;
     m_servingNodes = std::make_pair(n1, n2);
 }

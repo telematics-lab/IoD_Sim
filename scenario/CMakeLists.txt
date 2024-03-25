@@ -1,40 +1,42 @@
 create_test_sourcelist(Tests
-  demo_irs-test1.json
-  demo_irs-test2.json
-  demo_irs-test3.json
-  demo_irs-test4.json
-  demo_irs_noSN.json
-  demo_no_irs.json
+  integrated_ntn.json
+  irs_demo1.json
+  irs_demo2.json
+  irs_demo3.json
+  irs_demo4.json
+  irs_demo_channel.json
+  irs_demo_noSN.json
+  irs_paper_s1-varpatch.json
+  irs_paper_s1.json
+  irs_paper_s2-cluster1.json
+  irs_paper_s2-cluster2.json
+  irs_paper_s2-cluster2only.json
+  irs_paper_s2-cluster3.json
+  irs_paper_s2.json
+  irs_paper_s3-defined_1_all.json
+  irs_paper_s3-defined_1_uncov.json
+  irs_paper_s3-defined_4_all_diff.json
+  irs_paper_s3-defined_4_all_same.json
+  irs_paper_s3-defined_4_uncov_diff.json
+  irs_paper_s3-defined_4_uncov_same.json
+  irs_paper_s3-noIRS.json
+  irs_paper_s3-periodic_1_all.json
+  irs_paper_s3-periodic_1_uncov.json
+  irs_paper_s3-periodic_4_all_diff.json
+  irs_paper_s3-periodic_4_all_same.json
+  irs_paper_s3-periodic_4_uncov_diff.json
+  irs_paper_s3-periodic_4_uncov_same.json
+  irs_paper_s3-random_1_all.json
+  irs_paper_s3-random_1_uncov.json
+  irs_paper_s3-random_4_all.json
+  irs_paper_s3-random_4_uncov.json
   lm_grieco_s2.json
   lm_grieco_s3.json
-  paper_irs_s1.json
-  paper_irs_s2.json
   paper_s1.json
   paper_s2.json
   paper_s3-lte.json
   paper_s3-wifi.json
   paper_simple.json
-  s1_var_patch.json
-  s2_c1.json
-  s2_c2.json
-  s2_c3.json
-  s3_defined_1_all.json
-  s3_defined_1_uncov.json
-  s3_defined_4_all_diff.json
-  s3_defined_4_all_same.json
-  s3_defined_4_uncov_diff.json
-  s3_defined_4_uncov_same.json
-  s3_periodic_1_all.json
-  s3_periodic_1_uncov.json
-  s3_periodic_4_all_diff.json
-  s3_periodic_4_all_same.json
-  s3_periodic_4_uncov_diff.json
-  s3_periodic_4_uncov_same.json
-  s3_random_1_all.json
-  s3_random_1_uncov.json
-  s3_random_4_all.json
-  s3_random_4_uncov.json
-  s3_u.json
   simple_dual_stack.json
   simple_lte.json
   simple_peripherals.json
@@ -47,7 +49,7 @@ create_test_sourcelist(Tests
   test_periphstream-wifi.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/examples/ns3.38-iodsim-debug)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/examples/ns3-dev-iodsim-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)

@@ -96,7 +96,7 @@ DroneClientApplication::DoDispose()
 {
     NS_LOG_FUNCTION(this);
 
-    if (m_socket != NULL)
+    if (m_socket)
         m_socket->Close();
 
     m_state = CLOSED;
@@ -109,7 +109,7 @@ DroneClientApplication::StartApplication()
 {
     NS_LOG_FUNCTION(this);
 
-    if (m_socket == NULL)
+    if (!m_socket)
     {
         Ptr<SocketFactory> socketFactory =
             GetNode()->GetObject<SocketFactory>(UdpSocketFactory::GetTypeId());
@@ -162,7 +162,7 @@ DroneClientApplication::StopApplication()
 
     Simulator::Cancel(m_sendEvent);
 
-    if (m_socket != NULL)
+    if (m_socket)
     {
         NS_LOG_LOGIC("[Node " << GetNode()->GetId() << "] Closing client socket");
         m_socket->Close();
@@ -176,9 +176,9 @@ DroneClientApplication::SendPacket(const Intent i,
 {
     NS_LOG_FUNCTION(this << ToString(i) << socket << targetAddress);
 
-    if (m_socket != NULL)
+    if (m_socket)
     {
-        const char* command;
+        const char* command = nullptr;
         const auto nodeId = GetNode()->GetId();
 
         if (m_state == CLOSED && i == NEW)

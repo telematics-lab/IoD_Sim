@@ -18,7 +18,8 @@
 #ifndef MODEL_CONFIGURATION_VECTOR_H
 #define MODEL_CONFIGURATION_VECTOR_H
 
-#include <ns3/model-configuration.h>
+#include "model-configuration.h"
+
 #include <ns3/object.h>
 #include <ns3/ptr.h>
 

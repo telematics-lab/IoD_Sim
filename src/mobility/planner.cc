@@ -40,18 +40,18 @@ Planner<FlightParam, FlightType>::Planner(FlightPlan flightPlan,
     : m_step{step},
       m_flightParams{flightParam}
 {
-    for (auto point = flightPlan.Begin(); point != flightPlan.End(); point++)
+    for (auto& point : flightPlan)
     {
-        if ((*point)->GetInterest() == 0)
+        if (point->GetInterest() == 0)
         {
             if (!m_flightPlans.empty())
             {
-                m_flightPlans.back().Add(*point);
+                m_flightPlans.back().Add(point);
             }
-            m_flightPlans.push_back(FlightPlan(*point)); // Flight Plan to hover on the point
+            m_flightPlans.push_back(FlightPlan(point)); // Flight Plan to hover on the point
             m_flightPlans.push_back(FlightPlan());
         }
-        m_flightPlans.back().Add(*point);
+        m_flightPlans.back().Add(point);
     }
 
     for (auto flightPlan : m_flightPlans)

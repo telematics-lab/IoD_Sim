@@ -22,6 +22,7 @@
 #include <ns3/assert.h>
 #include <ns3/double.h>
 #include <ns3/fatal-error.h>
+#include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
 #include <ns3/wifi-mac-layer-configuration.h>
@@ -60,6 +61,37 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonMacLay
     else if (macType == "lte")
     {
         macConfig = Create<MacLayerConfiguration>(macType);
+    }
+    else if (macType == "NullNtnDemo")
+    {
+        NS_ASSERT_MSG(jsonMacLayer.HasMember("timeResolution"),
+                      "MAC Layer definition must have 'timeResolution' property.");
+        NS_ASSERT_MSG(jsonMacLayer["timeResolution"].IsNumber(),
+                      "MAC Layer 'timeResolution' property must be a number.");
+        NS_ASSERT_MSG(jsonMacLayer.HasMember("bandwidth"),
+                      "MAC Layer definition must have 'bandwidth' property.");
+        NS_ASSERT_MSG(jsonMacLayer["bandwidth"].IsNumber(),
+                      "MAC Layer 'bandwidth' property must be a number.");
+        NS_ASSERT_MSG(jsonMacLayer.HasMember("rbBandwidth"),
+                      "MAC Layer definition must have 'rbBandwidth' property.");
+        NS_ASSERT_MSG(jsonMacLayer["rbBandwidth"].IsNumber(),
+                      "MAC Layer 'rbBandwidth' property must be a number.");
+        NS_ASSERT_MSG(jsonMacLayer.HasMember("satEirpDensity"),
+                      "MAC Layer definition must have 'satEirpDensity' property.");
+        NS_ASSERT_MSG(jsonMacLayer["satEirpDensity"].IsNumber(),
+                      "MAC Layer 'satEirpDensity' property must be a number.");
+        NS_ASSERT_MSG(jsonMacLayer.HasMember("ueAntennaNoiseFigure"),
+                      "MAC Layer definition must have 'ueAntennaNoiseFigure' property.");
+        NS_ASSERT_MSG(jsonMacLayer["ueAntennaNoiseFigure"].IsNumber(),
+                      "MAC Layer 'ueAntennaNoiseFigure' property must be a number.");
+
+        macConfig = Create<NullNtnDemoMacLayerConfiguration>(
+            macType,
+            jsonMacLayer["timeResolution"].GetDouble(),
+            jsonMacLayer["bandwidth"].GetDouble(),
+            jsonMacLayer["rbBandwidth"].GetDouble(),
+            jsonMacLayer["satEirpDensity"].GetDouble(),
+            jsonMacLayer["ueAntennaNoiseFigure"].GetDouble());
     }
     else
     {

@@ -74,7 +74,7 @@ TcpClientServerApplication::StartApplication()
 {
     NS_LOG_FUNCTION(this);
     NS_ABORT_MSG_IF(
-        m_socket != NULL,
+        m_socket,
         "Application was called for startup, but the socket has been already initialized!");
 
     Ptr<SocketFactory> socketFactory =
@@ -100,7 +100,7 @@ TcpClientServerApplication::StopApplication()
 {
     NS_LOG_FUNCTION(this);
 
-    if (m_socket != nullptr)
+    if (m_socket)
     {
         m_socket->Close();
 

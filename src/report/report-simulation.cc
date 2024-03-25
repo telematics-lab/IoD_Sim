@@ -84,7 +84,7 @@ void
 ReportSimulation::Write(xmlTextWriterPtr h) const
 {
     NS_LOG_FUNCTION(h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "
@@ -133,7 +133,7 @@ ReportSimulation::PopulateEntities(const std::string nodeQuery, EntityContainer*
     {
         const auto node = DynamicCast<Node>(*i);
 
-        if (node != nullptr)
+        if (node)
         {
             const uint32_t uid = node->GetId();
             entities->Add(uid);

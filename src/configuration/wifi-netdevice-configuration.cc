@@ -20,10 +20,12 @@
 namespace ns3
 {
 
-WifiNetdeviceConfiguration::WifiNetdeviceConfiguration(const std::string type,
-                                                       const ModelConfiguration macLayer,
-                                                       const uint32_t networkLayerId)
-    : NetdeviceConfiguration{type, networkLayerId},
+WifiNetdeviceConfiguration::WifiNetdeviceConfiguration(
+    const std::string type,
+    const ModelConfiguration macLayer,
+    const std::optional<uint32_t> networkLayerId,
+    const std::optional<ModelConfiguration> antennaModel)
+    : NetdeviceConfiguration{type, networkLayerId, antennaModel},
       m_macLayer{macLayer}
 {
 }

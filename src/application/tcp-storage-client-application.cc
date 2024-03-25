@@ -93,7 +93,7 @@ TcpStorageClientApplication::DoSendPacket(const uint16_t payloadSize)
     NS_LOG_FUNCTION(this << payloadSize);
     const auto sock = GetSocket();
 
-    if (sock == nullptr)
+    if (!sock)
         return false;
 
     SeqTsHeader seqTs;
@@ -169,7 +169,7 @@ TcpStorageClientApplication::FindStorage() const
     NS_LOG_FUNCTION(this);
 
     auto drone = StaticCast<Drone, Node>(GetNode());
-    NS_ASSERT_MSG(drone != nullptr, "This application must be installed on a drone.");
+    NS_ASSERT_MSG(drone, "This application must be installed on a drone.");
 
     auto peripherals = drone->getPeripherals();
     NS_ASSERT_MSG(peripherals->thereIsStorage(),
@@ -177,7 +177,7 @@ TcpStorageClientApplication::FindStorage() const
 
     // Drone storage is always the first one in the container
     auto storage = StaticCast<StoragePeripheral, DronePeripheral>(peripherals->Get(0));
-    NS_ASSERT_MSG(storage != nullptr, "Drone must be equipped with a storage peripheral.");
+    NS_ASSERT_MSG(storage, "Drone must be equipped with a storage peripheral.");
 
     return storage;
 }

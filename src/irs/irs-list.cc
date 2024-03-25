@@ -18,8 +18,9 @@
  */
 #include "irs-list.h"
 
+#include "irs.h"
+
 #include <ns3/config.h>
-#include <ns3/irs.h>
 #include <ns3/log.h>
 #include <ns3/object-vector.h>
 #include <ns3/object.h>
@@ -130,7 +131,7 @@ IrsListPriv::DoGet()
     NS_LOG_FUNCTION_NOARGS();
 
     static Ptr<IrsListPriv> ptr = 0;
-    if (ptr == nullptr)
+    if (!ptr)
     {
         ptr = CreateObject<IrsListPriv>();
         Config::RegisterRootNamespaceObject(ptr);

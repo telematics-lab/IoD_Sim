@@ -17,16 +17,18 @@
  */
 #include "scenario-configuration-helper.h"
 
+#include "mac-layer-configuration-helper.h"
+#include "network-layer-configuration-helper.h"
+#include "phy-layer-configuration-helper.h"
+#include "remote-configuration-helper.h"
+
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
-#include <ns3/mac-layer-configuration-helper.h>
-#include <ns3/network-layer-configuration-helper.h>
 #include <ns3/object-factory.h>
-#include <ns3/phy-layer-configuration-helper.h>
-#include <ns3/remote-configuration-helper.h>
 #include <ns3/system-path.h>
 
+#include "model-configuration-helper.h"
 #include <chrono>
 #include <iomanip> /* put_time */
 #include <iostream>
@@ -141,17 +143,20 @@ ScenarioConfigurationHelper::GetLoggingFilePath()
     return ss.str();
 }
 
-const std::vector<std::pair<std::string, std::string>>
+const std::vector<std::pair<std::string, Ptr<AttributeValue>>>
 ScenarioConfigurationHelper::GetStaticConfig()
 {
     if (m_staticConfig.empty())
     {
-        NS_ASSERT_MSG(m_config.HasMember("staticNs3Config"),
-                      "Please define 'staticNs3Config' in configuration file.");
-        NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
-                      "'staticNs3Config' property must be an array.");
+        if (!m_config.HasMember("staticNs3Config"))
+            return {};
 
-        std::vector<std::pair<std::string, std::string>> staticConfigsDecoded = {};
+        NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
+                    "'staticNs3Config' property must be an array.");
+
+        auto decoded = std::vector<std::pair<std::string, Ptr<AttributeValue>>>{};
+        decoded.reserve(m_config["staticNs3Config"].Size());
+
         const auto staticConfigsArr = m_config["staticNs3Config"].GetArray();
         for (auto& sc : staticConfigsArr)
         {
@@ -159,27 +164,26 @@ ScenarioConfigurationHelper::GetStaticConfig()
 
             const auto obj = sc.GetObject();
             NS_ASSERT_MSG(obj.HasMember("name"),
-                          "'name' is required in staticNs3Config definition.");
+                        "'name' is required in staticNs3Config definition.");
             NS_ASSERT_MSG(obj["name"].IsString(),
-                          "'name' property must be a string in staticNs3Config definition.");
+                        "'name' property must be a string in staticNs3Config definition.");
             NS_ASSERT_MSG(obj.HasMember("value"),
-                          "'value' is required in staticNs3Config definiton.");
-            NS_ASSERT_MSG(
-                obj["value"].IsString() || obj["value"].IsNumber(),
-                "'value' property must be a string or a number in staticNs3Config definition.");
+                        "'value' is required in staticNs3Config definiton.");
 
-            std::stringstream value;
-            if (obj["value"].IsDouble())
-                value << obj["value"].GetDouble();
-            else if (obj["value"].IsInt())
-                value << obj["value"].GetInt();
-            else if (obj["value"].IsString())
-                value << obj["value"].GetString();
+            const std::string modelAttr = obj["name"].GetString();
+            const std::string delimiter = "::";
+            const std::string modelName = modelAttr.substr(0, modelAttr.rfind(delimiter));
+            const std::string attrName = modelAttr.substr(modelName.size() + delimiter.size());
+            const TypeId model = TypeId::LookupByName(modelName);
 
-            staticConfigsDecoded.push_back({obj["name"].GetString(), value.str()});
+            TypeId::AttributeInformation attrInfo;
+            NS_ABORT_MSG_IF(!model.LookupAttributeByName(attrName, &attrInfo), "Cannot find attribute name " << attrName << " of model " << modelName << ". Please check your static ns3 config parameters.");
+            const auto attrValue = ModelConfigurationHelper::DecodeAttributeValue(modelName, obj["value"], attrInfo);
+
+            decoded.push_back({modelAttr, attrValue});
         }
 
-        m_staticConfig = staticConfigsDecoded;
+        m_staticConfig = decoded;
     }
 
     return m_staticConfig;
@@ -224,8 +228,9 @@ ScenarioConfigurationHelper::GetMacLayers() const
 const std::vector<Ptr<NetworkLayerConfiguration>>
 ScenarioConfigurationHelper::GetNetworkLayers() const
 {
-    NS_ASSERT_MSG(m_config.HasMember("networkLayer"),
-                  "Please define 'networkLayer' in your JSON configuration.");
+    if (!m_config.HasMember("networkLayer"))
+        return {};
+
     NS_ASSERT_MSG(m_config["networkLayer"].IsArray(), "'networkLayer' property must be an array.");
 
     const auto arr = m_config["networkLayer"].GetArray();
@@ -742,7 +747,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
 
     // open configuration file and decode JSON data
     m_configFilePtr = fopen(configFilePath.c_str(), "rb");
-    if (m_configFilePtr == nullptr)
+    if (!m_configFilePtr)
     {
         NS_FATAL_ERROR("Cannot open " << configFilePath << ": " << std::strerror(errno));
     }
@@ -762,7 +767,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
 void
 ScenarioConfigurationHelper::DisposeConfiguration()
 {
-    if (m_configFilePtr != nullptr)
+    if (m_configFilePtr)
     {
         std::fclose(m_configFilePtr);
     }
@@ -961,22 +966,21 @@ ScenarioConfigurationHelper::GetBuildings() const
 {
     NS_LOG_FUNCTION_NOARGS();
 
+    if (!m_config.HasMember("world"))
+        return {};
+
     std::vector<Ptr<Building>> buildings;
 
-    NS_ASSERT_MSG(m_config.HasMember("world"), "'world' definition is missing from the JSON file.");
     NS_ASSERT_MSG(m_config["world"].IsObject(),
                   "'world' defined in the JSON configuration must be an object.");
 
-    if (m_config["world"].HasMember("buildings") == false)
-    {
-        return buildings;
-    }
+    if (!m_config["world"].HasMember("buildings"))
+        return {};
 
     NS_ASSERT_MSG(m_config["world"]["buildings"].IsArray(),
                   "'buildings' needs to be an array of objects, check the configuration file.");
 
     auto arr = m_config["world"]["buildings"].GetArray();
-
     for (auto b = arr.Begin(); b != arr.End(); ++b)
     {
         Ptr<Building> building = CreateObject<Building>();
@@ -1312,14 +1316,14 @@ ScenarioConfigurationHelper::MakePath(const std::string& path, uint32_t index) c
 bool
 ScenarioConfigurationHelper::CheckPath(const std::string& path) const
 {
-    return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config) != nullptr;
+    return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
 }
 
 const std::pair<bool, int32_t>
 ScenarioConfigurationHelper::GetInt(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, int32_t>(false, 0);
     }
@@ -1333,7 +1337,7 @@ const std::pair<bool, uint32_t>
 ScenarioConfigurationHelper::GetUint(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, uint32_t>(false, 0);
     }
@@ -1347,7 +1351,7 @@ const std::pair<bool, double>
 ScenarioConfigurationHelper::GetDouble(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, double>(false, 0.0);
     }
@@ -1361,7 +1365,7 @@ const std::pair<bool, bool>
 ScenarioConfigurationHelper::GetBool(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, bool>(false, false);
     }
@@ -1375,7 +1379,7 @@ const std::pair<bool, std::string>
 ScenarioConfigurationHelper::GetString(const std::string& path) const
 {
     const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
-    if (value == nullptr)
+    if (!value)
     {
         return std::make_pair<bool, std::string>(false, "");
     }

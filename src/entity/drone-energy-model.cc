@@ -56,7 +56,7 @@ void
 DroneEnergyModel::SetDrone(Ptr<Drone> drone)
 {
     NS_LOG_FUNCTION(this << drone);
-    NS_ASSERT(drone != NULL);
+    NS_ASSERT(drone);
     m_drone = drone;
 }
 

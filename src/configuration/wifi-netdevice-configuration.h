@@ -42,7 +42,8 @@ class WifiNetdeviceConfiguration : public NetdeviceConfiguration
      */
     WifiNetdeviceConfiguration(const std::string type,
                                const ModelConfiguration macLayer,
-                               const uint32_t networkLayerId);
+                               const std::optional<uint32_t> networkLayerId,
+                               const std::optional<ModelConfiguration> antennaModel);
     /** Default destructor */
     ~WifiNetdeviceConfiguration();
 

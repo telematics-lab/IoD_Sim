@@ -80,7 +80,7 @@ void
 ReportDrone::DoWrite(xmlTextWriterPtr h)
 {
     NS_LOG_FUNCTION(this << h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "

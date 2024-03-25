@@ -36,7 +36,7 @@ Report::Initialize(const std::string scenarioName,
                    const std::string resultsPath)
 {
     NS_LOG_FUNCTION(this);
-    if (m_dataTreeRoot != nullptr)
+    if (m_dataTreeRoot)
     {
         NS_LOG_WARN("Report is already being populated at "
                     << m_dataTreeRoot << ". There is no need to reinitialize it.");
@@ -79,13 +79,13 @@ void
 Report::Open()
 {
     NS_LOG_FUNCTION_NOARGS();
-    if (m_writer != nullptr)
+    if (m_writer)
         return;
 
     int rc;
 
     m_writer = xmlNewTextWriterFilename(GetFilename().c_str(), 0);
-    NS_ASSERT(m_writer != nullptr);
+    NS_ASSERT(m_writer);
 
     rc = xmlTextWriterSetIndent(m_writer, 4);
     NS_ASSERT(rc == 0);
@@ -101,7 +101,7 @@ void
 Report::Close()
 {
     NS_LOG_FUNCTION_NOARGS();
-    if (m_writer == nullptr)
+    if (!m_writer)
         return;
 
     const int rc = xmlTextWriterEndDocument(m_writer);
@@ -115,7 +115,7 @@ void
 Report::Write() const
 {
     NS_LOG_FUNCTION_NOARGS();
-    NS_ASSERT(m_writer != nullptr);
+    NS_ASSERT(m_writer);
 
     m_dataTreeRoot->Write(m_writer);
 }

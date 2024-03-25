@@ -63,7 +63,7 @@ void
 ReportDataStats::Write(xmlTextWriterPtr h) const
 {
     NS_LOG_FUNCTION(h);
-    if (h == nullptr)
+    if (!h)
     {
         NS_LOG_WARN("Passed handler is not valid: " << h
                                                     << ". "
