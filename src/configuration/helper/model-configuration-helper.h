@@ -58,7 +58,10 @@ class ModelConfigurationHelper
 
     static const std::vector<ModelConfiguration::Attribute> GetAttributes(const TypeId& model,
                                                                           const JsonArray& jAttrs);
-
+    static const Ptr<AttributeValue> DecodeAttributeValue(
+        const std::string& modelName,
+        const JsonValue& jAttr,
+        const TypeId::AttributeInformation& checker);
   private:
     ModelConfigurationHelper();
 
@@ -69,11 +72,6 @@ class ModelConfigurationHelper
 
     static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,
                                                          const JsonObject& jAttrs);
-
-    static const Ptr<AttributeValue> DecodeAttributeValue(
-        const std::string& modelName,
-        const JsonValue& jAttr,
-        const TypeId::AttributeInformation& checker);
 
     static const std::string ToString(rapidjson::Type t);
 };

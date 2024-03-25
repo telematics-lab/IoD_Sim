@@ -4,6 +4,12 @@
   "logOnFile": true,
   "duration": 10000,
   // Seeds: 1 6 7 16 22 25 30 42
+  "staticNs3Config": [
+	{
+		"name": "ns3::RandomVariableStream::Stream",
+		"value": "1"
+	}
+  ],
   "phyLayer": [
     {
       "type": "3GPP",
@@ -11,7 +17,7 @@
       "attributes": [
         {
           "name": "UpdatePeriod",
-          "value": 1
+          "value": "1s"
         }
       ],
       "channel": {
