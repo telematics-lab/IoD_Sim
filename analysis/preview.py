@@ -2,10 +2,11 @@
 A preview of a given simulation configuration in terms of drone trajectories and
 ZSPs position.
 """
+
 import jstyleson
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import binom
 
@@ -14,7 +15,8 @@ class Point:
     """
     A high-level construct to manipulate and debug 3D points easily.
     """
-    def __init__(self, arr=[0,0,0], interest_level=0):
+
+    def __init__(self, arr=[0, 0, 0], interest_level=0):
         """
         Default constructor.
 
@@ -35,7 +37,7 @@ class Point:
             A construct that summarizes the properties in space of this
             Point instance.
         """
-        return f'Point(x:{self.x}; y:{self.y}; z:{self.z}; int:{self.interest})'
+        return f"Point(x:{self.x}; y:{self.y}; z:{self.z}; int:{self.interest})"
 
 
 def parse_args():
@@ -46,14 +48,19 @@ def parse_args():
         A namespace with parsed arguments as its properties.
     """
     import argparse
-    parser = argparse.ArgumentParser(description='Preview a given simulation '
-                                     'in terms of drone trajectories and ZSPs '
-                                     'position.')
-    parser.add_argument('--pdf', help='Plot the figure in a pdf file'
-                        '(default: display the plot on a GUI)', action="store_true")
 
-    parser.add_argument('input_file', type=str,
-                        help='IoD Sim Scenario Configuration.')
+    parser = argparse.ArgumentParser(
+        description="Preview a given simulation "
+        "in terms of drone trajectories and ZSPs "
+        "position."
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Plot the figure in a pdf file" "(default: display the plot on a GUI)",
+        action="store_true",
+    )
+
+    parser.add_argument("input_file", type=str, help="IoD Sim Scenario Configuration.")
 
     return parser.parse_args()
 
@@ -68,7 +75,7 @@ def get_configuration(filepath):
     Returns:
         A dictionary containing decoded JSON data.
     """
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         jdoc = jstyleson.loads(f.read())
 
     return jdoc
@@ -86,36 +93,36 @@ def parse_positions(jd):
         Three arrays containing ZSP positions, Drones positions and Drone trajectories curve step.
     """
     # ZSPs are the easiest
-    zsps = jd['ZSPs']
+    zsps = jd["ZSPs"]
     zsp_positions = []
 
     for zsp in zsps:
-        mobilityModel=zsp['mobilityModel']['attributes']
-        if len(mobilityModel) > 0 :
+        mobilityModel = zsp["mobilityModel"]["attributes"]
+        if len(mobilityModel) > 0:
             for attributes in mobilityModel:
-                if attributes['name'] == 'Position':
-                    zsp_positions.append(Point(attributes['value']))
+                if attributes["name"] == "Position":
+                    zsp_positions.append(Point(attributes["value"]))
         else:
-            #support for not defined ZSPs Position
+            # support for not defined ZSPs Position
             zsp_positions.append(Point([0.0, 0.0, 0.0]))
 
     # get drones positions
-    drones = jd['drones']
+    drones = jd["drones"]
 
     drones_trajectories = []
     drones_curvestep = []
     flag = 0
     for drone in drones:
-        mobilityModel=drone['mobilityModel']['attributes']
+        mobilityModel = drone["mobilityModel"]["attributes"]
         trajectory = []
         for attributes in mobilityModel:
-            if attributes['name'] == 'FlightPlan':
-                for point in attributes['value']:
-                    trajectory.append(Point(point['position'], point['interest']))
+            if attributes["name"] == "FlightPlan":
+                for point in attributes["value"]:
+                    trajectory.append(Point(point["position"], point["interest"]))
                 drones_trajectories.append(trajectory)
-            if attributes['name'] == 'CurveStep':
+            if attributes["name"] == "CurveStep":
                 flag = 1
-                drones_curvestep.append(attributes['value'])
+                drones_curvestep.append(attributes["value"])
         # Support for not defined CurveStep
         if flag != 1:
             drones_curvestep.append(0.01)
@@ -135,7 +142,7 @@ def build_zsp_space(ax, zsps):
     zsps_x = [zsp.x for zsp in zsps]
     zsps_y = [zsp.y for zsp in zsps]
     zsps_z = [zsp.z for zsp in zsps]
-    ax.scatter(zsps_x, zsps_y, zsps_z, marker='+', label='ZSP')
+    ax.scatter(zsps_x, zsps_y, zsps_z, marker="+", label="ZSP")
 
 
 def build_drone_trajectory(drone_positions, step=0.01):
@@ -178,7 +185,7 @@ def build_drone_trajectory(drone_positions, step=0.01):
 
             for i in range(n):
                 a = binom(n, i)
-                b = (1 - t)**(n - i)
+                b = (1 - t) ** (n - i)
                 c = t**i
 
                 sum_x += a * b * c * tr[i].x
@@ -199,7 +206,7 @@ def build_drone_space(ax, drones):
         drones: Drone positions.
     """
     # drone index
-    cmap = matplotlib.cm.get_cmap('Set1')
+    cmap = matplotlib.cm.get_cmap("Set1")
     i = 1
 
     # Plot drones trajectories as 3D lines
@@ -212,11 +219,12 @@ def build_drone_space(ax, drones):
 
         color = cmap(i)
 
-        ax.scatter(dx[0], dy[0], dz[0], marker='.', c=color, label='Drone start')
-        ax.scatter(dx[-1], dy[-1], dz[-1], marker='x', c=color, label='Drone end')
-        ax.plot(dx, dy, dz, c=color, label='Drone trajectory')
+        ax.scatter(dx[0], dy[0], dz[0], marker=".", c=color, label="Drone start")
+        ax.scatter(dx[-1], dy[-1], dz[-1], marker="x", c=color, label="Drone end")
+        ax.plot(dx, dy, dz, c=color, label="Drone trajectory")
 
         i += 1
+
 
 def setup_3dplot():
     """
@@ -226,13 +234,14 @@ def setup_3dplot():
         Matplotlib axes.
     """
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_title('Drone Trajectories and ZSP positions')
-    ax.set_xlabel('[m]')
-    ax.set_ylabel('[m]')
-    ax.set_zlabel('[m]')
+    ax = fig.add_subplot(111, projection="3d")
+    ax.set_title("Drone Trajectories and ZSP positions")
+    ax.set_xlabel("[m]")
+    ax.set_ylabel("[m]")
+    ax.set_zlabel("[m]")
 
     return ax
+
 
 def main():
     """
@@ -253,11 +262,12 @@ def main():
 
     ax.legend()
     if args.pdf:
-        #For environment without graphic interface (Output is a .pdf file):
-        plt.savefig(args.input_file.replace('.json','.pdf'))
+        # For environment without graphic interface (Output is a .pdf file):
+        plt.savefig(args.input_file.replace(".json", ".pdf"))
     else:
-        #For environment with graphic interface:
+        # For environment with graphic interface:
         plt.show()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -1,7 +1,9 @@
 """
 Calculate and plot the PLR of given simulation results.
 """
+
 import xml.etree.ElementTree as ET
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,11 +16,12 @@ def parse_args():
         A namespace with parsed arguments as its properties.
     """
     import argparse
-    parser = argparse.ArgumentParser(description='Calculate and plot the PLR '
-                                     'of given simulation results.')
 
-    parser.add_argument('summary_file', type=str,
-                        help='IoD Sim Scenario Report.')
+    parser = argparse.ArgumentParser(
+        description="Calculate and plot the PLR " "of given simulation results."
+    )
+
+    parser.add_argument("summary_file", type=str, help="IoD Sim Scenario Report.")
 
     return parser.parse_args()
 
@@ -30,15 +33,20 @@ def welcome_the_user(root):
     Args:
         root: Decoded XML DOM root
     """
-    datetime = root.attrib['executedAt'].split('.')
+    datetime = root.attrib["executedAt"].split(".")
     date = datetime[0]
-    time = datetime[1].split('-')
+    time = datetime[1].split("-")
 
-    print('Analysing Scenario {} started in {} at {}:{}:{}'
-        .format(root.attrib['scenario'], date, time[0], time[1], time[2]))
+    print(
+        "Analysing Scenario {} started in {} at {}:{}:{}".format(
+            root.attrib["scenario"], date, time[0], time[1], time[2]
+        )
+    )
 
 
-def organize_data(root, entity_path, data_container_name, source_address, multi_stack=False):
+def organize_data(
+    root, entity_path, data_container_name, source_address, multi_stack=False
+):
     """
     Generic data collection function useful for organize_rx_data and
     organize_tx_data.
@@ -58,18 +66,18 @@ def organize_data(root, entity_path, data_container_name, source_address, multi_
         organized by the IP address of the entity and each IP address that had
         communication with.
     """
-    ms_path = 'networkStacks/' if multi_stack else ''
-    addr = 'sourceAddress' if source_address else 'destinationAddress'
+    ms_path = "networkStacks/" if multi_stack else ""
+    addr = "sourceAddress" if source_address else "destinationAddress"
     entities = root.findall(entity_path)
 
     entities_data = {}
     for e in entities:
         e_data = {}
-        ipv4 = e.find(f'./{ms_path}stack/ipv4/address').text
+        ipv4 = e.find(f"./{ms_path}stack/ipv4/address").text
         packets = e.findall(data_container_name)
 
         for pkt in packets:
-            sara = pkt.find(f'./{addr}').text
+            sara = pkt.find(f"./{addr}").text
 
             if sara not in e_data:
                 e_data[sara] = 0
@@ -94,8 +102,8 @@ def organize_rx_data(root):
         Multidimensional dictionary with all data received from each entity,
         organized by Sender IP address.
     """
-    zsps = organize_data(root, './zsps/zsp', './dataRx/transfer', True)
-    drones = organize_data(root, './drones/drone', './dataRx/transfer', True, True)
+    zsps = organize_data(root, "./zsps/zsp", "./dataRx/transfer", True)
+    drones = organize_data(root, "./drones/drone", "./dataRx/transfer", True, True)
 
     zsps.update(drones)  # merge
     return zsps
@@ -113,8 +121,8 @@ def organize_tx_data(root):
         Multidimensional dictionary with all data transmitted from each entity,
         organized by Target IP Address.
     """
-    zsps = organize_data(root, './zsps/zsp', './dataTx/transfer', False)
-    drones = organize_data(root, './drones/drone', './dataTx/transfer', False, True)
+    zsps = organize_data(root, "./zsps/zsp", "./dataTx/transfer", False)
+    drones = organize_data(root, "./drones/drone", "./dataTx/transfer", False, True)
 
     zsps.update(drones)  # merge
     return zsps
@@ -140,31 +148,28 @@ def analyse(filepath):
             pkts_tx = tx[sender][entity]
             pdr = float(pkts_rx) * 100.0 / float(pkts_tx)
 
-            stats.append({
-                'from': entity,
-                'to': sender,
-                'pdr': pdr,
-                'plr': 100.0 - pdr
-            })
+            stats.append({"from": entity, "to": sender, "pdr": pdr, "plr": 100.0 - pdr})
 
     # plot stats
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_title('PDR and PLR for each communication flux.')
-    ax.set_xlabel('Host')
-    ax.set_ylabel('[%]')
+    ax.set_title("PDR and PLR for each communication flux.")
+    ax.set_xlabel("Host")
+    ax.set_ylabel("[%]")
 
     width = 0.27  # width of the bars
     ind = np.arange(len(stats))  # x location of the groups
 
-    y = [x['pdr'] for x in stats]
-    ax.bar(ind, y, width, color='g')
+    y = [x["pdr"] for x in stats]
+    ax.bar(ind, y, width, color="g")
 
-    y = [x['plr'] for x in stats]
-    ax.bar(ind + width, y, width, color='r')
+    y = [x["plr"] for x in stats]
+    ax.bar(ind + width, y, width, color="r")
 
     ax.set_xticks(ind + width, minor=False)
-    ax.set_xticklabels([f"{i['from']} -> {i['to']}" for i in stats], fontdict=None, minor=False)
+    ax.set_xticklabels(
+        [f"{i['from']} -> {i['to']}" for i in stats], fontdict=None, minor=False
+    )
 
     plt.show()
 
@@ -177,5 +182,5 @@ def main():
     analyse(args.summary_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
