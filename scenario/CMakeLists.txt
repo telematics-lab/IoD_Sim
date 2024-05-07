@@ -32,6 +32,11 @@ create_test_sourcelist(Tests
   irs_paper_s3-random_4_uncov.json
   lm_grieco_s2.json
   lm_grieco_s3.json
+  ntn-hap-big.json
+  ntn-hap-static.json
+  ntn-hap-sweep.json
+  ntn-hap-test.json
+  ntn-hap.json
   paper_s1.json
   paper_s2.json
   paper_s3-lte.json
@@ -49,7 +54,7 @@ create_test_sourcelist(Tests
   test_periphstream-wifi.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/examples/ns3-dev-iodsim-debug)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/src/iodsim/ns3.41-iodsim-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)
