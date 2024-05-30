@@ -104,7 +104,7 @@
     {
       "label": "Profile IoD Sim",
       "type": "shell",
-      "command": "valgrind --tool=callgrind ${workspaceFolder}/ns3/build/src/drone/examples/ns3.33-iod-sim-debug --config=${input:scenarioConfigurationFilepath}",
+      "command": "valgrind --tool=callgrind ${workspaceFolder}/ns3/build/src/drone/examples/ns3.42-iod-sim-debug --config=${input:scenarioConfigurationFilepath}",
       "options": {
         "cwd": "${workspaceFolder}/ns3",
         "env": {
