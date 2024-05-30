@@ -8,7 +8,7 @@
       "name": "IoD Sim",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/ns3/build/src/iodsim/ns3.41-iodsim-debug",
+      "program": "${workspaceFolder}/ns3/build/src/iodsim/ns3.42-iodsim-debug",
       "args": [
         "--config=${workspaceFolder}/scenario/simple_wifi.json"
       ],
