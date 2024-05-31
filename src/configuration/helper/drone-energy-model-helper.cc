@@ -33,8 +33,8 @@ DroneEnergyModelHelper::Set(std::string name, const AttributeValue& v)
     m_droneEnergyModel.Set(name, v);
 }
 
-Ptr<DeviceEnergyModel>
-DroneEnergyModelHelper::Install(Ptr<Drone> drone, Ptr<EnergySource> source)
+Ptr<energy::DeviceEnergyModel>
+DroneEnergyModelHelper::Install(Ptr<Drone> drone, Ptr<energy::EnergySource> source)
 {
     Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
     model->SetDrone(drone);
@@ -44,8 +44,8 @@ DroneEnergyModelHelper::Install(Ptr<Drone> drone, Ptr<EnergySource> source)
     return model;
 }
 
-Ptr<DeviceEnergyModel>
-DroneEnergyModelHelper::DoInstall(Ptr<NetDevice> device, Ptr<EnergySource> source) const
+Ptr<energy::DeviceEnergyModel>
+DroneEnergyModelHelper::DoInstall(Ptr<NetDevice> device, Ptr<energy::EnergySource> source) const
 {
     Ptr<DroneEnergyModel> model = m_droneEnergyModel.Create<DroneEnergyModel>();
     return model;

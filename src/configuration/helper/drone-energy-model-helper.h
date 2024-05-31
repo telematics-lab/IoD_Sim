@@ -49,10 +49,11 @@ class DroneEnergyModelHelper : public DeviceEnergyModelHelper
      * Installs a DroneEnergyModel with a specified EnergySource onto a
      * Drone.
      */
-    Ptr<DeviceEnergyModel> Install(Ptr<Drone> drone, Ptr<EnergySource> source);
+    Ptr<energy::DeviceEnergyModel> Install(Ptr<Drone> drone, Ptr<energy::EnergySource> source);
 
   private:
-    Ptr<DeviceEnergyModel> DoInstall(Ptr<NetDevice> device, Ptr<EnergySource> source) const;
+    Ptr<energy::DeviceEnergyModel> DoInstall(Ptr<NetDevice> device,
+                                             Ptr<energy::EnergySource> source) const;
 
     ObjectFactory m_droneEnergyModel;
 };

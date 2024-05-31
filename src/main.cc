@@ -137,9 +137,9 @@ class Scenario
     void ConfigureEntityMechanics(const std::string& entityKey,
                                   Ptr<EntityConfiguration> entityConf,
                                   const uint32_t entityId);
-    Ptr<EnergySource> ConfigureEntityBattery(const std::string& entityKey,
-                                             Ptr<EntityConfiguration> entityConf,
-                                             const uint32_t entityId);
+    Ptr<energy::EnergySource> ConfigureEntityBattery(const std::string& entityKey,
+                                                     Ptr<EntityConfiguration> entityConf,
+                                                     const uint32_t entityId);
     void ConfigureEntityPeripherals(const std::string& entityKey,
                                     const Ptr<EntityConfiguration>& conf,
                                     const uint32_t& entityId);
@@ -338,7 +338,7 @@ Scenario::ApplyStaticConfig()
     NS_LOG_FUNCTION_NOARGS();
 
     for (auto& param : CONFIGURATOR->GetStaticConfig())
-	Config::SetDefault(param.first, *param.second);
+        Config::SetDefault(param.first, *param.second);
 }
 
 void
@@ -664,7 +664,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
         if (entityKey == "drones")
         {
             DroneEnergyModelHelper energyModel;
-            Ptr<EnergySource> energySource;
+            Ptr<energy::EnergySource> energySource;
 
             ConfigureEntityMechanics(entityKey, entityConf, entityId);
             energySource = ConfigureEntityBattery(entityKey, entityConf, entityId);
@@ -948,7 +948,7 @@ Scenario::ConfigureEntityMechanics(const std::string& entityKey,
         m_drones.Get(entityId)->SetAttribute(attr.name, *attr.value);
 }
 
-Ptr<EnergySource>
+Ptr<energy::EnergySource>
 Scenario::ConfigureEntityBattery(const std::string& entityKey,
                                  Ptr<EntityConfiguration> entityConf,
                                  const uint32_t entityId)
@@ -960,7 +960,7 @@ Scenario::ConfigureEntityBattery(const std::string& entityKey,
 
     for (auto attr : battery.GetAttributes())
         batteryFactory.Set(attr.name, *attr.value);
-    auto mountedBattery = batteryFactory.Create<EnergySource>();
+    auto mountedBattery = batteryFactory.Create<energy::EnergySource>();
 
     mountedBattery->SetNode(m_drones.Get(entityId));
     m_drones.Get(entityId)->AggregateObject(mountedBattery);

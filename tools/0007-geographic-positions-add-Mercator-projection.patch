@@ -1,108 +1,106 @@
-From ac769eb61150c8ab813dd9e433810edc8196bcff Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni.grieco@poliba.it>
-Date: Wed, 5 Jul 2023 10:27:09 +0000
+From 7540936429a37a24c99ff7bbe921320c2846db14 Mon Sep 17 00:00:00 2001
+From: Giovanni Grieco <giovanni@grieco.dev>
+Date: Thu, 30 May 2024 14:01:37 +0200
 Subject: [PATCH 3/3] geographic-positions: add Mercator projection
 
 ---
- ...entric-constant-position-mobility-model.cc |  7 ++++
- .../model/geocentric-mobility-model.cc        | 24 ++++++++++++
- .../model/geocentric-mobility-model.h         |  5 ++-
- src/mobility/model/geographic-positions.cc    | 38 +++++++++++++++++++
- src/mobility/model/geographic-positions.h     | 25 ++++++++++++
- 5 files changed, 98 insertions(+), 1 deletion(-)
+ ...entric-constant-position-mobility-model.cc |  7 +++
+ .../model/geocentric-mobility-model.cc        |  8 +++-
+ .../model/geocentric-mobility-model.h         |  3 +-
+ src/mobility/model/geographic-positions.cc    | 44 +++++++++++++++++++
+ src/mobility/model/geographic-positions.h     | 25 +++++++++++
+ 5 files changed, 85 insertions(+), 2 deletions(-)
 
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-index 7623e808c..288ad7ee0 100644
+index 5dfb5d16f..9f8c45eef 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-@@ -75,6 +75,9 @@ GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
-                                                                      m_position.y,
-                                                                      m_position.z,
+@@ -72,6 +72,9 @@ GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
                                                                       GetEarthSpheroidType());
+     case PositionType::GEOGRAPHIC:
+         return m_position;
 +    case PositionType::PROJECTED:
 +        return GeographicPositions::GeographicToProjectedCoordinates(m_position,
 +                                                                     GetEarthSpheroidType());
-     case PositionType::GEOGRAPHIC:
      default:
-         return m_position;
-@@ -96,6 +99,10 @@ GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position, P
-         m_position =
-             GeographicPositions::CartesianToGeographicCoordinates(position, GetEarthSpheroidType());
+         NS_ABORT_MSG("Unknown PositionType requested");
+     }
+@@ -99,6 +102,10 @@ GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position, P
+     case PositionType::GEOGRAPHIC:
+         m_position = position;
          break;
 +    case PositionType::PROJECTED:
 +        m_position =
 +            GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
 +        break;
-     case PositionType::GEOGRAPHIC:
      default:
-         m_position = position;
+         NS_ABORT_MSG("Unknown PositionType requested");
+         break;
 diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
-index 7dd6f0efd..dfb4318ce 100644
+index 709383a21..2150a1db4 100644
 --- a/src/mobility/model/geocentric-mobility-model.cc
 +++ b/src/mobility/model/geocentric-mobility-model.cc
-@@ -171,4 +171,28 @@ GeocentricMobilityModel::DoGetGeographicReferencePoint() const
-     return m_geographicReferencePoint;
- }
- 
-+std::ostream&
-+operator<<(std::ostream& os, GeocentricMobilityModel::PositionType type)
-+{
-+    switch (type)
-+    {
-+    case GeocentricMobilityModel::PositionType::TOPOCENTRIC:
-+        os << "TOPOCENTRIC";
-+        break;
-+    case GeocentricMobilityModel::PositionType::GEOCENTRIC:
-+        os << "GEOCENTRIC";
-+        break;
-+    case GeocentricMobilityModel::PositionType::GEOGRAPHIC:
-+        os << "GEOGRAPHIC";
-+        break;
-+    case GeocentricMobilityModel::PositionType::PROJECTED:
+@@ -42,6 +42,9 @@ operator<<(std::ostream& os, PositionType type)
+     case PositionType::GEOGRAPHIC:
+         os << "GEOGRAPHIC";
+         break;
++    case PositionType::PROJECTED:
 +        os << "PROJECTED";
 +        break;
-+    default:
-+        os << "UNKNOWN";
-+        break;
-+    }
-+    return os;
-+}
-+
- } // namespace ns3
+     default:
+         os << "UNKNOWN";
+         break;
+@@ -117,7 +120,10 @@ GeocentricMobilityModel::GetEarthSpheroidType() const
+ Vector
+ GeocentricMobilityModel::DoGetPosition() const
+ {
+-    return DoGetPosition(PositionType::TOPOCENTRIC);
++    // TODO: we should implement a proper way to understand what projection to use
++    return (GetEarthSpheroidType() == GeographicPositions::EarthSpheroidType::WGS84)
++               ? DoGetPosition(PositionType::PROJECTED)
++               : DoGetPosition(PositionType::TOPOCENTRIC);
+ }
+ 
+ void
 diff --git a/src/mobility/model/geocentric-mobility-model.h b/src/mobility/model/geocentric-mobility-model.h
-index 483b6c340..394252992 100644
+index baa28d4a3..b130d078d 100644
 --- a/src/mobility/model/geocentric-mobility-model.h
 +++ b/src/mobility/model/geocentric-mobility-model.h
-@@ -43,7 +43,8 @@ class GeocentricMobilityModel : public MobilityModel
-     {
-         TOPOCENTRIC,
-         GEOCENTRIC,
--        GEOGRAPHIC
-+        GEOGRAPHIC,
-+        PROJECTED
-     };
- 
-     /**
-@@ -140,6 +141,8 @@ class GeocentricMobilityModel : public MobilityModel
-     Vector3D m_geographicReferencePoint; //!< Reference point for coordinate translation
+@@ -35,7 +35,8 @@ enum class PositionType
+ {
+     TOPOCENTRIC,
+     GEOCENTRIC,
+-    GEOGRAPHIC
++    GEOGRAPHIC,
++    PROJECTED
  };
  
-+std::ostream& operator<<(std::ostream& os, GeocentricMobilityModel::PositionType type);
-+
- } // namespace ns3
- 
- #endif /* GEOCENTRIC_MOBILITY_MODEL_H */
+ std::ostream& operator<<(std::ostream& os, PositionType type);
 diff --git a/src/mobility/model/geographic-positions.cc b/src/mobility/model/geographic-positions.cc
-index 529a5d079..42631b5fa 100644
+index d1acb1e9e..cc22dc24e 100644
 --- a/src/mobility/model/geographic-positions.cc
 +++ b/src/mobility/model/geographic-positions.cc
-@@ -285,6 +285,44 @@ GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
+@@ -43,6 +43,16 @@ namespace
+  * \brief  Lambda function for computing the curvature
+  */
+ auto curvature = [](double e, double ph) { return sqrt(1 - e * e * sin(ph) * sin(ph)); };
++
++/**
++ * \brief Calibration of the Mercator projection's x-axis in order to have a unit equal to 1 meter.
++ */
++constexpr double projectionUnitX = 25.059;
++
++/**
++ * \brief Calibration of the Mercator projection's y-axis in order to have a unit equal to 1 meter.
++ */
++constexpr double projectionUnitY = 24.665;
+ } // namespace
+ 
+ namespace ns3
+@@ -204,6 +214,40 @@ GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
      return geographicCoordinates;
  }
  
-+constexpr double zx = 25.059;
-+constexpr double zy = 24.665;
-+
 +Vector
 +GeographicPositions::GeographicToProjectedCoordinates(Vector pos, EarthSpheroidType sphType)
 +{
@@ -115,11 +113,11 @@ index 529a5d079..42631b5fa 100644
 +                  "Latitude must be between -85.051129 and 85.051129 degrees to ensure proper "
 +                  "conversion using Web Marcator projection.");
 +
-+    const double phi = DEG2RAD * pos.x;
-+    const double lambda = DEG2RAD * pos.y;
++    double phi = DegreesToRadians(pos.x);
++    double lambda = DegreesToRadians(pos.y);
 +
-+    const double x = M_1_PI * pow(2, zx - 1) * (lambda + M_PI);
-+    const double y = M_1_PI * pow(2, zy - 1) * (M_PI - log(tan(M_PI_4 + phi * 0.5)));
++    double x = M_1_PI * pow(2, projectionUnitX - 1) * (lambda + M_PI);
++    double y = M_1_PI * pow(2, projectionUnitY - 1) * (M_PI - log(tan(M_PI_4 + phi * 0.5)));
 +
 +    NS_LOG_LOGIC("Translated to (" << x << ", " << y << ", " << pos.z << ")");
 +    return Vector(x, y, pos.z);
@@ -132,20 +130,19 @@ index 529a5d079..42631b5fa 100644
 +    NS_ASSERT_MSG(sphType == EarthSpheroidType::WGS84,
 +                  "Only WGS84 is supported for now. Requested: " << sphType);
 +
-+    const double lambda = M_PI * (pow(2, 1 - zx) * pos.x - 1);
-+    const double phi = 2 * atan(exp(M_PI * (1 - pow(2, 1 - zy) * pos.y))) - M_PI_2;
-+
-+    return Vector(RAD2DEG * phi, RAD2DEG * lambda, pos.z);
++    double lambda = M_PI * (pow(2, 1 - projectionUnitX) * pos.x - 1);
++    double phi = 2 * atan(exp(M_PI * (1 - pow(2, 1 - projectionUnitY) * pos.y))) - M_PI_2;
++    return Vector(RadiansToDegrees(phi), RadiansToDegrees(lambda), pos.z);
 +}
 +
  std::list<Vector>
  GeographicPositions::RandCartesianPointsAroundGeographicPoint(double originLatitude,
                                                                double originLongitude,
 diff --git a/src/mobility/model/geographic-positions.h b/src/mobility/model/geographic-positions.h
-index ddb814f76..012b9923a 100644
+index d11d4b783..471aa167a 100644
 --- a/src/mobility/model/geographic-positions.h
 +++ b/src/mobility/model/geographic-positions.h
-@@ -129,6 +129,31 @@ class GeographicPositions
+@@ -166,6 +166,31 @@ class GeographicPositions
                                                       Vector refPoint,
                                                       EarthSpheroidType sphType);
  

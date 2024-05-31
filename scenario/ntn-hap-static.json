@@ -89,13 +89,13 @@
                     {
                       "name": "OperatingFrequency",
                       "value": 20e9
-                    },
-                    {
-                      "name": "AntennaInclination",
-                      "value": 3.1415926535897931 // 180.0
                     }
                   ]
                 }
+              },
+              {
+                "name": "DowntiltAngle",
+                "value": 3.1415926535897931 // 180.0
               }
             ]
           }
@@ -149,10 +149,6 @@
                     {
                       "name": "OperatingFrequency",
                       "value": 20e9
-                    },
-                    {
-                      "name": "AntennaInclination",
-                      "value": 0.0 // 0 deg
                     }
                   ]
                 }

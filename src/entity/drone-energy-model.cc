@@ -33,7 +33,7 @@ TypeId
 DroneEnergyModel::GetTypeId(void)
 {
     static TypeId tid = TypeId("ns3::DroneEnergyModel")
-                            .SetParent<DeviceEnergyModel>()
+                            .SetParent<energy::DeviceEnergyModel>()
                             .SetGroupName("Energy")
                             .AddConstructor<DroneEnergyModel>();
     return tid;
@@ -46,7 +46,7 @@ DroneEnergyModel::DroneEnergyModel()
 }
 
 void
-DroneEnergyModel::SetEnergySource(Ptr<EnergySource> source)
+DroneEnergyModel::SetEnergySource(Ptr<energy::EnergySource> source)
 {
     NS_LOG_FUNCTION(this << source);
     m_source = source;

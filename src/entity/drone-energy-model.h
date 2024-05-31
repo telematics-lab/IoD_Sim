@@ -32,7 +32,7 @@ namespace ns3
  *
  * \brief Defines the power consumption of a drone together with its attached peripherals.
  */
-class DroneEnergyModel : public DeviceEnergyModel
+class DroneEnergyModel : public energy::DeviceEnergyModel
 {
   public:
     /**
@@ -53,7 +53,7 @@ class DroneEnergyModel : public DeviceEnergyModel
      *
      * \param source Pointer to energy source installed on drone.
      */
-    virtual void SetEnergySource(Ptr<EnergySource> source);
+    virtual void SetEnergySource(Ptr<energy::EnergySource> source);
 
     /**
      * \brief Sets the pointer of the drone.
@@ -144,7 +144,7 @@ class DroneEnergyModel : public DeviceEnergyModel
      */
     double DoGetCurrentA(void) const;
 
-    Ptr<EnergySource> m_source;
+    Ptr<energy::EnergySource> m_source;
     Ptr<Drone> m_drone;
     TracedValue<double> m_totalEnergyConsumption;
 };
