@@ -154,17 +154,17 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         const auto attrValueString = jAttr.GetString();
         const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
-	if (acceptedType == "ns3::TimeValue")
-	{
-	    TimeValue tv;
-	    NS_ABORT_MSG_IF(!tv.DeserializeFromString(attrValueString, MakeTimeChecker()),
-			    "Invalid TimeValue string passed: " << attrValueString);
-	    attrValue = attrInfo.checker->CreateValidValue(tv);
-	}
-	else
-	{
+        if (acceptedType == "ns3::TimeValue")
+        {
+            TimeValue tv;
+            NS_ABORT_MSG_IF(!tv.DeserializeFromString(attrValueString, MakeTimeChecker()),
+                            "Invalid TimeValue string passed: " << attrValueString);
+            attrValue = attrInfo.checker->CreateValidValue(tv);
+        }
+        else
+        {
             attrValue = attrInfo.checker->CreateValidValue(StringValue(attrValueString));
-	}
+        }
     }
     break;
     case rapidjson::Type::kNumberType: {

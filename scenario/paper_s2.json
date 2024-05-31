@@ -713,7 +713,7 @@
         "Scenario",
         "TcpStorageClientApplication",
         "TcpEchoServerApplication",
-	    "StoragePeripheral",
+        "StoragePeripheral",
         "Application",
         "TcpClientServerApplication",
         "TcpStubClientApplication"

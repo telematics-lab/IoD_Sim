@@ -62,6 +62,7 @@ class ModelConfigurationHelper
         const std::string& modelName,
         const JsonValue& jAttr,
         const TypeId::AttributeInformation& checker);
+
   private:
     ModelConfigurationHelper();
 

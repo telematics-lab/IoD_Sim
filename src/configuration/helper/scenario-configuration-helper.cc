@@ -18,6 +18,7 @@
 #include "scenario-configuration-helper.h"
 
 #include "mac-layer-configuration-helper.h"
+#include "model-configuration-helper.h"
 #include "network-layer-configuration-helper.h"
 #include "phy-layer-configuration-helper.h"
 #include "remote-configuration-helper.h"
@@ -28,7 +29,6 @@
 #include <ns3/object-factory.h>
 #include <ns3/system-path.h>
 
-#include "model-configuration-helper.h"
 #include <chrono>
 #include <iomanip> /* put_time */
 #include <iostream>
@@ -152,7 +152,7 @@ ScenarioConfigurationHelper::GetStaticConfig()
             return {};
 
         NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
-                    "'staticNs3Config' property must be an array.");
+                      "'staticNs3Config' property must be an array.");
 
         auto decoded = std::vector<std::pair<std::string, Ptr<AttributeValue>>>{};
         decoded.reserve(m_config["staticNs3Config"].Size());
@@ -164,11 +164,11 @@ ScenarioConfigurationHelper::GetStaticConfig()
 
             const auto obj = sc.GetObject();
             NS_ASSERT_MSG(obj.HasMember("name"),
-                        "'name' is required in staticNs3Config definition.");
+                          "'name' is required in staticNs3Config definition.");
             NS_ASSERT_MSG(obj["name"].IsString(),
-                        "'name' property must be a string in staticNs3Config definition.");
+                          "'name' property must be a string in staticNs3Config definition.");
             NS_ASSERT_MSG(obj.HasMember("value"),
-                        "'value' is required in staticNs3Config definiton.");
+                          "'value' is required in staticNs3Config definiton.");
 
             const std::string modelAttr = obj["name"].GetString();
             const std::string delimiter = "::";
@@ -177,8 +177,12 @@ ScenarioConfigurationHelper::GetStaticConfig()
             const TypeId model = TypeId::LookupByName(modelName);
 
             TypeId::AttributeInformation attrInfo;
-            NS_ABORT_MSG_IF(!model.LookupAttributeByName(attrName, &attrInfo), "Cannot find attribute name " << attrName << " of model " << modelName << ". Please check your static ns3 config parameters.");
-            const auto attrValue = ModelConfigurationHelper::DecodeAttributeValue(modelName, obj["value"], attrInfo);
+            NS_ABORT_MSG_IF(!model.LookupAttributeByName(attrName, &attrInfo),
+                            "Cannot find attribute name "
+                                << attrName << " of model " << modelName
+                                << ". Please check your static ns3 config parameters.");
+            const auto attrValue =
+                ModelConfigurationHelper::DecodeAttributeValue(modelName, obj["value"], attrInfo);
 
             decoded.push_back({modelAttr, attrValue});
         }
