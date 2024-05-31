@@ -122,7 +122,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
         }();
 
         const auto antennaModel =
-            ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antenna");
+            ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
 
         if (type == "wifi")
         {

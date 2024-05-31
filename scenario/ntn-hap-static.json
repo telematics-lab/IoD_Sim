@@ -62,7 +62,7 @@
           // TODO: What's the relation between netDevices and antennas?
           // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
           // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
-          "antenna": {
+          "antennaModel": {
             "name": "ns3::UniformPlanarArray",
             "attributes": [
               {
@@ -122,7 +122,7 @@
           // TODO: What's the relation between netDevices and antennas?
           // Antenna may be configured globally on the node. In this way, all the netDevices will use the same antenna.
           // If we want to configure different antennas for different netDevices, we have to specify the antenna in the netDevice.
-          "antenna": {
+          "antennaModel": {
             "name": "ns3::UniformPlanarArray",
             "attributes": [
               {
