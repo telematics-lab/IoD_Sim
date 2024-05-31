@@ -138,53 +138,70 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnrParams::ComputeSnrParams(
 {
 }
 
+/**
+ * @brief Create the PSD for the TX
+ *
+ * @param fcHz the carrier frequency in Hz
+ * @param pwrDbm the transmission power in dBm
+ * @param bwHz the bandwidth in Hz
+ * @param rbWidthHz the Resource Block (RB) width in Hz
+ *
+ * @return the pointer to the PSD
+ */
 Ptr<SpectrumValue>
-NullNtnDemoMacLayerSimulationHelper::CreateTxPowerSpectralDensity(double fc,
-                                                                  double pwr,
-                                                                  double BW,
-                                                                  double RB_WIDTH)
+NullNtnDemoMacLayerSimulationHelper::CreateTxPowerSpectralDensity(double fcHz,
+                                                                  double pwrDbm,
+                                                                  double bwHz,
+                                                                  double rbWidthHz)
 {
-    unsigned int numRbs = std::floor(BW / RB_WIDTH);
-    double f = fc - (numRbs * RB_WIDTH / 2.0);
-    double powerTx = pwr; // dBm power
+    unsigned int numRbs = std::floor(bwHz / rbWidthHz);
+    double f = fcHz - (numRbs * rbWidthHz / 2.0);
+    double powerTx = pwrDbm; // dBm power
 
-    Bands rbs;              // A vector representing each resource block
-    std::vector<int> rbsId; // A vector representing the resource block IDs
+    Bands rbs; // A vector representing each resource block
     for (uint32_t numrb = 0; numrb < numRbs; ++numrb)
     {
         BandInfo rb;
         rb.fl = f;
-        f += RB_WIDTH / 2;
+        f += rbWidthHz / 2;
         rb.fc = f;
-        f += RB_WIDTH / 2;
+        f += rbWidthHz / 2;
         rb.fh = f;
 
         rbs.push_back(rb);
-        rbsId.push_back(numrb);
     }
     Ptr<SpectrumModel> model = Create<SpectrumModel>(rbs);
     Ptr<SpectrumValue> txPsd = Create<SpectrumValue>(model);
 
     double powerTxW = std::pow(10., (powerTx - 30) / 10); // Get Tx power in Watts
-    double txPowerDensity = (powerTxW / BW);
+    double txPowerDensity = (powerTxW / bwHz);
 
-    for (auto rbId : rbsId)
+    for (auto psd = txPsd->ValuesBegin(); psd != txPsd->ValuesEnd(); ++psd)
     {
-        (*txPsd)[rbId] = txPowerDensity;
+        *psd = txPowerDensity;
     }
 
     return txPsd; // [W/Hz]
 }
 
+/**
+ * @brief Create the noise PSD for the
+ *
+ * @param fcHz the carrier frequency in Hz
+ * @param noiseFigureDb the noise figure in dB
+ * @param bwHz the bandwidth in Hz
+ * @param rbWidthHz the Resource Block (RB) width in Hz
+ *
+ * @return the pointer to the noise PSD
+ */
 Ptr<SpectrumValue>
-NullNtnDemoMacLayerSimulationHelper::CreateNoisePowerSpectralDensity(double fc,
-                                                                     double noiseFigure,
-                                                                     double BW,
-                                                                     double RB_WIDTH)
+NullNtnDemoMacLayerSimulationHelper::CreateNoisePowerSpectralDensity(double fcHz,
+                                                                     double noiseFigureDb,
+                                                                     double bwHz,
+                                                                     double rbWidthHz)
 {
-    unsigned int numRbs = std::floor(BW / RB_WIDTH);
-    double f = fc - (numRbs * RB_WIDTH / 2.0);
-    double noiseFigureDb = noiseFigure; // dB noise figure
+    unsigned int numRbs = std::floor(bwHz / rbWidthHz);
+    double f = fcHz - (numRbs * rbWidthHz / 2.0);
 
     Bands rbs;              // A vector representing each resource block
     std::vector<int> rbsId; // A vector representing the resource block IDs
@@ -192,9 +209,9 @@ NullNtnDemoMacLayerSimulationHelper::CreateNoisePowerSpectralDensity(double fc,
     {
         BandInfo rb;
         rb.fl = f;
-        f += RB_WIDTH / 2;
+        f += rbWidthHz / 2;
         rb.fc = f;
-        f += RB_WIDTH / 2;
+        f += rbWidthHz / 2;
         rb.fh = f;
 
         rbs.push_back(rb);
@@ -205,11 +222,11 @@ NullNtnDemoMacLayerSimulationHelper::CreateNoisePowerSpectralDensity(double fc,
 
     // see "LTE - From theory to practice"
     // Section 22.4.4.2 Thermal Noise and Receiver Noise Figure
-    const double kT_dBm_Hz = -174.0;                          // dBm/Hz
-    double kT_W_Hz = std::pow(10.0, (kT_dBm_Hz - 30) / 10.0); // W/Hz
+    const double ktDbmHz = -174.0;                        // dBm/Hz
+    double ktWHz = std::pow(10.0, (ktDbmHz - 30) / 10.0); // W/Hz
     double noiseFigureLinear = std::pow(10.0, noiseFigureDb / 10.0);
 
-    double noisePowerSpectralDensity = kT_W_Hz * noiseFigureLinear;
+    double noisePowerSpectralDensity = ktWHz * noiseFigureLinear;
 
     for (auto rbId : rbsId)
     {
@@ -237,7 +254,6 @@ NullNtnDemoMacLayerSimulationHelper::DoBeamforming(Ptr<NetDevice> thisDevice,
     // compute the azimuth and the elevation angles
     Angles completeAngle(bPos, aPos);
     double hAngleRadian = completeAngle.GetAzimuth();
-
     double vAngleRadian = completeAngle.GetInclination(); // the elevation angle
 
     // retrieve the number of antenna elements and resize the vector
@@ -306,65 +322,42 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
         ConstCast<AntennaModel, const AntennaModel>(params.txAntenna->GetAntennaElement());
 
     // apply the fast fading and the beamforming gain
-    rxPsd = m_phyHelper->GetSpectrumPropagationLossModel()
-                ->CalcRxPowerSpectralDensity(rxSsp,
-                                             params.txMob,
-                                             params.rxMob,
-                                             params.txAntenna,
-                                             params.rxAntenna)
-                ->psd;
-    NS_LOG_DEBUG("Average rx power " << 10 * log10(Sum(*rxPsd) * params.bandwidth) << " dB");
+    rxSsp = m_phyHelper->GetSpectrumPropagationLossModel()->CalcRxPowerSpectralDensity(
+        rxSsp,
+        params.txMob,
+        params.rxMob,
+        params.txAntenna,
+        params.rxAntenna);
+    NS_LOG_DEBUG("Average rx power " << 10 * log10(Sum(*rxSsp->psd) * params.bandwidth) << " dB");
 
     // compute the SNR
-    NS_LOG_DEBUG("Average SNR " << 10 * log10(Sum(*rxPsd) / Sum(*noisePsd)) << " dB");
+    NS_LOG_DEBUG("Average SNR " << 10 * log10(Sum(*rxSsp->psd) / Sum(*noisePsd)) << " dB");
 
     auto txMobPtr = DynamicCast<GeocentricMobilityModel, MobilityModel>(params.txMob);
     auto rxMobPtr = DynamicCast<GeocentricMobilityModel, MobilityModel>(params.rxMob);
 
     // compute geocentric distance between nodes
-    auto txMobGeocentric = txMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC);
-    auto rxMobGeocentric = rxMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC);
+    auto txMobGeocentric = txMobPtr->GetPosition(PositionType::GEOCENTRIC);
+    auto rxMobGeocentric = rxMobPtr->GetPosition(PositionType::GEOCENTRIC);
     double geocentricDistance = CalculateDistance(txMobGeocentric, rxMobGeocentric);
 
     auto getProjectedPositionFailsafe = [](Ptr<GeocentricMobilityModel> mm) -> Vector {
         if (mm->GetEarthSpheroidType() == GeographicPositions::EarthSpheroidType::WGS84)
         {
-            return mm->GetPosition(GeocentricMobilityModel::PositionType::PROJECTED);
+            return mm->GetPosition(PositionType::PROJECTED);
         }
         else
         {
             // fallback to Topocentric
             // TODO: need a threshold to understand if we can simplify to
             //       Topocentric, or it is better to use a projection
-            return mm->GetPosition(GeocentricMobilityModel::PositionType::TOPOCENTRIC);
+            return mm->GetPosition(PositionType::TOPOCENTRIC);
         }
     };
-
-    auto poiA = GeographicPositions::GeographicToProjectedCoordinates(
-        {35.7074505, 51.1498211, 20e3},
-        GeographicPositions::EarthSpheroidType::WGS84);
-    auto poiB = GeographicPositions::GeographicToProjectedCoordinates(
-        {0.04, -4.95, 20e3},
-        GeographicPositions::EarthSpheroidType::WGS84);
-    auto poiC = GeographicPositions::GeographicToProjectedCoordinates(
-        {64.133542, -21.9348416, 20e3},
-        GeographicPositions::EarthSpheroidType::WGS84);
-    auto satellite = GeographicPositions::GeographicToCartesianCoordinates(
-        0.04,
-        -4.95,
-        35770.88e3,
-        GeographicPositions::EarthSpheroidType::WGS84);
 
     auto txMobProjected = getProjectedPositionFailsafe(txMobPtr);
     auto rxMobProjected = getProjectedPositionFailsafe(rxMobPtr);
     double projectedDistance = CalculateDistance(txMobProjected, rxMobProjected);
-
-    double poiADist = CalculateDistance(rxMobProjected, poiA);
-    double poiBDist = CalculateDistance(rxMobProjected, poiB);
-    double poiCDist = CalculateDistance(rxMobProjected, poiC);
-    double satDistGeocentric =
-        CalculateDistance(rxMobPtr->GetPosition(GeocentricMobilityModel::PositionType::GEOCENTRIC),
-                          satellite);
 
     // print the SNR and pathloss values in the ntn-snr-trace.txt file
     std::ofstream f;
@@ -372,8 +365,7 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
     snrFilePath << CONFIGURATOR->GetResultsPath() << "ntn-snr-trace.txt";
     f.open(snrFilePath.str(), std::ios::out | std::ios::app);
     f << Simulator::Now().GetSeconds() << " " << 10 * log10(Sum(*rxPsd) / Sum(*noisePsd)) << " "
-      << propagationGainDb << " " << geocentricDistance << " " << projectedDistance << " "
-      << poiADist << " " << poiBDist << " " << poiCDist << " " << satDistGeocentric << std::endl;
+      << propagationGainDb << " " << geocentricDistance << " " << projectedDistance << std::endl;
     f.close();
 }
 

@@ -9,7 +9,7 @@
       // Given that GeoSat and Ground Node are in the same position,
       // we can set the reference point to the same position.
       // This allows topocentric coordinates to be more manageable.
-      "name": "ns3::GeocentricMobilityModel::CoordinateTranslationReferencePoint",
+      "name": "ns3::GeocentricMobilityModel::GeographicReferencePoint",
       // Padova without altitude
       "value": [45.40869, 11.89448, 0.0]
     }*/
@@ -112,14 +112,14 @@
                     {
                       "name": "OperatingFrequency",
                       "value": 20e9
-                    },
-                    {
-                      "name": "AntennaInclination",
-                      "value": 3.1415926535897931 // 180.0
                     }
                   ]
                 }
-              }
+              },
+          {
+            "name": "DowntiltAngle",
+            "value": 3.1415926535897931 // 180.0
+          }
             ]
           }
         }
@@ -133,7 +133,7 @@
             "value": [45.40869, 11.89448, 35786000.0]
           },
           {
-            "name": "CoordinateTranslationReferencePoint",
+            "name": "GeographicReferencePoint",
             "value": [45.40869, 11.89448, 0.0]
           },
           {
@@ -180,10 +180,6 @@
                     {
                       "name": "OperatingFrequency",
                       "value": 20e9
-                    },
-                    {
-                      "name": "AntennaInclination",
-                      "value": 0.0 // 0 deg
                     }
                   ]
                 }
@@ -201,7 +197,7 @@
             "value": [45.40869, 11.89448, 14.0]
           },
           {
-            "name": "CoordinateTranslationReferencePoint",
+            "name": "GeographicReferencePoint",
             "value": [45.40869, 11.89448, 0.0]
           },
           {
