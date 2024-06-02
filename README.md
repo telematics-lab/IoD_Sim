@@ -7,7 +7,7 @@ Drones](https://ieeexplore.ieee.org/document/7423671)).
 Developed on top of the well-known [ns-3](https://www.nsnam.org/) (Network
 Simulator 3), it implements the key networking elements (drones, network access
 points, and Zone Service Provider), a standard-compliant communication stack
-based on the IEEE 802.11 technology, and scenarios with various mobility
+based on the IEEE 802.11 and LTE technology, and scenarios with various mobility
 models.
 
 The source code presents the implementation of models and examples scripts,
@@ -18,9 +18,24 @@ of drones that:
 - Exchange messages with network access points deployed on a generic and flat
   3D space.
 
-The IoD_Sim repository is where this
-software is developed and there are many ways in which you can participate in
-the project, for example:
+For more details on how IoD_Sim works and all its features, the following
+research publications are highly recommended:
+
+- [G. Grieco, G. Iacovelli, P. Boccadoro and L. A. Grieco, "Internet of Drones Simulator: Design, Implementation, and Performance Evaluation," in IEEE Internet of Things Journal, vol. 10, no. 2, pp. 1476-1498, 15 Jan.15, 2023, doi: 10.1109/JIOT.2022.3207324.](https://doi.org/10.1109/JIOT.2022.3207324)
+- [G. Grieco, G. Iacovelli, M. Sandri, M. Giordani, M. Zorzi and L. A. Grieco, "Preliminary Performance Evaluation of a
+  Satellite-to-HAP Communication Link," European Wireless 2023; 28th European Wireless Conference, Rome, Italy, 2023,
+  pp. 340-345.](https://ieeexplore.ieee.org/abstract/document/10461435)
+- [G. Grieco, G. Iacovelli, D. Pugliese, D. Striccoli and L. A. Grieco, "A System-Level Simulation Module for Multi-UAV IRS-Assisted Communications," in IEEE Transactions on Vehicular Technology, vol. 73, no. 5, pp. 6740-6751, May 2024, doi: 10.1109/TVT.2023.3342298.](https://dx.doi.org/10.1109/TVT.2023.3342298)
+
+Older publications that might still be useful:
+
+- [G. Grieco, R. Artuso, P. Boccadoro, G. Piro and L. A. Grieco, "An Open Source and System-Level Simulator for the Internet of Drones," 2019 IEEE 30th International Symposium on Personal, Indoor and Mobile Radio Communications (PIMRC Workshops), Istanbul, Turkey, 2019, pp. 1-6, doi: 10.1109/PIMRCW.2019.8880832.](https://ieeexplore.ieee.org/document/8880832)
+
+You can head over to the [Releases](releases) section to download a copy of a
+stable version of the software.
+
+The IoD_Sim repository is where this software is developed and there are many
+ways in which you can participate in the project, for example:
 
 - [Submit bugs and feature requests](issues) and help us verify as they are
   checked in.
@@ -36,15 +51,19 @@ to use [Docker](https://www.docker.com/),
 (pseudo)virtualization platform that can provide you a stable Linux-based work
 environment. You are welcome to provide new compatibility solutions any time.
 
-For more details, a dedicated publication that describes the entire simulation platform is available on [arXiv](https://arxiv.org/abs/2203.13710).
-
-Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrieco/IoD_Sim-airflow) is a Visual Programming Editor ad-hoc for IoD_Sim! It relies on [splash](https://github.com/GiovanniGrieco/IoD_Sim-splash) to transpile C++ models in Python visual blocks.
+Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrieco/IoD_Sim-airflow)
+is a Visual Programming Editor ad-hoc for IoD_Sim! It relies on
+[splash](https://github.com/GiovanniGrieco/IoD_Sim-splash) to transpile C++
+models in Python visual blocks.
 
 ## Getting Started
 
-The following quick start has been tested on Ubuntu 22.04 LTS. Please note that this process may be similar in other distros as well. In case of any difficulties, you are welcome to raise a pull request and propose some adjustments.
+The following quick start has been tested on Ubuntu 22.04 LTS. Please note that
+this process may be similar in other distros as well. In case of any difficulties,
+you are welcome to raise a pull request and propose some adjustments.
 
-First of all, clone this repository, then open the folder with VSCode and execute the following tasks:
+First of all, clone this repository, then open the folder with VSCode and execute
+the following tasks:
 
 1. Install dependencies,
 2. Integrate IoD Sim with ns3
@@ -57,7 +76,7 @@ Otherwise, run the following commands:
 ./tools/install-dependencies.sh
 ./tools/prepare-ns3.sh
 cd ns3/
-./ns3 configure --build-profile=debug --enable-examples --disable-mpi --disable-python --enable-modules=iodsim
+./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=iodsim
 ./ns3 build
 ```
 
@@ -65,12 +84,12 @@ To run a JSON scenario configuration, execute the following command:
 
 ```
 cd ns3/
-./ns3 run "iodsim --config=../scenario/simple_wifi.json"
+./ns3 run iodsim -- --config=../scenario/simple_wifi.json
 ```
 
 ## License
 
-Copyright (C) 2018-2023 [The IoD_Sim Authors](AUTHORS).
+Copyright (C) 2018-2024 [The IoD_Sim Authors](AUTHORS).
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
