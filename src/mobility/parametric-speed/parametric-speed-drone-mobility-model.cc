@@ -138,12 +138,13 @@ void
 ParametricSpeedDroneMobilityModel::DoInitialize()
 {
     NS_LOG_FUNCTION(this);
-
+    GeocentricMobilityModel::DoInitialize();
+    m_flightPlan = (m_useGeodedicSystem)
+                       ? GeographicToProjectedCoordinates(m_flightPlan, GetEarthSpheroidType())
+                       : m_flightPlan;
     m_planner = Planner<ParametricSpeedParam, ParametricSpeedFlight>(m_flightPlan,
                                                                      m_flightParams,
                                                                      m_curveStep);
-
-    MobilityModel::DoInitialize();
 }
 
 void
@@ -282,9 +283,17 @@ void
 ParametricSpeedDroneMobilityModel::SetFlightPlan(const FlightPlan& flightPlan)
 {
     NS_LOG_FUNCTION(this << flightPlan);
-    m_flightPlan = (m_useGeodedicSystem)
-                       ? GeographicToProjectedCoordinates(flightPlan, GetEarthSpheroidType())
-                       : flightPlan;
+    if (IsInitialized())
+    {
+        m_flightPlan = (m_useGeodedicSystem)
+                           ? GeographicToProjectedCoordinates(flightPlan, GetEarthSpheroidType())
+                           : flightPlan;
+    }
+    else
+    {
+        // Temporally store raw Flight Plan. Will convert at object inizialization.
+        m_flightPlan = flightPlan;
+    }
 }
 
 void

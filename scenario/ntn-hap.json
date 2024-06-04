@@ -156,10 +156,6 @@
                     {
                       "name": "OperatingFrequency",
                       "value": 20e9
-                    },
-                    {
-                      "name": "AntennaInclination",
-                      "value": 0.0 // 0 deg
                     }
                   ]
                 }

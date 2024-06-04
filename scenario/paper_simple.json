@@ -87,11 +87,33 @@
             ],
             "mechanics": {
                 "name": "ns3::Drone",
-                "attributes": []
+                "attributes": [
+		    {
+                      "name": "Mass",
+                      "value": 0.75
+                    },
+                    {
+                      "name": "RotorDiskArea",
+                      "value": 0.18
+                    },
+                    {
+                      "name": "DragCoefficient",
+                      "value": 0.08
+                    }
+		]
             },
             "battery": {
                 "name": "ns3::LiIonEnergySource",
-                "attributes": []
+                "attributes": [
+                    {
+                      "name": "LiIonEnergySourceInitialEnergyJ",
+                      "value": 200.0
+                    },
+                    {
+                      "name": "LiIonEnergyLowBatteryThreshold",
+                      "value": 0.2
+                    }
+		]
             },
             "peripherals": []
         }

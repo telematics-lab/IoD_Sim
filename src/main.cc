@@ -695,8 +695,7 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     {
         mobility.Install(m_drones.Get(entityId));
         std::ostringstream oss;
-        oss << "/NodeList/" << m_drones.Get(entityId)->GetId()
-            << "/$ns3::MobilityModel/CourseChange";
+        oss << "/DroneList/" << entityId << "/$ns3::MobilityModel/CourseChange";
         Config::Connect(oss.str(), MakeCallback(&Scenario::CourseChange, this));
     }
     else if (entityKey == "ZSPs")
@@ -1210,7 +1209,7 @@ void
 Scenario::CourseChange(std::string context, Ptr<const MobilityModel> model)
 {
     Vector position = model->GetPosition();
-    std::string start = "/NodeList/";
+    std::string start = "/DroneList/";
     std::string end = "/$ns3::MobilityModel/CourseChange";
     std::string id = context.substr(context.find(start) + start.length(),
                                     context.length() - end.length() - start.length());

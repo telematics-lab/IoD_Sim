@@ -122,6 +122,9 @@ DroneEnergyModel::GetPower() const
 double
 DroneEnergyModel::DoGetCurrentA(void) const
 {
+    if (Simulator::Now() <= Time())
+        return 0;
+
     double PowerConsumption = GetPower() + GetPeripheralsPowerConsumption();
     double VoltageV = m_source->GetSupplyVoltage();
     double CurrentA = (PowerConsumption / VoltageV);

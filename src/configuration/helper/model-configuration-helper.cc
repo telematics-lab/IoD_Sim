@@ -231,11 +231,6 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 values.push_back(el.GetString());
             attrValue = attrInfo.checker->CreateValidValue(StrVecValue(values));
         }
-        else if (arr.Size() == 3 && arr[0].IsDouble())
-        {
-            const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
-            attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
-        }
         else if ((attrInfo.name == "SpeedCoefficients" || attrInfo.name == "PowerConsumption") &&
                  arr[0].IsNumber())
         {
@@ -339,6 +334,16 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
         else if (arr[0].IsDouble())
         {
+            // first of all, let's see if it can be decoded as a Vector3D
+            if (arr.Size() == 3)
+            {
+                const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
+                attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
+            }
+
+            if (attrValue)
+                break;
+
             std::vector<double> els;
             for (auto& c : arr)
                 els.push_back(c.GetDouble());

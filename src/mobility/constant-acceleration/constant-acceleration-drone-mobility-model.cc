@@ -145,14 +145,14 @@ void
 ConstantAccelerationDroneMobilityModel::DoInitialize()
 {
     NS_LOG_FUNCTION(this);
-
+    GeocentricMobilityModel::DoInitialize();
+    m_flightPlan = (m_useGeodedicSystem)
+                       ? GeographicToProjectedCoordinates(m_flightPlan, GetEarthSpheroidType())
+                       : m_flightPlan;
     m_flightParams = {m_acceleration, m_maxSpeed};
-
     m_planner = Planner<ConstantAccelerationParam, ConstantAccelerationFlight>(m_flightPlan,
                                                                                m_flightParams,
                                                                                m_curveStep);
-
-    MobilityModel::DoInitialize();
 }
 
 void
@@ -290,9 +290,17 @@ void
 ConstantAccelerationDroneMobilityModel::SetFlightPlan(const FlightPlan& flightPlan)
 {
     NS_LOG_FUNCTION(this << flightPlan);
-    m_flightPlan = (m_useGeodedicSystem)
-                       ? GeographicToProjectedCoordinates(flightPlan, GetEarthSpheroidType())
-                       : flightPlan;
+    if (IsInitialized())
+    {
+        m_flightPlan = (m_useGeodedicSystem)
+                           ? GeographicToProjectedCoordinates(flightPlan, GetEarthSpheroidType())
+                           : flightPlan;
+    }
+    else
+    {
+        // Temporally store raw Flight Plan. Will convert at object inizialization.
+        m_flightPlan = flightPlan;
+    }
 }
 
 } // namespace ns3
