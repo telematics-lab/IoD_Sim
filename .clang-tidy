@@ -18,28 +18,45 @@ Checks: >
   modernize-make-shared,
   modernize-make-unique,
   modernize-redundant-void-arg,
+  modernize-type-traits,
+  modernize-use-auto,
+  modernize-use-bool-literals,
   modernize-use-emplace,
   modernize-use-equals-delete,
   modernize-use-nullptr,
   modernize-use-override,
+  modernize-use-transparent-functors,
   performance-faster-string-find,
   performance-for-range-copy,
   performance-implicit-conversion-in-loop,
   performance-inefficient-algorithm,
   performance-inefficient-vector-operation,
   performance-trivially-destructible,
+  performance-unnecessary-copy-initialization,
   readability-braces-around-statements,
-  readability-duplicate-include,
+  readability-container-size-empty,
   readability-isolate-declaration,
+  readability-make-member-function-const,
   readability-misplaced-array-index,
   readability-redundant-control-flow,
   readability-redundant-function-ptr-dereference,
   readability-redundant-smartptr-get,
   readability-redundant-string-cstr,
+  readability-simplify-boolean-expr,
   readability-simplify-subscript-expr,
+  readability-static-accessed-through-instance,
   readability-static-definition-in-anonymous-namespace,
   readability-string-compare,
-  readability-uppercase-literal-suffix,
+
+CheckOptions:
+  - key: performance-unnecessary-copy-initialization.AllowedTypes
+    value: Ptr
+  - key: readability-simplify-boolean-expr.SimplifyDeMorgan
+    value: false
+
+ExtraArgsBefore:
+  - -Wno-unknown-warning-option
 
 FormatStyle: "file"
-HeaderFilterRegex: ".*h$"
+HeaderFilterRegex: ".*(ns|NS).*/(contrib|examples|src|scratch|utils)/*/.*h"
+UseColor: true
