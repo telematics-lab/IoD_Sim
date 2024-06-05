@@ -88,9 +88,9 @@ private:
 
 class VectorChecker : public AttributeChecker
 {
-public:
-  virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
-  virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
+  public:
+    virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
+    virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
 };
 
 /**
