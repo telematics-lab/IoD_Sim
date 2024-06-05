@@ -15,8 +15,7 @@ also known as _scenarios_, that use such models to simulate a variable number
 of drones that:
 
 - Move according to the mobility model associated to the reference scenario.
-- Exchange messages with network access points deployed on a generic and flat
-  3D space.
+- Exchange messages with network access points deployed on a cartesian or geographic 3D space.
 
 For more details on how IoD_Sim works and all its features, the following
 research publications are highly recommended:
