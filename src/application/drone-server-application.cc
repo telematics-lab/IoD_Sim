@@ -150,11 +150,11 @@ DroneServerApplication::ReceivePacket(const Ptr<Socket> socket) const
 
             packet->CopyData(payload, packet->GetSize());
             if (GetNode()->GetInstanceTypeId().GetName() == "ns3::Drone" &&
-                DroneList::GetDrone(GetNode()->GetId())->getPeripherals()->thereIsStorage() &&
+                DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->ThereIsStorage() &&
                 m_storage)
             {
                 Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral, DronePeripheral>(
-                    DroneList::GetDrone(GetNode()->GetId())->getPeripherals()->Get(0));
+                    DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->Get(0));
                 if (storage->Alloc(strlen((char*)payload) * sizeof(char), StoragePeripheral::byte))
                     NS_LOG_INFO("[Node " << GetNode()->GetId() << "] Stored "
                                          << strlen((char*)payload) * sizeof(char) << " bytes ");

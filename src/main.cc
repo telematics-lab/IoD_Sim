@@ -972,7 +972,7 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
                                      const uint32_t& entityId)
 {
     NS_LOG_FUNCTION(entityKey << entityId << conf);
-    auto dronePeripheralsContainer = m_drones.Get(entityId)->getPeripherals();
+    auto dronePeripheralsContainer = m_drones.Get(entityId)->GetPeripherals();
 
     if (conf->GetPeripherals().size() == 0)
         return;
@@ -1213,7 +1213,7 @@ Scenario::CourseChange(std::string context, Ptr<const MobilityModel> model)
     std::string end = "/$ns3::MobilityModel/CourseChange";
     std::string id = context.substr(context.find(start) + start.length(),
                                     context.length() - end.length() - start.length());
-    auto dronePeripheralsContainer = m_drones.Get(std::stoi(id))->getPeripherals();
+    auto dronePeripheralsContainer = m_drones.Get(std::stoi(id))->GetPeripherals();
     Ptr<DronePeripheral> peripheral;
     std::vector<int> regionindex;
     for (DronePeripheralContainer::Iterator i = dronePeripheralsContainer->Begin();

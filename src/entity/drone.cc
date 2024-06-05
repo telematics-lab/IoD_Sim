@@ -49,18 +49,18 @@ Drone::GetTypeId(void)
                             .AddAttribute("Mass",
                                           "The mass of this Drone.",
                                           DoubleValue(0),
-                                          MakeDoubleAccessor(&Drone::setMass, &Drone::getMass),
+                                          MakeDoubleAccessor(&Drone::SetMass, &Drone::GetMass),
                                           MakeDoubleChecker<double>())
                             .AddAttribute("RotorDiskArea",
                                           "The area of the rotor disk of this Drone.",
                                           DoubleValue(0),
-                                          MakeDoubleAccessor(&Drone::setArea, &Drone::getArea),
+                                          MakeDoubleAccessor(&Drone::SetArea, &Drone::GetArea),
                                           MakeDoubleChecker<double>())
                             .AddAttribute("DragCoefficient",
                                           "Drag Coefficient relative to this Drone.",
                                           DoubleValue(0),
-                                          MakeDoubleAccessor(&Drone::getDragCoefficient,
-                                                             &Drone::setDragCoefficient),
+                                          MakeDoubleAccessor(&Drone::GetDragCoefficient,
+                                                             &Drone::SetDragCoefficient),
                                           MakeDoubleChecker<double>())
 
         ;
@@ -87,51 +87,51 @@ Drone::DoInitialize(void)
 }
 
 Ptr<DronePeripheralContainer>
-Drone::getPeripherals()
+Drone::GetPeripherals()
 {
     // NS_LOG_FUNCTION (this);
     return m_peripheralContainer;
 }
 
 void
-Drone::setMass(double mass)
+Drone::SetMass(double mass)
 {
     m_mass = mass;
     m_weightForce = m_mass * GRAVITY;
 }
 
 void
-Drone::setArea(double area)
+Drone::SetArea(double area)
 {
     m_diskArea = area;
 }
 
 void
-Drone::setDragCoefficient(double coefficient)
+Drone::SetDragCoefficient(double coefficient)
 {
     m_dragCoefficient = coefficient;
 }
 
 double
-Drone::getMass() const
+Drone::GetMass() const
 {
     return m_mass;
 }
 
 double
-Drone::getWeight() const
+Drone::GetWeight() const
 {
     return m_weightForce;
 }
 
 double
-Drone::getArea() const
+Drone::GetArea() const
 {
     return m_diskArea;
 }
 
 double
-Drone::getDragCoefficient() const
+Drone::GetDragCoefficient() const
 {
     return m_dragCoefficient;
 }

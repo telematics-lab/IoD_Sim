@@ -56,56 +56,56 @@ class Drone : public Node
      *
      * \param mass Mass of the drone.
      */
-    void setMass(double mass);
+    void SetMass(double mass);
 
     /**
      * \brief Sets the area of the rotor disk.
      *
      * \param area Area of the rotor disk.
      */
-    void setArea(double area);
+    void SetArea(double area);
 
     /**
      * \brief Sets the drag coefficient.
      *
      * \param coefficient Drag coefficient.
      */
-    void setDragCoefficient(double coefficient);
+    void SetDragCoefficient(double coefficient);
 
     /**
      * \brief Returns the mass of the drone.
      *
      * \returns Mass of the drone.
      */
-    double getMass() const;
+    double GetMass() const;
 
     /**
      * \brief Returns the weight force applied to the drone.
      *
      * \returns Weight force.
      */
-    double getWeight() const;
+    double GetWeight() const;
 
     /**
      * \brief Returns the area of the rotor disk.
      *
      * \returns Area of the rotor disk.
      */
-    double getArea() const;
+    double GetArea() const;
 
     /**
      * \brief Returns the drag coefficient.
      *
      * \returns Drag coefficient.
      */
-    double getDragCoefficient() const;
+    double GetDragCoefficient() const;
 
     /**
      * \brief Returns the peripheral container of the drone.
      *
      * \returns peripheral Pointer to a DronePeripheralContainer.
      */
-    Ptr<DronePeripheralContainer> getPeripherals();
+    Ptr<DronePeripheralContainer> GetPeripherals();
 
   protected:
     virtual void DoDispose(void);

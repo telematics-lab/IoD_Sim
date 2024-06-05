@@ -79,7 +79,7 @@ DroneEnergyModel::GetPeripheralsPowerConsumption(void) const
 {
     double peripheralsPowerConsumption = 0;
 
-    for (auto i = m_drone->getPeripherals()->Begin(); i != m_drone->getPeripherals()->End(); i++)
+    for (auto i = m_drone->GetPeripherals()->Begin(); i != m_drone->GetPeripherals()->End(); i++)
     {
         peripheralsPowerConsumption += (*i)->GetPowerConsumption();
     }
@@ -95,15 +95,15 @@ DroneEnergyModel::GetPower() const
     Ptr<Drone> drone = GetDrone();
     Ptr<Object> obj = StaticCast<Object, Drone>(drone);
     Vector velocity = obj->GetObject<MobilityModel>()->GetVelocity();
-    double Phover = sqrt(drone->getWeight() / (2 * AIR_DENSITY * drone->getArea()));
+    double Phover = sqrt(drone->GetWeight() / (2 * AIR_DENSITY * drone->GetArea()));
     double Plevel =
-        ((pow(drone->getWeight(), 2)) / (sqrt(2) * AIR_DENSITY * drone->getArea())) *
+        ((pow(drone->GetWeight(), 2)) / (sqrt(2) * AIR_DENSITY * drone->GetArea())) *
         (1 /
          sqrt(pow(velocity.x, 2) + pow(velocity.y, 2) +
               sqrt(pow(sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)), 4) + (4 * pow(Phover, 4)))));
-    double Pdrag = (1 / 8) * drone->getDragCoefficient() * AIR_DENSITY * drone->getArea() *
+    double Pdrag = (1 / 8) * drone->GetDragCoefficient() * AIR_DENSITY * drone->GetArea() *
                    pow(sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)), 3);
-    double Pvertical = drone->getWeight() * velocity.z;
+    double Pvertical = drone->GetWeight() * velocity.z;
 
     if (Pvertical < 0.0)
         Pvertical = 0.0;

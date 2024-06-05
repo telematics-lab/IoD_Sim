@@ -166,7 +166,7 @@ DronePeripheralContainer::PinStorage(void)
 }
 
 bool
-DronePeripheralContainer::thereIsStorage(void)
+DronePeripheralContainer::ThereIsStorage(void)
 {
     return m_storage;
 }

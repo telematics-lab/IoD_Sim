@@ -171,8 +171,8 @@ TcpStorageClientApplication::FindStorage() const
     auto drone = StaticCast<Drone, Node>(GetNode());
     NS_ASSERT_MSG(drone, "This application must be installed on a drone.");
 
-    auto peripherals = drone->getPeripherals();
-    NS_ASSERT_MSG(peripherals->thereIsStorage(),
+    auto peripherals = drone->GetPeripherals();
+    NS_ASSERT_MSG(peripherals->ThereIsStorage(),
                   "Drone must be equipped with a storage peripheral");
 
     // Drone storage is always the first one in the container

@@ -123,7 +123,7 @@ class DronePeripheralContainer : public Object
     /**
      * \return the presence of storage peripheral
      */
-    bool thereIsStorage();
+    bool ThereIsStorage();
 
   protected:
     void virtual DoInitialize(void);

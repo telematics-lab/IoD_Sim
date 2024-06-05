@@ -240,7 +240,7 @@ ReportDrone::DoInitializePeripherals()
     NS_LOG_FUNCTION(this);
     auto nodeRef = NodeList::GetNode(m_reference);
     auto drone = StaticCast<Drone, Node>(nodeRef);
-    auto percont = drone->getPeripherals();
+    auto percont = drone->GetPeripherals();
 
     for (auto p = percont->Begin(); p != percont->End(); p++)
     {
