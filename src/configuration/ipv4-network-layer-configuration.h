@@ -43,9 +43,6 @@ class Ipv4NetworkLayerConfiguration : public NetworkLayerConfiguration
                                   std::string address,
                                   std::string mask,
                                   std::string gatewayAddress);
-    /** Default destructor */
-    ~Ipv4NetworkLayerConfiguration();
-
     /**
      * \return The configured network address.
      */

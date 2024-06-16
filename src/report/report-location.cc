@@ -42,16 +42,6 @@ ReportLocation::ReportLocation(Vector position, Time instant)
     NS_LOG_FUNCTION(this << position << instant);
 }
 
-ReportLocation::ReportLocation()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportLocation::~ReportLocation()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 Vector
 ReportLocation::GetPosition()
 {

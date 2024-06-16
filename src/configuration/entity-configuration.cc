@@ -57,10 +57,6 @@ EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>
 {
 }
 
-EntityConfiguration::~EntityConfiguration()
-{
-}
-
 const std::vector<Ptr<NetdeviceConfiguration>>&
 EntityConfiguration::GetNetDevices() const
 {

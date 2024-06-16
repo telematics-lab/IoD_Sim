@@ -37,7 +37,7 @@ class DoubleVector
   public:
     typedef std::vector<double>::const_iterator Iterator;
 
-    DoubleVector();
+    DoubleVector() = default;
     DoubleVector(std::vector<double> coefficients);
     DoubleVector(const DoubleVector& a);
 

@@ -56,11 +56,6 @@ NS_LOG_COMPONENT_DEFINE("IrsAssistedSpectrumChannel");
 
 NS_OBJECT_ENSURE_REGISTERED(IrsAssistedSpectrumChannel);
 
-IrsAssistedSpectrumChannel::IrsAssistedSpectrumChannel()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 IrsAssistedSpectrumChannel::DoDispose()
 {

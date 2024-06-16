@@ -44,8 +44,8 @@ class IrsListPriv : public Object
      */
     static TypeId GetTypeId();
 
-    IrsListPriv();
-    ~IrsListPriv();
+    IrsListPriv() = default;
+    ~IrsListPriv() = default;
 
     /**
      * \param irs Irs to add
@@ -148,16 +148,6 @@ IrsListPriv::Delete()
 
     Config::UnregisterRootNamespaceObject(Get());
     (*DoGet()) = 0;
-}
-
-IrsListPriv::IrsListPriv()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-IrsListPriv::~IrsListPriv()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

@@ -51,14 +51,6 @@ DefinedPatchConfigurator::GetTypeId()
     return tid;
 }
 
-DefinedPatchConfigurator::DefinedPatchConfigurator()
-{
-}
-
-DefinedPatchConfigurator::~DefinedPatchConfigurator()
-{
-}
-
 void
 DefinedPatchConfigurator::DoDispose()
 {

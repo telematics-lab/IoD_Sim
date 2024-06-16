@@ -41,15 +41,6 @@ class ReportTransfer : public Object
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
-    ReportTransfer();
-    /**
-     * Default destructor
-     */
-    ~ReportTransfer();
-
     int32_t GetIface();
     /**
      * Write Transfer report data to a XML file with a given handler

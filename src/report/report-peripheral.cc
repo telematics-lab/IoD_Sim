@@ -33,12 +33,6 @@ ReportPeripheral::ReportPeripheral(std::string tid,
       m_powerConsumptionStates{powerConsumptionStates},
       m_roi{roi}
 {
-    NS_LOG_FUNCTION(this << tid);
-}
-
-ReportPeripheral::~ReportPeripheral()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

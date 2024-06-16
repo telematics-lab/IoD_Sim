@@ -39,14 +39,6 @@ class InterestRegion : public Object
      */
     static TypeId GetTypeId(void);
     /**
-     * \brief default constructor
-     */
-    InterestRegion();
-    /**
-     * \brief default destructor
-     */
-    virtual ~InterestRegion();
-    /**
      * \return the 3D coordinates of the box
      */
     const DoubleVector GetCoordinates() const;

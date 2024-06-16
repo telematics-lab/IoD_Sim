@@ -36,6 +36,11 @@ class RemoteConfigurationHelper
 {
   public:
     /**
+     * RemoteConfigurationHelper can't be instantiated, as it is an utility class.
+     */
+    RemoteConfigurationHelper() = delete;
+
+    /**
      * Parse an entity configuration from a given JSON tree and map it on an RemoteConfiguration
      * data class.
      *
@@ -45,8 +50,6 @@ class RemoteConfigurationHelper
     static Ptr<RemoteConfiguration> GetConfiguration(const rapidjson::Value& json);
 
   private:
-    RemoteConfigurationHelper();
-
     static const uint32_t DecodeNetworkLayerId(const rapidjson::Value& json);
     static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
         const rapidjson::Value& json);

@@ -54,16 +54,6 @@ ReportRemote::GetTypeId()
     return tid;
 }
 
-ReportRemote::ReportRemote()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportRemote::~ReportRemote()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ReportRemote::DoWrite(xmlTextWriterPtr h)
 {

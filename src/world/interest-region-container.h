@@ -37,14 +37,6 @@ namespace ns3
 class InterestRegionContainer : public Singleton<InterestRegionContainer>
 {
   public:
-    /**
-     * \brief Get the type ID.
-     *
-     * \returns the object TypeId
-     */
-    // static TypeId GetTypeId (void);
-
-    InterestRegionContainer();
     ~InterestRegionContainer();
 
     /// Container iterator

@@ -75,11 +75,6 @@ ParametricSpeedDroneMobilityModel::ParametricSpeedDroneMobilityModel()
       m_lastUpdate{-1},
       m_useGeodedicSystem{false}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-ParametricSpeedDroneMobilityModel::~ParametricSpeedDroneMobilityModel()
-{
 }
 
 FlightPlan

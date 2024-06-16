@@ -42,8 +42,6 @@ class InputPeripheral : public DronePeripheral
      */
     static TypeId GetTypeId(void);
 
-    InputPeripheral();
-
     /**
      * \brief Simulates the data acquisition.
      *

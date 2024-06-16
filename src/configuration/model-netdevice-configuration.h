@@ -39,9 +39,6 @@ class ModelNetdeviceConfiguration : public NetdeviceConfiguration
      * \param macLayer The configuration of the MAC Layer to be simulated for this network device.
      */
     ModelNetdeviceConfiguration(const std::string type, const ModelConfiguration macLayer);
-    /** Default destructor */
-    ~ModelNetdeviceConfiguration();
-
     /**
      * \return The MAC Layer configuration.
      */

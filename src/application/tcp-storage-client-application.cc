@@ -58,12 +58,6 @@ TcpStorageClientApplication::GetTypeId()
 TcpStorageClientApplication::TcpStorageClientApplication()
     : m_seqNum{0}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-TcpStorageClientApplication::~TcpStorageClientApplication()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

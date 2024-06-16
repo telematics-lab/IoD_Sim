@@ -35,10 +35,6 @@ NullNtnDemoMacLayerConfiguration::NullNtnDemoMacLayerConfiguration(std::string m
 {
 }
 
-NullNtnDemoMacLayerConfiguration::~NullNtnDemoMacLayerConfiguration()
-{
-}
-
 double
 NullNtnDemoMacLayerConfiguration::GetTimeResolution() const
 {

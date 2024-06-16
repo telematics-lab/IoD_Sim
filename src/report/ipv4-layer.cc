@@ -48,16 +48,6 @@ Ipv4Layer::GetTypeId()
     return tid;
 }
 
-Ipv4Layer::Ipv4Layer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-Ipv4Layer::~Ipv4Layer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 Ipv4Layer::Write(xmlTextWriterPtr h)
 {

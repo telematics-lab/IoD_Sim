@@ -31,6 +31,10 @@ class LteSetupHelper
 {
   public:
     /**
+     * LteSetupHelper can't be instantiated, as it is an utility class.
+     */
+    LteSetupHelper() = delete;
+    /**
      * Create an eNodeB device (LteEnbNetDevice) on the given node.
      * \param helper A pre-inizialized instance of the Lte Helper.
      * \param n the node where the device is to be installed
@@ -45,9 +49,6 @@ class LteSetupHelper
      * \return pointer to the created device.
      */
     static Ptr<NetDevice> InstallSingleUeDevice(Ptr<LteHelper> helper, Ptr<Node> n);
-
-  private:
-    LteSetupHelper();
 };
 
 } // namespace ns3

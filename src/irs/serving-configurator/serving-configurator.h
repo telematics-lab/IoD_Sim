@@ -32,15 +32,6 @@ class ServingConfigurator : public Object
 {
   public:
     /**
-     * \brief Default constructor
-     */
-    ServingConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~ServingConfigurator();
-
-    /**
      * \brief This method schedule the updates of nodes to serve over time, according to a certain
      * logic. It must be implemented by child classes
      */

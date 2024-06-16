@@ -43,16 +43,6 @@ DroneControlLayer::GetTypeId()
     return tid;
 }
 
-DroneControlLayer::DroneControlLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-DroneControlLayer::~DroneControlLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 DroneControlLayer::Write(xmlTextWriterPtr h)
 {

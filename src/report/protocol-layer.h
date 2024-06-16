@@ -30,21 +30,12 @@ namespace ns3
 class ProtocolLayer : public Object
 {
   public:
-    /*
-     * Pure virtual declarations
-     * or very common methods/properties
-     * can be defined here
-     */
-
     /**
      * Register the type using ns-3 TypeId System.
      * \return the object TypeId
      */
     static TypeId GetTypeId();
 
-    ProtocolLayer();
-
-    ~ProtocolLayer();
     /**
      * Write Stack Layer report data to a XML file with a given handler
      *

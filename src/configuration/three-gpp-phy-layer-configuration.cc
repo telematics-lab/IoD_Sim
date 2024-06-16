@@ -35,10 +35,6 @@ ThreeGppPhyLayerConfiguration::ThreeGppPhyLayerConfiguration(
 {
 }
 
-ThreeGppPhyLayerConfiguration::~ThreeGppPhyLayerConfiguration()
-{
-}
-
 ModelConfiguration
 ThreeGppPhyLayerConfiguration::GetPropagationLossModel() const
 {

@@ -36,9 +36,6 @@ class MobilityModelConfiguration : public ModelConfiguration
     MobilityModelConfiguration(const std::string modelName,
                                const std::vector<ModelConfiguration::Attribute> modelAttributes,
                                const std::optional<Vector> initialPosition);
-    MobilityModelConfiguration();
-    ~MobilityModelConfiguration();
-
     const std::optional<Vector> GetInitialPosition() const;
 
   private:

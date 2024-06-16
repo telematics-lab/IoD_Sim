@@ -26,10 +26,6 @@ namespace ns3
 
 ATTRIBUTE_HELPER_CPP(IntVector);
 
-IntVector::IntVector()
-{
-}
-
 IntVector::IntVector(std::vector<int> coeffs)
 {
     for (auto c : coeffs)

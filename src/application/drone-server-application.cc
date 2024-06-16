@@ -58,18 +58,9 @@ DroneServerApplication::GetTypeId()
 }
 
 DroneServerApplication::DroneServerApplication()
+    : m_state{SERVER_CLOSED},
+      m_sequenceNumber{0}
 {
-    NS_LOG_FUNCTION(this);
-
-    m_state = SERVER_CLOSED;
-    m_sequenceNumber = 0;
-}
-
-DroneServerApplication::~DroneServerApplication()
-{
-    NS_LOG_FUNCTION(this);
-
-    m_state = SERVER_CLOSED;
 }
 
 void

@@ -59,16 +59,6 @@ ReportDrone::GetTypeId()
     return tid;
 }
 
-ReportDrone::ReportDrone()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportDrone::~ReportDrone()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ReportDrone::DoInitialize()
 {

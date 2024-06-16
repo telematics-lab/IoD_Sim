@@ -42,15 +42,6 @@ class PeriodicServingConfigurator : public ServingConfigurator
     static TypeId GetTypeId(void);
 
     /**
-     * \brief Default constructor
-     */
-    PeriodicServingConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~PeriodicServingConfigurator();
-
-    /**
      * \brief When invoked, it schedules the updates of the nodes to be served over time with a
      * period of one m_timeslot, until the end of patch lifetime is reached
      */

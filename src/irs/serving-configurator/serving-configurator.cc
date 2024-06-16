@@ -25,14 +25,6 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE("ServingConfigurator");
 NS_OBJECT_ENSURE_REGISTERED(ServingConfigurator);
 
-ServingConfigurator::ServingConfigurator()
-{
-}
-
-ServingConfigurator::~ServingConfigurator()
-{
-}
-
 void
 ServingConfigurator::UpdateServingNodes(std::pair<std::string, std::string> servingnodes)
 {

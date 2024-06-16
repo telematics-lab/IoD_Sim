@@ -32,10 +32,6 @@ WifiMacLayerConfiguration::WifiMacLayerConfiguration(
 {
 }
 
-WifiMacLayerConfiguration::~WifiMacLayerConfiguration()
-{
-}
-
 const std::string
 WifiMacLayerConfiguration::GetSsid() const
 {

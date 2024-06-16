@@ -93,16 +93,6 @@ ReportTransfer::GetTypeId()
     return tid;
 }
 
-ReportTransfer::ReportTransfer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportTransfer::~ReportTransfer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 int32_t
 ReportTransfer::GetIface()
 {

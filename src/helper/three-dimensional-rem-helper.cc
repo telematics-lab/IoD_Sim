@@ -48,14 +48,6 @@ NS_LOG_COMPONENT_DEFINE("ThreeDimensionalRemHelper");
 
 NS_OBJECT_ENSURE_REGISTERED(ThreeDimensionalRemHelper);
 
-ThreeDimensionalRemHelper::ThreeDimensionalRemHelper()
-{
-}
-
-ThreeDimensionalRemHelper::~ThreeDimensionalRemHelper()
-{
-}
-
 void
 ThreeDimensionalRemHelper::DoDispose()
 {

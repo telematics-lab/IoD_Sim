@@ -50,14 +50,7 @@ class ReportSimulation : public Object
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
     ReportSimulation();
-    /**
-     * Default destructor
-     */
-    ~ReportSimulation();
 
     /**
      * Write Zsp report data to a XML file with a given handler

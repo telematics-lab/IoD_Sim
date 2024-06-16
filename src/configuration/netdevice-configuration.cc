@@ -29,10 +29,6 @@ NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
 {
 }
 
-NetdeviceConfiguration::~NetdeviceConfiguration()
-{
-}
-
 const std::string
 NetdeviceConfiguration::GetType() const
 {

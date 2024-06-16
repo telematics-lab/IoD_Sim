@@ -53,15 +53,6 @@ class ReportZsp : public ReportEntity
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
-    ReportZsp();
-    /**
-     * Default destructor
-     */
-    ~ReportZsp();
-
   private:
     /**
      * Write Zsp report data to a XML file with a given handler

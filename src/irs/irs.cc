@@ -78,10 +78,6 @@ Irs::GetTypeId()
     return tid;
 }
 
-Irs::Irs()
-{
-}
-
 void
 Irs::DoDispose()
 {

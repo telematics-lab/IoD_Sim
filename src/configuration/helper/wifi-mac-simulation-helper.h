@@ -30,11 +30,6 @@ namespace ns3
 class WifiMacSimulationHelper : public Object
 {
   public:
-    /** Default constructor */
-    WifiMacSimulationHelper();
-    /** Default destructor */
-    ~WifiMacSimulationHelper();
-
     /**
      * \return The WiFi MAC Helper used to configure this layer.
      */

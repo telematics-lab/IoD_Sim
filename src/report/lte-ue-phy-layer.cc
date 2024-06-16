@@ -76,16 +76,6 @@ LteUEPhyLayer::GetTypeId()
     return tid;
 }
 
-LteUEPhyLayer::LteUEPhyLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-LteUEPhyLayer::~LteUEPhyLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 LteUEPhyLayer::Write(xmlTextWriterPtr h)
 {

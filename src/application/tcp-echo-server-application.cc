@@ -47,16 +47,6 @@ TcpEchoServerApplication::GetTypeId()
     return tid;
 }
 
-TcpEchoServerApplication::TcpEchoServerApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-TcpEchoServerApplication::~TcpEchoServerApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 TcpEchoServerApplication::StartApplication()
 {

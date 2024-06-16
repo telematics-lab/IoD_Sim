@@ -25,10 +25,6 @@ NetworkLayerConfiguration::NetworkLayerConfiguration(std::string type)
 {
 }
 
-NetworkLayerConfiguration::~NetworkLayerConfiguration()
-{
-}
-
 const std::string
 NetworkLayerConfiguration::GetType() const
 {

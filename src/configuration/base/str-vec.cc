@@ -26,10 +26,6 @@ namespace ns3
 
 ATTRIBUTE_HELPER_CPP(StrVec);
 
-StrVec::StrVec()
-{
-}
-
 StrVec::StrVec(std::vector<std::string> strs)
 {
     for (auto s : strs)

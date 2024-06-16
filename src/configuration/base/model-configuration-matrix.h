@@ -40,7 +40,7 @@ class ModelConfigurationMatrix
     typedef std::vector<ModelConfigurationVector>::iterator MutableIterator;
 
     /** Default constructor. Create an empty vector of IRS Patches. */
-    ModelConfigurationMatrix();
+    ModelConfigurationMatrix() = default;
     /**
      * Create a new ModelConfigurationMatrix with exactly one Patch which has been
      * previously istantiated. This single Patch is specified by a smart pointer.

@@ -37,7 +37,7 @@ class StrVec
   public:
     typedef std::vector<std::string>::const_iterator Iterator;
 
-    StrVec();
+    StrVec() = default;
     StrVec(std::vector<std::string> coefficients);
     StrVec(const StrVec& a);
 

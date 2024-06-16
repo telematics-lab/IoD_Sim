@@ -58,12 +58,6 @@ class Report : public Singleton<Report>
                     const std::string resultsPath);
 
     /**
-     * Base destructor.
-     * End of simulation, write data to file and clean the environment.
-     */
-    ~Report();
-
-    /**
      * Save all data to the summary file.
      */
     void Save();

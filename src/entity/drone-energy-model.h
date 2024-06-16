@@ -44,10 +44,6 @@ class DroneEnergyModel : public energy::DeviceEnergyModel
 
     DroneEnergyModel();
 
-    ~DroneEnergyModel()
-    {
-    }
-
     /**
      * \brief Sets the pointer to energy source installed on drone.
      *

@@ -31,6 +31,7 @@ namespace ns3
 class ReportLocation
 {
   public:
+    ReportLocation() = default;
     /**
      * Initialize a report location with a given position, instant, and region of interest
      */
@@ -39,14 +40,6 @@ class ReportLocation
      * Initialize a report location with a given position and instant
      */
     ReportLocation(Vector position, Time instant);
-    /**
-     * Default constructor for commodity purposes
-     */
-    ReportLocation();
-    /**
-     * Default destructor
-     */
-    ~ReportLocation();
     /**
      * \return the position vector
      */

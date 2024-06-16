@@ -40,6 +40,11 @@ class ModelConfigurationHelper
 {
   public:
     /**
+     * ModelConfigurationHelper is a utility class with only static members, thus it can't be initialized.
+     */
+    ModelConfigurationHelper() = delete;
+
+    /**
      * Parse a model configuration from a given JSON tree and map it on an ModelConfiguration data
      * class.
      *
@@ -64,8 +69,6 @@ class ModelConfigurationHelper
         const TypeId::AttributeInformation& checker);
 
   private:
-    ModelConfigurationHelper();
-
     static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
                                                                     const JsonValue& jAttr);
 

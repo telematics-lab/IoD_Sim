@@ -20,16 +20,6 @@
 namespace ns3
 {
 
-WifiPhySimulationHelper::WifiPhySimulationHelper()
-    : m_wifi{},
-      m_wifiPhy{}
-{
-}
-
-WifiPhySimulationHelper::~WifiPhySimulationHelper()
-{
-}
-
 WifiHelper*
 WifiPhySimulationHelper::GetWifiHelper()
 {

@@ -26,10 +26,6 @@ Ipv4SimulationHelper::Ipv4SimulationHelper(const std::string mask, const std::st
 {
 }
 
-Ipv4SimulationHelper::~Ipv4SimulationHelper()
-{
-}
-
 Ipv4InterfaceContainer&
 Ipv4SimulationHelper::GetIpv4Interfaces()
 {

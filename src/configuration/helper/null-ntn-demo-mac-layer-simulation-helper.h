@@ -78,7 +78,6 @@ class NullNtnDemoMacLayerSimulationHelper : public Object
 
     NullNtnDemoMacLayerSimulationHelper(Ptr<NullNtnDemoMacLayerConfiguration> configuration,
                                         Ptr<ThreeGppPhySimulationHelper> phyHelper);
-    ~NullNtnDemoMacLayerSimulationHelper();
 
     void Setup(const double simDuration) const;
 

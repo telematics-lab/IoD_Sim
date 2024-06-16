@@ -35,10 +35,6 @@ WifiPhyLayerConfiguration::WifiPhyLayerConfiguration(
 {
 }
 
-WifiPhyLayerConfiguration::~WifiPhyLayerConfiguration()
-{
-}
-
 const enum WifiStandard
 WifiPhyLayerConfiguration::GetStandard()
 {

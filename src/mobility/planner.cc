@@ -29,11 +29,6 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE_MASK("Planner", LOG_PREFIX_ALL);
 
 template <typename FlightParam, typename FlightType>
-Planner<FlightParam, FlightType>::Planner()
-{
-}
-
-template <typename FlightParam, typename FlightType>
 Planner<FlightParam, FlightType>::Planner(FlightPlan flightPlan,
                                           FlightParam flightParam,
                                           float step)
@@ -72,11 +67,6 @@ Planner<FlightParam, FlightType>::Planner(FlightPlan flightPlan,
     NS_LOG_LOGIC("Summary TimeWindow: " << m_timeWindows.size());
     for (auto tw : m_timeWindows)
         NS_LOG_LOGIC("    #: " << tw.first << "; " << tw.second);
-}
-
-template <typename FlightParam, typename FlightType>
-Planner<FlightParam, FlightType>::~Planner()
-{
 }
 
 /**

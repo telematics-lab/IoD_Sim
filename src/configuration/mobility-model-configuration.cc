@@ -29,15 +29,6 @@ MobilityModelConfiguration::MobilityModelConfiguration(
 {
 }
 
-MobilityModelConfiguration::MobilityModelConfiguration()
-    : ModelConfiguration()
-{
-}
-
-MobilityModelConfiguration::~MobilityModelConfiguration()
-{
-}
-
 const std::optional<Vector>
 MobilityModelConfiguration::GetInitialPosition() const
 {

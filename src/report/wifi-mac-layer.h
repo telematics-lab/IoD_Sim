@@ -37,15 +37,6 @@ class WifiMacLayer : public ProtocolLayer
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    WifiMacLayer();
-    /**
-     * Default destructor
-     */
-    ~WifiMacLayer();
-
-    /**
      * Write WiFi MAC Layer report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

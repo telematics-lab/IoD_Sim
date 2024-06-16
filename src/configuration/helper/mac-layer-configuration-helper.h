@@ -33,6 +33,10 @@ class MacLayerConfigurationHelper
 {
   public:
     /**
+     * MacLayerConfigurationHelper can't be instantiated, as it is an utility class.
+     */
+    MacLayerConfigurationHelper() = default;
+    /**
      * Parse a MAC Layer configuration from a given JSON tree and map it on a MacLayerConfiguration
      * data class.
      *
@@ -43,7 +47,6 @@ class MacLayerConfigurationHelper
     static Ptr<MacLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonMacLayer);
 
   private:
-    MacLayerConfigurationHelper();
     static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& jsonModel);
 };
 

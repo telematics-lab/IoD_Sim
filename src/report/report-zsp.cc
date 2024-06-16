@@ -54,16 +54,6 @@ ReportZsp::GetTypeId()
     return tid;
 }
 
-ReportZsp::ReportZsp()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportZsp::~ReportZsp()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ReportZsp::DoWrite(xmlTextWriterPtr h)
 {

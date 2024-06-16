@@ -33,10 +33,6 @@ LtePhyLayerConfiguration::LtePhyLayerConfiguration(
 {
 }
 
-LtePhyLayerConfiguration::~LtePhyLayerConfiguration()
-{
-}
-
 const std::optional<ModelConfiguration>
 LtePhyLayerConfiguration::GetChannelPropagationLossModel()
 {

@@ -68,14 +68,13 @@ Drone::GetTypeId(void)
 }
 
 Drone::Drone()
+    : m_peripheralContainer{CreateObject<DronePeripheralContainer>()}
 {
-    m_peripheralContainer = CreateObject<DronePeripheralContainer>();
 }
 
 void
 Drone::DoDispose()
 {
-    NS_LOG_FUNCTION(this);
     Node::DoDispose();
 }
 

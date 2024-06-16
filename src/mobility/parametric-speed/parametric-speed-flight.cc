@@ -54,13 +54,7 @@ ParametricSpeedFlight::ParametricSpeedFlight(FlightPlan flightPlan,
       m_speedParams{speedParams.GetSpeedCoefficients()},
       m_isHovering{flightPlan.GetN() == 1}
 {
-    NS_LOG_FUNCTION_NOARGS();
-
     Generate();
-}
-
-ParametricSpeedFlight::~ParametricSpeedFlight()
-{
 }
 
 void

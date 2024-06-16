@@ -33,15 +33,6 @@ class PatchConfigurator : public Object
 {
   public:
     /**
-     * \brief Default constructor
-     */
-    PatchConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~PatchConfigurator();
-
-    /**
      * \brief This method schedule patch updates over time according to a certain logic. It must be
      * implemented by child classes
      */

@@ -44,10 +44,6 @@ class DronePeripheralContainer : public Object
      */
     static TypeId GetTypeId(void);
 
-    DronePeripheralContainer()
-    {
-    }
-
     /// Drone peripherals container iterator
     typedef std::vector<Ptr<DronePeripheral>>::const_iterator Iterator;
 

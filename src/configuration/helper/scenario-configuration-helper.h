@@ -53,9 +53,6 @@ namespace ns3
 class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper>
 {
   public:
-    /**
-     * \brief default destructor
-     */
     ~ScenarioConfigurationHelper();
 
     /**

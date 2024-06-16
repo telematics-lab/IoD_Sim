@@ -42,15 +42,6 @@ class DefinedServingConfigurator : public ServingConfigurator
     static TypeId GetTypeId(void);
 
     /**
-     * \brief Default constructor
-     */
-    DefinedServingConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~DefinedServingConfigurator();
-
-    /**
      * \brief When invoked, it schedules the updates of the nodes to be served over time, following
      * the periods defined in the m_periods vector
      */

@@ -41,7 +41,6 @@ class ConstantAccelerationDroneMobilityModel : public GeocentricMobilityModel
     static TypeId GetTypeId();
 
     ConstantAccelerationDroneMobilityModel();
-    ~ConstantAccelerationDroneMobilityModel();
 
     static FlightPlan ProjectedToGeographicCoordinates(
         const FlightPlan& flightPlan,

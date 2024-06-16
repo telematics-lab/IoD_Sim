@@ -54,15 +54,6 @@ class ReportDrone : public ReportEntity
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
-    ReportDrone();
-    /**
-     * Default destructor
-     */
-    ~ReportDrone();
-
   protected:
     void DoInitialize();
 

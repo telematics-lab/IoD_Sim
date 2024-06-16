@@ -46,8 +46,6 @@ enum MultipathInterferenceType
 class IrsAssistedSpectrumChannel : public MultiModelSpectrumChannel
 {
   public:
-    IrsAssistedSpectrumChannel();
-
     /**
      * \brief Get the type ID.
      * \return the object TypeId

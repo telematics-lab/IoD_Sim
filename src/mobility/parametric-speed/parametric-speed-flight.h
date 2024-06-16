@@ -39,10 +39,6 @@ class ParametricSpeedFlight : public Curve
      * \param speedParameters The coefficients to model the speed of the drone.
      */
     ParametricSpeedFlight(FlightPlan flightPlan, ParametricSpeedParam speedParams, double step);
-    /**
-     * default destructor
-     */
-    virtual ~ParametricSpeedFlight();
 
     void Generate();
     void Update(const double& time) const;

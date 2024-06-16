@@ -44,9 +44,6 @@ class WifiMacLayerConfiguration : public MacLayerConfiguration
     WifiMacLayerConfiguration(std::string macType,
                               std::string ssid,
                               ModelConfiguration remoteStationManagerConfiguration);
-    /** Default destructor */
-    ~WifiMacLayerConfiguration();
-
     /**
      * \return The configured SSID.
      */

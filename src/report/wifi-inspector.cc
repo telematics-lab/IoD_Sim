@@ -35,12 +35,6 @@ WifiInspector::WifiInspector(Ptr<NetDevice> device)
       m_channel{InitializeChannel(m_dev)},
       m_mac{InitializeMac(m_dev)}
 {
-    NS_LOG_FUNCTION(this << device);
-}
-
-WifiInspector::~WifiInspector()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 const char*

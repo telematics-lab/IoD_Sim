@@ -60,16 +60,6 @@ ReportEntity::GetTypeId()
     return tid;
 }
 
-ReportEntity::ReportEntity()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportEntity::~ReportEntity()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ReportEntity::Write(xmlTextWriterPtr h)
 {

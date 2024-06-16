@@ -27,10 +27,6 @@ RemoteConfiguration::RemoteConfiguration(uint32_t netId,
 {
 }
 
-RemoteConfiguration::~RemoteConfiguration()
-{
-}
-
 const uint32_t
 RemoteConfiguration::GetNetworkLayerId() const
 {

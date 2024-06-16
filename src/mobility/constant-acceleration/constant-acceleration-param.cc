@@ -26,10 +26,6 @@ ConstantAccelerationParam::ConstantAccelerationParam(double acceleration, double
 {
 }
 
-ConstantAccelerationParam::~ConstantAccelerationParam()
-{
-}
-
 const double
 ConstantAccelerationParam::GetAcceleration() const
 {

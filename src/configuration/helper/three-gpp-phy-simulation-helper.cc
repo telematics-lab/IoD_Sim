@@ -32,10 +32,6 @@ ThreeGppPhySimulationHelper::ThreeGppPhySimulationHelper(
 {
 }
 
-ThreeGppPhySimulationHelper::~ThreeGppPhySimulationHelper()
-{
-}
-
 Ptr<ThreeGppChannelConditionModel>
 ThreeGppPhySimulationHelper::GetChannelConditionModel()
 {

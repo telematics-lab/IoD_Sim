@@ -36,15 +36,6 @@ class Ipv4Layer : public ProtocolLayer
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    Ipv4Layer();
-    /**
-     * Default destructor
-     */
-    ~Ipv4Layer();
-
-    /**
      * Write IPv4 Layer report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

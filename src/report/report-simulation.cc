@@ -62,12 +62,6 @@ ReportSimulation::ReportSimulation()
       m_zsps{"ZSPs"},
       m_remotes{"Remotes"}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-ReportSimulation::~ReportSimulation()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

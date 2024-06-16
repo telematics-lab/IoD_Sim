@@ -82,10 +82,6 @@ Curve::Curve()
     NS_LOG_FUNCTION_NOARGS();
 }
 
-Curve::~Curve()
-{
-}
-
 const double
 Curve::Generate() const
 {

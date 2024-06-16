@@ -101,8 +101,4 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonMacLay
     return macConfig;
 }
 
-MacLayerConfigurationHelper::MacLayerConfigurationHelper()
-{
-}
-
 } // namespace ns3

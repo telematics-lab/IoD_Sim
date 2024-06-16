@@ -48,10 +48,6 @@ LteNetdeviceConfiguration::LteNetdeviceConfiguration(
 {
 }
 
-LteNetdeviceConfiguration::~LteNetdeviceConfiguration()
-{
-}
-
 const LteRole
 LteNetdeviceConfiguration::GetRole() const
 {

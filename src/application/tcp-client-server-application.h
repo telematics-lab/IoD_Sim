@@ -32,9 +32,6 @@ class TcpClientServerApplication : public Application
 {
   public:
     static TypeId GetTypeId();
-    TcpClientServerApplication();
-    virtual ~TcpClientServerApplication();
-
   protected:
     virtual void StartApplication();
     virtual void StopApplication();

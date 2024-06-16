@@ -56,11 +56,6 @@ class Irs : public DronePeripheral
     static TypeId GetTypeId(void);
 
     /**
-     * \brief constructor used to instantiate an IRS.
-     */
-    Irs();
-
-    /**
      * \brief Returns the X-side dimension of a single Passive Reflective Unit.
      *
      * \returns X-side dimension of the PRU.

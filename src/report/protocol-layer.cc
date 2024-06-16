@@ -43,16 +43,6 @@ ProtocolLayer::GetTypeId()
     return tid;
 }
 
-ProtocolLayer::ProtocolLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ProtocolLayer::~ProtocolLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ProtocolLayer::Write(xmlTextWriterPtr h)
 {

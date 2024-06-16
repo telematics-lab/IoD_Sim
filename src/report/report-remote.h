@@ -51,15 +51,6 @@ class ReportRemote : public ReportEntity
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
-    ReportRemote();
-    /**
-     * Default destructor
-     */
-    ~ReportRemote();
-
   private:
     /**
      * Write Remote report data to a XML file with a given handler

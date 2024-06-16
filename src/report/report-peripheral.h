@@ -34,10 +34,6 @@ class ReportPeripheral
      */
     ReportPeripheral(std::string, std::vector<double>, std::vector<int>);
     /**
-     * Default destructor
-     */
-    ~ReportPeripheral();
-    /**
      * \param a tuple containing the name and the value (string) of an additional attribute
      */
     void AddAttribute(std::tuple<std::string, std::string>);

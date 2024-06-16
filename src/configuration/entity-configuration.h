@@ -50,8 +50,6 @@ class EntityConfiguration : public Object
                         ModelConfiguration m_battery,
                         std::vector<ModelConfiguration> m_peripherals);
 
-    ~EntityConfiguration();
-
     const std::vector<Ptr<NetdeviceConfiguration>>& GetNetDevices() const;
     const MobilityModelConfiguration& GetMobilityModel() const;
     const std::vector<ModelConfiguration>& GetApplications() const;

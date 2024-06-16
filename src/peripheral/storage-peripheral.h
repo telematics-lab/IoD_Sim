@@ -50,8 +50,6 @@ class StoragePeripheral : public DronePeripheral
      */
     static TypeId GetTypeId(void);
 
-    StoragePeripheral();
-
     /**
      * \brief Sets the capacity of the drive.
      *

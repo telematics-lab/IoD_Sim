@@ -44,8 +44,8 @@ class ZspListPriv : public Object
      */
     static TypeId GetTypeId();
 
-    ZspListPriv();
-    ~ZspListPriv();
+    ZspListPriv() = default;
+    ~ZspListPriv() = default;
 
     /**
      * \param zsp zsp to add
@@ -148,16 +148,6 @@ ZspListPriv::Delete()
 
     Config::UnregisterRootNamespaceObject(Get());
     (*DoGet()) = 0;
-}
-
-ZspListPriv::ZspListPriv()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ZspListPriv::~ZspListPriv()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

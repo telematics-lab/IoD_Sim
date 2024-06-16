@@ -39,11 +39,6 @@ class RandomUdpApplication : public Application
      * \brief Default constructor
      */
     RandomUdpApplication();
-    /**
-     * \brief Default destructor
-     */
-    virtual ~RandomUdpApplication();
-
   protected:
     /**
      * \brief Initialize the Object registered as TypeId

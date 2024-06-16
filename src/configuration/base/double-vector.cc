@@ -26,10 +26,6 @@ namespace ns3
 
 ATTRIBUTE_HELPER_CPP(DoubleVector);
 
-DoubleVector::DoubleVector()
-{
-}
-
 DoubleVector::DoubleVector(std::vector<double> coeffs)
 {
     for (auto c : coeffs)

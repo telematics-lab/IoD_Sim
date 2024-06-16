@@ -38,9 +38,6 @@ class MacLayerConfiguration : public Object
      * \param type The type of the MAC Layer Configuration.
      */
     MacLayerConfiguration(std::string type);
-    /** Default destructor */
-    virtual ~MacLayerConfiguration();
-
     /**
      * \return The type of the decoded MAC Layer.
      */

@@ -49,8 +49,6 @@ class WifiPhyLayerConfiguration : public PhyLayerConfiguration
                               std::vector<ModelConfiguration::Attribute> attributes,
                               ModelConfiguration channelPropagationDelayModel,
                               ModelConfiguration channelPropagationLossModel);
-    /** Default destructor */
-    ~WifiPhyLayerConfiguration();
 
     /**
      * \return The configured WiFi Standard.

@@ -53,10 +53,6 @@ InputPeripheral::GetTypeId()
     return tid;
 }
 
-InputPeripheral::InputPeripheral()
-{
-}
-
 void
 InputPeripheral::DoInitialize(void)
 {

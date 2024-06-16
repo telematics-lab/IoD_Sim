@@ -54,10 +54,6 @@ CurvePoint::CurvePoint()
 {
 }
 
-CurvePoint::~CurvePoint()
-{
-}
-
 const Vector
 CurvePoint::GetRelativeDistanceVector(const Vector& point) const
 {

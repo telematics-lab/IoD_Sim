@@ -39,8 +39,6 @@ class NatApplication : public Application
     // virtual void DoDispose ();
 
     NatApplication();
-    virtual ~NatApplication();
-
     bool RecvPktFromIntNetDev(Ptr<NetDevice> netdev,
                               Ptr<const Packet> pkt,
                               uint16_t protocol,

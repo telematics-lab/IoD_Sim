@@ -55,9 +55,6 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
                               const std::optional<uint32_t> networkLayerId,
                               const std::optional<ModelConfiguration> antennaModel,
                               const std::optional<ModelConfiguration> phyModel);
-    /** Default destructor */
-    ~LteNetdeviceConfiguration();
-
     /**
      * \return The role of the Network Device in the LTE network.
      */

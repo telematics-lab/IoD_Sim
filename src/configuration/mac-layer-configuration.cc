@@ -25,10 +25,6 @@ MacLayerConfiguration::MacLayerConfiguration(std::string type)
 {
 }
 
-MacLayerConfiguration::~MacLayerConfiguration()
-{
-}
-
 const std::string
 MacLayerConfiguration::GetType() const
 {

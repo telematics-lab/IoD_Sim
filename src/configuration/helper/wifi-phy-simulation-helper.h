@@ -31,11 +31,6 @@ namespace ns3
 class WifiPhySimulationHelper : public Object
 {
   public:
-    /** Default constructor */
-    WifiPhySimulationHelper();
-    /** Default destructor */
-    ~WifiPhySimulationHelper();
-
     /**
      * \return The WiFi Helper used to configure this layer.
      */

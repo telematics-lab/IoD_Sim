@@ -78,16 +78,6 @@ WifiPhyLayer::GetTypeId()
     return tid;
 }
 
-WifiPhyLayer::WifiPhyLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-WifiPhyLayer::~WifiPhyLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 WifiPhyLayer::Write(xmlTextWriterPtr h)
 {

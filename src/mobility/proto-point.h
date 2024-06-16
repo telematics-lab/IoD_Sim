@@ -48,16 +48,6 @@ class ProtoPoint : public Object
     static TypeId GetTypeId();
 
     /**
-     * The default constructor. Initialize a point at (0, 0, 0) with interest 0
-     * and rest time of 0 seconds.
-     */
-    ProtoPoint();
-    /**
-     * Destruct the object.
-     */
-    virtual ~ProtoPoint();
-
-    /**
      * Set the position of the point of interest.
      *
      * \param position The new position.

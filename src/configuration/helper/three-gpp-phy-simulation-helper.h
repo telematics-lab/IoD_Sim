@@ -31,14 +31,11 @@ namespace ns3
 class ThreeGppPhySimulationHelper : public Object
 {
   public:
-    /** Default constructor */
     ThreeGppPhySimulationHelper(
         const std::size_t stackId,
         Ptr<ThreeGppChannelConditionModel> channelConditionModel,
         Ptr<ThreeGppPropagationLossModel> propagationLossModel,
         Ptr<ThreeGppSpectrumPropagationLossModel> spectrumPropagationLossModel);
-    /** Default destructor */
-    ~ThreeGppPhySimulationHelper();
 
     Ptr<ThreeGppChannelConditionModel> GetChannelConditionModel();
     Ptr<ThreeGppPropagationLossModel> GetPropagationLossModel();

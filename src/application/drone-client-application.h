@@ -75,14 +75,7 @@ class DroneClientApplication : public Application
      */
     static TypeId GetTypeId(void);
 
-    /**
-     * \brief default constructor
-     */
     DroneClientApplication();
-    /**
-     * \brief default destructor
-     */
-    virtual ~DroneClientApplication();
 
   protected:
     /**

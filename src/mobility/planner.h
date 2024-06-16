@@ -35,10 +35,8 @@ template <typename FlightParam, typename FlightType>
 class Planner
 {
   public:
+    Planner() = default;
     Planner(FlightPlan flightPlan, FlightParam flightParam, float step);
-    Planner();
-    virtual ~Planner();
-
     void Update(const Time t) const;
 
     const Vector GetPosition() const;

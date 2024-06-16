@@ -37,10 +37,6 @@ class WifiInspector
      * Initialize the inspector with a given Network Device
      */
     WifiInspector(Ptr<NetDevice> device);
-    /**
-     * Default destructor
-     */
-    ~WifiInspector();
 
     /**
      * Get a string representation of the Wifi Standard in use

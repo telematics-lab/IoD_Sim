@@ -48,16 +48,6 @@ WifiMacLayer::GetTypeId()
     return tid;
 }
 
-WifiMacLayer::WifiMacLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-WifiMacLayer::~WifiMacLayer()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 WifiMacLayer::Write(xmlTextWriterPtr h)
 {

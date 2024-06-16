@@ -40,9 +40,8 @@ DroneEnergyModel::GetTypeId(void)
 }
 
 DroneEnergyModel::DroneEnergyModel()
+    : m_source{0}
 {
-    NS_LOG_FUNCTION(this);
-    m_source = 0;
 }
 
 void

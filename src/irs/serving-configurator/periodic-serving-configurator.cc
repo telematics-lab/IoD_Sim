@@ -50,14 +50,6 @@ PeriodicServingConfigurator::GetTypeId()
     return tid;
 }
 
-PeriodicServingConfigurator::PeriodicServingConfigurator()
-{
-}
-
-PeriodicServingConfigurator::~PeriodicServingConfigurator()
-{
-}
-
 void
 PeriodicServingConfigurator::DoDispose()
 {

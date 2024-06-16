@@ -52,10 +52,6 @@ StoragePeripheral::GetTypeId()
     return tid;
 }
 
-StoragePeripheral::StoragePeripheral()
-{
-}
-
 void
 StoragePeripheral::SetCapacity(uint64_t cap)
 {

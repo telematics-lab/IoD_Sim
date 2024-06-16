@@ -45,15 +45,7 @@ class CurvePoint
 
     CurvePoint(const Vector position);
 
-    /**
-     * \brief default constructor
-     */
     CurvePoint();
-    /**
-     * \brief default destructor
-     */
-    virtual ~CurvePoint();
-
     /**
      * \brief get the distance vector relative to a given point
      *

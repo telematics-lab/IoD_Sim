@@ -33,6 +33,10 @@ class PhyLayerConfigurationHelper
 {
   public:
     /**
+     * PhyLayerConfigurationHelper can't be instantiated, as it is an utility class.
+     */
+    PhyLayerConfigurationHelper() = delete;
+    /**
      * Parse a PHY configuration from a given JSON tree and map it on a PhyLayerConfiguration data
      * class.
      *
@@ -41,9 +45,6 @@ class PhyLayerConfigurationHelper
      * data.
      */
     static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonPhyLayer);
-
-  private:
-    PhyLayerConfigurationHelper();
 };
 
 } // namespace ns3

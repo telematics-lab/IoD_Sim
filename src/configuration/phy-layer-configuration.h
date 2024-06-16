@@ -40,9 +40,6 @@ class PhyLayerConfiguration : public Object
      * \param type The type of the PHY Layer to be configured.
      */
     PhyLayerConfiguration(std::string type, std::vector<ModelConfiguration::Attribute> attributes);
-    /** Default destructor */
-    virtual ~PhyLayerConfiguration();
-
     /**
      * \brief The type of the decoded PHY Layer
      */

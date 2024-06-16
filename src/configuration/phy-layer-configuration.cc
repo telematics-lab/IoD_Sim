@@ -27,10 +27,6 @@ PhyLayerConfiguration::PhyLayerConfiguration(std::string type,
 {
 }
 
-PhyLayerConfiguration::~PhyLayerConfiguration()
-{
-}
-
 const std::string
 PhyLayerConfiguration::GetType() const
 {

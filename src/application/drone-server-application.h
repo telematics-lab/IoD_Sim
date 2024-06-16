@@ -37,8 +37,6 @@ class DroneServerApplication : public Application
     static TypeId GetTypeId();
 
     DroneServerApplication();
-    virtual ~DroneServerApplication();
-
   protected:
     virtual void DoDispose();
 

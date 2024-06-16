@@ -38,9 +38,6 @@ class NetworkLayerConfiguration : public Object
      * \param type The type of the Network Layer to be configured.
      */
     NetworkLayerConfiguration(std::string type);
-    /** Default destructor */
-    virtual ~NetworkLayerConfiguration();
-
     /**
      * \return The type of the decoded Network Layer
      */

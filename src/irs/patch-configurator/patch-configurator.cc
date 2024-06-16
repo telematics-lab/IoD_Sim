@@ -26,14 +26,6 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE("PatchConfigurator");
 NS_OBJECT_ENSURE_REGISTERED(PatchConfigurator);
 
-PatchConfigurator::PatchConfigurator()
-{
-}
-
-PatchConfigurator::~PatchConfigurator()
-{
-}
-
 void
 PatchConfigurator::UpdateConfiguration(const ModelConfigurationVector& c)
 {

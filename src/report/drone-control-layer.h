@@ -36,15 +36,6 @@ class DroneControlLayer : public ProtocolLayer
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    DroneControlLayer();
-    /**
-     * Default destructor
-     */
-    ~DroneControlLayer();
-
-    /**
      * Write IPv4 Layer report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

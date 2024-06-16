@@ -60,10 +60,6 @@ LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
     m_lte->SetEpcHelper(m_epc);
 }
 
-LtePhySimulationHelper::~LtePhySimulationHelper()
-{
-}
-
 Ptr<LteHelper>
 LtePhySimulationHelper::GetLteHelper()
 {

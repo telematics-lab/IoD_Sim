@@ -75,12 +75,6 @@ RandomUdpApplication::RandomUdpApplication()
     : m_sendEvent{EventId()},
       m_seqNum{0}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-RandomUdpApplication::~RandomUdpApplication()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

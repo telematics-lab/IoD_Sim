@@ -44,9 +44,6 @@ class NetdeviceConfiguration : public Object
     NetdeviceConfiguration(const std::string type,
                            const std::optional<uint32_t> networkLayerId,
                            const std::optional<ModelConfiguration> antennaModel);
-    /** Default destructor */
-    ~NetdeviceConfiguration();
-
     /** \return The type of the Network Device. */
     const std::string GetType() const;
     /** \return The reference network layer identifier. */

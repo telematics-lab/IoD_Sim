@@ -36,9 +36,6 @@ class Ipv4SimulationHelper : public Object
      * Default constructor. It is needed the network mask used for the configured IPv4 network.
      */
     Ipv4SimulationHelper(const std::string mask, const std::string gatewayAddress);
-    /** Default destructor */
-    ~Ipv4SimulationHelper();
-
     /**
      * \return The container of IPv4 Interfaces associated to this layer.
      */

@@ -34,11 +34,6 @@ class ReportProtocolStack
     typedef std::vector<Ptr<ProtocolLayer>>::const_iterator Iterator;
 
     /**
-     * Create an empty ReportProtocolStack
-     */
-    ReportProtocolStack();
-
-    /**
      * Get an iterator which refers to the base Protocol Layer in the stack
      */
     Iterator Begin() const;

@@ -48,9 +48,6 @@ class ThreeGppPhyLayerConfiguration : public PhyLayerConfiguration
                                   ModelConfiguration propagationLossModel,
                                   ModelConfiguration conditionModel,
                                   std::string environment);
-    /// Default destructor
-    ~ThreeGppPhyLayerConfiguration();
-
     /// \return The Propagation Loss Model configuration.
     ModelConfiguration GetPropagationLossModel() const;
     /// \return The Propagation Loss Model configuration.

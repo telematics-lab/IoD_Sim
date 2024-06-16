@@ -55,15 +55,6 @@ class ReportEntity : public Object
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    ReportEntity();
-    /**
-     * Default destructor
-     */
-    ~ReportEntity();
-
-    /**
      * Write Entity report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

@@ -45,8 +45,8 @@ class DroneListPriv : public Object
      */
     static TypeId GetTypeId();
 
-    DroneListPriv();
-    ~DroneListPriv();
+    DroneListPriv() = default;
+    ~DroneListPriv() = default;
 
     /**
      * \param drone drone to add
@@ -149,16 +149,6 @@ DroneListPriv::Delete()
 
     Config::UnregisterRootNamespaceObject(Get());
     (*DoGet()) = 0;
-}
-
-DroneListPriv::DroneListPriv()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-DroneListPriv::~DroneListPriv()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

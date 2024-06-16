@@ -77,11 +77,7 @@ IrsPatch::GetTypeId()
 }
 
 IrsPatch::IrsPatch()
-{
-    m_isServing = false;
-}
-
-IrsPatch::~IrsPatch()
+    : m_isServing{false}
 {
 }
 

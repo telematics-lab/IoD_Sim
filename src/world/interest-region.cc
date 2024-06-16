@@ -45,14 +45,6 @@ InterestRegion::GetTypeId(void)
     return tid;
 }
 
-InterestRegion::InterestRegion()
-{
-}
-
-InterestRegion::~InterestRegion()
-{
-}
-
 void
 InterestRegion::DoDispose()
 {

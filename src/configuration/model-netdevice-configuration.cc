@@ -27,10 +27,6 @@ ModelNetdeviceConfiguration::ModelNetdeviceConfiguration(const std::string type,
 {
 }
 
-ModelNetdeviceConfiguration::~ModelNetdeviceConfiguration()
-{
-}
-
 const ModelConfiguration
 ModelNetdeviceConfiguration::GetMacLayer() const
 {

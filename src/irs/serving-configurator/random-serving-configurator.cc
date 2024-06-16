@@ -52,11 +52,8 @@ RandomServingConfigurator::GetTypeId()
 }
 
 RandomServingConfigurator::RandomServingConfigurator()
-{
-    m_rng = CreateObject<UniformRandomVariable>();
-}
-
-RandomServingConfigurator::~RandomServingConfigurator()
+    : ServingConfigurator(),
+      m_rng{CreateObject<UniformRandomVariable>()}
 {
 }
 

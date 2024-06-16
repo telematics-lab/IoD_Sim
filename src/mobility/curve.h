@@ -53,11 +53,6 @@ class Curve
      */
     Curve();
     /**
-     * \brief default destructor
-     */
-    virtual ~Curve();
-
-    /**
      * \brief generate the curve using the given flight plan and step during
      *        object initialization.
      *

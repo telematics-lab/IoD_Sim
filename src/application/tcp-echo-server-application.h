@@ -30,9 +30,6 @@ class TcpEchoServerApplication : public TcpClientServerApplication
 {
   public:
     static TypeId GetTypeId();
-    TcpEchoServerApplication();
-    virtual ~TcpEchoServerApplication();
-
   protected:
     virtual void StartApplication();
     virtual void ReceivedDataCallback(Ptr<Socket> s);

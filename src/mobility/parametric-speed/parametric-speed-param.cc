@@ -25,10 +25,6 @@ ParametricSpeedParam::ParametricSpeedParam(std::vector<double> speedCoefficients
 {
 }
 
-ParametricSpeedParam::~ParametricSpeedParam()
-{
-}
-
 const std::vector<double>
 ParametricSpeedParam::GetSpeedCoefficients() const
 {

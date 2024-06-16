@@ -48,16 +48,6 @@ TcpStubClientApplication::GetTypeId()
     return tid;
 }
 
-TcpStubClientApplication::TcpStubClientApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-TcpStubClientApplication::~TcpStubClientApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 TcpStubClientApplication::DoInitialize()
 {

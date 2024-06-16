@@ -30,10 +30,6 @@ WifiNetdeviceConfiguration::WifiNetdeviceConfiguration(
 {
 }
 
-WifiNetdeviceConfiguration::~WifiNetdeviceConfiguration()
-{
-}
-
 const ModelConfiguration
 WifiNetdeviceConfiguration::GetMacLayer() const
 {

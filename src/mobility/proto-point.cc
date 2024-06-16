@@ -52,14 +52,6 @@ ProtoPoint::GetTypeId()
     return tid;
 }
 
-ProtoPoint::ProtoPoint()
-{
-}
-
-ProtoPoint::~ProtoPoint()
-{
-}
-
 void
 ProtoPoint::SetPosition(const Vector& position)
 {

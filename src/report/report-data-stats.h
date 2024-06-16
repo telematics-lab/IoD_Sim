@@ -37,14 +37,7 @@ class ReportDataStats : public Object
      */
     static TypeId GetTypeId();
 
-    /**
-     * Default constructor
-     */
     ReportDataStats();
-    /**
-     * Default destructor
-     */
-    ~ReportDataStats();
 
     constexpr void Add(const uint32_t bytes)
     {

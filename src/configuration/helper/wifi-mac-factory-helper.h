@@ -32,6 +32,10 @@ class WifiMacFactoryHelper
 {
   public:
     /**
+     * WifiMacFactoryHelper can't be instantiated, as it is an utility class.
+     */
+    WifiMacFactoryHelper() = delete;
+    /**
      * Set the wifi model to be used from a ModelConfiguration data class.
      *
      * \param helper The WifiHelper instance.
@@ -39,9 +43,6 @@ class WifiMacFactoryHelper
      * configuration.
      */
     static void SetRemoteStationManager(WifiHelper& helper, const ModelConfiguration& modelConf);
-
-  private:
-    WifiMacFactoryHelper();
 };
 
 } // namespace ns3

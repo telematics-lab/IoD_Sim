@@ -74,7 +74,6 @@ class IrsPatch : public Object
     static TypeId GetTypeId();
 
     IrsPatch();
-    ~IrsPatch();
 
     /** Set the size of the patch.
      * \param serializedSize The coordinates of the patch specified through a

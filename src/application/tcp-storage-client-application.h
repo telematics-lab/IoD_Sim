@@ -34,8 +34,6 @@ class TcpStorageClientApplication : public TcpClientServerApplication
   public:
     static TypeId GetTypeId();
     TcpStorageClientApplication();
-    virtual ~TcpStorageClientApplication();
-
   protected:
     virtual void DoInitialize();
     virtual void StartApplication();

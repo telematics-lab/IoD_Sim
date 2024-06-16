@@ -46,8 +46,4 @@ WifiPhyFactoryHelper::AddPropagationLoss(YansWifiChannelHelper& channelHelper,
     channelHelper.m_propagationLoss.push_back(factory);
 }
 
-WifiPhyFactoryHelper::WifiPhyFactoryHelper()
-{
-}
-
 } // namespace ns3

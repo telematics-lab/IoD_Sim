@@ -37,7 +37,7 @@ class IntVector
   public:
     typedef std::vector<int>::const_iterator Iterator;
 
-    IntVector();
+    IntVector() = default;
     IntVector(std::vector<int> coefficients);
     IntVector(const IntVector& a);
 

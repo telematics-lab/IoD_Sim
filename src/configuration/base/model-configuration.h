@@ -38,8 +38,7 @@ class ModelConfiguration
         std::string name;
         Ptr<AttributeValue> value;
 
-        Attribute() = default;
-
+	Attribute() = default;
         Attribute(std::string name, Ptr<AttributeValue> value)
             : name{name},
               value{value}
@@ -73,7 +72,6 @@ class ModelConfiguration
                        const AttributeVector attributes,
                        const ModelConfigurationVector aggregates);
 
-    /** Default destructor */
     ~ModelConfiguration();
 
     /**

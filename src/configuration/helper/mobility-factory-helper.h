@@ -32,6 +32,10 @@ class MobilityFactoryHelper
 {
   public:
     /**
+     * MobilityFactoryHelper can't be instantiated, as it is an utility class.
+     */
+    MobilityFactoryHelper() = delete;
+    /**
      * Set the mobility model to be used from a ModelConfiguration data class.
      *
      * \param helper The MobilityHelper instance.
@@ -39,9 +43,6 @@ class MobilityFactoryHelper
      * its configuration.
      */
     static void SetMobilityModel(MobilityHelper& helper, const ModelConfiguration& modelConf);
-
-  private:
-    MobilityFactoryHelper();
 };
 
 } // namespace ns3

@@ -25,7 +25,6 @@ class ConstantAccelerationParam
 {
   public:
     ConstantAccelerationParam(double acceleration, double maxSpeed);
-    virtual ~ConstantAccelerationParam();
 
     const double GetAcceleration() const;
     const double GetMaxSpeed() const;

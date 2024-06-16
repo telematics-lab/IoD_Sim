@@ -35,9 +35,6 @@ class TcpStubClientApplication : public TcpStorageClientApplication
 {
   public:
     static TypeId GetTypeId();
-    TcpStubClientApplication();
-    virtual ~TcpStubClientApplication();
-
   protected:
     virtual void DoInitialize();
     virtual void StartApplication();

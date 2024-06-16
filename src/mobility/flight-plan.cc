@@ -26,10 +26,6 @@ namespace ns3
 
 ATTRIBUTE_HELPER_CPP(FlightPlan);
 
-FlightPlan::FlightPlan()
-{
-}
-
 FlightPlan::FlightPlan(Ptr<ProtoPoint> point)
 {
     m_protoPoints.push_back(point);

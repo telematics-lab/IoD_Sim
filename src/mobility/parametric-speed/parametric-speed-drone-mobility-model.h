@@ -41,7 +41,6 @@ class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
     static TypeId GetTypeId();
 
     ParametricSpeedDroneMobilityModel();
-    ~ParametricSpeedDroneMobilityModel();
 
     // TODO: Put into generic Utility object
     static FlightPlan ProjectedToGeographicCoordinates(

@@ -59,16 +59,6 @@ TcpClientServerApplication::GetTypeId()
     return tid;
 }
 
-TcpClientServerApplication::TcpClientServerApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-TcpClientServerApplication::~TcpClientServerApplication()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 TcpClientServerApplication::StartApplication()
 {

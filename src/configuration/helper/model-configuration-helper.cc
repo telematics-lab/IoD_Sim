@@ -90,10 +90,6 @@ ModelConfigurationHelper::GetOptionalCoaleshed(const JsonObject& jObj,
         return std::nullopt;
 }
 
-ModelConfigurationHelper::ModelConfigurationHelper()
-{
-}
-
 const std::vector<ModelConfiguration::Attribute>
 ModelConfigurationHelper::GetAttributes(const TypeId& model,
                                         const rapidjson::Value::ConstArray& jAttrs)

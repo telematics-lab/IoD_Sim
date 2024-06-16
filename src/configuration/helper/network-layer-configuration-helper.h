@@ -32,6 +32,10 @@ class NetworkLayerConfigurationHelper
 {
   public:
     /**
+     * NetworkLayerConfigurationHelper can't be instantiated, as it is an utility class.
+     */
+    NetworkLayerConfigurationHelper() = delete;
+    /**
      * Parse a Network configuration from a given JSON tree and map it on a
      * NetworkLayerConfiguration data class.
      *
@@ -40,9 +44,6 @@ class NetworkLayerConfigurationHelper
      * data.
      */
     static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidjson::Value& json);
-
-  private:
-    NetworkLayerConfigurationHelper();
 };
 
 } // namespace ns3

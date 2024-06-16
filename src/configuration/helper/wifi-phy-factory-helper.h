@@ -32,6 +32,10 @@ class WifiPhyFactoryHelper
 {
   public:
     /**
+     * WifiPhyFactoryHelper can't be instantiated, as it is an utility class.
+     */
+    WifiPhyFactoryHelper() = delete;
+    /**
      * Set the propagation delay model to be used from a ModelConfiguration data class.
      *
      * \param channelHelper The YansWifiChannelHelper instance.
@@ -49,9 +53,6 @@ class WifiPhyFactoryHelper
      */
     static void AddPropagationLoss(YansWifiChannelHelper& channelHelper,
                                    const ModelConfiguration& modelConf);
-
-  private:
-    WifiPhyFactoryHelper();
 };
 
 } // namespace ns3

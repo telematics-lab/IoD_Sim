@@ -51,12 +51,6 @@ ReportDataStats::ReportDataStats()
     : m_kind{PacketType::UNKNOWN},
       m_bytes{0}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-ReportDataStats::~ReportDataStats()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

@@ -65,12 +65,6 @@ NatApplication::GetTypeId()
 NatApplication::NatApplication()
     : m_curNatPort{1}
 {
-    NS_LOG_FUNCTION_NOARGS();
-}
-
-NatApplication::~NatApplication()
-{
-    NS_LOG_FUNCTION_NOARGS();
 }
 
 void

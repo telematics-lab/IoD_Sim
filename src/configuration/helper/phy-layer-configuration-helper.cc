@@ -156,8 +156,4 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
     return phyConfig;
 }
 
-PhyLayerConfigurationHelper::PhyLayerConfigurationHelper()
-{
-}
-
 } // namespace ns3

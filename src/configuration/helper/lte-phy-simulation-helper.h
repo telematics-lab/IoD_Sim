@@ -31,11 +31,7 @@ namespace ns3
 class LtePhySimulationHelper : public Object
 {
   public:
-    /** Default constructor */
     LtePhySimulationHelper(const size_t stackId);
-    /** Default destructor */
-    ~LtePhySimulationHelper();
-
     /**
      * \return The LTE Helper used to configure this layer.
      */

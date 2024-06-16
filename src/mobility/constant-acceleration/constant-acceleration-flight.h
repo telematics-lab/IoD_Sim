@@ -33,7 +33,6 @@ class ConstantAccelerationFlight : public Curve
     ConstantAccelerationFlight(FlightPlan flightPlan,
                                ConstantAccelerationParam flightParam,
                                double step);
-    ~ConstantAccelerationFlight();
 
     void Generate();
     void Update(const double& time) const;

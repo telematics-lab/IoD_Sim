@@ -22,10 +22,6 @@ namespace ns3
 
 ATTRIBUTE_HELPER_CPP(ModelConfigurationVector);
 
-ModelConfigurationVector::ModelConfigurationVector()
-{
-}
-
 ModelConfigurationVector::ModelConfigurationVector(ModelConfiguration conf)
     : m_confs{conf}
 {

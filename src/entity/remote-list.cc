@@ -44,8 +44,8 @@ class RemoteListPriv : public Object
      */
     static TypeId GetTypeId();
 
-    RemoteListPriv();
-    ~RemoteListPriv();
+    RemoteListPriv() = default;
+    ~RemoteListPriv() = default;
 
     /**
      * \param remote remote to add
@@ -148,16 +148,6 @@ RemoteListPriv::Delete()
 
     Config::UnregisterRootNamespaceObject(Get());
     (*DoGet()) = 0;
-}
-
-RemoteListPriv::RemoteListPriv()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-RemoteListPriv::~RemoteListPriv()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

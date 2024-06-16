@@ -33,8 +33,4 @@ WifiMacFactoryHelper::SetRemoteStationManager(WifiHelper& helper,
     helper.m_stationManager[0] = factory;
 }
 
-WifiMacFactoryHelper::WifiMacFactoryHelper()
-{
-}
-
 } // namespace ns3

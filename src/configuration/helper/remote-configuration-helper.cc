@@ -48,10 +48,6 @@ RemoteConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
     return CreateObject<RemoteConfiguration>(networkLayerId, applications);
 }
 
-RemoteConfigurationHelper::RemoteConfigurationHelper()
-{
-}
-
 const uint32_t
 RemoteConfigurationHelper::DecodeNetworkLayerId(const rapidjson::Value& json)
 {

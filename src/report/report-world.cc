@@ -28,16 +28,6 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("ReportWorld");
 
-ReportWorld::ReportWorld()
-{
-    NS_LOG_FUNCTION(this);
-}
-
-ReportWorld::~ReportWorld()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ReportWorld::Write(xmlTextWriterPtr h) const
 {

@@ -81,12 +81,6 @@ ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel()
       m_lastUpdate{-1},
       m_useGeodedicSystem{false}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-ConstantAccelerationDroneMobilityModel::~ConstantAccelerationDroneMobilityModel()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 FlightPlan

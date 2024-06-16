@@ -48,10 +48,6 @@ NullNtnDemoMacLayerSimulationHelper::NullNtnDemoMacLayerSimulationHelper(
 {
 }
 
-NullNtnDemoMacLayerSimulationHelper::~NullNtnDemoMacLayerSimulationHelper()
-{
-}
-
 void
 NullNtnDemoMacLayerSimulationHelper::Setup(const double simDuration) const
 {

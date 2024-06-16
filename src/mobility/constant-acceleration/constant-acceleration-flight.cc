@@ -44,11 +44,6 @@ ConstantAccelerationFlight::ConstantAccelerationFlight(FlightPlan flightPlan,
     Generate();
 }
 
-ConstantAccelerationFlight::~ConstantAccelerationFlight()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 ConstantAccelerationFlight::Generate()
 {

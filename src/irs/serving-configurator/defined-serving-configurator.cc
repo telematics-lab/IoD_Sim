@@ -49,14 +49,6 @@ DefinedServingConfigurator::GetTypeId()
     return tid;
 }
 
-DefinedServingConfigurator::DefinedServingConfigurator()
-{
-}
-
-DefinedServingConfigurator::~DefinedServingConfigurator()
-{
-}
-
 void
 DefinedServingConfigurator::DoDispose()
 {

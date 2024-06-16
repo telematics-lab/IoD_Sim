@@ -47,9 +47,6 @@ class LtePhyLayerConfiguration : public PhyLayerConfiguration
                              std::vector<ModelConfiguration::Attribute> attributes,
                              std::optional<ModelConfiguration> channelPropagationLossModel,
                              ModelConfiguration channelSpectrumModel);
-    /** Default destructor */
-    ~LtePhyLayerConfiguration();
-
     /**
      * \return The Propagation Loss Model configuration.
      */

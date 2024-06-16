@@ -23,10 +23,6 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("InterestRegionContainer");
 
-InterestRegionContainer::InterestRegionContainer()
-{
-}
-
 InterestRegionContainer::~InterestRegionContainer()
 {
     for (std::vector<ns3::Ptr<ns3::InterestRegion>>::iterator i = m_interestRegions.begin();

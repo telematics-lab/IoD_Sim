@@ -23,14 +23,7 @@ class SimulationDuration
      * \param virtualDuration the virtual time
      */
     SimulationDuration(const Time& realDuration, const Time& virtualDuration);
-    /**
-     * Default constructor, useful for higher-level object initialization
-     */
     SimulationDuration();
-    /**
-     * Default destructor
-     */
-    ~SimulationDuration();
 
     /**
      * Write SimulationDuration report data to a XML file with a given handler

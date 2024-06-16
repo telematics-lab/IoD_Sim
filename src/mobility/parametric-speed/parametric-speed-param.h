@@ -27,7 +27,6 @@ class ParametricSpeedParam
 {
   public:
     ParametricSpeedParam(std::vector<double> speedCoefficients);
-    virtual ~ParametricSpeedParam();
 
     const std::vector<double> GetSpeedCoefficients() const;
 

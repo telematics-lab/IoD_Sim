@@ -43,14 +43,7 @@ class RandomServingConfigurator : public ServingConfigurator
      */
     static TypeId GetTypeId(void);
 
-    /**
-     * \brief Default constructor
-     */
     RandomServingConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~RandomServingConfigurator();
 
     /**
      * \brief When invoked, it schedules the updates of the nodes to be served over time with a

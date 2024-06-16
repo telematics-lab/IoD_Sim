@@ -46,7 +46,7 @@ class FlightPlan
     /**
      * Create an empty FlightPlan
      */
-    FlightPlan();
+    FlightPlan() = default;
     /**
      * Create a FlightPlan with exactly one ProtoPoint which has been
      * previously instantiated. This single ProtoPoint is specified by a smart

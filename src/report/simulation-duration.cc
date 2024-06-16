@@ -41,12 +41,6 @@ SimulationDuration::SimulationDuration()
     : m_realDuration{GetRealTime()},
       m_virtualDuration{GetVirtualTime()}
 {
-    NS_LOG_FUNCTION(this);
-}
-
-SimulationDuration::~SimulationDuration()
-{
-    NS_LOG_FUNCTION(this);
 }
 
 void

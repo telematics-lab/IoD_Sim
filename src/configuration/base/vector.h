@@ -30,8 +30,6 @@ namespace ns3
 #include <typeinfo>
 #include <vector>
 
-// #include <typetraits>
-
 /**
  * Output streamer for std::vector<T>
  * \tparam T type of the vector elements
@@ -88,9 +86,9 @@ private:
 
 class VectorChecker : public AttributeChecker
 {
-  public:
-    virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
-    virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
+public:
+  virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
+  virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
 };
 
 /**

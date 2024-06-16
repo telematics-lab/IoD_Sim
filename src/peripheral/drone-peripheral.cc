@@ -48,9 +48,9 @@ DronePeripheral::GetTypeId()
 }
 
 DronePeripheral::DronePeripheral()
+    : m_powerConsumption{0},
+      m_state{OFF}
 {
-    m_state = OFF;
-    m_powerConsumption = 0;
 }
 
 void

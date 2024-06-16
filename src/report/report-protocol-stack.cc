@@ -26,11 +26,6 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("ReportProtocolStack");
 
-ReportProtocolStack::ReportProtocolStack()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 ReportProtocolStack::Iterator
 ReportProtocolStack::Begin() const
 {

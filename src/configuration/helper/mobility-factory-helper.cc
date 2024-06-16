@@ -60,8 +60,4 @@ MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfi
     }
 }
 
-MobilityFactoryHelper::MobilityFactoryHelper()
-{
-}
-
 } // namespace ns3

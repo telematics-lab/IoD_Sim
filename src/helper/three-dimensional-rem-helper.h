@@ -21,17 +21,16 @@
 #define THREE_DIMENSIONAL_REM_HELPER_H
 
 #include <ns3/object.h>
+#include <ns3/rem-spectrum-phy.h>
 
 #include <fstream>
 
 namespace ns3
 {
 
-class RemSpectrumPhy;
 class Node;
 class NetDevice;
 class SpectrumChannel;
-// class BuildingsMobilityModel;
 class MobilityModel;
 
 /**
@@ -43,9 +42,6 @@ class MobilityModel;
 class ThreeDimensionalRemHelper : public Object
 {
   public:
-    ThreeDimensionalRemHelper();
-    ~ThreeDimensionalRemHelper() override;
-
     // inherited from Object
     void DoDispose() override;
     /**

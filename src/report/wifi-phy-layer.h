@@ -45,15 +45,6 @@ class WifiPhyLayer : public ProtocolLayer
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    WifiPhyLayer();
-    /**
-     * Default destructor
-     */
-    ~WifiPhyLayer();
-
-    /**
      * Write Protocol Stack report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

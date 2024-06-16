@@ -33,10 +33,6 @@ Ipv4NetworkLayerConfiguration::Ipv4NetworkLayerConfiguration(std::string type,
 {
 }
 
-Ipv4NetworkLayerConfiguration::~Ipv4NetworkLayerConfiguration()
-{
-}
-
 const std::string
 Ipv4NetworkLayerConfiguration::GetAddress() const
 {

@@ -44,9 +44,6 @@ class WifiNetdeviceConfiguration : public NetdeviceConfiguration
                                const ModelConfiguration macLayer,
                                const std::optional<uint32_t> networkLayerId,
                                const std::optional<ModelConfiguration> antennaModel);
-    /** Default destructor */
-    ~WifiNetdeviceConfiguration();
-
     /**
      * \return The MAC Layer configuration.
      */

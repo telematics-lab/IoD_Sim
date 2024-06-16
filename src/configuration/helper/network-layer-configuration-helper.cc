@@ -63,8 +63,4 @@ NetworkLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
     return netConfig;
 }
 
-NetworkLayerConfigurationHelper::NetworkLayerConfigurationHelper()
-{
-}
-
 } // namespace ns3

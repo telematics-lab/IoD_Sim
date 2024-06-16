@@ -61,11 +61,6 @@ Report::Initialize(const std::string scenarioName,
     Open();
 }
 
-Report::~Report()
-{
-    NS_LOG_FUNCTION(this);
-}
-
 void
 Report::Save()
 {

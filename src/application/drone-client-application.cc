@@ -77,18 +77,9 @@ DroneClientApplication::GetTypeId()
 }
 
 DroneClientApplication::DroneClientApplication()
+    : m_sequenceNumber{0},
+      m_state{CLOSED}
 {
-    NS_LOG_FUNCTION(this);
-
-    m_state = CLOSED;
-    m_sequenceNumber = 0;
-}
-
-DroneClientApplication::~DroneClientApplication()
-{
-    NS_LOG_FUNCTION(this);
-
-    m_state = CLOSED;
 }
 
 void

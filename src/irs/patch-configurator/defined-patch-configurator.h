@@ -43,15 +43,6 @@ class DefinedPatchConfigurator : public PatchConfigurator
     static TypeId GetTypeId(void);
 
     /**
-     * \brief Default constructor
-     */
-    DefinedPatchConfigurator();
-    /**
-     * \brief Default destructor
-     */
-    ~DefinedPatchConfigurator();
-
-    /**
      * \brief When invoked, it schedules the patch organisation updates over time, following the
      * periods defined in the m_periods vector
      */

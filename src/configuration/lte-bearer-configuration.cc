@@ -96,10 +96,6 @@ LteBearerConfiguration::LteBearerConfiguration(const std::string type,
 {
 }
 
-LteBearerConfiguration::~LteBearerConfiguration()
-{
-}
-
 const EpsBearer::Qci
 LteBearerConfiguration::GetType() const
 {

@@ -45,9 +45,6 @@ class UdpEchoClientApplication : public Application
     static TypeId GetTypeId(void);
 
     UdpEchoClientApplication();
-
-    virtual ~UdpEchoClientApplication();
-
     /**
      * \brief set the remote address and port
      * \param ip remote IP address

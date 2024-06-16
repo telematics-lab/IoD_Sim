@@ -20,14 +20,6 @@
 namespace ns3
 {
 
-WifiMacSimulationHelper::WifiMacSimulationHelper()
-{
-}
-
-WifiMacSimulationHelper::~WifiMacSimulationHelper()
-{
-}
-
 WifiMacHelper&
 WifiMacSimulationHelper::GetMacHelper()
 {

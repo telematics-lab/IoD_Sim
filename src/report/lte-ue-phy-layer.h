@@ -37,15 +37,6 @@ class LteUEPhyLayer : public ProtocolLayer
     static TypeId GetTypeId();
 
     /**
-     * Default constructor
-     */
-    LteUEPhyLayer();
-    /**
-     * Default destructor
-     */
-    ~LteUEPhyLayer();
-
-    /**
      * Write LTE Phy Layer report data to a XML file with a given handler
      *
      * \param handle the XML handler to write data on

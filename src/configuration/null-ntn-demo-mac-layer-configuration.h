@@ -46,9 +46,6 @@ class NullNtnDemoMacLayerConfiguration : public MacLayerConfiguration
                                      double rbBandwidth,
                                      double satEirpDensity,
                                      double ueAntennaNoiseFigure);
-    /// Default destructor.
-    ~NullNtnDemoMacLayerConfiguration();
-
     /// \return The configured time resolution.
     double GetTimeResolution() const;
     /// \return The configured bandwidth.
