@@ -17,3 +17,7 @@ __pycache__
 
 # Ignore background scenario nohup outputs
 nohup.out
+
+# Ignore documentation build artifacts
+docs/html
+docs/latex

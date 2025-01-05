@@ -22,7 +22,9 @@ function install_debian_deps() {
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev
+    rapidjson-dev     \
+    doxygen           \
+    graphviz
 }
 
 function install_fedora_deps() {
@@ -40,7 +42,9 @@ function install_fedora_deps() {
     pkgconf                    \
     python-unversioned-command \
     python3                    \
-    rapidjson-devel
+    rapidjson-devel            \
+    doxygen                    \
+    graphviz
 }
 
 function install_arch_deps() {
@@ -58,7 +62,9 @@ function install_arch_deps() {
     patch                 \
     pkgconf               \
     python                \
-    rapidjson
+    rapidjson             \
+    doxygen-docs          \
+    graphviz
 }
 
 case "$ID" in

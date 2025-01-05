@@ -86,6 +86,17 @@ cd ns3/
 ./ns3 run iodsim -- --config=../scenario/simple_wifi.json
 ```
 
+## Generate documentation
+
+Before proceeding with the simulator, it may be helpful to generate the respective documentation. IoD_Sim relies on the [Doxygen](https://www.doxygen.nl/index.html) tool, which should already be installed with the other dependencies (if not, refer to the specific installation procedure for your distribution).
+
+The documentation can be generated in HTML and LaTeX formats by running:
+
+```
+doxygen ./docs/IoD_Sim_doc
+```
+
+
 ## License
 
 Copyright (C) 2018-2024 [The IoD_Sim Authors](AUTHORS).
