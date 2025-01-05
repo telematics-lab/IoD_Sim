@@ -96,6 +96,21 @@ The documentation can be generated in HTML and LaTeX formats by running:
 doxygen ./docs/IoD_Sim_doc
 ```
 
+## Working with docker
+
+After creating your own scenario through the JSON file, you can use [Docker](https://docs.docker.com/engine/) to quickly proceed to simulation in a few steps. The first time, the container image must be built by running the following command in the main directory of the repository:
+
+```
+docker build . -t docker_iod_sim
+```
+
+Next, the simulation can be run by launching:
+
+```
+sudo docker run --rm -v ./results:/IoD_Sim/results -v ./scenario:/IoD_Sim/scenario docker_iod_sim [--help] <simulation_file_name>
+```
+
+When completed, the `results` folder will contain the results of the simulation. It should be noted that if a new scenario is placed in `./scenario`, there will be no need to rebuild the container.
 
 ## License
 
