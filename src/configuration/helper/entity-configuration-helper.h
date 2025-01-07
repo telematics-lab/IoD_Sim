@@ -30,6 +30,8 @@ namespace ns3
 using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
 
 /**
+ * \brief Helper to decode Entities from a JSON configuration file.
+ *
  * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the
  * following properties:
  *   - Its network device(s)

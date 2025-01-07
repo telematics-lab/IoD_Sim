@@ -31,6 +31,10 @@
 namespace ns3
 {
 
+/**
+ * \ingroup mobility
+ * \brief A geocentric mobility model for drones that follows a parametric speed.
+ */
 class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
 {
   public:

@@ -24,7 +24,10 @@
 
 namespace ns3
 {
+
 /**
+ * \ingroup peripheral
+ *
  * \brief This class describes a generic storage peripheral.
  */
 class StoragePeripheral : public DronePeripheral

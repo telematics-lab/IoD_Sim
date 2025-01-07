@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * A data class to store information about an IPv4 layer configuration for a simulation.
+ * \brief A data class to store information about an IPv4 layer configuration for a simulation.
  */
 class Ipv4SimulationHelper : public Object
 {

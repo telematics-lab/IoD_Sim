@@ -26,7 +26,7 @@ namespace ns3
 {
 
 /**
- * Helper to decode a Network Layer from a JSON configuration file.
+ * \brief Helper to decode a Network Layer from a JSON configuration file.
  */
 class NetworkLayerConfigurationHelper
 {

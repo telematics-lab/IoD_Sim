@@ -31,6 +31,7 @@ namespace ns3
 {
 
 /**
+ * \ingroup mobility
  * \brief keep track of a set of ProtoPoint pointers.
  *
  * This is useful if we want to operate on more than one ProtoPoint at a time,

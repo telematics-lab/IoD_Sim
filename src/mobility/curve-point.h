@@ -24,6 +24,7 @@ namespace ns3
 {
 
 /**
+ * \ingroup mobility
  * \brief A point constructed during curve generation with the position
  *        relative to the curve length.
  */

@@ -26,14 +26,16 @@ namespace ns3
 {
 
 /**
- * TCP client that transmits data to a remote server to free as much memory as possible on the
- * storage peripheral attached to the same node.
+ * \ingroup applications
+ * \brief TCP client that transmits data to a remote server to free as much memory as possible on
+ * the storage peripheral attached to the same node.
  */
 class TcpStorageClientApplication : public TcpClientServerApplication
 {
   public:
     static TypeId GetTypeId();
     TcpStorageClientApplication();
+
   protected:
     virtual void DoInitialize();
     virtual void StartApplication();

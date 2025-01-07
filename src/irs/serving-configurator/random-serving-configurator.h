@@ -31,6 +31,9 @@ namespace ns3
 
 /**
  * \ingroup irs
+ *
+ * \brief Define a random serving configurator for the IRS.
+ *
  * Defines an object which, aggregated to an Irs Patch, updates the pair of nodes to be served
  * during the patch life time. The update of the serving pair is performed with a round robin
  * approach, choosing randomly a pair from the m_servingpairs vector

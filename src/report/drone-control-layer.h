@@ -26,6 +26,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief A class to report the Drone Control Layer.
+ */
 class DroneControlLayer : public ProtocolLayer
 {
   public:

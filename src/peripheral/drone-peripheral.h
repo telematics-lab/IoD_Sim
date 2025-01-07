@@ -31,6 +31,8 @@ namespace ns3
 class Drone;
 
 /**
+ * \ingroup peripheral
+ *
  * \brief Base class describing a general-purpose peripheral mounted on a drone.
  *
  * A peripheral is characterized by a constant power consumption.

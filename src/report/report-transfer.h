@@ -32,6 +32,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report module for a communication between entities.
+ *
+ */
 class ReportTransfer : public Object
 {
   public:

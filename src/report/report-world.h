@@ -27,6 +27,13 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report module for the scenario world.
+ *
+ * Retrieve and store data about the world, like the interest regions.
+ */
 class ReportWorld
 {
   public:

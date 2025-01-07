@@ -39,6 +39,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module for Drone entity.
+ *
  * Retrieve and store data about a drone, like its
  *  - trajectory
  *  - network stacks

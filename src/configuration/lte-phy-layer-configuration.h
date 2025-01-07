@@ -31,7 +31,9 @@ namespace ns3
 {
 
 /**
- * Data class to store information about the WiFi PHY Layer of a Scenario.
+ * \ingroup lte
+ *
+ * \brief Data class to store information about the WiFi PHY Layer of a Scenario.
  */
 class LtePhyLayerConfiguration : public PhyLayerConfiguration
 {

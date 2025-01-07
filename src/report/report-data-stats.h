@@ -28,6 +28,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report data statistics.
+ */
 class ReportDataStats : public Object
 {
   public:

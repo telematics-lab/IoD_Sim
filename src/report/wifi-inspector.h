@@ -30,6 +30,13 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Class for WiFi report generation.
+ *
+ * Defines an object which contains the Wifi Network Device informations.
+ */
 class WifiInspector
 {
   public:

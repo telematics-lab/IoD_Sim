@@ -30,6 +30,9 @@ namespace ns3
 
 /**
  * \ingroup irs
+ *
+ * \brief Define a static patch configurator for the IRS.
+ *
  * Defines an object which, aggregated to an Irs, updates its patch organisation during the
  * simulation. The different configurations are installed for a duration equal to that defined in
  * m_periods vector.

@@ -28,7 +28,9 @@ namespace ns3
 using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
 
 /**
- * Helper to decode an Remote from a JSON configuration file and read the following properties:
+ * \brief Helper to decode a Remote from a JSON configuration.
+ *
+ * Helper to decode a Remote from a JSON configuration file and read the following properties:
  *   - Its Network Layer Identifier
  *   - Its Applications
  */

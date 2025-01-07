@@ -32,6 +32,8 @@ class DronePeripheral;
 class Drone;
 
 /**
+ * \ingroup peripheral
+ *
  * \brief Keeps track of a set of drone peripherals pointers.
  */
 class DronePeripheralContainer : public Object

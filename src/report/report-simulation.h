@@ -34,6 +34,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module for the simulation.
+ *
  * Report a simulation by constructing a tree of data during the simulation
  * and then save all of it in a structured XML file.
  *

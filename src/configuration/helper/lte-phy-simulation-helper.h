@@ -26,7 +26,9 @@ namespace ns3
 {
 
 /**
- * A data class to store information about a WiFi PHY layer configuration for a simulation.
+ * \ingroup lte
+ *
+ * \brief A data class to store information about a WiFi PHY layer configuration for a simulation.
  */
 class LtePhySimulationHelper : public Object
 {

@@ -26,7 +26,7 @@ namespace ns3
 {
 
 /**
- * A data class to store information about a 3GPP PHY layer configuration for a simulation.
+ * \brief A data class to store information about a 3GPP PHY layer configuration for a simulation.
  */
 class ThreeGppPhySimulationHelper : public Object
 {

@@ -38,6 +38,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module for ZSP entity.
+ *
  * Retrieve and store data about a ZSP, like its
  *  - position (presumably fixed)
  *  - network stack

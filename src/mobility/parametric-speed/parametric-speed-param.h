@@ -23,6 +23,10 @@
 namespace ns3
 {
 
+/**
+ * \ingroup mobility
+ * \brief A class that holds the parameters for a parametric speed.
+ */
 class ParametricSpeedParam
 {
   public:

@@ -26,7 +26,9 @@ namespace ns3
 {
 
 /**
- * Data class to store parameters useful at LTE Bearer configuration.
+ * \ingroup lte
+ *
+ * \brief Data class to store parameters useful at LTE Bearer configuration.
  */
 class LteBearerConfiguration : public Object
 {

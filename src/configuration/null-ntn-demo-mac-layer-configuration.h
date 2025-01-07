@@ -30,7 +30,10 @@
 namespace ns3
 {
 
-/// Data class to store information about the Null NTN Demo (i.e., no MAC, just PHY analysis).
+/**
+ * \brief Data class to store information about the Null NTN Demo (i.e., no MAC, just PHY analysis).
+ *
+ */
 class NullNtnDemoMacLayerConfiguration : public MacLayerConfiguration
 {
   public:

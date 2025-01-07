@@ -27,6 +27,10 @@
 namespace ns3
 {
 
+/**
+ * \ingroup mobility
+ * \brief A curve that represents a drone flight with constant acceleration.
+ */
 class ConstantAccelerationFlight : public Curve
 {
   public:

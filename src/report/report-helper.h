@@ -23,6 +23,13 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Helper class for the Report module.
+ *
+ * This class is used to set the scenario name.
+ */
 class ReportHelper
 {
     void SetScenarioName(std::string);

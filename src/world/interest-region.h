@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * \brief A 3D region of interest modelled as a box
+ * \brief A 3D region of interest modelled as a box.
  */
 class InterestRegion : public Object
 {

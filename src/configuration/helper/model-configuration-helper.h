@@ -32,6 +32,8 @@ using JsonObject = rapidjson::Value::ConstObject;
 using JsonValue = rapidjson::Value;
 
 /**
+ * \brief Helper to decode a ns3 Model from a JSON configuration file.
+ *
  * Helper to decode a ns3 Model from a JSON configuration file and read the following properties:
  *   - Its name
  *   - Its set of attributes and values
@@ -40,7 +42,8 @@ class ModelConfigurationHelper
 {
   public:
     /**
-     * ModelConfigurationHelper is a utility class with only static members, thus it can't be initialized.
+     * ModelConfigurationHelper is a utility class with only static members, thus it can't be
+     * initialized.
      */
     ModelConfigurationHelper() = delete;
 

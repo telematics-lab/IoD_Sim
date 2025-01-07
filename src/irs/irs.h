@@ -40,6 +40,8 @@ enum class RotoAxisType
 };
 
 /**
+ * \ingroup irs
+ *
  * \brief Base class describing an Intelligent Reflective Surface aggregable to a node like a
  * peripheral.
  */
@@ -68,31 +70,34 @@ class Irs : public DronePeripheral
      * \returns Y-side dimension of the PRU.
      */
     double GetPruY() const;
+
     /**
-     * \brief TODO
+     * \brief Set the axis used to define IRS rotation.
      *
-     * \param a TODO
+     * \param v List of axis used to set IRS rotation (or to BackRotate other points).
      */
     void SetRotoAxis(const StrVec& v);
 
     /**
-     * \brief TODO
+     * \brief Retrieve the axis used to define IRS rotation.
      *
-     * \returns TODO
+     * \returns List of axis used to set IRS rotation (or to BackRotate other points).
      */
     const std::vector<RotoAxisType>& GetRotoAxis() const;
 
     /**
-     * \brief TODO
+     * \brief Set the angles used to rotate the IRS.
      *
-     * \param a TODO
+     * \param a list of angles (in radians) used to rotate the IRS, the n-th angles refers to n-th
+     * axis.
      */
     void SetRotoAnglesDegrees(const DoubleVector& a);
 
     /**
-     * \brief TODO
+     * \brief Retrieve the angles used to rotate the IRS.
      *
-     * \returns TODO
+     * \returns List of angles (in radians) used to rotate the IRS, the n-th angles refers to n-th
+     * axis.
      */
     std::vector<double> GetRotoAngles() const;
 

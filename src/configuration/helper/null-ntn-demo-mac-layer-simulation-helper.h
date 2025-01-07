@@ -31,7 +31,7 @@ namespace ns3
 {
 
 /**
- * Helper simulate a NTN scenario without a real-world MAC.
+ * \brief Helper to simulate a NTN scenario without a real-world MAC.
  */
 class NullNtnDemoMacLayerSimulationHelper : public Object
 {

@@ -24,7 +24,9 @@ namespace ns3
 {
 
 /**
- * Helper to enhance ns-3 LteHelper functionalities with additional
+ * \ingroup lte
+ *
+ * \brief Helper to enhance ns-3 LteHelper functionalities with additional
  * features, without modifying objects external to IoD_Sim.
  */
 class LteSetupHelper

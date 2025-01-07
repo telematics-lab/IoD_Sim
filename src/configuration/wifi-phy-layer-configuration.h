@@ -29,7 +29,7 @@ namespace ns3
 {
 
 /**
- * Data class to store information about the WiFi PHY Layer of a Scenario.
+ * \brief Data class to store information about the WiFi PHY Layer of a Scenario.
  */
 class WifiPhyLayerConfiguration : public PhyLayerConfiguration
 {

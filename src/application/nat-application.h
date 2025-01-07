@@ -28,6 +28,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup applications
+ *
+ * \brief Application that defines a Network Address Translation (NAT) service.
+ */
 class NatApplication : public Application
 {
   public:

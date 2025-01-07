@@ -29,6 +29,9 @@ namespace ns3
 
 /**
  * \ingroup irs
+ *
+ * \brief Define a static serving configurator for the IRS.
+ *
  * Defines an object which, aggregated to an Irs Patch, updates the pair of nodes to be served
  * during the patch life time. The different pairs are used for a duration equal to
  * the one defined in m_periods vector.

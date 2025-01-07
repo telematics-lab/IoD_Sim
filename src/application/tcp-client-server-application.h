@@ -26,12 +26,14 @@ namespace ns3
 {
 
 /**
- * Base application for reliable TCP-based client-server communications.
+ * \ingroup applications
+ * \brief application for reliable TCP-based client-server communications.
  */
 class TcpClientServerApplication : public Application
 {
   public:
     static TypeId GetTypeId();
+
   protected:
     virtual void StartApplication();
     virtual void StopApplication();
