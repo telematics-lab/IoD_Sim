@@ -31,9 +31,9 @@ class Node;
 class CallbackBase;
 
 /**
- * \ingroup iodsim
+ * \ingroup list
  *
- * \brief the list of simulated Remotes
+ * \brief The list of simulated Remotes.
  *
  * Every Remote created is manually added to this list.
  */

@@ -26,7 +26,8 @@ namespace ns3
 {
 
 /**
- * A data class to store configuration information related to the set up of an IPv4 Network Layer.
+ * \brief A data class to store configuration information related to the set up of an IPv4 Network
+ * Layer.
  */
 class Ipv4NetworkLayerConfiguration : public NetworkLayerConfiguration
 {

@@ -26,7 +26,8 @@ namespace ns3
 {
 
 /**
- * Application that sends random packets with Seq.Num. and Timestamp to a remote server
+ * \ingroup applications
+ * \brief Application that sends UDP packets with with a defined size and frequency.
  */
 class RandomUdpApplication : public Application
 {
@@ -39,6 +40,7 @@ class RandomUdpApplication : public Application
      * \brief Default constructor
      */
     RandomUdpApplication();
+
   protected:
     /**
      * \brief Initialize the Object registered as TypeId

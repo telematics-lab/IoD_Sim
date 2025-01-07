@@ -27,6 +27,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ * \brief Define a Wifi MAC Layer for report generation.
+ *
+ * Defines an object which contains the Wifi MAC Layer informations.
+ */
 class WifiMacLayer : public ProtocolLayer
 {
   public:

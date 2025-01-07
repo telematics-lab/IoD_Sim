@@ -9,9 +9,10 @@ namespace ns3
 {
 
 /**
- * Store real and virtual time, useful when it is required to
- * calculate the time taken in respect to the computation
- * (real) and to the simulation (virtual).
+ * \ingroup report
+ *
+ * \brief Store real and virtual time, useful when it is required to calculate the time taken in
+ * respect to the computation (real) and to the simulation (virtual).
  */
 class SimulationDuration
 {

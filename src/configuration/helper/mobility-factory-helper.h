@@ -25,7 +25,7 @@ namespace ns3
 {
 
 /**
- * Helper to enhance ns-3 MobilityHelper functionalities with additional
+ * \brief Helper to enhance ns-3 MobilityHelper functionalities with additional
  * features, without modifying objects external to IoD_Sim.
  */
 class MobilityFactoryHelper

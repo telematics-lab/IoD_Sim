@@ -26,6 +26,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief A class to report an IPv4 Layer.
+ */
 class Ipv4Layer : public ProtocolLayer
 {
   public:

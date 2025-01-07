@@ -24,12 +24,14 @@ namespace ns3
 {
 
 /**
- * Basic Server TCP application that echoes in case data is received.
+ * \ingroup applications
+ * \brief Server TCP application that echoes in case data is received.
  */
 class TcpEchoServerApplication : public TcpClientServerApplication
 {
   public:
     static TypeId GetTypeId();
+
   protected:
     virtual void StartApplication();
     virtual void ReceivedDataCallback(Ptr<Socket> s);

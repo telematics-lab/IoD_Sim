@@ -26,6 +26,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report module for a peripheral.
+ *
+ */
 class ReportPeripheral
 {
   public:

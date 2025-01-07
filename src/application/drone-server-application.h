@@ -24,19 +24,27 @@
 
 namespace ns3
 {
-
+/**
+ * \brief Define the state of the server.
+ */
 enum ServerState
 {
     SERVER_CLOSED,
     SERVER_LISTEN
 };
 
+/**
+ * \ingroup applications
+ *
+ * \brief Application that receives packets from a drone and sends back acknowledgements.
+ */
 class DroneServerApplication : public Application
 {
   public:
     static TypeId GetTypeId();
 
     DroneServerApplication();
+
   protected:
     virtual void DoDispose();
 

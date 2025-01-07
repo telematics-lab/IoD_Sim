@@ -29,6 +29,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup debugging
+ *
+ * \brief Class for debugging purposes.
+ */
 class DebugHelper
 {
   public:

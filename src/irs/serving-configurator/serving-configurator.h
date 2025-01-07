@@ -25,6 +25,9 @@ namespace ns3
 
 /**
  * \ingroup irs
+ *
+ * \brief Base class for Serving Configurators.
+ *
  * Defines the base object for Serving Configurators. Such a configurator updates Serving Nodes of
  * an Irs Patch during the simulation, in Patch lifetime.
  */

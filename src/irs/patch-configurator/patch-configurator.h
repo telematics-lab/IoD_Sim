@@ -26,6 +26,9 @@ namespace ns3
 
 /**
  * \ingroup irs
+ *
+ * \brief Base class for Patch Configurators.
+ *
  * Defines the base object for Patch Configurators. Such a configurator updates the patch
  * organisation of an Irs during the simulation
  */

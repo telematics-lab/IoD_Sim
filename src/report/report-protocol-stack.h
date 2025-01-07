@@ -27,6 +27,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report module for a Protocol Stack.
+ *
+ */
 class ReportProtocolStack
 {
   public:

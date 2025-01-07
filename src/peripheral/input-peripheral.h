@@ -28,6 +28,8 @@ namespace ns3
 {
 
 /**
+ * \ingroup peripheral
+ *
  * \brief This class describes a generic input peripheral with a constant
  * acquisition data rate.
  * It must be linked to a StoragePeripheral to store the gathered data.

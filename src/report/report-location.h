@@ -28,6 +28,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Report module for a location.
+ *
+ */
 class ReportLocation
 {
   public:

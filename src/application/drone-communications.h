@@ -26,6 +26,10 @@
 namespace ns3
 {
 
+/**
+ * \ingroup applications
+ * \brief The type of packet exchanged between drones and ZSPs.
+ */
 class PacketType
 {
   public:

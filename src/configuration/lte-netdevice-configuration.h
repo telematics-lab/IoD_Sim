@@ -28,6 +28,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup lte
+ *
+ * \brief Enum to represent the role of the Network Device in the LTE network.
+ */
 enum LteRole
 {
     UE,
@@ -35,7 +40,10 @@ enum LteRole
 };
 
 /**
- * Data class to recnognize and configure an LTE Network Device for an entity to be simulated.
+ * \ingroup lte
+ *
+ * \brief Data class to recnognize and configure an LTE Network Device for an entity to be
+ * simulated.
  */
 class LteNetdeviceConfiguration : public NetdeviceConfiguration
 {

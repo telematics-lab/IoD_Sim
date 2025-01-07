@@ -27,6 +27,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief A class to report a the LTE UE Phy Layer.
+ */
 class LteUEPhyLayer : public ProtocolLayer
 {
   public:

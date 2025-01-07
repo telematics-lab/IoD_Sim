@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * Data class to recnognize and configure a Network Device for an entity to be simulated.
+ * \brief Data class to recnognize and configure a Network Device for an entity to be simulated.
  */
 class WifiNetdeviceConfiguration : public NetdeviceConfiguration
 {

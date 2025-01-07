@@ -29,6 +29,7 @@ namespace ns3
 {
 
 /**
+ * \ingroup mobility
  * \brief Plan trajectories
  **/
 template <typename FlightParam, typename FlightType>

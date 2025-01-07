@@ -30,6 +30,8 @@ namespace ns3
 {
 
 /**
+ * \ingroup irs
+ *
  * \brief Model the Patch of an Intelligent Reflective Surface (IRS).
  */
 class IrsPatch : public Object

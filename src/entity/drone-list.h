@@ -31,9 +31,9 @@ class Drone;
 class CallbackBase;
 
 /**
- * \ingroup iodsim
+ * \ingroup list
  *
- * \brief the list of simulated Drones
+ * \brief The list of simulated Drones
  *
  * Every drone created is manually added to this list.
  */

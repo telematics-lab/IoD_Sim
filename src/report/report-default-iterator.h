@@ -8,6 +8,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief This class is an iterator that goes through all the TypeIds and get attributes.
+ */
 class ReportDefaultIterator
 {
   public:

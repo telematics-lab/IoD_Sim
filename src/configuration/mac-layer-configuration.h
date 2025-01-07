@@ -26,7 +26,8 @@ namespace ns3
 {
 
 /**
- * Data class to store information about the MAC Layer of a Scenario.
+ * \brief Data class to store information about the MAC Layer of a Scenario.
+ *
  * This is a base class, you should derive a specialized child to better describe the MAC Layer.
  */
 class MacLayerConfiguration : public Object

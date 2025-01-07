@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * \brief the client states
+ * \brief Define the client states
  */
 enum ClientState
 {
@@ -37,7 +37,7 @@ enum ClientState
 };
 
 /**
- * \brief the intent of a packet
+ * \brief Define the intent of a packet
  */
 enum Intent
 {
@@ -64,7 +64,8 @@ ToString(Intent i)
 }
 
 /**
- * Application to be installed on each drone that wants to participate in the
+ * \ingroup applications
+ * \brief Application to be installed on each drone that wants to participate in the
  * IoD inter-network using a simple JSON via UDP with ACK protocol.
  */
 class DroneClientApplication : public Application

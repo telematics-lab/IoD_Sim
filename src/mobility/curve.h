@@ -30,8 +30,8 @@ namespace ns3
 {
 
 /**
- * Generate a discrete curve given a flight plan and a step using Bézier
- * general equation.
+ * \ingroup mobility
+ * \brief Generate a discrete curve given a flight plan and a step using Bézier general equation.
  */
 class Curve
 {

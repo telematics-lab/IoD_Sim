@@ -27,6 +27,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief A base class to report a protocol layers
+ */
 class ProtocolLayer : public Object
 {
   public:

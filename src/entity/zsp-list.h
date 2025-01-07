@@ -31,9 +31,9 @@ class Node;
 class CallbackBase;
 
 /**
- * \ingroup iodsim
+ * \ingroup list
  *
- * \brief the list of simulated Zsps
+ * \brief The list of simulated ZSPs.
  *
  * Every Zsp created is manually added to this list.
  */

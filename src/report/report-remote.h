@@ -37,6 +37,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module for Remote entity.
+ *
  * Retrieve and store data about a Remote, like its
  *  - network stack
  *  - traffic (Rx and Tx)

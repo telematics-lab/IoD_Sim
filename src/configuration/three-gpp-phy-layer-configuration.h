@@ -31,7 +31,7 @@ namespace ns3
 {
 
 /**
- * Data class to store information about the 3GPP PHY Layer of a Scenario.
+ * \brief Data class to store information about the 3GPP PHY Layer of a Scenario.
  */
 class ThreeGppPhyLayerConfiguration : public PhyLayerConfiguration
 {

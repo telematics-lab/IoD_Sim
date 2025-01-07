@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * Helper to decode a MAC Layer from a JSON configuration file.
+ * \brief Helper to decode a MAC Layer from a JSON configuration file.
  */
 class MacLayerConfigurationHelper
 {

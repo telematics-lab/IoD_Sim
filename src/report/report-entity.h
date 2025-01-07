@@ -37,6 +37,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module for an entity.
+ *
  * Generic object to address common report functionalities between IoD_Sim
  * entities, like Drone and ZSP.
  * Reporting in IoD_Sim consists in building and using the following monitors:

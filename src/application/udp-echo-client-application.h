@@ -29,7 +29,7 @@ namespace ns3
 {
 
 /**
- * \ingroup udpclientserver
+ * \ingroup applications
  *
  * \brief A Udp client. Sends UDP packet carrying sequence number and time stamp
  *  in their payloads

@@ -25,6 +25,11 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ *
+ * \brief Define the direction of a communication.
+ */
 class TransferDirection
 {
   public:

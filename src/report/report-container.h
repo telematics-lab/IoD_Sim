@@ -34,7 +34,8 @@ namespace ns3
 {
 
 /**
- * A container to easily keep pointers
+ * \ingroup report
+ * \brief A container to easily keep pointers
  */
 template <class ReportType>
 class ReportContainer

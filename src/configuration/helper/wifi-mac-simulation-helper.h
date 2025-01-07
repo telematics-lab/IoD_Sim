@@ -25,7 +25,7 @@ namespace ns3
 {
 
 /**
- * A data class to store information about a WiFi MAC layer configuration for a simulation.
+ * \brief A data class to store information about a WiFi MAC layer configuration for a simulation.
  */
 class WifiMacSimulationHelper : public Object
 {

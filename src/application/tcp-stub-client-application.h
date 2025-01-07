@@ -29,12 +29,14 @@ namespace ns3
 {
 
 /**
- * Application that sends random packets with Seq.Num. and Timestamp to a remote server
+ * \ingroup applications
+ * \brief Application that sends random packets with Seq.Num. and Timestamp to a remote server.
  */
 class TcpStubClientApplication : public TcpStorageClientApplication
 {
   public:
     static TypeId GetTypeId();
+
   protected:
     virtual void DoInitialize();
     virtual void StartApplication();

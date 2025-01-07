@@ -31,6 +31,10 @@ namespace ns3
 {
 
 /**
+ * \ingroup report
+ *
+ * \brief Report module.
+ *
  * The Report module is made to agglomerate useful data and output all of it in
  * a XML file. Report should be initialized with all the needed information
  * prior to Simulation start.

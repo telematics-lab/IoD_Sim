@@ -51,7 +51,7 @@ operator<<(std::ostream& os, const std::vector<T>& v)
 }
 
 /**
- * Hold objects of type std::vector<T>
+ * \brief Hold objects of type std::vector<T>
  */
 template <class T>
 class VectorValue : public AttributeValue
@@ -84,11 +84,14 @@ private:
   value_type m_value;
 };
 
+/**
+ * \brief AttributeChecker for VectorValue.
+ */
 class VectorChecker : public AttributeChecker
 {
-public:
-  virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
-  virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
+  public:
+    virtual void SetChecker(Ptr<const AttributeChecker> checker) = 0;
+    virtual Ptr<const AttributeChecker> GetChecker(void) const = 0;
 };
 
 /**

@@ -27,7 +27,7 @@ namespace ns3
 {
 
 /**
- * Data class to recognize and configure a TypeId that is registered on ns-3.
+ * \brief class to recognize and configure a TypeId that is registered on ns-3.
  */
 class ModelConfiguration
 {
@@ -38,7 +38,8 @@ class ModelConfiguration
         std::string name;
         Ptr<AttributeValue> value;
 
-	Attribute() = default;
+        Attribute() = default;
+
         Attribute(std::string name, Ptr<AttributeValue> value)
             : name{name},
               value{value}

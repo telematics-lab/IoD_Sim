@@ -32,6 +32,12 @@
 namespace ns3
 {
 
+/**
+ * \ingroup report
+ * \brief Define a Wifi PHY Layer for report generation.
+ *
+ * Defines an object which contains the Wifi PHY Layer informations.
+ */
 class WifiPhyLayer : public ProtocolLayer
 {
   public:

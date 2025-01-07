@@ -29,7 +29,7 @@ class Irs;
 class CallbackBase;
 
 /**
- * \ingroup Irs
+ * \ingroup list
  *
  * \brief the list of Irs.
  *

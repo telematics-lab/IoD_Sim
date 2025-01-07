@@ -27,8 +27,8 @@ namespace ns3
 {
 
 /**
- * Data class specific for Mobility Models configuration, which may set nodes to an initial position
- * through a position allocator.
+ * \brief Data class specific for Mobility Models configuration, which may set nodes to an initial
+ * position through a position allocator.
  */
 class MobilityModelConfiguration : public ModelConfiguration
 {
