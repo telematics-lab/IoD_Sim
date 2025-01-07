@@ -110,6 +110,18 @@ sudo docker run --rm -v ./results:/IoD_Sim/results -v ./scenario:/IoD_Sim/scenar
 
 When completed, the `results` folder will contain the results of the simulation. It should be noted that if a new scenario is placed in `./scenario`, there will be no need to rebuild the container.
 
+## ns-3 compatibility
+Each version of IoD_Sim relies on a specific release of ns-3. A compatibility table can be found below:
+
+| IoD_Sim version| ns-3 version | Build system  | Release date       |
+| :------------: | :-----------:| :-----------: |--------------------|
+| v4.0.1         | ns-3.42      | cmake         | June 5, 2024       |
+| v4.0.0         | ns-3.42      | cmake         | June 2, 2024       |
+| v3.0.0         | ns-3.38      | cmake         | April 4, 2023      |
+| v2.0.0         | ns-3.35      | waf           | April 12, 2022     |
+| v1.0.0         | ns-3.30      | waf           | October 27, 2019   |
+
+
 ## License
 
 Copyright (C) 2018-2024 [The IoD_Sim Authors](AUTHORS).
