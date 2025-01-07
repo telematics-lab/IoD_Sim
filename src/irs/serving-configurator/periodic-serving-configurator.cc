@@ -77,9 +77,6 @@ PeriodicServingConfigurator::ScheduleUpdates()
     {
         if (periodend <= periodstart + nextupdate)
         {
-            // TODO: schedule patch and serving configurator destruction?
-            // Simulator::Schedule (Seconds (nextupdate), &PeriodicServingConfigurator::DoDispose,
-            // this);
             break; // we have reached the end of the period, no need to continue
         }
         if (nextupdate > 0)

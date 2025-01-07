@@ -46,7 +46,6 @@ class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
 
     ParametricSpeedDroneMobilityModel();
 
-    // TODO: Put into generic Utility object
     static FlightPlan ProjectedToGeographicCoordinates(
         const FlightPlan& flightPlan,
         GeographicPositions::EarthSpheroidType earthType);

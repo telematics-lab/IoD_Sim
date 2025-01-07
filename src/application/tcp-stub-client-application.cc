@@ -60,8 +60,7 @@ TcpStubClientApplication::StartApplication()
     NS_LOG_FUNCTION(this);
     TcpClientServerApplication::StartApplication();
 
-    Simulator::ScheduleNow(&TcpStubClientApplication::Connect,
-                           this); // TODO: parametrize Seconds (0.5)
+    Simulator::ScheduleNow(&TcpStubClientApplication::Connect, this);
     // Simulator::Schedule (m_txInterval, &TcpStubClientApplication::SendPacket, this);
 }
 
