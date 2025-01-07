@@ -120,8 +120,6 @@ NatApplication::RecvPktFromExtNetDev(Ptr<NetDevice> netdev,
                                      const Address& sender)
 {
     NS_LOG_FUNCTION(this << netdev << pkt << protocol << sender);
-    // TODO: This is a fake address. How can we easily retrieve the receiver IP Address from the
-    // packet?
     auto receiver = Ipv4Address::GetZero();
 
     return RecvPktFromNetDev(netdev,
@@ -154,7 +152,6 @@ NatApplication::RecvPktFromNetDev(Ptr<NetDevice> netdev,
         toBeSent->RemoveHeader(ipHdr);
         ipv4Protocol = ipHdr.GetProtocol();
 
-        // TODO: if (ipv4Protocol == 6 /* TCP */)
         if (ipv4Protocol == 17 /* UDP */)
         {
             toBeSent->RemoveHeader(udpHdr);
@@ -166,7 +163,6 @@ NatApplication::RecvPktFromNetDev(Ptr<NetDevice> netdev,
             auto outPort = m_natTable[entry];
             if (!outPort)
             {
-                // TODO: TCP could break!
                 if (m_curNatPort <= 0 || m_curNatPort >= UINT16_MAX)
                     m_curNatPort = 1;
 
@@ -204,7 +200,6 @@ NatApplication::RecvPktFromNetDev(Ptr<NetDevice> netdev,
         toBeSent->RemoveHeader(ipHdr);
         ipv4Protocol = ipHdr.GetProtocol();
 
-        // TODO: if (ipv4Protocol == 6 /* TCP */)
         if (ipv4Protocol == 17 /* UDP */)
         {
             toBeSent->RemoveHeader(udpHdr);

@@ -345,8 +345,6 @@ NullNtnDemoMacLayerSimulationHelper::ComputeSnr(ComputeSnrParams& params) const
         else
         {
             // fallback to Topocentric
-            // TODO: need a threshold to understand if we can simplify to
-            //       Topocentric, or it is better to use a projection
             return mm->GetPosition(PositionType::TOPOCENTRIC);
         }
     };

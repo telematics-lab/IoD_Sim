@@ -157,7 +157,7 @@ WifiPhyLayer::DoInitialize()
 {
     NS_LOG_FUNCTION_NOARGS();
 
-    m_address = GetDeviceAddress(); // TODO: it would be usedul to report it in the XML file.
+    m_address = GetDeviceAddress();
     DoInitializeRssiMonitor();
 
     ProtocolLayer::DoInitialize();

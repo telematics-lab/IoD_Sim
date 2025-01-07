@@ -161,8 +161,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
         {
             NS_LOG_LOGIC("converting txPowerSpectrum SpectrumModelUids "
                          << txSpectrumModelUid << " --> " << rxSpectrumModelUid);
-            auto rxConverterIt = txInfoIt->second.m_spectrumConverterMap.find(
-                rxSpectrumModelUid); // TODO: const ref?
+            auto rxConverterIt = txInfoIt->second.m_spectrumConverterMap.find(rxSpectrumModelUid);
             if (rxConverterIt == txInfoIt->second.m_spectrumConverterMap.end())
             {
                 // No converter means TX SpectrumModel is orthogonal to RX SpectrumModel
