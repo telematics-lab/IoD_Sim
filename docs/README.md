@@ -1,4 +1,4 @@
-![IoD_Sim ](.github/logo_extended.svg)
+![IoD_Sim ](docs/logo_extended.png)
 
 [IoD_Sim](https://telematics.poliba.it/iod-sim) is an open source and
 system-level simulator for the IoD ([Internet of
