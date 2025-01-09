@@ -115,6 +115,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | Build system  | Release date       |
 | :------------: | :-----------:| :-----------: |--------------------|
+| v4.0.2         | ns-3.42      | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      | cmake         | June 5, 2024       |
 | v4.0.0         | ns-3.42      | cmake         | June 2, 2024       |
 | v3.0.0         | ns-3.38      | cmake         | April 4, 2023      |
@@ -124,7 +125,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 ## License
 
-Copyright (C) 2018-2024 [The IoD_Sim Authors](AUTHORS).
+Copyright (C) 2018-2025 [The IoD_Sim Authors](AUTHORS).
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
