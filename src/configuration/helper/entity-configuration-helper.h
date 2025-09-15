@@ -58,6 +58,8 @@ class EntityConfigurationHelper
         const rapidjson::Value& json);
     static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
         const JsonArray& json);
+    static const std::vector<LteBearerConfiguration> DecodeNrBearerConfigurations(
+        const JsonArray& jsonArray);
     static const MobilityModelConfiguration DecodeMobilityConfiguration(
         const rapidjson::Value& json);
     static const std::optional<Vector> DecodeInitialPosition(const rapidjson::Value& json);

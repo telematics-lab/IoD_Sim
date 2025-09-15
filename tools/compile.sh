@@ -3,6 +3,7 @@
 set -e
 
 pushd ns3
-./ns3 configure --enable-examples --disable-python --enable-modules=iodsim
+./ns3 configure --build-profile=debug --enable-examples --enable-tests --disable-mpi \
+  --disable-python --enable-modules=iodsim,nr
 ./ns3 build
 popd

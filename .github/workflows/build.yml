@@ -4,18 +4,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-    - name: Configure git
-      uses: nodef/git-config.action@v1.0.0
-      with:
-        credentials: auto
-        entries: |-
-          user.name = Github Actions
-          user.email = email@example.com
-    - name: Install dependencies
-      run: sudo ./tools/install-dependencies.sh
-    - name: Integrate ns3 and IoD Sim
-      run: ./tools/prepare-ns3.sh
-    - name: Build IoD Sim
-      run: ./tools/compile.sh
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Configure git
+        uses: nodef/git-config.action@v1.0.0
+        with:
+          credentials: auto
+          entries: |-
+            user.name = Github Actions
+            user.email = email@example.com
+      - name: Install dependencies
+        run: sudo ./tools/install-dependencies.sh
+      - name: Integrate ns3 and IoD Sim
+        run: ./tools/prepare-ns3.sh
+      - name: Integrate nr and ns3
+        run: ./tools/clone-nr.sh
+      - name: Build IoD Sim
+        run: ./tools/compile.sh

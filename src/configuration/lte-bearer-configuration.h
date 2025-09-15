@@ -46,6 +46,12 @@ class LteBearerConfiguration : public Object
                            const uint64_t gbrUl,
                            const uint64_t mbrDl,
                            const uint64_t mbrUl);
+
+    LteBearerConfiguration(const std::string type);
+
+    /** Default destructor */
+    ~LteBearerConfiguration();
+
     /**
      * \return The type of the Network Device.
      */

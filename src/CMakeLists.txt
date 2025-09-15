@@ -19,6 +19,7 @@ set(source_files
   configuration/helper/entity-configuration-helper.cc
   configuration/helper/ipv4-simulation-helper.cc
   configuration/helper/lte-phy-simulation-helper.cc
+  configuration/helper/nr-phy-simulation-helper.cc
   configuration/helper/lte-setup-helper.cc
   configuration/helper/mac-layer-configuration-helper.cc
   configuration/helper/mobility-factory-helper.cc
@@ -37,7 +38,9 @@ set(source_files
   configuration/ipv4-network-layer-configuration.cc
   configuration/lte-bearer-configuration.cc
   configuration/lte-netdevice-configuration.cc
+  configuration/nr-netdevice-configuration.cc
   configuration/lte-phy-layer-configuration.cc
+  configuration/nr-phy-layer-configuration.cc
   configuration/mac-layer-configuration.cc
   configuration/mobility-model-configuration.cc
   configuration/netdevice-configuration.cc
@@ -129,6 +132,7 @@ set(header_files
   configuration/helper/entity-configuration-helper.h
   configuration/helper/ipv4-simulation-helper.h
   configuration/helper/lte-phy-simulation-helper.h
+  configuration/helper/nr-phy-simulation-helper.h
   configuration/helper/lte-setup-helper.h
   configuration/helper/mac-layer-configuration-helper.h
   configuration/helper/mobility-factory-helper.h
@@ -147,7 +151,9 @@ set(header_files
   configuration/ipv4-network-layer-configuration.h
   configuration/lte-bearer-configuration.h
   configuration/lte-netdevice-configuration.h
+  configuration/nr-netdevice-configuration.h
   configuration/lte-phy-layer-configuration.h
+  configuration/nr-phy-layer-configuration.h
   configuration/mac-layer-configuration.h
   configuration/mobility-model-configuration.h
   configuration/netdevice-configuration.h
@@ -230,6 +236,7 @@ build_lib(
                     ${liblte}
                     ${libwifi}
                     ${libmobility}
+                    ${libnr}
 )
 
 build_lib_example(
@@ -242,4 +249,5 @@ build_lib_example(
                     ${libnetwork}
                     ${libwifi}
                     ${libinternet}
+                    ${libnr}
 )

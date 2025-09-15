@@ -105,6 +105,7 @@ ModelConfigurationHelper::GetAttributes(const TypeId& model,
 const ModelConfiguration
 ModelConfigurationHelper::DecodeCoaleshedModel(const TypeId& model, const JsonObject& jModel)
 {
+    // TODO: decode additional phy attribute that cannot be directly mapped
     std::vector<ModelConfiguration::Attribute> attributes;
     std::vector<ModelConfiguration> aggregates;
     TypeId::AttributeInformation attrInfo;
@@ -388,8 +389,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
     NS_ABORT_MSG_IF(!attrValue,
                     "The attribute value for property "
                         << attrInfo.name << " defined in model " << modelName
-                        << " was not accepted. "
-                        << "Insert a valid value according to "
+                        << " was not accepted. " << "Insert a valid value according to "
                         << attrInfo.checker->GetUnderlyingTypeInformation());
     return attrValue;
 }

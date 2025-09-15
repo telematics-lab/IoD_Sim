@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include "ns3/ideal-beamforming-algorithm.h"
 #include <ns3/buildings-helper.h>
 #include <ns3/config.h>
 #include <ns3/csma-module.h>
@@ -27,6 +28,7 @@
 #include <ns3/drone-peripheral.h>
 #include <ns3/drone-server-application.h>
 #include <ns3/energy-source.h>
+#include <ns3/ideal-beamforming-helper.h>
 #include <ns3/input-peripheral.h>
 #include <ns3/interest-region-container.h>
 #include <ns3/internet-module.h>
@@ -47,6 +49,10 @@
 #include <ns3/nat-application.h>
 #include <ns3/net-device-container.h>
 #include <ns3/node-list.h>
+#include <ns3/nr-helper.h>
+#include <ns3/nr-netdevice-configuration.h>
+#include <ns3/nr-phy-layer-configuration.h>
+#include <ns3/nr-phy-simulation-helper.h>
 #include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/null-ntn-demo-mac-layer-simulation-helper.h>
 #include <ns3/object-factory.h>
@@ -123,6 +129,18 @@ class Scenario
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
                         const std::optional<ModelConfiguration> phyConf);
+
+    void ConfigureNrGnb(Ptr<Node> entityNode,
+                        const uint32_t netId,
+                        const std::optional<ModelConfiguration> antennaModel,
+                        const std::optional<ModelConfiguration> phyConf);
+
+    void ConfigureNrUe(Ptr<Node> entityNode,
+                       const std::vector<LteBearerConfiguration> bearers,
+                       const uint32_t netId,
+                       const std::optional<ModelConfiguration> antennaModel,
+                       const std::optional<ModelConfiguration> phyConf);
+
     void InstallEntityIpv4(Ptr<Node> entityNode,
                            NetDeviceContainer netDevices,
                            const uint32_t netId);
@@ -463,6 +481,55 @@ Scenario::ConfigurePhy()
                                                                        spectrumLoss);
             m_protocolStacks[PHY_LAYER].push_back(simHelper);
         }
+        else if (phyLayerConf->GetType() == "nr")
+        {
+            auto nrSim = CreateObject<NrPhySimulationHelper>(phyId);
+            auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
+            auto nrHelper = nrSim->GetNrHelper();
+
+            // TODO: Put this in the MAC section?
+            nrHelper->SetSchedulerTypeId(TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR"));
+
+            // Beamforming method
+            // TODO: find a way to set up it from JSON
+            // if (cellScan)
+            //{
+            // idealBeamformingHelper->SetAttribute("BeamformingMethod",TypeIdValue(CellScanBeamforming::GetTypeId()));
+            // idealBeamformingHelper->SetBeamformingAlgorithmAttribute("BeamSearchAngleStep",DoubleValue(beamSearchAngleStep));
+            //}
+            // else
+            //{
+            nrSim->GetIdealBeamformingHelper()->SetAttribute(
+                "BeamformingMethod",
+                TypeIdValue(DirectPathBeamforming::GetTypeId()));
+            //}
+
+            auto pathlossConf = nrConf->GetChannelPropagationLossModel();
+            if (pathlossConf)
+            {
+                // TODO: NrHelper doesn't provide a way to configure m_pathlossModelFactory
+
+                // nrHelper->SetAttribute("PathlossModel", StringValue(pathlossConf->GetName()));
+                for (auto& attr : pathlossConf->GetAttributes())
+                    nrHelper->SetPathlossAttribute(attr.name, *attr.value);
+            }
+
+            auto spectrumConf = nrConf->GetChannelSpectrumModel();
+            // TODO: NrHelper doesn't provide a way to configure m_channelFactory
+
+            // nrHelper->SetSpectrumChannelType(spectrumConf.GetName());
+            // for (auto& attr : spectrumConf.GetAttributes())
+            // nrHelper->SetSpectrumChannelAttribute(attr.name, *attr.value);
+
+            for (auto& attr : nrConf->GetAttributes())
+                nrHelper->SetAttribute(attr.name, *attr.value);
+
+            nrHelper->Initialize();
+
+            m_backbone.Add(nrSim->GetNrEpcHelper()->GetPgwNode());
+
+            m_protocolStacks[PHY_LAYER].push_back(nrSim);
+        }
         else
         {
             NS_FATAL_ERROR("Unsupported PHY Layer Type: " << phyLayerConf->GetType());
@@ -498,6 +565,11 @@ Scenario::ConfigureMac()
             m_protocolStacks[MAC_LAYER].push_back(wifiMac);
         }
         else if (macLayerConf->GetType() == "lte")
+        {
+            // NO OPERATION NEEDED HERE
+            m_protocolStacks[MAC_LAYER].push_back(nullptr);
+        }
+        else if (macLayerConf->GetType() == "nr")
         {
             // NO OPERATION NEEDED HERE
             m_protocolStacks[MAC_LAYER].push_back(nullptr);
@@ -578,7 +650,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
 {
     NS_LOG_FUNCTION(entityKey);
 
-    const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration(entityKey);
+    const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration(entityKey); // Modificare
     size_t entityId = 0;
 
     for (auto& entityConf : entityConfs)
@@ -629,6 +701,32 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     break;
                 default:
                     NS_FATAL_ERROR("Unrecognized LTE role for entity ID " << entityId);
+                }
+            }
+            else if (entityNetDev->GetType() == "nr")
+            {
+                NS_ASSERT_MSG(netId, "NR NetDevice must have a Network Layer ID");
+
+                const auto entityNrDevConf =
+                    StaticCast<NrNetdeviceConfiguration, NetdeviceConfiguration>(entityNetDev);
+                const auto role = entityNrDevConf->GetRole();
+                const auto antennaModel = entityNrDevConf->GetAntennaModel();
+                const auto phyConf = entityNrDevConf->GetPhyModel();
+
+                switch (role)
+                {
+                case gNB:
+                    ConfigureNrGnb(entityNode, *netId, antennaModel, phyConf);
+                    break;
+                case UE:
+                    ConfigureNrUe(entityNode,
+                                  entityNrDevConf->GetBearers(),
+                                  *netId,
+                                  antennaModel,
+                                  phyConf);
+                    break;
+                default:
+                    NS_FATAL_ERROR("Unrecognized NR role for entity ID " << entityId);
                 }
             }
             else if (entityNetDev->GetType() == "simple")
@@ -829,9 +927,8 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
     for (auto assignedIpIter = assignedIpAddrs.Begin(); assignedIpIter != assignedIpAddrs.End();
          assignedIpIter++)
     {
-        NS_LOG_LOGIC("Assigned IPv4 Address to UE with Node ID " << entityNode->GetId() << ":"
-                                                                 << " Iface "
-                                                                 << assignedIpIter->second);
+        NS_LOG_LOGIC("Assigned IPv4 Address to UE with Node ID "
+                     << entityNode->GetId() << ":" << " Iface " << assignedIpIter->second);
 
         for (uint32_t i = 0; i < assignedIpIter->first->GetNAddresses(assignedIpIter->second); i++)
         {
@@ -853,6 +950,23 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
         EpsBearer bearer(bearerConf.GetType(), bearerConf.GetQos());
         ltePhy->GetLteHelper()->ActivateDedicatedEpsBearer(dev, bearer, EpcTft::Default());
     }
+}
+
+void
+Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
+                         const uint32_t netId,
+                         const std::optional<ModelConfiguration> antennaModel,
+                         const std::optional<ModelConfiguration> phyConf)
+{
+}
+
+void
+Scenario::ConfigureNrUe(Ptr<Node> entityNode,
+                        const std::vector<LteBearerConfiguration> bearers,
+                        const uint32_t netId,
+                        const std::optional<ModelConfiguration> antennaModel,
+                        const std::optional<ModelConfiguration> phyConf)
+{
 }
 
 void
@@ -1087,11 +1201,10 @@ Scenario::ConfigureInternetBackbone()
                 netGwNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
 
             NS_LOG_LOGIC("Setting-up static route: REMOTE "
-                         << i << " "
-                         << "(" << remoteNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal()
-                         << ") "
-                         << "-> NETWORK " << j - m_remoteNodes.GetN() << " "
-                         << "(" << netGwBackboneIpv4 << " -> " << netGwInternalIpv4 << ")");
+                         << i << " " << "("
+                         << remoteNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal() << ") "
+                         << "-> NETWORK " << j - m_remoteNodes.GetN() << " " << "("
+                         << netGwBackboneIpv4 << " -> " << netGwInternalIpv4 << ")");
 
             Ptr<Ipv4StaticRouting> staticRouteRem =
                 routingHelper.GetStaticRouting(remoteNode->GetObject<Ipv4>());

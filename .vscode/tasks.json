@@ -14,14 +14,20 @@
       "problemMatcher": []
     },
     {
-      "label": "3-Configure IoD Sim",
+      "label": "3-Integrate ns3 with nr",
+      "type": "shell",
+      "command": "./tools/clone-nr.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "4-Configure IoD Sim",
       "type": "shell",
       "command": "./tools/configure-iodsim.sh",
       "group": "build",
       "problemMatcher": []
     },
     {
-      "label": "4-Build IoD Sim",
+      "label": "5-Build IoD Sim",
       "type": "shell",
       "command": "./ns3 build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {

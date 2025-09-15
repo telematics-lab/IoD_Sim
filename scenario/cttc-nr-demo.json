@@ -1,0 +1,328 @@
+{
+  "name": "cttc_nr_demo",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1,
+
+  "staticNs3Config": [],
+
+  "world": {
+    "size": {
+      "X": "1000",
+      "Y": "1000",
+      "Z": "100"
+    },
+    "buildings": []
+  },
+
+  "phyLayer": [
+    {
+      "type": "nr",
+      "attributes": [],
+      "channel": {
+        "propagationLossModel": {
+          "name": "ns3::ThreeGppPropagationLossModel", //TODO: set up the choosen LossModel in NrHelper
+          "attributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ]
+        },
+        "spectrumModel": {
+          "name": "ns3::MultiModelSpectrumChannel", //TODO: set up the choosen SpectrumChannel in NrHelper
+          "attributes": []
+        }
+      }
+    }
+  ],
+
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "1.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "1.0.0.1"
+    }
+  ],
+  "nodes": [
+    {
+      //LowLat UE
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumRows",
+                "value": 2
+              },
+              {
+                "name": "NumColumns",
+                "value": 4
+              },
+              {
+                "name": "AntennaElement",
+                "value": "ns3::IsotropicAntennaModel"
+              }
+            ]
+          },
+          "phy": {
+            "TxPower": 24.0, // Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
+            "EnableUplinkPowerControl": false
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [20.0, 10.0, 1.5]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        }
+      ]
+    },
+    {
+      //Voice UE
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VOICE"
+            }
+          ],
+          "antennaModel": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumRows",
+                "value": 2
+              },
+              {
+                "name": "NumColumns",
+                "value": 4
+              },
+              {
+                "name": "AntennaElement",
+                "value": "ns3::IsotropicAntennaModel"
+              }
+            ]
+          },
+          "phy": {
+            "TxPower": 24.0, // Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
+            "EnableUplinkPowerControl": false
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [10.0, 20.0, 1.5]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "bandwidthParts": {
+            "TotalTxPower": 35.0,
+            "bandConfs": [
+              {
+                "centralFreq": 28e9,
+                "channelBw": 50e6,
+                "numCc": 1,
+                "scenario": "BandwidthPartInfo::UMi_StreetCanyon",
+                "Numerology": 4
+              },
+              {
+                "centralFreq": 28.2e9,
+                "channelBw": 50e6,
+                "numCc": 1,
+                "scenario": "BandwidthPartInfo::UMi_StreetCanyon",
+                "Numerology": 2
+              }
+            ]
+          },
+          "antennaModel": {
+            "name": "ns3::UniformPlanarArray",
+            "attributes": [
+              {
+                "name": "NumRows",
+                "value": 4
+              },
+              {
+                "name": "NumColumns",
+                "value": 8
+              },
+              {
+                "name": "AntennaElement",
+                "value": "ns3::IsotropicAntennaModel"
+              }
+            ]
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [10.0, 10.0, 10.0]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "RemotePort",
+              "value": 1234
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295 //0xffffffff
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.0001
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "RemotePort",
+              "value": 1235
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295 //0xffffffff
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.0001
+            },
+            {
+              "name": "RemoteAddress",
+              "value": 0.0001
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "analytics": [
+    {
+      "type": "lteRadioEnvironmentMap",
+      "ChannelPath": "/ChannelList/2"
+    }
+  ],
+
+  "logComponents": [
+    "DroneServerApplication",
+    "DroneClientApplication",
+    "Drone",
+    "Scenario",
+    "LteHelper",
+    "NoBackhaulEpcHelper",
+    "LteEnbNetDevice"
+  ]
+}

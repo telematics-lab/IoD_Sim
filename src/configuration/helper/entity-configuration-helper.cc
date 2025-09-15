@@ -27,6 +27,9 @@
 #include <ns3/lte-enb-phy.h>
 #include <ns3/lte-netdevice-configuration.h>
 #include <ns3/lte-ue-phy.h>
+#include <ns3/nr-gnb-phy.h>
+#include <ns3/nr-netdevice-configuration.h>
+#include <ns3/nr-ue-phy.h>
 #include <ns3/object-factory.h>
 #include <ns3/rectangle.h>
 #include <ns3/string.h>
@@ -165,6 +168,34 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
                                                                     antennaModel,
                                                                     phyModel));
         }
+        else if (type == "nr")
+        {
+            NS_ASSERT_MSG(netdev.HasMember("role"),
+                          "Entity NR Network Device must have 'role' property defined.");
+            NS_ASSERT_MSG(netdev["role"].IsString(),
+                          "Entity NR Network Device 'role' property must be a string.");
+
+            const std::string role = netdev["role"].GetString();
+
+            NS_ASSERT_MSG(netdev.HasMember("bearers"),
+                          "Entity NR Network Device must have 'bearers' property defined.");
+            NS_ASSERT_MSG(netdev["bearers"].IsArray(),
+                          "Entity NR Network Device 'bearers' must be an array.");
+
+            const auto bearers = DecodeNrBearerConfigurations(netdev["bearers"].GetArray());
+
+            const auto phyTid = (role == "gNB") ? NrGnbPhy::GetTypeId() : NrUePhy::GetTypeId();
+            // TODO: read other informations about bands with the following line
+            const std::optional<ModelConfiguration> phyModel =
+                ModelConfigurationHelper::GetOptionalCoaleshed(netdev.GetObject(), "phy", phyTid);
+
+            confs.push_back(CreateObject<NrNetdeviceConfiguration>(type,
+                                                                   role,
+                                                                   bearers,
+                                                                   networkLayerId,
+                                                                   antennaModel,
+                                                                   phyModel));
+        }
         else if (type == "simple")
         {
             confs.push_back(
@@ -245,6 +276,58 @@ EntityConfigurationHelper::DecodeLteBearerConfigurations(const JsonArray& jsonAr
                                                  (uint64_t)gbrUl,
                                                  (uint64_t)mbrDl,
                                                  (uint64_t)mbrUl));
+    }
+
+    return bearers;
+}
+
+const std::vector<LteBearerConfiguration>
+EntityConfigurationHelper::DecodeNrBearerConfigurations(const JsonArray& jsonArray)
+{
+    auto bearers = std::vector<LteBearerConfiguration>();
+
+    for (auto& bearerConf : jsonArray)
+    {
+        NS_ASSERT_MSG(bearerConf.HasMember("type"),
+                      "Entity NR Bearer configuration must have 'type' property defined.");
+        NS_ASSERT_MSG(bearerConf["type"].IsString(),
+                      "Entity NR Bearer configuration 'type' must be an array.");
+        if (bearerConf.HasMember("bitrate") && bearerConf["bitrate"].IsObject() &&
+            bearerConf["bitrate"].HasMember("guaranteed") &&
+            bearerConf["bitrate"]["guaranteed"].IsObject() &&
+            bearerConf["bitrate"]["guaranteed"].HasMember("downlink") &&
+            bearerConf["bitrate"]["guaranteed"]["downlink"].IsDouble() &&
+            bearerConf["bitrate"]["guaranteed"].HasMember("uplink") &&
+            bearerConf["bitrate"]["guaranteed"]["uplink"].IsDouble() &&
+            bearerConf["bitrate"].HasMember("maximum") &&
+            bearerConf["bitrate"]["maximum"].IsObject() &&
+            bearerConf["bitrate"]["maximum"].HasMember("downlink") &&
+            bearerConf["bitrate"]["maximum"]["downlink"].IsDouble() &&
+            bearerConf["bitrate"]["maximum"].HasMember("uplink") &&
+            bearerConf["bitrate"]["maximum"]["uplink"].IsDouble())
+        {
+            const std::string type = bearerConf["type"].GetString();
+            const double gbrDl = bearerConf["bitrate"]["guaranteed"]["downlink"].GetDouble();
+            const double gbrUl = bearerConf["bitrate"]["guaranteed"]["uplink"].GetDouble();
+            const double mbrDl = bearerConf["bitrate"]["maximum"]["downlink"].GetDouble();
+            const double mbrUl = bearerConf["bitrate"]["maximum"]["uplink"].GetDouble();
+
+            NS_ASSERT_MSG(gbrDl >= 0.0 && gbrUl >= 0.0 && mbrDl >= 0.0 && mbrUl >= 0.0 &&
+                              floor(gbrDl) == gbrDl && floor(gbrUl) == gbrUl &&
+                              floor(mbrDl) == mbrDl && floor(mbrUl) == mbrUl,
+                          "Bitrate must be a positive integral number.");
+            bearers.push_back(LteBearerConfiguration(type,
+                                                     (uint64_t)gbrDl,
+                                                     (uint64_t)gbrUl,
+                                                     (uint64_t)mbrDl,
+                                                     (uint64_t)mbrUl));
+        }
+        else
+        {
+            // In Nr simulation bearers can also be specified without QoS params
+            const std::string type = bearerConf["type"].GetString();
+            bearers.push_back(LteBearerConfiguration(type));
+        }
     }
 
     return bearers;

@@ -64,16 +64,18 @@ the following tasks:
 
 1. Install dependencies,
 2. Integrate IoD Sim with ns3
-3. Configure IoD Sim
-4. Build IoD Sim
+3. Integrate ns3 with nr
+4. Configure IoD Sim
+5. Build IoD Sim
 
 Otherwise, run the following commands:
 
 ```
 ./tools/install-dependencies.sh
 ./tools/prepare-ns3.sh
+./tools/clone-nr.sh
+./tools/configure-iodsim.sh
 cd ns3/
-./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=iodsim
 ./ns3 build
 ```
 

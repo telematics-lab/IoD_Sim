@@ -96,6 +96,11 @@ LteBearerConfiguration::LteBearerConfiguration(const std::string type,
 {
 }
 
+LteBearerConfiguration::LteBearerConfiguration(const std::string type)
+    : m_type{LteBearerConfigurationPriv::ParseBearerType(type)}
+{
+}
+
 const EpsBearer::Qci
 LteBearerConfiguration::GetType() const
 {
