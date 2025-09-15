@@ -10,5 +10,5 @@ pip install -r analysis/requirements.txt \
 
 pushd ns3
 ./ns3 configure --build-profile=debug --enable-examples --enable-tests --disable-mpi \
-                --disable-python --enable-modules=iodsim,nr
+                --disable-python --enable-modules=iodsim,nr,leo
 popd
