@@ -1,0 +1,29 @@
+From 1d2bd0befece2160ca88cbc6010392f238c25b9e Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 15 Sep 2025 12:48:02 +0200
+Subject: [PATCH] [PATCH] Geographic Elevation Angle 0 when comparing the same
+ position (avoiding div by 0)
+
+---
+ src/mobility/model/geocentric-mobility-model.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
+index 2150a1db4..5b40ad17d 100644
+--- a/src/mobility/model/geocentric-mobility-model.cc
++++ b/src/mobility/model/geocentric-mobility-model.cc
+@@ -154,8 +154,10 @@ GeocentricMobilityModel::DoGetElevationAngle(Ptr<const GeocentricMobilityModel>
+     Vector& b = (me.z < them.z ? them : me);
+ 
+     Vector bMinusA = b - a;
+-    double numerator = std::abs(a * bMinusA);
+     double denominator = a.GetLength() * bMinusA.GetLength();
++    if (denominator == 0) // /0 case: same position
++        return 0.0;
++    double numerator = std::abs(a * bMinusA);
+     double x = numerator / denominator;
+ 
+     // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
+-- 
+2.39.5 (Apple Git-154)
+
