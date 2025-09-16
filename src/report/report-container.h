@@ -98,10 +98,8 @@ class ReportContainer
 
 /*
  * Structures that can be embedded in a ReportContainer
+ * (Explicit instantiations are in report-container.cc)
  */
-template class ReportContainer<ReportDrone>;
-template class ReportContainer<ReportZsp>;
-template class ReportContainer<ReportRemote>;
 
 } // namespace ns3
 

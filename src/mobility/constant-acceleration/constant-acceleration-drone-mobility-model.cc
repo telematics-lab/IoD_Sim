@@ -77,7 +77,9 @@ ConstantAccelerationDroneMobilityModel::GetTypeId()
 }
 
 ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel()
-    : m_flightParams{m_acceleration, m_maxSpeed},
+    : m_acceleration{0.0},
+      m_maxSpeed{0.0},
+      m_flightParams{m_acceleration, m_maxSpeed},
       m_lastUpdate{-1},
       m_useGeodedicSystem{false}
 {

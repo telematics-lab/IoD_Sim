@@ -112,11 +112,11 @@ class Drone : public Node
     virtual void DoInitialize(void);
 
   private:
-    double m_mass;            //!< Mass of the drone
-    double m_diskArea;        //!< Area of the rotor disk
-    double m_weightForce;     //!< Weight force, equals to m*g
-    double m_airDensity;      //!< Air density
-    double m_dragCoefficient; //!< Drag Coefficient
+    double m_mass;                        //!< Mass of the drone
+    double m_diskArea;                    //!< Area of the rotor disk
+    double m_weightForce;                 //!< Weight force, equals to m*g
+    [[maybe_unused]] double m_airDensity; //!< Air density
+    double m_dragCoefficient;             //!< Drag Coefficient
     Ptr<DronePeripheralContainer> m_peripheralContainer;
 };
 

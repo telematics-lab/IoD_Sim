@@ -90,7 +90,7 @@ constexpr int N_LAYERS = 4;
 constexpr int PHY_LAYER = 0;
 constexpr int MAC_LAYER = 1;
 constexpr int NET_LAYER = 2;
-constexpr int APP_LAYER = 3;
+[[maybe_unused]] constexpr int APP_LAYER = 3;
 constexpr int PROGRESS_REFRESH_INTERVAL_SECONDS = 1;
 
 class Scenario
@@ -715,10 +715,10 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
 
                 switch (role)
                 {
-                case gNB:
+                case NrRole::gNB:
                     ConfigureNrGnb(entityNode, *netId, antennaModel, phyConf);
                     break;
-                case UE:
+                case NrRole::nrUE:
                     ConfigureNrUe(entityNode,
                                   entityNrDevConf->GetBearers(),
                                   *netId,
@@ -1237,7 +1237,7 @@ Scenario::EnablePhyLteTraces()
     {
         auto obj = m_protocolStacks[PHY_LAYER][phyId];
 
-        if (typeid(*obj) == typeid(LtePhySimulationHelper))
+        if (DynamicCast<LtePhySimulationHelper>(obj))
         {
             /* LteHelperQuirk:
              *  This class is an hack to allow access to private members of LteHelper class,

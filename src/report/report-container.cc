@@ -19,6 +19,10 @@
  */
 #include "report-container.h"
 
+#include "report-drone.h"
+#include "report-remote.h"
+#include "report-zsp.h"
+
 #include <ns3/integer.h>
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
@@ -116,5 +120,10 @@ ReportContainer<T>::Write(xmlTextWriterPtr h) const
     rc = xmlTextWriterEndElement(h);
     NS_ASSERT(rc >= 0);
 }
+
+// Explicit template instantiations
+template class ReportContainer<ReportDrone>;
+template class ReportContainer<ReportRemote>;
+template class ReportContainer<ReportZsp>;
 
 }; // namespace ns3

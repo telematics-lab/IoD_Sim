@@ -49,9 +49,6 @@ class LteBearerConfiguration : public Object
 
     LteBearerConfiguration(const std::string type);
 
-    /** Default destructor */
-    ~LteBearerConfiguration();
-
     /**
      * \return The type of the Network Device.
      */

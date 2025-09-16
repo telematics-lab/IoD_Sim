@@ -37,7 +37,10 @@
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <rapidjson/document.h>
+#pragma GCC diagnostic pop
 
 namespace ns3
 {

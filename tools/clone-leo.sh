@@ -42,4 +42,4 @@ integrate_contrib_module() {
   fi
 }
 
-integrate_contrib_module "leo" "git@github.com:domysh/leo.git" "main"
+integrate_contrib_module "leo" "git@github.com:domysh/leo.git" "iodsim"

@@ -43,4 +43,4 @@ integrate_contrib_module() {
 }
 
 # Esempio di utilizzo per il modulo 'nr'
-integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.0.y"
+integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v3.3.y"

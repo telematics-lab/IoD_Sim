@@ -42,7 +42,7 @@ class ThreeGppPhySimulationHelper : public Object
     Ptr<ThreeGppSpectrumPropagationLossModel> GetSpectrumPropagationLossModel();
 
   private:
-    const std::size_t m_stackId;
+    [[maybe_unused]] const std::size_t m_stackId;
     Ptr<ThreeGppChannelConditionModel> m_channelConditionModel;
     Ptr<ThreeGppPropagationLossModel> m_propagationLossModel;
     Ptr<ThreeGppSpectrumPropagationLossModel> m_spectrumPropagationLossModel;

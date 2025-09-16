@@ -79,7 +79,6 @@ RandomServingConfigurator::ScheduleUpdates()
     double nextupdate = 0;
     double periodstart = Simulator::Now().GetSeconds();
     double periodend = periodstart + lifetime;
-    uint32_t j = 0;
     while (true)
     {
         if (periodend <= periodstart + nextupdate)
@@ -98,7 +97,6 @@ RandomServingConfigurator::ScheduleUpdates()
             UpdateServingNodes(m_servingpairs.at(m_rng->GetInteger(0, m_servingpairs.size() - 1)));
         }
         nextupdate += m_timeslot;
-        j++;
     }
 }
 
