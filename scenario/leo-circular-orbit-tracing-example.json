@@ -1,0 +1,21 @@
+{
+  "name": "leo-circular-orbit-tracing-example",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 60,
+  "staticNs3Config": [],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "none"
+    }
+  ],
+  "macLayer": []
+}

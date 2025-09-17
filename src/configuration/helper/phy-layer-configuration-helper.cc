@@ -23,6 +23,7 @@
 #include <ns3/double.h>
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
+#include <ns3/none-phy-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/type-id.h>
@@ -81,6 +82,11 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                                                  phyAttributes,
                                                  propagationDelayModel,
                                                  propagationLossModel);
+    }
+    if (phyType == "none")
+    {
+        return Create<NonePhyLayerConfiguration>(phyType,
+                                                 std::vector<ModelConfiguration::Attribute>());
     }
     else if (phyType == "lte")
     {

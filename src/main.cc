@@ -49,6 +49,7 @@
 #include <ns3/nat-application.h>
 #include <ns3/net-device-container.h>
 #include <ns3/node-list.h>
+#include <ns3/none-phy-layer-configuration.h>
 #include <ns3/nr-helper.h>
 #include <ns3/nr-netdevice-configuration.h>
 #include <ns3/nr-phy-layer-configuration.h>
@@ -430,6 +431,11 @@ Scenario::ConfigurePhy()
             m_backbone.Add(lteSim->GetEpcHelper()->GetPgwNode());
 
             m_protocolStacks[PHY_LAYER].push_back(lteSim);
+        }
+        else if (phyLayerConf->GetType() == "none")
+        {
+            const auto conf =
+                StaticCast<NonePhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
         }
         else if (phyLayerConf->GetType() == "3GPP")
         {

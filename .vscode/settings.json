@@ -96,7 +96,22 @@
         "numbers": "cpp",
         "queue": "cpp",
         "semaphore": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__locale": "cpp",
+        "__node_handle": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "__verbose_abort": "cpp",
+        "charconv": "cpp",
+        "csetjmp": "cpp",
+        "execution": "cpp",
+        "print": "cpp",
+        "source_location": "cpp",
+        "span": "cpp",
+        "stack": "cpp",
+        "valarray": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "git.ignoredRepositories": [

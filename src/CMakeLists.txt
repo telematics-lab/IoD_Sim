@@ -41,6 +41,7 @@ set(source_files
   configuration/nr-netdevice-configuration.cc
   configuration/lte-phy-layer-configuration.cc
   configuration/nr-phy-layer-configuration.cc
+  configuration/none-phy-layer-configuration.cc
   configuration/mac-layer-configuration.cc
   configuration/mobility-model-configuration.cc
   configuration/netdevice-configuration.cc
@@ -154,6 +155,7 @@ set(header_files
   configuration/nr-netdevice-configuration.h
   configuration/lte-phy-layer-configuration.h
   configuration/nr-phy-layer-configuration.h
+  configuration/none-phy-layer-configuration.h
   configuration/mac-layer-configuration.h
   configuration/mobility-model-configuration.h
   configuration/netdevice-configuration.h
