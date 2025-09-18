@@ -22,55 +22,65 @@
 #include <ns3/lte-bearer-configuration.h>
 #include <ns3/netdevice-configuration.h>
 
+#if defined(__clang__)
+_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
+#else
+#define SUPPRESS_DEPRECATED_POP
+#endif
+
 #include <rapidjson/document.h>
 
-namespace ns3
-{
+    SUPPRESS_DEPRECATED_POP
 
-using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
-
-/**
- * \brief Helper to decode Entities from a JSON configuration file.
- *
- * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the
- * following properties:
- *   - Its network device(s)
- *   - Its associated mobility model
- *   - Its application(s)
- *   - Its mechanical properties
- */
-class EntityConfigurationHelper
+    namespace ns3
 {
-  public:
+    using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
+
     /**
-     * Parse an entity configuration from a given JSON tree and map it on an EntityConfiguration
-     * data class.
-     *
-     * \param json The JSON tree to parse.
-     * \return The configuration as a pointer to EntityConfiguration to easily retrieve parsed data.
+     * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the
+     * following properties:
+     *   - Its network device(s)
+     *   - Its associated mobility model
+     *   - Its application(s)
+     *   - Its mechanical properties
      */
-    static Ptr<EntityConfiguration> GetConfiguration(const rapidjson::Value& json);
+    class EntityConfigurationHelper
+    {
+      public:
+        /**
+         * Parse an entity configuration from a given JSON tree and map it on an EntityConfiguration
+         * data class.
+         *
+         * \param json The JSON tree to parse.
+         * \return The configuration as a pointer to EntityConfiguration to easily retrieve parsed
+         * data.
+         */
+        static Ptr<EntityConfiguration> GetConfiguration(const rapidjson::Value& json);
 
-  private:
-    EntityConfigurationHelper();
+      private:
+        EntityConfigurationHelper();
 
-    static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations(
-        const rapidjson::Value& json);
-    static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
-        const JsonArray& json);
-    static const std::vector<LteBearerConfiguration> DecodeNrBearerConfigurations(
-        const JsonArray& jsonArray);
-    static const MobilityModelConfiguration DecodeMobilityConfiguration(
-        const rapidjson::Value& json);
-    static const std::optional<Vector> DecodeInitialPosition(const rapidjson::Value& json);
-    static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
-        const rapidjson::Value& json);
-    static const ModelConfiguration DecodeMechanicsConfiguration(const rapidjson::Value& json);
-    static const ModelConfiguration DecodeBatteryConfiguration(const rapidjson::Value& json);
-    static const std::vector<ModelConfiguration> DecodePeripheralConfigurations(
-        const rapidjson::Value& json);
-    static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& json);
-};
+        static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations(
+            const rapidjson::Value& json);
+        static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
+            const JsonArray& json);
+        static const std::vector<LteBearerConfiguration> DecodeNrBearerConfigurations(
+            const JsonArray& jsonArray);
+        static const MobilityModelConfiguration DecodeMobilityConfiguration(
+            const rapidjson::Value& json);
+        static const std::optional<Vector> DecodeInitialPosition(const rapidjson::Value& json);
+        static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
+            const rapidjson::Value& json);
+        static const ModelConfiguration DecodeMechanicsConfiguration(const rapidjson::Value& json);
+        static const ModelConfiguration DecodeBatteryConfiguration(const rapidjson::Value& json);
+        static const std::vector<ModelConfiguration> DecodePeripheralConfigurations(
+            const rapidjson::Value& json);
+        static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& json);
+    };
 
 } // namespace ns3
 

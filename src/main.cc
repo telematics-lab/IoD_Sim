@@ -199,13 +199,19 @@ Scenario::Scenario(int argc, char** argv)
 
     // Register created entities in their lists
     for (auto drone = m_drones.Begin(); drone != m_drones.End(); drone++)
+    {
         DroneList::Add(*drone);
+    }
 
     for (auto zsp = m_zsps.Begin(); zsp != m_zsps.End(); zsp++)
+    {
         ZspList::Add(*zsp);
+    }
 
     for (auto remote = m_remoteNodes.Begin(); remote != m_remoteNodes.End(); remote++)
+    {
         RemoteList::Add(*remote);
+    }
 
     ApplyStaticConfig();
     ConfigureWorld();
@@ -294,7 +300,9 @@ Scenario::operator()()
     else
     {
         if (CONFIGURATOR->IsDryRun())
+        {
             return;
+        }
 
         std::stringstream progressLogFilePath;
         progressLogFilePath << CONFIGURATOR->GetResultsPath() << "progress.log";
@@ -357,7 +365,9 @@ Scenario::ApplyStaticConfig()
     NS_LOG_FUNCTION_NOARGS();
 
     for (auto& param : CONFIGURATOR->GetStaticConfig())
+    {
         Config::SetDefault(param.first, *param.second);
+    }
 }
 
 void
@@ -389,7 +399,9 @@ Scenario::ConfigurePhy()
             wifiSim->GetWifiHelper()->SetStandard(wifiConf->GetStandard());
 
             for (auto& attr : wifiConf->GetAttributes())
+            {
                 wifiPhy->Set(attr.name, *attr.value);
+            }
 
             // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
             wifiPhy->SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
@@ -415,16 +427,22 @@ Scenario::ConfigurePhy()
             {
                 lteHelper->SetAttribute("PathlossModel", StringValue(pathlossConf->GetName()));
                 for (auto& attr : pathlossConf->GetAttributes())
+                {
                     lteHelper->SetPathlossModelAttribute(attr.name, *attr.value);
+                }
             }
 
             auto spectrumConf = lteConf->GetChannelSpectrumModel();
             lteHelper->SetSpectrumChannelType(spectrumConf.GetName());
             for (auto& attr : spectrumConf.GetAttributes())
+            {
                 lteHelper->SetSpectrumChannelAttribute(attr.name, *attr.value);
+            }
 
             for (auto& attr : lteConf->GetAttributes())
+            {
                 lteHelper->SetAttribute(attr.name, *attr.value);
+            }
 
             lteHelper->Initialize();
 
@@ -447,7 +465,9 @@ Scenario::ConfigurePhy()
 
                 factory.SetTypeId(conf->GetConditionModel().GetName());
                 for (auto& attr : conf->GetConditionModel().GetAttributes())
+                {
                     factory.Set(attr.name, *attr.value);
+                }
 
                 return factory.Create<ThreeGppChannelConditionModel>();
             }();
@@ -456,7 +476,9 @@ Scenario::ConfigurePhy()
 
                 factory.SetTypeId(conf->GetPropagationLossModel().GetName());
                 for (auto& attr : conf->GetPropagationLossModel().GetAttributes())
+                {
                     factory.Set(attr.name, *attr.value);
+                }
 
                 auto model = factory.Create<ThreeGppPropagationLossModel>();
                 model->SetChannelConditionModel(channelCond);
@@ -476,7 +498,9 @@ Scenario::ConfigurePhy()
                 model->SetChannelModelAttribute("Scenario", StringValue(conf->GetEnvironment()));
 
                 for (auto& attr : conf->GetAttributes())
+                {
                     model->SetChannelModelAttribute(attr.name, *attr.value);
+                }
 
                 return model;
             }();
@@ -516,8 +540,8 @@ Scenario::ConfigurePhy()
                 // TODO: NrHelper doesn't provide a way to configure m_pathlossModelFactory
 
                 // nrHelper->SetAttribute("PathlossModel", StringValue(pathlossConf->GetName()));
-                for (auto& attr : pathlossConf->GetAttributes())
-                    nrHelper->SetPathlossAttribute(attr.name, *attr.value);
+                // for (auto& attr : pathlossConf->GetAttributes())
+                //     nrHelper->SetPathlossAttribute(attr.name, *attr.value);
             }
 
             auto spectrumConf = nrConf->GetChannelSpectrumModel();
@@ -528,7 +552,9 @@ Scenario::ConfigurePhy()
             // nrHelper->SetSpectrumChannelAttribute(attr.name, *attr.value);
 
             for (auto& attr : nrConf->GetAttributes())
+            {
                 nrHelper->SetAttribute(attr.name, *attr.value);
+            }
 
             nrHelper->Initialize();
 
@@ -622,7 +648,9 @@ Scenario::ConfigureNetwork()
                                              Ipv4Mask(ipv4Conf->GetMask().c_str()));
 
             if (CONFIGURATOR->GetLogOnFile())
+            {
                 EnableIpv4RoutingTableReporting();
+            }
 
             m_protocolStacks[NET_LAYER].push_back(ipv4Sim);
         }
@@ -639,9 +667,13 @@ Scenario::EnableIpv4RoutingTableReporting()
     // this method should be called once
     static bool hasBeenCalled = false;
     if (hasBeenCalled)
+    {
         return;
+    }
     else
+    {
         hasBeenCalled = true;
+    }
 
     NS_LOG_FUNCTION_NOARGS();
 
@@ -745,7 +777,9 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     ObjectFactory factory;
                     factory.SetTypeId(antennaConf->GetName());
                     for (auto& attr : antennaConf->GetAttributes())
+                    {
                         factory.Set(attr.name, *attr.value);
+                    }
 
                     auto antenna = factory.Create();
                     netDevice->AggregateObject(antenna);
@@ -828,11 +862,15 @@ Scenario::ConfigureEntityWifiStack(const std::string entityKey,
     auto wifiMacAttrs = wifiNetDev->GetMacLayer().GetAttributes();
 
     if (wifiMacAttrs.size() == 0)
+    {
         wifiMac->GetMacHelper().SetType(wifiNetDev->GetMacLayer().GetName());
+    }
     else if (wifiMacAttrs.size() == 1)
+    {
         wifiMac->GetMacHelper().SetType(wifiNetDev->GetMacLayer().GetName(),
                                         wifiMacAttrs[0].name,
                                         *wifiMacAttrs[0].value);
+    }
 
     NetDeviceContainer devContainer =
         wifiPhy->GetWifiHelper()->Install(*wifiPhy->GetWifiPhyHelper(),
@@ -880,20 +918,28 @@ Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
     {
         lteHelper->SetEnbAntennaModelType(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
+        {
             lteHelper->SetEnbAntennaModelAttribute(attr.name, *attr.value);
+        }
     }
 
     auto dev = StaticCast<LteEnbNetDevice, NetDevice>(
         LteSetupHelper::InstallSingleEnbDevice(lteHelper, entityNode));
 
     if (phyConf)
+    {
         for (const auto& attr : phyConf->GetAttributes())
+        {
             dev->GetPhy()->SetAttribute(attr.name, *attr.value);
+        }
+    }
 
     for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin();
          eNB != backbonePerStack[netId].End();
          eNB++)
+    {
         ltePhy->GetLteHelper()->AddX2Interface(entityNode, *eNB);
+    }
     backbonePerStack[netId].Add(entityNode);
 }
 
@@ -914,15 +960,21 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
     {
         lteHelper->SetUeAntennaModelType(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
+        {
             lteHelper->SetUeAntennaModelAttribute(attr.name, *attr.value);
+        }
     }
 
     auto dev = StaticCast<LteUeNetDevice, NetDevice>(
         LteSetupHelper::InstallSingleUeDevice(lteHelper, entityNode));
 
     if (phyConf)
+    {
         for (const auto& attr : phyConf->GetAttributes())
+        {
             dev->GetPhy()->SetAttribute(attr.name, *attr.value);
+        }
+    }
 
     // Install network layer in order to proceed with IPv4 LTE configuration
     InstallEntityIpv4(entityNode, dev, netId);
@@ -983,7 +1035,9 @@ Scenario::InstallEntityIpv4(Ptr<Node> entityNode,
     NS_LOG_FUNCTION(entityNode << netId);
 
     for (NetDeviceContainer::Iterator i = netDevices.Begin(); i != netDevices.End(); i++)
+    {
         InstallEntityIpv4(entityNode, *i, netId);
+    }
 }
 
 void
@@ -1026,7 +1080,9 @@ Scenario::ConfigureEntityIpv4(Ptr<Node> entityNode,
 
     const Ipv4Address nodeAddr = assignedIPs.GetAddress(0, 0);
     if (nodeAddr != netLayer->GetGatewayAddress())
+    {
         ueStaticRoute->SetDefaultRoute(netLayer->GetGatewayAddress(), deviceIP.second);
+    }
 }
 
 void
@@ -1041,18 +1097,28 @@ Scenario::ConfigureEntityApplications(const std::string& entityKey,
         ObjectFactory f{appConf.GetName()};
 
         for (auto attr : appConf.GetAttributes())
+        {
             f.Set(attr.name, *attr.value);
+        }
 
         auto app = StaticCast<Application, Object>(f.Create());
 
         if (entityKey == "drones")
+        {
             m_drones.Get(entityId)->AddApplication(app);
+        }
         else if (entityKey == "ZSPs")
+        {
             m_zsps.Get(entityId)->AddApplication(app);
+        }
         else if (entityKey == "nodes")
+        {
             m_plainNodes.Get(entityId)->AddApplication(app);
+        }
         else
+        {
             NS_FATAL_ERROR("Unsupported Entity Type " << entityKey);
+        }
     }
 }
 
@@ -1064,7 +1130,9 @@ Scenario::ConfigureEntityMechanics(const std::string& entityKey,
     NS_LOG_FUNCTION_NOARGS();
     const auto mechanics = entityConf->GetMechanics();
     for (auto attr : mechanics.GetAttributes())
+    {
         m_drones.Get(entityId)->SetAttribute(attr.name, *attr.value);
+    }
 }
 
 Ptr<energy::EnergySource>
@@ -1078,7 +1146,9 @@ Scenario::ConfigureEntityBattery(const std::string& entityKey,
     batteryFactory.SetTypeId(entityConf->GetBattery().GetName());
 
     for (auto attr : battery.GetAttributes())
+    {
         batteryFactory.Set(attr.name, *attr.value);
+    }
     auto mountedBattery = batteryFactory.Create<energy::EnergySource>();
 
     mountedBattery->SetNode(m_drones.Get(entityId));
@@ -1095,7 +1165,9 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
     auto dronePeripheralsContainer = m_drones.Get(entityId)->GetPeripherals();
 
     if (conf->GetPeripherals().size() == 0)
+    {
         return;
+    }
 
     ObjectFactory factory;
 
@@ -1104,7 +1176,9 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
         NS_LOG_INFO("Configuring peripheral " << perConf.GetName());
         dronePeripheralsContainer->Add(perConf.GetName());
         for (auto attr : perConf.GetAttributes())
+        {
             dronePeripheralsContainer->Set(attr.name, *attr.value);
+        }
 
         NS_LOG_INFO("Peripheral configured");
         auto peripheral = dronePeripheralsContainer->Create();
@@ -1116,7 +1190,9 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
             factory = ObjectFactory{aggIt->GetName()};
 
             for (auto attr : aggIt->GetAttributes())
+            {
                 factory.Set(attr.name, *attr.value);
+            }
 
             auto aggObject = factory.Create<Object>();
             peripheral->AggregateObject(aggObject);
@@ -1128,7 +1204,9 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
         {
             auto reg = irc->GetRoI(i);
             if (!irc->GetRoI(i))
+            {
                 NS_FATAL_ERROR("Region of Interest #" << i << " does not exist.");
+            }
         }
     }
     dronePeripheralsContainer->InstallAll(m_drones.Get(entityId));
@@ -1156,7 +1234,9 @@ Scenario::ConfigureInternetRemotes()
             ObjectFactory factory(appTid.GetName());
 
             for (auto& appAttr : appConf.GetAttributes())
+            {
                 factory.Set(appAttr.name, *appAttr.value);
+            }
 
             auto app = StaticCast<Application, Object>(factory.Create());
             m_remoteNodes.Get(remoteId)->AddApplication(app);
@@ -1237,7 +1317,9 @@ Scenario::EnablePhyLteTraces()
 {
     NS_LOG_FUNCTION_NOARGS();
     if (!CONFIGURATOR->GetLogOnFile())
+    {
         return;
+    }
 
     for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
     {
@@ -1343,16 +1425,22 @@ Scenario::CourseChange(std::string context, Ptr<const MobilityModel> model)
         regionindex = peripheral->GetRegionsOfInterest();
         int status = irc->IsInRegions(regionindex, position);
         if (regionindex.empty())
+        {
             continue;
+        }
         if (status >= 0 || status == -2)
         {
             if (peripheral->GetState() != DronePeripheral::PeripheralState::ON)
+            {
                 peripheral->SetState(DronePeripheral::PeripheralState::ON);
+            }
         }
         else
         {
             if (peripheral->GetState() == DronePeripheral::PeripheralState::ON)
+            {
                 peripheral->SetState(DronePeripheral::PeripheralState::IDLE);
+            }
         }
     }
 }

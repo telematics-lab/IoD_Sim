@@ -20,31 +20,42 @@
 
 #include <ns3/network-layer-configuration.h>
 
+#if defined(__clang__)
+_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
+#else
+#define SUPPRESS_DEPRECATED_POP
+#endif
+
 #include <rapidjson/document.h>
 
-namespace ns3
-{
+    SUPPRESS_DEPRECATED_POP
 
-/**
- * \brief Helper to decode a Network Layer from a JSON configuration file.
- */
-class NetworkLayerConfigurationHelper
+    namespace ns3
 {
-  public:
     /**
-     * NetworkLayerConfigurationHelper can't be instantiated, as it is an utility class.
+     * Helper to decode a Network Layer from a JSON configuration file.
      */
-    NetworkLayerConfigurationHelper() = delete;
-    /**
-     * Parse a Network configuration from a given JSON tree and map it on a
-     * NetworkLayerConfiguration data class.
-     *
-     * \param json The JSON tree to parse.
-     * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve parsed
-     * data.
-     */
-    static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidjson::Value& json);
-};
+    class NetworkLayerConfigurationHelper
+    {
+      public:
+        /**
+         * NetworkLayerConfigurationHelper can't be instantiated, as it is an utility class.
+         */
+        NetworkLayerConfigurationHelper() = delete;
+        /**
+         * Parse a Network configuration from a given JSON tree and map it on a
+         * NetworkLayerConfiguration data class.
+         *
+         * \param json The JSON tree to parse.
+         * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve
+         * parsed data.
+         */
+        static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidjson::Value& json);
+    };
 
 } // namespace ns3
 

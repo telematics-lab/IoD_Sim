@@ -37,84 +37,136 @@
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
 
+#if defined(__clang__)
+_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
+#else
+#define SUPPRESS_DEPRECATED_POP
+#endif
+
 #include <rapidjson/document.h>
 
-namespace ns3
+    SUPPRESS_DEPRECATED_POP
+
+    namespace ns3
 {
+    NS_LOG_COMPONENT_DEFINE("ReportRemote");
+    NS_OBJECT_ENSURE_REGISTERED(ReportRemote);
 
-NS_LOG_COMPONENT_DEFINE("ReportRemote");
-NS_OBJECT_ENSURE_REGISTERED(ReportRemote);
-
-TypeId
-ReportRemote::GetTypeId()
-{
-    static TypeId tid =
-        TypeId("ns3::ReportRemote").AddConstructor<ReportRemote>().SetParent<ReportEntity>();
-
-    return tid;
-}
-
-void
-ReportRemote::DoWrite(xmlTextWriterPtr h)
-{
-    NS_LOG_FUNCTION(h);
-    if (!h)
+    TypeId ReportRemote::GetTypeId()
     {
-        NS_LOG_WARN("Passed handler is not valid: " << h
-                                                    << ". "
-                                                       "Data will be discarded.");
-        return;
+        static TypeId tid =
+            TypeId("ns3::ReportRemote").AddConstructor<ReportRemote>().SetParent<ReportEntity>();
+
+        return tid;
     }
 
-    int rc;
-
-    rc = xmlTextWriterStartElement(h, BAD_CAST "Remote");
-    NS_ASSERT(rc >= 0);
-
-    /* Nested Elements */
-    rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevices");
-    NS_ASSERT(rc >= 0);
-
-    for (int nid = 0; nid < (int)m_networkStacks.size(); nid++)
+    void ReportRemote::DoWrite(xmlTextWriterPtr h)
     {
-        rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevice");
+        NS_LOG_FUNCTION(h);
+        if (!h)
+        {
+            NS_LOG_WARN("Passed handler is not valid: " << h
+                                                        << ". "
+                                                           "Data will be discarded.");
+            return;
+        }
+
+        int rc;
+
+        rc = xmlTextWriterStartElement(h, BAD_CAST "Remote");
         NS_ASSERT(rc >= 0);
 
-        m_networkStacks[nid].Write(h);
+        /* Nested Elements */
+        rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevices");
+        NS_ASSERT(rc >= 0);
+
+        for (int nid = 0; nid < (int)m_networkStacks.size(); nid++)
+        {
+            rc = xmlTextWriterStartElement(h, BAD_CAST "NetDevice");
+            NS_ASSERT(rc >= 0);
+
+            m_networkStacks[nid].Write(h);
+
+            rc = xmlTextWriterStartElement(h, BAD_CAST "dataTx");
+            NS_ASSERT(rc >= 0);
+
+            for (auto rid = m_dataTx.begin(); rid != m_dataTx.end();)
+            {
+                if ((*rid)->GetIface() == nid)
+                {
+                    (*rid)->Write(h);
+                    m_dataTx.erase(rid);
+                }
+                else
+                {
+                    rid++;
+                }
+            }
+            rc = xmlTextWriterEndElement(h);
+            NS_ASSERT(rc >= 0);
+
+            rc = xmlTextWriterStartElement(h, BAD_CAST "dataRx");
+            NS_ASSERT(rc >= 0);
+
+            for (auto rid = m_dataRx.begin(); rid != m_dataRx.end();)
+            {
+                if ((*rid)->GetIface() == nid)
+                {
+                    (*rid)->Write(h);
+                    m_dataRx.erase(rid);
+                }
+                else
+                {
+                    rid++;
+                }
+            }
+
+            rc = xmlTextWriterEndElement(h);
+            NS_ASSERT(rc >= 0);
+
+            rc = xmlTextWriterEndElement(h);
+            NS_ASSERT(rc >= 0);
+        }
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
 
         rc = xmlTextWriterStartElement(h, BAD_CAST "dataTx");
+        // broadcast
         NS_ASSERT(rc >= 0);
 
-        for (auto rid = m_dataTx.begin(); rid != m_dataTx.end();)
-        {
-            if ((*rid)->GetIface() == nid)
-            {
-                (*rid)->Write(h);
-                m_dataTx.erase(rid);
-            }
-            else
-            {
-                rid++;
-            }
-        }
+        for (auto rid = m_dataTx.begin(); rid != m_dataTx.end(); rid++)
+            (*rid)->Write(h);
+
         rc = xmlTextWriterEndElement(h);
         NS_ASSERT(rc >= 0);
 
         rc = xmlTextWriterStartElement(h, BAD_CAST "dataRx");
         NS_ASSERT(rc >= 0);
 
-        for (auto rid = m_dataRx.begin(); rid != m_dataRx.end();)
-        {
-            if ((*rid)->GetIface() == nid)
-            {
-                (*rid)->Write(h);
-                m_dataRx.erase(rid);
-            }
-            else
-            {
-                rid++;
-            }
-        }
+        for (auto rid = m_dataRx.begin(); rid != m_dataRx.end(); rid++)
+            (*rid)->Write(h);
+
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
+        //////
+        rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataTx");
+        NS_ASSERT(rc >= 0);
+
+        for (auto& dataStatsTx : m_cumulativeDataTx)
+            dataStatsTx->Write(h);
+
+        rc = xmlTextWriterEndElement(h);
+        NS_ASSERT(rc >= 0);
+
+        rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataRx");
+        NS_ASSERT(rc >= 0);
+
+        for (auto& dataStatsRx : m_cumulativeDataRx)
+            dataStatsRx->Write(h);
 
         rc = xmlTextWriterEndElement(h);
         NS_ASSERT(rc >= 0);
@@ -122,48 +174,5 @@ ReportRemote::DoWrite(xmlTextWriterPtr h)
         rc = xmlTextWriterEndElement(h);
         NS_ASSERT(rc >= 0);
     }
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-
-    rc = xmlTextWriterStartElement(h, BAD_CAST "dataTx");
-    // broadcast
-    NS_ASSERT(rc >= 0);
-
-    for (auto rid = m_dataTx.begin(); rid != m_dataTx.end(); rid++)
-        (*rid)->Write(h);
-
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-
-    rc = xmlTextWriterStartElement(h, BAD_CAST "dataRx");
-    NS_ASSERT(rc >= 0);
-
-    for (auto rid = m_dataRx.begin(); rid != m_dataRx.end(); rid++)
-        (*rid)->Write(h);
-
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-    //////
-    rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataTx");
-    NS_ASSERT(rc >= 0);
-
-    for (auto& dataStatsTx : m_cumulativeDataTx)
-        dataStatsTx->Write(h);
-
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-
-    rc = xmlTextWriterStartElement(h, BAD_CAST "cumulativeDataRx");
-    NS_ASSERT(rc >= 0);
-
-    for (auto& dataStatsRx : m_cumulativeDataRx)
-        dataStatsRx->Write(h);
-
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-
-    rc = xmlTextWriterEndElement(h);
-    NS_ASSERT(rc >= 0);
-}
 
 } // namespace ns3

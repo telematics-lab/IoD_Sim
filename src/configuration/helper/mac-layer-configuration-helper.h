@@ -21,34 +21,45 @@
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/model-configuration.h>
 
+#if defined(__clang__)
+_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
+#else
+#define SUPPRESS_DEPRECATED_POP
+#endif
+
 #include <rapidjson/document.h>
 
-namespace ns3
-{
+    SUPPRESS_DEPRECATED_POP
 
-/**
- * \brief Helper to decode a MAC Layer from a JSON configuration file.
- */
-class MacLayerConfigurationHelper
+    namespace ns3
 {
-  public:
     /**
-     * MacLayerConfigurationHelper can't be instantiated, as it is an utility class.
+     * Helper to decode a MAC Layer from a JSON configuration file.
      */
-    MacLayerConfigurationHelper() = default;
-    /**
-     * Parse a MAC Layer configuration from a given JSON tree and map it on a MacLayerConfiguration
-     * data class.
-     *
-     * \param jsonMacLayer The JSON tree to parse.
-     * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
-     * data.
-     */
-    static Ptr<MacLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonMacLayer);
+    class MacLayerConfigurationHelper
+    {
+      public:
+        /**
+         * MacLayerConfigurationHelper can't be instantiated, as it is an utility class.
+         */
+        MacLayerConfigurationHelper() = default;
+        /**
+         * Parse a MAC Layer configuration from a given JSON tree and map it on a
+         * MacLayerConfiguration data class.
+         *
+         * \param jsonMacLayer The JSON tree to parse.
+         * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
+         * data.
+         */
+        static Ptr<MacLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonMacLayer);
 
-  private:
-    static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& jsonModel);
-};
+      private:
+        static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& jsonModel);
+    };
 
 } // namespace ns3
 

@@ -253,9 +253,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                 {
                     Irs2TxGain = rxParams->txAntenna->GetGainDb(Angles(IrsPosition, TxPosition));
                     if (std::isinf(Irs2TxGain))
+                    {
                         F_BRG *= 0.;
+                    }
                     else
+                    {
                         F_BRG *= std::pow(10., Irs2TxGain / 10.);
+                    }
                 }
                 else
                 {
@@ -267,9 +271,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                 {
                     Irs2RxGain = rxAntenna->GetGainDb(Angles(IrsPosition, RxPosition));
                     if (std::isinf(Irs2RxGain))
+                    {
                         F_BRG *= 0.;
+                    }
                     else
+                    {
                         F_BRG *= std::pow(10., Irs2RxGain / 10.);
+                    }
                 }
                 else
                 {
@@ -321,9 +329,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
             {
                 Rx2TxGain = rxParams->txAntenna->GetGainDb(Angles(RxPosition, TxPosition));
                 if (std::isinf(Rx2TxGain))
+                {
                     F_BG *= 0.;
+                }
                 else
+                {
                     F_BG *= std::pow(10., Rx2TxGain / 10.);
+                }
             }
             else
             {
@@ -335,9 +347,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
             {
                 Tx2RxGain = rxAntenna->GetGainDb(Angles(TxPosition, RxPosition));
                 if (std::isinf(Tx2RxGain))
+                {
                     F_BG *= 0.;
+                }
                 else
+                {
                     F_BG *= std::pow(10., Tx2RxGain / 10.);
+                }
             }
             else
             {
@@ -410,9 +426,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     double pathLossDb = 0.;
 
                     if (gain[u] > 0)
+                    {
                         pathLossDb = -10. * std::log10(gain[u]);
+                    }
                     else
+                    {
                         pathLossDb = m_maxLossDb;
+                    }
 
                     // Pathloss trace
                     m_pathLossTrace(txParams->txPhy, rxPhy, pathLossDb);
@@ -437,20 +457,15 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     const auto& dstNode = rxNetDevice->GetNode()->GetId();
                     Simulator::ScheduleWithContext(dstNode,
                                                    delay,
-                                                   &IrsAssistedSpectrumChannel::StartRx,
-                                                   this,
-                                                   rxParams,
-                                                   rxPhy);
+                                                   &SpectrumPhy::StartRx,
+                                                   rxPhy,
+                                                   rxParams);
                 }
                 else
                 {
                     // the receiver is not attached to a NetDevice, so we cannot assume that it is
                     // attached to a node
-                    Simulator::Schedule(delay,
-                                        &IrsAssistedSpectrumChannel::StartRx,
-                                        this,
-                                        rxParams,
-                                        rxPhy);
+                    Simulator::Schedule(delay, &SpectrumPhy::StartRx, rxPhy, rxParams);
                 }
             }
             ++u;
@@ -576,14 +591,18 @@ IrsAssistedSpectrumChannel::GetGain(const double f_c,
                 auto pigr = 2. * M_PI;
                 if (modf(phi_x * M_PI * f_c / SPEED_OF_LIGHT, &pigr) ==
                     0.) // if it is multiple of pi denominator is 0
+                {
                     modules_tmp[p] = modules_tmp[p] *
                                      patches[p]->GetSize().GetColSize(); // Paper: Formula 19 (Chi)
+                }
                 else
+                {
                     modules_tmp[p] =
                         modules_tmp[p] *
                         std::sin(patches[p]->GetSize().GetColSize() * phi_x * M_PI * f_c /
                                  SPEED_OF_LIGHT) /
                         std::sin(phi_x * M_PI * f_c / SPEED_OF_LIGHT); // Paper: Formula 19 (Chi)
+                }
 
                 if (modf(phi_y * M_PI * f_c / SPEED_OF_LIGHT, &pigr) ==
                     0) // if it is multiple of pi denominator is 0
@@ -592,11 +611,13 @@ IrsAssistedSpectrumChannel::GetGain(const double f_c,
                                      patches[p]->GetSize().GetRowSize(); // Paper: Formula 19 (Chi)
                 }
                 else
+                {
                     modules_tmp[p] =
                         modules_tmp[p] *
                         std::sin(patches[p]->GetSize().GetRowSize() * phi_y * M_PI * f_c /
                                  SPEED_OF_LIGHT) /
                         std::sin(phi_y * M_PI * f_c / SPEED_OF_LIGHT); // Paper: Formula 19 (Chi)
+                }
 
                 phases_tmp.push_back(
                     -2. * M_PI * f_c / SPEED_OF_LIGHT *
@@ -614,9 +635,13 @@ IrsAssistedSpectrumChannel::GetGain(const double f_c,
                         if (d == d1)
                         {
                             if (p1 <= p)
+                            {
                                 p1 = p + 1;
+                            }
                             if (p == P - 1)
+                            {
                                 break;
+                            }
                         }
                         nu_BRG += 2. * std::abs(modules[d][p]) * std::abs(modules[d1][p1]) *
                                   std::cos(phases[d][p] - phases[d1][p1]);
@@ -656,6 +681,7 @@ IrsAssistedSpectrumChannel::GetGain(const double f_c,
 
             sigma = nu_BRG + sig_BRG;
             if (std::sqrt(2. * K) > 2.5848)
+            {
                 gain.push_back(std::pow(std::sqrt(2. * K) +
                                             0.5 / m_invqfunc *
                                                 std::log(std::sqrt(2. * K) /
@@ -663,9 +689,12 @@ IrsAssistedSpectrumChannel::GetGain(const double f_c,
                                             m_invqfunc,
                                         2.) /
                                (2. * (K + 1.) / sigma));
+            }
             else
+            {
                 gain.push_back(std::pow(std::sqrt(-2. * std::log(1. - m_eps)) * exp(K / 2.), 2.) /
                                (2. * (K + 1.) / sigma));
+            }
         }
     }
     return gain;
@@ -682,16 +711,22 @@ void
 IrsAssistedSpectrumChannel::SetInvqfunc(const double eps)
 {
     if (eps <= 0. || eps >= 1.)
+    {
         NS_FATAL_ERROR("epsilon must be between 0 and 1. Given: " << eps);
+    }
 
     constexpr double c[] = {2.515517, 0.802853, 0.010328};
     constexpr double d[] = {1.432788, 0.189269, 0.001308};
     double t = 0.;
 
     if (eps < 0.5)
+    {
         t = std::sqrt(-2. * std::log(eps));
+    }
     else
+    {
         t = std::sqrt(-2. * std::log(1 - eps));
+    }
 
     m_invqfunc = (t - ((c[2] * t + c[1]) * t + c[0]) / (((d[2] * t + d[1]) * t + d[0]) * t + 1.));
 }
@@ -755,7 +790,9 @@ IrsAssistedSpectrumChannel::NodeToIrssAngles(Ptr<MobilityModel> node, std::vecto
         auto nRelPos = BackShift(nGlobalPos, irsMm);
 
         for (auto i = rotoAxis.size(); i > 0; --i)
+        {
             nRelPos = BackRotate(nRelPos, rotoAxis[i - 1], rotoAngles[i - 1]);
+        }
 
         a_Vector.push_back({nRelPos, irsPos});
     }
@@ -774,7 +811,9 @@ IrsAssistedSpectrumChannel::NodeToIrsAngles(Ptr<MobilityModel> node, Ptr<Irs> ir
 
     nPos = BackShift(nPos, irsMm);
     for (int i = rotoAxis.size(); i > 0; --i)
+    {
         nPos = BackRotate(nPos, rotoAxis[i - 1], rotoAngles[i - 1]);
+    }
 
     return {nPos, irsPos};
 }

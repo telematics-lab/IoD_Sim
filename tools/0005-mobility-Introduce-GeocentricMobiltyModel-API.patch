@@ -1,4 +1,4 @@
-From ea17dc4389af57c776c0ba34b0a17980181a3180 Mon Sep 17 00:00:00 2001
+From 93313c29c015ea477fee8971e46d123261bcc730 Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni@grieco.dev>
 Date: Thu, 30 May 2024 12:22:02 +0200
 Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
@@ -12,8 +12,9 @@ Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
  src/mobility/model/geographic-positions.h     |   7 +
  .../model/channel-condition-model.cc          |   8 +-
  .../model/three-gpp-propagation-loss-model.cc |  73 ++++--
+ .../examples/three-gpp-ntn-channel-example.cc |   9 +-
  src/spectrum/model/three-gpp-channel-model.cc |  27 +-
- 9 files changed, 470 insertions(+), 310 deletions(-)
+ 10 files changed, 475 insertions(+), 314 deletions(-)
  create mode 100644 src/mobility/model/geocentric-mobility-model.cc
  create mode 100644 src/mobility/model/geocentric-mobility-model.h
 
@@ -1063,6 +1064,37 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
+diff --git a/src/spectrum/examples/three-gpp-ntn-channel-example.cc b/src/spectrum/examples/three-gpp-ntn-channel-example.cc
+index 29dfb6828..587f760af 100644
+--- a/src/spectrum/examples/three-gpp-ntn-channel-example.cc
++++ b/src/spectrum/examples/three-gpp-ntn-channel-example.cc
+@@ -25,6 +25,7 @@
+ #include "ns3/constant-position-mobility-model.h"
+ #include "ns3/core-module.h"
+ #include "ns3/geocentric-constant-position-mobility-model.h"
++#include "ns3/geocentric-mobility-model.h"
+ #include "ns3/isotropic-antenna-model.h"
+ #include "ns3/mobility-model.h"
+ #include "ns3/net-device.h"
+@@ -423,14 +424,14 @@ main(int argc, char* argv[])
+     Ptr<GeocentricConstantPositionMobilityModel> rxMob =
+         CreateObject<GeocentricConstantPositionMobilityModel>();
+ 
+-    txMob->SetGeographicPosition(Vector(45.40869, 11.89448, 35786000)); // GEO over Padova
+-    rxMob->SetGeographicPosition(Vector(45.40869, 11.89448, 14.0));     // Padova Coordinates
++    txMob->SetPosition(Vector(45.40869, 11.89448, 35786000), PositionType::GEOGRAPHIC); // GEO over Padova
++    rxMob->SetPosition(Vector(45.40869, 11.89448, 14.0), PositionType::GEOGRAPHIC);     // Padova Coordinates
+ 
+     // This is not strictly necessary, but is useful to have "sensible" values when using
+     // GetPosition()
+-    txMob->SetCoordinateTranslationReferencePoint(
++    txMob->SetGeographicReferencePoint(
+         Vector(45.40869, 11.89448, 0.0)); // Padova Coordinates without altitude
+-    rxMob->SetCoordinateTranslationReferencePoint(
++    rxMob->SetGeographicReferencePoint(
+         Vector(45.40869, 11.89448, 0.0)); // Padova Coordinates without altitude
+     // End changes with respect to three-gpp-channel-example,
+ 
 diff --git a/src/spectrum/model/three-gpp-channel-model.cc b/src/spectrum/model/three-gpp-channel-model.cc
 index 9d372d5b1..f0f792097 100644
 --- a/src/spectrum/model/three-gpp-channel-model.cc

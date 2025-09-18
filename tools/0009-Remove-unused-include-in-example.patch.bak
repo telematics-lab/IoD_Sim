@@ -1,0 +1,24 @@
+From 27d9e98be9e572f0268dbf500c6031171c007d1f Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Thu, 18 Sep 2025 15:53:06 +0200
+Subject: [PATCH] remove unused include
+
+---
+ src/netanim/test/netanim-test.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/netanim/test/netanim-test.cc b/src/netanim/test/netanim-test.cc
+index f568f7d73..e2bbc77db 100644
+--- a/src/netanim/test/netanim-test.cc
++++ b/src/netanim/test/netanim-test.cc
+@@ -15,7 +15,6 @@
+ #include "ns3/internet-module.h"
+ #include "ns3/netanim-module.h"
+ #include "ns3/network-module.h"
+-#include "ns3/point-to-point-layout-module.h"
+ #include "ns3/point-to-point-module.h"
+ #include "ns3/simple-device-energy-model.h"
+ #include "ns3/udp-echo-helper.h"
+-- 
+2.39.5 (Apple Git-154)
+
