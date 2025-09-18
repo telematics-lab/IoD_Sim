@@ -13,11 +13,30 @@ check_availability() {
   fi
 }
 
-# check dependencies
 check_availability git
 check_availability patch
 
-git submodule update --init
+# Funzione per integrare un modulo in contrib
+clone_checkout_ns3() {
+  local module_name="ns3"
+  local repo_url="https://gitlab.com/nsnam/ns-3-dev.git"
+  local checkout_ref="$1"
+
+    if [ -d "$module_name" ]; then
+        cd "$module_name"
+        git checkout "$checkout_ref"
+	cd - > /dev/null
+    else
+      git clone "$repo_url" "$module_name"
+      if [ -n "$checkout_ref" ]; then
+        cd "$module_name"
+        git checkout "$checkout_ref"
+        cd - > /dev/null
+      fi
+    fi
+}
+
+clone_checkout_ns3 ns-3.45
 
 pushd ns3 > /dev/null
 git am ../tools/*.patch

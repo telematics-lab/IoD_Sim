@@ -1,6 +1,6 @@
 # Ignore build artifacts
 build/
-
+ns3/
 # Ignore upstream repository
 ns3/build
 ns3/src/iodsim
