@@ -11,7 +11,8 @@ function install_debian_deps() {
     sqlite         \
     sqlite3        \
     libsqlite3-dev \
-    libeigen3-dev
+    libeigen3-dev  \
+    pybind11-dev
 }
 
 

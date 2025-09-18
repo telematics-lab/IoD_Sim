@@ -241,8 +241,8 @@ build_lib(
                     ${libnr}
 )
 
-build_lib_example(
-  NAME iodsim
+build_exec(
+  EXECNAME iodsim-main
   SOURCE_FILES main.cc
   LIBRARIES_TO_LINK ${libiodsim}
                     ${libcore}
@@ -252,4 +252,6 @@ build_lib_example(
                     ${libwifi}
                     ${libinternet}
                     ${libnr}
+  EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  DEFINITIONS ""
 )

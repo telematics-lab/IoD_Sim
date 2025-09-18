@@ -1,4 +1,4 @@
-From c98749d4cb75554d0b5c6055062f48c72a4365a4 Mon Sep 17 00:00:00 2001
+From 109f3f11bb0131d5021fea93bcebb0b81d946812 Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni.grieco@poliba.it>
 Date: Wed, 5 Jul 2023 09:39:14 +0000
 Subject: [PATCH] Integrate IRS with MultiModelSpectrumChannel
@@ -8,10 +8,10 @@ Subject: [PATCH] Integrate IRS with MultiModelSpectrumChannel
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/src/spectrum/model/multi-model-spectrum-channel.h b/src/spectrum/model/multi-model-spectrum-channel.h
-index 6ace8abf5..8acddbb0c 100644
+index d2e97ecf9..32f8d40a1 100644
 --- a/src/spectrum/model/multi-model-spectrum-channel.h
 +++ b/src/spectrum/model/multi-model-spectrum-channel.h
-@@ -122,7 +122,6 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+@@ -112,7 +112,6 @@ class MultiModelSpectrumChannel : public SpectrumChannel
    protected:
      void DoDispose() override;
  
@@ -19,9 +19,9 @@ index 6ace8abf5..8acddbb0c 100644
      /**
       * This method checks if m_rxSpectrumModelInfoMap contains an entry
       * for the given TX SpectrumModel. If such entry exists, it returns
-@@ -144,6 +143,17 @@ class MultiModelSpectrumChannel : public SpectrumChannel
-      */
-     virtual void StartRx(Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver);
+@@ -142,6 +141,17 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+         Ptr<SpectrumPhy> receiver,
+         const std::map<SpectrumModelUid_t, Ptr<SpectrumValue>>& availableConvertedPsds);
  
 +    const TxSpectrumModelInfoMap_t& GetTxSpectrumModelInfoMap() const
 +    {
@@ -38,5 +38,5 @@ index 6ace8abf5..8acddbb0c 100644
       * Data structure holding, for each TX SpectrumModel,  all the
       * converters to any RX SpectrumModel, and all the corresponding
 -- 
-2.41.0
+2.39.5 (Apple Git-154)
 
