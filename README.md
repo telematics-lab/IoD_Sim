@@ -76,6 +76,7 @@ Otherwise, run the following commands:
 ./tools/clone-nr.sh
 ./tools/configure-iodsim.sh
 cd ns3/
+./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=iodsim,point-to-point-layout
 ./ns3 build
 ```
 
