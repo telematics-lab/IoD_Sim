@@ -28,6 +28,7 @@
 #include <ns3/drone-peripheral.h>
 #include <ns3/drone-server-application.h>
 #include <ns3/energy-source.h>
+#include <ns3/geocentric-mobility-model.h>
 #include <ns3/ideal-beamforming-helper.h>
 #include <ns3/input-peripheral.h>
 #include <ns3/interest-region-container.h>
@@ -37,6 +38,7 @@
 #include <ns3/ipv4-routing-helper.h>
 #include <ns3/ipv4-simulation-helper.h>
 #include <ns3/ipv4-static-routing-helper.h>
+#include <ns3/leo-sat-list.h>
 #include <ns3/log.h>
 #include <ns3/lte-enb-net-device.h>
 #include <ns3/lte-netdevice-configuration.h>
@@ -166,7 +168,8 @@ class Scenario
     void ConfigureInternetBackbone();
     void EnablePhyLteTraces();
     void ConfigureRegionsOfInterest();
-    void CourseChange(std::string context, Ptr<const MobilityModel> model);
+    void DroneCourseChange(std::string context, Ptr<const MobilityModel> model);
+    void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
 
     NodeContainer m_plainNodes;
@@ -174,8 +177,10 @@ class Scenario
     NodeContainer m_zsps;
     NodeContainer m_remoteNodes;
     NodeContainer m_backbone;
+    NodeContainer m_leoSats;
 
     std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
+    Ptr<OutputStreamWrapper> m_leoSatTraceStream;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -195,6 +200,7 @@ Scenario::Scenario(int argc, char** argv)
     m_drones.Create(CONFIGURATOR->GetN("drones"));
     m_zsps.Create(CONFIGURATOR->GetN("ZSPs"));
     m_remoteNodes.Create(CONFIGURATOR->GetN("remotes"));
+    m_leoSats.Create(CONFIGURATOR->GetN("leo-sats"));
     m_backbone.Add(m_remoteNodes);
 
     // Register created entities in their lists
@@ -213,6 +219,11 @@ Scenario::Scenario(int argc, char** argv)
         RemoteList::Add(*remote);
     }
 
+    for (auto leoSat = m_leoSats.Begin(); leoSat != m_leoSats.End(); leoSat++)
+    {
+        LeoSatList::Add(*leoSat);
+    }
+
     ApplyStaticConfig();
     ConfigureWorld();
     ConfigurePhy();
@@ -222,9 +233,18 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureEntities("nodes", m_plainNodes);
     ConfigureEntities("drones", m_drones);
     ConfigureEntities("ZSPs", m_zsps);
+    ConfigureEntities("leo-sats", m_leoSats);
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
     EnablePhyLteTraces();
+
+    // Initialize LeoSat trace CSV file
+    std::ostringstream leoSatTraceFilePath;
+    leoSatTraceFilePath << CONFIGURATOR->GetResultsPath() << "leo-sat-trace.csv";
+    m_leoSatTraceStream = Create<OutputStreamWrapper>(leoSatTraceFilePath.str(), std::ios::out);
+
+    // Write CSV header
+    *m_leoSatTraceStream->GetStream() << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
 
     // DebugHelper::ProbeNodes();
     ConfigureSimulator();
@@ -834,7 +854,7 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         mobility.Install(m_drones.Get(entityId));
         std::ostringstream oss;
         oss << "/DroneList/" << entityId << "/$ns3::MobilityModel/CourseChange";
-        Config::Connect(oss.str(), MakeCallback(&Scenario::CourseChange, this));
+        Config::Connect(oss.str(), MakeCallback(&Scenario::DroneCourseChange, this));
     }
     else if (entityKey == "ZSPs")
     {
@@ -843,6 +863,17 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     else if (entityKey == "nodes")
     {
         mobility.Install(m_plainNodes.Get(entityId));
+    }
+    else if (entityKey == "leo-sats")
+    {
+        mobility.Install(m_leoSats.Get(entityId));
+        std::ostringstream oss;
+        oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
+        Config::Connect(oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
+    }
+    else
+    {
+        NS_FATAL_ERROR("Unsupported Entity Key: " << entityKey);
     }
 }
 
@@ -1112,6 +1143,10 @@ Scenario::ConfigureEntityApplications(const std::string& entityKey,
             m_zsps.Get(entityId)->AddApplication(app);
         }
         else if (entityKey == "nodes")
+        {
+            m_plainNodes.Get(entityId)->AddApplication(app);
+        }
+        else if (entityKey == "leo-sats")
         {
             m_plainNodes.Get(entityId)->AddApplication(app);
         }
@@ -1407,7 +1442,23 @@ Scenario::ConfigureRegionsOfInterest()
 }
 
 void
-Scenario::CourseChange(std::string context, Ptr<const MobilityModel> model)
+Scenario::LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model)
+{
+    auto mobility = DynamicCast<const GeocentricMobilityModel>(model);
+    if (mobility)
+    {
+        auto pos = mobility->GetPosition(ns3::PositionType::GEOCENTRIC);
+        auto geo = mobility->GetPosition(ns3::PositionType::GEOGRAPHIC);
+        Ptr<const Node> node = model->GetObject<Node>();
+        // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude
+        *m_leoSatTraceStream->GetStream()
+            << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
+            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
+    }
+}
+
+void
+Scenario::DroneCourseChange(std::string context, Ptr<const MobilityModel> model)
 {
     Vector position = model->GetPosition();
     std::string start = "/DroneList/";

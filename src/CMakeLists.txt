@@ -59,6 +59,7 @@ set(source_files
   entity/drone.cc
   entity/remote-list.cc
   entity/zsp-list.cc
+  entity/leo-sat-list.cc
   helper/three-dimensional-rem-helper.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
@@ -173,6 +174,7 @@ set(header_files
   entity/drone.h
   entity/remote-list.h
   entity/zsp-list.h
+  entity/leo-sat-list.h
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.h
   irs/patch-configurator/defined-patch-configurator.h
@@ -239,10 +241,11 @@ build_lib(
                     ${libwifi}
                     ${libmobility}
                     ${libnr}
+                    ${libleo}
 )
 
 build_exec(
-  EXECNAME iodsim-main
+  EXECNAME scenario
   SOURCE_FILES main.cc
   LIBRARIES_TO_LINK ${libiodsim}
                     ${libcore}
@@ -252,6 +255,7 @@ build_exec(
                     ${libwifi}
                     ${libinternet}
                     ${libnr}
+                    ${libleo}
   EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   DEFINITIONS ""
 )

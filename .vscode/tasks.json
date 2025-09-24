@@ -64,7 +64,7 @@
     {
       "label": "Run IoD Sim",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} \"",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} \"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -73,7 +73,7 @@
     {
       "label": "Generate 2D REM",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} --radioMap=1\"",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} --radioMap=1\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },
@@ -82,7 +82,7 @@
     {
       "label": "Generate 3D REM",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"iodsim --config=${input:scenarioConfigurationFilepath} --radioMap=2\"",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} --radioMap=2\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },

@@ -84,7 +84,7 @@ To run a JSON scenario configuration, execute the following command:
 
 ```
 cd ns3/
-./ns3 run iodsim -- --config=../scenario/simple_wifi.json
+./ns3 run scenario -- --config=../scenario/simple_wifi.json
 ```
 
 ## Generate documentation
