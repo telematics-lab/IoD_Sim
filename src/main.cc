@@ -93,7 +93,7 @@ constexpr int N_LAYERS = 4;
 constexpr int PHY_LAYER = 0;
 constexpr int MAC_LAYER = 1;
 constexpr int NET_LAYER = 2;
-[[maybe_unused]] constexpr int APP_LAYER = 3;
+// constexpr int APP_LAYER = 3;
 constexpr int PROGRESS_REFRESH_INTERVAL_SECONDS = 1;
 
 class Scenario
@@ -170,6 +170,7 @@ class Scenario
     void ConfigureRegionsOfInterest();
     void DroneCourseChange(std::string context, Ptr<const MobilityModel> model);
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
+    void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
 
     NodeContainer m_plainNodes;
@@ -178,9 +179,11 @@ class Scenario
     NodeContainer m_remoteNodes;
     NodeContainer m_backbone;
     NodeContainer m_leoSats;
+    NodeContainer m_vehicles;
 
     std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
     Ptr<OutputStreamWrapper> m_leoSatTraceStream;
+    Ptr<OutputStreamWrapper> m_vehicleTraceStream;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -201,6 +204,7 @@ Scenario::Scenario(int argc, char** argv)
     m_zsps.Create(CONFIGURATOR->GetN("ZSPs"));
     m_remoteNodes.Create(CONFIGURATOR->GetN("remotes"));
     m_leoSats.Create(CONFIGURATOR->GetN("leo-sats"));
+    m_vehicles.Create(CONFIGURATOR->GetN("vehicles"));
     m_backbone.Add(m_remoteNodes);
 
     // Register created entities in their lists
@@ -234,6 +238,7 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureEntities("drones", m_drones);
     ConfigureEntities("ZSPs", m_zsps);
     ConfigureEntities("leo-sats", m_leoSats);
+    ConfigureEntities("vehicles", m_vehicles);
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
     EnablePhyLteTraces();
@@ -242,9 +247,13 @@ Scenario::Scenario(int argc, char** argv)
     std::ostringstream leoSatTraceFilePath;
     leoSatTraceFilePath << CONFIGURATOR->GetResultsPath() << "leo-sat-trace.csv";
     m_leoSatTraceStream = Create<OutputStreamWrapper>(leoSatTraceFilePath.str(), std::ios::out);
-
-    // Write CSV header
     *m_leoSatTraceStream->GetStream() << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
+    // Inizialize Vehicles trace CSV file
+    std::ostringstream vehicleTraceFilePath;
+    vehicleTraceFilePath << CONFIGURATOR->GetResultsPath() << "vehicle-trace.csv";
+    m_vehicleTraceStream = Create<OutputStreamWrapper>(vehicleTraceFilePath.str(), std::ios::out);
+    *m_vehicleTraceStream->GetStream()
+        << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
 
     // DebugHelper::ProbeNodes();
     ConfigureSimulator();
@@ -871,6 +880,14 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
         Config::Connect(oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
     }
+    else if (entityKey == "vehicles")
+    {
+        auto vehicle = m_vehicles.Get(entityId);
+        mobility.Install(vehicle);
+        std::ostringstream oss;
+        oss << "/NodeList/" << vehicle->GetId() << "/$ns3::MobilityModel/CourseChange";
+        Config::Connect(oss.str(), MakeCallback(&Scenario::VehicleCourseChange, this));
+    }
     else
     {
         NS_FATAL_ERROR("Unsupported Entity Key: " << entityKey);
@@ -1148,7 +1165,11 @@ Scenario::ConfigureEntityApplications(const std::string& entityKey,
         }
         else if (entityKey == "leo-sats")
         {
-            m_plainNodes.Get(entityId)->AddApplication(app);
+            m_leoSats.Get(entityId)->AddApplication(app);
+        }
+        else if (entityKey == "vehicles")
+        {
+            m_vehicles.Get(entityId)->AddApplication(app);
         }
         else
         {
@@ -1452,6 +1473,22 @@ Scenario::LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model
         Ptr<const Node> node = model->GetObject<Node>();
         // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude
         *m_leoSatTraceStream->GetStream()
+            << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
+            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
+    }
+}
+
+void
+Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> model)
+{
+    auto mobility = DynamicCast<const GeocentricMobilityModel>(model);
+    if (mobility)
+    {
+        auto pos = mobility->GetPosition(ns3::PositionType::GEOCENTRIC);
+        auto geo = mobility->GetPosition(ns3::PositionType::GEOGRAPHIC);
+        Ptr<const Node> node = model->GetObject<Node>();
+        // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude
+        *m_vehicleTraceStream->GetStream()
             << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
             << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
     }

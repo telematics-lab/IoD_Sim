@@ -1,0 +1,346 @@
+{
+  "name": "leo-circular-orbit-tracing",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 500,
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "1s"
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "1s"
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "none"
+    }
+  ],
+  "macLayer": [],
+  "vehicles": [
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 10.0
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 120.0
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 30.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 45.0
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 45.5
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 9.2
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 25.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 90.0
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": -34.6
+          },
+          {
+            "name": "InitialLongitude",
+            "value": -58.4
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 20.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 180.0
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 35.7
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 139.7
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 15.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 270.0
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 51.5
+          },
+          {
+            "name": "InitialLongitude",
+            "value": -0.1
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 35.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 135.0
+          }
+        ]
+      }
+    }
+  ],
+  "leo-sats": [
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination",
+            "value": 20.0
+          },
+          {
+            "name": "Longitude",
+            "value": 0.0
+          },
+          {
+            "name": "Offset",
+            "value": 0.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 550.0
+          },
+          {
+            "name": "Inclination",
+            "value": 53.0
+          },
+          {
+            "name": "Longitude",
+            "value": 45.0
+          },
+          {
+            "name": "Offset",
+            "value": 30.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 780.0
+          },
+          {
+            "name": "Inclination",
+            "value": 98.2
+          },
+          {
+            "name": "Longitude",
+            "value": 120.0
+          },
+          {
+            "name": "Offset",
+            "value": 60.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 600.0
+          },
+          {
+            "name": "Inclination",
+            "value": 87.4
+          },
+          {
+            "name": "Longitude",
+            "value": 180.0
+          },
+          {
+            "name": "Offset",
+            "value": 90.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 1200.0
+          },
+          {
+            "name": "Inclination",
+            "value": 70.0
+          },
+          {
+            "name": "Longitude",
+            "value": -90.0
+          },
+          {
+            "name": "Offset",
+            "value": 120.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 350.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": -45.0
+          },
+          {
+            "name": "Offset",
+            "value": 150.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      }
+    }
+  ]
+}

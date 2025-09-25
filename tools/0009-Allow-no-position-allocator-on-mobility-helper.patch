@@ -1,0 +1,30 @@
+From 336207a78dcf19d9a7e67f4f0c974b40e5339a01 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Thu, 25 Sep 2025 19:30:00 +0200
+Subject: [PATCH] Allowing not set a Position Allocator on MobilityHelper
+
+---
+ src/mobility/helper/mobility-helper.cc | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/mobility/helper/mobility-helper.cc b/src/mobility/helper/mobility-helper.cc
+index f89e33cba..5961fe9b7 100644
+--- a/src/mobility/helper/mobility-helper.cc
++++ b/src/mobility/helper/mobility-helper.cc
+@@ -101,8 +101,11 @@ MobilityHelper::Install(Ptr<Node> node) const
+             NS_LOG_DEBUG("node=" << object << ", mob=" << hierarchical);
+         }
+     }
+-    Vector position = m_position->GetNext();
+-    model->SetPosition(position);
++    if (m_position)
++    {
++        Vector position = m_position->GetNext();
++        model->SetPosition(position);
++    }
+ }
+ 
+ void
+-- 
+2.39.5 (Apple Git-154)
+

@@ -49,12 +49,10 @@ def generate_leo_satellites():
 
                 # Create satellite configuration
                 satellite = {
-                    "type": "LeoSat",
                     "netDevices": [],
                     "mobilityModel": {
                         "name": "ns3::GeoLeoOrbitMobility",
                         "attributes": [
-                            {"name": "EarthSpheroidType", "value": "SPHERE"},
                             {"name": "Altitude", "value": float(altitude)},
                             {"name": "Inclination", "value": float(inclination)},
                             {"name": "Longitude", "value": longitude},
@@ -87,7 +85,11 @@ def create_full_scenario():
         "logOnFile": True,
         "duration": 500,
         "staticNs3Config": [
-            {"name": "ns3::GeoLeoOrbitMobility::Precision", "value": "1s"}
+            {"name": "ns3::GeoLeoOrbitMobility::Precision", "value": "1s"},
+            {
+                "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+                "value": "SPHERE",
+            },
         ],
         "world": {
             "size": {"X": "40000000", "Y": "40000000", "Z": "40000000"},
@@ -105,7 +107,6 @@ def main():
     """Main function to generate and save the configuration"""
 
     print("Generating LEO satellite constellation configuration...")
-    print("Configuration: LeoOrbit (1200, 20, 32, 16) + LeoOrbit (1180, 30, 12, 10)")
     print()
 
     scenario = create_full_scenario()
@@ -116,7 +117,7 @@ def main():
     print(f"\nGenerated {total_sats} satellites:")
 
     # Save to file
-    output_file = "../leo-circular-orbit-tracing-example.json"
+    output_file = "../leo-circular-orbit-tracing.json"
     with open(output_file, "w") as f:
         json.dump(scenario, f, indent=2)
 

@@ -48,6 +48,14 @@ MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfi
             }
         }
     }
+    else if (modelConf.GetName() == "ns3::GeoConstantVelocityMobility")
+    {
+        helper.SetPositionAllocator(nullptr);
+        for (auto& attr : modelConf.GetAttributes())
+        {
+            helper.m_mobility.Set(attr.name, *attr.value);
+        }
+    }
     else if (modelConf.GetName() == "ns3::RandomWalk2dOutdoorMobilityModel")
     {
         static auto positionAllocator = CreateObject<OutdoorPositionAllocator>();
