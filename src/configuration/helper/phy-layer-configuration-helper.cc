@@ -24,6 +24,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/none-phy-layer-configuration.h>
+#include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/type-id.h>
@@ -153,6 +154,18 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                                                           propagationLossModel,
                                                           conditionModel,
                                                           environment);
+    }
+    else if (phyType == "nr")
+    {
+        NS_ASSERT_MSG(jsonPhyLayer.HasMember("beamforming"),
+                      "NR PHY Layer definition must have 'beamforming' property.");
+
+        const auto phyAttributes =
+            ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrHelper"),
+                                                    jsonPhyLayer["attributes"].GetArray());
+
+        // For NR, use simplified configuration with default parameters
+        phyConfig = Create<NrPhyLayerConfiguration>(phyType, phyAttributes, "UMi-StreetCanyon");
     }
     else
     {

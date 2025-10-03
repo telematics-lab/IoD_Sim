@@ -2125,7 +2125,7 @@
         ]
       },
       "battery": {
-        "name": "ns3::LiIonEnergySource",
+        "name": "ns3::energy::LiIonEnergySource",
         "attributes": [
           {
             "name": "LiIonEnergySourceInitialEnergyJ",
@@ -2293,7 +2293,7 @@
         ]
       },
       "battery": {
-        "name": "ns3::LiIonEnergySource",
+        "name": "ns3::energy::LiIonEnergySource",
         "attributes": [
           {
             "name": "LiIonEnergySourceInitialEnergyJ",
@@ -2461,7 +2461,7 @@
         ]
       },
       "battery": {
-        "name": "ns3::LiIonEnergySource",
+        "name": "ns3::energy::LiIonEnergySource",
         "attributes": [
           {
             "name": "LiIonEnergySourceInitialEnergyJ",
@@ -2629,7 +2629,7 @@
         ]
       },
       "battery": {
-        "name": "ns3::LiIonEnergySource",
+        "name": "ns3::energy::LiIonEnergySource",
         "attributes": [
           {
             "name": "LiIonEnergySourceInitialEnergyJ",

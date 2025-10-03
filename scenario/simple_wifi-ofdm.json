@@ -3,10 +3,8 @@
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 300,
-
     "staticNs3Config": [],
-
-    "world" : {
+    "world": {
         "size": {
             "X": "1000",
             "Y": "1000",
@@ -14,7 +12,6 @@
         },
         "buildings": []
     },
-
     "phyLayer": [
         {
             "type": "wifi",
@@ -42,7 +39,6 @@
             }
         }
     ],
-
     "macLayer": [
         {
             "type": "wifi",
@@ -62,7 +58,6 @@
             }
         }
     ],
-
     "networkLayer": [
         {
             "type": "ipv4",
@@ -71,7 +66,6 @@
             "gateway": "10.42.0.2"
         }
     ],
-
     "drones": [
         {
             "netDevices": [
@@ -80,14 +74,15 @@
                     "networkLayer": 0,
                     "macLayer": {
                         "name": "ns3::StaWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-default"
-                        }]
+                        "attributes": [
+                            {
+                                "name": "Ssid",
+                                "value": "wifi-default"
+                            }
+                        ]
                     }
                 }
             ],
-
             "mobilityModel": {
                 "name": "ns3::ConstantAccelerationDroneMobilityModel",
                 "attributes": [
@@ -103,36 +98,48 @@
                         "name": "FlightPlan",
                         "value": [
                             {
-                                "position": [0.0, 0.0, 0.0],
+                                "position": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
                                 "interest": 0
                             },
                             {
-                                "position": [30.0, 30.0, 30.0],
+                                "position": [
+                                    30.0,
+                                    30.0,
+                                    30.0
+                                ],
                                 "interest": 1
                             },
                             {
-                                "position": [60.0, 60.0, 60.0],
+                                "position": [
+                                    60.0,
+                                    60.0,
+                                    60.0
+                                ],
                                 "interest": 0
                             }
                         ]
                     }
                 ]
             },
-
-            "applications": [{
-                "name": "ns3::DroneClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 299.0
-                    }
-                ]
-            }],
-
+            "applications": [
+                {
+                    "name": "ns3::DroneClientApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 299.0
+                        }
+                    ]
+                }
+            ],
             "mechanics": {
                 "name": "ns3::Drone",
                 "attributes": [
@@ -150,9 +157,8 @@
                     }
                 ]
             },
-
             "battery": {
-                "name": "ns3::LiIonEnergySource",
+                "name": "ns3::energy::LiIonEnergySource",
                 "attributes": [
                     {
                         "name": "LiIonEnergySourceInitialEnergyJ",
@@ -168,11 +174,9 @@
                     }
                 ]
             },
-
             "peripherals": []
         }
     ],
-
     "ZSPs": [
         {
             "netDevices": [
@@ -180,40 +184,45 @@
                     "type": "wifi",
                     "macLayer": {
                         "name": "ns3::ApWifiMac",
-                        "attributes": [{
-                            "name": "Ssid",
-                            "value": "wifi-default"
-                        }]
+                        "attributes": [
+                            {
+                                "name": "Ssid",
+                                "value": "wifi-default"
+                            }
+                        ]
                     },
                     "networkLayer": 0
                 }
             ],
-
             "mobilityModel": {
                 "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [0.0, 0.0, 0.0]
-                }]
-            },
-
-            "applications": [{
-                "name": "ns3::DroneServerApplication",
                 "attributes": [
                     {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 99.0
+                        "name": "Position",
+                        "value": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
                     }
                 ]
-            }]
+            },
+            "applications": [
+                {
+                    "name": "ns3::DroneServerApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 99.0
+                        }
+                    ]
+                }
+            ]
         }
     ],
-
-    "logComponents": [
-
-    ]
+    "logComponents": []
 }

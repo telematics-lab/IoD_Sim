@@ -4,10 +4,8 @@
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 50,
-    "staticNs3Config": [
-    ],
-
-    "world" : {
+    "staticNs3Config": [],
+    "world": {
         "size": {
             "X": "1000",
             "Y": "1000",
@@ -17,86 +15,202 @@
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [0.0, 70.0, 0.0, 70.0, 0.0, 20.0],
+                "boundaries": [
+                    0.0,
+                    70.0,
+                    0.0,
+                    70.0,
+                    0.0,
+                    20.0
+                ],
                 "floors": 6,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [90.0, 160.0, 0.0, 70.0, 0.0, 15.0],
+                "boundaries": [
+                    90.0,
+                    160.0,
+                    0.0,
+                    70.0,
+                    0.0,
+                    15.0
+                ],
                 "floors": 5,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [90.0, 160.0, 90.0, 160.0, 0.0, 25.0],
+                "boundaries": [
+                    90.0,
+                    160.0,
+                    90.0,
+                    160.0,
+                    0.0,
+                    25.0
+                ],
                 "floors": 8,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [0.0, 70.0, 90.0, 160.0, 0.0, 18.0],
+                "boundaries": [
+                    0.0,
+                    70.0,
+                    90.0,
+                    160.0,
+                    0.0,
+                    18.0
+                ],
                 "floors": 6,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [180.0, 250.0, 90.0, 160.0, 0.0, 23.0],
+                "boundaries": [
+                    180.0,
+                    250.0,
+                    90.0,
+                    160.0,
+                    0.0,
+                    23.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [90.0, 160.0, 180.0, 250.0, 0.0, 21.0],
+                "boundaries": [
+                    90.0,
+                    160.0,
+                    180.0,
+                    250.0,
+                    0.0,
+                    21.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [180.0, 250.0, 180.0, 250.0, 0.0, 22.0],
+                "boundaries": [
+                    180.0,
+                    250.0,
+                    180.0,
+                    250.0,
+                    0.0,
+                    22.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [270.0, 340.0, 0.0, 70.0, 0.0, 22.0],
+                "boundaries": [
+                    270.0,
+                    340.0,
+                    0.0,
+                    70.0,
+                    0.0,
+                    22.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [270.0, 340.0, 180.0, 250.0, 0.0, 16.0],
+                "boundaries": [
+                    270.0,
+                    340.0,
+                    180.0,
+                    250.0,
+                    0.0,
+                    16.0
+                ],
                 "floors": 5,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [360.0, 430.0, 180.0, 250.0, 0.0, 15.0],
+                "boundaries": [
+                    360.0,
+                    430.0,
+                    180.0,
+                    250.0,
+                    0.0,
+                    15.0
+                ],
                 "floors": 4,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [360.0, 430.0, 90.0, 160.0, 0.0, 21.0],
+                "boundaries": [
+                    360.0,
+                    430.0,
+                    90.0,
+                    160.0,
+                    0.0,
+                    21.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             }
         ],
         "regionsOfInterest": [
-            [170.0, 340.0, 180.0, 250.0, 0.0, 15.0]
+            [
+                170.0,
+                340.0,
+                180.0,
+                250.0,
+                0.0,
+                15.0
+            ]
         ]
     },
-
     "phyLayer": [
         {
             "type": "lte",
@@ -126,13 +240,11 @@
             }
         }
     ],
-
     "macLayer": [
         {
             "type": "lte"
         }
     ],
-
     "networkLayer": [
         {
             "type": "ipv4",
@@ -141,8 +253,8 @@
             "gateway": "10.1.0.1"
         }
     ],
-
-    "drones": [{
+    "drones": [
+        {
             "netDevices": [
                 {
                     "type": "lte",
@@ -167,81 +279,153 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
-                "attributes": [{
+                "attributes": [
+                    {
                         "name": "SpeedCoefficients",
-                        "value": [10.0]
+                        "value": [
+                            10.0
+                        ]
                     },
                     {
                         "name": "FlightPlan",
-                        "value": [{
-                                "position": [0.0, 200.0, 0.1],
+                        "value": [
+                            {
+                                "position": [
+                                    0.0,
+                                    200.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
                             {
-                                "position": [0.0, 200.0, 3.0],
+                                "position": [
+                                    0.0,
+                                    200.0,
+                                    3.0
+                                ],
                                 "interest": 1
                             },
                             {
-                                "position": [0.0, 250.0, 5.0],
+                                "position": [
+                                    0.0,
+                                    250.0,
+                                    5.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [90.0, 250.0, 7.0],
+                                "position": [
+                                    90.0,
+                                    250.0,
+                                    7.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [90.0, 170.0, 10.0],
+                                "position": [
+                                    90.0,
+                                    170.0,
+                                    10.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [0.0, 170.0, 13.0],
+                                "position": [
+                                    0.0,
+                                    170.0,
+                                    13.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [0.0, 250.0, 15.0],
+                                "position": [
+                                    0.0,
+                                    250.0,
+                                    15.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [90.0, 250.0, 17.0],
+                                "position": [
+                                    90.0,
+                                    250.0,
+                                    17.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [80.0, 170.0, 20.0],
+                                "position": [
+                                    80.0,
+                                    170.0,
+                                    20.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [0.0, 125.0, 23.0],
+                                "position": [
+                                    0.0,
+                                    125.0,
+                                    23.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [100.0, 80.0, 23.0],
+                                "position": [
+                                    100.0,
+                                    80.0,
+                                    23.0
+                                ],
                                 "interest": 6
                             },
                             {
-                                "position": [250.0, 80.0, 23.0],
+                                "position": [
+                                    250.0,
+                                    80.0,
+                                    23.0
+                                ],
                                 "interest": 0,
                                 "restTime": 0.5
                             },
                             {
-                                "position": [340.0, 80.0, 23.0],
+                                "position": [
+                                    340.0,
+                                    80.0,
+                                    23.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [340.0, 170.0, 23.0],
+                                "position": [
+                                    340.0,
+                                    170.0,
+                                    23.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [50.0, 170.0, 23.0],
+                                "position": [
+                                    50.0,
+                                    170.0,
+                                    23.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [50.0, 230.0, 23.0],
+                                "position": [
+                                    50.0,
+                                    230.0,
+                                    23.0
+                                ],
                                 "interest": 0,
                                 "restTime": 0.5
                             },
                             {
-                                "position": [50.0, 230.0, 0.1],
+                                "position": [
+                                    50.0,
+                                    230.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             }
@@ -253,27 +437,29 @@
                     }
                 ]
             },
-            "applications": [{
-                "name": "ns3::DroneClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 499.0
-                    },
-                    {
-                        "name": "DestinationIpv4Address",
-                        "value": "200.0.0.1"
-                    },
-                    {
-                        "name": "Port",
-                        "value": "1337"
-                    }
-                ]
-            }],
+            "applications": [
+                {
+                    "name": "ns3::DroneClientApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 499.0
+                        },
+                        {
+                            "name": "DestinationIpv4Address",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "Port",
+                            "value": "1337"
+                        }
+                    ]
+                }
+            ],
             "mechanics": {
                 "name": "ns3::Drone",
                 "attributes": [
@@ -292,7 +478,7 @@
                 ]
             },
             "battery": {
-                "name": "ns3::LiIonEnergySource",
+                "name": "ns3::energy::LiIonEnergySource",
                 "attributes": [
                     {
                         "name": "LiIonEnergySourceInitialEnergyJ",
@@ -304,19 +490,27 @@
                     }
                 ]
             },
-            "peripherals": [{
-                "name": "ns3::DronePeripheral",
-                "attributes":[
-                    {
-                        "name": "PowerConsumption",
-                        "value": [0, 1.0, 5.0]
-                    },
-                    {
-                        "name": "RoITrigger",
-                        "value": [0]
-                    }
-                ]
-            }]
+            "peripherals": [
+                {
+                    "name": "ns3::DronePeripheral",
+                    "attributes": [
+                        {
+                            "name": "PowerConsumption",
+                            "value": [
+                                0,
+                                1.0,
+                                5.0
+                            ]
+                        },
+                        {
+                            "name": "RoITrigger",
+                            "value": [
+                                0
+                            ]
+                        }
+                    ]
+                }
+            ]
         },
         {
             "netDevices": [
@@ -343,57 +537,104 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
-                "attributes": [{
+                "attributes": [
+                    {
                         "name": "SpeedCoefficients",
-                        "value": [10.0]
+                        "value": [
+                            10.0
+                        ]
                     },
                     {
                         "name": "FlightPlan",
                         "value": [
                             {
-                                "position": [400.0,25.0,0.1],
+                                "position": [
+                                    400.0,
+                                    25.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 5.0
                             },
                             {
-                                "position": [400.0,25.0,15.0],
+                                "position": [
+                                    400.0,
+                                    25.0,
+                                    15.0
+                                ],
                                 "interest": 2
                             },
                             {
-                                "position": [340.0,90.0,15.0],
+                                "position": [
+                                    340.0,
+                                    90.0,
+                                    15.0
+                                ],
                                 "interest": 2
                             },
                             {
-                                "position": [340.0,150.0,15.0],
+                                "position": [
+                                    340.0,
+                                    150.0,
+                                    15.0
+                                ],
                                 "interest": 0,
                                 "restTime": 0.5
                             },
                             {
-                                "position": [340.0,170.0,15.0],
+                                "position": [
+                                    340.0,
+                                    170.0,
+                                    15.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [170.0,170.0,17.0],
+                                "position": [
+                                    170.0,
+                                    170.0,
+                                    17.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [170.0,70.0,17.0],
+                                "position": [
+                                    170.0,
+                                    70.0,
+                                    17.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [340.0,70.0,17.0],
+                                "position": [
+                                    340.0,
+                                    70.0,
+                                    17.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [400.0,70.0,17.0],
+                                "position": [
+                                    400.0,
+                                    70.0,
+                                    17.0
+                                ],
                                 "interest": 6
                             },
                             {
-                                "position": [420.0,25.0,10.0],
+                                "position": [
+                                    420.0,
+                                    25.0,
+                                    10.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [420.0, 25.0, 0.1],
+                                "position": [
+                                    420.0,
+                                    25.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             }
@@ -405,27 +646,29 @@
                     }
                 ]
             },
-            "applications": [{
-                "name": "ns3::DroneClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 499.0
-                    },
-                    {
-                        "name": "DestinationIpv4Address",
-                        "value": "200.0.0.1"
-                    },
-                    {
-                        "name": "Port",
-                        "value": "1337"
-                    }
-                ]
-            }],
+            "applications": [
+                {
+                    "name": "ns3::DroneClientApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 499.0
+                        },
+                        {
+                            "name": "DestinationIpv4Address",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "Port",
+                            "value": "1337"
+                        }
+                    ]
+                }
+            ],
             "mechanics": {
                 "name": "ns3::Drone",
                 "attributes": [
@@ -444,7 +687,7 @@
                 ]
             },
             "battery": {
-                "name": "ns3::LiIonEnergySource",
+                "name": "ns3::energy::LiIonEnergySource",
                 "attributes": [
                     {
                         "name": "LiIonEnergySourceInitialEnergyJ",
@@ -456,19 +699,27 @@
                     }
                 ]
             },
-            "peripherals": [{
-                "name": "ns3::DronePeripheral",
-                "attributes":[
-                    {
-                        "name": "PowerConsumption",
-                        "value": [0, 1.0, 5.0]
-                    },
-                    {
-                        "name": "RoITrigger",
-                        "value": [0]
-                    }
-                ]
-            }]
+            "peripherals": [
+                {
+                    "name": "ns3::DronePeripheral",
+                    "attributes": [
+                        {
+                            "name": "PowerConsumption",
+                            "value": [
+                                0,
+                                1.0,
+                                5.0
+                            ]
+                        },
+                        {
+                            "name": "RoITrigger",
+                            "value": [
+                                0
+                            ]
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "ZSPs": [
@@ -497,38 +748,44 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [215.0, 245.0, 22.0]
-                }]
+                "attributes": [
+                    {
+                        "name": "Position",
+                        "value": [
+                            215.0,
+                            245.0,
+                            22.0
+                        ]
+                    }
+                ]
             },
             "applications": []
         }
     ],
-
     "remotes": [
         {
             "networkLayer": 0,
-            "applications": [{
-                "name": "ns3::DroneServerApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 499.0
-                    },
-                    {
-                        "name": "Port",
-                        "value": 1337
-                    }
-                ]
-            }]
+            "applications": [
+                {
+                    "name": "ns3::DroneServerApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 499.0
+                        },
+                        {
+                            "name": "Port",
+                            "value": 1337
+                        }
+                    ]
+                }
+            ]
         }
     ],
-
     "logComponents": [
         "Scenario",
         "DroneEnergyModel",

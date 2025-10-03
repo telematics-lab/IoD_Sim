@@ -550,6 +550,7 @@ Scenario::ConfigurePhy()
             nrHelper->SetSchedulerTypeId(TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR"));
 
             // Beamforming method
+            std::string beamformingMethod = nrConf->GetAttribute("BeamformingMethod");
             // TODO: find a way to set up it from JSON
             // if (cellScan)
             //{
@@ -560,7 +561,7 @@ Scenario::ConfigurePhy()
             //{
             nrSim->GetIdealBeamformingHelper()->SetAttribute(
                 "BeamformingMethod",
-                TypeIdValue(DirectPathBeamforming::GetTypeId()));
+                TypeIdValue(IdealBeamformingAlgorithm::GetTypeId()));
             //}
 
             auto pathlossConf = nrConf->GetChannelPropagationLossModel();

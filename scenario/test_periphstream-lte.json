@@ -3,21 +3,16 @@
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 20,
-    "staticNs3Config": [
-    ],
-
-    "world" : {
+    "staticNs3Config": [],
+    "world": {
         "size": {
             "X": "1000",
             "Y": "1000",
             "Z": "100"
         },
-        "buildings": [
-        ],
-        "regionsOfInterest": [
-        ]
+        "buildings": [],
+        "regionsOfInterest": []
     },
-
     "phyLayer": [
         {
             "type": "lte",
@@ -47,13 +42,11 @@
             }
         }
     ],
-
     "macLayer": [
         {
             "type": "lte"
         }
     ],
-
     "networkLayer": [
         {
             "type": "ipv4",
@@ -62,8 +55,8 @@
             "gateway": "10.42.0.2"
         }
     ],
-
-    "drones": [{
+    "drones": [
+        {
             "netDevices": [
                 {
                     "type": "lte",
@@ -88,83 +81,151 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
-                "attributes": [{
+                "attributes": [
+                    {
                         "name": "SpeedCoefficients",
-                        "value": [5.0]
+                        "value": [
+                            5.0
+                        ]
                     },
                     {
                         "name": "FlightPlan",
-                        "value": [{
-                                "position": [50.0, 50.0, 0.1],
+                        "value": [
+                            {
+                                "position": [
+                                    50.0,
+                                    50.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
                             {
-                                "position": [50.0, 50.0, 5.0],
+                                "position": [
+                                    50.0,
+                                    50.0,
+                                    5.0
+                                ],
                                 "interest": 1
                             },
                             {
-                                "position": [60.0, 50.0, 5.0],
+                                "position": [
+                                    60.0,
+                                    50.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [60.0, 60.0, 5.0],
+                                "position": [
+                                    60.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [65.0, 60.0, 5.0],
+                                "position": [
+                                    65.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [65.0, 40.0, 5.0],
+                                "position": [
+                                    65.0,
+                                    40.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [70.0, 40.0, 5.0],
+                                "position": [
+                                    70.0,
+                                    40.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [70.0, 60.0, 5.0],
+                                "position": [
+                                    70.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [75.0, 60.0, 5.0],
+                                "position": [
+                                    75.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [75.0, 40.0, 5.0],
+                                "position": [
+                                    75.0,
+                                    40.0,
+                                    5.0
+                                ],
                                 "interest": 0,
                                 "restTime": 1.0
                             },
                             {
-                                "position": [80.0, 40.0, 5.0],
+                                "position": [
+                                    80.0,
+                                    40.0,
+                                    5.0
+                                ],
                                 "interest": 1
                             },
                             {
-                                "position": [80.0, 60.0, 5.0],
+                                "position": [
+                                    80.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 2
                             },
                             {
-                                "position": [85.0, 60.0, 5.0],
+                                "position": [
+                                    85.0,
+                                    60.0,
+                                    5.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [65.0, 50.0, 15.0],
+                                "position": [
+                                    65.0,
+                                    50.0,
+                                    15.0
+                                ],
                                 "interest": 4
                             },
                             {
-                                "position": [50.0, 53.0, 5.0],
+                                "position": [
+                                    50.0,
+                                    53.0,
+                                    5.0
+                                ],
                                 "interest": 3
                             },
                             {
-                                "position": [50.0, 53.0, 0.1],
+                                "position": [
+                                    50.0,
+                                    53.0,
+                                    0.1
+                                ],
                                 "interest": 0,
                                 "restTime": 5.0
                             }
@@ -172,27 +233,29 @@
                     }
                 ]
             },
-            "applications": [{
-                "name": "ns3::TcpStubClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 299.0
-                    },
-                    {
-                        "name": "Address",
-                        "value": "200.0.0.1"
-                    },
-                    {
-                        "name": "PayloadSize",
-                        "value": 1000
-                    }
-                ]
-            }],
+            "applications": [
+                {
+                    "name": "ns3::TcpStubClientApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 299.0
+                        },
+                        {
+                            "name": "Address",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "PayloadSize",
+                            "value": 1000
+                        }
+                    ]
+                }
+            ],
             "mechanics": {
                 "name": "ns3::Drone",
                 "attributes": [
@@ -211,7 +274,7 @@
                 ]
             },
             "battery": {
-                "name": "ns3::LiIonEnergySource",
+                "name": "ns3::energy::LiIonEnergySource",
                 "attributes": [
                     {
                         "name": "LiIonEnergySourceInitialEnergyJ",
@@ -229,7 +292,11 @@
                     "attributes": [
                         {
                             "name": "PowerConsumption",
-                            "value": [0, 1.0, 5.0]
+                            "value": [
+                                0,
+                                1.0,
+                                5.0
+                            ]
                         },
                         {
                             "name": "Capacity",
@@ -243,10 +310,14 @@
                 },
                 {
                     "name": "ns3::InputPeripheral",
-                    "attributes":[
+                    "attributes": [
                         {
                             "name": "PowerConsumption",
-                            "value": [0, 1.0, 5.0]
+                            "value": [
+                                0,
+                                1.0,
+                                5.0
+                            ]
                         },
                         {
                             "name": "DataRate",
@@ -287,34 +358,40 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ConstantPositionMobilityModel",
-                "attributes": [{
-                    "name": "Position",
-                    "value": [60.0, 45.0, 0.1]
-                }]
+                "attributes": [
+                    {
+                        "name": "Position",
+                        "value": [
+                            60.0,
+                            45.0,
+                            0.1
+                        ]
+                    }
+                ]
             },
             "applications": []
         }
     ],
-
     "remotes": [
         {
             "networkLayer": 0,
-            "applications": [{
-                "name": "ns3::TcpEchoServerApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 299.0
-                    }
-                ]
-            }]
+            "applications": [
+                {
+                    "name": "ns3::TcpEchoServerApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 299.0
+                        }
+                    ]
+                }
+            ]
         }
     ],
-
     "logComponents": [
         "Scenario",
         "DroneEnergyModel",

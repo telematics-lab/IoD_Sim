@@ -20,12 +20,30 @@
 
 #include "phy-layer-configuration.h"
 
+#include <ns3/cc-bwp-helper.h>
 #include <ns3/model-configuration.h>
+#include <ns3/nr-channel-helper.h>
+#include <ns3/object-factory.h>
+#include <ns3/uinteger.h>
 #include <ns3/wifi-phy.h>
 
+#include <functional>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
+
+// Forward declarations for NR components
+namespace ns3
+{
+class NrHelper;
+class NrPointToPointEpcHelper;
+class IdealBeamformingHelper;
+struct OperationBandInfo; // struct, not class
+class NetDeviceContainer;
+class NodeContainer;
+// BandwidthPartInfoPtr is a typedef, not a class - removing forward declaration
+} // namespace ns3
 
 namespace ns3
 {
@@ -43,25 +61,42 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
      * \param channelSpectrumModel The Spectrum Model type to be used.
      */
-    NrPhyLayerConfiguration(std::string phyType,
-                            std::vector<ModelConfiguration::Attribute> attributes,
-                            std::optional<ModelConfiguration> channelPropagationLossModel,
-                            ModelConfiguration channelSpectrumModel);
+    NrPhyLayerConfiguration(
+        std::string phyType,
+        std::vector<ModelConfiguration::Attribute> attributes,
+        std::string channelScenario,
+        std::string ueAntennaType = "ns3::IsotropicAntennaModel",
+        std::vector<ModelConfiguration::Attribute> ueAntennaProps = {},
+        std::vector<ModelConfiguration::Attribute> ueAntennaArrayProps = {},
+        std::string gnbAntennaType = "ns3::IsotropicAntennaModel",
+        std::vector<ModelConfiguration::Attribute> gnbAntennaProps = {},
+        std::vector<ModelConfiguration::Attribute> gnbAntennaArrayProps = {},
+        std::string channelCondition = "Default",
+        std::string channelModel = "ThreeGpp",
+        std::string beamformingType = "ns3::DirectPathBeamforming",
+        std::string schedulerType = "ns3::NrMacSchedulerTdmaRR",
+        uint8_t channelConfigFlags = 0, // Will be set in constructor
+        bool contiguousCc = true,
+        std::vector<std::vector<CcBwpCreator::SimpleOperationBandConf>> bandConfs = {});
     /** Default destructor */
     ~NrPhyLayerConfiguration();
 
     /**
-     * \return The Propagation Loss Model configuration.
+     * Get attribute value
      */
-    const std::optional<ModelConfiguration> GetChannelPropagationLossModel();
+    std::string GetAttribute(const std::string& name) const;
+
     /**
-     * \return The Propagation Loss Model configuration.
+     * Get channel propagation loss model configuration
      */
-    const ModelConfiguration GetChannelSpectrumModel();
+    std::shared_ptr<ModelConfiguration> GetChannelPropagationLossModel() const;
+
+    /**
+     * Get channel spectrum model configuration
+     */
+    std::shared_ptr<ModelConfiguration> GetChannelSpectrumModel() const;
 
   private:
-    const std::optional<ModelConfiguration> m_channelPropagationLossModel;
-    const ModelConfiguration m_channelSpectrumModel;
 };
 
 } // namespace ns3

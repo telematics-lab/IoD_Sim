@@ -3,11 +3,8 @@
     "resultsPath": "../results/",
     "logOnFile": true,
     "duration": 25,
-
-    "staticNs3Config": [
-    ],
-
-    "world" : {
+    "staticNs3Config": [],
+    "world": {
         "size": {
             "X": "1000",
             "Y": "1000",
@@ -17,20 +14,39 @@
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [10.0, 30.0, 50.0, 80.0, 0.0, 40.0],
+                "boundaries": [
+                    10.0,
+                    30.0,
+                    50.0,
+                    80.0,
+                    0.0,
+                    40.0
+                ],
                 "floors": 7,
-                "rooms": [2, 1]
+                "rooms": [
+                    2,
+                    1
+                ]
             },
             {
                 "type": "residential",
                 "walls": "concreteWithoutWindows",
-                "boundaries": [-60.0, -50.0, 10.0, 45.0, 0.0, 30.0],
+                "boundaries": [
+                    -60.0,
+                    -50.0,
+                    10.0,
+                    45.0,
+                    0.0,
+                    30.0
+                ],
                 "floors": 5,
-                "rooms": [2, 2]
+                "rooms": [
+                    2,
+                    2
+                ]
             }
         ]
     },
-
     "phyLayer": [
         {
             "type": "lte",
@@ -60,13 +76,11 @@
             }
         }
     ],
-
     "macLayer": [
         {
             "type": "lte"
         }
     ],
-
     "networkLayer": [
         {
             "type": "ipv4",
@@ -75,8 +89,8 @@
             "gateway": "10.1.0.1"
         }
     ],
-
-    "drones": [{
+    "drones": [
+        {
             "netDevices": [
                 {
                     "type": "lte",
@@ -101,23 +115,40 @@
             ],
             "mobilityModel": {
                 "name": "ns3::ParametricSpeedDroneMobilityModel",
-                "attributes": [{
+                "attributes": [
+                    {
                         "name": "SpeedCoefficients",
-                        "value": [1.0, 0.0]
+                        "value": [
+                            1.0,
+                            0.0
+                        ]
                     },
                     {
                         "name": "FlightPlan",
-                        "value": [{
-                                "position": [0.0, 0.0, 1.0],
+                        "value": [
+                            {
+                                "position": [
+                                    0.0,
+                                    0.0,
+                                    1.0
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             },
                             {
-                                "position": [10.0, 10.0, 1.0],
+                                "position": [
+                                    10.0,
+                                    10.0,
+                                    1.0
+                                ],
                                 "interest": 1
                             },
                             {
-                                "position": [20.0, 0.0, 1.0],
+                                "position": [
+                                    20.0,
+                                    0.0,
+                                    1.0
+                                ],
                                 "interest": 0,
                                 "restTime": 3.0
                             }
@@ -129,23 +160,25 @@
                     }
                 ]
             },
-            "applications": [{
-                "name": "ns3::DroneClientApplication",
-                "attributes": [
-                    {
-                        "name": "StartTime",
-                        "value": 1.0
-                    },
-                    {
-                        "name": "StopTime",
-                        "value": 299.0
-                    },
-                    {
-                        "name": "DestinationIpv4Address",
-                        "value": "200.0.0.1"
-                    }
-                ]
-            }],
+            "applications": [
+                {
+                    "name": "ns3::DroneClientApplication",
+                    "attributes": [
+                        {
+                            "name": "StartTime",
+                            "value": 1.0
+                        },
+                        {
+                            "name": "StopTime",
+                            "value": 299.0
+                        },
+                        {
+                            "name": "DestinationIpv4Address",
+                            "value": "200.0.0.1"
+                        }
+                    ]
+                }
+            ],
             "mechanics": {
                 "name": "ns3::Drone",
                 "attributes": [
@@ -164,7 +197,7 @@
                 ]
             },
             "battery": {
-                "name": "ns3::LiIonEnergySource",
+                "name": "ns3::energy::LiIonEnergySource",
                 "attributes": [
                     {
                         "name": "LiIonEnergySourceInitialEnergyJ",
@@ -176,94 +209,114 @@
                     }
                 ]
             },
-            "peripherals": [{
-                "name": "ns3::DronePeripheral",
-                "attributes":[
-                    {
-                        "name": "PowerConsumption",
-                        "value": [0, 1.0, 3.3]
-                    }
-                ]
-            },
-            {
-                "name": "ns3::StoragePeripheral",
-                "attributes":[
-                    {
-                        "name": "PowerConsumption",
-                        "value": [0, 1.0, 3.3]
-                    },
-                    {
-                        "name": "Capacity",
-                        "value": 8000000
-                    }
-                ]
-            },
-            {
-                "name": "ns3::InputPeripheral",
-                "attributes":[
-                    {
-                        "name": "PowerConsumption",
-                        "value": [0, 1.0, 3.3]
-                    },
-                    {
-                        "name": "DataRate",
-                        "value": 1e+6
-                    }
-                ]
-
-            }]
+            "peripherals": [
+                {
+                    "name": "ns3::DronePeripheral",
+                    "attributes": [
+                        {
+                            "name": "PowerConsumption",
+                            "value": [
+                                0,
+                                1.0,
+                                3.3
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "ns3::StoragePeripheral",
+                    "attributes": [
+                        {
+                            "name": "PowerConsumption",
+                            "value": [
+                                0,
+                                1.0,
+                                3.3
+                            ]
+                        },
+                        {
+                            "name": "Capacity",
+                            "value": 8000000
+                        }
+                    ]
+                },
+                {
+                    "name": "ns3::InputPeripheral",
+                    "attributes": [
+                        {
+                            "name": "PowerConsumption",
+                            "value": [
+                                0,
+                                1.0,
+                                3.3
+                            ]
+                        },
+                        {
+                            "name": "DataRate",
+                            "value": 1e+6
+                        }
+                    ]
+                }
+            ]
         }
     ],
-    "ZSPs": [{
-        "netDevices": [
-            {
-                "type": "lte",
-                "role": "eNB",
-                "networkLayer": 0,
-                "bearers": [
-                    {
-                        "type": "GBR_CONV_VIDEO",
-                        "bitrate": {
-                            "guaranteed": {
-                                "downlink": 20e6,
-                                "uplink": 5e6
-                            },
-                            "maximum": {
-                                "downlink": 20e6,
-                                "uplink": 5e6
+    "ZSPs": [
+        {
+            "netDevices": [
+                {
+                    "type": "lte",
+                    "role": "eNB",
+                    "networkLayer": 0,
+                    "bearers": [
+                        {
+                            "type": "GBR_CONV_VIDEO",
+                            "bitrate": {
+                                "guaranteed": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                },
+                                "maximum": {
+                                    "downlink": 20e6,
+                                    "uplink": 5e6
+                                }
                             }
                         }
+                    ]
+                }
+            ],
+            "mobilityModel": {
+                "name": "ns3::ConstantPositionMobilityModel",
+                "attributes": [
+                    {
+                        "name": "Position",
+                        "value": [
+                            10.0,
+                            10.0,
+                            1.0
+                        ]
                     }
                 ]
-            }
-        ],
-        "mobilityModel": {
-            "name": "ns3::ConstantPositionMobilityModel",
-            "attributes": [{
-                "name": "Position",
-                "value": [10.0, 10.0, 1.0]
-            }]
-        },
-        "applications": []
-    }],
-
+            },
+            "applications": []
+        }
+    ],
     "remotes": [
         {
             "networkLayer": 0,
-            "applications": [{
-                "name": "ns3::DroneServerApplication",
-                "attributes": []
-            }]
+            "applications": [
+                {
+                    "name": "ns3::DroneServerApplication",
+                    "attributes": []
+                }
+            ]
         }
     ],
-
     "analytics": [
         {
             "type": "lteRadioEnvironmentMap",
             "ChannelPath": "/ChannelList/2"
         }
     ],
-
     "logComponents": [
         "DroneServerApplication",
         "DroneClientApplication",
