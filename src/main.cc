@@ -544,52 +544,46 @@ Scenario::ConfigurePhy()
         {
             auto nrSim = CreateObject<NrPhySimulationHelper>(phyId);
             auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
-            auto nrHelper = nrSim->GetNrHelper();
-
-            // TODO: Put this in the MAC section?
-            nrHelper->SetSchedulerTypeId(TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR"));
-
-            // Beamforming method
-            std::string beamformingMethod = nrConf->GetAttribute("BeamformingMethod");
-            // TODO: find a way to set up it from JSON
-            // if (cellScan)
-            //{
-            // idealBeamformingHelper->SetAttribute("BeamformingMethod",TypeIdValue(CellScanBeamforming::GetTypeId()));
-            // idealBeamformingHelper->SetBeamformingAlgorithmAttribute("BeamSearchAngleStep",DoubleValue(beamSearchAngleStep));
-            //}
-            // else
-            //{
-            nrSim->GetIdealBeamformingHelper()->SetAttribute(
-                "BeamformingMethod",
-                TypeIdValue(IdealBeamformingAlgorithm::GetTypeId()));
-            //}
-
-            auto pathlossConf = nrConf->GetChannelPropagationLossModel();
-            if (pathlossConf)
-            {
-                // TODO: NrHelper doesn't provide a way to configure m_pathlossModelFactory
-
-                // nrHelper->SetAttribute("PathlossModel", StringValue(pathlossConf->GetName()));
-                // for (auto& attr : pathlossConf->GetAttributes())
-                //     nrHelper->SetPathlossAttribute(attr.name, *attr.value);
-            }
-
-            auto spectrumConf = nrConf->GetChannelSpectrumModel();
-            // TODO: NrHelper doesn't provide a way to configure m_channelFactory
-
-            // nrHelper->SetSpectrumChannelType(spectrumConf.GetName());
-            // for (auto& attr : spectrumConf.GetAttributes())
-            // nrHelper->SetSpectrumChannelAttribute(attr.name, *attr.value);
-
             for (auto& attr : nrConf->GetAttributes())
             {
-                nrHelper->SetAttribute(attr.name, *attr.value);
+                nrSim->GetNrHelper()->SetAttribute(attr.name, *attr.value);
             }
+            for (auto bandConf : nrConf->GetBandsConfiguration())
+            {
+                std::vector<CcBwpCreator::SimpleOperationBandConf> freqs;
+                for (auto& attr : bandConf.frequencyBands)
+                {
+                    auto conf = CcBwpCreator::SimpleOperationBandConf(attr.centralFrequency,
+                                                                      attr.bandwidth,
+                                                                      attr.numComponentCarriers);
+                    conf.m_numBwp = attr.numBandwidthParts;
+                    freqs.push_back(conf);
+                }
+                nrSim->CreateOperationBand(freqs,
+                                           bandConf.channel.scenario,
+                                           bandConf.channel.conditionModel,
+                                           bandConf.channel.propagationModel,
+                                           bandConf.contiguousCc,
+                                           bandConf.channel.configFlags);
+            }
+            nrSim->SetBeamformingMethod(TypeId::LookupByName(nrConf->GetBeamformingMethod()),
+                                        nrConf->GetBeamformingAttributes());
 
-            nrHelper->Initialize();
+            nrSim->SetScheduler(TypeId::LookupByName(nrConf->GetSchedulerType()));
+
+            auto gnbAntennaConf = nrConf->GetGnbAntenna();
+            nrSim->SetGnbAntenna(gnbAntennaConf.type,
+                                 gnbAntennaConf.properties,
+                                 gnbAntennaConf.arrayProperties);
+            auto ueAntennaConf = nrConf->GetUeAntenna();
+            nrSim->SetUeAntenna(ueAntennaConf.type,
+                                ueAntennaConf.properties,
+                                ueAntennaConf.arrayProperties);
+
+            nrSim->SetGnbPhyAttributes(nrConf->GetGnbPhyAttributes());
+            nrSim->SetUePhyAttributes(nrConf->GetUePhyAttributes());
 
             m_backbone.Add(nrSim->GetNrEpcHelper()->GetPgwNode());
-
             m_protocolStacks[PHY_LAYER].push_back(nrSim);
         }
         else

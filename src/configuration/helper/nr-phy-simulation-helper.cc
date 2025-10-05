@@ -20,7 +20,14 @@
 #include "scenario-configuration-helper.h"
 
 #include <ns3/boolean.h>
+#include <ns3/cc-bwp-helper.h>
+#include <ns3/net-device-container.h>
+#include <ns3/node-container.h>
+#include <ns3/nr-channel-helper.h>
+#include <ns3/object-factory.h>
+#include <ns3/pointer.h>
 #include <ns3/string.h>
+#include <ns3/type-id.h>
 
 namespace ns3
 {
@@ -56,7 +63,8 @@ NrPhySimulationHelper::NrPhySimulationHelper(const size_t stackId)
           BooleanValue(CONFIGURATOR->GetLogOnFile()),
           "X2LinkPcapPrefix",
           StringValue(NrPhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))},
-      m_ideal_beam{CreateObject<IdealBeamformingHelper>()}
+      m_ideal_beam{CreateObject<IdealBeamformingHelper>()},
+      m_nr_channel{CreateObject<NrChannelHelper>()}
 {
     m_nr->SetEpcHelper(m_nr_epc);
     m_nr->SetBeamformingHelper(m_ideal_beam);
@@ -82,6 +90,174 @@ Ptr<IdealBeamformingHelper>
 NrPhySimulationHelper::GetIdealBeamformingHelper()
 {
     return m_ideal_beam;
+}
+
+Ptr<NrChannelHelper>
+NrPhySimulationHelper::GetNrChannelHelper()
+{
+    return m_nr_channel;
+}
+
+void
+NrPhySimulationHelper::SetScheduler(const TypeId& schedulerType)
+{
+    m_nr->SetSchedulerTypeId(schedulerType);
+}
+
+void
+NrPhySimulationHelper::SetBeamformingMethod(
+    const TypeId& beamformingMethod,
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_ideal_beam->SetBeamformingMethod(beamformingMethod);
+    for (size_t i = 0; i < attributes.size(); i++)
+    {
+        m_ideal_beam->SetBeamformingAlgorithmAttribute(attributes[i].name, *attributes[i].value);
+    }
+}
+
+void
+NrPhySimulationHelper::SetBeamformingMethod(const TypeId& beamformingMethod)
+{
+    SetBeamformingMethod(beamformingMethod, {});
+}
+
+OperationBandInfo
+NrPhySimulationHelper::CreateOperationBand(
+    const std::vector<CcBwpCreator::SimpleOperationBandConf>& bandConf,
+    const std::string& bandScenario,
+    const std::string& bandCondition,
+    const std::string& bandModel,
+    bool contiguousCc,
+    uint8_t channelConfigFlags)
+{
+    CcBwpCreator ccBwpCreator;
+    OperationBandInfo res;
+    m_nr_channel->ConfigureFactories(bandScenario, bandCondition, bandModel);
+    if (contiguousCc)
+    {
+        NS_ASSERT_MSG(bandConf.size() == 1,
+                      "When using contiguous CC, only one band configuration must be provided");
+        res = ccBwpCreator.CreateOperationBandContiguousCc(bandConf[0]);
+    }
+    else
+    {
+        NS_ASSERT_MSG(
+            bandConf.size() > 0,
+            "When using non-contiguous CC, at least one band configuration must be provided");
+        res = ccBwpCreator.CreateOperationBandNonContiguousCc(bandConf);
+    }
+    m_nr_channel->AssignChannelsToBands({res}, channelConfigFlags);
+    m_bands.push_back(std::ref(res));
+    return res;
+}
+
+BandwidthPartInfoPtrVector
+NrPhySimulationHelper::GetAllBwps() const
+{
+    return CcBwpCreator::GetAllBwps(m_bands);
+}
+
+void
+NrPhySimulationHelper::SetGnbAntenna(
+    const std::string& antennaType,
+    const std::vector<ModelConfiguration::Attribute>& antennaProps,
+    const std::vector<ModelConfiguration::Attribute>& antennaArrayProps)
+{
+    for (const auto& attr : antennaArrayProps)
+    {
+        m_nr->SetGnbAntennaAttribute(attr.name, *attr.value);
+    }
+
+    ObjectFactory antennaFactory;
+    antennaFactory.SetTypeId(TypeId::LookupByName(antennaType));
+    for (const auto& attr : antennaProps)
+    {
+        antennaFactory.Set(attr.name, *attr.value);
+    }
+    Ptr<Object> antenna = antennaFactory.Create();
+    m_nr->SetGnbAntennaAttribute("AntennaElement", PointerValue(antenna));
+}
+
+void
+NrPhySimulationHelper::SetUeAntenna(
+    const std::string& antennaType,
+    const std::vector<ModelConfiguration::Attribute>& antennaProps,
+    const std::vector<ModelConfiguration::Attribute>& antennaArrayProps)
+{
+    {
+        for (const auto& attr : antennaArrayProps)
+        {
+            m_nr->SetUeAntennaAttribute(attr.name, *attr.value);
+        }
+
+        ObjectFactory antennaFactory;
+        antennaFactory.SetTypeId(TypeId::LookupByName(antennaType));
+        for (const auto& attr : antennaProps)
+        {
+            antennaFactory.Set(attr.name, *attr.value);
+        }
+        Ptr<Object> antenna = antennaFactory.Create();
+        m_nr->SetUeAntennaAttribute("AntennaElement", PointerValue(antenna));
+    }
+}
+
+NetDeviceContainer
+NrPhySimulationHelper::InstallGnbDevices(NodeContainer& gnbNode, BandwidthPartInfoPtrVector allBwps)
+{
+    return m_nr->InstallGnbDevice(gnbNode, allBwps);
+}
+
+NetDeviceContainer
+NrPhySimulationHelper::InstallGnbDevices(NodeContainer& gnbNode)
+{
+    return InstallGnbDevices(gnbNode, GetAllBwps());
+}
+
+NetDeviceContainer
+NrPhySimulationHelper::InstallUeDevices(NodeContainer& ueNodes, BandwidthPartInfoPtrVector allBwps)
+{
+    return m_nr->InstallUeDevice(ueNodes, allBwps);
+}
+
+NetDeviceContainer
+NrPhySimulationHelper::InstallUeDevices(NodeContainer& ueNodes)
+{
+    return InstallUeDevices(ueNodes, GetAllBwps());
+}
+
+std::pair<NetDeviceContainer, NetDeviceContainer>
+NrPhySimulationHelper::InstallDevices(NodeContainer& gnbNode,
+                                      NodeContainer& ueNodes,
+                                      BandwidthPartInfoPtrVector allBwps)
+{
+    return std::make_pair(InstallGnbDevices(gnbNode, allBwps), InstallUeDevices(ueNodes, allBwps));
+}
+
+std::pair<NetDeviceContainer, NetDeviceContainer>
+NrPhySimulationHelper::InstallDevices(NodeContainer& gnbNode, NodeContainer& ueNodes)
+{
+    return InstallDevices(gnbNode, ueNodes, GetAllBwps());
+}
+
+void
+NrPhySimulationHelper::SetUePhyAttributes(
+    const std::vector<ModelConfiguration::Attribute>& uePhyAttributes)
+{
+    for (const auto& attr : uePhyAttributes)
+    {
+        m_nr->SetUePhyAttribute(attr.name, *attr.value);
+    }
+}
+
+void
+NrPhySimulationHelper::SetGnbPhyAttributes(
+    const std::vector<ModelConfiguration::Attribute>& gnbPhyAttributes)
+{
+    for (const auto& attr : gnbPhyAttributes)
+    {
+        m_nr->SetGnbPhyAttribute(attr.name, *attr.value);
+    }
 }
 
 } // namespace ns3

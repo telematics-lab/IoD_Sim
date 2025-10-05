@@ -157,15 +157,210 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
     }
     else if (phyType == "nr")
     {
-        NS_ASSERT_MSG(jsonPhyLayer.HasMember("beamforming"),
-                      "NR PHY Layer definition must have 'beamforming' property.");
+        Ptr<NrPhyLayerConfiguration> nrConfig;
+        if (!jsonPhyLayer.HasMember("attributes"))
+        {
+            nrConfig =
+                Create<NrPhyLayerConfiguration>(phyType, ModelConfiguration::AttributeVector());
+        }
+        else
+        {
+            NS_ASSERT_MSG(jsonPhyLayer["attributes"].IsArray(),
+                          "NR PHY Layer 'attributes' must be an array.");
+            const auto phyAttributes =
+                ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrHelper"),
+                                                        jsonPhyLayer["attributes"].GetArray());
+            nrConfig = Create<NrPhyLayerConfiguration>(phyType, phyAttributes);
+        }
+        // Parse beamforming configuration
+        if (jsonPhyLayer.HasMember("beamforming") && jsonPhyLayer["beamforming"].IsObject())
+        {
+            const auto& beamforming = jsonPhyLayer["beamforming"];
+            if (beamforming.HasMember("method") && beamforming["method"].IsString())
+            {
+                nrConfig->SetBeamformingMethod(beamforming["method"].GetString());
+            }
+            else
+            {
+                nrConfig->SetBeamformingMethod("ns3::DirectPathBeamforming");
+            }
 
-        const auto phyAttributes =
-            ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrHelper"),
-                                                    jsonPhyLayer["attributes"].GetArray());
+            if (beamforming.HasMember("attributes") && beamforming["attributes"].IsArray())
+            {
+                const auto bfAttributes = ModelConfigurationHelper::GetAttributes(
+                    TypeId::LookupByName(nrConfig->GetBeamformingMethod()),
+                    beamforming["attributes"].GetArray());
+                nrConfig->SetBeamformingAttributes(bfAttributes);
+            }
+        }
+        else
+        {
+            nrConfig->SetBeamformingMethod("ns3::DirectPathBeamforming");
+        }
 
-        // For NR, use simplified configuration with default parameters
-        phyConfig = Create<NrPhyLayerConfiguration>(phyType, phyAttributes, "UMi-StreetCanyon");
+        // Parse scheduler configuration
+        if (jsonPhyLayer.HasMember("scheduler") && jsonPhyLayer["scheduler"].IsObject())
+        {
+            const auto& scheduler = jsonPhyLayer["scheduler"];
+            if (scheduler.HasMember("type") && scheduler["type"].IsString())
+            {
+                nrConfig->SetScheduler(scheduler["type"].GetString());
+            }
+        }
+
+        // Parse UE antenna configuration
+        if (jsonPhyLayer.HasMember("ueAntenna") && jsonPhyLayer["ueAntenna"].IsObject())
+        {
+            const auto& ueAntenna = jsonPhyLayer["ueAntenna"];
+            std::string antennaType = "ns3::IsotropicAntennaModel";
+            if (ueAntenna.HasMember("type") && ueAntenna["type"].IsString())
+            {
+                antennaType = ueAntenna["type"].GetString();
+            }
+
+            std::vector<ModelConfiguration::Attribute> antennaProps;
+            std::vector<ModelConfiguration::Attribute> arrayProps;
+
+            if (ueAntenna.HasMember("properties") && ueAntenna["properties"].IsArray())
+            {
+                antennaProps =
+                    ModelConfigurationHelper::GetAttributes(TypeId::LookupByName(antennaType),
+                                                            ueAntenna["properties"].GetArray());
+            }
+
+            if (ueAntenna.HasMember("arrayProperties") && ueAntenna["arrayProperties"].IsArray())
+            {
+                arrayProps = ModelConfigurationHelper::GetAttributes(
+                    TypeId::LookupByName("ns3::UniformPlanarArray"),
+                    ueAntenna["arrayProperties"].GetArray());
+            }
+
+            nrConfig->SetUeAntenna(NrAntennaConfiguration{
+                .type = antennaType,
+                .properties = antennaProps,
+                .arrayProperties = arrayProps,
+            });
+        }
+
+        if (jsonPhyLayer.HasMember("uePhyAttributes") && jsonPhyLayer["uePhyAttributes"].IsArray())
+        {
+            const auto uePhyAttributes =
+                ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrUePhy"),
+                                                        jsonPhyLayer["uePhyAttributes"].GetArray());
+            nrConfig->SetUePhyAttributes(uePhyAttributes);
+        }
+
+        // Parse gNB antenna configuration
+        if (jsonPhyLayer.HasMember("gnbAntenna") && jsonPhyLayer["gnbAntenna"].IsObject())
+        {
+            const auto& gnbAntenna = jsonPhyLayer["gnbAntenna"];
+            std::string antennaType = "ns3::IsotropicAntennaModel";
+            if (gnbAntenna.HasMember("type") && gnbAntenna["type"].IsString())
+            {
+                antennaType = gnbAntenna["type"].GetString();
+            }
+
+            std::vector<ModelConfiguration::Attribute> antennaProps;
+            std::vector<ModelConfiguration::Attribute> arrayProps;
+
+            if (gnbAntenna.HasMember("properties") && gnbAntenna["properties"].IsArray())
+            {
+                antennaProps =
+                    ModelConfigurationHelper::GetAttributes(TypeId::LookupByName(antennaType),
+                                                            gnbAntenna["properties"].GetArray());
+            }
+
+            if (gnbAntenna.HasMember("arrayProperties") && gnbAntenna["arrayProperties"].IsArray())
+            {
+                arrayProps = ModelConfigurationHelper::GetAttributes(
+                    TypeId::LookupByName("ns3::UniformPlanarArray"),
+                    gnbAntenna["arrayProperties"].GetArray());
+            }
+
+            nrConfig->SetGnbAntenna(NrAntennaConfiguration{
+                .type = antennaType,
+                .properties = antennaProps,
+                .arrayProperties = arrayProps,
+            });
+        }
+
+        if (jsonPhyLayer.HasMember("uePhyAttributes") && jsonPhyLayer["uePhyAttributes"].IsArray())
+        {
+            const auto gnbPhyAttributes = ModelConfigurationHelper::GetAttributes(
+                TypeId::LookupByName("ns3::NrGnbPhy"),
+                jsonPhyLayer["gnbPhyAttributes"].GetArray());
+            nrConfig->SetGnbPhyAttributes(gnbPhyAttributes);
+        }
+
+        if (jsonPhyLayer.HasMember("bands") && jsonPhyLayer["bands"].IsArray())
+        {
+            const auto bands = jsonPhyLayer["bands"].GetArray();
+            for (rapidjson::SizeType i = 0; i < bands.Size(); ++i)
+            {
+                const auto& band = bands[i];
+                NS_ASSERT_MSG(band.IsObject(), "NR band must be an object.");
+
+                NrBandConfiguration bandConfig;
+                bandConfig.contiguousCc =
+                    band.HasMember("contiguousCc") && band["contiguousCc"].IsBool()
+                        ? band["contiguousCc"].GetBool()
+                        : true;
+                bandConfig.channel.scenario =
+                    band.HasMember("scenario") && band["scenario"].IsString()
+                        ? band["scenario"].GetString()
+                        : "UMi-StreetCanyon";
+                bandConfig.channel.conditionModel =
+                    band.HasMember("conditionModel") && band["conditionModel"].IsString()
+                        ? band["conditionModel"].GetString()
+                        : "Default";
+                bandConfig.channel.propagationModel =
+                    band.HasMember("propagationModel") && band["propagationModel"].IsString()
+                        ? band["propagationModel"].GetString()
+                        : "ThreeGpp";
+                bandConfig.channel.configFlags =
+                    band.HasMember("configFlags") && band["configFlags"].IsUint()
+                        ? static_cast<uint8_t>(band["configFlags"].GetUint())
+                        : (NrChannelHelper::INIT_PROPAGATION | NrChannelHelper::INIT_FADING);
+
+                if (!jsonPhyLayer.HasMember("bands") || !jsonPhyLayer["bands"].IsArray() ||
+                    jsonPhyLayer["bands"].GetArray().Size() == 0)
+                {
+                    NS_FATAL_ERROR(
+                        "NR PHY Layer definition must have at least one band in 'bands' property.");
+                }
+                for (rapidjson::SizeType j = 0; j < band["frequencyBands"].GetArray().Size(); ++j)
+                {
+                    const auto& freqBand = band["frequencyBands"].GetArray()[j];
+                    NS_ASSERT_MSG(freqBand.IsObject(), "NR frequency band must be an object.");
+
+                    NrFrequencyBand freqBandConfig;
+                    freqBandConfig.centralFrequency =
+                        freqBand.HasMember("centralFrequency") &&
+                                freqBand["centralFrequency"].IsNumber()
+                            ? freqBand["centralFrequency"].GetDouble()
+                            : 28e9;
+                    freqBandConfig.bandwidth =
+                        freqBand.HasMember("bandwidth") && freqBand["bandwidth"].IsNumber()
+                            ? freqBand["bandwidth"].GetDouble()
+                            : 100e6;
+                    freqBandConfig.numComponentCarriers =
+                        freqBand.HasMember("numComponentCarriers") &&
+                                freqBand["numComponentCarriers"].IsUint()
+                            ? static_cast<uint8_t>(freqBand["numComponentCarriers"].GetUint())
+                            : 1;
+                    freqBandConfig.numBandwidthParts =
+                        freqBand.HasMember("numBandwidthParts") &&
+                                freqBand["numBandwidthParts"].IsUint()
+                            ? static_cast<uint8_t>(freqBand["numBandwidthParts"].GetUint())
+                            : 1;
+
+                    bandConfig.frequencyBands.push_back(freqBandConfig);
+                }
+                nrConfig->AddBandConfiguration(bandConfig);
+            }
+        }
+
+        phyConfig = nrConfig;
     }
     else
     {

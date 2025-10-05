@@ -49,7 +49,65 @@ namespace ns3
 {
 
 /**
+ * Data structure for NR channel configuration
+ */
+struct NrChannelConfiguration
+{
+    // Channel scenario (Urban Macro, Urban Micro, etc.)
+    std::string scenario = "UMi-StreetCanyon";
+
+    // Channel condition model
+    std::string conditionModel = "Default";
+
+    // Propagation model type
+    std::string propagationModel = "ThreeGpp";
+
+    // Channel configuration flags
+    uint8_t configFlags = NrChannelHelper::INIT_PROPAGATION | NrChannelHelper::INIT_FADING;
+};
+
+/**
+ * Data structure for NR frequency band configuration
+ */
+struct NrFrequencyBand
+{
+    // Central frequency in Hz
+    double centralFrequency = 28e9;
+
+    // Bandwidth in Hz
+    double bandwidth = 100e6;
+
+    // Number of component carriers
+    uint8_t numComponentCarriers = 1;
+
+    // Number of bandwidth parts per CC
+    uint8_t numBandwidthParts = 1;
+};
+
+/**
+ * Data structure for NR band configuration
+ */
+struct NrBandConfiguration
+{
+    std::vector<NrFrequencyBand> frequencyBands;
+    bool contiguousCc = true;
+    // Channel configuration for this band
+    NrChannelConfiguration channel;
+};
+
+/**
+ * Data structure for antenna configuration
+ */
+struct NrAntennaConfiguration
+{
+    std::string type = "ns3::IsotropicAntennaModel";
+    std::vector<ModelConfiguration::Attribute> properties;
+    std::vector<ModelConfiguration::Attribute> arrayProperties;
+};
+
+/**
  * Data class to store information about the NR PHY Layer of a Scenario.
+ * This class only stores configuration data and does not create or manage NR helpers.
  */
 class NrPhyLayerConfiguration : public PhyLayerConfiguration
 {
@@ -58,45 +116,104 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      * Create a new object instance.
      *
      * \param phyType The type of the PHY Layer to be configured. It should be "nr".
-     * \param channelPropagationLossModel The Propagation Loss Model to be used for this Layer.
-     * \param channelSpectrumModel The Spectrum Model type to be used.
+     * \param attributes General PHY attributes
      */
-    NrPhyLayerConfiguration(
-        std::string phyType,
-        std::vector<ModelConfiguration::Attribute> attributes,
-        std::string channelScenario,
-        std::string ueAntennaType = "ns3::IsotropicAntennaModel",
-        std::vector<ModelConfiguration::Attribute> ueAntennaProps = {},
-        std::vector<ModelConfiguration::Attribute> ueAntennaArrayProps = {},
-        std::string gnbAntennaType = "ns3::IsotropicAntennaModel",
-        std::vector<ModelConfiguration::Attribute> gnbAntennaProps = {},
-        std::vector<ModelConfiguration::Attribute> gnbAntennaArrayProps = {},
-        std::string channelCondition = "Default",
-        std::string channelModel = "ThreeGpp",
-        std::string beamformingType = "ns3::DirectPathBeamforming",
-        std::string schedulerType = "ns3::NrMacSchedulerTdmaRR",
-        uint8_t channelConfigFlags = 0, // Will be set in constructor
-        bool contiguousCc = true,
-        std::vector<std::vector<CcBwpCreator::SimpleOperationBandConf>> bandConfs = {});
+    NrPhyLayerConfiguration(std::string phyType,
+                            std::vector<ModelConfiguration::Attribute> attributes);
     /** Default destructor */
     ~NrPhyLayerConfiguration();
 
     /**
-     * Get attribute value
+     * Set the beamforming method
+     */
+    void SetBeamformingMethod(const std::string& beamformingMethod);
+
+    /**
+     * Set the scheduler type
+     */
+    void SetScheduler(const std::string& schedulerType);
+
+    /**
+     * Set band configuration
+     */
+    void AddBandConfiguration(const NrBandConfiguration& bandConfig);
+    /**
+     * Set gNB antenna configuration
+     */
+    void SetGnbAntenna(const NrAntennaConfiguration& antennaConfig);
+
+    /**
+     * Set UE antenna configuration
+     */
+    void SetUeAntenna(const NrAntennaConfiguration& antennaConfig);
+
+    /**
+     * Get beamforming method
+     */
+    const std::string& GetBeamformingMethod() const;
+
+    /**
+     * Get scheduler type
+     */
+    const std::string& GetSchedulerType() const;
+
+    /**
+     * Get gNB antenna configuration
+     */
+    const NrAntennaConfiguration& GetGnbAntenna() const;
+    /**
+     * Get UE antenna configuration
+     */
+    const NrAntennaConfiguration& GetUeAntenna() const;
+
+    /**
+     * Get attribute value (for backward compatibility)
      */
     std::string GetAttribute(const std::string& name) const;
 
     /**
-     * Get channel propagation loss model configuration
+     * Get UE PHY attributes
      */
-    std::shared_ptr<ModelConfiguration> GetChannelPropagationLossModel() const;
+    const std::vector<ModelConfiguration::Attribute>& GetUePhyAttributes() const;
 
     /**
-     * Get channel spectrum model configuration
+     * Get gNB PHY attributes
      */
-    std::shared_ptr<ModelConfiguration> GetChannelSpectrumModel() const;
+    const std::vector<ModelConfiguration::Attribute>& GetGnbPhyAttributes() const;
+
+    /**
+     * Set UE PHY attributes
+     * \param attributes The list of attributes that configures the UE PHY.
+     */
+    void SetUePhyAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
+    /**
+     * Set gNB PHY attributes
+     * \param attributes The list of attributes that configures the gNB PHY.
+     */
+    void SetGnbPhyAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
+
+    /**
+     * Get beamforming attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetBeamformingAttributes() const;
+
+    /**
+     * Set beamforming attributes
+     * \param attributes The list of attributes that configures the beamforming method.
+     */
+    void SetBeamformingAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
+
+    std::vector<NrBandConfiguration> GetBandsConfiguration() const;
 
   private:
+    std::string m_beamformingMethod = "ns3::IdealBeamformingAlgorithm";
+    std::string m_schedulerType = "ns3::NrMacSchedulerTdmaRr";
+    std::vector<NrBandConfiguration> m_bandsConfig;
+    NrAntennaConfiguration m_ueAntenna;
+    NrAntennaConfiguration m_gnbAntenna;
+    std::vector<ModelConfiguration::Attribute> m_uePhyAttributes;
+    std::vector<ModelConfiguration::Attribute> m_gnbPhyAttributes;
+    std::vector<ModelConfiguration::Attribute> m_beamformingAttributes;
 };
 
 } // namespace ns3
