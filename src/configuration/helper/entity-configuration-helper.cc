@@ -96,7 +96,9 @@ const std::vector<Ptr<NetdeviceConfiguration>>
 EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value& json)
 {
     if (json.IsNull())
+    {
         return {};
+    }
 
     NS_ASSERT_MSG(json.IsArray(), "Entity configuration 'netDevices' property must be an array.");
 
@@ -185,7 +187,6 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
             const auto bearers = DecodeNrBearerConfigurations(netdev["bearers"].GetArray());
 
             const auto phyTid = (role == "gNB") ? NrGnbPhy::GetTypeId() : NrUePhy::GetTypeId();
-            // TODO: read other informations about bands with the following line
             const std::optional<ModelConfiguration> phyModel =
                 ModelConfigurationHelper::GetOptionalCoaleshed(netdev.GetObject(), "phy", phyTid);
 
@@ -281,10 +282,10 @@ EntityConfigurationHelper::DecodeLteBearerConfigurations(const JsonArray& jsonAr
     return bearers;
 }
 
-const std::vector<LteBearerConfiguration>
+const std::vector<NrBearerConfiguration>
 EntityConfigurationHelper::DecodeNrBearerConfigurations(const JsonArray& jsonArray)
 {
-    auto bearers = std::vector<LteBearerConfiguration>();
+    auto bearers = std::vector<NrBearerConfiguration>();
 
     for (auto& bearerConf : jsonArray)
     {
@@ -316,17 +317,17 @@ EntityConfigurationHelper::DecodeNrBearerConfigurations(const JsonArray& jsonArr
                               floor(gbrDl) == gbrDl && floor(gbrUl) == gbrUl &&
                               floor(mbrDl) == mbrDl && floor(mbrUl) == mbrUl,
                           "Bitrate must be a positive integral number.");
-            bearers.push_back(LteBearerConfiguration(type,
-                                                     (uint64_t)gbrDl,
-                                                     (uint64_t)gbrUl,
-                                                     (uint64_t)mbrDl,
-                                                     (uint64_t)mbrUl));
+            bearers.push_back(NrBearerConfiguration(type,
+                                                    (uint64_t)gbrDl,
+                                                    (uint64_t)gbrUl,
+                                                    (uint64_t)mbrDl,
+                                                    (uint64_t)mbrUl));
         }
         else
         {
             // In Nr simulation bearers can also be specified without QoS params
             const std::string type = bearerConf["type"].GetString();
-            bearers.push_back(LteBearerConfiguration(type));
+            bearers.push_back(NrBearerConfiguration(type));
         }
     }
 
@@ -397,7 +398,9 @@ EntityConfigurationHelper::DecodeInitialPosition(const rapidjson::Value& jsonMod
 {
     // Initial Position is optional as not all mobility models use it!
     if (!(jsonModel.HasMember("initialPosition")))
+    {
         return std::nullopt;
+    }
 
     NS_ASSERT_MSG(jsonModel["initialPosition"].IsArray(),
                   "Mobility Model initialPosition must be an array of 3 coordinates.");

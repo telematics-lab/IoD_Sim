@@ -52,10 +52,15 @@
 #include <ns3/net-device-container.h>
 #include <ns3/node-list.h>
 #include <ns3/none-phy-layer-configuration.h>
+#include <ns3/nr-bearer-configuration.h>
+#include <ns3/nr-eps-bearer.h>
+#include <ns3/nr-gnb-net-device.h>
 #include <ns3/nr-helper.h>
 #include <ns3/nr-netdevice-configuration.h>
 #include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/nr-phy-simulation-helper.h>
+#include <ns3/nr-ue-net-device.h>
+#include <ns3/nr-ue-phy.h>
 #include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/null-ntn-demo-mac-layer-simulation-helper.h>
 #include <ns3/object-factory.h>
@@ -84,6 +89,7 @@
 #include <ns3/zsp-list.h>
 
 #include <algorithm>
+#include <map>
 #include <vector>
 
 namespace ns3
@@ -139,7 +145,7 @@ class Scenario
                         const std::optional<ModelConfiguration> phyConf);
 
     void ConfigureNrUe(Ptr<Node> entityNode,
-                       const std::vector<LteBearerConfiguration> bearers,
+                       const std::vector<NrBearerConfiguration> bearers,
                        const uint32_t netId,
                        const std::optional<ModelConfiguration> antennaModel,
                        const std::optional<ModelConfiguration> phyConf);
@@ -172,6 +178,7 @@ class Scenario
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
+    void AttachAllNrUesToClosestGnb(const uint32_t netId);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -184,6 +191,10 @@ class Scenario
     std::array<std::vector<Ptr<Object>>, N_LAYERS> m_protocolStacks;
     Ptr<OutputStreamWrapper> m_leoSatTraceStream;
     Ptr<OutputStreamWrapper> m_vehicleTraceStream;
+
+    // NR gNB and UE tracking for proper attachment
+    std::map<uint32_t, std::vector<NetDeviceContainer>> m_nrGnbDevices;
+    std::map<uint32_t, std::vector<Ptr<NetDevice>>> m_nrUeDevices;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -227,6 +238,10 @@ Scenario::Scenario(int argc, char** argv)
     {
         LeoSatList::Add(*leoSat);
     }
+
+    // Initialize NR device tracking maps
+    m_nrGnbDevices.clear();
+    m_nrUeDevices.clear();
 
     ApplyStaticConfig();
     ConfigureWorld();
@@ -1059,15 +1074,120 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const std::optional<ModelConfiguration> antennaModel,
                          const std::optional<ModelConfiguration> phyConf)
 {
+    // !NOTICE: no checks are made for backbone/netid combination that do not represent an LTE
+    // backbone!
+    static std::vector<NodeContainer> backbonePerStack(m_protocolStacks[PHY_LAYER].size());
+    auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrHelper = nrPhy->GetNrHelper();
+
+    // TODO allow better substitution of default antenna model
+    if (antennaModel)
+    {
+        nrHelper->SetGnbAntennaTypeId(antennaModel->GetName());
+        for (auto& attr : antennaModel->GetAttributes())
+        {
+            nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+        }
+    }
+    auto entityNodeContainer = NodeContainer(entityNode);
+    auto dev =
+        StaticCast<NrGnbNetDevice, NetDevice>(nrPhy->InstallGnbDevices(entityNodeContainer).Get(0));
+
+    if (phyConf)
+    {
+        for (const auto& attr : phyConf->GetAttributes())
+        {
+            dev->GetPhy(0)->SetAttribute(attr.name, *attr.value);
+        }
+    }
+
+    for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin();
+         eNB != backbonePerStack[netId].End();
+         eNB++)
+    {
+        nrPhy->GetNrHelper()->AddX2Interface(entityNode, *eNB);
+    }
+    backbonePerStack[netId].Add(entityNode);
+
+    // Store gNB device for later attachment operations
+    NetDeviceContainer gnbDevContainer(dev);
+    m_nrGnbDevices[netId].push_back(gnbDevContainer);
+
+    // Re-attach all existing UEs to the closest gNB (including this new one)
+    AttachAllNrUesToClosestGnb(netId);
 }
 
 void
 Scenario::ConfigureNrUe(Ptr<Node> entityNode,
-                        const std::vector<LteBearerConfiguration> bearers,
+                        const std::vector<NrBearerConfiguration> bearers,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
                         const std::optional<ModelConfiguration> phyConf)
 {
+    // NOTICE: no checks are made for ue/netid combination that do not represent an LTE backbone!
+    static std::vector<NodeContainer> uePerStack(m_protocolStacks[PHY_LAYER].size());
+    auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrHelper = nrPhy->GetNrHelper();
+    Ipv4StaticRoutingHelper routingHelper;
+
+    if (antennaModel)
+    {
+        nrHelper->SetUeAntennaTypeId(antennaModel->GetName());
+        for (auto& attr : antennaModel->GetAttributes())
+        {
+            nrHelper->SetUeAntennaAttribute(attr.name, *attr.value);
+        }
+    }
+
+    auto entityNodeContainer = NodeContainer(entityNode);
+    auto dev =
+        StaticCast<NrUeNetDevice, NetDevice>(nrPhy->InstallUeDevices(entityNodeContainer).Get(0));
+
+    if (phyConf)
+    {
+        for (const auto& attr : phyConf->GetAttributes())
+        {
+            dev->GetPhy(0)->SetAttribute(attr.name, *attr.value);
+        }
+    }
+
+    // Install network layer in order to proceed with IPv4 LTE configuration
+    InstallEntityIpv4(entityNode, dev, netId);
+    // Register UEs into network 1.0.0.0/8
+    // unfortunately this is hardwired into EpcHelper implementation
+
+    auto assignedIpAddrs = nrPhy->GetNrEpcHelper()->AssignUeIpv4Address(NetDeviceContainer(dev));
+    for (auto assignedIpIter = assignedIpAddrs.Begin(); assignedIpIter != assignedIpAddrs.End();
+         assignedIpIter++)
+    {
+        NS_LOG_LOGIC("Assigned IPv4 Address to UE with Node ID "
+                     << entityNode->GetId() << ":" << " Iface " << assignedIpIter->second);
+
+        for (uint32_t i = 0; i < assignedIpIter->first->GetNAddresses(assignedIpIter->second); i++)
+        {
+            NS_LOG_LOGIC(" Addr " << assignedIpIter->first->GetAddress(assignedIpIter->second, i));
+        }
+    }
+
+    // create a static route for each UE to the SGW/PGW in order to communicate
+    // with the internet
+    auto nodeIpv4 = entityNode->GetObject<Ipv4>();
+    Ptr<Ipv4StaticRouting> ueStaticRoute = routingHelper.GetStaticRouting(nodeIpv4);
+    ueStaticRoute->SetDefaultRoute(nrPhy->GetNrEpcHelper()->GetUeDefaultGatewayAddress(),
+                                   nodeIpv4->GetInterfaceForDevice(dev));
+
+    // Store UE device for later attachment operations
+    m_nrUeDevices[netId].push_back(dev);
+
+    // Attach this UE to the closest gNB among all available gNBs
+    AttachAllNrUesToClosestGnb(netId);
+
+    // init bearers on UE
+    for (auto& bearerConf : bearers)
+    {
+        NrEpsBearer bearer(bearerConf.GetType(), bearerConf.GetQos());
+        nrPhy->GetNrHelper()->ActivateDedicatedEpsBearer(dev, bearer, NrEpcTft::Default());
+    }
 }
 
 void
@@ -1542,6 +1662,48 @@ Scenario::ConfigureSimulator()
     }
 
     Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
+}
+
+void
+Scenario::AttachAllNrUesToClosestGnb(const uint32_t netId)
+{
+    NS_LOG_FUNCTION(netId);
+
+    auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrHelper = nrPhy->GetNrHelper();
+
+    // Check if we have gNBs for this netId
+    auto gnbIt = m_nrGnbDevices.find(netId);
+    if (gnbIt == m_nrGnbDevices.end() || gnbIt->second.empty())
+    {
+        NS_LOG_INFO("No gNBs available for attachment in stack " << netId);
+        return;
+    }
+
+    // Collect all gNB devices for this network stack
+    NetDeviceContainer allGnbDevices;
+    for (const auto& gnbContainer : gnbIt->second)
+    {
+        allGnbDevices.Add(gnbContainer);
+    }
+
+    // Check if we have UEs for this netId
+    auto ueIt = m_nrUeDevices.find(netId);
+    if (ueIt == m_nrUeDevices.end() || ueIt->second.empty())
+    {
+        NS_LOG_INFO("No UEs available for attachment in stack " << netId);
+        return;
+    }
+
+    // Attach all UEs to closest gNB
+    NetDeviceContainer ueDevices;
+    for (auto ueDevice : ueIt->second)
+    {
+        ueDevices.Add(ueDevice);
+    }
+    NS_LOG_INFO("Attaching " << ueDevices.GetN() << " UE devices to closest gNB among "
+                             << allGnbDevices.GetN() << " available gNBs");
+    nrHelper->AttachToClosestGnb(ueDevices, allGnbDevices);
 }
 
 } // namespace ns3

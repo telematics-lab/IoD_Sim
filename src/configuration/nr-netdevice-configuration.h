@@ -18,8 +18,8 @@
 #ifndef NR_NETDEVICE_CONFIGURATION_H
 #define NR_NETDEVICE_CONFIGURATION_H
 
-#include "lte-bearer-configuration.h"
 #include "netdevice-configuration.h"
+#include "nr-bearer-configuration.h"
 
 #include <ns3/model-configuration.h>
 
@@ -51,7 +51,7 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
      */
     NrNetdeviceConfiguration(const std::string type,
                              const std::string rawRole,
-                             const std::vector<LteBearerConfiguration> bearers,
+                             const std::vector<NrBearerConfiguration> bearers,
                              const std::optional<uint32_t> networkLayerId,
                              const std::optional<ModelConfiguration> antennaModel,
                              const std::optional<ModelConfiguration> phyModel);
@@ -65,13 +65,13 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     /**
      * \return The bearers configuration for the Network Device.
      */
-    const std::vector<LteBearerConfiguration> GetBearers() const;
+    const std::vector<NrBearerConfiguration> GetBearers() const;
     /** \return The phy model configuration for the Network Device. */
     const std::optional<ModelConfiguration> GetPhyModel() const;
 
   private:
     const NrRole m_role;
-    const std::vector<LteBearerConfiguration> m_bearers;
+    const std::vector<NrBearerConfiguration> m_bearers;
     const std::optional<ModelConfiguration> m_phyModel;
 };
 

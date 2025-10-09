@@ -37,6 +37,7 @@ set(source_files
   configuration/entity-configuration.cc
   configuration/ipv4-network-layer-configuration.cc
   configuration/lte-bearer-configuration.cc
+  configuration/nr-bearer-configuration.cc
   configuration/lte-netdevice-configuration.cc
   configuration/nr-netdevice-configuration.cc
   configuration/lte-phy-layer-configuration.cc
@@ -152,6 +153,7 @@ set(header_files
   configuration/entity-configuration.h
   configuration/ipv4-network-layer-configuration.h
   configuration/lte-bearer-configuration.h
+  configuration/nr-bearer-configuration.h
   configuration/lte-netdevice-configuration.h
   configuration/nr-netdevice-configuration.h
   configuration/lte-phy-layer-configuration.h

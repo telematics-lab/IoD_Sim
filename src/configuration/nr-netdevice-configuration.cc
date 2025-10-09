@@ -37,7 +37,7 @@ class NrNetdeviceConfigurationPriv
 NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,
-    const std::vector<LteBearerConfiguration> bearers,
+    const std::vector<NrBearerConfiguration> bearers,
     const std::optional<uint32_t> networkLayerId,
     const std::optional<ModelConfiguration> antennaModel,
     const std::optional<ModelConfiguration> phyModel)
@@ -58,7 +58,7 @@ NrNetdeviceConfiguration::GetRole() const
     return m_role;
 }
 
-const std::vector<LteBearerConfiguration>
+const std::vector<NrBearerConfiguration>
 NrNetdeviceConfiguration::GetBearers() const
 {
     return m_bearers;

@@ -21,6 +21,7 @@
 #include <ns3/entity-configuration.h>
 #include <ns3/lte-bearer-configuration.h>
 #include <ns3/netdevice-configuration.h>
+#include <ns3/nr-bearer-configuration.h>
 
 #if defined(__clang__)
 _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
@@ -68,7 +69,7 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
             const rapidjson::Value& json);
         static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
             const JsonArray& json);
-        static const std::vector<LteBearerConfiguration> DecodeNrBearerConfigurations(
+        static const std::vector<NrBearerConfiguration> DecodeNrBearerConfigurations(
             const JsonArray& jsonArray);
         static const MobilityModelConfiguration DecodeMobilityConfiguration(
             const rapidjson::Value& json);
