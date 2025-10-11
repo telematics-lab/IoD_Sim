@@ -498,8 +498,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         std::string m_name;           /// name of the simulation
         std::string m_dateTime;       /// cache for the current datetime
         std::vector<std::pair<std::string, Ptr<AttributeValue>>>
-            m_staticConfig;  /// cache for ns-3 static config params
-        uint32_t m_radioMap; /// a code for radio map generation options
+            m_staticConfig;        /// cache for ns-3 static config params
+        uint32_t m_radioMap;       /// a code for radio map generation options
+        std::string m_currentPath; /// cache for the current path at initialization
     };
 
 } // namespace ns3

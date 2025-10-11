@@ -208,6 +208,50 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             }
         }
 
+        if (jsonPhyLayer.HasMember("channelConditionAttributes") &&
+            jsonPhyLayer["channelConditionAttributes"].IsArray())
+        {
+            const auto channelConditionAttributes = ModelConfigurationHelper::GetAttributes(
+                TypeId::LookupByName("ns3::ThreeGppChannelConditionModel"), // TODO generalize, how?
+                jsonPhyLayer["channelConditionAttributes"].GetArray());
+            nrConfig->SetChannelConditionAttributes(channelConditionAttributes);
+        }
+
+        if (jsonPhyLayer.HasMember("pathlossAttributes") &&
+            jsonPhyLayer["pathlossAttributes"].IsArray())
+        {
+            const auto pathlossAttributes = ModelConfigurationHelper::GetAttributes(
+                TypeId::LookupByName("ns3::ThreeGppPropagationLossModel"),
+                jsonPhyLayer["pathlossAttributes"].GetArray());
+            nrConfig->SetPathlossAttributes(pathlossAttributes);
+        }
+
+        if (jsonPhyLayer.HasMember("epcAttributes") && jsonPhyLayer["epcAttributes"].IsArray())
+        {
+            const auto epcAttributes =
+                ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrEpcHelper"),
+                                                        jsonPhyLayer["epcAttributes"].GetArray());
+            nrConfig->SetEpcAttributes(epcAttributes);
+        }
+
+        if (jsonPhyLayer.HasMember("gnbBwpManagerAttribute") &&
+            jsonPhyLayer["gnbBwpManagerAttribute"].IsArray())
+        {
+            const auto gnbBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
+                TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic"), // TODO generalize, how?
+                jsonPhyLayer["gnbBwpManagerAttribute"].GetArray());
+            nrConfig->SetGnbBwpManagerAttributes(gnbBwpManagerAttributes);
+        }
+
+        if (jsonPhyLayer.HasMember("ueBwpManagerAttribute") &&
+            jsonPhyLayer["ueBwpManagerAttribute"].IsArray())
+        {
+            const auto ueBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
+                TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic"), // TODO generalize, how?
+                jsonPhyLayer["ueBwpManagerAttribute"].GetArray());
+            nrConfig->SetUeBwpManagerAttributes(ueBwpManagerAttributes);
+        }
+
         // Parse UE antenna configuration
         if (jsonPhyLayer.HasMember("ueAntenna") && jsonPhyLayer["ueAntenna"].IsObject())
         {
@@ -284,7 +328,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             });
         }
 
-        if (jsonPhyLayer.HasMember("uePhyAttributes") && jsonPhyLayer["uePhyAttributes"].IsArray())
+        if (jsonPhyLayer.HasMember("gnbPhyAttributes") &&
+            jsonPhyLayer["gnbPhyAttributes"].IsArray())
         {
             const auto gnbPhyAttributes = ModelConfigurationHelper::GetAttributes(
                 TypeId::LookupByName("ns3::NrGnbPhy"),

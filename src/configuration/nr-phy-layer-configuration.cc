@@ -169,4 +169,83 @@ NrPhyLayerConfiguration::SetBeamformingAttributes(
     m_beamformingAttributes = attributes;
 }
 
+/**
+ * Set channel condition attributes
+ * \param attributes The list of attributes that configures the channel condition model.
+ */
+void
+NrPhyLayerConfiguration::SetChannelConditionAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_channelConditionAttributes = attributes;
+}
+
+/**
+ * Set pathloss attributes
+ * \param attributes The list of attributes that configures the pathloss model.
+ */
+void
+NrPhyLayerConfiguration::SetPathlossAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_pathlossAttributes = attributes;
+}
+
+/**
+ * Get channel condition attributes
+ */
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetChannelConditionAttributes() const
+{
+    return m_channelConditionAttributes;
+}
+
+/**
+ * Get pathloss attributes
+ */
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetPathlossAttributes() const
+{
+    return m_pathlossAttributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetEpcAttributes() const
+{
+    return m_epcAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetEpcAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_epcAttributes = attributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetGnbBwpManagerAttributes() const
+{
+    return m_gnbBwpManagerAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetGnbBwpManagerAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_gnbBwpManagerAttributes = attributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetUeBwpManagerAttributes() const
+{
+    return m_ueBwpManagerAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetUeBwpManagerAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_ueBwpManagerAttributes = attributes;
+}
+
 } // namespace ns3

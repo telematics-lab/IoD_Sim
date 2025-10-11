@@ -129,7 +129,7 @@ class NrPhySimulationHelper : public Object
     Ptr<NrPointToPointEpcHelper> m_nr_epc;
     Ptr<IdealBeamformingHelper> m_ideal_beam;
     Ptr<NrChannelHelper> m_nr_channel;
-    std::vector<std::reference_wrapper<OperationBandInfo>> m_bands;
+    std::vector<OperationBandInfo> m_bands;
 };
 
 } // namespace ns3

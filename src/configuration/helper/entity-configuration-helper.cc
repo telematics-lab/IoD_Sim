@@ -179,12 +179,21 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
 
             const std::string role = netdev["role"].GetString();
 
-            NS_ASSERT_MSG(netdev.HasMember("bearers"),
-                          "Entity NR Network Device must have 'bearers' property defined.");
-            NS_ASSERT_MSG(netdev["bearers"].IsArray(),
-                          "Entity NR Network Device 'bearers' must be an array.");
-
-            const auto bearers = DecodeNrBearerConfigurations(netdev["bearers"].GetArray());
+            std::vector<ns3::NrBearerConfiguration> bearers;
+            if (netdev.HasMember("bearers"))
+            {
+                if (netdev["bearers"].IsArray())
+                {
+                    for (auto& ele : DecodeNrBearerConfigurations(netdev["bearers"].GetArray()))
+                    {
+                        bearers.push_back(std::move(ele));
+                    }
+                }
+                else
+                {
+                    NS_FATAL_ERROR("Entity NR Network Device 'bearers' property must be an array.");
+                }
+            }
 
             const auto phyTid = (role == "gNB") ? NrGnbPhy::GetTypeId() : NrUePhy::GetTypeId();
             const std::optional<ModelConfiguration> phyModel =

@@ -53,11 +53,13 @@
 #include <ns3/node-list.h>
 #include <ns3/none-phy-layer-configuration.h>
 #include <ns3/nr-bearer-configuration.h>
+#include <ns3/nr-bearer-stats-calculator.h>
 #include <ns3/nr-eps-bearer.h>
 #include <ns3/nr-gnb-net-device.h>
 #include <ns3/nr-helper.h>
 #include <ns3/nr-netdevice-configuration.h>
 #include <ns3/nr-phy-layer-configuration.h>
+#include <ns3/nr-phy-rx-trace.h>
 #include <ns3/nr-phy-simulation-helper.h>
 #include <ns3/nr-ue-net-device.h>
 #include <ns3/nr-ue-phy.h>
@@ -173,6 +175,7 @@ class Scenario
     void ConfigureInternetRemotes();
     void ConfigureInternetBackbone();
     void EnablePhyLteTraces();
+    void EnablePhyNrTraces();
     void ConfigureRegionsOfInterest();
     void DroneCourseChange(std::string context, Ptr<const MobilityModel> model);
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
@@ -257,6 +260,7 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
     EnablePhyLteTraces();
+    EnablePhyNrTraces();
 
     // Initialize LeoSat trace CSV file
     std::ostringstream leoSatTraceFilePath;
@@ -563,6 +567,22 @@ Scenario::ConfigurePhy()
             {
                 nrSim->GetNrHelper()->SetAttribute(attr.name, *attr.value);
             }
+
+            for (auto& attr : nrConf->GetEpcAttributes())
+            {
+                nrSim->GetNrEpcHelper()->SetAttribute(attr.name, *attr.value);
+            }
+
+            for (auto& attr : nrConf->GetUeBwpManagerAttributes())
+            {
+                nrSim->GetNrHelper()->SetUeBwpManagerAlgorithmAttribute(attr.name, *attr.value);
+            }
+
+            for (auto& attr : nrConf->GetGnbBwpManagerAttributes())
+            {
+                nrSim->GetNrHelper()->SetGnbBwpManagerAlgorithmAttribute(attr.name, *attr.value);
+            }
+
             for (auto bandConf : nrConf->GetBandsConfiguration())
             {
                 std::vector<CcBwpCreator::SimpleOperationBandConf> freqs;
@@ -581,6 +601,18 @@ Scenario::ConfigurePhy()
                                            bandConf.contiguousCc,
                                            bandConf.channel.configFlags);
             }
+
+            for (auto& attr : nrConf->GetChannelConditionAttributes())
+            {
+                nrSim->GetNrChannelHelper()->SetChannelConditionModelAttribute(attr.name,
+                                                                               *attr.value);
+            }
+
+            for (auto& attr : nrConf->GetPathlossAttributes())
+            {
+                nrSim->GetNrChannelHelper()->SetPathlossAttribute(attr.name, *attr.value);
+            }
+
             nrSim->SetBeamformingMethod(TypeId::LookupByName(nrConf->GetBeamformingMethod()),
                                         nrConf->GetBeamformingAttributes());
 
@@ -1539,8 +1571,8 @@ Scenario::EnablePhyLteTraces()
             lteHelper->EnableTraces();
 
             auto rlcStat = lteHelper->GetRlcStats();
-            rlcStat->SetDlOutputFilename(basePath.str() + "RlcDlStats.txt");
-            rlcStat->SetUlOutputFilename(basePath.str() + "RlcUlStats.txt");
+            rlcStat->SetDlOutputFilename(basePath.str() + "LteRlcDlStats.txt");
+            rlcStat->SetUlOutputFilename(basePath.str() + "LteRlcUlStats.txt");
 
             auto pdcpStat = lteHelper->GetPdcpStats();
             pdcpStat->SetDlPdcpOutputFilename(basePath.str() + "PdcpDlStats.txt");
@@ -1562,6 +1594,38 @@ Scenario::EnablePhyLteTraces()
 
             lteHelperQ->macStat->SetDlOutputFilename(basePath.str() + "MacDlStats.txt");
             lteHelperQ->macStat->SetUlOutputFilename(basePath.str() + "MacUlStats.txt");
+        }
+    }
+}
+
+void
+Scenario::EnablePhyNrTraces()
+{
+    NS_LOG_FUNCTION_NOARGS();
+    if (!CONFIGURATOR->GetLogOnFile())
+    {
+        return;
+    }
+
+    for (size_t phyId = 0; phyId < m_protocolStacks[PHY_LAYER].size(); phyId++)
+    {
+        auto obj = m_protocolStacks[PHY_LAYER][phyId];
+
+        if (DynamicCast<NrPhySimulationHelper>(obj))
+        {
+            auto phy = StaticCast<NrPhySimulationHelper, Object>(obj);
+            auto nrHelper = phy->GetNrHelper();
+
+            // Some paths are hadcoded during runtime (overwriting the filename variable, and not
+            // allowing setting paths), other also creates the file during the call to EnableTraces,
+            // so we can't set it like in LTE
+            // We need to change for this reason the application path execution to the results path
+            // and keep it also during the simulation
+            // GetResultsPath() use as base folder the initial program path, so other next paths
+            // will not be affected by the change of the current program path (this change has been
+            // done to manage this issue)
+            std::filesystem::current_path(CONFIGURATOR->GetResultsPath());
+            nrHelper->EnableTraces();
         }
     }
 }

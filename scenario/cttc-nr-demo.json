@@ -3,9 +3,13 @@
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
-
-  "staticNs3Config": [],
-
+  "staticNs3Config": [
+    {
+      // Set it when UEs are too many to handle with default SrsPeriodicity value
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 999999999
+    }
+  ],
   "world": {
     "size": {
       "X": "1000",
@@ -14,36 +18,130 @@
     },
     "buildings": []
   },
-
   "phyLayer": [
     {
       "type": "nr",
-      "attributes": [],
-      "channel": {
-        "propagationLossModel": {
-          "name": "ns3::ThreeGppPropagationLossModel", //TODO: set up the choosen LossModel in NrHelper
-          "attributes": [
+      "bands": [
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "frequencyBands": [
             {
-              "name": "ShadowingEnabled",
-              "value": false
+              "centralFrequency": 28e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
             }
           ]
         },
-        "spectrumModel": {
-          "name": "ns3::MultiModelSpectrumChannel", //TODO: set up the choosen SpectrumChannel in NrHelper
-          "attributes": []
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "frequencyBands": [
+            {
+              "centralFrequency": 28.2e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
+            }
+          ]
         }
-      }
+      ],
+      "channelConditionAttributes": [
+        {
+          "name": "UpdatePeriod",
+          "value": "0ms"
+        }
+      ],
+      "pathlossAttributes": [
+        {
+          "name": "ShadowingEnabled",
+          "value": false
+        }
+      ],
+      /*"epcAttributes": [ // NOT WORKS ://
+        {
+          "name": "S1uLinkDelay",
+          "value": "0ms"
+        }
+      ],*/
+      "beamforming": {
+        "method": "ns3::DirectPathBeamforming",
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 2
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbBwpManagerAttribute": [
+        {
+          "name": "NGBR_LOW_LAT_EMBB",
+          "value": 0
+        },
+        {
+          "name": "GBR_CONV_VOICE",
+          "value": 1
+        }
+      ],
+      "ueBwpManagerAttribute": [
+        {
+          "name": "NGBR_LOW_LAT_EMBB",
+          "value": 0
+        },
+        {
+          "name": "GBR_CONV_VOICE",
+          "value": 1
+        }
+      ],
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 24.0
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 35.0
+        }
+      ]
     }
   ],
-
   "macLayer": [
     {
       "type": "nr"
     }
   ],
-
   "networkLayer": [
+    // This is not working, but probably should now work due to UE & gNB ips are hardcoded
     {
       "type": "ipv4",
       "address": "1.0.0.0",
@@ -63,28 +161,7 @@
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
-          ],
-          "antennaModel": {
-            "name": "ns3::UniformPlanarArray",
-            "attributes": [
-              {
-                "name": "NumRows",
-                "value": 2
-              },
-              {
-                "name": "NumColumns",
-                "value": 4
-              },
-              {
-                "name": "AntennaElement",
-                "value": "ns3::IsotropicAntennaModel"
-              }
-            ]
-          },
-          "phy": {
-            "TxPower": 24.0, // Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
-            "EnableUplinkPowerControl": false
-          }
+          ]
         }
       ],
       "mobilityModel": {
@@ -92,7 +169,11 @@
         "attributes": [
           {
             "name": "Position",
-            "value": [20.0, 10.0, 1.5]
+            "value": [
+              20.0,
+              10.0,
+              1.5
+            ]
           }
         ]
       },
@@ -127,28 +208,7 @@
             {
               "type": "GBR_CONV_VOICE"
             }
-          ],
-          "antennaModel": {
-            "name": "ns3::UniformPlanarArray",
-            "attributes": [
-              {
-                "name": "NumRows",
-                "value": 2
-              },
-              {
-                "name": "NumColumns",
-                "value": 4
-              },
-              {
-                "name": "AntennaElement",
-                "value": "ns3::IsotropicAntennaModel"
-              }
-            ]
-          },
-          "phy": {
-            "TxPower": 24.0, // Ref: https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-M.2135-1-2009-PDF-E.pdf
-            "EnableUplinkPowerControl": false
-          }
+          ]
         }
       ],
       "mobilityModel": {
@@ -156,7 +216,11 @@
         "attributes": [
           {
             "name": "Position",
-            "value": [10.0, 20.0, 1.5]
+            "value": [
+              10.0,
+              20.0,
+              1.5
+            ]
           }
         ]
       },
@@ -187,43 +251,7 @@
         {
           "type": "nr",
           "role": "gNB",
-          "networkLayer": 0,
-          "bandwidthParts": {
-            "TotalTxPower": 35.0,
-            "bandConfs": [
-              {
-                "centralFreq": 28e9,
-                "channelBw": 50e6,
-                "numCc": 1,
-                "scenario": "BandwidthPartInfo::UMi_StreetCanyon",
-                "Numerology": 4
-              },
-              {
-                "centralFreq": 28.2e9,
-                "channelBw": 50e6,
-                "numCc": 1,
-                "scenario": "BandwidthPartInfo::UMi_StreetCanyon",
-                "Numerology": 2
-              }
-            ]
-          },
-          "antennaModel": {
-            "name": "ns3::UniformPlanarArray",
-            "attributes": [
-              {
-                "name": "NumRows",
-                "value": 4
-              },
-              {
-                "name": "NumColumns",
-                "value": 8
-              },
-              {
-                "name": "AntennaElement",
-                "value": "ns3::IsotropicAntennaModel"
-              }
-            ]
-          }
+          "networkLayer": 0
         }
       ],
       "mobilityModel": {
@@ -231,14 +259,17 @@
         "attributes": [
           {
             "name": "Position",
-            "value": [10.0, 10.0, 10.0]
+            "value": [
+              10.0,
+              20.0,
+              10.0
+            ]
           }
         ]
       },
       "applications": []
     }
   ],
-
   "remotes": [
     {
       "networkLayer": 0,
@@ -255,8 +286,11 @@
               "value": 1.0
             },
             {
-              "name": "RemotePort",
-              "value": 1234
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1234
+              ]
             },
             {
               "name": "MaxPackets",
@@ -284,8 +318,11 @@
               "value": 1.0
             },
             {
-              "name": "RemotePort",
-              "value": 1235
+              "name": "Remote",
+              "value": [
+                "7.0.0.3",
+                1235
+              ]
             },
             {
               "name": "MaxPackets",
@@ -298,31 +335,39 @@
             {
               "name": "Interval",
               "value": 0.0001
-            },
-            {
-              "name": "RemoteAddress",
-              "value": 0.0001
             }
           ]
         }
       ]
     }
   ],
-
-  "analytics": [
-    {
-      "type": "lteRadioEnvironmentMap",
-      "ChannelPath": "/ChannelList/2"
-    }
-  ],
-
   "logComponents": [
-    "DroneServerApplication",
-    "DroneClientApplication",
-    "Drone",
-    "Scenario",
-    "LteHelper",
-    "NoBackhaulEpcHelper",
-    "LteEnbNetDevice"
+    "UdpClient",
+    "UdpServer",
+    "NrPdcp",
+    "Scenario"
   ]
 }
+/*
+HOW TO IMPLEMENT THIS??
+  // Get the first netdevice (gnbNetDev.Get (0)) and the first bandwidth part (0)
+  // and set the attribute.
+    nrHelper->GetGnbPhy(gnbNetDev.Get(0),
+  0)
+        ->SetAttribute("Numerology", UintegerValue(numerologyBwp1));
+    nrHelper->GetGnbPhy(gnbNetDev.Get(0),
+  0)
+        ->SetAttribute("TxPower", DoubleValue(10 * log10((bandwidthBand1 / totalBandwidth) * x)));
+
+    if (doubleOperationalBand)
+    {
+    // Get the first netdevice (gnbNetDev.Get (0)) and the second bandwidth part (1)
+    // and set the attribute.
+        nrHelper->GetGnbPhy(gnbNetDev.Get(0),
+    1)
+            ->SetAttribute("Numerology", UintegerValue(numerologyBwp2));
+        nrHelper->GetGnbPhy(gnbNetDev.Get(0),
+    1)
+            ->SetTxPower(10 * log10((bandwidthBand2 / totalBandwidth) * x));
+  }
+*/

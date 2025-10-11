@@ -17,6 +17,7 @@
  */
 #include "model-configuration-helper.h"
 
+#include <ns3/address-utils.h>
 #include <ns3/assert.h>
 #include <ns3/boolean.h>
 #include <ns3/double-vector.h>
@@ -37,6 +38,9 @@
 #include <ns3/string.h>
 #include <ns3/uinteger.h>
 #include <ns3/vector.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 namespace ns3
 {
@@ -73,9 +77,13 @@ ModelConfigurationHelper::GetOptional(const JsonObject& jObj, const std::string&
 {
     const auto& key = name.c_str();
     if (jObj.HasMember(key))
+    {
         return Get(jObj[key]);
+    }
     else
+    {
         return std::nullopt;
+    }
 }
 
 const std::optional<ModelConfiguration>
@@ -85,9 +93,13 @@ ModelConfigurationHelper::GetOptionalCoaleshed(const JsonObject& jObj,
 {
     const auto& key = name.c_str();
     if (jObj.HasMember(key) && jObj[key].IsObject())
+    {
         return DecodeCoaleshedModel(tid, jObj[key].GetObject());
+    }
     else
+    {
         return std::nullopt;
+    }
 }
 
 const std::vector<ModelConfiguration::Attribute>
@@ -97,7 +109,9 @@ ModelConfigurationHelper::GetAttributes(const TypeId& model,
     std::vector<ModelConfiguration::Attribute> attributes;
     attributes.reserve(jAttrs.Size());
     for (auto& el : jAttrs)
+    {
         attributes.push_back(DecodeModelAttribute(model, el));
+    }
 
     return attributes;
 }
@@ -171,15 +185,23 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
             if (acceptedType == "ns3::IntegerValue")
+            {
                 attrValue = attrInfo.checker->CreateValidValue(IntegerValue(attrValueInt));
+            }
             else if (acceptedType == "ns3::UintegerValue")
+            {
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
+            }
             else if (acceptedType == "ns3::TimeValue")
+            {
                 attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueInt)));
+            }
             else
+            {
                 NS_FATAL_ERROR("The attribute value for property "
                                << attrInfo.name << " defined in model " << modelName
                                << " has incompatible type: " << acceptedType << " is needed.");
+            }
         }
         else if (jAttr.IsUint64())
         {
@@ -187,26 +209,38 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
             if (acceptedType == "ns3::IntegerValue")
+            {
                 attrValue = attrInfo.checker->CreateValidValue(IntegerValue(attrValueInt));
+            }
             else if (acceptedType == "ns3::UintegerValue")
+            {
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
+            }
             else
+            {
                 NS_FATAL_ERROR("The attribute value for property "
                                << attrInfo.name << " defined in model " << modelName
                                << " has incompatible type: " << acceptedType << " is needed.");
+            }
         }
         else if (jAttr.IsDouble())
         {
             const double attrValueDouble = jAttr.GetDouble();
 
             if (attrInfo.checker->Check(DoubleValue(attrValueDouble)))
+            {
                 attrValue = attrInfo.checker->CreateValidValue(DoubleValue(attrValueDouble));
+            }
             else if (attrInfo.checker->Check(TimeValue(Seconds(attrValueDouble))))
+            {
                 attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueDouble)));
+            }
             else
+            {
                 NS_FATAL_ERROR("Attribute "
                                << attrInfo.name << " for model " << modelName
                                << " has incompatible value type or it is out of range.");
+            }
         }
         else
         {
@@ -219,13 +253,51 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
     break;
     case rapidjson::Type::kArrayType: {
         const auto arr = jAttr.GetArray();
+        const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
-        if (arr[0].IsString()) // StrVecValue
+        if (acceptedType == "ns3::AddressValue")
+        {
+            if (arr.Size() != 2 || !arr[0].IsString() || !arr[1].IsInt())
+            {
+                NS_FATAL_ERROR(
+                    "Attribute "
+                    << attrInfo.name << " for model " << modelName
+                    << " must be an array with a string and an integer. eg. [\"10.1.1.1\", 1234]");
+            }
+            const auto addr = arr[0].GetString();
+            const auto port = arr[1].GetInt();
+            // Checking if address is v6 or v4
+            Address parsedAddr;
+            uint8_t byteAddr[16];
+            if (inet_pton(AF_INET, addr, &byteAddr) <= 0)
+            {
+                if (inet_pton(AF_INET6, addr, &byteAddr) <= 0)
+                {
+                    NS_FATAL_ERROR("Attribute "
+                                   << attrInfo.name << " for model " << modelName
+                                   << " must has as first paramether a valid IPv4 or v6 address");
+                }
+                else
+                {
+                    parsedAddr = Ipv6Address(addr);
+                }
+            }
+            else
+            {
+                parsedAddr = Ipv4Address(addr);
+            }
+            attrValue = attrInfo.checker->CreateValidValue(
+                AddressValue(addressUtils::ConvertToSocketAddress(parsedAddr, port)));
+            const auto acceptedType = attrInfo.checker->GetValueTypeName();
+        }
+        else if (arr[0].IsString()) // StrVecValue
         {
             std::vector<std::string> values;
             values.reserve(arr.Size());
             for (auto& el : arr)
+            {
                 values.push_back(el.GetString());
+            }
             attrValue = attrInfo.checker->CreateValidValue(StrVecValue(values));
         }
         else if ((attrInfo.name == "SpeedCoefficients" || attrInfo.name == "PowerConsumption") &&
@@ -326,7 +398,9 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         {
             std::vector<int> els;
             for (auto& c : arr)
+            {
                 els.push_back(c.GetInt());
+            }
             attrValue = attrInfo.checker->CreateValidValue(IntVectorValue(els));
         }
         else if (arr[0].IsDouble())
@@ -339,11 +413,15 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             }
 
             if (attrValue)
+            {
                 break;
+            }
 
             std::vector<double> els;
             for (auto& c : arr)
+            {
                 els.push_back(c.GetDouble());
+            }
             attrValue = attrInfo.checker->CreateValidValue(DoubleVectorValue(els));
         }
         else
@@ -352,6 +430,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                            << attrInfo.name << ": " << attrInfo.checker->GetValueTypeName());
         }
     }
+
     break;
     case rapidjson::Type::kFalseType:
     case rapidjson::Type::kTrueType: {
@@ -367,7 +446,9 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
 
             factory.SetTypeId(objConf.GetName());
             for (auto& attr : objConf.GetAttributes())
+            {
                 factory.Set(attr.name, *attr.value);
+            }
 
             auto obj = factory.Create<Object>();
             attrValue = attrInfo.checker->CreateValidValue(PointerValue(obj));
@@ -389,7 +470,8 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
     NS_ABORT_MSG_IF(!attrValue,
                     "The attribute value for property "
                         << attrInfo.name << " defined in model " << modelName
-                        << " was not accepted. " << "Insert a valid value according to "
+                        << " was not accepted. "
+                        << "Insert a valid value according to "
                         << attrInfo.checker->GetUnderlyingTypeInformation());
     return attrValue;
 }

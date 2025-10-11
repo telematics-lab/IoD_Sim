@@ -62,6 +62,7 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         dateTime << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d.%H-%M-%S");
 
         m_dateTime = dateTime.str();
+        m_currentPath = std::filesystem::current_path();
 
         InitializeConfiguration(argc, argv);
         InitializeLogging(GetLogOnFile());
@@ -116,7 +117,8 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
 
         std::stringstream path;
 
-        path << m_config["resultsPath"].GetString() << "/" << GetName() << "-" << m_dateTime;
+        path << m_currentPath << "/" << m_config["resultsPath"].GetString() << "/" << GetName()
+             << "-" << m_dateTime;
 
         SystemPath::MakeDirectories(path.str());
 

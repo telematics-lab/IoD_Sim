@@ -62,6 +62,10 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonMacLay
     {
         macConfig = Create<MacLayerConfiguration>(macType);
     }
+    else if (macType == "nr")
+    {
+        macConfig = Create<MacLayerConfiguration>(macType);
+    }
     else if (macType == "NullNtnDemo")
     {
         NS_ASSERT_MSG(jsonMacLayer.HasMember("timeResolution"),

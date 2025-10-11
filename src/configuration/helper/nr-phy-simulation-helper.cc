@@ -148,14 +148,20 @@ NrPhySimulationHelper::CreateOperationBand(
         res = ccBwpCreator.CreateOperationBandNonContiguousCc(bandConf);
     }
     m_nr_channel->AssignChannelsToBands({res}, channelConfigFlags);
-    m_bands.push_back(std::ref(res));
+    m_bands.push_back(std::move(res));
     return res;
 }
 
 BandwidthPartInfoPtrVector
 NrPhySimulationHelper::GetAllBwps() const
 {
-    return CcBwpCreator::GetAllBwps(m_bands);
+    std::vector<std::reference_wrapper<OperationBandInfo>> refs;
+    refs.reserve(m_bands.size());
+    for (const auto& band : m_bands)
+    {
+        refs.push_back(std::ref(const_cast<OperationBandInfo&>(band)));
+    }
+    return CcBwpCreator::GetAllBwps(refs);
 }
 
 void
