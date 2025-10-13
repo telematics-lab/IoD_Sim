@@ -573,11 +573,13 @@ Scenario::ConfigurePhy()
                 nrSim->GetNrEpcHelper()->SetAttribute(attr.name, *attr.value);
             }
 
+            nrSim->GetNrHelper()->SetUeBwpManagerAlgorithmTypeId(nrConf->GetUeBwpManagerType());
             for (auto& attr : nrConf->GetUeBwpManagerAttributes())
             {
                 nrSim->GetNrHelper()->SetUeBwpManagerAlgorithmAttribute(attr.name, *attr.value);
             }
 
+            nrSim->GetNrHelper()->SetGnbBwpManagerAlgorithmTypeId(nrConf->GetGnbBwpManagerType());
             for (auto& attr : nrConf->GetGnbBwpManagerAttributes())
             {
                 nrSim->GetNrHelper()->SetGnbBwpManagerAlgorithmAttribute(attr.name, *attr.value);
@@ -599,24 +601,16 @@ Scenario::ConfigurePhy()
                                            bandConf.channel.conditionModel,
                                            bandConf.channel.propagationModel,
                                            bandConf.contiguousCc,
+                                           bandConf.channelConditionAttributes,
+                                           bandConf.pathlossAttributes,
+                                           bandConf.phasedSpectrumAttributes,
                                            bandConf.channel.configFlags);
             }
 
-            for (auto& attr : nrConf->GetChannelConditionAttributes())
-            {
-                nrSim->GetNrChannelHelper()->SetChannelConditionModelAttribute(attr.name,
-                                                                               *attr.value);
-            }
-
-            for (auto& attr : nrConf->GetPathlossAttributes())
-            {
-                nrSim->GetNrChannelHelper()->SetPathlossAttribute(attr.name, *attr.value);
-            }
-
-            nrSim->SetBeamformingMethod(TypeId::LookupByName(nrConf->GetBeamformingMethod()),
+            nrSim->SetBeamformingMethod(nrConf->GetBeamformingMethod(),
                                         nrConf->GetBeamformingAttributes());
 
-            nrSim->SetScheduler(TypeId::LookupByName(nrConf->GetSchedulerType()));
+            nrSim->SetScheduler(nrConf->GetSchedulerType());
 
             auto gnbAntennaConf = nrConf->GetGnbAntenna();
             nrSim->SetGnbAntenna(gnbAntennaConf.type,
@@ -1177,9 +1171,13 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
 
     if (phyConf)
     {
-        for (const auto& attr : phyConf->GetAttributes())
+        for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
         {
-            dev->GetPhy(0)->SetAttribute(attr.name, *attr.value);
+            for (const auto& attr : phyConf->GetAttributes())
+            {
+                std::cout << "SETTING " << attr.name << " ON INT " << i << std::endl;
+                dev->GetPhy(i)->SetAttribute(attr.name, *attr.value);
+            }
         }
     }
 
@@ -1616,14 +1614,13 @@ Scenario::EnablePhyNrTraces()
             auto phy = StaticCast<NrPhySimulationHelper, Object>(obj);
             auto nrHelper = phy->GetNrHelper();
 
-            // Some paths are hadcoded during runtime (overwriting the filename variable, and not
-            // allowing setting paths), other also creates the file during the call to EnableTraces,
-            // so we can't set it like in LTE
-            // We need to change for this reason the application path execution to the results path
-            // and keep it also during the simulation
-            // GetResultsPath() use as base folder the initial program path, so other next paths
-            // will not be affected by the change of the current program path (this change has been
-            // done to manage this issue)
+            // Some paths are hadcoded during runtime (overwriting the filename variable, and
+            // not allowing setting paths), other also creates the file during the call to
+            // EnableTraces, so we can't set it like in LTE We need to change for this reason
+            // the application path execution to the results path and keep it also during the
+            // simulation GetResultsPath() use as base folder the initial program path, so other
+            // next paths will not be affected by the change of the current program path (this
+            // change has been done to manage this issue)
             std::filesystem::current_path(CONFIGURATOR->GetResultsPath());
             nrHelper->EnableTraces();
         }

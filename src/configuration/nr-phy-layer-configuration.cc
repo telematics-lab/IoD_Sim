@@ -38,13 +38,13 @@ NrPhyLayerConfiguration::~NrPhyLayerConfiguration()
 }
 
 void
-NrPhyLayerConfiguration::SetBeamformingMethod(const std::string& beamformingMethod)
+NrPhyLayerConfiguration::SetBeamformingMethod(const TypeId& beamformingMethod)
 {
     m_beamformingMethod = beamformingMethod;
 }
 
 void
-NrPhyLayerConfiguration::SetScheduler(const std::string& schedulerType)
+NrPhyLayerConfiguration::SetScheduler(const TypeId& schedulerType)
 {
     m_schedulerType = schedulerType;
 }
@@ -70,7 +70,7 @@ NrPhyLayerConfiguration::SetUeAntenna(const NrAntennaConfiguration& antennaConfi
 /**
  * Get beamforming method
  */
-const std::string&
+const TypeId&
 NrPhyLayerConfiguration::GetBeamformingMethod() const
 {
     return m_beamformingMethod;
@@ -79,7 +79,7 @@ NrPhyLayerConfiguration::GetBeamformingMethod() const
 /**
  * Get scheduler type
  */
-const std::string&
+const TypeId&
 NrPhyLayerConfiguration::GetSchedulerType() const
 {
     return m_schedulerType;
@@ -101,20 +101,6 @@ const NrAntennaConfiguration&
 NrPhyLayerConfiguration::GetUeAntenna() const
 {
     return m_ueAntenna;
-}
-
-std::string
-NrPhyLayerConfiguration::GetAttribute(const std::string& name) const
-{
-    if (name == "BeamformingMethod")
-    {
-        return m_beamformingMethod;
-    }
-    else if (name == "SchedulerType")
-    {
-        return m_schedulerType;
-    }
-    return "";
 }
 
 const std::vector<ModelConfiguration::Attribute>&
@@ -169,46 +155,6 @@ NrPhyLayerConfiguration::SetBeamformingAttributes(
     m_beamformingAttributes = attributes;
 }
 
-/**
- * Set channel condition attributes
- * \param attributes The list of attributes that configures the channel condition model.
- */
-void
-NrPhyLayerConfiguration::SetChannelConditionAttributes(
-    const std::vector<ModelConfiguration::Attribute>& attributes)
-{
-    m_channelConditionAttributes = attributes;
-}
-
-/**
- * Set pathloss attributes
- * \param attributes The list of attributes that configures the pathloss model.
- */
-void
-NrPhyLayerConfiguration::SetPathlossAttributes(
-    const std::vector<ModelConfiguration::Attribute>& attributes)
-{
-    m_pathlossAttributes = attributes;
-}
-
-/**
- * Get channel condition attributes
- */
-std::vector<ModelConfiguration::Attribute>
-NrPhyLayerConfiguration::GetChannelConditionAttributes() const
-{
-    return m_channelConditionAttributes;
-}
-
-/**
- * Get pathloss attributes
- */
-std::vector<ModelConfiguration::Attribute>
-NrPhyLayerConfiguration::GetPathlossAttributes() const
-{
-    return m_pathlossAttributes;
-}
-
 std::vector<ModelConfiguration::Attribute>
 NrPhyLayerConfiguration::GetEpcAttributes() const
 {
@@ -246,6 +192,30 @@ NrPhyLayerConfiguration::SetUeBwpManagerAttributes(
     const std::vector<ModelConfiguration::Attribute>& attributes)
 {
     m_ueBwpManagerAttributes = attributes;
+}
+
+void
+NrPhyLayerConfiguration::SetGnbBwpManager(const TypeId& bwpManagerType)
+{
+    m_gnbBwpManagerType = bwpManagerType;
+}
+
+void
+NrPhyLayerConfiguration::SetUeBwpManager(const TypeId& bwpManagerType)
+{
+    m_ueBwpManagerType = bwpManagerType;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetGnbBwpManagerType() const
+{
+    return m_gnbBwpManagerType;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetUeBwpManagerType() const
+{
+    return m_ueBwpManagerType;
 }
 
 } // namespace ns3

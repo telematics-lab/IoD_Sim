@@ -93,6 +93,9 @@ struct NrBandConfiguration
     bool contiguousCc = true;
     // Channel configuration for this band
     NrChannelConfiguration channel;
+    std::vector<ModelConfiguration::Attribute> channelConditionAttributes;
+    std::vector<ModelConfiguration::Attribute> pathlossAttributes;
+    std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes;
 };
 
 /**
@@ -126,12 +129,12 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     /**
      * Set the beamforming method
      */
-    void SetBeamformingMethod(const std::string& beamformingMethod);
+    void SetBeamformingMethod(const TypeId& beamformingMethod);
 
     /**
      * Set the scheduler type
      */
-    void SetScheduler(const std::string& schedulerType);
+    void SetScheduler(const TypeId& schedulerType);
 
     /**
      * Set band configuration
@@ -150,12 +153,12 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     /**
      * Get beamforming method
      */
-    const std::string& GetBeamformingMethod() const;
+    const TypeId& GetBeamformingMethod() const;
 
     /**
      * Get scheduler type
      */
-    const std::string& GetSchedulerType() const;
+    const TypeId& GetSchedulerType() const;
 
     /**
      * Get gNB antenna configuration
@@ -165,11 +168,6 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      * Get UE antenna configuration
      */
     const NrAntennaConfiguration& GetUeAntenna() const;
-
-    /**
-     * Get attribute value (for backward compatibility)
-     */
-    std::string GetAttribute(const std::string& name) const;
 
     /**
      * Get UE PHY attributes
@@ -202,29 +200,6 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      * \param attributes The list of attributes that configures the beamforming method.
      */
     void SetBeamformingAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
-
-    /**
-     * Set channel condition attributes
-     * \param attributes The list of attributes that configures the channel condition model.
-     */
-    void SetChannelConditionAttributes(
-        const std::vector<ModelConfiguration::Attribute>& attributes);
-
-    /**
-     * Set pathloss attributes
-     * \param attributes The list of attributes that configures the pathloss model.
-     */
-    void SetPathlossAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
-
-    /**
-     * Get channel condition attributes
-     */
-    std::vector<ModelConfiguration::Attribute> GetChannelConditionAttributes() const;
-
-    /**
-     * Get pathloss attributes
-     */
-    std::vector<ModelConfiguration::Attribute> GetPathlossAttributes() const;
 
     /**
      * Get bands configuration
@@ -261,20 +236,40 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      */
     void SetEpcAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
 
+    /**
+     * Set Ue BWP Manager
+     */
+    void SetUeBwpManager(const TypeId& bwpManagerType);
+
+    /**
+     * Set gNB BWP Manager
+     */
+    void SetGnbBwpManager(const TypeId& bwpManagerType);
+
+    /**
+     * Get gNB BWP Manager Type
+     */
+    TypeId GetGnbBwpManagerType() const;
+
+    /**
+     * Get UE BWP Manager Type
+     */
+    TypeId GetUeBwpManagerType() const;
+
   private:
-    std::string m_beamformingMethod = "ns3::IdealBeamformingAlgorithm";
-    std::string m_schedulerType = "ns3::NrMacSchedulerTdmaRR";
+    TypeId m_beamformingMethod = TypeId::LookupByName("ns3::IdealBeamformingAlgorithm");
+    TypeId m_schedulerType = TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR");
     std::vector<NrBandConfiguration> m_bandsConfig;
     NrAntennaConfiguration m_ueAntenna;
     NrAntennaConfiguration m_gnbAntenna;
     std::vector<ModelConfiguration::Attribute> m_uePhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_gnbPhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_beamformingAttributes;
-    std::vector<ModelConfiguration::Attribute> m_channelConditionAttributes;
-    std::vector<ModelConfiguration::Attribute> m_pathlossAttributes;
     std::vector<ModelConfiguration::Attribute> m_epcAttributes;
     std::vector<ModelConfiguration::Attribute> m_gnbBwpManagerAttributes;
     std::vector<ModelConfiguration::Attribute> m_ueBwpManagerAttributes;
+    TypeId m_gnbBwpManagerType = TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic");
+    TypeId m_ueBwpManagerType = TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic");
 };
 
 } // namespace ns3

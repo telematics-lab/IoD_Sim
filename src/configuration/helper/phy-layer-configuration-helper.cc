@@ -24,6 +24,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/none-phy-layer-configuration.h>
+#include <ns3/nr-channel-helper.h>
 #include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
@@ -35,6 +36,7 @@ namespace ns3
 
 Ptr<PhyLayerConfiguration>
 PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLayer)
+
 {
     NS_ASSERT_MSG(jsonPhyLayer.IsObject(),
                   "PHY Layer definition must be an object, got " << jsonPhyLayer.GetType());
@@ -158,6 +160,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
     else if (phyType == "nr")
     {
         Ptr<NrPhyLayerConfiguration> nrConfig;
+
         if (!jsonPhyLayer.HasMember("attributes"))
         {
             nrConfig =
@@ -178,24 +181,25 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             const auto& beamforming = jsonPhyLayer["beamforming"];
             if (beamforming.HasMember("method") && beamforming["method"].IsString())
             {
-                nrConfig->SetBeamformingMethod(beamforming["method"].GetString());
+                nrConfig->SetBeamformingMethod(
+                    TypeId::LookupByName(beamforming["method"].GetString()));
             }
             else
             {
-                nrConfig->SetBeamformingMethod("ns3::DirectPathBeamforming");
+                nrConfig->SetBeamformingMethod(TypeId::LookupByName("ns3::DirectPathBeamforming"));
             }
 
             if (beamforming.HasMember("attributes") && beamforming["attributes"].IsArray())
             {
-                const auto bfAttributes = ModelConfigurationHelper::GetAttributes(
-                    TypeId::LookupByName(nrConfig->GetBeamformingMethod()),
-                    beamforming["attributes"].GetArray());
+                const auto bfAttributes =
+                    ModelConfigurationHelper::GetAttributes(nrConfig->GetBeamformingMethod(),
+                                                            beamforming["attributes"].GetArray());
                 nrConfig->SetBeamformingAttributes(bfAttributes);
             }
         }
         else
         {
-            nrConfig->SetBeamformingMethod("ns3::DirectPathBeamforming");
+            nrConfig->SetBeamformingMethod(TypeId::LookupByName("ns3::DirectPathBeamforming"));
         }
 
         // Parse scheduler configuration
@@ -204,26 +208,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             const auto& scheduler = jsonPhyLayer["scheduler"];
             if (scheduler.HasMember("type") && scheduler["type"].IsString())
             {
-                nrConfig->SetScheduler(scheduler["type"].GetString());
+                nrConfig->SetScheduler(TypeId::LookupByName(scheduler["type"].GetString()));
             }
-        }
-
-        if (jsonPhyLayer.HasMember("channelConditionAttributes") &&
-            jsonPhyLayer["channelConditionAttributes"].IsArray())
-        {
-            const auto channelConditionAttributes = ModelConfigurationHelper::GetAttributes(
-                TypeId::LookupByName("ns3::ThreeGppChannelConditionModel"), // TODO generalize, how?
-                jsonPhyLayer["channelConditionAttributes"].GetArray());
-            nrConfig->SetChannelConditionAttributes(channelConditionAttributes);
-        }
-
-        if (jsonPhyLayer.HasMember("pathlossAttributes") &&
-            jsonPhyLayer["pathlossAttributes"].IsArray())
-        {
-            const auto pathlossAttributes = ModelConfigurationHelper::GetAttributes(
-                TypeId::LookupByName("ns3::ThreeGppPropagationLossModel"),
-                jsonPhyLayer["pathlossAttributes"].GetArray());
-            nrConfig->SetPathlossAttributes(pathlossAttributes);
         }
 
         if (jsonPhyLayer.HasMember("epcAttributes") && jsonPhyLayer["epcAttributes"].IsArray())
@@ -234,22 +220,40 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             nrConfig->SetEpcAttributes(epcAttributes);
         }
 
-        if (jsonPhyLayer.HasMember("gnbBwpManagerAttribute") &&
-            jsonPhyLayer["gnbBwpManagerAttribute"].IsArray())
+        if (jsonPhyLayer.HasMember("gnbBwpManager") && jsonPhyLayer["gnbBwpManager"].IsObject())
         {
-            const auto gnbBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
-                TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic"), // TODO generalize, how?
-                jsonPhyLayer["gnbBwpManagerAttribute"].GetArray());
-            nrConfig->SetGnbBwpManagerAttributes(gnbBwpManagerAttributes);
+            const auto bwpManagerType =
+                TypeId::LookupByName(jsonPhyLayer["gnbBwpManager"].HasMember("type") &&
+                                             jsonPhyLayer["gnbBwpManager"]["type"].IsString()
+                                         ? jsonPhyLayer["gnbBwpManager"]["type"].GetString()
+                                         : "ns3::BwpManagerAlgorithmStatic");
+            nrConfig->SetGnbBwpManager(bwpManagerType);
+            if (jsonPhyLayer["gnbBwpManager"].HasMember("attributes") &&
+                jsonPhyLayer["gnbBwpManager"]["attributes"].IsArray())
+            {
+                const auto gnbBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
+                    bwpManagerType,
+                    jsonPhyLayer["gnbBwpManager"]["attributes"].GetArray());
+                nrConfig->SetGnbBwpManagerAttributes(gnbBwpManagerAttributes);
+            }
         }
 
-        if (jsonPhyLayer.HasMember("ueBwpManagerAttribute") &&
-            jsonPhyLayer["ueBwpManagerAttribute"].IsArray())
+        if (jsonPhyLayer.HasMember("ueBwpManager") && jsonPhyLayer["ueBwpManager"].IsObject())
         {
-            const auto ueBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
-                TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic"), // TODO generalize, how?
-                jsonPhyLayer["ueBwpManagerAttribute"].GetArray());
-            nrConfig->SetUeBwpManagerAttributes(ueBwpManagerAttributes);
+            const auto bwpManagerType =
+                TypeId::LookupByName(jsonPhyLayer["ueBwpManager"].HasMember("type") &&
+                                             jsonPhyLayer["ueBwpManager"]["type"].IsString()
+                                         ? jsonPhyLayer["ueBwpManager"]["type"].GetString()
+                                         : "ns3::BwpManagerAlgorithmStatic");
+            nrConfig->SetUeBwpManager(bwpManagerType);
+            if (jsonPhyLayer["ueBwpManager"].HasMember("attributes") &&
+                jsonPhyLayer["ueBwpManager"]["attributes"].IsArray())
+            {
+                const auto ueBwpManagerAttributes = ModelConfigurationHelper::GetAttributes(
+                    bwpManagerType,
+                    jsonPhyLayer["ueBwpManager"]["attributes"].GetArray());
+                nrConfig->SetUeBwpManagerAttributes(ueBwpManagerAttributes);
+            }
         }
 
         // Parse UE antenna configuration
@@ -339,6 +343,12 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
 
         if (jsonPhyLayer.HasMember("bands") && jsonPhyLayer["bands"].IsArray())
         {
+            if (!jsonPhyLayer.HasMember("bands") || !jsonPhyLayer["bands"].IsArray() ||
+                jsonPhyLayer["bands"].GetArray().Size() == 0)
+            {
+                NS_FATAL_ERROR(
+                    "NR PHY Layer definition must have at least one band in 'bands' property.");
+            }
             const auto bands = jsonPhyLayer["bands"].GetArray();
             for (rapidjson::SizeType i = 0; i < bands.Size(); ++i)
             {
@@ -367,12 +377,60 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                         ? static_cast<uint8_t>(band["configFlags"].GetUint())
                         : (NrChannelHelper::INIT_PROPAGATION | NrChannelHelper::INIT_FADING);
 
-                if (!jsonPhyLayer.HasMember("bands") || !jsonPhyLayer["bands"].IsArray() ||
-                    jsonPhyLayer["bands"].GetArray().Size() == 0)
+                // We should know what is the typeid of the channel and pathloss model to set and
+                // check the attributes
+                auto nrChannel = CreateObject<NrChannelHelper>();
+                nrChannel->ConfigureFactories(bandConfig.channel.scenario,
+                                              bandConfig.channel.conditionModel,
+                                              bandConfig.channel.propagationModel);
+
+                // Needed to access private members of NrChannelHelper
+                class NrChannelHelperQuirk : public Object
                 {
-                    NS_FATAL_ERROR(
-                        "NR PHY Layer definition must have at least one band in 'bands' property.");
+                  public:
+                    enum class Scenario;
+                    enum class ChannelModel;
+                    enum class Condition;
+                    Scenario m_scenario;
+                    ChannelModel m_channelModel;
+                    Condition m_condition;
+                    std::set<std::tuple<ChannelModel, Scenario>> m_supportedCombinations;
+                    ObjectFactory m_pathLossModel;
+                    ObjectFactory m_spectrumModel;
+                    ObjectFactory m_channelConditionModel;
+                };
+
+                auto nrChannelQ = reinterpret_cast<NrChannelHelperQuirk*>(&(*nrChannel));
+                auto propagationLossTypeId = nrChannelQ->m_pathLossModel.GetTypeId();
+                auto phasedSpectrumTypeId = nrChannelQ->m_spectrumModel.GetTypeId();
+                auto channelConditionTypeId = nrChannelQ->m_channelConditionModel.GetTypeId();
+
+                if (band.HasMember("channelConditionAttributes") &&
+                    band["channelConditionAttributes"].IsArray())
+                {
+                    const auto channelConditionAttributes = ModelConfigurationHelper::GetAttributes(
+                        channelConditionTypeId,
+                        band["channelConditionAttributes"].GetArray());
+                    bandConfig.channelConditionAttributes = channelConditionAttributes;
                 }
+
+                if (band.HasMember("pathlossAttributes") && band["pathlossAttributes"].IsArray())
+                {
+                    const auto pathlossAttributes = ModelConfigurationHelper::GetAttributes(
+                        propagationLossTypeId,
+                        band["pathlossAttributes"].GetArray());
+                    bandConfig.pathlossAttributes = pathlossAttributes;
+                }
+
+                if (band.HasMember("phasedSpectrumAttributes") &&
+                    band["phasedSpectrumAttributes"].IsArray())
+                {
+                    const auto phasedSpectrumAttributes = ModelConfigurationHelper::GetAttributes(
+                        phasedSpectrumTypeId,
+                        band["phasedSpectrumAttributes"].GetArray());
+                    bandConfig.phasedSpectrumAttributes = phasedSpectrumAttributes;
+                }
+
                 for (rapidjson::SizeType j = 0; j < band["frequencyBands"].GetArray().Size(); ++j)
                 {
                     const auto& freqBand = band["frequencyBands"].GetArray()[j];

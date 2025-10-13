@@ -63,8 +63,7 @@ NrPhySimulationHelper::NrPhySimulationHelper(const size_t stackId)
           BooleanValue(CONFIGURATOR->GetLogOnFile()),
           "X2LinkPcapPrefix",
           StringValue(NrPhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))},
-      m_ideal_beam{CreateObject<IdealBeamformingHelper>()},
-      m_nr_channel{CreateObject<NrChannelHelper>()}
+      m_ideal_beam{CreateObject<IdealBeamformingHelper>()}
 {
     m_nr->SetEpcHelper(m_nr_epc);
     m_nr->SetBeamformingHelper(m_ideal_beam);
@@ -90,12 +89,6 @@ Ptr<IdealBeamformingHelper>
 NrPhySimulationHelper::GetIdealBeamformingHelper()
 {
     return m_ideal_beam;
-}
-
-Ptr<NrChannelHelper>
-NrPhySimulationHelper::GetNrChannelHelper()
-{
-    return m_nr_channel;
 }
 
 void
@@ -129,11 +122,15 @@ NrPhySimulationHelper::CreateOperationBand(
     const std::string& bandCondition,
     const std::string& bandModel,
     bool contiguousCc,
+    std::vector<ModelConfiguration::Attribute> channelAttributes,
+    std::vector<ModelConfiguration::Attribute> pathlossAttributes,
+    std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
     uint8_t channelConfigFlags)
 {
     CcBwpCreator ccBwpCreator;
     OperationBandInfo res;
-    m_nr_channel->ConfigureFactories(bandScenario, bandCondition, bandModel);
+    auto nrChannel = CreateObject<NrChannelHelper>();
+    nrChannel->ConfigureFactories(bandScenario, bandCondition, bandModel);
     if (contiguousCc)
     {
         NS_ASSERT_MSG(bandConf.size() == 1,
@@ -147,7 +144,20 @@ NrPhySimulationHelper::CreateOperationBand(
             "When using non-contiguous CC, at least one band configuration must be provided");
         res = ccBwpCreator.CreateOperationBandNonContiguousCc(bandConf);
     }
-    m_nr_channel->AssignChannelsToBands({res}, channelConfigFlags);
+    for (const auto& attr : channelAttributes)
+    {
+        nrChannel->SetChannelConditionModelAttribute(attr.name, *attr.value);
+    }
+    for (const auto& attr : pathlossAttributes)
+    {
+        nrChannel->SetPathlossAttribute(attr.name, *attr.value);
+    }
+    for (const auto& attr : phasedSpectrumAttributes)
+    {
+        nrChannel->SetPhasedArraySpectrumPropagationLossModelAttribute(attr.name, *attr.value);
+    }
+
+    nrChannel->AssignChannelsToBands({res}, channelConfigFlags);
     m_bands.push_back(std::move(res));
     return res;
 }

@@ -63,10 +63,6 @@ class NrPhySimulationHelper : public Object
      * \return The Ideal Beamforming Helper used to configure Beamforming.
      */
     Ptr<IdealBeamformingHelper> GetIdealBeamformingHelper();
-    /**
-     * \return The NR Channel Helper used to configure the channel.
-     */
-    Ptr<NrChannelHelper> GetNrChannelHelper();
 
     /**
      * Set the beamforming method to be used in the simulation.
@@ -95,6 +91,9 @@ class NrPhySimulationHelper : public Object
         const std::string& bandCondition,
         const std::string& bandModel,
         bool contiguousCc,
+        std::vector<ModelConfiguration::Attribute> channelAttributes,
+        std::vector<ModelConfiguration::Attribute> pathlossAttributes,
+        std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
         uint8_t channelConfigFlags = NrChannelHelper::INIT_PROPAGATION |
                                      NrChannelHelper::INIT_FADING);
 
@@ -128,7 +127,6 @@ class NrPhySimulationHelper : public Object
     Ptr<NrHelper> m_nr;
     Ptr<NrPointToPointEpcHelper> m_nr_epc;
     Ptr<IdealBeamformingHelper> m_ideal_beam;
-    Ptr<NrChannelHelper> m_nr_channel;
     std::vector<OperationBandInfo> m_bands;
 };
 

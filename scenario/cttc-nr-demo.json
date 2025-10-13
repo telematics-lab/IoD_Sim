@@ -27,6 +27,18 @@
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
           "contiguousCc": true,
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
           "frequencyBands": [
             {
               "centralFrequency": 28e9,
@@ -40,6 +52,18 @@
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
           "contiguousCc": true,
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
           "frequencyBands": [
             {
               "centralFrequency": 28.2e9,
@@ -47,18 +71,6 @@
               "numComponentCarriers": 1
             }
           ]
-        }
-      ],
-      "channelConditionAttributes": [
-        {
-          "name": "UpdatePeriod",
-          "value": "0ms"
-        }
-      ],
-      "pathlossAttributes": [
-        {
-          "name": "ShadowingEnabled",
-          "value": false
         }
       ],
       /*"epcAttributes": [ // NOT WORKS ://
@@ -97,26 +109,30 @@
           }
         ]
       },
-      "gnbBwpManagerAttribute": [
-        {
-          "name": "NGBR_LOW_LAT_EMBB",
-          "value": 0
-        },
-        {
-          "name": "GBR_CONV_VOICE",
-          "value": 1
-        }
-      ],
-      "ueBwpManagerAttribute": [
-        {
-          "name": "NGBR_LOW_LAT_EMBB",
-          "value": 0
-        },
-        {
-          "name": "GBR_CONV_VOICE",
-          "value": 1
-        }
-      ],
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 1
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 1
+          }
+        ]
+      },
       "uePhyAttributes": [
         {
           "name": "TxPower",
