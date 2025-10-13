@@ -91,6 +91,7 @@
 #include <ns3/zsp-list.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <map>
 #include <vector>
 
