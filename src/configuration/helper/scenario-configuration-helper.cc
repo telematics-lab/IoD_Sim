@@ -32,6 +32,7 @@
 #include <chrono>
 #include <iomanip> /* put_time */
 #include <iostream>
+#include <unistd.h>
 
 #if defined(__clang__)
 _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
@@ -62,7 +63,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         dateTime << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d.%H-%M-%S");
 
         m_dateTime = dateTime.str();
-        m_currentPath = std::filesystem::current_path();
+        char* cwd = getcwd(nullptr, 0);
+        m_currentPath = std::string(cwd);
+        free(cwd);
 
         InitializeConfiguration(argc, argv);
         InitializeLogging(GetLogOnFile());
@@ -156,7 +159,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         if (m_staticConfig.empty())
         {
             if (!m_config.HasMember("staticNs3Config"))
+            {
                 return {};
+            }
 
             NS_ASSERT_MSG(m_config["staticNs3Config"].IsArray(),
                           "'staticNs3Config' property must be an array.");
@@ -239,7 +244,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     ScenarioConfigurationHelper::GetNetworkLayers() const
     {
         if (!m_config.HasMember("networkLayer"))
+        {
             return {};
+        }
 
         NS_ASSERT_MSG(m_config["networkLayer"].IsArray(),
                       "'networkLayer' property must be an array.");
@@ -260,7 +267,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     {
         const char* entityKeyCStr = entityKey.c_str();
         if (!m_config.HasMember(entityKeyCStr))
+        {
             return {};
+        }
 
         NS_ASSERT_MSG(m_config[entityKeyCStr].IsArray(),
                       "JSON property '" << entityKey << "' must be an array.");
@@ -284,7 +293,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         std::vector<Ptr<RemoteConfiguration>> remoteConf;
 
         if (!m_config.HasMember("remotes"))
+        {
             return remoteConf;
+        }
 
         NS_ASSERT_MSG(m_config["remotes"].IsArray(), "JSON property 'remotes' must be an array.");
 
@@ -321,7 +332,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     std::size_t ScenarioConfigurationHelper::GetN(const char* ek) const
     {
         if (!m_config.HasMember(ek))
+        {
             return 0;
+        }
 
         NS_ASSERT_MSG(m_config[ek].IsArray(),
                       "'" << ek
@@ -334,7 +347,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     {
         // optional field
         if (!m_config.HasMember("nodes"))
+        {
             return 0;
+        }
 
         NS_ASSERT_MSG(m_config["nodes"].IsArray(),
                       "Expected \"nodes\" property to be an array of objects.");
@@ -409,7 +424,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     const uint32_t ScenarioConfigurationHelper::GetDronesN() const
     {
         if (!m_config.HasMember("drones"))
+        {
             return 0;
+        }
 
         NS_ASSERT_MSG(m_config["drones"].IsArray(),
                       "'drones' property in the configuration file must be an array of objects.");
@@ -594,9 +611,13 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         const auto drone = drones[i].GetObject();
 
         if (drone.HasMember("applicationStartTime") && drone["applicationStartTime"].IsDouble())
+        {
             return drone["applicationStartTime"].GetDouble();
+        }
         else
+        {
             return 0.0;
+        }
     }
 
     const double ScenarioConfigurationHelper::GetDroneApplicationStopTime(uint32_t i) const
@@ -605,15 +626,21 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         const auto drone = drones[i].GetObject();
 
         if (drone.HasMember("applicationStopTime") && drone["applicationStopTime"].IsDouble())
+        {
             return drone["applicationStopTime"].GetDouble();
+        }
         else
+        {
             return GetDuration();
+        }
     }
 
     const uint32_t ScenarioConfigurationHelper::GetZspsN() const
     {
         if (!m_config.HasMember("ZSPs"))
+        {
             return 0;
+        }
 
         NS_ASSERT_MSG(m_config["ZSPs"].IsArray(),
                       "'ZSPs' property in the configuration file must be an array of objects.");
@@ -653,9 +680,13 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         const auto zsp = zsps[i].GetObject();
 
         if (zsp.HasMember("applicationStartTime") && zsp["applicationStartTime"].IsDouble())
+        {
             return zsp["applicationStartTime"].GetDouble();
+        }
         else
+        {
             return 0.0;
+        }
     }
 
     const double ScenarioConfigurationHelper::GetZspApplicationStopTime(uint32_t i) const
@@ -666,9 +697,13 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         const auto zsp = zsps[i].GetObject();
 
         if (zsp.HasMember("applicationStopTime") && zsp["applicationStopTime"].IsDouble())
+        {
             return zsp["applicationStopTime"].GetDouble();
+        }
         else
+        {
             return GetDuration();
+        }
     }
 
     const uint32_t ScenarioConfigurationHelper::GetEnbsN() const
@@ -847,7 +882,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     const uint32_t ScenarioConfigurationHelper::GetRemotesN() const
     {
         if (!m_config.HasMember("remotes"))
+        {
             return 0;
+        }
 
         NS_ASSERT_MSG(m_config["remotes"].IsArray(), "JSON property 'remotes' must be an array.");
 
@@ -951,7 +988,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         NS_LOG_FUNCTION_NOARGS();
 
         if (!m_config.HasMember("world"))
+        {
             return {};
+        }
 
         std::vector<Ptr<Building>> buildings;
 
@@ -959,7 +998,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
                       "'world' defined in the JSON configuration must be an object.");
 
         if (!m_config["world"].HasMember("buildings"))
+        {
             return {};
+        }
 
         NS_ASSERT_MSG(m_config["world"]["buildings"].IsArray(),
                       "'buildings' needs to be an array of objects, check the configuration file.");
@@ -1373,7 +1414,9 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         std::vector<DoubleVector> final_regions;
 
         if (!m_config.HasMember("world"))
+        {
             return final_regions;
+        }
 
         const auto world = m_config["world"].GetObject();
         if (world.HasMember("regionsOfInterest"))
