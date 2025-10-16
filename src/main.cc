@@ -564,16 +564,20 @@ Scenario::ConfigurePhy()
         {
             auto nrSim = CreateObject<NrPhySimulationHelper>(phyId);
             auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConf);
+
+            // Set Nr Helpers
             for (auto& attr : nrConf->GetAttributes())
             {
                 nrSim->GetNrHelper()->SetAttribute(attr.name, *attr.value);
             }
 
-            for (auto& attr : nrConf->GetEpcAttributes())
-            {
-                nrSim->GetNrEpcHelper()->SetAttribute(attr.name, *attr.value);
-            }
+            nrSim->SetEpcHelper(nrConf->GetEpcHelperType(), nrConf->GetEpcAttributes());
+            nrSim->SetBeamformingHelper(nrConf->GetBeamformingHelperType(),
+                                        nrConf->GetBeamformingAttributes());
+            nrSim->SetBeamformingMethod(nrConf->GetBeamformingMethod(),
+                                        nrConf->GetBeamformingAlgorithmAttributes());
 
+            // Setup configs on helpers
             nrSim->GetNrHelper()->SetUeBwpManagerAlgorithmTypeId(nrConf->GetUeBwpManagerType());
             for (auto& attr : nrConf->GetUeBwpManagerAttributes())
             {
@@ -607,9 +611,6 @@ Scenario::ConfigurePhy()
                                            bandConf.phasedSpectrumAttributes,
                                            bandConf.channel.configFlags);
             }
-
-            nrSim->SetBeamformingMethod(nrConf->GetBeamformingMethod(),
-                                        nrConf->GetBeamformingAttributes());
 
             nrSim->SetScheduler(nrConf->GetSchedulerType());
 

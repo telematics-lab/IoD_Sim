@@ -18,12 +18,12 @@
 #ifndef NR_PHY_SIMULATION_HELPER_H
 #define NR_PHY_SIMULATION_HELPER_H
 
+#include <ns3/beamforming-helper-base.h>
 #include <ns3/cc-bwp-helper.h>
-#include <ns3/ideal-beamforming-helper.h>
 #include <ns3/model-configuration.h>
 #include <ns3/nr-channel-helper.h>
+#include <ns3/nr-epc-helper.h>
 #include <ns3/nr-helper.h>
-#include <ns3/nr-point-to-point-epc-helper.h>
 #include <ns3/object.h>
 #include <ns3/type-id.h>
 
@@ -58,11 +58,11 @@ class NrPhySimulationHelper : public Object
     /**
      * \return The NR EPC PHY Helper used to configure this layer.
      */
-    Ptr<NrPointToPointEpcHelper> GetNrEpcHelper();
+    Ptr<NrEpcHelper> GetNrEpcHelper();
     /**
-     * \return The Ideal Beamforming Helper used to configure Beamforming.
+     * \return The Beamforming Helper used to configure Beamforming.
      */
-    Ptr<IdealBeamformingHelper> GetIdealBeamformingHelper();
+    Ptr<BeamformingHelperBase> GetBeamformingHelper();
 
     /**
      * Set the beamforming method to be used in the simulation.
@@ -123,11 +123,15 @@ class NrPhySimulationHelper : public Object
     std::pair<NetDeviceContainer, NetDeviceContainer> InstallDevices(NodeContainer& gnbNode,
                                                                      NodeContainer& ueNodes);
 
+    void SetEpcHelper(TypeId epc, std::vector<ModelConfiguration::Attribute> attributes);
+    void SetBeamformingHelper(TypeId beam, std::vector<ModelConfiguration::Attribute> attributes);
+
   private:
     Ptr<NrHelper> m_nr;
-    Ptr<NrPointToPointEpcHelper> m_nr_epc;
-    Ptr<IdealBeamformingHelper> m_ideal_beam;
+    Ptr<NrEpcHelper> m_nr_epc;
+    Ptr<BeamformingHelperBase> m_beamHelper;
     std::vector<OperationBandInfo> m_bands;
+    size_t m_stackId = 0;
 };
 
 } // namespace ns3

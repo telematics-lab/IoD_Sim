@@ -73,14 +73,19 @@
           ]
         }
       ],
-      /*"epcAttributes": [ // NOT WORKS ://
-        {
-          "name": "S1uLinkDelay",
-          "value": "0ms"
-        }
-      ],*/
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
       "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
         "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
         "attributes": []
       },
       "ueAntenna": {

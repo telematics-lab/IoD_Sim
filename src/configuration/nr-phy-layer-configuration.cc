@@ -155,6 +155,17 @@ NrPhyLayerConfiguration::SetBeamformingAttributes(
     m_beamformingAttributes = attributes;
 }
 
+/**
+ * Set beamforming method attributes
+ * \param attributes The list of attributes that configures the beamforming method.
+ */
+void
+NrPhyLayerConfiguration::SetBeamformingAlgorithmAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_beamformingAlgorithmAttributes = attributes;
+}
+
 std::vector<ModelConfiguration::Attribute>
 NrPhyLayerConfiguration::GetEpcAttributes() const
 {
@@ -216,6 +227,36 @@ TypeId
 NrPhyLayerConfiguration::GetUeBwpManagerType() const
 {
     return m_ueBwpManagerType;
+}
+
+void
+NrPhyLayerConfiguration::SetEpcHelper(const TypeId& epcHelperType)
+{
+    m_epcHelperType = epcHelperType;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetEpcHelperType() const
+{
+    return m_epcHelperType;
+}
+
+void
+NrPhyLayerConfiguration::SetBeamformingHelper(const TypeId& beamformingHelperType)
+{
+    m_beamformingHelperType = beamformingHelperType;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetBeamformingHelperType() const
+{
+    return m_beamformingHelperType;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetBeamformingAlgorithmAttributes() const
+{
+    return m_beamformingAlgorithmAttributes;
 }
 
 } // namespace ns3

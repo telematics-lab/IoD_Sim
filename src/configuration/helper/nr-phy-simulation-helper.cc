@@ -53,20 +53,45 @@ class NrPhySimulationHelperPriv
 };
 
 NrPhySimulationHelper::NrPhySimulationHelper(const size_t stackId)
-    : m_nr{CreateObject<NrHelper>()},
-      m_nr_epc{CreateObjectWithAttributes<NrPointToPointEpcHelper>(
-          "S1uLinkEnablePcap",
-          BooleanValue(CONFIGURATOR->GetLogOnFile()),
-          "S1uLinkPcapPrefix",
-          StringValue(NrPhySimulationHelperPriv::GetS1uLinkPcapPrefix(stackId)),
-          "X2LinkEnablePcap",
-          BooleanValue(CONFIGURATOR->GetLogOnFile()),
-          "X2LinkPcapPrefix",
-          StringValue(NrPhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))},
-      m_ideal_beam{CreateObject<IdealBeamformingHelper>()}
+    : m_nr{CreateObject<NrHelper>()}
 {
+    m_stackId = stackId;
+}
+
+void
+NrPhySimulationHelper::SetEpcHelper(TypeId epc,
+                                    std::vector<ModelConfiguration::Attribute> attributes)
+{
+    ObjectFactory factory;
+    factory.SetTypeId(epc);
+    factory.Set("S1uLinkEnablePcap", BooleanValue(CONFIGURATOR->GetLogOnFile()));
+    factory.Set("S1uLinkPcapPrefix",
+                StringValue(NrPhySimulationHelperPriv::GetS1uLinkPcapPrefix(m_stackId)));
+    factory.Set("X2LinkEnablePcap", BooleanValue(CONFIGURATOR->GetLogOnFile()));
+    factory.Set("X2LinkPcapPrefix",
+                StringValue(NrPhySimulationHelperPriv::GetX2LinkPcapPrefix(m_stackId)));
+    m_nr_epc = factory.Create<NrEpcHelper>();
     m_nr->SetEpcHelper(m_nr_epc);
-    m_nr->SetBeamformingHelper(m_ideal_beam);
+
+    for (const auto& attr : attributes)
+    {
+        m_nr_epc->SetAttribute(attr.name, *attr.value);
+    }
+}
+
+void
+NrPhySimulationHelper::SetBeamformingHelper(TypeId beam,
+                                            std::vector<ModelConfiguration::Attribute> attributes)
+{
+    ObjectFactory factory;
+    factory.SetTypeId(beam);
+    m_beamHelper = factory.Create<BeamformingHelperBase>();
+    m_nr->SetBeamformingHelper(m_beamHelper);
+
+    for (const auto& attr : attributes)
+    {
+        m_beamHelper->SetAttribute(attr.name, *attr.value);
+    }
 }
 
 NrPhySimulationHelper::~NrPhySimulationHelper()
@@ -79,16 +104,16 @@ NrPhySimulationHelper::GetNrHelper()
     return m_nr;
 }
 
-Ptr<NrPointToPointEpcHelper>
+Ptr<NrEpcHelper>
 NrPhySimulationHelper::GetNrEpcHelper()
 {
     return m_nr_epc;
 }
 
-Ptr<IdealBeamformingHelper>
-NrPhySimulationHelper::GetIdealBeamformingHelper()
+Ptr<BeamformingHelperBase>
+NrPhySimulationHelper::GetBeamformingHelper()
 {
-    return m_ideal_beam;
+    return m_beamHelper;
 }
 
 void
@@ -102,10 +127,10 @@ NrPhySimulationHelper::SetBeamformingMethod(
     const TypeId& beamformingMethod,
     const std::vector<ModelConfiguration::Attribute>& attributes)
 {
-    m_ideal_beam->SetBeamformingMethod(beamformingMethod);
+    m_beamHelper->SetBeamformingMethod(beamformingMethod);
     for (size_t i = 0; i < attributes.size(); i++)
     {
-        m_ideal_beam->SetBeamformingAlgorithmAttribute(attributes[i].name, *attributes[i].value);
+        m_beamHelper->SetBeamformingAlgorithmAttribute(attributes[i].name, *attributes[i].value);
     }
 }
 

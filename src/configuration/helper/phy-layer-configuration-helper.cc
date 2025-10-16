@@ -20,11 +20,13 @@
 #include "model-configuration-helper.h"
 
 #include <ns3/assert.h>
+#include <ns3/beamforming-helper-base.h>
 #include <ns3/double.h>
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/none-phy-layer-configuration.h>
 #include <ns3/nr-channel-helper.h>
+#include <ns3/nr-epc-helper.h>
 #include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/string.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
@@ -179,6 +181,18 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
         if (jsonPhyLayer.HasMember("beamforming") && jsonPhyLayer["beamforming"].IsObject())
         {
             const auto& beamforming = jsonPhyLayer["beamforming"];
+            if (beamforming.HasMember("helper") && beamforming["helper"].IsString())
+            {
+                auto helperType = TypeId::LookupByName(beamforming["helper"].GetString());
+                if (!helperType.IsChildOf(BeamformingHelperBase::GetTypeId()))
+                {
+                    NS_FATAL_ERROR("Beamforming helper "
+                                   << beamforming["helper"].GetString()
+                                   << " is not a valid BeamformingHelperBase");
+                }
+                nrConfig->SetBeamformingHelper(helperType);
+            }
+
             if (beamforming.HasMember("method") && beamforming["method"].IsString())
             {
                 nrConfig->SetBeamformingMethod(
@@ -192,14 +206,45 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             if (beamforming.HasMember("attributes") && beamforming["attributes"].IsArray())
             {
                 const auto bfAttributes =
-                    ModelConfigurationHelper::GetAttributes(nrConfig->GetBeamformingMethod(),
+                    ModelConfigurationHelper::GetAttributes(nrConfig->GetBeamformingHelperType(),
                                                             beamforming["attributes"].GetArray());
                 nrConfig->SetBeamformingAttributes(bfAttributes);
+            }
+
+            if (beamforming.HasMember("algorithmAttributes") &&
+                beamforming["algorithmAttributes"].IsArray())
+            {
+                const auto bfMethodAttributes = ModelConfigurationHelper::GetAttributes(
+                    nrConfig->GetBeamformingMethod(),
+                    beamforming["algorithmAttributes"].GetArray());
+                nrConfig->SetBeamformingAlgorithmAttributes(bfMethodAttributes);
             }
         }
         else
         {
             nrConfig->SetBeamformingMethod(TypeId::LookupByName("ns3::DirectPathBeamforming"));
+        }
+
+        if (jsonPhyLayer.HasMember("epc") && jsonPhyLayer["epc"].IsObject())
+        {
+            const auto& epc = jsonPhyLayer["epc"];
+            if (epc.HasMember("helper") && epc["helper"].IsString())
+            {
+                auto helperType = TypeId::LookupByName(epc["helper"].GetString());
+                if (!helperType.IsChildOf(NrEpcHelper::GetTypeId()))
+                {
+                    NS_FATAL_ERROR("EPC helper " << epc["helper"].GetString()
+                                                 << " is not a valid NrEpcHelper");
+                }
+                nrConfig->SetEpcHelper(helperType);
+            }
+            if (epc.HasMember("attributes") && epc["attributes"].IsArray())
+            {
+                const auto epcAttributes = ModelConfigurationHelper::GetAttributes(
+                    nrConfig->GetEpcHelperType(),
+                    jsonPhyLayer["epcAttributes"].GetArray());
+                nrConfig->SetEpcAttributes(epcAttributes);
+            }
         }
 
         // Parse scheduler configuration
@@ -210,14 +255,6 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             {
                 nrConfig->SetScheduler(TypeId::LookupByName(scheduler["type"].GetString()));
             }
-        }
-
-        if (jsonPhyLayer.HasMember("epcAttributes") && jsonPhyLayer["epcAttributes"].IsArray())
-        {
-            const auto epcAttributes =
-                ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrEpcHelper"),
-                                                        jsonPhyLayer["epcAttributes"].GetArray());
-            nrConfig->SetEpcAttributes(epcAttributes);
         }
 
         if (jsonPhyLayer.HasMember("gnbBwpManager") && jsonPhyLayer["gnbBwpManager"].IsObject())
@@ -377,8 +414,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                         ? static_cast<uint8_t>(band["configFlags"].GetUint())
                         : (NrChannelHelper::INIT_PROPAGATION | NrChannelHelper::INIT_FADING);
 
-                // We should know what is the typeid of the channel and pathloss model to set and
-                // check the attributes
+                // We should know what is the typeid of the channel and pathloss model to set
+                // and check the attributes
                 auto nrChannel = CreateObject<NrChannelHelper>();
                 nrChannel->ConfigureFactories(bandConfig.channel.scenario,
                                               bandConfig.channel.conditionModel,

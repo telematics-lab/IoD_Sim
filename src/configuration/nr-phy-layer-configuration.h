@@ -256,7 +256,38 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      */
     TypeId GetUeBwpManagerType() const;
 
+    /**
+     * Set EPC Helper Type
+     */
+    void SetEpcHelper(const TypeId& epcHelperType);
+    /**
+     * Get EPC Helper Type
+     */
+    TypeId GetEpcHelperType() const;
+    /**
+     * Set Beamforming Helper Type
+     */
+    void SetBeamformingHelper(const TypeId& beamformingHelperType);
+    /**
+     * Get Beamforming Helper Type
+     */
+    TypeId GetBeamformingHelperType() const;
+
+    /**
+     * Get Beamforming Method Attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetBeamformingAlgorithmAttributes() const;
+
+    /**
+     * Set Beamforming Method Attributes
+     * \param attributes The list of attributes that configures the beamforming method.
+     */
+    void SetBeamformingAlgorithmAttributes(
+        const std::vector<ModelConfiguration::Attribute>& attributes);
+
   private:
+    TypeId m_epcHelperType = TypeId::LookupByName("ns3::NrPointToPointEpcHelper");
+    TypeId m_beamformingHelperType = TypeId::LookupByName("ns3::IdealBeamformingHelper");
     TypeId m_beamformingMethod = TypeId::LookupByName("ns3::IdealBeamformingAlgorithm");
     TypeId m_schedulerType = TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR");
     std::vector<NrBandConfiguration> m_bandsConfig;
@@ -265,6 +296,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::vector<ModelConfiguration::Attribute> m_uePhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_gnbPhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_beamformingAttributes;
+    std::vector<ModelConfiguration::Attribute> m_beamformingAlgorithmAttributes;
     std::vector<ModelConfiguration::Attribute> m_epcAttributes;
     std::vector<ModelConfiguration::Attribute> m_gnbBwpManagerAttributes;
     std::vector<ModelConfiguration::Attribute> m_ueBwpManagerAttributes;
