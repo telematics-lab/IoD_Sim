@@ -119,9 +119,21 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         NS_ASSERT_MSG(m_config["resultsPath"].IsString(), "'resultsPath' must be a string.");
 
         std::stringstream path;
-
-        path << m_currentPath << "/" << m_config["resultsPath"].GetString() << "/" << GetName()
-             << "-" << m_dateTime;
+        auto resPath = m_config["resultsPath"].GetString();
+        auto resPathLen = strlen(resPath);
+        if (resPathLen > 0 && resPath[0] == '/')
+        {
+            path << resPath;
+        }
+        else
+        {
+            std::string resPathStr = std::string(resPath);
+            if (resPathLen > 1 && resPath[resPathLen - 1] == '/')
+            {
+                resPathStr.pop_back();
+            }
+            path << m_currentPath << "/" << resPathStr << "/" << GetName() << "-" << m_dateTime;
+        }
 
         SystemPath::MakeDirectories(path.str());
 

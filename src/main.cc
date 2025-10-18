@@ -93,6 +93,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <map>
+#include <sys/resource.h>
 #include <vector>
 
 namespace ns3
@@ -1177,7 +1178,6 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
         {
             for (const auto& attr : phyConf->GetAttributes())
             {
-                std::cout << "SETTING " << attr.name << " ON INT " << i << std::endl;
                 dev->GetPhy(i)->SetAttribute(attr.name, *attr.value);
             }
         }
@@ -1774,6 +1774,12 @@ Scenario::AttachAllNrUesToClosestGnb(const uint32_t netId)
 int
 main(int argc, char** argv)
 {
+    struct rlimit file_limits;
+    file_limits.rlim_cur = 65536;
+    file_limits.rlim_max = 65536;
+
+    setrlimit(RLIMIT_NOFILE, &file_limits);
+
     ns3::Scenario s(argc, argv);
     s(); // run the scenario as soon as it is ready
 

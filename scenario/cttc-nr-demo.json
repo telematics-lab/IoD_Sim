@@ -162,7 +162,7 @@
     }
   ],
   "networkLayer": [
-    // This is not working, but probably should now work due to UE & gNB ips are hardcoded
+    // This is not working due to UE & gNB ips are hardcoded in epc
     {
       "type": "ipv4",
       "address": "1.0.0.0",
