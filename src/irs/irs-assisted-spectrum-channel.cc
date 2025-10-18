@@ -135,20 +135,21 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                           // underlying DynamicCasts)
     m_txSigParamsTrace(txParamsTrace);
 
-    Ptr<MobilityModel> txMobility = txParams->txPhy->GetMobility();
-    SpectrumModelUid_t txSpectrumModelUid = txParams->psd->GetSpectrumModelUid();
+    auto txMobility = txParams->txPhy->GetMobility();
+    const auto txSpectrumModelUid = txParams->psd->GetSpectrumModelUid();
     NS_LOG_LOGIC("txSpectrumModelUid " << txSpectrumModelUid);
 
-    auto txInfoIt = FindAndEventuallyAddTxSpectrumModel(txParams->psd->GetSpectrumModel());
+    const auto txInfoIt = FindAndEventuallyAddTxSpectrumModel(txParams->psd->GetSpectrumModel());
 
     NS_LOG_LOGIC("converter map for TX SpectrumModel with Uid " << txInfoIt->first);
     NS_LOG_LOGIC("converter map size: " << txInfoIt->second.m_spectrumConverterMap.size());
     NS_LOG_LOGIC(
         "converter map first element: " << txInfoIt->second.m_spectrumConverterMap.begin()->first);
 
+    std::map<SpectrumModelUid_t, Ptr<SpectrumValue>> convertedPsds{};
     for (auto& rxInfo : GetRxSpectrumModelInfoMap())
     {
-        SpectrumModelUid_t rxSpectrumModelUid = rxInfo.second.m_rxSpectrumModel->GetUid();
+        const auto rxSpectrumModelUid = rxInfo.second.m_rxSpectrumModel->GetUid();
         NS_LOG_LOGIC("rxSpectrumModelUids " << rxSpectrumModelUid);
 
         Ptr<SpectrumValue> convertedTxPowerSpectrum;
@@ -169,6 +170,8 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
             }
             convertedTxPowerSpectrum = rxConverterIt->second.Convert(txParams->psd);
         }
+        convertedPsds.emplace(rxSpectrumModelUid,
+                              convertedTxPowerSpectrum); // CHECK: it's ok to put here?
 
         // Speculative calc. section
         double K_BG, F_BG, F_BRG, Irs2TxGain, Irs2RxGain, Tx2RxGain, Rx2TxGain;
@@ -391,12 +394,15 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
 
         //
         int u = 0;
-        for (auto& rxPhy : rxInfo.second.m_rxPhys)
+        for (auto rxPhyIterator = rxInfo.second.m_rxPhys.begin();
+             rxPhyIterator != rxInfo.second.m_rxPhys.end();
+             ++rxPhyIterator)
         {
+            auto rxPhy = *rxPhyIterator;
             NS_ASSERT_MSG(rxPhy->GetRxSpectrumModel()->GetUid() == rxSpectrumModelUid,
                           "SpectrumModel change was not notified to IrsAssistedSpectrumChannel "
                           "(i.e., AddRx should be called again after model is changed)");
-
+            auto txAntennaGain{0.0};
             if (rxPhy != txParams->txPhy) // Check if TX Phy is different from RX Phy
             {
                 Ptr<NetDevice> rxNetDevice = rxPhy->GetDevice();
@@ -423,6 +429,12 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                 // Channel gain calc. section
                 if (txMobility && receiverMobility)
                 {
+                    if (rxParams->txAntenna) // CHECK: is good also here adding this check???
+                    {
+                        Angles txAngles(receiverMobility->GetPosition(), txMobility->GetPosition());
+                        txAntennaGain = rxParams->txAntenna->GetGainDb(txAngles);
+                        NS_LOG_LOGIC("txAntennaGain = " << txAntennaGain << " dB");
+                    }
                     double pathLossDb = 0.;
 
                     if (gain[u] > 0)
@@ -457,15 +469,26 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     const auto& dstNode = rxNetDevice->GetNode()->GetId();
                     Simulator::ScheduleWithContext(dstNode,
                                                    delay,
-                                                   &SpectrumPhy::StartRx,
-                                                   rxPhy,
-                                                   rxParams);
+                                                   &IrsAssistedSpectrumChannel::StartRx,
+                                                   this,
+                                                   txParams->psd,
+                                                   txAntennaGain,
+                                                   rxParams,
+                                                   *rxPhyIterator,
+                                                   convertedPsds);
                 }
                 else
                 {
-                    // the receiver is not attached to a NetDevice, so we cannot assume that it is
-                    // attached to a node
-                    Simulator::Schedule(delay, &SpectrumPhy::StartRx, rxPhy, rxParams);
+                    // the receiver is not attached to a NetDevice, so we cannot assume that it
+                    // is attached to a node
+                    Simulator::Schedule(delay,
+                                        &IrsAssistedSpectrumChannel::StartRx,
+                                        this,
+                                        txParams->psd,
+                                        txAntennaGain,
+                                        rxParams,
+                                        *rxPhyIterator,
+                                        convertedPsds);
                 }
             }
             ++u;
