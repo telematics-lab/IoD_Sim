@@ -5,11 +5,13 @@ Questo documento descrive tutte le opzioni configurabili nelle simulazioni che u
 ## Indice
 1. [Configurazione Globale](#configurazione-globale)
 2. [Configurazione del Mondo](#configurazione-del-mondo)
-3. [Layer Fisico (PHY Layer)](#layer-fisico-phy-layer)
+3. [Configurazione di NR](#configurazione-di-nr)
+  - [Configurazioni delle bande NR](#configurazioni-delle-bande-nr)
+  - [Layer MAC e di rete NR](#layer-mac-e-di-rete-nr)
+  - [Configurazione di UE e gNB in IoD-Sim con NR](#configurazione-di-ue-e-gnb-in-iod-sim-con-nr)
 4. [Veicoli sulla Terra](#veicoli-sulla-terra)
 5. [Satelliti LEO](#satelliti-leo)
-6. [Comunicazioni Remote](#comunicazioni-remote)
-7. [Registrazione Log](#registrazione-log)
+6. [Esempi di Configurazione](#esempi-di-configurazione)
 
 ---
 
@@ -78,7 +80,7 @@ In questi modelli è necessario impostare una dimensione del mondo molto ampia p
 
 ---
 
-## Layer Fisico (PHY Layer)
+## Configurazione di NR
 
 Nelle impostazioni `phyLayer` possiamo configurare un layer fisico di tipo `nr` che verrà supportato da 5g-lena e ne permette la configurazioni con le seguenti opzioni:
 
