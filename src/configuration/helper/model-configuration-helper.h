@@ -84,10 +84,10 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
             const JsonValue& jAttr,
             const TypeId::AttributeInformation& checker);
 
-      private:
         static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
                                                                         const JsonValue& jAttr);
 
+      private:
         static const std::vector<ModelConfiguration> DecodeModelAggregates(const JsonArray& jAggs);
 
         static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,

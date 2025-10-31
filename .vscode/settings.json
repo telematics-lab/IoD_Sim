@@ -111,7 +111,8 @@
         "source_location": "cpp",
         "span": "cpp",
         "stack": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "text_encoding": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "git.ignoredRepositories": [

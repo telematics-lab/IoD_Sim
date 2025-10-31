@@ -146,13 +146,13 @@ class Scenario
     void ConfigureNrGnb(Ptr<Node> entityNode,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
-                        const std::optional<ModelConfiguration> phyConf);
+                        const std::vector<ns3::NrPhyProperty> phyConf);
 
     void ConfigureNrUe(Ptr<Node> entityNode,
                        const std::vector<NrBearerConfiguration> bearers,
                        const uint32_t netId,
                        const std::optional<ModelConfiguration> antennaModel,
-                       const std::optional<ModelConfiguration> phyConf);
+                       const std::vector<ns3::NrPhyProperty> phyConf);
 
     void InstallEntityIpv4(Ptr<Node> entityNode,
                            NetDeviceContainer netDevices,
@@ -817,7 +817,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     StaticCast<NrNetdeviceConfiguration, NetdeviceConfiguration>(entityNetDev);
                 const auto role = entityNrDevConf->GetRole();
                 const auto antennaModel = entityNrDevConf->GetAntennaModel();
-                const auto phyConf = entityNrDevConf->GetPhyModel();
+                const auto phyConf = entityNrDevConf->GetPhyProperties();
 
                 switch (role)
                 {
@@ -1101,7 +1101,7 @@ void
 Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const uint32_t netId,
                          const std::optional<ModelConfiguration> antennaModel,
-                         const std::optional<ModelConfiguration> phyConf)
+                         const std::vector<ns3::NrPhyProperty> phyConf)
 {
     // !NOTICE: no checks are made for backbone/netid combination that do not represent an LTE
     // backbone!
@@ -1122,11 +1122,20 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     auto dev =
         StaticCast<NrGnbNetDevice, NetDevice>(nrPhy->InstallGnbDevices(entityNodeContainer).Get(0));
 
-    if (phyConf)
+    for (const auto& attr : phyConf)
     {
-        for (const auto& attr : phyConf->GetAttributes())
+        if (attr.bwpId.has_value())
         {
-            dev->GetPhy(0)->SetAttribute(attr.name, *attr.value);
+            nrHelper->GetGnbPhy(dev, attr.bwpId.value())
+                ->SetAttribute(attr.attribute.name, *attr.attribute.value);
+        }
+        else
+        {
+            for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
+            {
+                nrHelper->GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
+                                                          *attr.attribute.value);
+            }
         }
     }
 
@@ -1151,7 +1160,7 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::vector<NrBearerConfiguration> bearers,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
-                        const std::optional<ModelConfiguration> phyConf)
+                        const std::vector<ns3::NrPhyProperty> phyConf)
 {
     // NOTICE: no checks are made for ue/netid combination that do not represent an LTE backbone!
     static std::vector<NodeContainer> uePerStack(m_protocolStacks[PHY_LAYER].size());
@@ -1172,13 +1181,19 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
     auto dev =
         StaticCast<NrUeNetDevice, NetDevice>(nrPhy->InstallUeDevices(entityNodeContainer).Get(0));
 
-    if (phyConf)
+    for (const auto& attr : phyConf)
     {
-        for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
+        if (attr.bwpId.has_value())
         {
-            for (const auto& attr : phyConf->GetAttributes())
+            nrHelper->GetUePhy(dev, attr.bwpId.value())
+                ->SetAttribute(attr.attribute.name, *attr.attribute.value);
+        }
+        else
+        {
+            for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
             {
-                dev->GetPhy(i)->SetAttribute(attr.name, *attr.value);
+                nrHelper->GetUePhy(dev, i)->SetAttribute(attr.attribute.name,
+                                                         *attr.attribute.value);
             }
         }
     }

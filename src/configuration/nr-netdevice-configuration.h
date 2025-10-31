@@ -34,6 +34,12 @@ enum NrRole
     gNB
 };
 
+struct NrPhyProperty
+{
+    ModelConfiguration::Attribute attribute;
+    std::optional<uint32_t> bwpId;
+};
+
 /**
  * Data class to recnognize and configure an NR Network Device for an entity to be simulated.
  */
@@ -52,9 +58,9 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     NrNetdeviceConfiguration(const std::string type,
                              const std::string rawRole,
                              const std::vector<NrBearerConfiguration> bearers,
+                             const std::vector<NrPhyProperty> phyProperties,
                              const std::optional<uint32_t> networkLayerId,
-                             const std::optional<ModelConfiguration> antennaModel,
-                             const std::optional<ModelConfiguration> phyModel);
+                             const std::optional<ModelConfiguration> antennaModel);
     /** Default destructor */
     ~NrNetdeviceConfiguration();
 
@@ -66,13 +72,13 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
      * \return The bearers configuration for the Network Device.
      */
     const std::vector<NrBearerConfiguration> GetBearers() const;
-    /** \return The phy model configuration for the Network Device. */
-    const std::optional<ModelConfiguration> GetPhyModel() const;
+    /** \return The phy properties configuration for the Network Device. */
+    const std::vector<NrPhyProperty> GetPhyProperties() const;
 
   private:
     const NrRole m_role;
     const std::vector<NrBearerConfiguration> m_bearers;
-    const std::optional<ModelConfiguration> m_phyModel;
+    const std::vector<NrPhyProperty> m_phyProperties;
 };
 
 } // namespace ns3

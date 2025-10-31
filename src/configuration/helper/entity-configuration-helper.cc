@@ -196,15 +196,56 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value&
             }
 
             const auto phyTid = (role == "gNB") ? NrGnbPhy::GetTypeId() : NrUePhy::GetTypeId();
-            const std::optional<ModelConfiguration> phyModel =
-                ModelConfigurationHelper::GetOptionalCoaleshed(netdev.GetObject(), "phy", phyTid);
+
+            std::vector<NrPhyProperty> phyProperties;
+            if (netdev.HasMember("phy") && netdev["phy"].IsArray())
+            {
+                for (auto& prop : netdev["phy"].GetArray())
+                {
+                    NS_ASSERT_MSG(
+                        prop.IsObject(),
+                        "Entity NR Network Device 'phyProperties' must be an array of objects.");
+                    if (prop.HasMember("name") && prop["name"].IsString() &&
+                        prop.HasMember("value"))
+                    {
+                        NrPhyProperty phyProp;
+
+                        if (prop.HasMember("bwpId"))
+                        {
+                            if (prop["bwpId"].IsUint())
+                            {
+                                phyProp.bwpId = prop["bwpId"].GetUint();
+                            }
+                            else
+                            {
+                                NS_FATAL_ERROR("Entity NR Network Device 'phyProperties' property "
+                                               "'bwpId' must be an unsigned integer.");
+                            }
+                        }
+                        else
+                        {
+                            phyProp.bwpId = std::nullopt;
+                        }
+                        phyProp.attribute =
+                            ModelConfigurationHelper::DecodeModelAttribute(phyTid, prop);
+                        phyProperties.push_back(phyProp);
+                    }
+                    else
+                    {
+                        NS_FATAL_ERROR(
+                            "Entity NR Network Device 'phyProperties' object must have "
+                            "'bwpId' (uint), 'phyId' (uint), 'name' (string) and 'value' "
+                            "properties defined.");
+                    }
+                }
+            }
 
             confs.push_back(CreateObject<NrNetdeviceConfiguration>(type,
                                                                    role,
                                                                    bearers,
+                                                                   phyProperties,
                                                                    networkLayerId,
-                                                                   antennaModel,
-                                                                   phyModel));
+                                                                   antennaModel));
         }
         else if (type == "simple")
         {
@@ -263,9 +304,9 @@ EntityConfigurationHelper::DecodeLteBearerConfigurations(const JsonArray& jsonAr
         NS_ASSERT_MSG(bearerConf["bitrate"]["maximum"]["downlink"].IsDouble(),
                       "Entity LTE Bearer configuration 'downlink' maximum bitrate must be an "
                       "unsigned integer.");
-        NS_ASSERT_MSG(
-            bearerConf["bitrate"]["maximum"].HasMember("uplink"),
-            "Entity LTE Bearer configuration maximum bitrate must have 'uplink' property defined.");
+        NS_ASSERT_MSG(bearerConf["bitrate"]["maximum"].HasMember("uplink"),
+                      "Entity LTE Bearer configuration maximum bitrate must have 'uplink' "
+                      "property defined.");
         NS_ASSERT_MSG(bearerConf["bitrate"]["maximum"]["uplink"].IsDouble(),
                       "Entity LTE Bearer configuration 'uplink' maximum bitrate must be an "
                       "unsigned integer.");

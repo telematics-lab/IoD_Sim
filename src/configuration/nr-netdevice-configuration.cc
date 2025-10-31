@@ -38,13 +38,13 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,
     const std::vector<NrBearerConfiguration> bearers,
+    const std::vector<NrPhyProperty> phyProperties,
     const std::optional<uint32_t> networkLayerId,
-    const std::optional<ModelConfiguration> antennaModel,
-    const std::optional<ModelConfiguration> phyModel)
+    const std::optional<ModelConfiguration> antennaModel)
     : NetdeviceConfiguration{type, networkLayerId, antennaModel},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
-      m_phyModel{phyModel}
+      m_phyProperties{phyProperties}
 {
 }
 
@@ -64,10 +64,10 @@ NrNetdeviceConfiguration::GetBearers() const
     return m_bearers;
 }
 
-const std::optional<ModelConfiguration>
-NrNetdeviceConfiguration::GetPhyModel() const
+const std::vector<NrPhyProperty>
+NrNetdeviceConfiguration::GetPhyProperties() const
 {
-    return m_phyModel;
+    return m_phyProperties;
 }
 
 } // namespace ns3

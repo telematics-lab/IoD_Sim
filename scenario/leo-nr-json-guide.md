@@ -662,12 +662,23 @@ Quando andiamo a configurare i vari dispositivi di rete, è possibile configurar
       {
         "type": "NGBR_LOW_LAT_EMBB"
       }
+    ],
+    "phy": [
+      {
+        "bwpId": 0, // Optional, if not specified, this is applied to all BWPs
+        "name": "TxPower",
+        "value": 23.0
+      }
     ]
   }
 ]
 ```
 
 Come è possibile notare, è possibile specficare il tipo di bearer (flusso) che si vuole utilizzare tra quelli supportati da 5g-lena.
+
+Inoltre è possibile specificare degli attributi nel layer fisico specifici per quel netdevice NR: l'attributo è applicato ad una particolare BWP se specificato, altrimenti a tutti i BWP del dispositivo.
+
+Gli attributi supportati sono i medesimi di quelli elencati nella sezione precedente per `uePhyAttributes` e `gnbPhyAttributes`.
 
 ---
 
