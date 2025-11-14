@@ -61,6 +61,7 @@ set(source_files
   entity/remote-list.cc
   entity/zsp-list.cc
   entity/leo-sat-list.cc
+  helper/app-statistics-helper.cc
   helper/three-dimensional-rem-helper.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
@@ -177,6 +178,7 @@ set(header_files
   entity/remote-list.h
   entity/zsp-list.h
   entity/leo-sat-list.h
+  helper/app-statistics-helper.h
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.h
   irs/patch-configurator/defined-patch-configurator.h

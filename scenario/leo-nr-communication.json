@@ -10,11 +10,11 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "1s"
+      "value": "10ms"
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
-      "value": "1s"
+      "value": "10ms"
     },
     {
       "name": "ns3::NrRlcUm::MaxTxBufferSize",
@@ -34,7 +34,7 @@
       "type": "nr",
       "bands": [
         {
-          "scenario": "NTN-Suburban",
+          "scenario": "NTN-Urban",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
           "contiguousCc": true,
@@ -47,7 +47,7 @@
           "channelConditionAttributes": [
             {
               "name": "UpdatePeriod",
-              "value": "100ms"
+              "value": "10ms"
             }
           ],
           "frequencyBands": [
@@ -119,7 +119,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 180.0
+          "value": 300.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -129,7 +129,7 @@
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 180.0
+          "value": 300.0
         }
       ]
     }
@@ -642,6 +642,13 @@
     "UdpClient",
     "UdpServer",
     "NrPdcp",
-    "Scenario"
+    "Scenario",
+    "UdpEchoClientApplication",
+    "UdpEchoServerApplication",
+    "PacketSink",
+    "UdpL4Protocol",
+    "NrSpectrumPhy",
+    "NrEesmErrorModel",
+    "ThreeGppSpectrumPropagationLossModel"
   ]
 }

@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "ns3/ideal-beamforming-algorithm.h"
+#include <ns3/app-statistics-helper.h>
 #include <ns3/buildings-helper.h>
 #include <ns3/config.h>
 #include <ns3/csma-module.h>
@@ -200,6 +201,9 @@ class Scenario
     // NR gNB and UE tracking for proper attachment
     std::map<uint32_t, std::vector<NetDeviceContainer>> m_nrGnbDevices;
     std::map<uint32_t, std::vector<Ptr<NetDevice>>> m_nrUeDevices;
+
+    // Application statistics helper
+    AppStatisticsHelper m_appStatsHelper;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -263,6 +267,11 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureInternetRemotes();
     EnablePhyLteTraces();
     EnablePhyNrTraces();
+
+    // Configure application statistics helper
+    m_appStatsHelper.SetOutputPath(CONFIGURATOR->GetResultsPath() + "app-statistics.txt");
+    m_appStatsHelper.SetReportingInterval(Seconds(0.1)); // Report every 100ms
+    m_appStatsHelper.InstallAll();
 
     // Initialize LeoSat trace CSV file
     std::ostringstream leoSatTraceFilePath;
@@ -364,6 +373,10 @@ Scenario::operator()()
         ShowProgress progressStdout{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
         Simulator::Run();
+
+        // Stop UDP statistics collection
+        m_appStatsHelper.Stop();
+
         if (CONFIGURATOR->GetLogOnFile())
         {
             // Report Module needs the simulator context alive to introspect it
@@ -1738,6 +1751,9 @@ Scenario::ConfigureSimulator()
                                   CONFIGURATOR->GetCurrentDateTime(),
                                   CONFIGURATOR->GetResultsPath());
     }
+
+    // Start application statistics collection
+    m_appStatsHelper.Start();
 
     Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
 }
