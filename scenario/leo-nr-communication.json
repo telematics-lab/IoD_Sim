@@ -34,7 +34,7 @@
       "type": "nr",
       "bands": [
         {
-          "scenario": "NTN-Urban",
+          "scenario": "NTN-Rural",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
           "contiguousCc": true,
@@ -192,7 +192,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -201,6 +201,38 @@
             {
               "name": "Port",
               "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 290.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "1.0.0.2",
+                5000
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
             }
           ]
         }
@@ -250,7 +282,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -259,6 +291,38 @@
             {
               "name": "Port",
               "value": 1235
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 290.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "1.0.0.2",
+                5000
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
             }
           ]
         }
@@ -308,7 +372,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -317,6 +381,38 @@
             {
               "name": "Port",
               "value": 1236
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 290.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "1.0.0.2",
+                5000
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
             }
           ]
         }
@@ -544,7 +640,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -576,7 +672,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -608,7 +704,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 10.0
+              "value": 0.5
             },
             {
               "name": "StopTime",
@@ -632,6 +728,23 @@
             {
               "name": "Interval",
               "value": 0.01
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 290.0
+            },
+            {
+              "name": "Port",
+              "value": 5000
             }
           ]
         }
