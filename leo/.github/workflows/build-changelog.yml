@@ -1,0 +1,56 @@
+name: Build and Release Report PDF
+
+on:
+  push:
+    branches:
+      - main  # Change if your default branch is different
+    paths:
+      - 'doc/**'  # Only trigger when files in the doc folder change
+
+permissions:
+  contents: write  # This is needed to create and update releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build report PDF using Docker
+        run: |
+          chmod +x doc/run.sh
+          ./doc/run.sh
+
+      - name: Check if PDF exists
+        run: |
+          if [ ! -f doc/build/changelog.pdf ]; then
+            echo "PDF file not found! Build failed."
+            exit 1
+          fi
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
+
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Get latest release ID (if exists)
+        id: get_release
+        run: |
+          RELEASE_ID=$(gh release view latest --json id -q '.id' || echo "")
+          echo "release_id=$RELEASE_ID" >> $GITHUB_ENV
+
+      - name: Create new release if none exists
+        if: env.release_id == ''
+        run: |
+          gh release create latest doc/build/changelog.pdf --title "Latest Report PDF" --notes "Automated release with the latest compiled report PDF."
+
+      - name: Update existing release
+        if: env.release_id != ''
+        run: |
+          gh release upload latest doc/build/changelog.pdf --clobber
+          gh release edit latest --notes "Updated PDF from commit ${{ github.sha }}"

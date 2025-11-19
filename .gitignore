@@ -9,6 +9,17 @@ ns3/src/iodsim
 results/*
 !results/.placeholder
 
+# Ignore leo simulator outputs
+leo/*.swp
+leo/*.swo
+leo/.vscode
+leo/examples/trace_view/grafico_3d_gpu.html
+leo/examples/trace_view/punti_3d.csv
+leo/doc/build/**
+leo/doc/build
+leo/doc/svg-inkscape/**
+leo/doc/svg-inkscape/
+
 # Ignore Python cache
 __pycache__
 

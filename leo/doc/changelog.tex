@@ -1,0 +1,679 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{url}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage{xurl}
+
+% Configurazioni per evitare l'intreccio di figure e tabelle
+\usepackage{placeins} % Fornisce il comando \FloatBarrier
+\usepackage{afterpage} % Per controlli di posizionamento avanzati
+
+% Impostazioni per il posizionamento dei float
+\renewcommand{\topfraction}{0.9}       % max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}    % max fraction of floats at bottom
+\setcounter{topnumber}{2}              % max floats at top
+\setcounter{bottomnumber}{1}           % max floats at bottom
+\setcounter{totalnumber}{3}            % max floats per page
+\renewcommand{\textfraction}{0.07}     % min text on page
+\renewcommand{\floatpagefraction}{0.7} % min for a float page
+
+% Evita che le figure si spostino oltre la sezione
+\let\oldsection\section
+\renewcommand\section{\FloatBarrier\oldsection}
+\let\oldsubsection\subsection  
+\renewcommand\subsection{\FloatBarrier\oldsubsection}
+\lstset{
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    frame=single,
+    framerule=0.8pt,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+% Definizione del comando pandocbounded per le immagini
+\providecommand{\pandocbounded}[1]{#1}
+
+% Definizione del comando tightlist (usato da Pandoc)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\title{Aggiornamenti sul progetto per la simulazione di reti veicolari con comunicazione satellitare tramite 5G}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Adattamento del modulo ns-3 leo}\label{adattamento-del-modulo-ns-3-leo}
+
+Come base per l'implementazione del sistema satellitare è stato utilizzato il progetto ns-3-leo~\cite{ns3leo}\cite{ns3leoarticle}, che tuttavia presenta le seguenti limitazioni:
+
+\begin{itemize}
+\tightlist
+\item
+  Risulta obsoleto e non compatibile con le ultime versioni di ns-3
+\item
+  Manca di alcune funzionalità (movimento di oggetti terrestri a velocità costante)
+\end{itemize}
+
+Il lavoro svolto ha quindi comportato:
+
+\begin{itemize}
+\item
+  Migrazione del sistema di build da wscript a CMake per garantire la compatibilità con le versioni più recenti di ns-3
+\item
+  Risoluzione di numerosi bug e problemi di compilazione che impedivano l'utilizzo del modulo con clang (compilatore più rigoroso riguardo alla sintassi C++ e al controllo dei tipi, ad esempio l'uso di 0 o NULL invece di nullptr, incongruenze di tipi)
+\item
+  Aggiornamento delle funzioni interne per garantire la compatibilità con i moduli più recenti
+\item
+  Integrazione di ns-3-leo con il modulo nr (5G-LENA~\cite{5glena}) sull'ultima versione di ns-3
+\item
+  Implementazione di un nuovo mobility model che consente di modellare il movimento a velocità costante di un oggetto da una posizione specifica (longitudine, latitudine, altezza) verso una direzione definita (specificando l'azimut) sulla superficie terrestre, idealizzando la forma del globo come una sfera semplice
+\end{itemize}
+
+Il nuovo mobility model è stato sviluppato utilizzando come riferimento il ground model già presente per le stazioni fisse~\cite{ns3leo_groundhelper} e, principalmente, il mobility model del satellite~\cite{ns3leo_mobility}. Sebbene quest'ultimo presentasse logiche simili, il suo modello di movimento era strettamente legato alle orbite, rendendo necessaria una riscrittura sostanziale delle funzioni e delle formule che modellano il movimento.
+
+\begin{itemize}
+\tightlist
+\item
+  Implementazione di un esempio per il tracciamento dei movimenti del nodo veicolo sulla superficie terrestre a velocità costante e di un satellite, con output delle coordinate istantanee
+\end{itemize}
+
+Il mobility model è stato sviluppato partendo dall'esempio di tracciamento orbitale circolare~\cite{ns3leo_example} e successivamente adattato allo scenario richiesto.
+
+\begin{itemize}
+\tightlist
+\item
+  Sviluppo di uno script Python per la visualizzazione tridimensionale dei punti elaborati dall'esempio precedente, utilizzando matplotlib per la rappresentazione grafica dei risultati (come mostrato in Figura~\ref{fig:car_move_model})
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/move-model.jpg}
+    \caption{Esempi di grafici del modello di movimento}\label{fig:car_move_model}
+\end{figure}
+
+\begin{itemize}
+\tightlist
+\item
+  Fork del progetto epidemic-routing per garantire la compilabilità di tutti gli esempi già presenti in ns-3-leo, adottando anche in questo modulo il sistema di build CMake
+\end{itemize}
+
+\textbf{Note tecniche:}
+
+Il modulo ns-3-leo utilizza orbite sferiche semplificate che non tengono conto di fattori aggiuntivi e non sono ellittiche. Il sistema costruisce un pianeta sferico al centro delle coordinate e posiziona i satelliti su diverse orbite (i cui piani orbitali richiederebbero ulteriori chiarimenti), distribuendoli equidistantemente e facendoli muovere a una velocità calcolata in base all'altitudine su orbite circolari nella direzione prevista.
+
+In alternativa, il progetto Hypatia~\cite{hypatia} utilizza ns3-satellite~\cite{ns3satellite} come modulo per il movimento satellitare, implementando il modello SGP4/SDP4 (modello americano che offre previsioni più accurate). Sebbene sia possibile considerare l'adozione di questo modello in sostituzione a quello di ns-3-leo, l'approssimazione attualmente utilizzata potrebbe risultare sufficiente per i casi d'uso specifici del progetto.
+
+\textbf{Risorse utili:} Dataset satelliti Starlink~\cite{starlink_dataset}
+
+\section{Implementazione della comunicazione satellite-veicolo con 5G-LENA}\label{inizio-di-implementazione-della-comunicazione-satellite-veicolo-con-5g-lena}
+
+\begin{itemize}
+\tightlist
+\item
+  Sviluppo di un esempio in ns-3-leo basato sull'esempio CTTC 3GPP~\cite{cttc_3gpp_example} e sulla simulazione precedente per testare la comunicazione 5G-LENA~\cite{5glena} tra un satellite e un veicolo terrestre, utilizzando il mobility model precedentemente implementato.
+\item
+  Reimplementazione del visualizzatore utilizzando Plotly per il rendering 3D con accelerazione GPU, consentendo la visualizzazione dei dati di movimento di satellite e veicolo e il debugging del mobility model e della comunicazione. Il sistema offre un'interfaccia interattiva per visualizzare latitudine, longitudine e altezza di satellite e veicolo, nonché le loro posizioni nello spazio tridimensionale (Figura~\ref{fig:new_vis_trace_orbits}).
+\end{itemize}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/new_vis_trace_orbits.png}
+    \caption{Orbits tracing with plotly with interactive interface GPU accelerated}\label{fig:new_vis_trace_orbits}
+\end{figure}
+
+\begin{itemize}
+\tightlist
+\item
+  Integrazione con i modelli NTN (Non-Terrestrial Networks) di ns-3: rimodulazione dei Mobility Model per supportare le coordinate geocentriche, necessarie per l'utilizzo degli scenari NTN e per l'implementazione dei modelli di propagation loss 3GPP. L'implementazione è stata realizzata derivando il mobility model GeocentricConstantPositionMobilityModel~\cite{ns3_ntn_workshop}, poiché i controlli interni di ns-3 vengono effettuati esclusivamente su questa classe (non esistendo una classe virtuale per questi modelli), come evidenziato nel codice sorgente~\cite{ns3_channel_condition} alla riga 585. È importante notare che i metodi utilizzati per l'impostazione della posizione non sono completamente funzionali e richiederebbero l'implementazione di un MobilityHelper personalizzato che utilizzi i setter della posizione tramite coordinate geocentriche anziché topocentriche (coordinate standard).
+\item
+  Utilizzo degli esempi NTN~\cite{ns3_ntn_example} e CTTC 3GPP~\cite{cttc_3gpp_example} per la realizzazione di uno scenario con un'automobile e un satellite in comunicazione tramite 5G-LENA~\cite{5glena}, utilizzando i mobility model precedentemente creati e il propagation loss model ThreeGppPropagationLossModel in ambiente suburbano (configurabile).
+\item
+  Implementazione nel LeoOrbitNodeHelper della possibilità di specificare la precisione del modello di movimento, consentendo l'aggiornamento della posizione del nodo con frequenza personalizzabile (ad esempio ogni 50ms) invece del default di un secondo.
+\item
+  Implementazione dei metodi per il calcolo del SNR tra satellite e veicolo, basati sugli esempi precedentemente citati, utilizzando le antenne dei dispositivi e il propagation loss model 3GPP per determinare la qualità del segnale tra i nodi.
+\item
+  Integrazione nell'esempio di comunicazione NR di estesi output di debug per le condizioni di rete e lo stato della comunicazione, collegando il gNB satellitare tramite canale Point-to-Point a un nodo di rete dedicato alla risoluzione delle problematiche di configurazione di 5G-LENA~\cite{5glena}, permettendo il successo della comunicazione UDP tra satellite e veicolo. Lo scenario implementato è illustrato in Figura~\ref{fig:initial_nr_scenario_sim}.
+\item
+  Ristrutturazione della gestione del parametro ``precision'' e dello scheduling degli aggiornamenti di posizione per nodi veicolo e satellite, risolvendo bug di sincronizzazione e migliorando la stabilità del sistema, evitando scheduling di eventi non necessari.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{assets/satellite_and_car_nr_simulation.png}
+    \caption{Simulation Scenario with 1 car and 1 satellite communicating with 5g-lena}\label{fig:initial_nr_scenario_sim}
+\end{figure}
+
+\section{Report di test e i relativi risultati}\label{report-di-test-e-i-relativi-risultati}
+Si riportano i seguenti test relativi ai risultati ottenuti dall'esecuzione dell'esempio con 5g lena dal codice nel commit \href{https://github.com/domysh/leo/tree/302099845e6bb4bc3e0cd30ef0e7e7a88d0ead11}{302099845e6bb4bc3e0cd30ef0e7e7a88d0ead11} dal file elaborato da 5g-lena usando i parametri di default ma abilitando il logging (tramite --logging) dal file DlDataSinr:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Time & CellId & RNTI & BWPId & SINR(dB) \\ \hline
+        1.00314 & 1 & 1 & 0 & 7.6479 \\ \hline
+        1.00893 & 1 & 1 & 0 & 5.48247 \\ \hline
+        1.01314 & 1 & 1 & 0 & 22.2687 \\ \hline
+        1.02314 & 1 & 1 & 0 & 6.75876 \\ \hline
+        1.02893 & 1 & 1 & 0 & 9.00803 \\ \hline
+        1.03314 & 1 & 1 & 0 & 4.21954 \\ \hline
+        1.03893 & 1 & 1 & 0 & 10.1628 \\ \hline
+        1.04314 & 1 & 1 & 0 & 3.34375 \\ \hline
+        1.04893 & 1 & 1 & 0 & 18.913 \\ \hline
+        1.05314 & 1 & 1 & 0 & 16.4609 \\ \hline
+        1.05893 & 1 & 1 & 0 & 2.49132 \\ \hline
+        1.06314 & 1 & 1 & 0 & 5.24952 \\ \hline
+        1.06893 & 1 & 1 & 0 & -4.61782 \\ \hline
+        1.07393 & 1 & 1 & 0 & 1.74165 \\ \hline
+        1.07414 & 1 & 1 & 0 & 5.36954 \\ \hline
+        1.07993 & 1 & 1 & 0 & 6.60927 \\ \hline
+        1.08314 & 1 & 1 & 0 & 5.17402 \\ \hline
+        1.08893 & 1 & 1 & 0 & 10.3276 \\ \hline
+        1.09314 & 1 & 1 & 0 & 6.5821 \\ \hline
+        1.09893 & 1 & 1 & 0 & 13.1331 \\ \hline
+    \end{tabular}
+    \caption{Simulazione con parametri di default (tx gNB a 40 dB)}
+\end{table}
+
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Time & CellId & RNTI & BWPId & SINR(dB) \\ \hline
+        1.00314 & 1 & 1 & 0 & 47.6479 \\ \hline
+        1.01314 & 1 & 1 & 0 & 46.8916 \\ \hline
+        1.02314 & 1 & 1 & 0 & 46.7588 \\ \hline
+        1.03314 & 1 & 1 & 0 & 45.2061 \\ \hline
+        1.04314 & 1 & 1 & 0 & 43.3438 \\ \hline
+        1.05314 & 1 & 1 & 0 & 45.1769 \\ \hline
+        1.06314 & 1 & 1 & 0 & 45.2495 \\ \hline
+        1.07314 & 1 & 1 & 0 & 65.5475 \\ \hline
+        1.08314 & 1 & 1 & 0 & 49.5355 \\ \hline
+        1.09314 & 1 & 1 & 0 & 46.5821 \\ \hline
+    \end{tabular}
+    \caption{Simulazione con parametri di default ma con tx gNB portata a 80 dB}
+\end{table}
+
+Si può evidentemente notare che sulle prime trasmissioni probabilmente abbiamo avuto delle ritrasmissioni gestite dal protocollo 5G, date i bassi valori di SINR in alcuni casi, ma che il sistema è riuscito a stabilizzarsi e a garantire una comunicazione stabile tra satellite e veicolo.
+Mentre aumentando la potenza in trasmissione ad 80dB, i 10 pacchetti UDP non subiscono ritrasmissioni e il SINR si stabilizza su valori più alti, garantendo una comunicazione stabile e senza errori.
+
+Le latenze si mantengono sui 2ms e i pacchetti correttamente riscontrati, come verificabile nel file RxedUePhyDlDciTrace e NrDlRxRlcStats (dalla simulazione ad 80dB):
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+        time(s) & cellId & rnti & lcid & packetSize & delay(s) \\ \hline
+        1.00324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.01324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.02324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.03324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.04324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.05324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.06324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.07324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.08324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+        1.09324 & 1 & 1 & 3 & 1056 & 0.00224286 \\ \hline
+    \end{tabular}
+    \caption{NrDlRxRlcStats (txPower gNB ad 80 dB)}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|}
+    \hline
+        Time & Entity & Frame & SF & Slot & nodeId & RNTI & bwpId & Harq ID & K1 Delay \\ \hline
+        1.00307 & DL DCI Rxed & 100 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.00593 & HARQ FD Txed & 100 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.00807 & DL DCI Rxed & 100 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.01093 & HARQ FD Txed & 101 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.01307 & DL DCI Rxed & 101 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.01593 & HARQ FD Txed & 101 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.02307 & DL DCI Rxed & 102 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.02593 & HARQ FD Txed & 102 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.02807 & DL DCI Rxed & 102 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.03093 & HARQ FD Txed & 103 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.03307 & DL DCI Rxed & 103 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.03593 & HARQ FD Txed & 103 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.03807 & DL DCI Rxed & 103 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.04093 & HARQ FD Txed & 104 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.04307 & DL DCI Rxed & 104 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.04593 & HARQ FD Txed & 104 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.04807 & DL DCI Rxed & 104 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.05093 & HARQ FD Txed & 105 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.05307 & DL DCI Rxed & 105 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.05593 & HARQ FD Txed & 105 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.05807 & DL DCI Rxed & 105 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.06093 & HARQ FD Txed & 106 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.06307 & DL DCI Rxed & 106 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.06593 & HARQ FD Txed & 106 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.06807 & DL DCI Rxed & 106 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.07093 & HARQ FD Txed & 107 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.07307 & DL DCI Rxed & 107 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.07407 & DL DCI Rxed & 107 & 4 & 0 & 1 & 1 & 0 & 14 & 2 \\ \hline
+        1.07593 & HARQ FD Txed & 107 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.07693 & HARQ FD Txed & 107 & 6 & 0 & 1 & 1 & 0 & 14 & 2 \\ \hline
+        1.07907 & DL DCI Rxed & 107 & 9 & 0 & 1 & 1 & 0 & 14 & 2 \\ \hline
+        1.08193 & HARQ FD Txed & 108 & 1 & 0 & 1 & 1 & 0 & 14 & 2 \\ \hline
+        1.08307 & DL DCI Rxed & 108 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.08593 & HARQ FD Txed & 108 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.08807 & DL DCI Rxed & 108 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.09093 & HARQ FD Txed & 109 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.09307 & DL DCI Rxed & 109 & 3 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.09593 & HARQ FD Txed & 109 & 5 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.09807 & DL DCI Rxed & 109 & 8 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+        1.10093 & HARQ FD Txed & 110 & 0 & 0 & 1 & 1 & 0 & 15 & 2 \\ \hline
+    \end{tabular}
+    \caption{RxedUePhyDlDciTrace (txPower gNB ad 80 dB)}
+\end{table}
+
+\cleardoublepage
+
+Si risportano inoltre alcuni valori di pathloss calcolati nel file DlPathlossTrace su una simulazione di lunga durata:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Time(sec) & CellId & BwpId & IMSI & pathLoss(dB) \\ \hline
+        0 & 1 & 0 & 1 & -198.484 \\ \hline
+        0.005 & 1 & 0 & 1 & -196.781 \\ \hline
+        0.01 & 1 & 0 & 1 & -196.781 \\ \hline
+        2.4 & 1 & 0 & 1 & -172.074 \\ \hline
+        68.875 & 1 & 0 & 1 & -177.741 \\ \hline
+        89.27 & 1 & 0 & 1 & -180.501 \\ \hline
+        190.815 & 1 & 0 & 1 & -186.807 \\ \hline
+        214.63 & 1 & 0 & 1 & -193.27 \\ \hline
+        233.36 & 1 & 0 & 1 & -198.193 \\ \hline
+        251.04 & 1 & 0 & 1 & -270.626 \\ \hline
+        252.11 & 1 & 0 & 1 & -311.17 \\ \hline
+        253.96 & 1 & 0 & 1 & -429.763 \\ \hline
+    \end{tabular}
+    \caption{Pathloss Trace (txPower gNB ad 80 dB)}
+\end{table}
+
+\section{Approfondimenti e ulteriori integrazioni su ns-3-leo sulle orbite satellitari}\label{approfondimenti-e-ulteriori-integrazioni-su-ns-3-leo-sulle-orbite-satellitari}
+
+\subsection{Sistema di posizionamento dei satelliti e delle loro orbite}
+
+Il modulo ns-3-leo implementa un sistema di identificazione di ogni satellite e della sua orbita basato su 4 parametri:
+
+\begin{itemize}
+\tightlist
+\item
+  Altitudine (che definisce l'altezza del satellite rispetto alla superficie terrestre, in direzione del centro della terra)
+\item
+  Longitudine (che definisce la direzione verso cui verrà inclinato il piano orbitale del satellite rispetto al centro della terra: l'apogeo dell'orbita è sempre posizionato in corrispondenza della longitudine definita)
+\item
+  Inclinazione (che definisce l'inclinazione del piano orbitale rispetto al centro della terra e alla longitudine precedentemente definita)
+\item
+  Offset (che definisce la posizione sulla circonferenza dell'orbita, in gradi, in cui si trova il satellite ad inizio simulazione)
+\end{itemize}
+
+Il verso di rotazione intorno alla terra del satellite inizialmente era sempre ricalibrato, in modo da mantenere un'evoluzione circolare concorde a quella della terra, ma è stato modificato aggiungendo un nuovo parametro che consente di definire orbite retrograde, in cui il satellite ruota in senso opposto rispetto alla rotazione terrestre.
+
+La nuova funzione \textit{LeoOrbitNodeHelper::Install (300.0, 20, 90., 180.0, false);}, ad esempio posiziona un satellite a 300 km di altitudine, con inclinazione di 20 gradi, longitudine di 90 gradi e offset di 180 gradi, con rotazione normale (non retrograda, in senso anti-orario), pertanto il satellite si troverà sulla parte più `bassa' dell'orbita a -20° di inclinazione rispetto al piano equatoriale terrestre, in direzione della longitudine di 90° come mostrato in Figura~\ref{fig:sat_custom_positioning}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{assets/sat_custom_positioning.png}
+    \caption{Satellite Custom Positioning Install Function: \textit{LeoOrbitNodeHelper::Install (300.0, 20, 90., 180.0, false);}}\label{fig:sat_custom_positioning}
+\end{figure}
+
+Di default ns-3 leo tramite LeoOrbitNodeHelper posiziona i satelliti consentendo di specificare solo l'altitudine, l'inclinazione, il numero di \textit{piani} e i satelliti per \textit{piano}. (Si evidenzia come nel README originale del progetto l'ordine di questi parametri sia errato)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{assets/leo_orbit_more_planes.png}
+    \caption{\textit{LeoOrbitNodeHelper::Install (LeoOrbit(300.0, 20, 5, 1));}}\label{fig:sat_custom_positioning_more_planes}
+\end{figure}
+
+Come è possibile vedere nella Figura~\ref{fig:sat_custom_positioning_more_planes}, il sistema posiziona i satelliti in 5 piani, con inclinazione di 20 gradi, e distribuisce i satelliti equidistantemente dai -180° ai 180° di longitudine, con un offset di 0 gradi, in modo da avere i satelliti distribuiti su diverse orbite spaziati in latitudine di 360/5=72° gradi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{assets/leo_orbit_more_sats.png}
+    \caption{\textit{LeoOrbitNodeHelper::Install (LeoOrbit(300.0, 20, 1, 5));}}\label{fig:sat_custom_positioning_more_sats}
+\end{figure}
+
+Mentre modificando il parametro del numero di satelliti per piano, come in Figura~\ref{fig:sat_custom_positioning_more_sats}, il sistema posiziona 5 satelliti equidistanti su un singolo piano orbitale, con inclinazione di 20 gradi e altitudine di 300 km, con offset incrementale di 72° di offset tra i satelliti sulla stessa circonferenza orbitale.
+
+\subsection{Simulazioni con UDP: molteplici automobili e 1 satellite: caso non conforme}
+
+Duranti alcuni test nelle simulazioni con UDP, sono state posizionate 10 automobili con direzioni causali e posizioni iniziali casuali, ed un solo satellite (come mostrato in Figura~\ref{fig:multi_car_one_sat_example}, dove il nodo evidenziato è l'unico satellite), dove tuttavia risulta che tutti e 10 gli udp server abbiano ricevuto correttamente i 10 pacchetti inviati tramite il satellite a ciascuno di loro, nonostante ci siano distante elevate dal satellite stesso. Nel seguente esempio si sono registrate nei log di 5g-lena lateze tra i 3 e i 6 ms, con SINR dai 41 ai 49 per i 100 pacchetti scambiati.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/testdata/multi_car_one_sat_example/screenshot.png}
+    \caption{Esempio di 10 automobili e un satellite in comunicazione con UDP}\label{fig:multi_car_one_sat_example}
+\end{figure}
+
+\subsection{Simulazioni con UDP: molteplici automobili e molteplici satelliti}
+
+In un ulteriore esempio sono state usate 10 orbite a 300km di altitudine a 20° di inclinazione distribuite uniformemente su tutte le longitudini con 10 satelliti a offset equidistanti nella stessa orbite, per ciascuna orbita, per un totale di 100 satelliti (\textit{LeoOrbitNodeHelper::Install (LeoOrbit(300.0, 20, 10, 10));}) e come nell'esempio precedente 10 auto distribuite causalmente sulla superficie terrestre, con direzioni casuali. Anche in questo caso, tutti i pacchetti sono stati ricevuti correttamente da ciascuna automobile, ma ci sono stati dei pacchetti corrotti, delle ritrasmissioni, i valori di SINR sono risultati molto variabili come mostrato nella Tabella~\ref{tab:sinr_values_multi_car_one_sat_example} e i valori di pathloss meno suscettibili a variazioni, come mostrato nella Tabella~\ref{tab:pathloss_values_multi_car_one_sat_example}. Le latenze emerse dai log sono state mediamente 3-4ms con picchi sporadici a 9ms, probabilmente dovuti a ritrasmissioni o errori di comunicazione.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Time & CellId & RNTI & BWPId & SINR(dB) \\ \hline
+        0.203286 & 11 & 1 & 0 & -0.0221018 \\ \hline
+        0.203286 & 21 & 1 & 0 & 39.3213 \\ \hline
+        0.203286 & 41 & 2 & 0 & -7.21148 \\ \hline
+        0.203286 & 61 & 2 & 0 & -9.69702 \\ \hline
+        0.203286 & 67 & 1 & 0 & 64.0005 \\ \hline
+        0.203286 & 85 & 1 & 0 & 40.3446 \\ \hline
+        0.203286 & 111 & 1 & 0 & 37.1436 \\ \hline
+        0.203286 & 151 & 1 & 0 & 33.6474 \\ \hline
+        0.2035 & 41 & 1 & 0 & 53.9643 \\ \hline
+        0.2035 & 61 & 1 & 0 & 59.7016 \\ \hline
+        0.208929 & 61 & 2 & 0 & 14.7294 \\ \hline
+        0.213143 & 11 & 1 & 0 & -7.67671 \\ \hline
+        0.213143 & 21 & 1 & 0 & 43.0344 \\ \hline
+        0.213143 & 67 & 1 & 0 & 62.637 \\ \hline
+        0.213143 & 85 & 1 & 0 & 39.392 \\ \hline
+        0.213143 & 111 & 1 & 0 & 34.523 \\ \hline
+        0.213143 & 151 & 1 & 0 & 32.4326 \\ \hline
+        0.213286 & 41 & 2 & 0 & -6.22506 \\ \hline
+        0.213286 & 61 & 2 & 0 & -10.9642 \\ \hline
+        0.213357 & 41 & 1 & 0 & 54.0424 \\ \hline
+        0.213357 & 61 & 1 & 0 & 61.41 \\ \hline
+        0.218929 & 11 & 1 & 0 & 17.607 \\ \hline
+        0.223143 & 21 & 1 & 0 & 43.0113 \\ \hline
+        0.223143 & 67 & 1 & 0 & 63.5249 \\ \hline
+        0.223143 & 85 & 1 & 0 & 39.3425 \\ \hline
+        0.223143 & 111 & 1 & 0 & 34.5217 \\ \hline
+        0.223143 & 151 & 1 & 0 & 32.479 \\ \hline
+        0.223286 & 11 & 1 & 0 & -3.09574 \\ \hline
+        0.223286 & 41 & 2 & 0 & -5.41163 \\ \hline
+        0.223286 & 61 & 2 & 0 & -14.5532 \\ \hline
+    \end{tabular}
+    \caption{Valori di SINR per 10 automobili e 100 satelliti (txPower gNB a 40 dB)}\label{tab:sinr_values_multi_car_one_sat_example}
+\end{table}
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Time(sec) & CellId & BwpId & IMSI & pathLoss(dB) \\ \hline
+        0.0179286 & 151 & 0 & 100 & -196.012 \\ \hline
+        0.0179286 & 61 & 0 & 101 & -188.79 \\ \hline
+        0.0179286 & 41 & 0 & 102 & -190.057 \\ \hline
+        0.0179286 & 11 & 0 & 103 & -223.155 \\ \hline
+        0.0179286 & 111 & 0 & 104 & -196.99 \\ \hline
+        0.0179286 & 85 & 0 & 105 & -193.023 \\ \hline
+        0.0179286 & 61 & 0 & 106 & -236.975 \\ \hline
+        0.0179286 & 41 & 0 & 107 & -202.457 \\ \hline
+        0.0179286 & 21 & 0 & 108 & -191.77 \\ \hline
+        0.0179286 & 67 & 0 & 109 & -178.838 \\ \hline
+        0.0288571 & 11 & 0 & 103 & -223.155 \\ \hline
+        0.0348571 & 61 & 0 & 101 & -188.79 \\ \hline
+        0.0428571 & 61 & 0 & 106 & -236.975 \\ \hline
+        0.0428571 & 85 & 0 & 105 & -193.023 \\ \hline
+        0.0638571 & 111 & 0 & 104 & -195.884 \\ \hline
+    \end{tabular}
+    \caption{Valori di Pathloss per 10 automobili e 100 satelliti (txPower gNB a 40 dB)}\label{tab:pathloss_values_multi_car_one_sat_example}
+\end{table}
+
+Si riportano inoltre le figure di tutti i nodi (Figura~\ref{fig:multi_car_one_sat_example_nodes}), solo quello delle auto (Figura~\ref{fig:multi_car_one_sat_example_cars}) e quello dei satelliti utilizzati e le auto(Figura~\ref{fig:multi_car_one_sat_example_satellites_and_cars}). Guardando le figure si delinea come le antenne attivate per la comunicazione siano coerenti con il posizionamento dei vari nodi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/testdata/multi_sat_multi_car_example/nodi.png}
+    \caption{Tutti i nodi della simulazione}\label{fig:multi_car_one_sat_example_nodes}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/testdata/multi_sat_multi_car_example/auto_usate.png}
+    \caption{Le automobili posizionate nella simulazione causualmente}\label{fig:multi_car_one_sat_example_cars}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/testdata/multi_sat_multi_car_example/satelliti_usati_e_auto.png}
+    \caption{I satelliti utilizzati e le automobili posizionate nella simulazione}\label{fig:multi_car_one_sat_example_satellites_and_cars}
+\end{figure}
+
+\subsection{Test con diverse tipologie di antenne}
+
+Nei seguenti test vedremo come si comportano antenne diverse da quella usata fin'ora (antenna isotropica).
+
+\textbf{Modalità di posizionamento del satellite:}
+\begin{itemize}
+    \item \textbf{multiple}: flotta di satelliti come in Figura~\ref{fig:multi_car_one_sat_example_nodes}
+    \item \textbf{single}: singolo satellite di fronte all'automobile (configurazione di default)
+    \item \textbf{single-dislocated}: satellite posizionato a 300km di altitudine, inclinato di 20° con longitudine di 90° e offset di 180°, come mostrato in Figura~\ref{fig:sat_custom_positioning}
+\end{itemize}
+
+\textbf{Modelli di antenna implementati:}
+\begin{itemize}
+    \item IsotropicAntennaModel
+    \item CircularApertureAntennaModel
+    \item ParabolicAntennaModel
+    \item ThreeGppAntennaModel
+    \item CosineAntennaModel
+\end{itemize}
+
+Di seguito si mostrerà come si comportano le antenne in queste diverse configurazioni.
+
+\subsubsection{CircularApertureAntennaModel}
+
+\textbf{Test con posizionamento diretto:}
+\begin{itemize}
+    \item Parametri: \texttt{--duration=2s --mobilityPrecision=1s --traceFile=track.csv --satMode=single --antennaModel=CircularApertureAntennaModel --txPower=120 --logging}
+    \item Risultato: trasmissione senza perdite
+    \item Note: con txPower=100dB non è possibile inviare i pacchetti
+\end{itemize}
+
+
+\textbf{Comportamento anomalo osservato:}
+\begin{itemize}
+    \item Con txPower=110 e posizionamento diretto: nessuna trasmissione
+    \item Con txPower=110 e posizionamento dislocato: 8/10 pacchetti ricevuti con SINR molto basso
+    \item SINR: oscillazione tra -19 e -21dB
+    \item Latenza: 19-20ms
+\end{itemize}
+
+\subsubsection{ParabolicAntennaModel}
+
+\textbf{Test principale:}
+\begin{itemize}
+    \item Parametri: \texttt{--duration=2s --mobilityPrecision=1s --traceFile=track.csv --satMode=single --antennaModel=ParabolicAntennaModel --txPower=70 --logging}
+    \item Risultato: trasmissione senza perdite
+    \item SINR: -18 a -20dB
+    \item Latenza: 19-20ms
+    \item Note: in modalità dislocata nessuna trasmissione (SINR -47dB)
+\end{itemize}
+
+\subsubsection{ThreeGppAntennaModel}
+
+\textbf{Test con posizionamento diretto:}
+\begin{itemize}
+    \item Parametri: \texttt{--duration=2s --mobilityPrecision=1s --traceFile=track.csv --satMode=single --antennaModel=ThreeGppAntennaModel --txPower=70 --logging}
+    \item Risultato: trasmissione senza perdite
+    \item SINR: -19dB
+    \item Latenza: 19-20ms
+\end{itemize}
+
+\textbf{Test con posizionamento dislocato:}
+\begin{itemize}
+    \item Parametri: \texttt{--duration=2s --mobilityPrecision=1s --traceFile=track.csv --satMode=single-dislocated --antennaModel=ThreeGppAntennaModel --txPower=95 --logging}
+    \item Risultato: trasmissione senza perdite
+    \item SINR: -18dB
+    \item Latenza: 18ms
+    \item Con txPower=95dB in direzione diretta: SINR -15dB, latenza 3ms, 10 pacchetti ricevuti
+\end{itemize}
+
+\subsubsection{CosineAntennaModel}
+
+\textbf{Risultati test:}
+\begin{itemize}
+    \item Parametri: \texttt{--duration=2s --mobilityPrecision=1s --traceFile=track.csv --satMode=single --antennaModel=CosineAntennaModel --txPower=0.1 --logging}
+    \item Risultato: comunicazione avvenuta con txPower molto basso (0.1)
+    \item SINR: 5dB (ottimale)
+    \item Latenza: 3ms (eccellente)
+    \item Note: in posizioni dislocate i pacchetti non vengono tutti ricevuti, SINR passa a -20/-22dB
+\end{itemize}
+
+\section{Utilizzo di applicazioni per la comunicazione aggiuntivi}
+
+Durante lo sviluppo del simulatore sono state implementate diverse migliorie per supportare la misurazione accurata del throughput e gestire diversi tipi di applicazioni di rete:
+
+\begin{itemize}
+\item
+  Supporto per TCP in 2 modalità: una limitata e una illimitata
+\item
+  Nella modalità limitata, il numero di pacchetti da trasmettere è fissato
+\item
+  Nella modalità illimitata non ci sono restrizioni sul numero di pacchetti, ed è possibile verificare il datarate massimo ottenibile in una connessione satellite-veicolo
+\item
+  Implementazione di comunicazioni bidirezionali per tutti i protocolli, con applicazioni che possono inviare e ricevere pacchetti in modo continuo
+\item
+  Calcolo del datarate per TCP tenendo conto del numero di byte ricevuto e del tempo trascorso dal primo all'ultimo pacchetto ricevuto
+\item
+  I log ora sono personalizzati e mostrano il percorso che i pacchetti hanno seguito, con informazioni aggiuntive sul trasferimento.
+\end{itemize}
+
+\subsection{Output delle statistiche migliorato}
+
+Il sistema di output delle statistiche è stato migliorato per fornire informazioni dettagliate sui trasferimenti:
+
+\textbf{Informazioni mostrate:}
+\begin{itemize}
+    \item Numero di pacchetti trasmessi/ricevuti con percentuale di successo
+    \item Tempo di trasferimento effettivo (non tempo di simulazione)
+    \item Datarate in Mbps basato sul tempo di trasferimento
+    \item Informazioni dettagliate sui nodi coinvolti (auto, satellite/gNB)
+    \item Informazioni rilasciate per ogni auto coinvolta nella simulazione
+\end{itemize}
+
+\subsection{Test di diverse antenne con bitrate tramite TCP}
+
+Nei seguenti esempi è stata anche modificata la potenza di trasmissione delle auto, in quanto è fondamentale che la comunicazione birdirazionale sia funzionante in TCP.
+
+\begin{table}[H]
+    \centering
+    \caption{Riepilogo Statistiche Traffico per Vari Modelli di Antenna}
+    \label{tab:traffic_summary_compact}
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Antenna} & \textbf{gNB Tx (dB)} & \textbf{UE Tx (dB)} & \textbf{Modo} & \textbf{DL Rate (Mbps)} & \textbf{UL Rate (Mbps)} \\
+        \midrule
+        \multirow{3}{*}{Isotropic} 
+        & 40 & 23 & single & 61.67 & 48.56 \\
+        & 40 & 23 & dislocated & 61.67 & 48.56 \\
+        & $10^{-6}$ & $10^{-6}$ & dislocated & 58.60 & 48.32 \\
+        \midrule
+        \multirow{4}{*}{Parabolic} 
+        & 90 & 80 & single & 9.24 & 6.63 \\
+        & 90 & 80 & dislocated & 0 & 0 \\
+        & 110 & 110 & single & 55.82 & 47.03 \\
+        & 110 & 110 & dislocated & 20.51 & 11.70 \\
+        \midrule
+        \multirow{4}{*}{ThreeGpp} 
+        & 90 & 80 & single & 18.15 & 6.93 \\
+        & 90 & 80 & dislocated & 0 & 0 \\
+        & 100 & 100 & single & 51.83 & 43.59 \\
+        & 110 & 100 & dislocated & 12.49 & 5.80 \\
+        \midrule
+        \multirow{4}{*}{CircularAperture} 
+        & 140 & 130 & single & 9.15 & 13.47 \\
+        & 140 & 130 & dislocated & 0 & 0 \\
+        & 180 & 180 & single & 61.67 & 48.56 \\
+        & 180 & 180 & dislocated & 62.53 & 49.64 \\
+        \midrule
+        \multirow{5}{*}{Cosine} 
+        & 0.01 & 0.01 & single & 50.04 & 42.39 \\
+        & 0.01 & 0.01 & dislocated & 0 & 0 \\s
+        & 40 & 23 & single & 61.67 & 48.56 \\
+        & 40 & 23 & dislocated & 51.07 & 42.39 \\
+        & 5 & 5 & dislocated & 5.02 & 1.39 \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+\textbf{Analisi comparativa dei modelli di antenna:}
+
+\begin{itemize}
+\item \textbf{Isotropic Antenna}: Si verifica un comportamento anomalo dato che nella simulazione vengono mantenuti throughput elevati (58.60 Mbps DL, 48.32 Mbps UL) anche con potenze di trasmissione estremamente basse ($10^{-6}$ dB) in configurazione dislocata.
+
+\item \textbf{Parabolic e ThreeGpp Antennas}: Questi modelli mostrano un comportamento fisicamente coerente, con una chiara correlazione tra potenza di trasmissione, posizionamento geometrico e qualità del collegamento. Il miglioramento delle prestazioni all'aumentare della potenza (fino a 55.82 Mbps DL per Parabolic a 110 dB).
+
+\item \textbf{CircularAperture Antenna}: Richiede potenze significativamente elevate (140--180 dB), ma si comporta compatibilmente con Parabolic e ThreeGpp.
+
+\item \textbf{Cosine Antenna}: Presenta comunicazioni anche con potenze di trasmisione stranamente estremamente basse (50.04 Mbps DL, 42.39 Mbps UL con 0.01 dB) ma rimane coerente sulla dislocazione dell'antenna per cui per avere una comunicazione funzionante necessitiamo almeno 5dBm di potenza, comunque irragionevolmente bassa, ma proporzionalmente corretta rispetto ai risultati in comunicazione diretta.
+
+\end{itemize}
+
+\section{BUG REPORT}
+
+\begin{lstlisting}[
+    frame=single,
+    framerule=0.8pt,
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    caption={Errore NS\_ASSERT rbUsed durante simulazione di lunga durata},
+    label={lst:ns3-assert-error}
+]
+~/repos/ns-3-dev (heads/ns-3.45*) > ./ns3 run "leo-nr-send-example --carSpeed=30 --duration=5400s --mobilityPrecision=1s --traceFile=track.csv" && cp track.csv contrib/leo/examples/trace_view/punti_3d.csv && py contrib/leo/examples/trace_view/main.py
+[0/2] Re-checking globbed directories...
+[2/3] Linking CXX executable /Users/domysh/repos/ns-3-dev/build/contrib/leo/examples/ns3.45-leo-nr-send-example-default
+gNB enabled with transmission power: 40 dB
+============= Starting simulation for 5400s =============
+============= Starting UDP client and server applications =============
+NS_ASSERT failed, cond="rbUsed", +254.000071427s 1 file=/Users/domysh/repos/ns-3-dev/contrib/nr/model/nr-ue-phy.cc, line=1557
+NS_FATAL, terminating
+libc++abi: terminating
+Command 'build/contrib/leo/examples/ns3.45-leo-nr-send-example-default --carSpeed=30 --duration=5400s --mobilityPrecision=1s --traceFile=track.csv' died with <Signals.SIGABRT: 6>.
+\end{lstlisting}
+
+\begin{lstlisting}[
+    frame=single,
+    framerule=0.8pt,
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    caption={Correzione del bug: Aggiunta di un controllo per nodi in posizione identica per evitare NaN generati da divisione per 0},
+    label={lst:ns3-elevation-angle-fix}
+]
+diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
+index 282feeeda..eef215446 100644
+--- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
++++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
+@@ -202,6 +202,7 @@ GeocentricConstantPositionMobilityModel::DoGetElevationAngle(
+     Vector bMinusA = b - a;
+     double numerator = std::abs(a * bMinusA);
+     double denominator = a.GetLength() * bMinusA.GetLength();
++    if (denominator == 0) return 0.0; // Distance is zero, no elevation angle
+     double x = numerator / denominator;
+
+     // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
+\end{lstlisting}
+
+\cleardoublepage
+\bibliographystyle{unsrt}
+\phantomsection{}
+\addcontentsline{toc}{section}{Bibliografia}
+\bibliography{bibliografia}
+
+\end{document}

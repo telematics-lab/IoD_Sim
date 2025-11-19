@@ -1,0 +1,12 @@
+diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
+index 282feeeda..eef215446 100644
+--- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
++++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
+@@ -202,6 +202,7 @@ GeocentricConstantPositionMobilityModel::DoGetElevationAngle(
+     Vector bMinusA = b - a;
+     double numerator = std::abs(a * bMinusA);
+     double denominator = a.GetLength() * bMinusA.GetLength();
++    if (denominator == 0) return 0.0; // Distance is zero, no elevation angle
+     double x = numerator / denominator;
+ 
+     // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
