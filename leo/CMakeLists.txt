@@ -16,9 +16,8 @@ set(public_headers
     helper/nd-cache-helper.h
     helper/leo-ground-node-helper.h
     helper/satellite-node-helper.h
-    model/leo-circular-orbit-mobility-model.h
-    model/leo-circular-orbit-position-allocator.h
-    model/leo-gnd-constant-velocity-mobility-model.h
+    model/geo-leo-orbit-mobility.h
+    model/geo-constant-velocity-mobility.h
     model/leo-mock-channel.h
     model/leo-mock-net-device.h
     model/leo-oneweb-constants.h
@@ -44,9 +43,8 @@ set(sources
     helper/nd-cache-helper.cc
     helper/leo-ground-node-helper.cc
     helper/satellite-node-helper.cc
-    model/leo-circular-orbit-mobility-model.cc
-    model/leo-circular-orbit-position-allocator.cc
-    model/leo-gnd-constant-velocity-mobility-model.cc
+    model/geo-leo-orbit-mobility.cc
+    model/geo-constant-velocity-mobility.cc
     model/leo-mock-channel.cc
     model/leo-mock-net-device.cc
     model/leo-orbit.cc
@@ -61,18 +59,18 @@ set(sources
 
 # List the other ns-3 modules this one depends on
 set(dependencies
-    core
-    internet
-    propagation
-    stats
-    flow-monitor
-    applications
-    point-to-point
-    netanim
-    aodv
-    buildings
-    antenna
-    mobility
+    ${libcore}
+    ${libinternet}
+    ${libpropagation}
+    ${libstats}
+    ${libflow-monitor}
+    ${libapplications}
+    ${libpoint-to-point}
+    ${libnetanim}
+    ${libaodv}
+    ${libbuildings}
+    ${libantenna}
+    ${libmobility}
 )
 
 

@@ -15,7 +15,8 @@ set(routing_examples
 
 # Examples that require NR module
 set(nr_examples
-    leo-nr-send-example
+   leo-nr-send-example
+   leo-ka-band-automotive-example
 )
 
 # Build basic examples

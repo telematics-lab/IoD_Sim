@@ -59,7 +59,7 @@ int main (int argc, char *argv[])
 
   cmd.AddValue("orbitFile", "CSV file with orbit parameters", orbitFile);
   cmd.AddValue("traceFile", "CSV file to store mobility trace in", traceFile);
-  cmd.AddValue("precision", "ns3::LeoCircularOrbitMobilityModel::Precision");
+  cmd.AddValue("precision", "ns3::GeoLeoOrbitMobility::Precision");
   cmd.AddValue("duration", "Duration of the simulation in seconds", duration);
   cmd.AddValue("source", "Traffic source", source);
   cmd.AddValue("destination", "Traffic destination", destination);

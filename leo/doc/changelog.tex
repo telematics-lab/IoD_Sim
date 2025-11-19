@@ -29,7 +29,7 @@
 % Evita che le figure si spostino oltre la sezione
 \let\oldsection\section
 \renewcommand\section{\FloatBarrier\oldsection}
-\let\oldsubsection\subsection  
+\let\oldsubsection\subsection
 \renewcommand\subsection{\FloatBarrier\oldsubsection}
 \lstset{
     basicstyle=\footnotesize\ttfamily,
@@ -579,30 +579,30 @@ Nei seguenti esempi è stata anche modificata la potenza di trasmissione delle a
         \toprule
         \textbf{Antenna} & \textbf{gNB Tx (dB)} & \textbf{UE Tx (dB)} & \textbf{Modo} & \textbf{DL Rate (Mbps)} & \textbf{UL Rate (Mbps)} \\
         \midrule
-        \multirow{3}{*}{Isotropic} 
+        \multirow{3}{*}{Isotropic}
         & 40 & 23 & single & 61.67 & 48.56 \\
         & 40 & 23 & dislocated & 61.67 & 48.56 \\
         & $10^{-6}$ & $10^{-6}$ & dislocated & 58.60 & 48.32 \\
         \midrule
-        \multirow{4}{*}{Parabolic} 
+        \multirow{4}{*}{Parabolic}
         & 90 & 80 & single & 9.24 & 6.63 \\
         & 90 & 80 & dislocated & 0 & 0 \\
         & 110 & 110 & single & 55.82 & 47.03 \\
         & 110 & 110 & dislocated & 20.51 & 11.70 \\
         \midrule
-        \multirow{4}{*}{ThreeGpp} 
+        \multirow{4}{*}{ThreeGpp}
         & 90 & 80 & single & 18.15 & 6.93 \\
         & 90 & 80 & dislocated & 0 & 0 \\
         & 100 & 100 & single & 51.83 & 43.59 \\
         & 110 & 100 & dislocated & 12.49 & 5.80 \\
         \midrule
-        \multirow{4}{*}{CircularAperture} 
+        \multirow{4}{*}{CircularAperture}
         & 140 & 130 & single & 9.15 & 13.47 \\
         & 140 & 130 & dislocated & 0 & 0 \\
         & 180 & 180 & single & 61.67 & 48.56 \\
         & 180 & 180 & dislocated & 62.53 & 49.64 \\
         \midrule
-        \multirow{5}{*}{Cosine} 
+        \multirow{5}{*}{Cosine}
         & 0.01 & 0.01 & single & 50.04 & 42.39 \\
         & 0.01 & 0.01 & dislocated & 0 & 0 \\s
         & 40 & 23 & single & 61.67 & 48.56 \\
@@ -626,49 +626,235 @@ Nei seguenti esempi è stata anche modificata la potenza di trasmissione delle a
 
 \end{itemize}
 
-\section{BUG REPORT}
+\section{Aggiornamenti e Novità per integrazione su IoD\_Sim}\label{aggiornamenti-e-novità-iod-sim-settembre-2025}
 
-\begin{lstlisting}[
-    frame=single,
-    framerule=0.8pt,
-    basicstyle=\footnotesize\ttfamily,
-    breaklines=true,
-    caption={Errore NS\_ASSERT rbUsed durante simulazione di lunga durata},
-    label={lst:ns3-assert-error}
-]
-~/repos/ns-3-dev (heads/ns-3.45*) > ./ns3 run "leo-nr-send-example --carSpeed=30 --duration=5400s --mobilityPrecision=1s --traceFile=track.csv" && cp track.csv contrib/leo/examples/trace_view/punti_3d.csv && py contrib/leo/examples/trace_view/main.py
-[0/2] Re-checking globbed directories...
-[2/3] Linking CXX executable /Users/domysh/repos/ns-3-dev/build/contrib/leo/examples/ns3.45-leo-nr-send-example-default
-gNB enabled with transmission power: 40 dB
-============= Starting simulation for 5400s =============
-============= Starting UDP client and server applications =============
-NS_ASSERT failed, cond="rbUsed", +254.000071427s 1 file=/Users/domysh/repos/ns-3-dev/contrib/nr/model/nr-ue-phy.cc, line=1557
-NS_FATAL, terminating
-libc++abi: terminating
-Command 'build/contrib/leo/examples/ns3.45-leo-nr-send-example-default --carSpeed=30 --duration=5400s --mobilityPrecision=1s --traceFile=track.csv' died with <Signals.SIGABRT: 6>.
+Di seguito sono riportati i principali miglioramenti e le novità introdotte in IoD\_Sim per l'integrazione dei moduli leo e 5g-lena:
+
+\subsection{Integrazione del Modulo LEO con Patch IoD\_Sim}
+
+\textbf{Integrazione completa del modulo LEO (Low Earth Orbit)} con le patch specifiche di IoD\_Sim applicate a ns-3 sul sistema di posizionamento e mobilità geocentrico.
+
+\textbf{Implementazione del PHY layer "none"} per scenari di simulazione che non richiedono scambio effettivo di pacchetti. I benefici includono:
+
+\subsection{Aggiornamento a ns-3 versione 3.45}
+
+\textbf{Upgrade completo delle patch IoD\_Sim} per la compatibilità con ns-3 3.45, reso necessario per supportare le ultime versioni di 5g lena usate negli esempi citati e sviluppati precedentemente:
+
+\begin{itemize}
+\tightlist
+\item
+  Aggiornate e integrate tutte le patch esistenti per la nuova versione
+\item
+  \textbf{Nuova patch per modelli geocentrici}: risolve problemi di posizioni coincidenti nei sistemi di coordinate geocentriche
+\item
+  Eliminazione di bug legati a divisioni per zero nei calcoli di angoli di elevazione
+\item
+  Correzione attributi deprecated: \texttt{RemotePort} sostituito con \texttt{Remote}, adattando il nuovo tipo di attributo \texttt{AddressValue}
+\item
+  Possibilità di evitare l'utilizzo del Position Allocator nel Mobility Helper per scenari con posizioni predefinite negli attributi del Mobility Model
+\end{itemize}
+
+\textbf{Nuovo metodo di gestione} per il clone e checkout di ns-3 all'interno di IoD\_Sim:
+
+\begin{itemize}
+\tightlist
+\item
+  Processo di setup più robusto e affidabile
+\item
+  Migliore integrazione tra i repository e gestione delle dipendenze
+\item
+  Automazione migliorata per l'ambiente di sviluppo
+\item
+  Riduzione degli errori manuali durante l'installazione
+\item
+  Supporto per diversi sistemi operativi (Linux, macOS)
+\end{itemize}
+
+\textbf{Soppressione completa dei warning RapidJSON} durante la compilazione anche per compilatore clang.
+
+\section{Implementazione Completa 5G NR in IoD\_Sim}\label{implementazione-5g-nr-ottobre-2025}
+
+È stata implementata una nuova architettura completa per il supporto delle reti 5G New Radio (NR) in IoD\_Sim, integrando nuovi parametri e configurazioni adattate al modulo 5-lena.
+
+\subsection{Sintassi JSON}
+
+\textbf{Configurazione PHY Layer JSON}:
+
+\begin{lstlisting}[]
+{
+  "phyLayer": [
+    {
+      "type": "nr",
+      "bands": [ // E' possibile configurare diverse bande di frequenza con differenti scenari e modelli di propagazione
+        {
+          "scenario": "UMi-StreetCanyon",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "frequencyBands": [ // Se configuriamo CC non contigui, possiamo definire i vari segmenti di frequenza da utilizzare
+            {
+              "centralFrequency": 28e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
+            }
+          ],
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+        }
+      ],
+      "channelConditionAttributes": [
+        {
+          "name": "UpdatePeriod",
+          "value": "0ms"
+        }
+      ],
+      "pathlossAttributes": [
+        {
+          "name": "ShadowingEnabled",
+          "value": false
+        }
+      ],
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper", // Helper EPC per la rete 5G NR
+        "attributes": [ // Attributi specifici per l'EPC
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {// Impostazione del metodo di beamforming con relativi attributi
+        "helper": "ns3::IdealBeamformingHelper", // Helper per il beamforming
+        "method": "ns3::DirectPathBeamforming", // Metodo/Algoritmo di beamforming
+        "algorithmAttributes": [], // Attributi specifici per l'algoritmo di beamforming
+        "attributes": [] // Attributi generali per il beamforming (per l'helper)
+      },
+      "ueAntenna": {
+        // Tipo di antenna utilizzata per gli UE
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          // Definizione dei parametri dell'array di antenne
+          {
+            "name": "NumRows",
+            "value": 2
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ],
+        "properties": [
+          // Qui e' possibile specificare i parametri specifici per il tipo di antenna scelto
+        ]
+      },
+      // Tutti i parametri configurabili per le antenne UE sono applicabili anche alle antenne gNB
+      "gnbAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+        {
+          "name": "NGBR_LOW_LAT_EMBB",
+          "value": 0
+        },
+        {
+          "name": "GBR_CONV_VOICE",
+          "value": 1
+        }
+      ]},
+      // Impostazioni per la gestione delle Bandwidth Parts (BWP)
+      "ueBwpManager":{
+        "attributes": [
+        {
+          "name": "NGBR_LOW_LAT_EMBB",
+          "value": 0
+        },
+        {
+          "name": "GBR_CONV_VOICE",
+          "value": 1
+        }
+      ]},
+      // Attributi specifici del layer fisico per gli UE
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 24.0
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        }
+      ],
+      // Attributi specifici del layer fisico per i gNB
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 35.0
+        }
+      ]
+    }
+  ]
+}
 \end{lstlisting}
 
-\begin{lstlisting}[
-    frame=single,
-    framerule=0.8pt,
-    basicstyle=\footnotesize\ttfamily,
-    breaklines=true,
-    caption={Correzione del bug: Aggiunta di un controllo per nodi in posizione identica per evitare NaN generati da divisione per 0},
-    label={lst:ns3-elevation-angle-fix}
-]
-diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-index 282feeeda..eef215446 100644
---- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
-+++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-@@ -202,6 +202,7 @@ GeocentricConstantPositionMobilityModel::DoGetElevationAngle(
-     Vector bMinusA = b - a;
-     double numerator = std::abs(a * bMinusA);
-     double denominator = a.GetLength() * bMinusA.GetLength();
-+    if (denominator == 0) return 0.0; // Distance is zero, no elevation angle
-     double x = numerator / denominator;
+\subsection{Dettagli della Configurazione NR}
 
-     // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
-\end{lstlisting}
+La configurazione JSON precedente presenta una struttura modulare che consente un controllo granulare di tutti gli aspetti del sistema 5G NR:
+
+\subsubsection{Configurazione delle Bande di Frequenza}
+
+Il parametro \texttt{bands} consente di definire multiple configurazioni per diverse bande di frequenza, ognuna con:
+
+\begin{itemize}
+\item \textbf{Scenario 3GPP}: Supporta scenari standardizzati come \texttt{UMa-UrbanMacro}, \texttt{UMi-StreetCanyon}, \texttt{RMa-Rural}, \texttt{InH-OfficeOpen}, \texttt{InH-OfficeMixed}
+\item \textbf{Modelli di Propagazione}: Integrazione completa con i modelli di propagazione per calcoli del path loss
+\item \textbf{Component Carriers}: Supporto per configurazioni multi-CC sia contigue (\texttt{contiguousCc: true}) che non contigue
+\end{itemize}
+
+\subsubsection{Configurazione Array di Antenne}
+
+La sezione \texttt{ueAntenna} e \texttt{gnbAntenna} permette la configurazione di:
+
+\begin{itemize}
+\item \textbf{Modelli di Antenna}: \texttt{IsotropicAntennaModel}, \texttt{ThreeGppAntennaModel}, \texttt{ParabolicAntennaModel}, \texttt{CosineAntennaModel}
+\item \textbf{Array Properties}: Configurazione matriciale con \texttt{NumRows} e \texttt{NumColumns} per MIMO massivo
+\item \textbf{Parametri Specifici}: Ogni modello di antenna supporta parametri personalizzati (guadagno, pattern di radiazione, etc.)
+\end{itemize}
+
+\subsubsection{Gestione Quality of Service (QoS)}
+
+I parametri \texttt{gnbBwpManagerAttribute} e \texttt{ueBwpManagerAttribute} gestiscono:
+
+\begin{itemize}
+\item \textbf{5QI (5G QoS Identifier)}: Configurazione per diversi tipi di traffico
+\item \texttt{NGBR\_LOW\_LAT\_EMBB}: Enhanced Mobile Broadband a bassa latenza
+\item \texttt{GBR\_CONV\_VOICE}: Guaranteed Bit Rate per comunicazioni vocali
+\item \textbf{Bandwidth Parts}: Allocazione dinamica delle risorse di banda
+\end{itemize}
+
+\subsubsection{Configurazione del Layer Fisico con opzioni personalizzate per device e per BWP}
+
+E' stato introdotto nella configurazione JSON una particolare configuraszione per gli attributi del layer fisico sia per gli UE che per i gNB che permette tramite il BWP-id di specificare parametri diversi per ogni BWP configurato, come ad esempio la potenza di trasmissione o la Numerology, parametri di particolare interesse e importanza.
 
 \cleardoublepage
 \bibliographystyle{unsrt}

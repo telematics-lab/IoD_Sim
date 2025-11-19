@@ -19,13 +19,12 @@
 #ifndef LEO_ORBIT_NODE_HELPER_H
 #define LEO_ORBIT_NODE_HELPER_H
 
-#include <string>
-
-#include "ns3/object-factory.h"
-#include "ns3/node-container.h"
-#include "ns3/leo-circular-orbit-mobility-model.h"
-#include "ns3/leo-circular-orbit-position-allocator.h"
 #include "ns3/leo-orbit.h"
+#include "ns3/node-container.h"
+#include "ns3/nstime.h"
+#include "ns3/object-factory.h"
+
+#include <string>
 
 /**
  * \file
@@ -44,55 +43,57 @@ namespace ns3
  */
 class LeoOrbitNodeHelper
 {
-public:
-  /// constructor
-  LeoOrbitNodeHelper ();
+  public:
+    /// constructor
+    LeoOrbitNodeHelper();
 
-  /// destructor
-  virtual ~LeoOrbitNodeHelper ();
+    /// destructor
+    virtual ~LeoOrbitNodeHelper();
 
-  /**
-   *
-   * \param orbitFile path to orbit definitions file
-   * \returns a node container containing nodes using the specified attributes
-   */
-  NodeContainer Install (const std::string &orbitFile);
+    /**
+     *
+     * \param orbitFile path to orbit definitions file
+     * \returns a node container containing nodes using the specified attributes
+     */
+    NodeContainer Install(const std::string& orbitFile);
 
-  /**
-   *
-   * \param orbits orbit definitions
-   * \returns a node container containing nodes using the specified attributes
-   */
-  NodeContainer Install (const std::vector<LeoOrbit> &orbits);
+    /**
+     *
+     * \param orbits orbit definitions
+     * \returns a node container containing nodes using the specified attributes
+     */
+    NodeContainer Install(const std::vector<LeoOrbit>& orbits);
 
-  /**
-   *
-   * \param orbit orbit definition
-   * \returns a node container containing nodes using the specified attributes
-   */
-  NodeContainer Install (const LeoOrbit &orbit);
+    /**
+     *
+     * \param orbit orbit definition
+     * \returns a node container containing nodes using the specified attributes
+     */
+    NodeContainer Install(const LeoOrbit& orbit);
 
-  NodeContainer
-  Install (const double &altitude, const double &inclination,
-        const double &longitude, const double &offset, const bool &retrograde = false);
+    NodeContainer Install(const double& altitude,
+                          const double& inclination,
+                          const double& longitude,
+                          const double& offset,
+                          const bool& retrograde = false);
 
-  /**
-   * Set an attribute for each node
-   *
-   * \param name name of the attribute
-   * \param value value of the attribute
-   */
-  void SetAttribute (std::string name, const AttributeValue &value);
+    /**
+     * Set an attribute for each node
+     *
+     * \param name name of the attribute
+     * \param value value of the attribute
+     */
+    void SetAttribute(std::string name, const AttributeValue& value);
 
-  Time GetPrecision () const;
+    Time GetPrecision() const;
 
-  void SetPrecision (Time precision);
+    void SetPrecision(Time precision);
 
-private:
-  /// Factory for nodes
-  ObjectFactory m_nodeFactory;
-  // Precision of the position allocator
-  Time m_precision = Seconds (1.0); // Default precision
+  private:
+    /// Factory for nodes
+    ObjectFactory m_nodeFactory;
+    // Precision of the position allocator
+    Time m_precision = Seconds(1.0); // Default precision
 };
 
 }; // namespace ns3

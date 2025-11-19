@@ -23,7 +23,7 @@
 #include "ns3/integer.h"
 #include "ns3/nstime.h"
 #include "ns3/geographic-positions.h"
-#include "../model/leo-circular-orbit-mobility-model.h"
+#include "ns3/geo-leo-orbit-mobility.h"
 
 using namespace ns3;
 
@@ -47,7 +47,7 @@ public:
 private:
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (0.0));
 
     NS_TEST_ASSERT_MSG_EQ ((uint64_t) mob->GetSpeed (), (uint64_t) 7909.79, "postion at 0 altitude is on surface");
@@ -68,7 +68,7 @@ public:
 private:
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (0.0));
     mob->SetAttribute ("Inclination", DoubleValue (1.0));
 
@@ -88,7 +88,7 @@ public:
   LeoOrbitProgressTestCase () : TestCase ("position changes over time") {}
   virtual ~LeoOrbitProgressTestCase () {}
 private:
-  void TestLengthPosition (double expl, double expx, Ptr<LeoCircularOrbitMobilityModel> mob)
+  void TestLengthPosition (double expl, double expx, Ptr<GeoLeoOrbitMobility> mob)
   {
     Vector pos = mob->GetPosition ();
     NS_TEST_EXPECT_MSG_EQ_TOL (pos.GetLength () / 1000, expl, 0.001, "Distance to earth should be the same");
@@ -97,7 +97,7 @@ private:
 
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (0.0));
     mob->SetAttribute ("Inclination", DoubleValue (20.0));
 
@@ -123,7 +123,7 @@ public:
 private:
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (1000.0));
     mob->SetAttribute ("Inclination", DoubleValue (20.0));
 
@@ -150,7 +150,7 @@ public:
 private:
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (1000.0));
     mob->SetAttribute ("Inclination", DoubleValue (20.0));
 
@@ -181,7 +181,7 @@ public:
 private:
   virtual void DoRun (void)
   {
-    Ptr<LeoCircularOrbitMobilityModel> mob = CreateObject<LeoCircularOrbitMobilityModel> ();
+    Ptr<GeoLeoOrbitMobility> mob = CreateObject<GeoLeoOrbitMobility> ();
     mob->SetAttribute ("Altitude", DoubleValue (1000.0));
     mob->SetAttribute ("Inclination", DoubleValue (20.0));
     mob->SetAttribute ("Precision", TimeValue (Seconds (10)));
@@ -193,7 +193,7 @@ private:
     mobility.SetPositionAllocator ("ns3::LeoCircularOrbitPostionAllocator",
                                    "NumOrbits", IntegerValue (100),
                                    "NumSatellites", IntegerValue (100));
-    mobility.SetMobilityModel ("ns3::LeoCircularOrbitMobilityModel");
+    mobility.SetMobilityModel ("ns3::GeoLeoOrbitMobility");
     mobility.Install (c);
 
     Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",

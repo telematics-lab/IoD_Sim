@@ -137,7 +137,7 @@ Examples
 leo-circlular-orbit
 ###################
 
-The program configures a ``LeoCircularOrbitMobilityModel`` and traces the positions of the satellites during the simulation.
+The program configures a ``GeoLeoOrbitMobility`` and traces the positions of the satellites during the simulation.
 
 .. sourcecode:: bash
   

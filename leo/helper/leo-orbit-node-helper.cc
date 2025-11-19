@@ -16,127 +16,181 @@
  * Author: Tim Schubert <ns-3-leo@timschubert.net>
  */
 
+#include "leo-orbit-node-helper.h"
+
+#include "ns3/boolean.h"
+#include "ns3/config.h"
+#include "ns3/double.h"
+#include "ns3/enum.h"
+#include "ns3/integer.h"
+#include "ns3/log.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/waypoint.h"
+
 #include <fstream>
 #include <vector>
-
-#include "ns3/log.h"
-#include "ns3/config.h"
-#include "ns3/waypoint.h"
-#include "ns3/mobility-helper.h"
-#include "ns3/double.h"
-#include "ns3/boolean.h"
-#include "ns3/integer.h"
-
-#include "leo-orbit-node-helper.h"
 
 using namespace std;
 
 namespace ns3
 {
-NS_LOG_COMPONENT_DEFINE ("LeoOrbitNodeHelper");
+NS_LOG_COMPONENT_DEFINE("LeoOrbitNodeHelper");
 
-LeoOrbitNodeHelper::LeoOrbitNodeHelper ()
+LeoOrbitNodeHelper::LeoOrbitNodeHelper()
 {
-  m_nodeFactory.SetTypeId ("ns3::Node");
+    m_nodeFactory.SetTypeId("ns3::Node");
 }
 
-LeoOrbitNodeHelper::~LeoOrbitNodeHelper ()
+LeoOrbitNodeHelper::~LeoOrbitNodeHelper()
 {
 }
 
 void
-LeoOrbitNodeHelper::SetAttribute (string name, const AttributeValue &value)
+LeoOrbitNodeHelper::SetAttribute(string name, const AttributeValue& value)
 {
-  m_nodeFactory.Set (name, value);
+    m_nodeFactory.Set(name, value);
 }
 
 NodeContainer
-LeoOrbitNodeHelper::Install (const LeoOrbit &orbit)
+LeoOrbitNodeHelper::Install(const LeoOrbit& orbit)
 {
-  NS_LOG_FUNCTION (this << orbit);
+    NS_LOG_FUNCTION(this << orbit);
 
-  MobilityHelper mobility;
-  mobility.SetPositionAllocator ("ns3::LeoCircularOrbitPostionAllocator",
-                                 "NumOrbits", IntegerValue (orbit.planes),
-                                 "NumSatellites", IntegerValue (orbit.sats));
-  mobility.SetMobilityModel ("ns3::LeoCircularOrbitMobilityModel",
-             "Precision", TimeValue (m_precision),
-  			     "Altitude", DoubleValue (orbit.alt),
-  			     "Inclination", DoubleValue (orbit.inc));
+    NodeContainer c;
+    c.Create(orbit.sats * orbit.planes);
 
-  NodeContainer c;
-  c.Create (orbit.sats*orbit.planes);
-  mobility.Install (c);
+    // Calculate spacing between orbital planes and satellites
+    double longitudeSpacing = 360.0 / orbit.planes; // degrees
+    double offsetSpacing = 360.0 / orbit.sats;      // degrees
 
-  return c;
-}
-
-NodeContainer
-LeoOrbitNodeHelper::Install (const double &altitude, const double &inclination,
-      const double &longitude, const double &offset, const bool &retrograde){
-  NS_LOG_FUNCTION (this << altitude << inclination << longitude << offset);
-
-
-  Ptr<LeoCircularOrbitMobilityModel> mobilityModel = CreateObject<LeoCircularOrbitMobilityModel>();
-  mobilityModel->SetAttribute("Precision", TimeValue (m_precision));
-  mobilityModel->SetAttribute("Altitude", DoubleValue(altitude));
-  mobilityModel->SetAttribute("Inclination", DoubleValue (inclination));
-  mobilityModel->SetAttribute("Longitude", DoubleValue (longitude));
-  mobilityModel->SetAttribute("Offset", DoubleValue (offset));
-  mobilityModel->SetAttribute("RetrogradeOrbit", BooleanValue (retrograde));
-
-  NodeContainer c;
-  c.Create (1);
-  c.Get(0)->AggregateObject(mobilityModel);
-  return c;
-}
-
-Time LeoOrbitNodeHelper::GetPrecision () const
-{
-  return m_precision;
-}
-
-void LeoOrbitNodeHelper::SetPrecision (Time precision)
-{
-  m_precision = precision;
-}
-
-NodeContainer
-LeoOrbitNodeHelper::Install (const std::string &orbitFile)
-{
-  NS_LOG_FUNCTION (this << orbitFile);
-
-  NodeContainer nodes;
-  ifstream orbits;
-  orbits.open (orbitFile, ifstream::in);
-  LeoOrbit orbit;
-  while ((orbits >> orbit))
+    uint32_t nodeIndex = 0;
+    for (uint32_t plane = 0; plane < orbit.planes; plane++)
     {
-      nodes.Add (Install (orbit));
-      NS_LOG_DEBUG ("Added orbit plane");
-    }
-  orbits.close ();
+        // Calculate longitude for this orbital plane
+        double longitude = plane * longitudeSpacing;
 
-  NS_LOG_DEBUG ("Added " << nodes.GetN () << " nodes");
+        // Normalize longitude to [-180, 180] range as required by GeoLeoOrbitMobility
+        if (longitude > 180.0)
+        {
+            longitude -= 360.0;
+        }
 
-  return nodes;
-}
+        for (uint32_t sat = 0; sat < orbit.sats; sat++)
+        {
+            // Calculate offset for this satellite within the plane
+            double offset = sat * offsetSpacing;
 
-NodeContainer
-LeoOrbitNodeHelper::Install (const vector<LeoOrbit> &orbits)
-{
-  NS_LOG_FUNCTION (this << orbits);
+            // Use MobilityHelper to configure each satellite individually
+            MobilityHelper mobility;
+            mobility.SetMobilityModel("ns3::GeoLeoOrbitMobility",
+                                      "Precision",
+                                      TimeValue(m_precision),
+                                      "Altitude",
+                                      DoubleValue(orbit.alt),
+                                      "Inclination",
+                                      DoubleValue(orbit.inc),
+                                      "Longitude",
+                                      DoubleValue(longitude),
+                                      "Offset",
+                                      DoubleValue(offset),
+                                      "RetrogradeOrbit",
+                                      BooleanValue(false),
+                                      "EarthSpheroidType",
+                                      EnumValue(GeographicPositions::EarthSpheroidType::SPHERE));
 
-  NodeContainer nodes;
-  for (uint64_t i = 0; i < orbits.size(); i++)
-    {
-      nodes.Add (Install (orbits[i]));
-      NS_LOG_DEBUG ("Added orbit plane");
+            // Install mobility on this specific node
+            NodeContainer singleNode;
+            singleNode.Add(c.Get(nodeIndex));
+            mobility.Install(singleNode);
+
+            nodeIndex++;
+        }
     }
 
-  NS_LOG_DEBUG ("Added " << nodes.GetN () << " nodes");
+    return c;
+}
 
-  return nodes;
+NodeContainer
+LeoOrbitNodeHelper::Install(const double& altitude,
+                            const double& inclination,
+                            const double& longitude,
+                            const double& offset,
+                            const bool& retrograde)
+{
+    NS_LOG_FUNCTION(this << altitude << inclination << longitude << offset);
+
+    NodeContainer c;
+    c.Create(1);
+
+    MobilityHelper mobility;
+    mobility.SetMobilityModel("ns3::GeoLeoOrbitMobility",
+                              "Precision",
+                              TimeValue(m_precision),
+                              "Altitude",
+                              DoubleValue(altitude),
+                              "Inclination",
+                              DoubleValue(inclination),
+                              "Longitude",
+                              DoubleValue(longitude),
+                              "Offset",
+                              DoubleValue(offset),
+                              "RetrogradeOrbit",
+                              BooleanValue(retrograde),
+                              "EarthSpheroidType",
+                              EnumValue(GeographicPositions::EarthSpheroidType::SPHERE));
+
+    mobility.Install(c);
+    return c;
+}
+
+Time
+LeoOrbitNodeHelper::GetPrecision() const
+{
+    return m_precision;
+}
+
+void
+LeoOrbitNodeHelper::SetPrecision(Time precision)
+{
+    m_precision = precision;
+}
+
+NodeContainer
+LeoOrbitNodeHelper::Install(const std::string& orbitFile)
+{
+    NS_LOG_FUNCTION(this << orbitFile);
+
+    NodeContainer nodes;
+    ifstream orbits;
+    orbits.open(orbitFile, ifstream::in);
+    LeoOrbit orbit;
+    while ((orbits >> orbit))
+    {
+        nodes.Add(Install(orbit));
+        NS_LOG_DEBUG("Added orbit plane");
+    }
+    orbits.close();
+
+    NS_LOG_DEBUG("Added " << nodes.GetN() << " nodes");
+
+    return nodes;
+}
+
+NodeContainer
+LeoOrbitNodeHelper::Install(const vector<LeoOrbit>& orbits)
+{
+    NS_LOG_FUNCTION(this << orbits);
+
+    NodeContainer nodes;
+    for (uint64_t i = 0; i < orbits.size(); i++)
+    {
+        nodes.Add(Install(orbits[i]));
+        NS_LOG_DEBUG("Added orbit plane");
+    }
+
+    NS_LOG_DEBUG("Added " << nodes.GetN() << " nodes");
+
+    return nodes;
 }
 
 }; // namespace ns3

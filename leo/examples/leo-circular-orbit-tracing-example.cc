@@ -16,70 +16,71 @@
  * Author: Tim Schubert <ns-3-leo@timschubert.net>
  */
 
-#include <fstream>
-
 #include "ns3/core-module.h"
-#include "ns3/mobility-module.h"
 #include "ns3/leo-module.h"
+#include "ns3/mobility-module.h"
+
+#include <fstream>
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("LeoCircularOrbitTracingExample");
+NS_LOG_COMPONENT_DEFINE("LeoCircularOrbitTracingExample");
 
-void CourseChange (std::string context, Ptr<const MobilityModel> position)
+void
+CourseChange(std::string context, Ptr<const MobilityModel> position)
 {
-  auto mobility = DynamicCast<const GeocentricConstantPositionMobilityModel> (position);
-  if (mobility)
+    auto mobility = DynamicCast<const GeocentricMobilityModel>(position);
+    if (mobility)
     {
-      auto pos = mobility->GetGeocentricPosition();
-      auto geo = mobility->GetGeographicPosition();
-      Ptr<const Node> node = position->GetObject<Node>();
-      std::cout << Simulator::Now () << "," << node->GetId () << "," << pos.x << "," << pos.y << "," << pos.z << "," << mobility->GetVelocity() << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
+        auto pos = mobility->GetPosition(ns3::PositionType::GEOCENTRIC);
+        auto geo = mobility->GetPosition(ns3::PositionType::GEOGRAPHIC);
+        Ptr<const Node> node = position->GetObject<Node>();
+        std::cout << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << ","
+                  << pos.y << "," << pos.z << "," << mobility->GetVelocity() << "," << geo.x << ","
+                  << geo.y << "," << geo.z << std::endl;
     }
-
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char* argv[])
 {
-  CommandLine cmd;
-  std::string orbitFile;
-  std::string traceFile;
-  std::string duration = "60s";
-  cmd.AddValue("orbitFile", "CSV file with orbit parameters", orbitFile);
-  cmd.AddValue("traceFile", "CSV file to store mobility trace in", traceFile);
-  cmd.AddValue("precision", "ns3::LeoCircularOrbitMobilityModel::Precision");
-  cmd.AddValue("duration", "Duration of the simulation in seconds", duration);
-  cmd.Parse (argc, argv);
+    CommandLine cmd;
+    std::string orbitFile;
+    std::string traceFile;
+    std::string duration = "60s";
+    cmd.AddValue("orbitFile", "CSV file with orbit parameters", orbitFile);
+    cmd.AddValue("traceFile", "CSV file to store mobility trace in", traceFile);
+    cmd.AddValue("precision", "ns3::GeoLeoOrbitMobility::Precision");
+    cmd.AddValue("duration", "Duration of the simulation in seconds", duration);
+    cmd.Parse(argc, argv);
 
-  LeoOrbitNodeHelper orbit;
-  NodeContainer satellites;
-  if (!orbitFile.empty())
+    LeoOrbitNodeHelper orbit;
+    NodeContainer satellites;
+    if (!orbitFile.empty())
     {
-      satellites = orbit.Install (orbitFile);
+        satellites = orbit.Install(orbitFile);
     }
-  else
+    else
     {
-      satellites = orbit.Install ({ LeoOrbit (1200, 20, 32, 16),
-      				  LeoOrbit (1180, 30, 12, 10) });
+        satellites = orbit.Install({LeoOrbit(1200, 20, 32, 16), LeoOrbit(1180, 30, 12, 10)});
     }
 
-  Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
-                   MakeCallback (&CourseChange));
+    Config::Connect("/NodeList/*/$ns3::MobilityModel/CourseChange", MakeCallback(&CourseChange));
 
-  std::streambuf *coutbuf = std::cout.rdbuf();
-  // redirect cout if traceFile is specified
-  std::ofstream out;
-  out.open (traceFile);
-  if (out.is_open ())
+    std::streambuf* coutbuf = std::cout.rdbuf();
+    // redirect cout if traceFile is specified
+    std::ofstream out;
+    out.open(traceFile);
+    if (out.is_open())
     {
-      std::cout.rdbuf(out.rdbuf());
+        std::cout.rdbuf(out.rdbuf());
     }
-  std::cout << "Time,Node,X,Y,Z,Speed,Latitude,Longitude,Altitude" << std::endl;
+    std::cout << "Time,Node,X,Y,Z,Speed,Latitude,Longitude,Altitude" << std::endl;
 
-  Simulator::Stop (Time (duration));
-  Simulator::Run ();
-  Simulator::Destroy ();
+    Simulator::Stop(Time(duration));
+    Simulator::Run();
+    Simulator::Destroy();
 
-  out.close ();
-  std::cout.rdbuf(coutbuf);
+    out.close();
+    std::cout.rdbuf(coutbuf);
 }
