@@ -32,6 +32,13 @@
       "group": "build",
       "problemMatcher": []
     },
+        {
+      "label": "dev-5-Configure IoD Sim",
+      "type": "shell",
+      "command": "./tools/configure-iodsim.sh",
+      "group": "build",
+      "problemMatcher": []
+    },
     {
       "label": "6-Build IoD Sim",
       "type": "shell",
