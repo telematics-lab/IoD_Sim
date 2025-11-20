@@ -42,7 +42,4 @@ integrate_contrib_module() {
   fi
 }
 
-#TODO: Evaluate if to retrieve leo from another repository or add it in the iodsim src code
-#integrate_contrib_module "leo" "git@github.com:domysh/leo.git" "iodsim"
-#mkdir ns3/contrib/leo
-ln -s ../../leo ./ns3/contrib/
+integrate_contrib_module "leo" "https://github.com/domysh/leo.git" "iodsim"
