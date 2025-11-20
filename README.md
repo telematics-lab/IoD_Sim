@@ -23,6 +23,7 @@ research publications are highly recommended:
 - [G. Grieco, G. Iacovelli, P. Boccadoro and L. A. Grieco, "Internet of Drones Simulator: Design, Implementation, and Performance Evaluation," in IEEE Internet of Things Journal, vol. 10, no. 2, pp. 1476-1498, 15 Jan.15, 2023, doi: 10.1109/JIOT.2022.3207324.](https://doi.org/10.1109/JIOT.2022.3207324)
 - [G. Grieco, G. Iacovelli, M. Sandri, M. Giordani, M. Zorzi and L. A. Grieco, "Preliminary Performance Evaluation of avSatellite-to-HAP Communication Link," European Wireless 2023; 28th European Wireless Conference, Rome, Italy, 2023, pp. 340-345.](https://ieeexplore.ieee.org/abstract/document/10461435)
 - [G. Grieco, G. Iacovelli, D. Pugliese, D. Striccoli and L. A. Grieco, "A System-Level Simulation Module for Multi-UAV IRS-Assisted Communications," in IEEE Transactions on Vehicular Technology, vol. 73, no. 5, pp. 6740-6751, May 2024, doi: 10.1109/TVT.2023.3342298.](https://dx.doi.org/10.1109/TVT.2023.3342298)
+- [G. Grieco, D. Pugliese, A. Rashid and I. Cianci, "IoD-Sim: An Open-Source Simulator for 6G Integrated Terrestrial/Non-Terrestrial Networks", Computer Networks, Volume 274, 2026, 111876, ISSN 1389-1286.](https://doi.org/10.1016/j.comnet.2025.111876)
 
 Older publications that might still be useful:
 
@@ -113,18 +114,18 @@ sudo docker run --rm -v ./results:/IoD_Sim/results -v ./scenario:/IoD_Sim/scenar
 
 When completed, the `results` folder will contain the results of the simulation. It should be noted that if a new scenario is placed in `./scenario`, there will be no need to rebuild the container.
 
-## ns-3 compatibility
+## ns-3 and 5G LENA compatibility
 Each version of IoD_Sim relies on a specific release of ns-3. A compatibility table can be found below:
 
-| IoD_Sim version| ns-3 version | Build system  | Release date       |
-| :------------: | :-----------:| :-----------: |--------------------|
-| v4.1.0         | ns-3.45      | cmake         | Under development  |
-| v4.0.2         | ns-3.42      | cmake         | January 9, 2025    |
-| v4.0.1         | ns-3.42      | cmake         | June 5, 2024       |
-| v4.0.0         | ns-3.42      | cmake         | June 2, 2024       |
-| v3.0.0         | ns-3.38      | cmake         | April 4, 2023      |
-| v2.0.0         | ns-3.35      | waf           | April 12, 2022     |
-| v1.0.0         | ns-3.30      | waf           | October 27, 2019   |
+| IoD_Sim version| ns-3 version | 5G LENA version | Build system  | Release date       |
+| :------------: | :-----------:| :-----------:   | :-----------: |--------------------|
+| v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | Under development  |
+| v4.0.2         | ns-3.42      |      N/A        | cmake         | January 9, 2025    |
+| v4.0.1         | ns-3.42      |      N/A        | cmake         | June 5, 2024       |
+| v4.0.0         | ns-3.42      |      N/A        | cmake         | June 2, 2024       |
+| v3.0.0         | ns-3.38      |      N/A        | cmake         | April 4, 2023      |
+| v2.0.0         | ns-3.35      |      N/A        | waf           | April 12, 2022     |
+| v1.0.0         | ns-3.30      |      N/A        | waf           | October 27, 2019   |
 
 
 ## License
