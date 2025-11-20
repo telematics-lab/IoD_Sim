@@ -1,4 +1,4 @@
-![IoD_Sim ](.github/logo_extended.svg)
+![IoD_Sim ](docs/logo_extended.png)
 
 [IoD_Sim](https://telematics.poliba.it/iod-sim) is an open source and
 system-level simulator for the IoD ([Internet of
@@ -118,6 +118,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | Build system  | Release date       |
 | :------------: | :-----------:| :-----------: |--------------------|
+| v4.1.0         | ns-3.45      | cmake         | Under development  |
 | v4.0.2         | ns-3.42      | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      | cmake         | June 5, 2024       |
 | v4.0.0         | ns-3.42      | cmake         | June 2, 2024       |
