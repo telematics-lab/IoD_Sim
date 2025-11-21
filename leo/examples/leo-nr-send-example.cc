@@ -405,7 +405,7 @@ main(int argc, char* argv[])
     if (numCars > 1)
     {
         cars.Create(numCars); // Create multiple cars
-        for (int i = 0; i < cars.GetN(); ++i)
+        for (uint32_t i = 0; i < cars.GetN(); ++i)
         {
             auto car = cars.Get(i);
             auto rndLat = (rand() % 180000) / 1000.0 - 90.0;  // Random latitude
@@ -414,13 +414,18 @@ main(int argc, char* argv[])
 
             MobilityHelper mobility;
             mobility.SetMobilityModel("ns3::GeoConstantVelocityMobility",
-                                      "InitialLatitude", DoubleValue(rndLat),
-                                      "InitialLongitude", DoubleValue(rndLon),
-                                      "Altitude", DoubleValue(2),
-                                      "Speed", DoubleValue(carSpeed),
-                                      "Azimuth", DoubleValue(rndAzimuth),
-                                      "Precision", TimeValue(mobilityPrecision)
-                                    );
+                                      "InitialLatitude",
+                                      DoubleValue(rndLat),
+                                      "InitialLongitude",
+                                      DoubleValue(rndLon),
+                                      "Altitude",
+                                      DoubleValue(2),
+                                      "Speed",
+                                      DoubleValue(carSpeed),
+                                      "Azimuth",
+                                      DoubleValue(rndAzimuth),
+                                      "Precision",
+                                      TimeValue(mobilityPrecision));
             mobility.SetPositionAllocator(nullptr);
             mobility.Install(car);
         }
@@ -430,13 +435,18 @@ main(int argc, char* argv[])
         cars.Create(1); // Create a single car
         MobilityHelper mobility;
         mobility.SetMobilityModel("ns3::GeoConstantVelocityMobility",
-                                  "InitialLatitude", DoubleValue(carLatitude),
-                                  "InitialLongitude", DoubleValue(carLongitude),
-                                    "Altitude", DoubleValue(2),
-                                    "Speed", DoubleValue(carSpeed),
-                                    "Azimuth", DoubleValue(0),
-                                    "Precision", TimeValue(mobilityPrecision)
-                                );
+                                  "InitialLatitude",
+                                  DoubleValue(carLatitude),
+                                  "InitialLongitude",
+                                  DoubleValue(carLongitude),
+                                  "Altitude",
+                                  DoubleValue(2),
+                                  "Speed",
+                                  DoubleValue(carSpeed),
+                                  "Azimuth",
+                                  DoubleValue(0),
+                                  "Precision",
+                                  TimeValue(mobilityPrecision));
         mobility.SetPositionAllocator(nullptr);
         mobility.Install(cars);
     }
