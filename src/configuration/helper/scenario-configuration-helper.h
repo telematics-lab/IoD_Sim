@@ -160,6 +160,11 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         const double GetDuration() const;
 
         /**
+         * \return The reporting interval for application statistics in seconds.
+         */
+        const double GetAppStatisticsReportInterval() const;
+
+        /**
          * \return The number of entities in the given entityKey category.
          */
         std::size_t GetN(const char* entityKey) const;

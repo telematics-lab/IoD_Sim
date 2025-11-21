@@ -37,6 +37,30 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE("AppStatisticsHelper");
 NS_OBJECT_ENSURE_REGISTERED(AppStatisticsHelper);
 
+int32_t
+AppStatisticsHelper::GetNodeIdFromIpAddress(Ipv4Address ipAddress)
+{
+    for (auto iter = NodeList::Begin(); iter != NodeList::End(); ++iter)
+    {
+        Ptr<Node> node = *iter;
+        Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+        if (ipv4)
+        {
+            for (uint32_t i = 0; i < ipv4->GetNInterfaces(); ++i)
+            {
+                for (uint32_t j = 0; j < ipv4->GetNAddresses(i); ++j)
+                {
+                    if (ipv4->GetAddress(i, j).GetLocal() == ipAddress)
+                    {
+                        return node->GetId();
+                    }
+                }
+            }
+        }
+    }
+    return -1; // Not found
+}
+
 TypeId
 AppStatisticsHelper::GetTypeId()
 {
@@ -50,7 +74,9 @@ AppStatisticsHelper::GetTypeId()
 AppStatisticsHelper::AppStatisticsHelper()
     : m_outputPath("app-statistics.txt"),
       m_reportInterval(Seconds(1.0)),
-      m_started(false)
+      m_started(false),
+      m_lastReportTime(Seconds(0)),
+      m_flowMonitor(nullptr)
 {
     NS_LOG_FUNCTION(this);
 }
@@ -58,9 +84,9 @@ AppStatisticsHelper::AppStatisticsHelper()
 AppStatisticsHelper::~AppStatisticsHelper()
 {
     NS_LOG_FUNCTION(this);
-    if (m_outputFile.is_open())
+    if (m_periodicFile.is_open())
     {
-        m_outputFile.close();
+        m_periodicFile.close();
     }
 }
 
@@ -79,192 +105,11 @@ AppStatisticsHelper::SetReportingInterval(Time interval)
 }
 
 void
-AppStatisticsHelper::InstallAll()
+AppStatisticsHelper::InstallFlowMonitor(NodeContainer nodes)
 {
     NS_LOG_FUNCTION(this);
-
-    // Structure to store server info with IP address and port
-    struct ServerInfo
-    {
-        uint32_t nodeId;
-        Ptr<Application> app;
-        std::string ipAddress;
-        uint16_t port;
-    };
-
-    std::vector<ServerInfo> servers;
-
-    // Maps to store client info
-    struct ClientInfo
-    {
-        uint32_t nodeId;
-        Ptr<Application> app;
-        std::string remoteIp;
-        uint16_t remotePort;
-    };
-
-    std::vector<ClientInfo> clients;
-
-    // First pass: identify all servers with their IP addresses and ports
-    for (auto iter = NodeList::Begin(); iter != NodeList::End(); ++iter)
-    {
-        Ptr<Node> node = *iter;
-        uint32_t nodeId = node->GetId();
-
-        for (uint32_t i = 0; i < node->GetNApplications(); ++i)
-        {
-            Ptr<Application> app = node->GetApplication(i);
-
-            // Try to get the Port attribute
-            UintegerValue portValue;
-            if (app->GetAttributeFailSafe("Port", portValue))
-            {
-                uint16_t port = portValue.Get();
-
-                // Get the IP address of this node
-                Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
-                std::string ipAddress = "unknown";
-
-                if (ipv4 && ipv4->GetNInterfaces() > 1)
-                {
-                    // Skip loopback (interface 0), get first real interface
-                    Ipv4Address addr = ipv4->GetAddress(1, 0).GetLocal();
-                    std::ostringstream oss;
-                    oss << addr;
-                    ipAddress = oss.str();
-                }
-
-                ServerInfo serverInfo;
-                serverInfo.nodeId = nodeId;
-                serverInfo.app = app;
-                serverInfo.ipAddress = ipAddress;
-                serverInfo.port = port;
-                servers.push_back(serverInfo);
-
-                NS_LOG_INFO("Found UdpServer on node " << nodeId << " at " << ipAddress << ":"
-                                                       << port);
-            }
-        }
-    }
-
-    // Second pass: identify all clients and match them with servers
-    for (auto iter = NodeList::Begin(); iter != NodeList::End(); ++iter)
-    {
-        Ptr<Node> node = *iter;
-        uint32_t nodeId = node->GetId();
-
-        for (uint32_t i = 0; i < node->GetNApplications(); ++i)
-        {
-            Ptr<Application> app = node->GetApplication(i);
-            std::string typeName = app->GetInstanceTypeId().GetName();
-
-            // Try to get the Remote attribute (contains both address and port)
-            AddressValue remoteValue;
-
-            if (app->GetAttributeFailSafe("Remote", remoteValue))
-            {
-                Address remoteAddr = remoteValue.Get();
-                uint16_t remotePort = 0;
-
-                // Convert address to string and extract port
-                std::ostringstream oss;
-                if (InetSocketAddress::IsMatchingType(remoteAddr))
-                {
-                    InetSocketAddress inetAddr = InetSocketAddress::ConvertFrom(remoteAddr);
-                    oss << inetAddr.GetIpv4();
-                    remotePort = inetAddr.GetPort();
-                }
-
-                ClientInfo clientInfo;
-                clientInfo.nodeId = nodeId;
-                clientInfo.app = app;
-                clientInfo.remoteIp = oss.str();
-                clientInfo.remotePort = remotePort;
-                clients.push_back(clientInfo);
-
-                NS_LOG_INFO("Found UdpClient on node " << nodeId << " targeting "
-                                                       << clientInfo.remoteIp << ":" << remotePort);
-            }
-        }
-    }
-
-    // Third pass: create flows by matching clients with servers
-    for (const auto& clientInfo : clients)
-    {
-        uint32_t clientNodeId = clientInfo.nodeId;
-        std::string targetIp = clientInfo.remoteIp;
-        uint16_t targetPort = clientInfo.remotePort;
-
-        // Find the server with matching IP and port (both must match)
-        ServerInfo* matchedServer = nullptr;
-        for (auto& serverInfo : servers)
-        {
-            if (serverInfo.ipAddress == targetIp && serverInfo.port == targetPort)
-            {
-                matchedServer = &serverInfo;
-                NS_LOG_INFO("Matched client on node " << clientNodeId << " -> server on node "
-                                                      << serverInfo.nodeId << " (" << targetIp
-                                                      << ":" << targetPort << ")");
-                break;
-            }
-        }
-
-        if (matchedServer == nullptr)
-        {
-            NS_LOG_WARN("Client on node " << clientNodeId << " targets " << targetIp << ":"
-                                          << targetPort << " but no matching server found");
-            continue;
-        }
-
-        uint32_t serverNodeId = matchedServer->nodeId;
-        Ptr<Application> serverApp = matchedServer->app;
-
-        // Create flow identifier
-        std::stringstream flowId;
-        flowId << "node" << clientNodeId << "->node" << serverNodeId << ":" << targetPort;
-        std::string flowIdStr = flowId.str();
-
-        // Initialize flow statistics
-        FlowStats stats;
-        stats.clientNodeId = clientNodeId;
-        stats.serverNodeId = serverNodeId;
-        stats.packetsSent = 0;
-        stats.packetsReceived = 0;
-        stats.bytesReceived = 0;
-        stats.firstTxTime = Seconds(-1); // Not set yet
-        stats.lastRxTime = Seconds(0);
-        m_flowStats[flowIdStr] = stats;
-
-        // Connect client Tx trace
-        bool txConnected = clientInfo.app->TraceConnectWithoutContext(
-            "Tx",
-            MakeCallback(&AppStatisticsHelper::TxCallback, this).Bind(flowIdStr));
-
-        if (txConnected)
-        {
-            NS_LOG_INFO("Connected Tx trace: " << flowIdStr);
-        }
-        else
-        {
-            NS_LOG_WARN("Failed to connect Tx trace for " << flowIdStr);
-        }
-
-        // Connect server Rx trace
-        bool rxConnected = serverApp->TraceConnectWithoutContext(
-            "Rx",
-            MakeCallback(&AppStatisticsHelper::RxCallback, this).Bind(flowIdStr));
-
-        if (rxConnected)
-        {
-            NS_LOG_INFO("Connected Rx trace: " << flowIdStr);
-        }
-        else
-        {
-            NS_LOG_WARN("Failed to connect Rx trace for " << flowIdStr);
-        }
-    }
-
-    NS_LOG_INFO("Total flows configured: " << m_flowStats.size());
+    m_flowMonitor = m_flowMonitorHelper.InstallAll();
+    NS_LOG_INFO("FlowMonitor installed on all nodes");
 }
 
 void
@@ -277,17 +122,32 @@ AppStatisticsHelper::Start()
         return;
     }
 
-    // Open output file
-    m_outputFile.open(m_outputPath, std::ios::out);
-    NS_ABORT_MSG_IF(!m_outputFile.is_open(), "Cannot open file " << m_outputPath);
+    if (!m_flowMonitor)
+    {
+        NS_ABORT_MSG("FlowMonitor not installed. Call InstallFlowMonitor() before Start()");
+    }
 
-    WriteHeader();
+    std::string basePath = m_outputPath.substr(0, m_outputPath.find_last_of("."));
+
+    // Open periodic statistics file
+    std::string periodicFileName = basePath + "-periodic.txt";
+    m_periodicFile.open(periodicFileName, std::ios::out);
+    m_periodicFile.setf(std::ios_base::fixed);
+    NS_ABORT_MSG_IF(!m_periodicFile.is_open(), "Cannot open file " << periodicFileName);
+    m_periodicFile << "Time_s\tFlowID\tSrcNodeID\tSrcIP:Port\tDstNodeID\tDstIP:Port\tProto\t"
+                   << "IntervalTxPkts\tIntervalRxPkts\tIntervalLostPkts\t"
+                   << "TotalTxPkts\tTotalRxPkts\tTotalLostPkts\t"
+                   << "IntervalTxBytes\tIntervalRxBytes\t"
+                   << "Throughput_Mbps\tDelay_ms\tJitter_ms\tPLR_%\n";
 
     // Schedule periodic reports
+    m_lastReportTime = Simulator::Now();
     m_reportEvent =
-        Simulator::Schedule(m_reportInterval, &AppStatisticsHelper::GenerateReport, this);
+        Simulator::Schedule(m_reportInterval, &AppStatisticsHelper::GeneratePeriodicReport, this);
 
     m_started = true;
+    NS_LOG_INFO("AppStatisticsHelper started with periodic reporting every "
+                << m_reportInterval.GetSeconds() << " seconds");
 }
 
 void
@@ -303,164 +163,275 @@ AppStatisticsHelper::Stop()
     // Cancel periodic reporting
     Simulator::Cancel(m_reportEvent);
 
-    // Generate final report
-    GenerateReport();
+    WriteFlowMonitorStats();
 
-    // Write summary
-    m_outputFile << "\n=== FINAL SUMMARY ===\n";
-    for (auto& entry : m_flowStats)
+    // Close periodic file
+    if (m_periodicFile.is_open())
     {
-        const std::string& flowId = entry.first;
-        const FlowStats& stats = entry.second;
+        m_periodicFile.close();
+    }
 
-        double pdr = 0.0;
-        if (stats.packetsSent > 0)
+    m_started = false;
+    NS_LOG_INFO("AppStatisticsHelper stopped");
+}
+
+void
+AppStatisticsHelper::GeneratePeriodicReport()
+{
+    NS_LOG_FUNCTION(this);
+
+    if (!m_flowMonitor)
+    {
+        NS_LOG_WARN("FlowMonitor not available for periodic report");
+        return;
+    }
+
+    Time now = Simulator::Now();
+    double intervalDuration = (now - m_lastReportTime).GetSeconds();
+
+    if (intervalDuration <= 0)
+    {
+        intervalDuration = m_reportInterval.GetSeconds();
+    }
+
+    m_flowMonitor->CheckForLostPackets();
+    Ptr<Ipv4FlowClassifier> classifier =
+        DynamicCast<Ipv4FlowClassifier>(m_flowMonitorHelper.GetClassifier());
+    FlowMonitor::FlowStatsContainer stats = m_flowMonitor->GetFlowStats();
+
+    for (auto i = stats.begin(); i != stats.end(); ++i)
+    {
+        uint32_t flowId = i->first;
+        const FlowMonitor::FlowStats& currentStats = i->second;
+        Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow(flowId);
+
+        // Get NodeIDs from IP addresses
+        int32_t srcNodeId = GetNodeIdFromIpAddress(t.sourceAddress);
+        int32_t dstNodeId = GetNodeIdFromIpAddress(t.destinationAddress);
+
+        std::stringstream protoStream;
+        protoStream << (uint16_t)t.protocol;
+        if (t.protocol == 6)
         {
-            pdr = (static_cast<double>(stats.packetsReceived) / stats.packetsSent) * 100.0;
+            protoStream.str("TCP");
+        }
+        else if (t.protocol == 17)
+        {
+            protoStream.str("UDP");
         }
 
-        uint32_t packetsLost = stats.packetsSent - stats.packetsReceived;
-
-        // Calculate average data rate based on actual transmission time
-        double avgDataRate = 0.0;
-        if (!stats.firstTxTime.IsNegative() && stats.lastRxTime > stats.firstTxTime)
+        // Get previous stats or initialize if first time
+        PreviousFlowStats prevStats;
+        auto prevIt = m_previousStats.find(flowId);
+        if (prevIt != m_previousStats.end())
         {
-            double transmissionTime = (stats.lastRxTime - stats.firstTxTime).GetSeconds();
-            if (transmissionTime > 0)
+            prevStats = prevIt->second;
+        }
+        else
+        {
+            // First measurement for this flow
+            prevStats.txPackets = 0;
+            prevStats.rxPackets = 0;
+            prevStats.txBytes = 0;
+            prevStats.rxBytes = 0;
+            prevStats.delaySum = Seconds(0);
+            prevStats.jitterSum = Seconds(0);
+        }
+
+        // Calculate deltas (incremental values for this interval)
+        // Note: deltaRxPackets can be > deltaTxPackets if receiving packets from previous intervals
+        uint32_t deltaTxPackets = currentStats.txPackets - prevStats.txPackets;
+        uint32_t deltaRxPackets = currentStats.rxPackets - prevStats.rxPackets;
+
+        // Calculate lost packets safely (can be negative if more packets received than sent in this
+        // interval)
+        int64_t deltaLostPackets =
+            static_cast<int64_t>(deltaTxPackets) - static_cast<int64_t>(deltaRxPackets);
+
+        uint64_t deltaTxBytes = currentStats.txBytes - prevStats.txBytes;
+        uint64_t deltaRxBytes = currentStats.rxBytes - prevStats.rxBytes;
+        Time deltaDelaySum = currentStats.delaySum - prevStats.delaySum;
+        Time deltaJitterSum = currentStats.jitterSum - prevStats.jitterSum;
+
+        // Calculate metrics for this interval
+        double throughput = 0.0;
+        double delay = 0.0;
+        double jitter = 0.0;
+        double plr = 0.0;
+
+        if (deltaRxPackets > 0)
+        {
+            throughput = deltaRxBytes * 8.0 / intervalDuration / 1000.0 / 1000.0;
+            delay = 1000.0 * deltaDelaySum.GetSeconds() / deltaRxPackets;
+            jitter = 1000.0 * deltaJitterSum.GetSeconds() / deltaRxPackets;
+        }
+
+        // Calculate PLR based on total statistics to avoid interval artifacts
+        // Interval PLR can be misleading when packets arrive delayed
+        if (currentStats.txPackets > 0)
+        {
+            int64_t totalLost = static_cast<int64_t>(currentStats.txPackets) -
+                                static_cast<int64_t>(currentStats.rxPackets);
+            if (totalLost > 0)
             {
-                avgDataRate = (stats.bytesReceived * 8.0) / (transmissionTime * 1e6); // Mbps
+                plr = 100.0 * totalLost / currentStats.txPackets;
+            }
+            else
+            {
+                plr = 0.0;
             }
         }
 
-        m_outputFile << "Flow " << flowId << " (Node " << stats.clientNodeId << " -> Node "
-                     << stats.serverNodeId << "):\n";
-        m_outputFile << "  Packets Sent: " << stats.packetsSent << "\n";
-        m_outputFile << "  Packets Received: " << stats.packetsReceived << "\n";
-        m_outputFile << "  Packets Lost: " << packetsLost << "\n";
-        m_outputFile << "  PDR: " << std::fixed << std::setprecision(2) << pdr << "%\n";
-        m_outputFile << "  Total Bytes Received: " << stats.bytesReceived << "\n";
+        // Calculate total lost packets (can be negative temporarily)
+        int64_t totalLostPackets = static_cast<int64_t>(currentStats.txPackets) -
+                                   static_cast<int64_t>(currentStats.rxPackets);
 
-        if (!stats.firstTxTime.IsNegative())
-        {
-            m_outputFile << "  First Tx Time: " << std::setprecision(6)
-                         << stats.firstTxTime.GetSeconds() << " s\n";
-        }
+        // Write interval statistics
+        m_periodicFile << std::fixed << std::setprecision(6) << now.GetSeconds() << "\t" << flowId
+                       << "\t" << srcNodeId << "\t" << t.sourceAddress << ":" << t.sourcePort
+                       << "\t" << dstNodeId << "\t" << t.destinationAddress << ":"
+                       << t.destinationPort << "\t" << protoStream.str() << "\t" << deltaTxPackets
+                       << "\t" << deltaRxPackets << "\t" << deltaLostPackets << "\t"
+                       << currentStats.txPackets << "\t" << currentStats.rxPackets << "\t"
+                       << totalLostPackets << "\t" << deltaTxBytes << "\t" << deltaRxBytes << "\t"
+                       << std::setprecision(3) << throughput << "\t" << std::setprecision(3)
+                       << delay << "\t" << std::setprecision(3) << jitter << "\t"
+                       << std::setprecision(2) << plr << "\n";
 
-        if (stats.lastRxTime > Seconds(0))
-        {
-            m_outputFile << "  Last Rx Time: " << std::setprecision(6)
-                         << stats.lastRxTime.GetSeconds() << " s\n";
-        }
-
-        if (avgDataRate > 0)
-        {
-            m_outputFile << "  Average Data Rate: " << std::setprecision(3) << avgDataRate
-                         << " Mbps\n";
-        }
-
-        m_outputFile << "\n";
+        // Update previous stats for next interval
+        m_previousStats[flowId].txPackets = currentStats.txPackets;
+        m_previousStats[flowId].rxPackets = currentStats.rxPackets;
+        m_previousStats[flowId].txBytes = currentStats.txBytes;
+        m_previousStats[flowId].rxBytes = currentStats.rxBytes;
+        m_previousStats[flowId].delaySum = currentStats.delaySum;
+        m_previousStats[flowId].jitterSum = currentStats.jitterSum;
     }
 
-    m_outputFile.close();
-    m_started = false;
-}
-
-void
-AppStatisticsHelper::TxCallback(std::string flowId, Ptr<const Packet> packet)
-{
-    NS_LOG_FUNCTION(this << flowId << packet->GetSize());
-
-    if (m_flowStats.find(flowId) != m_flowStats.end())
-    {
-        m_flowStats[flowId].packetsSent++;
-
-        // Record time of first transmission
-        if (m_flowStats[flowId].firstTxTime.IsNegative())
-        {
-            m_flowStats[flowId].firstTxTime = Simulator::Now();
-            NS_LOG_DEBUG("First packet sent at " << m_flowStats[flowId].firstTxTime.GetSeconds()
-                                                 << "s for flow " << flowId);
-        }
-    }
-}
-
-void
-AppStatisticsHelper::RxCallback(std::string flowId, Ptr<const Packet> packet)
-{
-    NS_LOG_FUNCTION(this << flowId << packet->GetSize());
-
-    if (m_flowStats.find(flowId) != m_flowStats.end())
-    {
-        m_flowStats[flowId].packetsReceived++;
-        m_flowStats[flowId].bytesReceived += packet->GetSize();
-
-        // Always update the last reception time
-        m_flowStats[flowId].lastRxTime = Simulator::Now();
-    }
-}
-
-void
-AppStatisticsHelper::GenerateReport()
-{
-    NS_LOG_FUNCTION(this);
-
-    Time now = Simulator::Now();
-
-    for (auto& entry : m_flowStats)
-    {
-        const std::string& flowId = entry.first;
-        FlowStats& stats = entry.second;
-
-        // Calculate total PDR
-        double totalPdr = 0.0;
-        if (stats.packetsSent > 0)
-        {
-            totalPdr = (static_cast<double>(stats.packetsReceived) / stats.packetsSent) * 100.0;
-        }
-
-        // Calculate total packets lost
-        uint32_t packetsLost = stats.packetsSent - stats.packetsReceived;
-
-        // Calculate average data rate (in Mbps) from the beginning
-        double dataRate = 0.0;
-        if (now.GetSeconds() > 0)
-        {
-            dataRate = (stats.bytesReceived * 8.0) / (now.GetSeconds() * 1e6);
-        }
-
-        // Write to file
-        m_outputFile << std::fixed << std::setprecision(6) << now.GetSeconds() << "\t" << flowId
-                     << "\t" << stats.clientNodeId << "\t" << stats.serverNodeId << "\t"
-                     << stats.packetsSent << "\t" << stats.packetsReceived << "\t" << packetsLost
-                     << "\t" << std::setprecision(2) << totalPdr << "\t" << std::setprecision(3)
-                     << dataRate << "\n";
-
-        m_outputFile.flush();
-    }
+    m_periodicFile.flush();
+    m_lastReportTime = now;
 
     // Schedule next report
     m_reportEvent =
-        Simulator::Schedule(m_reportInterval, &AppStatisticsHelper::GenerateReport, this);
+        Simulator::Schedule(m_reportInterval, &AppStatisticsHelper::GeneratePeriodicReport, this);
 }
 
 void
-AppStatisticsHelper::WriteHeader()
+AppStatisticsHelper::WriteFlowMonitorStats()
 {
     NS_LOG_FUNCTION(this);
 
-    m_outputFile << "# Application-Level Statistics\n";
-    m_outputFile << "# Time: Simulation time (s)\n";
-    m_outputFile << "# FlowID: Flow identifier (ClientNode->ServerNode:Port)\n";
-    m_outputFile << "# ClientNodeID: ID of the client node\n";
-    m_outputFile << "# ServerNodeID: ID of the server node\n";
-    m_outputFile << "# TotalPktsSent: Total packets sent from the beginning\n";
-    m_outputFile << "# TotalPktsRcvd: Total packets received from the beginning\n";
-    m_outputFile << "# TotalPktsLost: Total packets lost from the beginning\n";
-    m_outputFile << "# PDR: Packet Delivery Ratio (%)\n";
-    m_outputFile << "# AvgDataRate: Average data rate from the beginning (Mbps)\n";
-    m_outputFile << "#\n";
-    m_outputFile << "Time\tFlowID\tClientNodeID\tServerNodeID\tTotalPktsSent\tTotalPktsRcvd\t"
-                    "TotalPktsLost\tPDR(%)\tAvgDataRate(Mbps)\n";
+    if (!m_flowMonitor)
+    {
+        NS_LOG_WARN("FlowMonitor not installed, skipping FlowMonitor statistics");
+        return;
+    }
+
+    // Check for lost packets
+
+    Ptr<Ipv4FlowClassifier> classifier =
+        DynamicCast<Ipv4FlowClassifier>(m_flowMonitorHelper.GetClassifier());
+    FlowMonitor::FlowStatsContainer stats = m_flowMonitor->GetFlowStats();
+
+    std::string basePath = m_outputPath.substr(0, m_outputPath.find_last_of("."));
+    std::string flowMonFileName = basePath + "-final.txt";
+    std::ofstream flowMonFile;
+    flowMonFile.open(flowMonFileName, std::ios::out | std::ios::trunc);
+    flowMonFile.setf(std::ios_base::fixed);
+
+    if (!flowMonFile.is_open())
+    {
+        NS_LOG_ERROR("Cannot open file " << flowMonFileName);
+        return;
+    }
+
+    double averageFlowThroughput = 0.0;
+    double averageFlowDelay = 0.0;
+    double averageFlowJitter = 0.0;
+    double averagePacketLoss = 0.0;
+    uint32_t flowCount = 0;
+
+    for (auto i = stats.begin(); i != stats.end(); ++i)
+    {
+        Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow(i->first);
+
+        // Get NodeIDs from IP addresses
+        int32_t srcNodeId = GetNodeIdFromIpAddress(t.sourceAddress);
+        int32_t dstNodeId = GetNodeIdFromIpAddress(t.destinationAddress);
+
+        std::stringstream protoStream;
+        protoStream << (uint16_t)t.protocol;
+        if (t.protocol == 6)
+        {
+            protoStream.str("TCP");
+        }
+        if (t.protocol == 17)
+        {
+            protoStream.str("UDP");
+        }
+
+        flowMonFile << "Flow " << i->first << " (Node " << srcNodeId << " [" << t.sourceAddress
+                    << ":" << t.sourcePort << "] -> Node " << dstNodeId << " ["
+                    << t.destinationAddress << ":" << t.destinationPort << "]) proto "
+                    << protoStream.str() << "\n";
+        flowMonFile << "  Tx Packets: " << i->second.txPackets << "\n";
+        flowMonFile << "  Tx Bytes:   " << i->second.txBytes << "\n";
+
+        double flowDuration = (Simulator::Now() - Seconds(0)).GetSeconds();
+        if (flowDuration > 0)
+        {
+            flowMonFile << "  TxOffered:  "
+                        << i->second.txBytes * 8.0 / flowDuration / 1000.0 / 1000.0 << " Mbps\n";
+        }
+
+        flowMonFile << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+        flowMonFile << "  Rx Packets: " << i->second.rxPackets << "\n";
+
+        // Calculate packet loss
+        uint32_t lostPackets = i->second.txPackets - i->second.rxPackets;
+        double packetLossRatio = 0.0;
+        if (i->second.txPackets > 0)
+        {
+            packetLossRatio = 100.0 * lostPackets / i->second.txPackets;
+        }
+        flowMonFile << "  Lost Packets: " << lostPackets << "\n";
+        flowMonFile << "  Packet Loss Ratio: " << std::setprecision(2) << packetLossRatio << " %\n";
+
+        if (i->second.rxPackets > 0)
+        {
+            double throughput = i->second.rxBytes * 8.0 / flowDuration / 1000.0 / 1000.0;
+            double delay = 1000.0 * i->second.delaySum.GetSeconds() / i->second.rxPackets;
+            double jitter = 1000.0 * i->second.jitterSum.GetSeconds() / i->second.rxPackets;
+
+            averageFlowThroughput += throughput;
+            averageFlowDelay += delay;
+            averageFlowJitter += jitter;
+            averagePacketLoss += packetLossRatio;
+            flowCount++;
+
+            flowMonFile << "  Throughput: " << std::setprecision(3) << throughput << " Mbps\n";
+            flowMonFile << "  Mean delay:  " << std::setprecision(3) << delay << " ms\n";
+            flowMonFile << "  Mean jitter:  " << std::setprecision(3) << jitter << " ms\n";
+        }
+        else
+        {
+            flowMonFile << "  Throughput:  0 Mbps\n";
+            flowMonFile << "  Mean delay:  0 ms\n";
+            flowMonFile << "  Mean jitter: 0 ms\n";
+        }
+    }
+
+    if (flowCount > 0)
+    {
+        flowMonFile << "\n\n  Mean flow throughput: " << averageFlowThroughput / flowCount
+                    << " Mbps\n";
+        flowMonFile << "  Mean flow delay: " << averageFlowDelay / flowCount << " ms\n";
+        flowMonFile << "  Mean flow jitter: " << averageFlowJitter / flowCount << " ms\n";
+        flowMonFile << "  Mean packet loss: " << std::setprecision(2)
+                    << averagePacketLoss / flowCount << " %\n";
+    }
+
+    flowMonFile.close();
+    NS_LOG_INFO("FlowMonitor statistics written to " << flowMonFileName);
 }
 
 } // namespace ns3

@@ -270,8 +270,8 @@ Scenario::Scenario(int argc, char** argv)
 
     // Configure application statistics helper
     m_appStatsHelper.SetOutputPath(CONFIGURATOR->GetResultsPath() + "app-statistics.txt");
-    m_appStatsHelper.SetReportingInterval(Seconds(0.1)); // Report every 100ms
-    m_appStatsHelper.InstallAll();
+    m_appStatsHelper.SetReportingInterval(Seconds(CONFIGURATOR->GetAppStatisticsReportInterval()));
+    m_appStatsHelper.InstallFlowMonitor(NodeContainer::GetGlobal()); // Install on all nodes
 
     // Initialize LeoSat trace CSV file
     std::ostringstream leoSatTraceFilePath;

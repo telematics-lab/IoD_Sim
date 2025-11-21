@@ -21,7 +21,9 @@
 
 #include <ns3/application-container.h>
 #include <ns3/application.h>
+#include <ns3/flow-monitor-helper.h>
 #include <ns3/ipv4-address.h>
+#include <ns3/ipv4-flow-classifier.h>
 #include <ns3/node-container.h>
 #include <ns3/object.h>
 #include <ns3/packet.h>
@@ -72,11 +74,10 @@ class AppStatisticsHelper : public Object
     void SetReportingInterval(Time interval);
 
     /**
-     * \brief Install callbacks on all applications in the simulation
-     * This method automatically finds all client and server applications
-     * in all nodes and installs trace callbacks to collect statistics.
+     * \brief Install FlowMonitor on nodes
+     * \param nodes The nodes to monitor
      */
-    void InstallAll();
+    void InstallFlowMonitor(NodeContainer nodes);
 
     /**
      * \brief Start statistics collection
@@ -90,49 +91,47 @@ class AppStatisticsHelper : public Object
 
   private:
     /**
-     * \brief Structure to hold statistics for a single flow
+     * \brief Structure to hold previous flow statistics for delta calculations
      */
-    struct FlowStats
+    struct PreviousFlowStats
     {
-        uint32_t clientNodeId;    ///< Client node ID
-        uint32_t serverNodeId;    ///< Server node ID
-        uint32_t packetsSent;     ///< Total packets sent
-        uint32_t packetsReceived; ///< Total packets received
-        uint32_t bytesReceived;   ///< Total bytes received
-        Time firstTxTime;         ///< Time of first packet transmission
-        Time lastRxTime;          ///< Time of last packet reception
+        uint32_t txPackets;
+        uint32_t rxPackets;
+        uint64_t txBytes;
+        uint64_t rxBytes;
+        Time delaySum;
+        Time jitterSum;
     };
 
     /**
-     * \brief Callback for packet transmission
-     * \param flowId Flow identifier
-     * \param packet The transmitted packet
+     * \brief Generate periodic FlowMonitor report
      */
-    void TxCallback(std::string flowId, Ptr<const Packet> packet);
+    void GeneratePeriodicReport();
 
     /**
-     * \brief Callback for packet reception
-     * \param flowId Flow identifier
-     * \param packet The received packet
+     * \brief Write FlowMonitor statistics
      */
-    void RxCallback(std::string flowId, Ptr<const Packet> packet);
+    void WriteFlowMonitorStats();
 
     /**
-     * \brief Generate periodic statistics report
+     * \brief Get NodeID from IP address
+     * \param ipAddress The IP address
+     * \return The node ID, or -1 if not found
      */
-    void GenerateReport();
+    int32_t GetNodeIdFromIpAddress(Ipv4Address ipAddress);
 
-    /**
-     * \brief Write header to output file
-     */
-    void WriteHeader();
+    std::string m_outputPath; ///< Output file path
+    Time m_reportInterval;    ///< Reporting interval
+    EventId m_reportEvent;    ///< Event for periodic reporting
+    bool m_started;           ///< Whether collection has started
+    Time m_lastReportTime;    ///< Time of last periodic report
 
-    std::map<std::string, FlowStats> m_flowStats; ///< Statistics per flow
-    std::ofstream m_outputFile;                   ///< Output file stream
-    std::string m_outputPath;                     ///< Output file path
-    Time m_reportInterval;                        ///< Reporting interval
-    EventId m_reportEvent;                        ///< Event for periodic reporting
-    bool m_started;                               ///< Whether collection has started
+    // FlowMonitor support
+    FlowMonitorHelper m_flowMonitorHelper; ///< FlowMonitor helper
+    Ptr<FlowMonitor> m_flowMonitor;        ///< FlowMonitor instance
+    std::ofstream m_periodicFile;          ///< Periodic statistics file
+    std::map<uint32_t, PreviousFlowStats>
+        m_previousStats; ///< Previous flow statistics for delta calculations
 };
 
 } // namespace ns3

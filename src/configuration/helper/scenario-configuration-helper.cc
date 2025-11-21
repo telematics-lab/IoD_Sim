@@ -341,6 +341,31 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         return duration;
     }
 
+    const double ScenarioConfigurationHelper::GetAppStatisticsReportInterval() const
+    {
+        // Default to 1 second if not specified
+        if (!m_config.HasMember("appStatisticsReportInterval"))
+        {
+            return 1;
+        }
+
+        NS_ASSERT_MSG(m_config["appStatisticsReportInterval"].IsNumber(),
+                      "appStatisticsReportInterval must be a number.");
+
+        double interval = 0.0;
+
+        if (m_config["appStatisticsReportInterval"].IsUint())
+        {
+            interval = static_cast<double>(m_config["appStatisticsReportInterval"].GetUint());
+        }
+        else
+        {
+            interval = m_config["appStatisticsReportInterval"].GetDouble();
+        }
+
+        return interval;
+    }
+
     std::size_t ScenarioConfigurationHelper::GetN(const char* ek) const
     {
         if (!m_config.HasMember(ek))
