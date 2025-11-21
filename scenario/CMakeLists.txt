@@ -54,7 +54,7 @@ create_test_sourcelist(Tests
   test_periphstream-wifi.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/src/iodsim/ns3.45-iodsim-default)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.45-scenario-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)
