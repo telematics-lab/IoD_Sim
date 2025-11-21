@@ -20,19 +20,13 @@
       "problemMatcher": []
     },
     {
-      "label": "4-Integrate ns3 with leo",
-      "type": "shell",
-      "command": "./tools/clone-leo.sh",
-      "problemMatcher": []
-    },
-    {
-      "label": "5-Configure IoD Sim",
+      "label": "4-Configure IoD Sim",
       "type": "shell",
       "command": "./tools/configure-iodsim.sh",
       "group": "build",
       "problemMatcher": []
     },
-        {
+    {
       "label": "dev-5-Configure IoD Sim",
       "type": "shell",
       "command": "./tools/configure-iodsim.sh",

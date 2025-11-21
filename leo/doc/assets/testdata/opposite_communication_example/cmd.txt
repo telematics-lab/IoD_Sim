@@ -1,1 +1,0 @@
-./ns3 run "leo-nr-send-example --carSpeed=30 --numCars=1 --duration=3s --mobilityPrecision=100ms --traceFile=track.csv" && cp track.csv contrib/leo/examples/trace_view/punti_3d.csv && py contrib/leo/examples/trace_view/main.py

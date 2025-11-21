@@ -2,6 +2,9 @@
 
 set -e
 
+# Cd on the root IoD_Sim directory
+cd $(dirname "$0")/..
+
 check_availability() {
   PRG_NAME=$1
 
@@ -37,6 +40,7 @@ clone_checkout_ns3() {
 }
 
 clone_checkout_ns3 ns-3.45
+ln -s ../../leo ./ns3/contrib/
 
 pushd ns3 > /dev/null
 git am ../tools/*.patch
