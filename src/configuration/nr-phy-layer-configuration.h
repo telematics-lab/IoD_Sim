@@ -134,7 +134,60 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     /**
      * Set the scheduler type
      */
-    void SetScheduler(const TypeId& schedulerType);
+    void SetSchedulerTypeId(const TypeId& schedulerType);
+
+    /**
+     * Get scheduler attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetSchedulerAttributes() const;
+
+    /**
+     * Set scheduler attributes
+     * \param attributes The list of attributes that configures the scheduler.
+     */
+    void SetSchedulerAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
+
+    /**
+     * Get DL error model type
+     */
+    const TypeId& GetDlErrorModelType() const;
+
+    /**
+     * Set DL error model type
+     */
+    void SetDlErrorModelType(const TypeId& dlErrorModelType);
+
+    /**
+     * Get DL error model attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetDlErrorModelAttributes() const;
+
+    /**
+     * Set DL error model attributes
+     * \param attributes The list of attributes that configures the DL error model.
+     */
+    void SetDlErrorModelAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
+
+    /**
+     * Get UL error model type
+     */
+    const TypeId& GetUlErrorModelType() const;
+
+    /**
+     * Set UL error model type
+     */
+    void SetUlErrorModelType(const TypeId& ulErrorModelType);
+
+    /**
+     * Get UL error model attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetUlErrorModelAttributes() const;
+
+    /**
+     * Set UL error model attributes
+     * \param attributes The list of attributes that configures the UL error model.
+     */
+    void SetUlErrorModelAttributes(const std::vector<ModelConfiguration::Attribute>& attributes);
 
     /**
      * Set band configuration
@@ -290,6 +343,11 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     TypeId m_beamformingHelperType = TypeId::LookupByName("ns3::IdealBeamformingHelper");
     TypeId m_beamformingMethod = TypeId::LookupByName("ns3::IdealBeamformingAlgorithm");
     TypeId m_schedulerType = TypeId::LookupByName("ns3::NrMacSchedulerTdmaRR");
+    std::vector<ModelConfiguration::Attribute> m_schedulerAttributes;
+    TypeId m_dlErrorModelType;
+    std::vector<ModelConfiguration::Attribute> m_dlErrorModelAttributes;
+    TypeId m_ulErrorModelType;
+    std::vector<ModelConfiguration::Attribute> m_ulErrorModelAttributes;
     std::vector<NrBandConfiguration> m_bandsConfig;
     NrAntennaConfiguration m_ueAntenna;
     NrAntennaConfiguration m_gnbAntenna;

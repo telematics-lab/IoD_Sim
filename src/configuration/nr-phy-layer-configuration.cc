@@ -44,9 +44,72 @@ NrPhyLayerConfiguration::SetBeamformingMethod(const TypeId& beamformingMethod)
 }
 
 void
-NrPhyLayerConfiguration::SetScheduler(const TypeId& schedulerType)
+NrPhyLayerConfiguration::SetSchedulerTypeId(const TypeId& schedulerType)
 {
     m_schedulerType = schedulerType;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetSchedulerAttributes() const
+{
+    return m_schedulerAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetSchedulerAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_schedulerAttributes = attributes;
+}
+
+const TypeId&
+NrPhyLayerConfiguration::GetDlErrorModelType() const
+{
+    return m_dlErrorModelType;
+}
+
+void
+NrPhyLayerConfiguration::SetDlErrorModelType(const TypeId& dlErrorModelType)
+{
+    m_dlErrorModelType = dlErrorModelType;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetDlErrorModelAttributes() const
+{
+    return m_dlErrorModelAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetDlErrorModelAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_dlErrorModelAttributes = attributes;
+}
+
+const TypeId&
+NrPhyLayerConfiguration::GetUlErrorModelType() const
+{
+    return m_ulErrorModelType;
+}
+
+void
+NrPhyLayerConfiguration::SetUlErrorModelType(const TypeId& ulErrorModelType)
+{
+    m_ulErrorModelType = ulErrorModelType;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetUlErrorModelAttributes() const
+{
+    return m_ulErrorModelAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetUlErrorModelAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_ulErrorModelAttributes = attributes;
 }
 
 void

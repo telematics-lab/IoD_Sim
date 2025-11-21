@@ -251,6 +251,228 @@ Esempio di un oggetto frequencyBands:
 }
 ```
 
+### `phyLayer[0].scheduler`
+**Descrizione:** Configurazione del scheduler NR.
+
+Esempio di configurazione del scheduler:
+
+```json
+"scheduler": : {
+  "type": "ns3::NrMacSchedulerOfdmaPF",
+  "attributes": [
+    {
+      "name": "HarqEnabled",
+      "value": true
+    }
+  ]
+}
+```
+
+In questo parametro va impostato come definire lo scheduler da usare per la gestione delle risorse radio. Possiamo scegliere tra i vari scheduler disponibili in 5g-lena:
+
+| Tipo Scheduler (Classe ns-3)   | Famiglia | Logica dell'Algoritmo    | Descrizione                                                                                                                                                          |
+|--------------------------------|----------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ns3::NrMacSchedulerOfdmaRR     | OFDMA    | Round Robin (RR)         | Assegna le risorse agli UE a turno, ciclicamente. Garantisce massima equità (fairness) ma non ottimizza il throughput totale né la qualità del canale.               |
+| ns3::NrMacSchedulerOfdmaPF     | OFDMA    | Proportional Fair (PF)   | Cerca un compromesso tra equità e throughput. Assegna risorse basandosi sul rapporto tra la qualità del canale istantanea e il throughput medio storico dell'utente. |
+| ns3::NrMacSchedulerOfdmaMR     | OFDMA    | Max Rate (MR)            | Assegna le risorse all'UE con il miglior canale in assoluto. Massimizza il throughput della cella ma affama gli utenti ai bordi (minima equità).                     |
+| ns3::NrMacSchedulerOfdmaQos    | OFDMA    | Quality of Service (QoS) | Prioritizza gli utenti in base ai requisiti di QoS (es. priorità del bearer/flusso). Ideale per scenari misti con traffico voce, video e dati.                       |
+| ns3::NrMacSchedulerOfdmaRandom | OFDMA    | Random                   | Assegna le risorse in modo puramente casuale. Usato principalmente per scopi di debug o baseline.                                                                    |
+| ns3::NrMacSchedulerOfdmaAi     | OFDMA    | AI / External            | Interfaccia per collegare agenti di apprendimento esterni (es. tramite ns3-ai) per prendere decisioni di scheduling basate su Machine Learning.                      |
+| ns3::NrMacSchedulerTdmaRR      | TDMA     | Round Robin (RR)         | Versione TDMA del Round Robin. Assegna l'intero slot agli utenti a turno.                                                                                            |
+| ns3::NrMacSchedulerTdmaPF      | TDMA     | Proportional Fair (PF)   | Versione TDMA del Proportional Fair.                                                                                                                                 |
+| ns3::NrMacSchedulerTdmaMR      | TDMA     | Max Rate (MR)            | Versione TDMA del Max Rate.                                                                                                                                          |
+| ns3::NrMacSchedulerTdmaQos     | TDMA     | Quality of Service (QoS) | Versione TDMA dello scheduler QoS.                                                                                                                                   |
+| ns3::NrMacSchedulerTdmaRandom  | TDMA     | Random                   | Versione TDMA dello scheduler casuale.                                                                                                                               |
+| ns3::NrMacSchedulerTdmaAi      | TDMA     | AI / External            | Versione TDMA per agenti AI esterni.                                                                                                                                 |
+
+#### Attributi comuni degli scheduler OFDMA
+
+Gli scheduler OFDMA e TDMA condividono i seguenti attributi configurabili:
+
+| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+|----------------|------|---------------|-----------------|-------------|
+| `CqiTimerThreshold` | Time | -9.22337e+18ns:+9.22337e+18ns | +1e+09ns | Tempo di validità di un CQI |
+| `FixedMcsDl` | boolean | - | false | Fissa l'MCS DL al valore impostato in StartingMcsDl |
+| `FixedMcsUl` | boolean | - | false | Fissa l'MCS UL al valore impostato in StartingMcsUl |
+| `StartingMcsDl` | uint8_t | 0:255 | 0 | MCS iniziale per DL |
+| `StartingMcsUl` | uint8_t | 0:255 | 0 | MCS iniziale per UL |
+| `DlCtrlSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per il controllo DL |
+| `UlCtrlSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per il controllo UL |
+| `SrsSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per SRS in UL |
+| `EnableSrsInUlSlots` | boolean | - | true | Abilita la trasmissione SRS negli slot UL (oltre agli slot F) |
+| `EnableSrsInFSlots` | boolean | - | true | Abilita la trasmissione SRS negli slot F |
+| `DlAmc` | Ptr | - | 0 | Puntatore all'AMC DL dello scheduler |
+| `UlAmc` | Ptr | - | 0 | Puntatore all'AMC UL dello scheduler |
+| `MaxDlMcs` | int8_t | -1:30 | -1 | Indice MCS massimo per DL (-1 = nessun limite) |
+| `EnableHarqReTx` | boolean | - | true | Abilita le ritrasmissioni HARQ (max 3 se true, 0 se false) |
+| `SchedLcAlgorithmType` | TypeId | - | ns3::NrMacSchedulerLcRR | Tipo di algoritmo per assegnare byte ai diversi LC |
+| `RachUlGrantMcs` | uint8_t | 0:255 | 0 | MCS del grant UL RACH (deve essere [0..15]) |
+| `McsCsiSource` | enum | AVG_MCS\|AVG_SPEC_EFF\|AVG_SINR\|WIDEBAND_MCS | WIDEBAND_MCS | Fonte delle informazioni CSI per stimare l'MCS DL |
+
+Solo per OFDMA:
+| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+|----------------|------|---------------|-----------------|-------------|
+| `SymPerBeamType` | enum | LOAD_BASED\|ROUND_ROBIN\|PROPORTIONAL_FAIR | LOAD_BASED | Tipo di allocazione dei simboli per beam |
+
+**Note:**
+- `SymPerBeamType`: Determina come vengono allocati i simboli tra i diversi beam (basato sul carico, round robin o proporzionalmente equo)
+- `McsCsiSource`: Sceglie quale metrica CSI utilizzare per la stima dell'MCS DL (MCS medio, efficienza spettrale media, SINR medio o MCS wideband)
+
+#### Attributi specifici di NrMacSchedulerOfdmaPF, NrMacSchedulerOfdmaQos, NrMacSchedulerTdmaPF
+
+Lo scheduler Proportional Fair (PF) ha attributi aggiuntivi per controllare il bilanciamento tra equità e throughput:
+
+| Nome Attributo | Tipo | Range | Valore Iniziale | Descrizione |
+|----------------|------|-------|-----------------|-------------|
+| `FairnessIndex` | float | 0:1 | 1 | Indice che definisce la metrica PF (1 = PF tradizionale 3GPP, 0 = Round Robin in throughput) |
+| `LastAvgTPutWeight` | float | 0:3.40282e+38 | 99 | Peso dell'ultimo throughput medio nel calcolo del throughput medio |
+
+**Note:**
+- `FairnessIndex`: Controlla il bilanciamento tra equità e massimizzazione del throughput. Un valore di 1 implementa il Proportional Fair tradizionale secondo le specifiche 3GPP, mentre un valore di 0 si comporta come un Round Robin basato sul throughput
+- `LastAvgTPutWeight`: Determina quanto peso dare al throughput medio storico rispetto alle misure recenti. Valori più alti danno più peso alla storia passata, rendendo la metrica più stabile ma meno reattiva ai cambiamenti
+
+#### Attributi specifici di NrMacSchedulerOfdmaAi
+
+Gli scheduler AI permettono l'integrazione con modelli di Machine Learning esterni (es. tramite ns3-ai) per decisioni di scheduling intelligenti. Ereditano tutti gli attributi da `NrMacSchedulerOfdmaQos` (o `NrMacSchedulerTdmaQos` per la versione TDMA) e aggiungono:
+
+| Nome Attributo | Tipo | Valore Iniziale | Descrizione |
+|----------------|------|-----------------|-------------|
+| `NotifyCbDl` | Callback | NullCallback | Funzione di callback per notificare il modello AI per il downlink |
+| `NotifyCbUl` | Callback | NullCallback | Funzione di callback per notificare il modello AI per l'uplink |
+| `ActiveDlAi` | boolean | false | Flag per attivare il modello AI per il downlink |
+| `ActiveUlAi` | boolean | false | Flag per attivare il modello AI per l'uplink |
+
+**Note:**
+- `NotifyCbDl` e `NotifyCbUl`: Devono essere configurati tramite codice C++ per collegare il modello AI esterno. Non possono essere impostati direttamente da JSON
+- `ActiveDlAi` e `ActiveUlAi`: Controllano se le decisioni di scheduling vengono delegate al modello AI. Se `false`, lo scheduler si comporta come un normale scheduler QoS
+- Gli scheduler AI sono progettati per integrarsi con framework come ns3-ai per implementare algoritmi di scheduling basati su reinforcement learning o altri approcci ML
+
+### `phyLayer[0].error-model`
+**Tipo:** `array`
+**Descrizione:** Array di configurazioni dei modelli di errore per la simulazione del canale radio NR.
+
+Il modello di errore simula le perdite di pacchetti e gli errori di trasmissione in base alle condizioni del canale (SINR, MCS, ecc.). È fondamentale per una simulazione realistica delle prestazioni del sistema.
+
+**Esempio di configurazione singola (DL e UL con stesso modello):**
+
+```json
+"error-model": [
+  {
+    "type": "ns3::NrEesmIrT1",
+    "direction": "both",
+    "amcAttributes": [
+      {
+        "name": "McsTable",
+        "value": "NrEesmIrT1"
+      }
+    ]
+  }
+]
+```
+
+#### Parametri del modello di errore
+
+| Parametro | Tipo | Valori | Descrizione |
+|-----------|------|--------|-------------|
+| `type` | string | TypeId ns-3 | Tipo del modello di errore da utilizzare |
+| `direction` | string | `both` \| `uplink` \| `downlink` | Direzione a cui applicare il modello (default: `both`) |
+| `amcAttributes` | array | - | Array di attributi specifici per l'AMC (Adaptive Modulation and Coding) |
+
+**Valori di `direction`:**
+- `both`: Applica lo stesso modello sia a downlink che uplink
+- `downlink`: Applica il modello solo al downlink (DL)
+- `uplink`: Applica il modello solo all'uplink (UL)
+
+#### Attributi AMC (Adaptive Modulation and Coding)
+
+Gli attributi `amcAttributes` configurano il modulo AMC che determina il MCS (Modulation and Coding Scheme) basandosi sul CQI:
+
+| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+|----------------|------|---------------|-----------------|-------------|
+| `NumRefScPerRb` | uint8_t | 0:12 | 1 | Numero di sottoportanti che trasportano Reference Signals per Resource Block |
+| `AmcModel` | enum | ErrorModel \| ShannonModel | ErrorModel | Modello AMC utilizzato per assegnare il CQI |
+
+**Valori di `AmcModel`:**
+- `ErrorModel`: Usa il modello di errore configurato (es. NrEesmIrT1) per calcolare il CQI in base alle tabelle BLER
+- `ShannonModel`: Usa il limite teorico di Shannon per calcolare il CQI (più ottimistico, utile per analisi teoriche)
+
+**Esempio con attributi AMC:**
+
+```json
+"error-model": [
+  {
+    "type": "ns3::NrEesmIrT1",
+    "direction": "both",
+    "amcAttributes": [
+      {
+        "name": "AmcModel",
+        "value": "ErrorModel"
+      },
+      {
+        "name": "NumRefScPerRb",
+        "value": 1
+      }
+    ]
+  }
+]
+```
+
+**Nota:** Sia type che amcAttributes sono opzionali: Si possono usare insieme o separatamente in oggetti separati nell'array, a seconda delle esigenze di configurazione.
+
+#### Modelli di errore disponibili
+
+I modelli di errore disponibili in 5g-lena sono organizzati in due rami principali:
+
+##### Ramo NrEesmErrorModel
+
+Modelli basati su EESM (Exponential Effective SINR Mapping) con supporto per HARQ:
+
+| Tipo Modello | Descrizione | Supporto HARQ |
+|--------------|-------------|---------------|
+| `ns3::NrEesmErrorModel` | Classe base astratta per modelli EESM | - |
+| `ns3::NrEesmCc` | Error model con Chase Combining (classe base CC) | Chase Combining |
+| `ns3::NrEesmCcT1` | EESM con Chase Combining e tabelle di tipo 1 (LDPC) | Chase Combining |
+| `ns3::NrEesmCcT2` | EESM con Chase Combining e tabelle di tipo 2 (modulazioni elevate) | Chase Combining |
+| `ns3::NrEesmIr` | Error model con Incremental Redundancy (classe base IR) | Incremental Redundancy |
+| `ns3::NrEesmIrT1` | EESM con Incremental Redundancy e tabelle di tipo 1 (LDPC) | Incremental Redundancy |
+| `ns3::NrEesmIrT2` | EESM con Incremental Redundancy e tabelle di tipo 2 (modulazioni elevate) | Incremental Redundancy |
+
+##### Ramo NrLteMiErrorModel
+
+Modelli basati su Mutual Information, compatibili con LTE:
+
+| Tipo Modello | Descrizione |
+|--------------|-------------|
+| `ns3::NrLteMiErrorModel` | Classe base per modelli basati su Mutual Information |
+| `ns3::LenaErrorModel` | Error model compatibile con LENA (LTE framework) |
+
+
+
+**Esempio completo con configurazione DL/UL separata:**
+
+Per configurare modelli diversi per downlink e uplink, aggiungere due elementi all'array `error-model` con `direction` appropriata:
+
+```json
+"error-model": [
+  {
+    "type": "ns3::NrEesmIrT1",
+    "direction": "downlink",
+    "amcAttributes": []
+  },
+  {
+    "type": "ns3::NrEesmIrT2",
+    "direction": "uplink",
+    "amcAttributes": [
+      {"name": "NumRefScPerRb", "value": 2}
+    ]
+  }
+]
+```
+
+**Nota:** È possibile specificare più configurazioni `error-model` con direzioni diverse nello stesso array. Se si specificano più configurazioni con la stessa direzione, l'ultima sovrascriverà le precedenti.
+
+
+
 
 ### `phyLayer[0].epc`
 **Descrizione:** Configurazione dell'EPC (Evolved Packet Core).

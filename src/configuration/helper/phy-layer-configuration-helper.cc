@@ -25,6 +25,7 @@
 #include <ns3/fatal-error.h>
 #include <ns3/lte-phy-layer-configuration.h>
 #include <ns3/none-phy-layer-configuration.h>
+#include <ns3/nr-amc.h>
 #include <ns3/nr-channel-helper.h>
 #include <ns3/nr-epc-helper.h>
 #include <ns3/nr-phy-layer-configuration.h>
@@ -253,7 +254,72 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             const auto& scheduler = jsonPhyLayer["scheduler"];
             if (scheduler.HasMember("type") && scheduler["type"].IsString())
             {
-                nrConfig->SetScheduler(TypeId::LookupByName(scheduler["type"].GetString()));
+                nrConfig->SetSchedulerTypeId(TypeId::LookupByName(scheduler["type"].GetString()));
+            }
+            if (scheduler.HasMember("attributes") && scheduler["attributes"].IsArray())
+            {
+                const auto schedulerAttrs =
+                    ModelConfigurationHelper::GetAttributes(nrConfig->GetSchedulerType(),
+                                                            scheduler["attributes"].GetArray());
+                nrConfig->SetSchedulerAttributes(schedulerAttrs);
+            }
+        }
+
+        // Parse error-model configuration
+        if (jsonPhyLayer.HasMember("error-model") && jsonPhyLayer["error-model"].IsArray())
+        {
+            const auto errorModels = jsonPhyLayer["error-model"].GetArray();
+            for (rapidjson::SizeType i = 0; i < errorModels.Size(); ++i)
+            {
+                const auto& errorModel = errorModels[i];
+                NS_ASSERT_MSG(errorModel.IsObject(), "Each error-model entry must be an object.");
+
+                std::string direction = "both"; // default
+
+                // Get direction if specified
+                if (errorModel.HasMember("direction") && errorModel["direction"].IsString())
+                {
+                    direction = errorModel["direction"].GetString();
+                }
+
+                if (errorModel.HasMember("type") && errorModel["type"].IsString())
+                {
+                    TypeId errorModelType = TypeId::LookupByName(errorModel["type"].GetString());
+                    std::vector<ModelConfiguration::Attribute> errorModelAttrs;
+
+                    if (errorModel.HasMember("amcAttributes") &&
+                        errorModel["amcAttributes"].IsArray())
+                    {
+                        errorModelAttrs = ModelConfigurationHelper::GetAttributes(
+                            ns3::NrAmc::GetTypeId(),
+                            errorModel["amcAttributes"].GetArray());
+                    }
+
+                    // Set based on direction
+                    if (direction == "both")
+                    {
+                        nrConfig->SetDlErrorModelType(errorModelType);
+                        nrConfig->SetDlErrorModelAttributes(errorModelAttrs);
+                        nrConfig->SetUlErrorModelType(errorModelType);
+                        nrConfig->SetUlErrorModelAttributes(errorModelAttrs);
+                    }
+                    else if (direction == "downlink")
+                    {
+                        nrConfig->SetDlErrorModelType(errorModelType);
+                        nrConfig->SetDlErrorModelAttributes(errorModelAttrs);
+                    }
+                    else if (direction == "uplink")
+                    {
+                        nrConfig->SetUlErrorModelType(errorModelType);
+                        nrConfig->SetUlErrorModelAttributes(errorModelAttrs);
+                    }
+                    else
+                    {
+                        NS_FATAL_ERROR("Invalid error-model direction: "
+                                       << direction
+                                       << ". Valid values are: both, downlink, uplink");
+                    }
+                }
             }
         }
 

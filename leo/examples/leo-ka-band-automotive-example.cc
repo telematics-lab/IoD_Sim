@@ -406,7 +406,7 @@ main(int argc, char* argv[])
     if (numVehicles > 1)
     {
         vehicles.Create(numVehicles); // Create multiple vehicles
-        for (int i = 0; i < vehicles.GetN(); ++i)
+        for (uint32_t i = 0; i < vehicles.GetN(); ++i)
         {
             auto vehicle = vehicles.Get(i);
             auto rndLat = (rand() % 180000) / 1000.0 - 90.0;  // Random latitude

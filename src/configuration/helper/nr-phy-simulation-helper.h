@@ -82,8 +82,34 @@ class NrPhySimulationHelper : public Object
      * Set the MAC scheduler to be used in the simulation.
      * @param schedulerType The scheduler type to be used. It must be a valid TypeId name
      * accepted by NrHelper::SetSchedulerTypeId.
+     * @param attributes The list of attributes to configure the scheduler (optional).
      */
-    void SetScheduler(const TypeId& schedulerType);
+    void SetScheduler(const TypeId& schedulerType,
+                      const std::vector<ModelConfiguration::Attribute>& attributes = {});
+
+    /**
+     * Set the error model to be used in the simulation.
+     * @param errorModelType The error model type to be used.
+     * @param attributes The list of attributes to configure the error model (optional).
+     */
+    void SetErrorModel(const TypeId& errorModelType,
+                       const std::vector<ModelConfiguration::Attribute>& attributes = {});
+
+    /**
+     * Set the DL error model to be used in the simulation.
+     * @param dlErrorModelType The DL error model type to be used.
+     * @param attributes The list of attributes to configure the DL error model (optional).
+     */
+    void SetDlErrorModel(const TypeId& dlErrorModelType,
+                         const std::vector<ModelConfiguration::Attribute>& attributes = {});
+
+    /**
+     * Set the UL error model to be used in the simulation.
+     * @param ulErrorModelType The UL error model type to be used.
+     * @param attributes The list of attributes to configure the UL error model (optional).
+     */
+    void SetUlErrorModel(const TypeId& ulErrorModelType,
+                         const std::vector<ModelConfiguration::Attribute>& attributes = {});
 
     OperationBandInfo CreateOperationBand(
         const std::vector<CcBwpCreator::SimpleOperationBandConf>& bandConf,

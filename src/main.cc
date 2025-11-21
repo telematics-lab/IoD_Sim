@@ -626,7 +626,21 @@ Scenario::ConfigurePhy()
                                            bandConf.channel.configFlags);
             }
 
-            nrSim->SetScheduler(nrConf->GetSchedulerType());
+            nrSim->SetScheduler(nrConf->GetSchedulerType(), nrConf->GetSchedulerAttributes());
+
+            // Configure DL error model if specified
+            if (nrConf->GetDlErrorModelType().GetUid() != 0)
+            {
+                nrSim->SetDlErrorModel(nrConf->GetDlErrorModelType(),
+                                       nrConf->GetDlErrorModelAttributes());
+            }
+
+            // Configure UL error model if specified
+            if (nrConf->GetUlErrorModelType().GetUid() != 0)
+            {
+                nrSim->SetUlErrorModel(nrConf->GetUlErrorModelType(),
+                                       nrConf->GetUlErrorModelAttributes());
+            }
 
             auto gnbAntennaConf = nrConf->GetGnbAntenna();
             nrSim->SetGnbAntenna(gnbAntennaConf.type,

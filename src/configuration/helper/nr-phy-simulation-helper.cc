@@ -117,9 +117,45 @@ NrPhySimulationHelper::GetBeamformingHelper()
 }
 
 void
-NrPhySimulationHelper::SetScheduler(const TypeId& schedulerType)
+NrPhySimulationHelper::SetScheduler(const TypeId& schedulerType,
+                                    const std::vector<ModelConfiguration::Attribute>& attributes)
 {
     m_nr->SetSchedulerTypeId(schedulerType);
+    for (const auto& attr : attributes)
+    {
+        m_nr->SetSchedulerAttribute(attr.name, *attr.value);
+    }
+}
+
+void
+NrPhySimulationHelper::SetErrorModel(const TypeId& errorModelType,
+                                     const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    // Set both DL and UL with the same model (backward compatibility)
+    SetDlErrorModel(errorModelType, attributes);
+    SetUlErrorModel(errorModelType, attributes);
+}
+
+void
+NrPhySimulationHelper::SetDlErrorModel(const TypeId& dlErrorModelType,
+                                       const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_nr->SetDlErrorModel(dlErrorModelType.GetName());
+    for (const auto& attr : attributes)
+    {
+        m_nr->SetGnbDlAmcAttribute(attr.name, *attr.value);
+    }
+}
+
+void
+NrPhySimulationHelper::SetUlErrorModel(const TypeId& ulErrorModelType,
+                                       const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_nr->SetUlErrorModel(ulErrorModelType.GetName());
+    for (const auto& attr : attributes)
+    {
+        m_nr->SetGnbUlAmcAttribute(attr.name, *attr.value);
+    }
 }
 
 void
