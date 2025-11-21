@@ -27,14 +27,7 @@
       "problemMatcher": []
     },
     {
-      "label": "dev-5-Configure IoD Sim",
-      "type": "shell",
-      "command": "./tools/configure-iodsim.sh",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "6-Build IoD Sim",
+      "label": "5-Build IoD Sim",
       "type": "shell",
       "command": "./ns3 build -j$(grep -c ^processor /proc/cpuinfo)",
       "options": {
