@@ -223,11 +223,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -299,11 +300,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -375,11 +377,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -451,11 +454,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -527,11 +531,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -603,11 +608,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -679,11 +685,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -755,11 +762,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -831,11 +839,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -907,11 +916,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -983,11 +993,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1059,11 +1070,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1135,11 +1147,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1211,11 +1224,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1287,11 +1301,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1363,11 +1378,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1439,11 +1455,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1515,11 +1532,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1591,11 +1609,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1667,11 +1686,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1743,11 +1763,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1819,11 +1840,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1895,11 +1917,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -1971,11 +1994,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)
@@ -2047,11 +2071,12 @@
               "value": 75.0
             },
             {
-                "name": "Remote",
-                "value": [
-                    "200.0.0.1",
-                    80
-                ]
+              "name": "RemoteAddress",
+              "value": "200.0.0.1"
+            },
+            {
+              "name": "RemotePort",
+              "value": "80"
             },
             {
               "name": "Interval", //65535[B]/0.025[s]=2621400[B/s]=20,9712[Mbps] (Saturate for sure the link with 18Mbps)

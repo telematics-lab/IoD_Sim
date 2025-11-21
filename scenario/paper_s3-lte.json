@@ -358,11 +358,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -456,11 +457,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -554,11 +556,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -652,11 +655,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -750,11 +754,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -848,11 +853,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -946,11 +952,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1044,11 +1051,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1142,11 +1150,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1240,11 +1249,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1338,11 +1348,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1436,11 +1447,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1534,11 +1546,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1632,11 +1645,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1730,11 +1744,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1828,11 +1843,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -1926,11 +1942,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2024,11 +2041,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2122,11 +2140,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2220,11 +2239,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2318,11 +2338,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2416,11 +2437,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2514,11 +2536,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2612,11 +2635,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2710,11 +2734,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2808,11 +2833,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -2906,11 +2932,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3004,11 +3031,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3102,11 +3130,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3200,11 +3229,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3298,11 +3328,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3396,11 +3427,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3494,11 +3526,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
@@ -3592,11 +3625,12 @@
                             "value": 499.0
                         },
                         {
-                            "name": "Remote",
-                            "value": [
-                                "200.0.0.1",
-                                1337
-                            ]
+                            "name": "RemoteAddress",
+                            "value": "200.0.0.1"
+                        },
+                        {
+                            "name": "RemotePort",
+                            "value": "1337"
                         },
                         {
                             "name": "Interval",
