@@ -65,7 +65,7 @@ integrate_contrib_module() {
 }
 
 clone_checkout_ns3 ns-3.45
-ln -s ./leo ./ns3/contrib/
+ln -fs ../../leo ./ns3/contrib/leo
 
 # If this step fails, continue anyway
 ./tools/install-nr-dependencies.sh || {
