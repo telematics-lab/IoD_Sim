@@ -241,9 +241,9 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             }
             if (epc.HasMember("attributes") && epc["attributes"].IsArray())
             {
-                const auto epcAttributes = ModelConfigurationHelper::GetAttributes(
-                    nrConfig->GetEpcHelperType(),
-                    jsonPhyLayer["epcAttributes"].GetArray());
+                const auto epcAttributes =
+                    ModelConfigurationHelper::GetAttributes(nrConfig->GetEpcHelperType(),
+                                                            epc["attributes"].GetArray());
                 nrConfig->SetEpcAttributes(epcAttributes);
             }
         }
