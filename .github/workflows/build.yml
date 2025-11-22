@@ -17,7 +17,5 @@ jobs:
         run: sudo ./tools/install-dependencies.sh
       - name: Integrate ns3 and IoD Sim
         run: ./tools/prepare-ns3.sh
-      - name: Integrate nr and ns3
-        run: ./tools/clone-nr.sh
       - name: Build IoD Sim
         run: ./tools/compile.sh

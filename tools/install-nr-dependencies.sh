@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 
 if [ -z "$ID" ]; then
-  source /etc/os-release
+  if [ -r /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+  elif command -v lsb_release >/dev/null 2>&1; then
+    NAME="$(lsb_release -ds 2>/dev/null | tr -d '"')"
+    ID="$(lsb_release -is 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+  else
+    NAME="$(uname -s)"
+    ID="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    echo "Warning: /etc/os-release not found and lsb_release unavailable; assuming NAME=${NAME}, ID=${ID}"
+  fi
 fi
 
 function install_debian_deps() {
