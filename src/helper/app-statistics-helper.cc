@@ -18,6 +18,7 @@
 
 #include "app-statistics-helper.h"
 
+#include <ns3/flow-monitor.h>
 #include <ns3/inet-socket-address.h>
 #include <ns3/ipv4.h>
 #include <ns3/log.h>
@@ -109,6 +110,11 @@ AppStatisticsHelper::InstallFlowMonitor(NodeContainer nodes)
 {
     NS_LOG_FUNCTION(this);
     m_flowMonitor = m_flowMonitorHelper.InstallAll();
+    if (!m_flowMonitor)
+    {
+        NS_LOG_WARN("FlowMonitorHelper::InstallAll() returned null (likely no IP stack).");
+        m_flowMonitor = CreateObject<FlowMonitor>();
+    }
     NS_LOG_INFO("FlowMonitor installed on all nodes");
 }
 

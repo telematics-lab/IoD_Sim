@@ -26,6 +26,9 @@
 #include "ns3/object.h"
 #include "ns3/vector.h"
 
+#include <memory>
+#include <string>
+
 /**
  * \file
  * \ingroup leo
@@ -34,6 +37,15 @@
  */
 
 #define LEO_EARTH_GM_KM_E10 39.8600436
+
+#define LEO_EARTH_GM_KM_E10 39.8600436
+
+namespace libsgp4
+{
+class SGP4;
+class Tle;
+class DateTime;
+} // namespace libsgp4
 
 namespace ns3
 {
@@ -90,7 +102,7 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
     /**
      * \brief Sets the retrograde orbit flag
      * \param the retrograde orbit flag
-    */
+     */
     void SetRetrogradeOrbit(bool retrograde);
 
     /**
@@ -124,6 +136,42 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
     double GetOffset() const;
 
     /**
+     * \brief Sets the TLE Line 1
+     * \param tle1 TLE Line 1
+     */
+    void SetTleLine1(std::string tle1);
+
+    /**
+     * \brief Gets the TLE Line 1
+     * \return TLE Line 1
+     */
+    std::string GetTleLine1() const;
+
+    /**
+     * \brief Sets the TLE Line 2
+     * \param tle2 TLE Line 2
+     */
+    void SetTleLine2(std::string tle2);
+
+    /**
+     * \brief Gets the TLE Line 2
+     * \return TLE Line 2
+     */
+    std::string GetTleLine2() const;
+
+    /**
+     * \brief Sets the TLE start time (offset from TLE epoch for simulation t=0)
+     * \param startTime Start time string in ISO 8601 format
+     */
+    void SetTleStartTime(std::string startTime);
+
+    /**
+     * \brief Gets the TLE start time
+     * \return Start time string
+     */
+    std::string GetTleStartTime() const;
+
+    /**
      * \brief Get velocity
      * \return the current velocity
      */
@@ -133,7 +181,6 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
      * \return the current geocentric velocity
      */
     virtual Vector GetGeocentricVelocity() const;
-
 
   private:
     /**
@@ -171,6 +218,12 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
      */
     Time m_precision;
 
+    std::string m_tleLine1;
+    std::string m_tleLine2;
+    std::unique_ptr<libsgp4::Tle> m_tle;
+    Time m_tleStartTime = Seconds(0);      ///< Offset from TLE epoch for simulation start
+    std::string m_tleStartTimeString = ""; ///< Original ISO 8601 string
+
     EventId m_updateEvent = EventId(); ///< Event for periodic updates
 
     /**
@@ -178,19 +231,19 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
      * \param type the coordinate type to return
      * \return the current position in the specified coordinate system
      */
-    virtual Vector DoGetPosition(PositionType type) const override;
+    Vector DoGetPosition(PositionType type) const override;
 
     /**
      * \brief Implementation of DoSetPosition for the GeocentricMobilityModel interface
      * \param position the position to set
      * \param type the coordinate type of the input position
      */
-    virtual void DoSetPosition(const Vector& position, PositionType type) override;
+    void DoSetPosition(const Vector& position, PositionType type) override;
 
     /**
      * \return the current velocity.
      */
-    virtual Vector DoGetVelocity(void) const override;
+    Vector DoGetVelocity() const override;
 
     /**
      * \brief Get geographic velocity
@@ -243,9 +296,14 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
 
     /**
      * \brief Update the internal position of the mobility model
-     * \return position that will be returned upon next call to DoGetPosition
      */
-    Vector Update();
+    void Update();
+
+    /**
+     * \brief Initialize classical orbital parameters from TLE data
+     * Uses SGP4 once to get position at start time, then extracts orbital parameters
+     */
+    void InitializeFromTLE();
 };
 
 } // namespace ns3

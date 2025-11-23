@@ -18,15 +18,19 @@
 
 #include "geo-leo-orbit-mobility.h"
 
+#include "../sgp4/libsgp4/DateTime.h"
+#include "../sgp4/libsgp4/SGP4.h"
+#include "../sgp4/libsgp4/Tle.h"
 #include "leo-orbit.h"
 #include "math.h"
 
 #include "ns3/angles.h"
 #include "ns3/boolean.h"
 #include "ns3/double.h"
-#include "ns3/geographic-positions.h"
 #include "ns3/geo-leo-orbit-mobility.h"
+#include "ns3/geographic-positions.h"
 #include "ns3/simulator.h"
+#include "ns3/string.h"
 
 namespace ns3
 {
@@ -77,7 +81,25 @@ GeoLeoOrbitMobility::GetTypeId()
             "The initial offset of the satellite in degrees",
             DoubleValue(0.0),
             MakeDoubleAccessor(&GeoLeoOrbitMobility::SetOffset, &GeoLeoOrbitMobility::GetOffset),
-            MakeDoubleChecker<double>(0, 360.0));
+            MakeDoubleChecker<double>(0, 360.0))
+        .AddAttribute("TleLine1",
+                      "TLE Line 1",
+                      StringValue(""),
+                      MakeStringAccessor(&GeoLeoOrbitMobility::SetTleLine1,
+                                         &GeoLeoOrbitMobility::GetTleLine1),
+                      MakeStringChecker())
+        .AddAttribute("TleLine2",
+                      "TLE Line 2",
+                      StringValue(""),
+                      MakeStringAccessor(&GeoLeoOrbitMobility::SetTleLine2,
+                                         &GeoLeoOrbitMobility::GetTleLine2),
+                      MakeStringChecker())
+        .AddAttribute("TleStartTime",
+                      "The start time for TLE propagation (format: ISO 8601)",
+                      StringValue(""),
+                      MakeStringAccessor(&GeoLeoOrbitMobility::SetTleStartTime,
+                                         &GeoLeoOrbitMobility::GetTleStartTime),
+                      MakeStringChecker());
 }
 
 GeoLeoOrbitMobility::GeoLeoOrbitMobility()
@@ -118,6 +140,150 @@ GeoLeoOrbitMobility::GetOffset() const
 {
     NS_LOG_FUNCTION_NOARGS();
     return RadiansToDegrees(m_offset);
+}
+
+void
+GeoLeoOrbitMobility::SetTleLine1(std::string tle1)
+{
+    NS_LOG_FUNCTION(this << tle1);
+    m_tleLine1 = tle1;
+    NS_LOG_INFO("TLE Line 1 set to: '" << m_tleLine1 << "'");
+    Update();
+}
+
+std::string
+GeoLeoOrbitMobility::GetTleLine1() const
+{
+    NS_LOG_FUNCTION_NOARGS();
+    return m_tleLine1;
+}
+
+void
+GeoLeoOrbitMobility::SetTleLine2(std::string tle2)
+{
+    NS_LOG_FUNCTION(this << tle2);
+    m_tleLine2 = tle2;
+    NS_LOG_INFO("TLE Line 2 set to: '" << m_tleLine2 << "'");
+
+    // If both TLE lines are set, initialize orbital parameters from TLE
+    if (!m_tleLine1.empty() && !m_tleLine2.empty())
+    {
+        InitializeFromTLE();
+    }
+    Update();
+}
+
+std::string
+GeoLeoOrbitMobility::GetTleLine2() const
+{
+    NS_LOG_FUNCTION_NOARGS();
+    return m_tleLine2;
+}
+
+void
+GeoLeoOrbitMobility::InitializeFromTLE()
+{
+    NS_LOG_FUNCTION(this);
+
+    try
+    {
+        NS_LOG_INFO("Initializing orbital parameters from TLE...");
+        libsgp4::Tle tle(m_tleLine1, m_tleLine2);
+        libsgp4::SGP4 sgp4(tle);
+
+        libsgp4::DateTime tleEpoch = tle.Epoch();
+        libsgp4::Eci eci = sgp4.FindPosition(tleEpoch);
+        libsgp4::CoordGeodetic geo = eci.ToGeodetic();
+
+        double altitude = geo.altitude;
+        m_orbitHeight = GeographicPositions::EARTH_SPHERE_RADIUS / 1000.0 + altitude;
+        m_inclination = tle.Inclination(false);
+
+        double speed = sqrt(LEO_EARTH_GM_KM_E10 / m_orbitHeight) * 1e5;
+        double timeOffset = m_tleStartTime.GetSeconds();
+        double angularDistance = (speed * timeOffset) / GeographicPositions::EARTH_SPHERE_RADIUS;
+        m_offset = angularDistance;
+        m_longitude = DegreesToRadians(geo.longitude);
+    }
+    catch (const std::exception& e)
+    {
+        NS_LOG_ERROR("Failed to initialize from TLE: " << e.what());
+        NS_LOG_ERROR("  TLE Line 1: '" << m_tleLine1 << "'");
+        NS_LOG_ERROR("  TLE Line 2: '" << m_tleLine2 << "'");
+    }
+}
+
+void
+GeoLeoOrbitMobility::SetTleStartTime(std::string startTime)
+{
+    NS_LOG_FUNCTION(this << startTime);
+    if (startTime.empty())
+    {
+        m_tleStartTime = Seconds(0);
+        m_tleStartTimeString = "";
+        return;
+    }
+
+    // Parse ISO 8601 format: YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SSZ
+    int year, month, day, hour, minute, second;
+    int parsed = sscanf(startTime.c_str(),
+                        "%d-%d-%d %d:%d:%d",
+                        &year,
+                        &month,
+                        &day,
+                        &hour,
+                        &minute,
+                        &second);
+
+    if (parsed != 6)
+    {
+        // Try with 'T' separator
+        parsed = sscanf(startTime.c_str(),
+                        "%d-%d-%dT%d:%d:%d",
+                        &year,
+                        &month,
+                        &day,
+                        &hour,
+                        &minute,
+                        &second);
+    }
+
+    if (parsed == 6)
+    {
+        // Create DateTime for the start time
+        libsgp4::DateTime startDt(year, month, day, hour, minute, second);
+
+        // Calculate offset from TLE epoch (we need TLE to be loaded first)
+        if (m_tle)
+        {
+            libsgp4::DateTime tleEpoch = m_tle->Epoch();
+            double offsetSeconds = (startDt - tleEpoch).TotalSeconds();
+            m_tleStartTime = Seconds(offsetSeconds);
+            m_tleStartTimeString = startTime;
+            NS_LOG_INFO("TLE start time set: " << offsetSeconds << "s from TLE epoch");
+        }
+        else
+        {
+            // TLE not loaded yet, just save the string and calculate offset later
+            m_tleStartTimeString = startTime;
+            NS_LOG_WARN("TLE not loaded yet, will calculate offset when TLE is set");
+        }
+    }
+    else
+    {
+        NS_LOG_WARN("Invalid TleStartTime format: '"
+                    << startTime << "'. Expected ISO 8601 (YYYY-MM-DD HH:MM:SS). Using TLE epoch.");
+        m_tleStartTime = Seconds(0);
+        m_tleStartTimeString = "";
+    }
+    Update();
+}
+
+std::string
+GeoLeoOrbitMobility::GetTleStartTime() const
+{
+    NS_LOG_FUNCTION_NOARGS();
+    return m_tleStartTimeString;
 }
 
 double
@@ -211,10 +377,19 @@ GeoLeoOrbitMobility::CalcPosition(Time t) const
     return RotatePlane(GetProgress(t), x);
 }
 
-Vector
+void
+GeoLeoOrbitMobility::DoSetPosition(const Vector& position, PositionType type)
+{
+    // Setting position in a classical way has no sense in this model
+    NS_LOG_WARN("Setting position in a classical way has no sense in GeoLeoOrbitMobility");
+}
+
+void
 GeoLeoOrbitMobility::Update()
 {
+    // Use classical orbital model
     m_position = CalcPosition(Simulator::Now());
+
     NotifyCourseChange();
     if (m_updateEvent.IsPending())
     {
@@ -225,8 +400,6 @@ GeoLeoOrbitMobility::Update()
     {
         m_updateEvent = Simulator::Schedule(m_precision, &GeoLeoOrbitMobility::Update, this);
     }
-
-    return m_position;
 }
 
 void
@@ -263,29 +436,13 @@ GeoLeoOrbitMobility::SetInclination(double incl)
     Update();
 }
 
-void
-GeoLeoOrbitMobility::SetRetrogradeOrbit(bool retrograde)
-{
-    NS_LOG_FUNCTION(this << retrograde);
-    m_retrogradeOrbit = retrograde;
-    Update();
-}
-
-bool
-GeoLeoOrbitMobility::GetRetrogradeOrbit() const
-{
-    NS_LOG_FUNCTION_NOARGS();
-    return m_retrogradeOrbit;
-}
-
-// GeocentricMobilityModel interface implementation
 Vector
 GeoLeoOrbitMobility::DoGetPosition(PositionType type) const
 {
     Vector geocentricPos;
     if (m_precision == Time(0))
     {
-        // Notice: NotifyCourseChange () will not be called
+        // Calculate position on-demand using classical model
         geocentricPos = CalcPosition(Simulator::Now());
     }
     else
@@ -315,12 +472,4 @@ GeoLeoOrbitMobility::DoGetPosition(PositionType type) const
         return Vector();
     }
 }
-
-void
-GeoLeoOrbitMobility::DoSetPosition(const Vector& position, PositionType type)
-{
-    // Setting position in a classical way has no sense in this model
-    NS_LOG_WARN("Setting position in a classical way has no sense in GeoLeoOrbitMobility");
-}
-
 }; // namespace ns3

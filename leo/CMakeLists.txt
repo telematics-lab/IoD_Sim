@@ -17,6 +17,7 @@ set(public_headers
     helper/leo-ground-node-helper.h
     helper/satellite-node-helper.h
     model/geo-leo-orbit-mobility.h
+    model/geo-sgp4-mobility.h
     model/geo-constant-velocity-mobility.h
     model/leo-mock-channel.h
     model/leo-mock-net-device.h
@@ -44,6 +45,7 @@ set(sources
     helper/leo-ground-node-helper.cc
     helper/satellite-node-helper.cc
     model/geo-leo-orbit-mobility.cc
+    model/geo-sgp4-mobility.cc
     model/geo-constant-velocity-mobility.cc
     model/leo-mock-channel.cc
     model/leo-mock-net-device.cc
@@ -55,6 +57,22 @@ set(sources
     model/mock-channel.cc
     model/isl-mock-channel.cc
     model/isl-propagation-loss-model.cc
+    sgp4/libsgp4/CoordGeodetic.cc
+    sgp4/libsgp4/CoordTopocentric.cc
+    sgp4/libsgp4/DateTime.cc
+    sgp4/libsgp4/DecayedException.cc
+    sgp4/libsgp4/Eci.cc
+    sgp4/libsgp4/Globals.cc
+    sgp4/libsgp4/Observer.cc
+    sgp4/libsgp4/OrbitalElements.cc
+    sgp4/libsgp4/SGP4.cc
+    sgp4/libsgp4/SatelliteException.cc
+    sgp4/libsgp4/SolarPosition.cc
+    sgp4/libsgp4/TimeSpan.cc
+    sgp4/libsgp4/Tle.cc
+    sgp4/libsgp4/TleException.cc
+    sgp4/libsgp4/Util.cc
+    sgp4/libsgp4/Vector.cc
 )
 
 # List the other ns-3 modules this one depends on
@@ -72,7 +90,6 @@ set(dependencies
     ${libantenna}
     ${libmobility}
 )
-
 
 build_lib(
   LIBNAME leo

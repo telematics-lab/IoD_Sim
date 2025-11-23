@@ -20,6 +20,10 @@
     {
       "name": "ns3::NrRlcUm::MaxTxBufferSize",
       "value": 999999999
+    },
+    {
+      "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
+      "value": false // Deactivated HARQ for satellite communication
     }
   ],
   "world": {

@@ -1,0 +1,44 @@
+{
+  "name": "leo-constellation-file",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 3,
+  "appStatisticsReportInterval": 0.3,
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "10ms"
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "none"
+    }
+  ],
+  "macLayer": [],
+  "leo-sats": [
+    {
+      "!constellation": {
+        "distribution": "file",
+        "file": "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=starlink&FORMAT=tle",
+        "model": "sgp4",
+        "tleTimeReference": "now"
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario"
+  ]
+}

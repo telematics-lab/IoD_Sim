@@ -23,6 +23,8 @@
 #include "phy-layer-configuration-helper.h"
 #include "remote-configuration-helper.h"
 
+#include "ns3/constellation-expander.h"
+#include "ns3/json-importer.h"
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
@@ -30,6 +32,7 @@
 #include <ns3/system-path.h>
 
 #include <chrono>
+#include <filesystem>
 #include <iomanip> /* put_time */
 #include <iostream>
 #include <unistd.h>
@@ -47,6 +50,8 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
 #include <rapidjson/error/en.h>
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/pointer.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
     SUPPRESS_DEPRECATED_POP
 
@@ -794,6 +799,8 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
     void ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
     {
         std::string configFilePath = "";
+        std::string expandOutputPath = "";
+        bool doExpand = false;
         constexpr const ssize_t configFileBufferSize = 64 * 1024; // KiB
         char configFileBuffer[configFileBufferSize];
         m_radioMap = 0; // no generation as default
@@ -801,6 +808,10 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         cmd.AddValue("name", "Name of the scenario", m_name);
         cmd.AddValue("config", "Configuration file path", configFilePath);
         cmd.AddValue("radioMap", "Enables the generation of the EnvironmentRadioMap", m_radioMap);
+        cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
+        cmd.AddValue("output",
+                     "Output file path for expanded JSON (optional, default stdout)",
+                     expandOutputPath);
         cmd.Parse(argc, argv);
 
         if (configFilePath.empty())
@@ -821,11 +832,68 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
                                                  configFileBufferSize);
         m_config.ParseStream<rapidjson::kParseCommentsFlag>(jsonFileStream);
 
-        // close???
-
         NS_ABORT_MSG_IF(m_config.HasParseError(),
                         "The given configuration schema is not valid JSON: "
                             << rapidjson::GetParseError_En(m_config.GetParseError()));
+
+        // Process !importJson commands
+        std::string scenarioPath = std::filesystem::path(configFilePath).parent_path().string();
+        JsonImporter::Process(m_config, scenarioPath);
+
+        // Expand constellation definitions if present
+        if (m_config.HasMember("leo-sats") && m_config["leo-sats"].IsArray())
+        {
+            rapidjson::Value newSatArray(rapidjson::kArrayType);
+            auto& allocator = m_config.GetAllocator();
+            bool expanded = false;
+
+            for (auto& sat : m_config["leo-sats"].GetArray())
+            {
+                if (ConstellationExpander::HasConstellationParameter(sat))
+                {
+                    std::vector<rapidjson::Document> expandedSats =
+                        ConstellationExpander::ExpandConstellation(sat, scenarioPath);
+                    for (auto& expandedSat : expandedSats)
+                    {
+                        rapidjson::Value satVal(rapidjson::kObjectType);
+                        satVal.CopyFrom(expandedSat, allocator);
+                        newSatArray.PushBack(satVal, allocator);
+                    }
+                    expanded = true;
+                }
+                else
+                {
+                    rapidjson::Value satVal(rapidjson::kObjectType);
+                    satVal.CopyFrom(sat, allocator);
+                    newSatArray.PushBack(satVal, allocator);
+                }
+            }
+
+            if (expanded)
+            {
+                m_config["leo-sats"] = newSatArray;
+            }
+        }
+
+        // Handle expansion export
+        if (doExpand)
+        {
+            rapidjson::StringBuffer buffer;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+            m_config.Accept(writer);
+
+            if (!expandOutputPath.empty())
+            {
+                std::ofstream ofs(expandOutputPath);
+                ofs << buffer.GetString();
+                ofs.close();
+            }
+            else
+            {
+                std::cout << buffer.GetString() << std::endl;
+            }
+            exit(0);
+        }
     }
 
     void ScenarioConfigurationHelper::DisposeConfiguration()

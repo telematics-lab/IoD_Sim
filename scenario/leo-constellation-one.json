@@ -1,0 +1,48 @@
+{
+  "name": "leo-constellation-one",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 3,
+  "appStatisticsReportInterval": 0.3,
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "10ms"
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "none"
+    }
+  ],
+  "macLayer": [],
+  "leo-sats": [
+    {
+      "!constellation": {
+        "distribution": "one",
+        "orbit": {
+          "altitude": 400.0,
+          "inclination": 20.0,
+          "longitude": 0.0,
+          "offset": 0.0,
+          "retrograde-orbit": false
+        }
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario"
+  ]
+}
