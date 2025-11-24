@@ -72,5 +72,14 @@ integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.
 pushd ns3 > /dev/null
 # Deactivate signature of commit if any setted globally on current global git config
 git config --local commit.gpgsign false
+
+if [ -z "$(git config user.name)" ]; then
+  git config --local user.name "IoD Sim"
+fi
+
+if [ -z "$(git config user.email)" ]; then
+  git config --local user.email "iod_sim@no-reply.com"
+fi
+
 git am ../tools/*.patch
 popd > /dev/null
