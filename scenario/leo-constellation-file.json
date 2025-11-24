@@ -11,7 +11,7 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "10ms"
+      "value": "500ms"
     }
   ],
   "world": {

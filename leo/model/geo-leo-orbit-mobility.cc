@@ -191,19 +191,84 @@ GeoLeoOrbitMobility::InitializeFromTLE()
         libsgp4::Tle tle(m_tleLine1, m_tleLine2);
         libsgp4::SGP4 sgp4(tle);
 
+        // Calculate simulation start time
         libsgp4::DateTime tleEpoch = tle.Epoch();
+
+        // Get SGP4 position and velocity at simulation start time (ECI)
         libsgp4::Eci eci = sgp4.FindPosition(tleEpoch);
-        libsgp4::CoordGeodetic geo = eci.ToGeodetic();
 
-        double altitude = geo.altitude;
-        m_orbitHeight = GeographicPositions::EARTH_SPHERE_RADIUS / 1000.0 + altitude;
-        m_inclination = tle.Inclination(false);
+        // Convert to ECEF (Earth-Centered, Earth-Fixed)
+        // We need to rotate the ECI vector by the Greenwich Sidereal Time (GST)
+        double gmst = tleEpoch.ToGreenwichSiderealTime();
 
-        double speed = sqrt(LEO_EARTH_GM_KM_E10 / m_orbitHeight) * 1e5;
-        double timeOffset = m_tleStartTime.GetSeconds();
-        double angularDistance = (speed * timeOffset) / GeographicPositions::EARTH_SPHERE_RADIUS;
-        m_offset = angularDistance;
-        m_longitude = DegreesToRadians(geo.longitude);
+        // ECI position and velocity
+        libsgp4::Vector r_eci = eci.Position();
+        libsgp4::Vector v_eci = eci.Velocity();
+
+        // Rotation matrix for ECI to ECEF (rotation around Z-axis by GST)
+        double cos_theta = cos(gmst);
+        double sin_theta = sin(gmst);
+
+        libsgp4::Vector r_ecef(r_eci.x * cos_theta + r_eci.y * sin_theta,
+                               -r_eci.x * sin_theta + r_eci.y * cos_theta,
+                               r_eci.z);
+
+        // Calculate angular momentum vector in ECI
+        // h = r x v
+        libsgp4::Vector h_eci(r_eci.y * v_eci.z - r_eci.z * v_eci.y,
+                              r_eci.z * v_eci.x - r_eci.x * v_eci.z,
+                              r_eci.x * v_eci.y - r_eci.y * v_eci.x);
+
+        libsgp4::Vector n_eci(-h_eci.y, h_eci.x, 0.0); // Node vector in ECI
+
+        // Inclination (same in ECI and ECEF if Z axes are aligned)
+        m_inclination = acos(h_eci.z / h_eci.Magnitude());
+
+        // h_ecef = h_eci rotated by GST
+        libsgp4::Vector h_ecef(h_eci.x * cos_theta + h_eci.y * sin_theta,
+                               -h_eci.x * sin_theta + h_eci.y * cos_theta,
+                               h_eci.z);
+
+        // Calculate Node vector in ECEF
+        libsgp4::Vector n_ecef(-h_ecef.y, h_ecef.x, 0.0);
+        double n_ecef_mag = n_ecef.Magnitude();
+
+        // Calculate m_longitude (LAN in ECEF at t=0)
+        if (n_ecef_mag > 1e-12)
+        {
+            m_longitude = atan2(n_ecef.y, n_ecef.x);
+        }
+        else
+        {
+            m_longitude = 0.0;
+        }
+
+        // Calculate Argument of Latitude (u)
+        if (n_ecef_mag > 1e-12)
+        {
+            double cos_u = r_ecef.Dot(n_ecef) / (r_ecef.Magnitude() * n_ecef_mag);
+            // Clamp for safety
+            if (cos_u > 1.0)
+                cos_u = 1.0;
+            if (cos_u < -1.0)
+                cos_u = -1.0;
+
+            m_offset = acos(cos_u);
+
+            // Check quadrant
+            if (r_ecef.z < 0)
+            {
+                m_offset = 2 * M_PI - m_offset;
+            }
+        }
+        else
+        {
+            // Equatorial orbit
+            m_offset = atan2(r_ecef.y, r_ecef.x);
+        }
+
+        // Set altitude
+        m_orbitHeight = r_ecef.Magnitude();
     }
     catch (const std::exception& e)
     {
@@ -346,7 +411,8 @@ GeoLeoOrbitMobility::GetProgress(Time t) const
     }
 
     // 2pi * (distance travelled / circumference of earth) + offset
-    return sign * (((GetSpeed() * t.GetSeconds()) / GeographicPositions::EARTH_SPHERE_RADIUS)) +
+    return sign * (((GetSpeed() * (t + m_tleStartTime).GetSeconds()) /
+                    GeographicPositions::EARTH_SPHERE_RADIUS)) +
            m_offset;
 }
 
