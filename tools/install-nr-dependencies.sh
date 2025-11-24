@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Cd on the root IoD_Sim directory
+cd $(dirname "$0")/..
+
 if [ -z "$ID" ]; then
   if [ -r /etc/os-release ]; then
     # shellcheck disable=SC1091
@@ -18,8 +21,6 @@ function install_debian_deps() {
   sudo apt update \
   && sudo apt install -y --no-install-recommends \
     libc6-dev      \
-    sqlite         \
-    sqlite3        \
     libsqlite3-dev \
     libeigen3-dev  \
     pybind11-dev

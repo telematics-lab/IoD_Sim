@@ -67,10 +67,6 @@ integrate_contrib_module() {
 clone_checkout_ns3 ns-3.45
 ln -fs ../../leo ./ns3/contrib/leo
 
-# If this step fails, continue anyway
-./tools/install-nr-dependencies.sh || {
-  echo "Warning: ./tools/install-nr-dependencies.sh failed — continuing."
-}
 integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.1.y"
 
 pushd ns3 > /dev/null

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Cd on the root IoD_Sim directory
+cd $(dirname "$0")/..
+
 if [ -z "$ID" ]; then
   source /etc/os-release
 fi
