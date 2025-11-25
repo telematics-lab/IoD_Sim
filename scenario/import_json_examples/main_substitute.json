@@ -1,0 +1,10 @@
+{
+  "description": "Example of substituting an imported JSON (object or array) into a new key",
+  "someConfig": {
+    "!importJson": {
+      "file": "imported_object.json",
+      "mode": "substituteWithKey",
+      "newKey": "myNewImportedKey"
+    }
+  }
+}

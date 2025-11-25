@@ -1,0 +1,14 @@
+{
+  "description": "Example of expanding an imported array into the current array",
+  "myArray": [
+    {
+      "existingItem": 0
+    },
+    {
+      "!importJson": {
+        "file": "imported_array.json",
+        "mode": "expand"
+      }
+    }
+  ]
+}

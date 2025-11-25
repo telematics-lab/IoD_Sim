@@ -1,0 +1,8 @@
+{
+  "description": "Example of expanding an imported object into the current object",
+  "existingKey": "existingValue",
+  "!importJson": {
+    "file": "imported_object.json",
+    "mode": "expand"
+  }
+}
