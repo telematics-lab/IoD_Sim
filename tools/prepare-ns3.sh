@@ -33,6 +33,7 @@ clone_checkout_ns3() {
       git clone "$repo_url" "$module_name"
       if [ -n "$checkout_ref" ]; then
         cd "$module_name"
+        git config --local advice.detachedHead false
         git checkout "$checkout_ref"
         cd - > /dev/null
       fi
@@ -55,6 +56,7 @@ integrate_contrib_module() {
       git clone "$repo_url" "$module_path"
       if [ -n "$checkout_ref" ]; then
         cd "$module_path"
+        git config --local advice.detachedHead false
         git checkout "$checkout_ref"
         cd - > /dev/null
       fi
@@ -82,4 +84,9 @@ if [ -z "$(git config user.email)" ]; then
 fi
 
 git am ../tools/*.patch
+
+# Retrieve the ns3 script from a future commit to avoid python3.14 crashes
+git checkout 30eb4168f63ee7263a046d5851ce99913e84d42a -- ns3
+chmod +x ns3
+
 popd > /dev/null
