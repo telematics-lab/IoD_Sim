@@ -283,7 +283,7 @@ Scenario::Scenario(int argc, char** argv)
     vehicleTraceFilePath << CONFIGURATOR->GetResultsPath() << "vehicle-trace.csv";
     m_vehicleTraceStream = Create<OutputStreamWrapper>(vehicleTraceFilePath.str(), std::ios::out);
     *m_vehicleTraceStream->GetStream()
-        << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
+        << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude,NearestSatElevationAngle" << std::endl;
 
     // DebugHelper::ProbeNodes();
     ConfigureSimulator();
@@ -1701,16 +1701,42 @@ Scenario::LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model
 void
 Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> model)
 {
-    auto mobility = DynamicCast<const GeocentricMobilityModel>(model);
+    auto mobility = DynamicCast<GeocentricMobilityModel>(ConstCast<MobilityModel>(model));
     if (mobility)
     {
         auto pos = mobility->GetPosition(ns3::PositionType::GEOCENTRIC);
         auto geo = mobility->GetPosition(ns3::PositionType::GEOGRAPHIC);
         Ptr<const Node> node = model->GetObject<Node>();
-        // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude
+        // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude,ElevationAngle
+        double minDistance = std::numeric_limits<double>::max();
+        Ptr<const GeocentricMobilityModel> nearestSat = nullptr;
+
+        for (uint32_t i = 0; i < m_leoSats.GetN(); ++i)
+        {
+            Ptr<Node> satNode = m_leoSats.Get(i);
+            Ptr<const GeocentricMobilityModel> satMobility =
+                satNode->GetObject<GeocentricMobilityModel>();
+            if (satMobility)
+            {
+                double dist = mobility->GetDistanceFrom(satMobility);
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    nearestSat = satMobility;
+                }
+            }
+        }
+
+        double elevationAngle = 0.0;
+        if (nearestSat)
+        {
+            elevationAngle = mobility->GetElevationAngle(nearestSat);
+        }
+
         *m_vehicleTraceStream->GetStream()
             << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
-            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
+            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << "," << elevationAngle
+            << std::endl;
     }
 }
 
