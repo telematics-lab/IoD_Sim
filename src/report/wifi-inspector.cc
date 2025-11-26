@@ -32,7 +32,7 @@ NS_LOG_COMPONENT_DEFINE("WifiInspector");
 WifiInspector::WifiInspector(Ptr<NetDevice> device)
     : m_dev{InitializeNetDevice(device)},
       m_phy{InitializePhy(m_dev)},
-      m_channel{InitializeChannel(m_dev)},
+      m_channel{InitializeChannel(m_phy)},
       m_mac{InitializeMac(m_dev)}
 {
 }
@@ -137,64 +137,34 @@ Ptr<WifiPhy>
 WifiInspector::InitializePhy(Ptr<WifiNetDevice> dev)
 {
     NS_LOG_FUNCTION_NOARGS();
-    const TypeId devTid = dev->GetInstanceTypeId();
-    TypeId::AttributeInformation info;
-    PointerValue attribute;
-    Ptr<WifiPhy> phy;
+    Ptr<WifiPhy> phy = dev->GetPhy();
 
-    if (!devTid.LookupAttributeByName("Phy", &info))
-        NS_FATAL_ERROR("Wifi Device was expected to have Phy as attribute, but "
-                       "instead it does not exist!");
-
-    dev->GetAttribute(info.name, attribute);
-    phy = DynamicCast<WifiPhy>(attribute.GetObject());
     if (!phy)
-        NS_FATAL_ERROR("Cannot inspect and object that is not a WifiPhy.");
+        NS_FATAL_ERROR("Cannot inspect an object that is not a WifiPhy.");
 
     return phy;
 }
 
 Ptr<YansWifiChannel>
-WifiInspector::InitializeChannel(Ptr<WifiNetDevice> dev)
+WifiInspector::InitializeChannel(Ptr<WifiPhy> phy)
 {
     NS_LOG_FUNCTION_NOARGS();
-    const TypeId devTid = dev->GetInstanceTypeId();
-    TypeId channelTid;
-    TypeId::AttributeInformation info;
-    PointerValue attribute;
-    Ptr<Object> channelObject;
+    Ptr<YansWifiChannel> channel = DynamicCast<YansWifiChannel>(phy->GetChannel());
 
-    if (!devTid.LookupAttributeByName("Channel", &info))
-        NS_FATAL_ERROR("Device was expected to have Channel as attribute, but "
-                       "instead it does not exist!");
+    if (!channel)
+        NS_FATAL_ERROR("Unsupported channel type or channel not found");
 
-    dev->GetAttribute(info.name, attribute);
-    channelObject = attribute.GetObject();
-    channelTid = channelObject->GetInstanceTypeId();
-
-    if (channelTid.GetName() != "ns3::YansWifiChannel")
-        NS_FATAL_ERROR("Unsupported channel type " << channelTid.GetName());
-
-    return DynamicCast<YansWifiChannel>(channelObject);
+    return channel;
 }
 
 Ptr<WifiMac>
 WifiInspector::InitializeMac(Ptr<WifiNetDevice> dev)
 {
     NS_LOG_FUNCTION_NOARGS();
-    const TypeId devTid = dev->GetInstanceTypeId();
-    TypeId::AttributeInformation info;
-    PointerValue attribute;
-    Ptr<WifiMac> mac;
+    Ptr<WifiMac> mac = dev->GetMac();
 
-    if (!devTid.LookupAttributeByName("Mac", &info))
-        NS_FATAL_ERROR("Wifi Device was expected to have Mac as attribute, but "
-                       "instead it does not exist!");
-
-    dev->GetAttribute(info.name, attribute);
-    mac = DynamicCast<WifiMac>(attribute.GetObject());
     if (!mac)
-        NS_FATAL_ERROR("Cannot inspect and object that is not a WifiMac.");
+        NS_FATAL_ERROR("Cannot inspect an object that is not a WifiMac.");
 
     return mac;
 }

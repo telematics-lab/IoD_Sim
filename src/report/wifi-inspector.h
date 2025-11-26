@@ -82,7 +82,7 @@ class WifiInspector
     /**
      * Internal helper to get the Wifi Channel of a given WifiNetDevice
      */
-    static Ptr<YansWifiChannel> InitializeChannel(Ptr<WifiNetDevice> dev);
+    static Ptr<YansWifiChannel> InitializeChannel(Ptr<WifiPhy> phy);
     /**
      * Internal helper to get the MAC Layer of a given WifiNetDevice
      */

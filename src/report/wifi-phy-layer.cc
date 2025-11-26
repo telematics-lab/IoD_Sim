@@ -28,6 +28,7 @@
 #include <ns3/simulator.h>
 #include <ns3/string.h>
 #include <ns3/wifi-mac-header.h>
+#include <ns3/wifi-net-device.h>
 
 #include <algorithm>
 
@@ -167,13 +168,20 @@ void
 WifiPhyLayer::DoInitializeRssiMonitor()
 {
     NS_LOG_FUNCTION_NOARGS();
-    /* set callback using ns-3 XPath addressing system */
-    std::stringstream xPathCallback;
 
-    xPathCallback << "/NodeList/" << m_droneReference << "/DeviceList/" << m_netdevReference
-                  << "/$ns3::WifiNetDevice/Phy/PhyRxBegin";
-    Config::ConnectWithoutContext(xPathCallback.str(),
-                                  MakeCallback(&WifiPhyLayer::DoMonitorRssi, this));
+    auto node = NodeList::GetNode(m_droneReference);
+    auto dev = node->GetDevice(m_netdevReference);
+    auto wifiDev = DynamicCast<WifiNetDevice>(dev);
+
+    if (wifiDev)
+    {
+        auto phy = wifiDev->GetPhy();
+        if (phy)
+        {
+            phy->TraceConnectWithoutContext("PhyRxBegin",
+                                            MakeCallback(&WifiPhyLayer::DoMonitorRssi, this));
+        }
+    }
 }
 
 Mac48Address
