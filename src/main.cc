@@ -274,16 +274,25 @@ Scenario::Scenario(int argc, char** argv)
     m_appStatsHelper.InstallFlowMonitor(NodeContainer::GetGlobal()); // Install on all nodes
 
     // Initialize LeoSat trace CSV file
-    std::ostringstream leoSatTraceFilePath;
-    leoSatTraceFilePath << CONFIGURATOR->GetResultsPath() << "leo-sat-trace.csv";
-    m_leoSatTraceStream = Create<OutputStreamWrapper>(leoSatTraceFilePath.str(), std::ios::out);
-    *m_leoSatTraceStream->GetStream() << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
+    if (m_leoSats.GetN() > 0)
+    {
+        std::ostringstream leoSatTraceFilePath;
+        leoSatTraceFilePath << CONFIGURATOR->GetResultsPath() << "leo-sat-trace.csv";
+        m_leoSatTraceStream = Create<OutputStreamWrapper>(leoSatTraceFilePath.str(), std::ios::out);
+        *m_leoSatTraceStream->GetStream()
+            << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude" << std::endl;
+    }
+
     // Inizialize Vehicles trace CSV file
-    std::ostringstream vehicleTraceFilePath;
-    vehicleTraceFilePath << CONFIGURATOR->GetResultsPath() << "vehicle-trace.csv";
-    m_vehicleTraceStream = Create<OutputStreamWrapper>(vehicleTraceFilePath.str(), std::ios::out);
-    *m_vehicleTraceStream->GetStream()
-        << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude,NearestSatElevationAngle" << std::endl;
+    if (m_vehicles.GetN() > 0)
+    {
+        std::ostringstream vehicleTraceFilePath;
+        vehicleTraceFilePath << CONFIGURATOR->GetResultsPath() << "vehicle-trace.csv";
+        m_vehicleTraceStream =
+            Create<OutputStreamWrapper>(vehicleTraceFilePath.str(), std::ios::out);
+        *m_vehicleTraceStream->GetStream()
+            << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude,NearestSatElevationAngle" << std::endl;
+    }
 
     // DebugHelper::ProbeNodes();
     ConfigureSimulator();
@@ -1692,9 +1701,13 @@ Scenario::LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model
         auto geo = mobility->GetPosition(ns3::PositionType::GEOGRAPHIC);
         Ptr<const Node> node = model->GetObject<Node>();
         // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude
-        *m_leoSatTraceStream->GetStream()
-            << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
-            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << std::endl;
+        if (m_leoSatTraceStream)
+        {
+            *m_leoSatTraceStream->GetStream()
+                << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << ","
+                << pos.y << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z
+                << std::endl;
+        }
     }
 }
 
@@ -1733,10 +1746,13 @@ Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> mode
             elevationAngle = mobility->GetElevationAngle(nearestSat);
         }
 
-        *m_vehicleTraceStream->GetStream()
-            << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << "," << pos.y
-            << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << "," << elevationAngle
-            << std::endl;
+        if (m_vehicleTraceStream)
+        {
+            *m_vehicleTraceStream->GetStream()
+                << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << ","
+                << pos.y << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << ","
+                << elevationAngle << std::endl;
+        }
     }
 }
 
