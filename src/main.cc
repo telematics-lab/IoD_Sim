@@ -291,7 +291,8 @@ Scenario::Scenario(int argc, char** argv)
         m_vehicleTraceStream =
             Create<OutputStreamWrapper>(vehicleTraceFilePath.str(), std::ios::out);
         *m_vehicleTraceStream->GetStream()
-            << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude,NearestSatElevationAngle" << std::endl;
+            << "Time,Node,X,Y,Z,Latitude,Longitude,Altitude,NearestSatId,NearestSatElevationAngle"
+            << std::endl;
     }
 
     // DebugHelper::ProbeNodes();
@@ -1723,6 +1724,7 @@ Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> mode
         // Write to CSV file: Time,Node,X,Y,Z,Latitude,Longitude,Altitude,ElevationAngle
         double minDistance = std::numeric_limits<double>::max();
         Ptr<const GeocentricMobilityModel> nearestSat = nullptr;
+        int32_t nearestSatId = -1;
 
         for (uint32_t i = 0; i < m_leoSats.GetN(); ++i)
         {
@@ -1736,6 +1738,7 @@ Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> mode
                 {
                     minDistance = dist;
                     nearestSat = satMobility;
+                    nearestSatId = satNode->GetId();
                 }
             }
         }
@@ -1751,7 +1754,7 @@ Scenario::VehicleCourseChange(std::string context, Ptr<const MobilityModel> mode
             *m_vehicleTraceStream->GetStream()
                 << Simulator::Now().GetSeconds() << "," << node->GetId() << "," << pos.x << ","
                 << pos.y << "," << pos.z << "," << geo.x << "," << geo.y << "," << geo.z << ","
-                << elevationAngle << std::endl;
+                << nearestSatId << "," << elevationAngle << std::endl;
         }
     }
 }
