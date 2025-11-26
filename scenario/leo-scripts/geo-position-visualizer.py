@@ -21,7 +21,7 @@ def select_results_folder():
 
     # Find folders containing tracking CSV files
     valid_folders = []
-    for item in os.listdir(results_path):
+    for item in sorted(os.listdir(results_path)):
         folder_path = os.path.join(results_path, item)
         if os.path.isdir(folder_path):
             leo_csv_path = os.path.join(folder_path, "leo-sat-trace.csv")
