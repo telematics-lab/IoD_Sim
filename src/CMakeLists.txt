@@ -1,3 +1,6 @@
+find_package(ZLIB REQUIRED)
+find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
+
 set(source_files
   application/drone-client-application.cc
   application/drone-communications.cc
@@ -115,6 +118,8 @@ set(source_files
   report/wifi-phy-layer.cc
   world/interest-region-container.cc
   world/interest-region.cc
+  mobility/trace-reader.cc
+  mobility/trace-based-mobility-model.cc
 )
 
 set(header_files
@@ -206,6 +211,8 @@ set(header_files
   mobility/flight-plan.h
   mobility/planner.h
   mobility/proto-point.h
+  mobility/trace-reader.h
+  mobility/trace-based-mobility-model.h
   peripheral/drone-peripheral-container.h
   peripheral/drone-peripheral.h
   peripheral/input-peripheral.h
@@ -236,6 +243,8 @@ set(header_files
   report/wifi-phy-layer.h
   world/interest-region-container.h
   world/interest-region.h
+  mobility/trace-reader.h
+  mobility/trace-based-mobility-model.h
 )
 
 build_lib(
@@ -250,6 +259,8 @@ build_lib(
                     ${libmobility}
                     ${libnr}
                     ${libleo}
+                    ${LIBTAR_LIBRARY}
+                    ${ZLIB_LIBRARIES}
 )
 
 build_exec(
