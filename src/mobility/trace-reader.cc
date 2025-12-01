@@ -80,6 +80,27 @@ TraceReader::Register(const std::string& traceFile,
     return true;
 }
 
+std::vector<std::string>
+TraceReader::GetDeviceIds(const std::string& traceFile)
+{
+    NS_LOG_FUNCTION(this << traceFile);
+
+    if (m_traceFiles.find(traceFile) == m_traceFiles.end())
+    {
+        OpenTraceFile(traceFile);
+    }
+
+    std::vector<std::string> deviceIds;
+    const TraceFileState& state = m_traceFiles[traceFile];
+
+    for (const auto& pair : state.availableNodes)
+    {
+        deviceIds.push_back(pair.first);
+    }
+
+    return deviceIds;
+}
+
 void
 TraceReader::OpenTraceFile(const std::string& traceFile)
 {

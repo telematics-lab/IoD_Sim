@@ -43,6 +43,13 @@ class TraceReader
                   const std::string& deviceId,
                   Vector& initialPosition);
 
+    /**
+     * \brief Get the list of device IDs available in a trace file.
+     * \param traceFile The path to the trace file (tar.gz)
+     * \return A vector of device IDs found in nodes.csv.gz
+     */
+    std::vector<std::string> GetDeviceIds(const std::string& traceFile);
+
     // Returns true if a point was found (interpolated or exact).
     // If false, it means end of trace or no data.
     bool GetNextPoint(const std::string& traceFile,

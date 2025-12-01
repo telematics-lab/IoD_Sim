@@ -24,7 +24,9 @@
 #include "remote-configuration-helper.h"
 
 #include "ns3/constellation-expander.h"
+#include "ns3/fatal-error.h"
 #include "ns3/json-importer.h"
+#include "ns3/trace-expander.h"
 #include <ns3/command-line.h>
 #include <ns3/integer.h>
 #include <ns3/log.h>
@@ -840,38 +842,61 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         std::string scenarioPath = std::filesystem::path(configFilePath).parent_path().string();
         JsonImporter::Process(m_config, scenarioPath);
 
-        // Expand constellation definitions if present
-        if (m_config.HasMember("leo-sats") && m_config["leo-sats"].IsArray())
+        // Expand trace definitions if present in any supported object array
+        std::vector<std::string> keysToExpand = {"drones", "ZSPs", "remotes", "vehicles", "nodes"};
+        for (const auto& key : keysToExpand)
         {
-            rapidjson::Value newSatArray(rapidjson::kArrayType);
-            auto& allocator = m_config.GetAllocator();
-            bool expanded = false;
-
-            for (auto& sat : m_config["leo-sats"].GetArray())
+            if (m_config.HasMember(key.c_str()) && m_config[key.c_str()].IsArray())
             {
-                if (ConstellationExpander::HasConstellationParameter(sat))
+                rapidjson::Value newArray(rapidjson::kArrayType);
+                auto& allocator = m_config.GetAllocator();
+                bool expanded = false;
+
+                for (auto& obj : m_config[key.c_str()].GetArray())
                 {
-                    std::vector<rapidjson::Document> expandedSats =
-                        ConstellationExpander::ExpandConstellation(sat, scenarioPath);
-                    for (auto& expandedSat : expandedSats)
+                    bool hasTrace = TraceExpander::HasTraceParameter(obj);
+                    bool hasConstellation = ConstellationExpander::HasConstellationParameter(obj);
+                    if (hasTrace && hasConstellation)
                     {
-                        rapidjson::Value satVal(rapidjson::kObjectType);
-                        satVal.CopyFrom(expandedSat, allocator);
-                        newSatArray.PushBack(satVal, allocator);
+                        NS_FATAL_ERROR(
+                            "You cannot have both !trace and !constellation in the same object.");
                     }
-                    expanded = true;
+                    if (hasTrace)
+                    {
+                        std::vector<rapidjson::Document> expandedObjects =
+                            TraceExpander::ExpandTrace(obj, scenarioPath);
+                        for (auto& expandedObj : expandedObjects)
+                        {
+                            rapidjson::Value objVal(rapidjson::kObjectType);
+                            objVal.CopyFrom(expandedObj, allocator);
+                            newArray.PushBack(objVal, allocator);
+                        }
+                        expanded = true;
+                    }
+                    else if (hasConstellation)
+                    {
+                        std::vector<rapidjson::Document> expandedObjects =
+                            ConstellationExpander::ExpandConstellation(obj, scenarioPath);
+                        for (auto& expandedObj : expandedObjects)
+                        {
+                            rapidjson::Value objVal(rapidjson::kObjectType);
+                            objVal.CopyFrom(expandedObj, allocator);
+                            newArray.PushBack(objVal, allocator);
+                        }
+                        expanded = true;
+                    }
+                    else
+                    {
+                        rapidjson::Value objVal(rapidjson::kObjectType);
+                        objVal.CopyFrom(obj, allocator);
+                        newArray.PushBack(objVal, allocator);
+                    }
                 }
-                else
-                {
-                    rapidjson::Value satVal(rapidjson::kObjectType);
-                    satVal.CopyFrom(sat, allocator);
-                    newSatArray.PushBack(satVal, allocator);
-                }
-            }
 
-            if (expanded)
-            {
-                m_config["leo-sats"] = newSatArray;
+                if (expanded)
+                {
+                    m_config[key.c_str()] = newArray;
+                }
             }
         }
 

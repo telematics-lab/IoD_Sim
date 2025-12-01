@@ -200,7 +200,7 @@ TraceBasedMobilityModel::CalcPosition(Time t) const
     {
         return geoPos;
     }
-    return Vector(0, 0, 0);
+    return m_position;
 }
 
 Vector

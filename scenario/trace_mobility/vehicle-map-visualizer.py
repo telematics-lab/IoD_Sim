@@ -31,7 +31,9 @@ def select_results_folder():
                 valid_folders.append((item, vehicle_csv_path))
 
     if not valid_folders:
-        print(f"Nessuna cartella con file vehicle-trace.csv trovata in '{results_path}'")
+        print(
+            f"Nessuna cartella con file vehicle-trace.csv trovata in '{results_path}'"
+        )
         return None
 
     # Mostra menu
@@ -176,7 +178,7 @@ else:
                     size=6,
                     color=color,
                     opacity=0.8,
-                    line=dict(width=0.5, color='white'),
+                    line=dict(width=0.5, color="white"),
                 ),
                 line=dict(
                     width=2,
@@ -201,22 +203,26 @@ else:
     # Layout per Scatter Geo
     fig.update_layout(
         title={
-            'text': "Visualizzazione Tracce Veicoli - Mappa Topografica",
-            'x': 0.5,
-            'xanchor': 'center',
-            'font': {'size': 20}
+            "text": "Visualizzazione Tracce Veicoli - Mappa Topografica",
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"size": 20},
         },
         geo=dict(
-            scope='world',
-            projection_type='mercator',
+            scope="world",
+            projection_type="mercator",
             center=dict(lat=center_lat, lon=center_lon),
             lonaxis=dict(
-                range=[longitudes.min() - lon_range * 0.1,
-                       longitudes.max() + lon_range * 0.1]
+                range=[
+                    longitudes.min() - lon_range * 0.1,
+                    longitudes.max() + lon_range * 0.1,
+                ]
             ),
             lataxis=dict(
-                range=[latitudes.min() - lat_range * 0.1,
-                       latitudes.max() + lat_range * 0.1]
+                range=[
+                    latitudes.min() - lat_range * 0.1,
+                    latitudes.max() + lat_range * 0.1,
+                ]
             ),
             showland=True,
             landcolor="rgb(243, 243, 243)",
@@ -253,7 +259,7 @@ fig.show(renderer="browser")
 # Salva come HTML interattivo
 output_file = "vehicle_map_visualization.html"
 print(f"\nSalvataggio file HTML interattivo come '{output_file}'...")
-#fig.write_html(output_file)
+# fig.write_html(output_file)
 print(f"✓ Visualizzazione completata! File salvato come '{output_file}'")
 
 # Stampa istruzioni

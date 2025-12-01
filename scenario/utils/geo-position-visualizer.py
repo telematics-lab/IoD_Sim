@@ -193,36 +193,43 @@ for data_type in data_types:
     symbol = type_symbols.get(data_type, "circle")
 
     for i, nodo in enumerate(type_nodes):
+        # Filter and sort by time to ensure correct line drawing
         mask = (df["Node"] == nodo) & (df["DataType"] == data_type)
+        node_df = df[mask].sort_values("Time")
+
         colore = colors[i % len(colors)]
 
         # Create hover text with geographic coordinates
         hover_text = []
-        for idx in df[mask].index:
+        for idx in node_df.index:
             text = (
                 f"Type: {type_names.get(data_type, data_type)}<br>"
                 f"Node: {nodo}<br>"
-                f"Lat: {df.loc[idx, 'Latitude']:.3f}°<br>"
-                f"Lon: {df.loc[idx, 'Longitude']:.3f}°<br>"
-                f"Alt: {format_altitude(df.loc[idx, 'Altitude'])}<br>"
-                f"X: {df.loc[idx, 'X']:.0f}<br>"
-                f"Y: {df.loc[idx, 'Y']:.0f}<br>"
-                f"Z: {df.loc[idx, 'Z']:.0f}"
+                f"Lat: {node_df.loc[idx, 'Latitude']:.3f}°<br>"
+                f"Lon: {node_df.loc[idx, 'Longitude']:.3f}°<br>"
+                f"Alt: {format_altitude(node_df.loc[idx, 'Altitude'])}<br>"
+                f"X: {node_df.loc[idx, 'X']:.0f}<br>"
+                f"Y: {node_df.loc[idx, 'Y']:.0f}<br>"
+                f"Z: {node_df.loc[idx, 'Z']:.0f}"
             )
             hover_text.append(text)
 
         fig.add_trace(
             go.Scatter3d(
-                x=df.loc[mask, "X"],
-                y=df.loc[mask, "Y"],
-                z=df.loc[mask, "Z"],
-                mode="markers",
+                x=node_df["X"],
+                y=node_df["Y"],
+                z=node_df["Z"],
+                mode="lines+markers",
                 marker=dict(
                     color=colore,
                     size=2 if data_type == "leo-sat" else 3,
                     symbol=symbol,
                     opacity=0.8,
                     line=dict(width=0.3, color=colore),
+                ),
+                line=dict(
+                    color=colore,
+                    width=4,
                 ),
                 hovertemplate="%{hovertext}<extra></extra>",
                 hovertext=hover_text,

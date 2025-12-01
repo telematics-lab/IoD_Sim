@@ -1,0 +1,53 @@
+{
+  "name": "test-trace",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 20,
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "none"
+    }
+  ],
+  "macLayer": [],
+  "vehicles": [
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::TraceBasedMobilityModel",
+        "attributes": [
+          {
+            "name": "TraceFile",
+            "value": "../scenario/trace_mobility/taxi_example.trace"
+          },
+          {
+            "name": "DeviceId",
+            "value": "2"
+          },
+          {
+            "name": "Precision",
+            "value": "1s"
+          }
+        ]
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "TraceBasedMobilityModel",
+    "TraceReader"
+  ]
+}
