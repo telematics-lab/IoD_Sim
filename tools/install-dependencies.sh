@@ -28,7 +28,8 @@ function install_debian_deps() {
     rapidjson-dev     \
     libtar-dev        \
     doxygen           \
-    graphviz
+    graphviz          \
+    libtar-dev
 }
 
 function install_fedora_deps() {
@@ -49,7 +50,8 @@ function install_fedora_deps() {
     rapidjson-devel            \
     libtar-devel               \
     doxygen                    \
-    graphviz
+    graphviz                   \
+    libtar-devel
 }
 
 function install_arch_deps() {
@@ -70,7 +72,8 @@ function install_arch_deps() {
     rapidjson             \
     libtar                \
     doxygen-docs          \
-    graphviz
+    graphviz              \
+    libtar
 }
 
 case "$ID" in

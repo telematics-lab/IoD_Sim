@@ -14,7 +14,7 @@ jobs:
             user.name = Github Actions
             user.email = email@example.com
       - name: Install dependencies
-        run: sudo ./tools/install-dependencies.sh
+        run: sudo ./tools/install-dependencies.sh && sudo ./tools/install-nr-dependencies.sh
       - name: Integrate ns3 and IoD Sim
         run: ./tools/prepare-ns3.sh
       - name: Build IoD Sim

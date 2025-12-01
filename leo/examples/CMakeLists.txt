@@ -1,7 +1,8 @@
 # CMakeLists.txt for LEO module examples
 # Based on the original wscript configuration
 
-# Basic examples that don't require special dependencies
+find_package(ICU REQUIRED COMPONENTS uc data)
+
 set(basic_examples
     leo-circular-orbit-tracing-example
     leo-car-move-trace-example

@@ -1,5 +1,11 @@
 find_package(ZLIB REQUIRED)
+find_package(LibXml2 REQUIRED)
+
+find_package(ICU REQUIRED COMPONENTS uc data)
 find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
+
+include_directories(${LIBXML2_INCLUDE_DIR})
+include_directories(${ICU_INCLUDE_DIRS})
 
 set(source_files
   application/drone-client-application.cc
@@ -263,6 +269,7 @@ build_lib(
                     ${libleo}
                     ${LIBTAR_LIBRARY}
                     ${ZLIB_LIBRARIES}
+                    ${LIBXML2_LIBRARIES}
 )
 
 build_exec(

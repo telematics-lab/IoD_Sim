@@ -1,0 +1,61 @@
+FROM ubuntu:24.04
+
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+####
+# Machine setup and dependecies installation
+####
+RUN apt update \
+  && apt install -y --no-install-recommends \
+    clang-format      \
+    cmake             \
+    g++               \
+    gdb               \
+    gcc               \
+    git               \
+    make              \
+    libgsl-dev        \
+    libxml2-dev       \
+    patch             \
+    pkg-config        \
+    python3           \
+    python3-venv      \
+    python3-pip       \
+    python-is-python3 \
+    rapidjson-dev     \
+    libtar-dev        \
+    doxygen           \
+    graphviz          \
+    libc6-dev         \
+    libsqlite3-dev    \
+    libeigen3-dev     \
+    pybind11-dev      \
+    liblzma-dev       \
+    libicu-dev        \
+    libtar-dev        \
+    xz-utils          \
+    wget
+
+
+RUN wget https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz && \
+    tar -xf libxml2-2.15.1.tar.xz && rm libxml2-2.15.1.tar.xz && cd libxml2-2.15.1 && \
+    ./configure --enable-static --disable-shared --without-icu --without-python --prefix=/usr/local && \
+    make -j$(nproc) && make install && cd / && rm -rf libxml2-2.15.1
+
+RUN mkdir /IoD_Sim
+COPY . /IoD_Sim/
+
+# Use remote version of the simulator
+#RUN git clone -b develop https://github.com/telematics-lab/IoD_Sim
+
+WORKDIR /IoD_Sim
+RUN ./tools/prepare-ns3.sh
+WORKDIR /IoD_Sim/ns3
+
+RUN ./ns3 configure --build-profile=default --enable-static --enable-examples --enable-tests --disable-mpi --disable-python --enable-modules=iodsim,nr,leo,point-to-point-layout
+RUN ./ns3 build -j$(nproc) scenario
+
+WORKDIR /IoD_Sim/ns3/build
+
+CMD mv ns3.45-scenario-default /bin_result/ && exit 0

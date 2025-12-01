@@ -1,29 +1,29 @@
-# Guida LEO-NR Communication Scenario
+# LEO-NR Communication Scenario Guide
 
-Questo documento descrive tutte le opzioni configurabili nelle simulazioni che usano i moduli leo e i moduli nr in IoD-Sim.
+This document describes all configurable options in simulations using the leo and nr modules in IoD-Sim.
 
-## Indice
-1. [Configurazione Globale](#configurazione-globale)
-2. [Configurazione del Mondo](#configurazione-del-mondo)
-3. [Configurazione di NR](#configurazione-di-nr)
-  - [Configurazioni delle bande NR](#configurazioni-delle-bande-nr)
-  - [Layer MAC e di rete NR](#layer-mac-e-di-rete-nr)
-  - [Configurazione di UE e gNB in IoD-Sim con NR](#configurazione-di-ue-e-gnb-in-iod-sim-con-nr)
-4. [Veicoli sulla Terra](#veicoli-sulla-terra)
-5. [Satelliti LEO](#satelliti-leo)
-6. [Esempi di Configurazione](#esempi-di-configurazione)
+## Index
+1. [Global Configuration](#global-configuration)
+2. [World Configuration](#world-configuration)
+3. [NR Configuration](#nr-configuration)
+  - [NR Band Configurations](#nr-band-configurations)
+  - [NR MAC and Network Layer](#nr-mac-and-network-layer)
+  - [UE and gNB Configuration in IoD-Sim with NR](#ue-and-gnb-configuration-in-iod-sim-with-nr)
+4. [Vehicles on Earth](#vehicles-on-earth)
+5. [LEO Satellites](#leo-satellites)
+6. [Configuration Examples](#configuration-examples)
 
 ---
 
-## Configurazione Globale
+## Global Configuration
 
 ### `staticNs3Config`
-**Tipo:** `array[object]`
-**Descrizione:** Array di configurazioni statiche ns-3 da applicare prima della simulazione. Ogni oggetto ha `name` (nome dell'attributo) e `value`.
+**Type:** `array[object]`
+**Description:** Array of static ns-3 configurations to apply before the simulation. Each object has `name` (attribute name) and `value`.
 
-Conviene impostare alcuni parametri globali utili alla configurazione di alcune impostazioni di nr e le configuazioni sul modello della terra usato in LEO e nei modelli di propagazione NTN.
+It is advisable to set some global parameters useful for configuring certain nr settings and configurations on the earth model used in LEO and NTN propagation models.
 
-Per Nr, negli esempi di lena si "annulla" il valore di default del buffer RLC UM per evitare perdite di pacchetti in scenari ad alta latenza come quelli satellitari.
+For Nr, in the lena examples, the default value of the RLC UM buffer is "overridden" to avoid packet loss in high-latency scenarios such as satellite ones.
 ```json
 {
   "name": "ns3::NrRlcUm::MaxTxBufferSize",
@@ -31,7 +31,7 @@ Per Nr, negli esempi di lena si "annulla" il valore di default del buffer RLC UM
 }
 ```
 
-Mentre per le configurazioni LEO, è importante specificare il tipo di sferoid terrestre usato nel modello di mobilità geocentrica e nei modelli di propagazione NTN. Usualmente è comodo usare una sfera perfetta (`SPHERE`) per il posizionamento dei satelliti e dei veicoli terresti.
+While for LEO configurations, it is important to specify the type of earth spheroid used in the geocentric mobility model and in the NTN propagation models. Usually, it is convenient to use a perfect sphere (`SPHERE`) for the positioning of satellites and ground vehicles.
 ```json
 {
   "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
@@ -39,7 +39,7 @@ Mentre per le configurazioni LEO, è importante specificare il tipo di sferoid t
 }
 ```
 
-Inoltre possiamo specificare la precisione dei modelli di mobilità, impostando per i vari modelli la frequenza di aggiornamento della posizione (schedulando gli aggiornamenti in cui verrà chiamato CourseChange).
+Furthermore, we can specify the precision of the mobility models, setting the position update frequency for the various models (scheduling the updates in which CourseChange will be called).
 
 ```json
 {
@@ -52,20 +52,20 @@ Inoltre possiamo specificare la precisione dei modelli di mobilità, impostando 
 }
 ```
 
-In questo esempio impostiamo a 1 seocondo la frequenza nei modelli di mobilità orbitale LEO e nei modelli di mobilità a velocità costante usati dai veicoli terrestri.
+In this example, we set the frequency to 1 second in the LEO orbital mobility models and in the constant velocity mobility models used by ground vehicles.
 
-## Configurazione del Mondo
+## World Configuration
 
 ### `world.size`
-**Descrizione:** Dimensioni dello spazio simulato in metri.
+**Description:** Dimensions of the simulated space in meters.
 
-| Parametro | Tipo | Descrizione |
+| Parameter | Type | Description |
 |-----------|------|-------------|
-| `X` | string | Dimensione lungo l'asse X |
-| `Y` | string | Dimensione lungo l'asse Y |
-| `Z` | string | Dimensione lungo l'asse Z (altitudine) |
+| `X` | string | Dimension along the X axis |
+| `Y` | string | Dimension along the Y axis |
+| `Z` | string | Dimension along the Z axis (altitude) |
 
-**Esempio:**
+**Example:**
 ```json
 "world": {
   "size": {
@@ -76,44 +76,44 @@ In questo esempio impostiamo a 1 seocondo la frequenza nei modelli di mobilità 
 }
 ```
 
-In questi modelli è necessario impostare una dimensione del mondo molto ampia poichè al centro delle coordinate avremo la terra e attorno i satelliti in orbite LEO quindi dobbiamo considerare una dimensione che possa comprendere tutto come quella fornita in questo esempio.
+In these models, it is necessary to set a very large world dimension because we will have the earth at the center of the coordinates and the satellites in LEO orbits around it, so we must consider a dimension that can encompass everything like the one provided in this example.
 
 ---
 
-## Configurazione di NR
+## NR Configuration
 
-Nelle impostazioni `phyLayer` possiamo configurare un layer fisico di tipo `nr` che verrà supportato da 5g-lena e ne permette la configurazioni con le seguenti opzioni:
+In the `phyLayer` settings, we can configure a physical layer of type `nr` which will be supported by 5g-lena and allows configuration with the following options:
 
 
 ### `type`
-**Tipo:** `string`
-**Opzioni:** `nr`, `lte`, `wifi`, `none`
-**Descrizione:** Tipo di layer fisico. Nel nostro caso è `nr` per comunicazioni 5G NR (New Radio).
+**Type:** `string`
+**Options:** `nr`, `lte`, `wifi`, `none`
+**Description:** Type of physical layer. In our case, it is `nr` for 5G NR (New Radio) communications.
 
 ### `bands`
-**Descrizione:** Array di bande di frequenza disponibili per la comunicazione.
+**Description:** Array of frequency bands available for communication.
 
-## Configurazioni delle bande NR
+## NR Band Configurations
 
-Abbiamo la possibilità di configurare varie bande NR con differenti scenari, modelli di propagazione e frequenze.
+We have the possibility to configure various NR bands with different scenarios, propagation models, and frequencies.
 
-In particolare per la singola banda abbiamo i seguenti parametri configurabili:
+In particular, for the single band, we have the following configurable parameters:
 
 ### `bands[i].scenario`
-**Tipo**: `string`
-**Opzioni:** `InF`, `InH`, `UMa`, `UMi`, `RMa`, `InH-OfficeMixed`, `InH-OfficeOpen`, `V2V-Highway`, `V2V-Urban`, `NTN-DenseUrban`, `NTN-Urban`, `NTN-Suburban`, `NTN-Rural`
-**Descrizione:** Scenario di propagazione per la banda NR.
+**Type**: `string`
+**Options:** `InF`, `InH`, `UMa`, `UMi`, `RMa`, `InH-OfficeMixed`, `InH-OfficeOpen`, `V2V-Highway`, `V2V-Urban`, `NTN-DenseUrban`, `NTN-Urban`, `NTN-Suburban`, `NTN-Rural`
+**Description:** Propagation scenario for the NR band.
 
-Negli scenari di nostro interesse per comunicazioni LEO-satellite, conviene usare gli scenari `NTN-*` come `NTN-Suburban`, `NTN-Urban`, `NTN-DenseUrban` o `NTN-Rural` a seconda del tipo di ambiente terrestre in cui si trovano i veicoli.
+In the scenarios of our interest for LEO-satellite communications, it is convenient to use `NTN-*` scenarios such as `NTN-Suburban`, `NTN-Urban`, `NTN-DenseUrban`, or `NTN-Rural` depending on the type of terrestrial environment where the vehicles are located.
 
 ### `bands[i].propagationModel`
-**Tipo:** `string`
-**Opzioni:** `NYU`, `TwoRay`, `ThreeGpp`
-**Descrizione:** Modello di propagazione per la banda NR.
+**Type:** `string`
+**Options:** `NYU`, `TwoRay`, `ThreeGpp`
+**Description:** Propagation model for the NR band.
 
-La scelta dello scenario, delle condizioni del modello e del tipo di modello di propagazione, influenzerà il calcolo della path loss e della qualità del canale tra i nodi, andando a definire secondo una tabella il ChannelModel di ns3.
+The choice of scenario, model conditions, and propagation model type will influence the calculation of path loss and channel quality between nodes, defining the ns3 ChannelModel according to a table.
 
-In particolare con questo parametro andiamo a definire lo "Spectrum Propagation Loss Model" usato per calcolare la path loss tra i nodi.
+In particular, with this parameter, we define the "Spectrum Propagation Loss Model" used to calculate the path loss between nodes.
 | ChannelModel | SpectrumPropagationLossModel |
 |---------------|------------------------------|
 | ChannelModel::ThreeGpp | ThreeGppSpectrumPropagationLossModel |
@@ -121,23 +121,23 @@ In particolare con questo parametro andiamo a definire lo "Spectrum Propagation 
 | ChannelModel::NYU | NYUSpectrumPropagationLossModel |
 
 ### `bands[i].conditionModel`
-**Tipo:** `string`
-**Opzioni:** `NLOS`, `LOS`, `Buildings`, `Default`
-**Descrizione:** Modello della condizione del canale per la banda NR.
+**Type:** `string`
+**Options:** `NLOS`, `LOS`, `Buildings`, `Default`
+**Description:** Channel condition model for the NR band.
 
-Con questa opzione possiamo specificare un Channel Condition Model specifico. Se selezioniamo 'Default', questo verrà scelto automaticamente in base allo scenario selezionato e al modello di propagazione.
+With this option, we can specify a specific Channel Condition Model. If we select 'Default', this will be automatically chosen based on the selected scenario and propagation model.
 
-#### Tabella di Lookup: Modelli di Propagazione Disponibili
+#### Lookup Table: Available Propagation Models
 
-La seguente tabella mostra le combinazioni valide di **Propagation Model** e **Scenario**:
+The following table shows the valid combinations of **Propagation Model** and **Scenario**:
 
-##### ThreeGpp e TwoRay Models
+##### ThreeGpp and TwoRay Models
 
-In caso impostiamo TwoRay come modello di propagazione, verrà usato lo stesso schema di ThreeGpp per gli scenari disponibili.
+In case we set TwoRay as the propagation model, the same scheme as ThreeGpp will be used for the available scenarios.
 
-Il Channel Condition Model verrà usato se conditionModel è "Default".
+The Channel Condition Model will be used if conditionModel is "Default".
 
-| Scenario | Propagation Loss Model | Channel Condition Model (Default conditions) | Descrizione |
+| Scenario | Propagation Loss Model | Channel Condition Model (Default conditions) | Description |
 |----------|------------------------|------------------------|-------------|
 | `RMa` | ThreeGppRmaPropagationLossModel | ThreeGppRmaChannelConditionModel | Rural Macrocell |
 | `UMa` | ThreeGppUmaPropagationLossModel | ThreeGppUmaChannelConditionModel | Urban Macrocell |
@@ -153,9 +153,9 @@ Il Channel Condition Model verrà usato se conditionModel è "Default".
 
 ##### NYU Models
 
-Il Channel Condition Model verrà usato se conditionModel è "Default".
+The Channel Condition Model will be used if conditionModel is "Default".
 
-| Scenario | Propagation Loss Model | Channel Condition Model (Default conditions) | Descrizione |
+| Scenario | Propagation Loss Model | Channel Condition Model (Default conditions) | Description |
 |----------|------------------------|------------------------|-------------|
 | `RMa` | NYURmaPropagationLossModel | NYURmaChannelConditionModel | Rural Macrocell |
 | `UMa` | NYUUmaPropagationLossModel | NYUUmaChannelConditionModel | Urban Macrocell |
@@ -164,84 +164,84 @@ Il Channel Condition Model verrà usato se conditionModel è "Default".
 | `InF` | NYUInFPropagationLossModel | NYUInFChannelConditionModel | In-Factory |
 
 
-#### Channel Condition Model su conditionModel != "Default"
+#### Channel Condition Model on conditionModel != "Default"
 
-Se conditionModel è impostato su un valore diverso da "Default", il Channel Condition Model verrà scelto in base alla seguente tabella:
+If conditionModel is set to a value other than "Default", the Channel Condition Model will be chosen based on the following table:
 
-| Condizione | Channel Condition Model |
+| Condition | Channel Condition Model |
 |------------|-------------------------|
 | NLOS       | NeverLosChannelConditionModel |
 | LOS        | AlwaysLosChannelConditionModel |
 | Buildings  | BuildingsChannelConditionModel |
 
 ### `bands[i].contiguousCc`
-**Tipo:** `boolean`
-**Descrizione:** Se `true`, le component carrier (CC) sono allocate in modo contiguo nello spettro; se `false`, possono essere allocate in modo non contiguo.
-**Nota:** Questo parametro influisce sulla gestione delle risorse radio e sulla pianificazione delle bande di frequenza: se a true sarà possibile impostare 1 solo intervallo di frequenza per le CC, mentre a false si potranno avere CC in intervalli separati.
+**Type:** `boolean`
+**Description:** If `true`, component carriers (CC) are allocated contiguously in the spectrum; if `false`, they can be allocated non-contiguously.
+**Note:** This parameter affects radio resource management and frequency band planning: if true, it will be possible to set only 1 frequency range for the CCs, while if false, CCs can be in separate ranges.
 
 ### `bands[i].pathlossAttributes`
-**Tipo:** `array`
-**Descrizione:** Elenco degli attributi di perdita di percorso per la banda specificata. Ogni attributo di perdita di percorso è definito da un oggetto che specifica il nome e il valore dell'attributo.
-**Note:** Questi attributi vengono passati al modello di perdita di percorso selezionato di PropagationLoss, pertanto i parametri disponibili dipendono dal modello di propagazione scelto.
+**Type:** `array`
+**Description:** List of path loss attributes for the specified band. Each path loss attribute is defined by an object specifying the attribute name and value.
+**Notes:** These attributes are passed to the selected PropagationLoss model, so the available parameters depend on the chosen propagation model.
 
-In generale per i modelli ThreeGpp (o TwoRay) abbiamo questi attributi presi dal modello generico ThreeGppPropagationLossModel:
+In general, for ThreeGpp (or TwoRay) models, we have these attributes taken from the generic ThreeGppPropagationLossModel:
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `BuildingPenetrationLossesEnabled` | boolean | true | Abilita/disabilita le perdite di penetrazione degli edifici |
-| `EnforceParameterRanges` | boolean | false | Se applicare rigorosamente i range di applicabilità TR38.901 |
-| `ShadowingEnabled` | boolean | true | Abilita/disabilita l'effetto shadowing |
+| `BuildingPenetrationLossesEnabled` | boolean | true | Enable/disable building penetration losses |
+| `EnforceParameterRanges` | boolean | false | Whether to strictly enforce TR38.901 applicability ranges |
+| `ShadowingEnabled` | boolean | true | Enable/disable shadowing effect |
 
-Mentre per i modelli NYU abbiamo questi attributi presi dal modello generico NYUPropagationLossModel:
+While for NYU models, we have these attributes taken from the generic NYUPropagationLossModel:
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `FoliageLoss` | double | 0.4 | La perdita di foliage in dB |
-| `ShadowingEnabled` | boolean | true | Abilita/disabilita l'effetto shadowing |
-| `O2ILosstype` | string | "Low Loss" | Tipo di perdita di penetrazione Outdoor-to-Indoor (O2I) - "Low Loss" o "High Loss" |
-| `FoliageLossEnabled` | boolean | false | Abilita/disabilita la perdita di foliage |
-| `AtmosphericLossEnabled` | boolean | false | Abilita/disabilita la perdita atmosferica |
-| `Pressure` | double | 1013.25 | La pressione barometrica in mbar |
-| `Humidity` | double | 50 | L'umidità in percentuale |
-| `Temperature` | double | 20 | La temperatura in gradi celsius |
-| `RainRate` | double | 0 | Il tasso di pioggia in mm/hr |
+| `FoliageLoss` | double | 0.4 | Foliage loss in dB |
+| `ShadowingEnabled` | boolean | true | Enable/disable shadowing effect |
+| `O2ILosstype` | string | "Low Loss" | Outdoor-to-Indoor (O2I) penetration loss type - "Low Loss" or "High Loss" |
+| `FoliageLossEnabled` | boolean | false | Enable/disable foliage loss |
+| `AtmosphericLossEnabled` | boolean | false | Enable/disable atmospheric loss |
+| `Pressure` | double | 1013.25 | Barometric pressure in mbar |
+| `Humidity` | double | 50 | Humidity in percentage |
+| `Temperature` | double | 20 | Temperature in degrees Celsius |
+| `RainRate` | double | 0 | Rain rate in mm/hr |
 
-Per modelli specifici potrebbero esserci ulteriori attributi disponibili più specifici per cui si lascia il riferimento alla documentazione di ns-3 e di 5g-lena.
+For specific models, there might be additional more specific attributes available, for which reference is made to the ns-3 and 5g-lena documentation.
 
 ### `bands[i].channelConditionAttributes`
-**Descrizione:** Attributi della condizione del canale per la banda specificata. Ogni attributo della condizione del canale è definito da un oggetto che specifica il nome e il valore dell'attributo.
+**Description:** Channel condition attributes for the specified band. Each channel condition attribute is defined by an object specifying the attribute name and value.
 
-Anche in questo caso, gli attributi disponibili dipendono dal modello di condizione del canale selezionato.
+Also in this case, the available attributes depend on the selected channel condition model.
 
-Ad esempio per channelCondition "Default" con modelli ThreeGpp abbiamo questi attributi comuni (da ):
+For example, for "Default" channelCondition with ThreeGpp models, we have these common attributes (from ):
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `LinkO2iConditionToAntennaHeight` | boolean | false | Specifica se la condizione O2I sarà determinata in base all'altezza dell'antenna UE (se l'altezza UE è 1.5m allora è O2O, altrimenti è O2I) |
-| `O2iLowLossThreshold` | double (0:1) | 1 | Specifica il rapporto delle perdite di penetrazione O2I basse vs. alte. Valore di default 1.0 significa che tutte le perdite saranno basse |
-| `O2iThreshold` | double (0:1) | 0 | Specifica il rapporto delle condizioni del canale O2I. Valore di default 0 corrisponde a 0 perdite O2I |
-| `UpdatePeriod` | Time | 0ns | Specifica il periodo di tempo dopo il quale la condizione del canale viene ricalcolata. Se impostato a 0, la condizione del canale non viene mai aggiornata |
+| `LinkO2iConditionToAntennaHeight` | boolean | false | Specifies if the O2I condition will be determined based on the UE antenna height (if UE height is 1.5m then it is O2O, otherwise it is O2I) |
+| `O2iLowLossThreshold` | double (0:1) | 1 | Specifies the ratio of low vs. high O2I penetration losses. Default value 1.0 means all losses will be low |
+| `O2iThreshold` | double (0:1) | 0 | Specifies the ratio of O2I channel conditions. Default value 0 corresponds to 0 O2I losses |
+| `UpdatePeriod` | Time | 0ns | Specifies the time period after which the channel condition is recalculated. If set to 0, the channel condition is never updated |
 
-Nel caso di modelli NYU abbiamo questi attributi comuni (da NYUPropagationLossModel):
+In the case of NYU models, we have these common attributes (from NYUPropagationLossModel):
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `UpdatePeriod` | Time | 0ms | Specifica il periodo di tempo dopo il quale la condizione del canale viene ricalcolata. Se impostato a 0, la condizione del canale non viene mai aggiornata |
+| `UpdatePeriod` | Time | 0ms | Specifies the time period after which the channel condition is recalculated. If set to 0, the channel condition is never updated |
 
-Mentre per i modelli NLOS, LOS e Buildings non abbiamo attributi specificabili.
+While for NLOS, LOS, and Buildings models, we do not have specifiable attributes.
 
 
 ### `bands[i].phasedSpectrumAttributes`
-**Descrizione:** Attributi dello spettro a fasi per la banda specificata. Ogni attributo dello spettro a fasi è definito da un oggetto che specifica il nome e il valore dell'attributo.
+**Description:** Phased spectrum attributes for the specified band. Each phased spectrum attribute is defined by an object specifying the attribute name and value.
 
-Qui possiamo speificare attributi per gli Specrum PropagationLossModel. In particolare tuttavia non ci sono attributi utili associabili a questi modelli.
-È comunque lasciata la possibilità di utilizzare questa funzionalità derivata dall'nr helper di 5g-lena.
+Here we can specify attributes for the Spectrum PropagationLossModel. In particular, however, there are no useful attributes associated with these models.
+The possibility to use this functionality derived from the 5g-lena nr helper is still left open.
 
 ### `bands[i].frequencyBands`
-**Tipo:** `array`
-**Descrizione:** Elenco delle bande di frequenza per la banda NR specificata. Ogni banda di frequenza è definita da un oggetto che specifica la frequenza centrale, la larghezza di banda, il numero di component carrier e il numero di bandwidth part.
+**Type:** `array`
+**Description:** List of frequency bands for the specified NR band. Each frequency band is defined by an object specifying the central frequency, bandwidth, number of component carriers, and number of bandwidth parts.
 
-Esempio di un oggetto frequencyBands:
+Example of a frequencyBands object:
 ```json
 {
   "centralFrequency": 28e9,
@@ -252,9 +252,9 @@ Esempio di un oggetto frequencyBands:
 ```
 
 ### `phyLayer[0].scheduler`
-**Descrizione:** Configurazione del scheduler NR.
+**Description:** NR scheduler configuration.
 
-Esempio di configurazione del scheduler:
+Example of scheduler configuration:
 
 ```json
 "scheduler": : {
@@ -268,92 +268,92 @@ Esempio di configurazione del scheduler:
 }
 ```
 
-In questo parametro va impostato come definire lo scheduler da usare per la gestione delle risorse radio. Possiamo scegliere tra i vari scheduler disponibili in 5g-lena:
+In this parameter, we set how to define the scheduler to use for radio resource management. We can choose from various schedulers available in 5g-lena:
 
-| Tipo Scheduler (Classe ns-3)   | Famiglia | Logica dell'Algoritmo    | Descrizione                                                                                                                                                          |
+| Scheduler Type (ns-3 Class)   | Family | Algorithm Logic    | Description                                                                                                                                                          |
 |--------------------------------|----------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ns3::NrMacSchedulerOfdmaRR     | OFDMA    | Round Robin (RR)         | Assegna le risorse agli UE a turno, ciclicamente. Garantisce massima equità (fairness) ma non ottimizza il throughput totale né la qualità del canale.               |
-| ns3::NrMacSchedulerOfdmaPF     | OFDMA    | Proportional Fair (PF)   | Cerca un compromesso tra equità e throughput. Assegna risorse basandosi sul rapporto tra la qualità del canale istantanea e il throughput medio storico dell'utente. |
-| ns3::NrMacSchedulerOfdmaMR     | OFDMA    | Max Rate (MR)            | Assegna le risorse all'UE con il miglior canale in assoluto. Massimizza il throughput della cella ma affama gli utenti ai bordi (minima equità).                     |
-| ns3::NrMacSchedulerOfdmaQos    | OFDMA    | Quality of Service (QoS) | Prioritizza gli utenti in base ai requisiti di QoS (es. priorità del bearer/flusso). Ideale per scenari misti con traffico voce, video e dati.                       |
-| ns3::NrMacSchedulerOfdmaRandom | OFDMA    | Random                   | Assegna le risorse in modo puramente casuale. Usato principalmente per scopi di debug o baseline.                                                                    |
-| ns3::NrMacSchedulerOfdmaAi     | OFDMA    | AI / External            | Interfaccia per collegare agenti di apprendimento esterni (es. tramite ns3-ai) per prendere decisioni di scheduling basate su Machine Learning.                      |
-| ns3::NrMacSchedulerTdmaRR      | TDMA     | Round Robin (RR)         | Versione TDMA del Round Robin. Assegna l'intero slot agli utenti a turno.                                                                                            |
-| ns3::NrMacSchedulerTdmaPF      | TDMA     | Proportional Fair (PF)   | Versione TDMA del Proportional Fair.                                                                                                                                 |
-| ns3::NrMacSchedulerTdmaMR      | TDMA     | Max Rate (MR)            | Versione TDMA del Max Rate.                                                                                                                                          |
-| ns3::NrMacSchedulerTdmaQos     | TDMA     | Quality of Service (QoS) | Versione TDMA dello scheduler QoS.                                                                                                                                   |
-| ns3::NrMacSchedulerTdmaRandom  | TDMA     | Random                   | Versione TDMA dello scheduler casuale.                                                                                                                               |
-| ns3::NrMacSchedulerTdmaAi      | TDMA     | AI / External            | Versione TDMA per agenti AI esterni.                                                                                                                                 |
+| ns3::NrMacSchedulerOfdmaRR     | OFDMA    | Round Robin (RR)         | Assigns resources to UEs in turn, cyclically. Guarantees maximum fairness but does not optimize total throughput or channel quality.               |
+| ns3::NrMacSchedulerOfdmaPF     | OFDMA    | Proportional Fair (PF)   | Seeks a compromise between fairness and throughput. Assigns resources based on the ratio between instantaneous channel quality and the user's historical average throughput. |
+| ns3::NrMacSchedulerOfdmaMR     | OFDMA    | Max Rate (MR)            | Assigns resources to the UE with the absolute best channel. Maximizes cell throughput but starves edge users (minimum fairness).                     |
+| ns3::NrMacSchedulerOfdmaQos    | OFDMA    | Quality of Service (QoS) | Prioritizes users based on QoS requirements (e.g., bearer/flow priority). Ideal for mixed scenarios with voice, video, and data traffic.                       |
+| ns3::NrMacSchedulerOfdmaRandom | OFDMA    | Random                   | Assigns resources purely randomly. Mainly used for debug or baseline purposes.                                                                    |
+| ns3::NrMacSchedulerOfdmaAi     | OFDMA    | AI / External            | Interface to connect external learning agents (e.g., via ns3-ai) to make scheduling decisions based on Machine Learning.                      |
+| ns3::NrMacSchedulerTdmaRR      | TDMA     | Round Robin (RR)         | TDMA version of Round Robin. Assigns the entire slot to users in turn.                                                                                            |
+| ns3::NrMacSchedulerTdmaPF      | TDMA     | Proportional Fair (PF)   | TDMA version of Proportional Fair.                                                                                                                                 |
+| ns3::NrMacSchedulerTdmaMR      | TDMA     | Max Rate (MR)            | TDMA version of Max Rate.                                                                                                                                          |
+| ns3::NrMacSchedulerTdmaQos     | TDMA     | Quality of Service (QoS) | TDMA version of QoS scheduler.                                                                                                                                   |
+| ns3::NrMacSchedulerTdmaRandom  | TDMA     | Random                   | TDMA version of random scheduler.                                                                                                                               |
+| ns3::NrMacSchedulerTdmaAi      | TDMA     | AI / External            | TDMA version for external AI agents.                                                                                                                                 |
 
-#### Attributi comuni degli scheduler OFDMA
+#### Common Attributes of OFDMA Schedulers
 
-Gli scheduler OFDMA e TDMA condividono i seguenti attributi configurabili:
+OFDMA and TDMA schedulers share the following configurable attributes:
 
-| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+| Attribute Name | Type | Range/Options | Initial Value | Description |
 |----------------|------|---------------|-----------------|-------------|
-| `CqiTimerThreshold` | Time | -9.22337e+18ns:+9.22337e+18ns | +1e+09ns | Tempo di validità di un CQI |
-| `FixedMcsDl` | boolean | - | false | Fissa l'MCS DL al valore impostato in StartingMcsDl |
-| `FixedMcsUl` | boolean | - | false | Fissa l'MCS UL al valore impostato in StartingMcsUl |
-| `StartingMcsDl` | uint8_t | 0:255 | 0 | MCS iniziale per DL |
-| `StartingMcsUl` | uint8_t | 0:255 | 0 | MCS iniziale per UL |
-| `DlCtrlSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per il controllo DL |
-| `UlCtrlSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per il controllo UL |
-| `SrsSymbols` | uint8_t | 0:255 | 1 | Numero di simboli allocati per SRS in UL |
-| `EnableSrsInUlSlots` | boolean | - | true | Abilita la trasmissione SRS negli slot UL (oltre agli slot F) |
-| `EnableSrsInFSlots` | boolean | - | true | Abilita la trasmissione SRS negli slot F |
-| `DlAmc` | Ptr | - | 0 | Puntatore all'AMC DL dello scheduler |
-| `UlAmc` | Ptr | - | 0 | Puntatore all'AMC UL dello scheduler |
-| `MaxDlMcs` | int8_t | -1:30 | -1 | Indice MCS massimo per DL (-1 = nessun limite) |
-| `EnableHarqReTx` | boolean | - | true | Abilita le ritrasmissioni HARQ (max 3 se true, 0 se false) |
-| `SchedLcAlgorithmType` | TypeId | - | ns3::NrMacSchedulerLcRR | Tipo di algoritmo per assegnare byte ai diversi LC |
-| `RachUlGrantMcs` | uint8_t | 0:255 | 0 | MCS del grant UL RACH (deve essere [0..15]) |
-| `McsCsiSource` | enum | AVG_MCS\|AVG_SPEC_EFF\|AVG_SINR\|WIDEBAND_MCS | WIDEBAND_MCS | Fonte delle informazioni CSI per stimare l'MCS DL |
+| `CqiTimerThreshold` | Time | -9.22337e+18ns:+9.22337e+18ns | +1e+09ns | Validity time of a CQI |
+| `FixedMcsDl` | boolean | - | false | Fixes DL MCS to the value set in StartingMcsDl |
+| `FixedMcsUl` | boolean | - | false | Fixes UL MCS to the value set in StartingMcsUl |
+| `StartingMcsDl` | uint8_t | 0:255 | 0 | Initial MCS for DL |
+| `StartingMcsUl` | uint8_t | 0:255 | 0 | Initial MCS for UL |
+| `DlCtrlSymbols` | uint8_t | 0:255 | 1 | Number of symbols allocated for DL control |
+| `UlCtrlSymbols` | uint8_t | 0:255 | 1 | Number of symbols allocated for UL control |
+| `SrsSymbols` | uint8_t | 0:255 | 1 | Number of symbols allocated for SRS in UL |
+| `EnableSrsInUlSlots` | boolean | - | true | Enables SRS transmission in UL slots (in addition to F slots) |
+| `EnableSrsInFSlots` | boolean | - | true | Enables SRS transmission in F slots |
+| `DlAmc` | Ptr | - | 0 | Pointer to the scheduler's DL AMC |
+| `UlAmc` | Ptr | - | 0 | Pointer to the scheduler's UL AMC |
+| `MaxDlMcs` | int8_t | -1:30 | -1 | Maximum MCS index for DL (-1 = no limit) |
+| `EnableHarqReTx` | boolean | - | true | Enables HARQ retransmissions (max 3 if true, 0 if false) |
+| `SchedLcAlgorithmType` | TypeId | - | ns3::NrMacSchedulerLcRR | Type of algorithm to assign bytes to different LCs |
+| `RachUlGrantMcs` | uint8_t | 0:255 | 0 | MCS of the RACH UL grant (must be [0..15]) |
+| `McsCsiSource` | enum | AVG_MCS\|AVG_SPEC_EFF\|AVG_SINR\|WIDEBAND_MCS | WIDEBAND_MCS | Source of CSI information to estimate DL MCS |
 
-Solo per OFDMA:
-| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+Only for OFDMA:
+| Attribute Name | Type | Range/Options | Initial Value | Description |
 |----------------|------|---------------|-----------------|-------------|
-| `SymPerBeamType` | enum | LOAD_BASED\|ROUND_ROBIN\|PROPORTIONAL_FAIR | LOAD_BASED | Tipo di allocazione dei simboli per beam |
+| `SymPerBeamType` | enum | LOAD_BASED\|ROUND_ROBIN\|PROPORTIONAL_FAIR | LOAD_BASED | Type of symbol allocation per beam |
 
-**Note:**
-- `SymPerBeamType`: Determina come vengono allocati i simboli tra i diversi beam (basato sul carico, round robin o proporzionalmente equo)
-- `McsCsiSource`: Sceglie quale metrica CSI utilizzare per la stima dell'MCS DL (MCS medio, efficienza spettrale media, SINR medio o MCS wideband)
+**Notes:**
+- `SymPerBeamType`: Determines how symbols are allocated among different beams (load-based, round robin, or proportionally fair)
+- `McsCsiSource`: Chooses which CSI metric to use for DL MCS estimation (average MCS, average spectral efficiency, average SINR, or wideband MCS)
 
-#### Attributi specifici di NrMacSchedulerOfdmaPF, NrMacSchedulerOfdmaQos, NrMacSchedulerTdmaPF
+#### Specific Attributes of NrMacSchedulerOfdmaPF, NrMacSchedulerOfdmaQos, NrMacSchedulerTdmaPF
 
-Lo scheduler Proportional Fair (PF) ha attributi aggiuntivi per controllare il bilanciamento tra equità e throughput:
+The Proportional Fair (PF) scheduler has additional attributes to control the balance between fairness and throughput:
 
-| Nome Attributo | Tipo | Range | Valore Iniziale | Descrizione |
+| Attribute Name | Type | Range | Initial Value | Description |
 |----------------|------|-------|-----------------|-------------|
-| `FairnessIndex` | float | 0:1 | 1 | Indice che definisce la metrica PF (1 = PF tradizionale 3GPP, 0 = Round Robin in throughput) |
-| `LastAvgTPutWeight` | float | 0:3.40282e+38 | 99 | Peso dell'ultimo throughput medio nel calcolo del throughput medio |
+| `FairnessIndex` | float | 0:1 | 1 | Index defining the PF metric (1 = traditional 3GPP PF, 0 = Round Robin in throughput) |
+| `LastAvgTPutWeight` | float | 0:3.40282e+38 | 99 | Weight of the last average throughput in the average throughput calculation |
 
-**Note:**
-- `FairnessIndex`: Controlla il bilanciamento tra equità e massimizzazione del throughput. Un valore di 1 implementa il Proportional Fair tradizionale secondo le specifiche 3GPP, mentre un valore di 0 si comporta come un Round Robin basato sul throughput
-- `LastAvgTPutWeight`: Determina quanto peso dare al throughput medio storico rispetto alle misure recenti. Valori più alti danno più peso alla storia passata, rendendo la metrica più stabile ma meno reattiva ai cambiamenti
+**Notes:**
+- `FairnessIndex`: Controls the balance between fairness and throughput maximization. A value of 1 implements traditional Proportional Fair according to 3GPP specifications, while a value of 0 behaves like a Round Robin based on throughput
+- `LastAvgTPutWeight`: Determines how much weight to give to historical average throughput versus recent measurements. Higher values give more weight to past history, making the metric more stable but less reactive to changes
 
-#### Attributi specifici di NrMacSchedulerOfdmaAi
+#### Specific Attributes of NrMacSchedulerOfdmaAi
 
-Gli scheduler AI permettono l'integrazione con modelli di Machine Learning esterni (es. tramite ns3-ai) per decisioni di scheduling intelligenti. Ereditano tutti gli attributi da `NrMacSchedulerOfdmaQos` (o `NrMacSchedulerTdmaQos` per la versione TDMA) e aggiungono:
+AI schedulers allow integration with external Machine Learning models (e.g., via ns3-ai) for intelligent scheduling decisions. They inherit all attributes from `NrMacSchedulerOfdmaQos` (or `NrMacSchedulerTdmaQos` for the TDMA version) and add:
 
-| Nome Attributo | Tipo | Valore Iniziale | Descrizione |
+| Attribute Name | Type | Initial Value | Description |
 |----------------|------|-----------------|-------------|
-| `NotifyCbDl` | Callback | NullCallback | Funzione di callback per notificare il modello AI per il downlink |
-| `NotifyCbUl` | Callback | NullCallback | Funzione di callback per notificare il modello AI per l'uplink |
-| `ActiveDlAi` | boolean | false | Flag per attivare il modello AI per il downlink |
-| `ActiveUlAi` | boolean | false | Flag per attivare il modello AI per l'uplink |
+| `NotifyCbDl` | Callback | NullCallback | Callback function to notify the AI model for downlink |
+| `NotifyCbUl` | Callback | NullCallback | Callback function to notify the AI model for uplink |
+| `ActiveDlAi` | boolean | false | Flag to activate the AI model for downlink |
+| `ActiveUlAi` | boolean | false | Flag to activate the AI model for uplink |
 
-**Note:**
-- `NotifyCbDl` e `NotifyCbUl`: Devono essere configurati tramite codice C++ per collegare il modello AI esterno. Non possono essere impostati direttamente da JSON
-- `ActiveDlAi` e `ActiveUlAi`: Controllano se le decisioni di scheduling vengono delegate al modello AI. Se `false`, lo scheduler si comporta come un normale scheduler QoS
-- Gli scheduler AI sono progettati per integrarsi con framework come ns3-ai per implementare algoritmi di scheduling basati su reinforcement learning o altri approcci ML
+**Notes:**
+- `NotifyCbDl` and `NotifyCbUl`: Must be configured via C++ code to connect the external AI model. They cannot be set directly via JSON
+- `ActiveDlAi` and `ActiveUlAi`: Control whether scheduling decisions are delegated to the AI model. If `false`, the scheduler behaves like a normal QoS scheduler
+- AI schedulers are designed to integrate with frameworks like ns3-ai to implement scheduling algorithms based on reinforcement learning or other ML approaches
 
 ### `phyLayer[0].error-model`
-**Tipo:** `array`
-**Descrizione:** Array di configurazioni dei modelli di errore per la simulazione del canale radio NR.
+**Type:** `array`
+**Description:** Array of error model configurations for NR radio channel simulation.
 
-Il modello di errore simula le perdite di pacchetti e gli errori di trasmissione in base alle condizioni del canale (SINR, MCS, ecc.). È fondamentale per una simulazione realistica delle prestazioni del sistema.
+The error model simulates packet losses and transmission errors based on channel conditions (SINR, MCS, etc.). It is fundamental for a realistic simulation of system performance.
 
-**Esempio di configurazione singola (DL e UL con stesso modello):**
+**Example of single configuration (DL and UL with same model):**
 
 ```json
 "error-model": [
@@ -370,33 +370,33 @@ Il modello di errore simula le perdite di pacchetti e gli errori di trasmissione
 ]
 ```
 
-#### Parametri del modello di errore
+#### Error Model Parameters
 
-| Parametro | Tipo | Valori | Descrizione |
+| Parameter | Type | Values | Description |
 |-----------|------|--------|-------------|
-| `type` | string | TypeId ns-3 | Tipo del modello di errore da utilizzare |
-| `direction` | string | `both` \| `uplink` \| `downlink` | Direzione a cui applicare il modello (default: `both`) |
-| `amcAttributes` | array | - | Array di attributi specifici per l'AMC (Adaptive Modulation and Coding) |
+| `type` | string | ns-3 TypeId | Type of error model to use |
+| `direction` | string | `both` \| `uplink` \| `downlink` | Direction to apply the model to (default: `both`) |
+| `amcAttributes` | array | - | Array of specific attributes for AMC (Adaptive Modulation and Coding) |
 
-**Valori di `direction`:**
-- `both`: Applica lo stesso modello sia a downlink che uplink
-- `downlink`: Applica il modello solo al downlink (DL)
-- `uplink`: Applica il modello solo all'uplink (UL)
+**Values of `direction`:**
+- `both`: Applies the same model to both downlink and uplink
+- `downlink`: Applies the model only to downlink (DL)
+- `uplink`: Applies the model only to uplink (UL)
 
-#### Attributi AMC (Adaptive Modulation and Coding)
+#### AMC (Adaptive Modulation and Coding) Attributes
 
-Gli attributi `amcAttributes` configurano il modulo AMC che determina il MCS (Modulation and Coding Scheme) basandosi sul CQI:
+The `amcAttributes` configure the AMC module which determines the MCS (Modulation and Coding Scheme) based on the CQI:
 
-| Nome Attributo | Tipo | Range/Opzioni | Valore Iniziale | Descrizione |
+| Attribute Name | Type | Range/Options | Initial Value | Description |
 |----------------|------|---------------|-----------------|-------------|
-| `NumRefScPerRb` | uint8_t | 0:12 | 1 | Numero di sottoportanti che trasportano Reference Signals per Resource Block |
-| `AmcModel` | enum | ErrorModel \| ShannonModel | ErrorModel | Modello AMC utilizzato per assegnare il CQI |
+| `NumRefScPerRb` | uint8_t | 0:12 | 1 | Number of subcarriers carrying Reference Signals per Resource Block |
+| `AmcModel` | enum | ErrorModel \| ShannonModel | ErrorModel | AMC model used to assign CQI |
 
-**Valori di `AmcModel`:**
-- `ErrorModel`: Usa il modello di errore configurato (es. NrEesmIrT1) per calcolare il CQI in base alle tabelle BLER
-- `ShannonModel`: Usa il limite teorico di Shannon per calcolare il CQI (più ottimistico, utile per analisi teoriche)
+**Values of `AmcModel`:**
+- `ErrorModel`: Uses the configured error model (e.g., NrEesmIrT1) to calculate CQI based on BLER tables
+- `ShannonModel`: Uses the theoretical Shannon limit to calculate CQI (more optimistic, useful for theoretical analysis)
 
-**Esempio con attributi AMC:**
+**Example with AMC attributes:**
 
 ```json
 "error-model": [
@@ -417,40 +417,40 @@ Gli attributi `amcAttributes` configurano il modulo AMC che determina il MCS (Mo
 ]
 ```
 
-**Nota:** Sia type che amcAttributes sono opzionali: Si possono usare insieme o separatamente in oggetti separati nell'array, a seconda delle esigenze di configurazione.
+**Note:** Both type and amcAttributes are optional: They can be used together or separately in separate objects in the array, depending on configuration needs.
 
-#### Modelli di errore disponibili
+#### Available Error Models
 
-I modelli di errore disponibili in 5g-lena sono organizzati in due rami principali:
+The error models available in 5g-lena are organized into two main branches:
 
-##### Ramo NrEesmErrorModel
+##### NrEesmErrorModel Branch
 
-Modelli basati su EESM (Exponential Effective SINR Mapping) con supporto per HARQ:
+Models based on EESM (Exponential Effective SINR Mapping) with HARQ support:
 
-| Tipo Modello | Descrizione | Supporto HARQ |
+| Model Type | Description | HARQ Support |
 |--------------|-------------|---------------|
-| `ns3::NrEesmErrorModel` | Classe base astratta per modelli EESM | - |
-| `ns3::NrEesmCc` | Error model con Chase Combining (classe base CC) | Chase Combining |
-| `ns3::NrEesmCcT1` | EESM con Chase Combining e tabelle di tipo 1 (LDPC) | Chase Combining |
-| `ns3::NrEesmCcT2` | EESM con Chase Combining e tabelle di tipo 2 (modulazioni elevate) | Chase Combining |
-| `ns3::NrEesmIr` | Error model con Incremental Redundancy (classe base IR) | Incremental Redundancy |
-| `ns3::NrEesmIrT1` | EESM con Incremental Redundancy e tabelle di tipo 1 (LDPC) | Incremental Redundancy |
-| `ns3::NrEesmIrT2` | EESM con Incremental Redundancy e tabelle di tipo 2 (modulazioni elevate) | Incremental Redundancy |
+| `ns3::NrEesmErrorModel` | Abstract base class for EESM models | - |
+| `ns3::NrEesmCc` | Error model with Chase Combining (CC base class) | Chase Combining |
+| `ns3::NrEesmCcT1` | EESM with Chase Combining and Type 1 tables (LDPC) | Chase Combining |
+| `ns3::NrEesmCcT2` | EESM with Chase Combining and Type 2 tables (high modulations) | Chase Combining |
+| `ns3::NrEesmIr` | Error model with Incremental Redundancy (IR base class) | Incremental Redundancy |
+| `ns3::NrEesmIrT1` | EESM with Incremental Redundancy and Type 1 tables (LDPC) | Incremental Redundancy |
+| `ns3::NrEesmIrT2` | EESM with Incremental Redundancy and Type 2 tables (high modulations) | Incremental Redundancy |
 
-##### Ramo NrLteMiErrorModel
+##### NrLteMiErrorModel Branch
 
-Modelli basati su Mutual Information, compatibili con LTE:
+Models based on Mutual Information, compatible with LTE:
 
-| Tipo Modello | Descrizione |
+| Model Type | Description |
 |--------------|-------------|
-| `ns3::NrLteMiErrorModel` | Classe base per modelli basati su Mutual Information |
-| `ns3::LenaErrorModel` | Error model compatibile con LENA (LTE framework) |
+| `ns3::NrLteMiErrorModel` | Base class for models based on Mutual Information |
+| `ns3::LenaErrorModel` | Error model compatible with LENA (LTE framework) |
 
 
 
-**Esempio completo con configurazione DL/UL separata:**
+**Complete example with separate DL/UL configuration:**
 
-Per configurare modelli diversi per downlink e uplink, aggiungere due elementi all'array `error-model` con `direction` appropriata:
+To configure different models for downlink and uplink, add two elements to the `error-model` array with appropriate `direction`:
 
 ```json
 "error-model": [
@@ -469,19 +469,19 @@ Per configurare modelli diversi per downlink e uplink, aggiungere due elementi a
 ]
 ```
 
-**Nota:** È possibile specificare più configurazioni `error-model` con direzioni diverse nello stesso array. Se si specificano più configurazioni con la stessa direzione, l'ultima sovrascriverà le precedenti.
+**Note:** It is possible to specify multiple `error-model` configurations with different directions in the same array. If multiple configurations with the same direction are specified, the last one will overwrite the previous ones.
 
 
 
 
 ### `phyLayer[0].epc`
-**Descrizione:** Configurazione dell'EPC (Evolved Packet Core).
+**Description:** Configuration of the EPC (Evolved Packet Core).
 
-In generale come helper per l'epc abbiamo come classi disponibili: `ns3::NrPointToPointEpcHelper`, `ns3::NrPointToPointEpcHelperBase`, `ns3::NrNoBackhaulEpcHelper`.
+In general, as helpers for the epc, we have available classes: `ns3::NrPointToPointEpcHelper`, `ns3::NrPointToPointEpcHelperBase`, `ns3::NrNoBackhaulEpcHelper`.
 
-Si noti come `ns3::NrPointToPointEpcHelper` e `ns3::NrPointToPointEpcHelperBase` derivino da `ns3::NrNoBackhaulEpcHelper` e quindi ereditino tutti i suoi attributi.
+Note that `ns3::NrPointToPointEpcHelper` and `ns3::NrPointToPointEpcHelperBase` derive from `ns3::NrNoBackhaulEpcHelper` and therefore inherit all its attributes.
 
-Esempio di configurazione EPC:
+Example of EPC configuration:
 
 ```json
 "epc": {
@@ -495,42 +495,42 @@ Esempio di configurazione EPC:
 }
 ```
 
-Attibuti disponibili per `ns3::NrPointToPointEpcHelper` e `ns3::NrPointToPointEpcHelperBase` (oltre a quelli ereditati da `ns3::NrNoBackhaulEpcHelper`):
+Attributes available for `ns3::NrPointToPointEpcHelper` and `ns3::NrPointToPointEpcHelperBase` (in addition to those inherited from `ns3::NrNoBackhaulEpcHelper`):
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `S1uLinkDataRate` | DataRate | 10000000000bps | La velocità di trasmissione da utilizzare per il prossimo link S1-U da creare |
-| `S1uLinkDelay` | Time | +0ns | Il ritardo da utilizzare per il prossimo link S1-U da creare |
-| `S1uLinkMtu` | uint16_t (0:65535) | 2000 | La MTU del prossimo link S1-U da creare. Nota: a causa dell'overhead aggiuntivo del tunneling GTP/UDP/IP, è necessaria una MTU maggiore della MTU end-to-end che si vuole supportare |
-| `S1uLinkPcapPrefix` | string | "s1u" | Prefisso per i file Pcap generati dal link S1-U |
-| `S1uLinkEnablePcap` | boolean | false | Abilita la generazione di file Pcap per il link S1-U |
+| `S1uLinkDataRate` | DataRate | 10000000000bps | The data rate to be used for the next S1-U link to be created |
+| `S1uLinkDelay` | Time | +0ns | The delay to be used for the next S1-U link to be created |
+| `S1uLinkMtu` | uint16_t (0:65535) | 2000 | The MTU of the next S1-U link to be created. Note: due to the additional overhead of GTP/UDP/IP tunneling, an MTU larger than the end-to-end MTU you want to support is required |
+| `S1uLinkPcapPrefix` | string | "s1u" | Prefix for Pcap files generated by the S1-U link |
+| `S1uLinkEnablePcap` | boolean | false | Enable Pcap file generation for the S1-U link |
 
-Qui gli attributi ereditati da `ns3::NrNoBackhaulEpcHelper`:
+Here are the attributes inherited from `ns3::NrNoBackhaulEpcHelper`:
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `S5LinkDataRate` | DataRate | 10000000000bps | La velocità di trasmissione da utilizzare per il prossimo link S5 da creare |
-| `S5LinkDelay` | Time | +0ns | Il ritardo da utilizzare per il prossimo link S5 da creare |
-| `S5LinkMtu` | uint16_t (0:65535) | 2000 | La MTU del prossimo link S5 da creare |
-| `S11LinkDataRate` | DataRate | 10000000000bps | La velocità di trasmissione da utilizzare per il prossimo link S11 da creare |
-| `S11LinkDelay` | Time | +0ns | Il ritardo da utilizzare per il prossimo link S11 da creare |
-| `S11LinkMtu` | uint16_t (0:65535) | 2000 | La MTU del prossimo link S11 da creare |
-| `X2LinkDataRate` | DataRate | 10000000000bps | La velocità di trasmissione da utilizzare per il prossimo link X2 da creare |
-| `X2LinkDelay` | Time | +0ns | Il ritardo da utilizzare per il prossimo link X2 da creare |
-| `X2LinkMtu` | uint16_t (0:65535) | 3000 | La MTU del prossimo link X2 da creare. Nota: a causa di alcuni messaggi X2 grandi, è necessaria una MTU grande |
-| `X2LinkPcapPrefix` | string | "x2" | Prefisso per i file Pcap generati dal link X2 |
-| `X2LinkEnablePcap` | boolean | false | Abilita la generazione di file Pcap per il link X2 |
+| `S5LinkDataRate` | DataRate | 10000000000bps | The data rate to be used for the next S5 link to be created |
+| `S5LinkDelay` | Time | +0ns | The delay to be used for the next S5 link to be created |
+| `S5LinkMtu` | uint16_t (0:65535) | 2000 | The MTU of the next S5 link to be created |
+| `S11LinkDataRate` | DataRate | 10000000000bps | The data rate to be used for the next S11 link to be created |
+| `S11LinkDelay` | Time | +0ns | The delay to be used for the next S11 link to be created |
+| `S11LinkMtu` | uint16_t (0:65535) | 2000 | The MTU of the next S11 link to be created |
+| `X2LinkDataRate` | DataRate | 10000000000bps | The data rate to be used for the next X2 link to be created |
+| `X2LinkDelay` | Time | +0ns | The delay to be used for the next X2 link to be created |
+| `X2LinkMtu` | uint16_t (0:65535) | 3000 | The MTU of the next X2 link to be created. Note: due to some large X2 messages, a large MTU is required |
+| `X2LinkPcapPrefix` | string | "x2" | Prefix for Pcap files generated by the X2 link |
+| `X2LinkEnablePcap` | boolean | false | Enable Pcap file generation for the X2 link |
 
-Si noti come alcuni Prefix vengono già sovrascritti di default in IoD-Sim per evitare conflitti tra i vari link generati: sostiuirli nuovamente potrebbe compromettere la generazione dei file di reportistica.
+Note that some Prefixes are already overwritten by default in IoD-Sim to avoid conflicts between the various generated links: replacing them again could compromise the generation of reporting files.
 
 ### `phyLayer[0].beamforming`
-**Descrizione:** Configurazione del beamforming.
+**Description:** Beamforming configuration.
 
-In generale come helper per il beamforming abbiamo come classi disponibili: `ns3::IdealBeamformingHelper`, `ns3::RealisticBeamformingHelper`.
-Per questi helper non abbiam particolari attributi specifici, ma possiamo scegliere il metodo di beamforming (o algoritmo) tra `ns3::IdealBeamformingAlgorithm`, `ns3::DirectPathBeamforming`, `ns3::DirectPathQuasiOmniBeamforming` e `ns3::QuasiOmniDirectPathBeamforming`.
-Anche per gli algoritmi di beamforming non abbiamo particolari attributi specifici.
+In general, as helpers for beamforming, we have available classes: `ns3::IdealBeamformingHelper`, `ns3::RealisticBeamformingHelper`.
+For these helpers, we do not have particular specific attributes, but we can choose the beamforming method (or algorithm) from `ns3::IdealBeamformingAlgorithm`, `ns3::DirectPathBeamforming`, `ns3::DirectPathQuasiOmniBeamforming`, and `ns3::QuasiOmniDirectPathBeamforming`.
+Also for beamforming algorithms, we do not have particular specific attributes.
 
-Esempio di configurazione del beamforming:
+Example of beamforming configuration:
 
 ```json
 "beamforming": {
@@ -541,10 +541,10 @@ Esempio di configurazione del beamforming:
 }
 ```
 
-### `phyLayer[0].ueAntenna` e `gnbAntenna`
-**Descrizione:** Configurazione dell'antenna per UE e gNB.
+### `phyLayer[0].ueAntenna` and `gnbAntenna`
+**Description:** Antenna configuration for UE and gNB.
 
-Esempio di configurazione dell'antenna UE:
+Example of UE antenna configuration:
 
 ```json
 "ueAntenna": {
@@ -557,125 +557,125 @@ Esempio di configurazione dell'antenna UE:
 }
 ```
 
-In Type Possiamo inserire una qualunque antenna presente su ns-3, che sarà inserita in un array di antenne (come definito da 5g-lena), i cui parametri di configurazione possono essere specificati in arrayProperties.
+In Type, we can insert any antenna present on ns-3, which will be inserted into an antenna array (as defined by 5g-lena), whose configuration parameters can be specified in arrayProperties.
 
-Le proprietà specifiche dell'antenna (diverse da NumRows e NumColumns) possono essere specificate nell'array `properties` e dipendono dal tipo di antenna selezionato.
+Specific antenna properties (other than NumRows and NumColumns) can be specified in the `properties` array and depend on the selected antenna type.
 
-In particolare l'Array di antenne è costituito da un `UniformPlanarArray` di antenne del tipo specificato in `type` e può avere questi attributi (in arrayProperties):
+In particular, the Antenna Array consists of a `UniformPlanarArray` of antennas of the type specified in `type` and can have these attributes (in arrayProperties):
 
-| Nome | Tipo | Valore Iniziale | Range | Descrizione |
+| Name | Type | Initial Value | Range | Description |
 |------|------|----------------|--------|-------------|
-| `AntennaHorizontalSpacing` | double | 0.5 | 0:1.79769e+308 | Spaziatura orizzontale tra elementi antenna, in multipli della lunghezza d'onda |
-| `AntennaVerticalSpacing` | double | 0.5 | 0:1.79769e+308 | Spaziatura verticale tra elementi antenna, in multipli della lunghezza d'onda |
-| `BearingAngle` | double | 0 | -π:π | Angolo di orientamento in radianti |
-| `DowntiltAngle` | double | 0 | -π:π | Angolo di inclinazione verso il basso in radianti |
-| `IsDualPolarized` | boolean | false | - | Se true, antenna a doppia polarizzazione |
-| `NumColumns` | uint32_t | 4 | 1:4294967295 | Dimensione orizzontale dell'array |
-| `NumHorizontalPorts` | uint32_t | 1 | 0:4294967295 | Numero di porte orizzontali |
-| `NumRows` | uint32_t | 4 | 1:4294967295 | Dimensione verticale dell'array |
-| `NumVerticalPorts` | uint32_t | 1 | 0:4294967295 | Numero di porte verticali |
-| `PolSlantAngle` | double | 0 | -π:π | Angolo di inclinazione della polarizzazione in radianti |
+| `AntennaHorizontalSpacing` | double | 0.5 | 0:1.79769e+308 | Horizontal spacing between antenna elements, in multiples of wavelength |
+| `AntennaVerticalSpacing` | double | 0.5 | 0:1.79769e+308 | Vertical spacing between antenna elements, in multiples of wavelength |
+| `BearingAngle` | double | 0 | -π:π | Orientation angle in radians |
+| `DowntiltAngle` | double | 0 | -π:π | Downtilt angle in radians |
+| `IsDualPolarized` | boolean | false | - | If true, dual-polarized antenna |
+| `NumColumns` | uint32_t | 4 | 1:4294967295 | Horizontal dimension of the array |
+| `NumHorizontalPorts` | uint32_t | 1 | 0:4294967295 | Number of horizontal ports |
+| `NumRows` | uint32_t | 4 | 1:4294967295 | Vertical dimension of the array |
+| `NumVerticalPorts` | uint32_t | 1 | 0:4294967295 | Number of vertical ports |
+| `PolSlantAngle` | double | 0 | -π:π | Polarization slant angle in radians |
 
-mentre di seguito si riportano i tipi di antenne disponibili con i relativi parametri:
+while below are the available antenna types with relative parameters:
 
 #### ns3::IsotropicAntennaModel
 
-Antenna isotropa che irradia uniformemente in tutte le direzioni. È la più semplice da configurare.
+Isotropic antenna that radiates uniformly in all directions. It is the simplest to configure.
 
-| Nome | Tipo | Valore Iniziale | Range | Descrizione |
+| Name | Type | Initial Value | Range | Description |
 |------|------|----------------|--------|-------------|
-| `Gain` | double | 0 | -∞:+∞ | Guadagno dell'antenna in dB |
+| `Gain` | double | 0 | -∞:+∞ | Antenna gain in dB |
 
 #### ns3::CosineAntennaModel
 
-Antenna con pattern di radiazione coseno, utile per modellare antenne direttive con lobi principali definiti.
+Antenna with cosine radiation pattern, useful for modeling directional antennas with defined main lobes.
 
-| Nome | Tipo | Valore Iniziale | Range | Descrizione |
+| Name | Type | Initial Value | Range | Description |
 |------|------|----------------|--------|-------------|
-| `HorizontalBeamwidth` | double | 120 | 0:360 | Larghezza del fascio orizzontale a 3 dB (gradi). 360° = guadagno costante |
-| `VerticalBeamwidth` | double | 360 | 0:360 | Larghezza del fascio verticale a 3 dB (gradi). 360° = guadagno costante |
-| `MaxGain` | double | 0 | -∞:+∞ | Guadagno massimo (dB) nella direzione di puntamento |
-| `Orientation` | double | 0 | -360:360 | Orientamento dell'antenna sul piano x-y rispetto all'asse x (gradi) |
+| `HorizontalBeamwidth` | double | 120 | 0:360 | Horizontal beamwidth at 3 dB (degrees). 360° = constant gain |
+| `VerticalBeamwidth` | double | 360 | 0:360 | Vertical beamwidth at 3 dB (degrees). 360° = constant gain |
+| `MaxGain` | double | 0 | -∞:+∞ | Maximum gain (dB) in the pointing direction |
+| `Orientation` | double | 0 | -360:360 | Antenna orientation on the x-y plane with respect to the x-axis (degrees) |
 
 
 #### ns3::ParabolicAntennaModel
 
-Antenna parabolica con pattern di radiazione direttivo, ideale per comunicazioni punto-punto ad alta direttività.
+Parabolic antenna with directional radiation pattern, ideal for high-directivity point-to-point communications.
 
-| Nome | Tipo | Valore Iniziale | Range | Descrizione |
+| Name | Type | Initial Value | Range | Description |
 |------|------|----------------|--------|-------------|
-| `Beamwidth` | double | 60 | 0:180 | Larghezza del fascio a 3 dB (gradi) |
-| `MaxAttenuation` | double | 20 | -∞:+∞ | Attenuazione massima (dB) del pattern di radiazione |
-| `Orientation` | double | 0 | -360:360 | Orientamento dell'antenna sul piano x-y rispetto all'asse x (gradi) |
+| `Beamwidth` | double | 60 | 0:180 | Beamwidth at 3 dB (degrees) |
+| `MaxAttenuation` | double | 20 | -∞:+∞ | Maximum attenuation (dB) of the radiation pattern |
+| `Orientation` | double | 0 | -360:360 | Antenna orientation on the x-y plane with respect to the x-axis (degrees) |
 
 
 #### ns3::CircularApertureAntennaModel
 
-Antenna ad apertura circolare che simula il comportamento di antenne riflettore o array con apertura fisica definita.
+Circular aperture antenna that simulates the behavior of reflector antennas or arrays with defined physical aperture.
 
-| Nome | Tipo | Valore Iniziale | Range | Descrizione |
+| Name | Type | Initial Value | Range | Description |
 |------|------|----------------|--------|-------------|
-| `AntennaCircularApertureRadius` | double | 0.5 | ≥0 | Raggio dell'apertura dell'antenna (metri) |
-| `OperatingFrequency` | double | 2e9 | >0 | Frequenza operativa dell'antenna (Hz) |
-| `AntennaMinGainDb` | double | -100.0 | -∞:+∞ | Guadagno minimo dell'antenna (dB) |
-| `AntennaMaxGainDb` | double | 1.0 | ≥0 | Guadagno massimo dell'antenna (dB) |
-| `ForceGainBounds` | boolean | true | - | Forza GetGainDb nell'intervallo [AntennaMinGainDb, AntennaMaxGainDb] |
+| `AntennaCircularApertureRadius` | double | 0.5 | ≥0 | Antenna aperture radius (meters) |
+| `OperatingFrequency` | double | 2e9 | >0 | Antenna operating frequency (Hz) |
+| `AntennaMinGainDb` | double | -100.0 | -∞:+∞ | Minimum antenna gain (dB) |
+| `AntennaMaxGainDb` | double | 1.0 | ≥0 | Maximum antenna gain (dB) |
+| `ForceGainBounds` | boolean | true | - | Forces GetGainDb into the interval [AntennaMinGainDb, AntennaMaxGainDb] |
 
 #### ns3::ThreeGppAntennaModel
 
-Antenna basata su un'approssimazione parabolica del pattern di radiazione del lobo principale, conforme agli standard 3GPP.
+Antenna based on a parabolic approximation of the main lobe radiation pattern, compliant with 3GPP standards.
 
-| Nome | Tipo | Valore Iniziale | Descrizione |
+| Name | Type | Initial Value | Description |
 |------|------|----------------|-------------|
-| `RadiationPattern` | string | "Outdoor" | Pattern di radiazione dell'antenna 3GPP |
+| `RadiationPattern` | string | "Outdoor" | 3GPP antenna radiation pattern |
 
-**Valori possibili per RadiationPattern:**
-- `Outdoor` - Pattern per ambienti esterni
-- `Indoor` - Pattern per ambienti interni
+**Possible values for RadiationPattern:**
+- `Outdoor` - Pattern for outdoor environments
+- `Indoor` - Pattern for indoor environments
 
-### `gnbBwpManager` e `ueBwpManager`
-**Descrizione:** Configurazione del Bandwidth Part (BWP) Manager per gNB e UE.
+### `gnbBwpManager` and `ueBwpManager`
+**Description:** Bandwidth Part (BWP) Manager configuration for gNB and UE.
 
-È possibile specificare il tipo del BWP Manager Algorithm con il campo "type", anche se attualmente disponibile solo `ns3::BwpManagerAlgorithmStatic`, e i relativi attributi quali:
+It is possible to specify the BWP Manager Algorithm type with the "type" field, although currently only `ns3::BwpManagerAlgorithmStatic` is available, and related attributes such as:
 
-**Attributi di `ns3::BwpManagerAlgorithmStatic`:**
+**Attributes of `ns3::BwpManagerAlgorithmStatic`:**
 
-| Nome Attributo | Tipo | Range | Valore Iniziale | Descrizione |
+| Attribute Name | Type | Range | Initial Value | Description |
 |----------------|------|-------|-----------------|-------------|
-| `GBR_CONV_VOICE` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_CONV_VOICE (voce conversazionale) |
-| `GBR_CONV_VIDEO` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_CONV_VIDEO (video conversazionale) |
-| `GBR_GAMING` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_GAMING (gaming) |
-| `GBR_NON_CONV_VIDEO` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_NON_CONV_VIDEO (video non conversazionale) |
-| `GBR_MC_PUSH_TO_TALK` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_MC_PUSH_TO_TALK (push-to-talk mission critical) |
-| `GBR_NMC_PUSH_TO_TALK` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_NMC_PUSH_TO_TALK (push-to-talk non mission critical) |
-| `GBR_MC_VIDEO` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_MC_VIDEO (video mission critical) |
-| `GBR_V2X` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_V2X (Vehicle-to-Everything) |
-| `NGBR_IMS` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_IMS (IP Multimedia Subsystem) |
-| `NGBR_VIDEO_TCP_OPERATOR` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_VIDEO_TCP_OPERATOR (video TCP operatore) |
-| `NGBR_VOICE_VIDEO_GAMING` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_VOICE_VIDEO_GAMING (voce/video/gaming) |
-| `NGBR_VIDEO_TCP_PREMIUM` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_VIDEO_TCP_PREMIUM (video TCP premium) |
-| `NGBR_VIDEO_TCP_DEFAULT` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_VIDEO_TCP_DEFAULT (video TCP default) |
-| `NGBR_MC_DELAY_SIGNAL` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_MC_DELAY_SIGNAL (segnalazione delay-sensitive MC) |
-| `NGBR_MC_DATA` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_MC_DATA (dati mission critical) |
-| `NGBR_V2X` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_V2X (Vehicle-to-Everything non-GBR) |
-| `NGBR_LOW_LAT_EMBB` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo NGBR_LOW_LAT_EMBB (eMBB bassa latenza) |
-| `DGBR_DISCRETE_AUT_SMALL` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_DISCRETE_AUT_SMALL (automazione discreta small) |
-| `DGBR_DISCRETE_AUT_LARGE` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_DISCRETE_AUT_LARGE (automazione discreta large) |
-| `DGBR_ITS` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_ITS (Intelligent Transport Systems) |
-| `DGBR_ELECTRICITY` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_ELECTRICITY (distribuzione elettrica) |
-| `GBR_LIVE_UL_71` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_LIVE_UL_71 (live uplink 71) |
-| `GBR_LIVE_UL_72` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_LIVE_UL_72 (live uplink 72) |
-| `GBR_LIVE_UL_73` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_LIVE_UL_73 (live uplink 73) |
-| `GBR_LIVE_UL_74` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_LIVE_UL_74 (live uplink 74) |
-| `GBR_LIVE_UL_76` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo GBR_LIVE_UL_76 (live uplink 76) |
-| `DGBR_INTER_SERV_87` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_INTER_SERV_87 (servizi interattivi 87) |
-| `DGBR_INTER_SERV_88` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_INTER_SERV_88 (servizi interattivi 88) |
-| `DGBR_VISUAL_CONTENT_89` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_VISUAL_CONTENT_89 (contenuto visuale 89) |
-| `DGBR_VISUAL_CONTENT_90` | uint8_t | 0:5 | 0 | Indice BWP per flussi di tipo DGBR_VISUAL_CONTENT_90 (contenuto visuale 90) |
+| `GBR_CONV_VOICE` | uint8_t | 0:5 | 0 | BWP index for GBR_CONV_VOICE flows (conversational voice) |
+| `GBR_CONV_VIDEO` | uint8_t | 0:5 | 0 | BWP index for GBR_CONV_VIDEO flows (conversational video) |
+| `GBR_GAMING` | uint8_t | 0:5 | 0 | BWP index for GBR_GAMING flows (gaming) |
+| `GBR_NON_CONV_VIDEO` | uint8_t | 0:5 | 0 | BWP index for GBR_NON_CONV_VIDEO flows (non-conversational video) |
+| `GBR_MC_PUSH_TO_TALK` | uint8_t | 0:5 | 0 | BWP index for GBR_MC_PUSH_TO_TALK flows (mission critical push-to-talk) |
+| `GBR_NMC_PUSH_TO_TALK` | uint8_t | 0:5 | 0 | BWP index for GBR_NMC_PUSH_TO_TALK flows (non-mission critical push-to-talk) |
+| `GBR_MC_VIDEO` | uint8_t | 0:5 | 0 | BWP index for GBR_MC_VIDEO flows (mission critical video) |
+| `GBR_V2X` | uint8_t | 0:5 | 0 | BWP index for GBR_V2X flows (Vehicle-to-Everything) |
+| `NGBR_IMS` | uint8_t | 0:5 | 0 | BWP index for NGBR_IMS flows (IP Multimedia Subsystem) |
+| `NGBR_VIDEO_TCP_OPERATOR` | uint8_t | 0:5 | 0 | BWP index for NGBR_VIDEO_TCP_OPERATOR flows (operator TCP video) |
+| `NGBR_VOICE_VIDEO_GAMING` | uint8_t | 0:5 | 0 | BWP index for NGBR_VOICE_VIDEO_GAMING flows (voice/video/gaming) |
+| `NGBR_VIDEO_TCP_PREMIUM` | uint8_t | 0:5 | 0 | BWP index for NGBR_VIDEO_TCP_PREMIUM flows (premium TCP video) |
+| `NGBR_VIDEO_TCP_DEFAULT` | uint8_t | 0:5 | 0 | BWP index for NGBR_VIDEO_TCP_DEFAULT flows (default TCP video) |
+| `NGBR_MC_DELAY_SIGNAL` | uint8_t | 0:5 | 0 | BWP index for NGBR_MC_DELAY_SIGNAL flows (delay-sensitive MC signaling) |
+| `NGBR_MC_DATA` | uint8_t | 0:5 | 0 | BWP index for NGBR_MC_DATA flows (mission critical data) |
+| `NGBR_V2X` | uint8_t | 0:5 | 0 | BWP index for NGBR_V2X flows (non-GBR Vehicle-to-Everything) |
+| `NGBR_LOW_LAT_EMBB` | uint8_t | 0:5 | 0 | BWP index for NGBR_LOW_LAT_EMBB flows (low latency eMBB) |
+| `DGBR_DISCRETE_AUT_SMALL` | uint8_t | 0:5 | 0 | BWP index for DGBR_DISCRETE_AUT_SMALL flows (discrete automation small) |
+| `DGBR_DISCRETE_AUT_LARGE` | uint8_t | 0:5 | 0 | BWP index for DGBR_DISCRETE_AUT_LARGE flows (discrete automation large) |
+| `DGBR_ITS` | uint8_t | 0:5 | 0 | BWP index for DGBR_ITS flows (Intelligent Transport Systems) |
+| `DGBR_ELECTRICITY` | uint8_t | 0:5 | 0 | BWP index for DGBR_ELECTRICITY flows (electricity distribution) |
+| `GBR_LIVE_UL_71` | uint8_t | 0:5 | 0 | BWP index for GBR_LIVE_UL_71 flows (live uplink 71) |
+| `GBR_LIVE_UL_72` | uint8_t | 0:5 | 0 | BWP index for GBR_LIVE_UL_72 flows (live uplink 72) |
+| `GBR_LIVE_UL_73` | uint8_t | 0:5 | 0 | BWP index for GBR_LIVE_UL_73 flows (live uplink 73) |
+| `GBR_LIVE_UL_74` | uint8_t | 0:5 | 0 | BWP index for GBR_LIVE_UL_74 flows (live uplink 74) |
+| `GBR_LIVE_UL_76` | uint8_t | 0:5 | 0 | BWP index for GBR_LIVE_UL_76 flows (live uplink 76) |
+| `DGBR_INTER_SERV_87` | uint8_t | 0:5 | 0 | BWP index for DGBR_INTER_SERV_87 flows (interactive services 87) |
+| `DGBR_INTER_SERV_88` | uint8_t | 0:5 | 0 | BWP index for DGBR_INTER_SERV_88 flows (interactive services 88) |
+| `DGBR_VISUAL_CONTENT_89` | uint8_t | 0:5 | 0 | BWP index for DGBR_VISUAL_CONTENT_89 flows (visual content 89) |
+| `DGBR_VISUAL_CONTENT_90` | uint8_t | 0:5 | 0 | BWP index for DGBR_VISUAL_CONTENT_90 flows (visual content 90) |
 
-**Nota:** Ogni attributo specifica l'indice della Bandwidth Part (BWP) a cui devono essere inoltrati i flussi del rispettivo tipo QCI (Quality of Service Class Identifier). Il valore deve essere compreso tra 0 e 5, corrispondente all'indice della BWP configurata.
+**Note:** Each attribute specifies the index of the Bandwidth Part (BWP) to which flows of the respective QCI (Quality of Service Class Identifier) type should be forwarded. The value must be between 0 and 5, corresponding to the configured BWP index.
 
-Esempio di configurazione del BWP Manager:
+Example of BWP Manager configuration:
 
 ```json
 "gnbBwpManager": {
@@ -689,47 +689,47 @@ Esempio di configurazione del BWP Manager:
 }
 ```
 
-### `phyLayer[0].uePhyAttributes` e `gnbPhyAttributes`
-**Descrizione:** Attributi fisici specifici per UE e gNB.
+### `phyLayer[0].uePhyAttributes` and `gnbPhyAttributes`
+**Description:** Physical attributes specific to UE and gNB.
 
-Attributi disponibili per `uePhyAttributes`:
+Attributes available for `uePhyAttributes`:
 
-| Nome | Tipo | Range | Valore Iniziale | Descrizione |
+| Name | Type | Range | Initial Value | Description |
 |------|------|-------|-----------------|-------------|
-| `TxPower` | double | -1.79769e+308:1.79769e+308 | 2 | Potenza di trasmissione in dBm |
-| `NoiseFigure` | double | -1.79769e+308:1.79769e+308 | 5 | Perdita (dB) nel rapporto segnale-rumore dovuta a non-idealità nel ricevitore |
-| `PowerAllocationType` | enum | UniformPowerAllocBw\|UniformPowerAllocUsed | UniformPowerAllocUsed | Tipo di allocazione della potenza sui RB |
-| `LBTThresholdForCtrl` | Time | -9.22337e+18ns:+9.22337e+18ns | +25000ns | Soglia per considerare il canale libero per trasmissione controllo |
-| `TbDecodeLatency` | Time | -9.22337e+18ns:+9.22337e+18ns | +100000ns | Latenza di decodifica del transport block |
-| `EnableUplinkPowerControl` | boolean | - | false | Abilita il controllo della potenza in uplink |
-| `WbPmiUpdateInterval` | Time | -9.22337e+18ns:+9.22337e+18ns | +1e+07ns | Intervallo di aggiornamento PMI wideband |
-| `SbPmiUpdateInterval` | Time | -9.22337e+18ns:+9.22337e+18ns | +2e+06ns | Intervallo di aggiornamento PMI subband |
-| `AlphaCovMat` | double | 0:1 | 1 | Parametro alpha per calcolo matrice covarianza interferenza |
-| `CsiImDuration` | uint8_t | 1:12 | 1 | Durata CSI-IM in numero di simboli OFDM |
-| `UeMeasurementsFilterPeriod` | Time | -9.22337e+18ns:+9.22337e+18ns | +2e+08ns | Periodo di filtraggio per misure UE |
-| `EnableRlfDetection` | boolean | - | true | Abilita la rilevazione RLF (Radio Link Failure) |
+| `TxPower` | double | -1.79769e+308:1.79769e+308 | 2 | Transmission power in dBm |
+| `NoiseFigure` | double | -1.79769e+308:1.79769e+308 | 5 | Loss (dB) in signal-to-noise ratio due to non-idealities in the receiver |
+| `PowerAllocationType` | enum | UniformPowerAllocBw\|UniformPowerAllocUsed | UniformPowerAllocUsed | Type of power allocation on RBs |
+| `LBTThresholdForCtrl` | Time | -9.22337e+18ns:+9.22337e+18ns | +25000ns | Threshold to consider the channel free for control transmission |
+| `TbDecodeLatency` | Time | -9.22337e+18ns:+9.22337e+18ns | +100000ns | Transport block decoding latency |
+| `EnableUplinkPowerControl` | boolean | - | false | Enables uplink power control |
+| `WbPmiUpdateInterval` | Time | -9.22337e+18ns:+9.22337e+18ns | +1e+07ns | Wideband PMI update interval |
+| `SbPmiUpdateInterval` | Time | -9.22337e+18ns:+9.22337e+18ns | +2e+06ns | Subband PMI update interval |
+| `AlphaCovMat` | double | 0:1 | 1 | Alpha parameter for interference covariance matrix calculation |
+| `CsiImDuration` | uint8_t | 1:12 | 1 | CSI-IM duration in number of OFDM symbols |
+| `UeMeasurementsFilterPeriod` | Time | -9.22337e+18ns:+9.22337e+18ns | +2e+08ns | Filtering period for UE measurements |
+| `EnableRlfDetection` | boolean | - | true | Enables RLF (Radio Link Failure) detection |
 
-Attributi disponibili per `gnbPhyAttributes`:
+Attributes available for `gnbPhyAttributes`:
 
-| Nome | Tipo | Range | Valore Iniziale | Descrizione |
+| Name | Type | Range | Initial Value | Description |
 |------|------|-------|-----------------|-------------|
-| `RbOverhead` | double | 0:0.5 | 0.04 | Overhead nel calcolo del numero di RB utilizzabili |
-| `TxPower` | double | -1.79769e+308:1.79769e+308 | 4 | Potenza di trasmissione in dBm |
-| `NoiseFigure` | double | -1.79769e+308:1.79769e+308 | 5 | Perdita (dB) nel rapporto segnale-rumore dovuta a non-idealità nel ricevitore |
-| `PowerAllocationType` | enum | UniformPowerAllocBw\|UniformPowerAllocUsed | UniformPowerAllocUsed | Tipo di allocazione della potenza: uniforme su tutta la banda o sui RB utilizzati |
-| `N0Delay` | uint32_t | 0:1 | 0 | Ritardo minimo di elaborazione per decodificare DL DCI e dati DL |
-| `N1Delay` | uint32_t | 0:4 | 2 | Ritardo minimo (lato UE) dalla fine della ricezione dati DL all'inizio della trasmissione ACK/NACK |
-| `N2Delay` | uint32_t | 0:4 | 2 | Ritardo minimo di elaborazione per decodificare UL DCI e preparare dati UL |
-| `TbDecodeLatency` | Time | -9.22337e+18ns:+9.22337e+18ns | +100000ns | Latenza di decodifica del transport block |
-| `Numerology` | uint16_t | 0:65535 | 0 | La numerologia 3GPP da utilizzare |
-| `SymbolsPerSlot` | uint16_t | 0:65535 | 14 | Numero di simboli in uno slot |
-| `Pattern` | string | - | F\|F\|F\|F\|F\|F\|F\|F\|F\|F\| | Pattern degli slot |
-| `CsiRsModel` | enum | CsiRsPerUe\|CsiRsPerBeam | CsiRsPerUe | Tipo di modello CSI-RS: per UE o per beam |
-| `CsiRsPeriodicity` | uint16_t | 0:65535 | 10 | Periodicità CSI predefinita in numero di slot |
+| `RbOverhead` | double | 0:0.5 | 0.04 | Overhead in calculating the number of usable RBs |
+| `TxPower` | double | -1.79769e+308:1.79769e+308 | 4 | Transmission power in dBm |
+| `NoiseFigure` | double | -1.79769e+308:1.79769e+308 | 5 | Loss (dB) in signal-to-noise ratio due to non-idealities in the receiver |
+| `PowerAllocationType` | enum | UniformPowerAllocBw\|UniformPowerAllocUsed | UniformPowerAllocUsed | Type of power allocation: uniform over the entire band or on used RBs |
+| `N0Delay` | uint32_t | 0:1 | 0 | Minimum processing delay to decode DL DCI and DL data |
+| `N1Delay` | uint32_t | 0:4 | 2 | Minimum delay (UE side) from end of DL data reception to start of ACK/NACK transmission |
+| `N2Delay` | uint32_t | 0:4 | 2 | Minimum processing delay to decode UL DCI and prepare UL data |
+| `TbDecodeLatency` | Time | -9.22337e+18ns:+9.22337e+18ns | +100000ns | Transport block decoding latency |
+| `Numerology` | uint16_t | 0:65535 | 0 | The 3GPP numerology to use |
+| `SymbolsPerSlot` | uint16_t | 0:65535 | 14 | Number of symbols in a slot |
+| `Pattern` | string | - | F\|F\|F\|F\|F\|F\|F\|F\|F\|F\| | Slot pattern |
+| `CsiRsModel` | enum | CsiRsPerUe\|CsiRsPerBeam | CsiRsPerUe | Type of CSI-RS model: per UE or per beam |
+| `CsiRsPeriodicity` | uint16_t | 0:65535 | 10 | Default CSI periodicity in number of slots |
 
-**Nota:** Dall'attributo `Pattern` possiamo definire il pattern degli slot in termini di Downlink (D), Uplink (U) e Flexible (F). Ad esempio, un pattern di "DDFU" indica che i primi due slot sono Downlink, il terzo è Flexible e il quarto è Uplink.
+**Note:** From the `Pattern` attribute we can define the slot pattern in terms of Downlink (D), Uplink (U), and Flexible (F). For example, a pattern of "DDFU" indicates that the first two slots are Downlink, the third is Flexible, and the fourth is Uplink.
 
-**Esempio:**
+**Example:**
 ```json
 "uePhyAttributes": [
   {"name": "TxPower", "value": 23.0},
@@ -737,8 +737,8 @@ Attributi disponibili per `gnbPhyAttributes`:
 ]
 ```
 
-### Esempio Completo di Configurazione NR PHY Layer
-Ecco un esempio completo di configurazione del livello fisico NR in formato JSON:
+### Complete NR PHY Layer Configuration Example
+Here is a complete example of NR physical layer configuration in JSON format:
 ```json
 "phyLayer": [
    {
@@ -847,11 +847,11 @@ Ecco un esempio completo di configurazione del livello fisico NR in formato JSON
 ]
 ```
 
-## Layer MAC e di rete NR
+## NR MAC and Network Layer
 
-NR include la gestione del layer MAC e di rete, aggregata da 1 unico modulo, che viene già configurato con il layer fisico, inoltre gli IP usati sono hardcoded all'interno del codice di NS3 pertanto non sono configurabili via JSON.
+NR includes the management of the MAC and network layer, aggregated by 1 single module, which is already configured with the physical layer, moreover the IPs used are hardcoded within the NS3 code therefore they are not configurable via JSON.
 
-È sufficiente quindi aggiungere la seguente configurazione all'interno del dispositivo di rete NR per abilitare il layer MAC e di rete:
+It is therefore sufficient to add the following configuration inside the NR network device to enable the MAC and network layer:
 ```json
 "macLayer": [
   {
@@ -868,18 +868,18 @@ NR include la gestione del layer MAC e di rete, aggregata da 1 unico modulo, che
 ]
 ```
 
-Anche se si cercherà di impostare il network layer su indirizzi diversi da 7.0.0.0/8, questi verranno ignorati e sovrascritti con gli indirizzi hardcoded di 5g-lena.
+Even if you try to set the network layer to addresses other than 7.0.0.0/8, these will be ignored and overwritten with the hardcoded addresses of 5g-lena.
 
-## Configurazione di UE e gNB in IoD-Sim con NR
+## UE and gNB Configuration in IoD-Sim with NR
 
-Quando andiamo a configurare i vari dispositivi di rete, è possibile configurare il netdevice NR tramite i seguenti parametri come nell'esempio qui sotto.
+When we go to configure the various network devices, it is possible to configure the NR netdevice through the following parameters as in the example below.
 
 ```json
 "netDevices": [
   {
     "type": "nr",
-    "networkLayer": 0, // ID del layer nr
-    "role": "UE", // Ruolo: UE o gNB
+    "networkLayer": 0, // ID of the nr layer
+    "role": "UE", // Role: UE or gNB
     "bearers": [
       {
         "type": "NGBR_LOW_LAT_EMBB"
@@ -896,17 +896,17 @@ Quando andiamo a configurare i vari dispositivi di rete, è possibile configurar
 ]
 ```
 
-Come è possibile notare, è possibile specficare il tipo di bearer (flusso) che si vuole utilizzare tra quelli supportati da 5g-lena.
+As you can see, it is possible to specify the type of bearer (flow) you want to use among those supported by 5g-lena.
 
-Inoltre è possibile specificare degli attributi nel layer fisico specifici per quel netdevice NR: l'attributo è applicato ad una particolare BWP se specificato, altrimenti a tutti i BWP del dispositivo.
+Furthermore, it is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device.
 
-Gli attributi supportati sono i medesimi di quelli elencati nella sezione precedente per `uePhyAttributes` e `gnbPhyAttributes`.
+The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
 
 ---
 
-## Veicoli sulla Terra
+## Vehicles on Earth
 
-### Struttura di base
+### Basic Structure
 ```json
 "vehicles": [
   {
@@ -916,12 +916,12 @@ Gli attributi supportati sono i medesimi di quelli elencati nella sezione preced
   }
 ]
 ```
-I veicoli in generale agiscono come dei normali nodi, pertanto ne supportano tutti i parametri, ma vegono tracciati separatamente per comodità d'uso e per loggare separatamente le variazioni delle loro posizioni.
+Vehicles in general act like normal nodes, therefore they support all parameters, but are tracked separately for convenience of use and to log changes in their positions separately.
 
-In particolare però concentriamo il dettagli sul modello geocentrico a velocità costante creato proprio per i veicoli terrestri:
+In particular, however, we focus the detail on the constant velocity geocentric model created specifically for ground vehicles:
 
 ### `vehicles[n].mobilityModel`
-**Descrizione:** Modello di mobilità del veicolo sulla terra.
+**Description:** Mobility model of the vehicle on earth.
 
 ```json
 "mobilityModel": {
@@ -936,19 +936,19 @@ In particolare però concentriamo il dettagli sul modello geocentrico a velocit�
 }
 ```
 
-| Parametro | Tipo | Descrizione |
+| Parameter | Type | Description |
 |-----------|------|-------------|
-| `InitialLatitude` | number | Latitudine iniziale in gradi (-90 a +90) |
-| `InitialLongitude` | number | Longitudine iniziale in gradi (-180 a +180) |
-| `Altitude` | number | Altitudine in metri (0 per superficie) |
-| `Speed` | number | Velocità in m/s |
-| `Azimuth` | number | Direzione di movimento in gradi (0-360) |
+| `InitialLatitude` | number | Initial latitude in degrees (-90 to +90) |
+| `InitialLongitude` | number | Initial longitude in degrees (-180 to +180) |
+| `Altitude` | number | Altitude in meters (0 for surface) |
+| `Speed` | number | Speed in m/s |
+| `Azimuth` | number | Direction of movement in degrees (0-360) |
 
 ---
 
-## Satelliti LEO
+## LEO Satellites
 
-### Struttura di base
+### Basic Structure
 ```json
 "leo-sats": [
   {
@@ -959,12 +959,12 @@ In particolare però concentriamo il dettagli sul modello geocentrico a velocit�
 ]
 ```
 
-Allo stesso modo, anche i satelliti LEO sono nodi con tutti i parametri standard, ma viene separatamente tracciata la loro mobilità orbitale.
-Inoltre anche in questo caso vediamo nello specifico il modello di mobilità geocentrica per satelliti LEO:
+Similarly, LEO satellites are also nodes with all standard parameters, but their orbital mobility is tracked separately.
+Furthermore, also in this case we see specifically the geocentric mobility model for LEO satellites:
 
 
 ### `leo-sats[n].mobilityModel`
-**Descrizione:** Modello di mobilità orbitale LEO.
+**Description:** LEO orbital mobility model.
 
 ```json
 "mobilityModel": {
@@ -979,19 +979,19 @@ Inoltre anche in questo caso vediamo nello specifico il modello di mobilità geo
 }
 ```
 
-| Parametro | Tipo | Descrizione |
+| Parameter | Type | Description |
 |-----------|------|-------------|
-| `Altitude` | number | Altitudine orbitale in km |
-| `Inclination` | number | Inclinazione orbitale in gradi (0-180) |
-| `Longitude` | number | Longitudine del nodo ascendente in gradi |
-| `Offset` | number | Offset orbitale (phase offset) in gradi |
-| `RetrogradeOrbit` | boolean | Se `true`, orbita retrograda |
+| `Altitude` | number | Orbital altitude in km |
+| `Inclination` | number | Orbital inclination in degrees (0-180) |
+| `Longitude` | number | Longitude of the ascending node in degrees |
+| `Offset` | number | Orbital offset (phase offset) in degrees |
+| `RetrogradeOrbit` | boolean | If `true`, retrograde orbit |
 
 ---
 
-## Esempi di Configurazione
+## Configuration Examples
 
-### Esempio 1: Simulazione breve con 2 satelliti e 1 auto
+### Example 1: Short simulation with 2 satellites and 1 car
 ```json
 {
   "name": "leo-nr-short-test",

@@ -1,0 +1,7 @@
+services:
+  builder:
+    build:
+      dockerfile: tools/compile/Dockerfile.build
+      context: ../../
+    volumes:
+      - ./bin:/bin_result
