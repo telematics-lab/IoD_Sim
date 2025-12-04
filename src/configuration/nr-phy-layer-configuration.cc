@@ -334,4 +334,81 @@ NrPhyLayerConfiguration::GetAttachMethod() const
     return m_attachMethod;
 }
 
+
+
+void
+NrPhyLayerConfiguration::SetHandoverAlgorithmType(const TypeId& typeId)
+{
+    m_handoverAlgorithmType = typeId;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetHandoverAlgorithmType() const
+{
+    return m_handoverAlgorithmType;
+}
+
+void
+NrPhyLayerConfiguration::SetHandoverAlgorithmAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_handoverAlgorithmAttributes = attributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetHandoverAlgorithmAttributes() const
+{
+    return m_handoverAlgorithmAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetUeChannelAccessManagerType(const TypeId& typeId)
+{
+    m_ueChannelAccessManagerType = typeId;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetUeChannelAccessManagerType() const
+{
+    return m_ueChannelAccessManagerType;
+}
+
+void
+NrPhyLayerConfiguration::SetUeChannelAccessManagerAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_ueChannelAccessManagerAttributes = attributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetUeChannelAccessManagerAttributes() const
+{
+    return m_ueChannelAccessManagerAttributes;
+}
+
+void
+NrPhyLayerConfiguration::SetGnbChannelAccessManagerType(const TypeId& typeId)
+{
+    m_gnbChannelAccessManagerType = typeId;
+}
+
+TypeId
+NrPhyLayerConfiguration::GetGnbChannelAccessManagerType() const
+{
+    return m_gnbChannelAccessManagerType;
+}
+
+void
+NrPhyLayerConfiguration::SetGnbChannelAccessManagerAttributes(
+    const std::vector<ModelConfiguration::Attribute>& attributes)
+{
+    m_gnbChannelAccessManagerAttributes = attributes;
+}
+
+std::vector<ModelConfiguration::Attribute>
+NrPhyLayerConfiguration::GetGnbChannelAccessManagerAttributes() const
+{
+    return m_gnbChannelAccessManagerAttributes;
+}
+
 } // namespace ns3

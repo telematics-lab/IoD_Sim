@@ -90,6 +90,15 @@ In the `phyLayer` settings, we can configure a physical layer of type `nr` which
 **Options:** `nr`, `lte`, `wifi`, `none`
 **Description:** Type of physical layer. In our case, it is `nr` for 5G NR (New Radio) communications.
 
+### `attachMethod`
+**Type:** `string`
+**Options:** `closest`, `max-rsrp`, `none`
+**Default:** `max-rsrp`
+**Description:** Method used to attach UEs to gNBs.
+- `closest`: Attaches the UE to the geographically closest gNB.
+- `max-rsrp`: Attaches the UE to the gNB with the strongest signal (RSRP).
+- `none`: Does not perform attachment.
+
 ### `bands`
 **Description:** Array of frequency bands available for communication.
 
@@ -686,6 +695,38 @@ Example of BWP Manager configuration:
       "value": 0
     }
   ]
+}
+```
+
+### `phyLayer[0].handover`
+**Description:** Handover algorithm configuration.
+
+It is possible to specify the handover algorithm type and its attributes.
+
+**Example:**
+```json
+"handover": {
+  "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+  "attributes": []
+}
+```
+
+### `phyLayer[0].channelAccessManager`
+**Description:** Channel Access Manager configuration for UE and gNB.
+
+It is possible to specify the channel access manager type and its attributes for both UE and gNB.
+
+**Example:**
+```json
+"channelAccessManager": {
+  "ue": {
+    "type": "ns3::NrAlwaysOnAccessManager",
+    "attributes": []
+  },
+  "gnb": {
+    "type": "ns3::NrAlwaysOnAccessManager",
+    "attributes": []
+  }
 }
 ```
 

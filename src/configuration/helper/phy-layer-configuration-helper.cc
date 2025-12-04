@@ -372,6 +372,79 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
             }
         }
 
+        // Parse Handover configuration
+        if (jsonPhyLayer.HasMember("handover") && jsonPhyLayer["handover"].IsObject())
+        {
+            const auto& handover = jsonPhyLayer["handover"];
+            TypeId algoType = TypeId::LookupByName("ns3::NrNoOpHandoverAlgorithm"); // Default
+
+            if (handover.HasMember("algorithm") && handover["algorithm"].IsString())
+            {
+                algoType = TypeId::LookupByName(handover["algorithm"].GetString());
+            }
+
+            nrConfig->SetHandoverAlgorithmType(algoType);
+
+            if (handover.HasMember("attributes") && handover["attributes"].IsArray())
+            {
+                const auto handoverAttributes = ModelConfigurationHelper::GetAttributes(
+                    algoType,
+                    handover["attributes"].GetArray());
+                nrConfig->SetHandoverAlgorithmAttributes(handoverAttributes);
+            }
+        }
+
+        // Parse Channel Access Manager configuration
+        if (jsonPhyLayer.HasMember("channelAccessManager") &&
+            jsonPhyLayer["channelAccessManager"].IsObject())
+        {
+            const auto& cam = jsonPhyLayer["channelAccessManager"];
+
+            // UE
+            if (cam.HasMember("ue") && cam["ue"].IsObject())
+            {
+                const auto& ueCam = cam["ue"];
+                TypeId ueCamType = TypeId::LookupByName("ns3::NrAlwaysOnAccessManager"); // Default
+
+                if (ueCam.HasMember("type") && ueCam["type"].IsString())
+                {
+                    ueCamType = TypeId::LookupByName(ueCam["type"].GetString());
+                }
+
+                nrConfig->SetUeChannelAccessManagerType(ueCamType);
+
+                if (ueCam.HasMember("attributes") && ueCam["attributes"].IsArray())
+                {
+                    const auto ueCamAttributes = ModelConfigurationHelper::GetAttributes(
+                        ueCamType,
+                        ueCam["attributes"].GetArray());
+                    nrConfig->SetUeChannelAccessManagerAttributes(ueCamAttributes);
+                }
+            }
+
+            // gNB
+            if (cam.HasMember("gnb") && cam["gnb"].IsObject())
+            {
+                const auto& gnbCam = cam["gnb"];
+                TypeId gnbCamType = TypeId::LookupByName("ns3::NrAlwaysOnAccessManager"); // Default
+
+                if (gnbCam.HasMember("type") && gnbCam["type"].IsString())
+                {
+                    gnbCamType = TypeId::LookupByName(gnbCam["type"].GetString());
+                }
+
+                nrConfig->SetGnbChannelAccessManagerType(gnbCamType);
+
+                if (gnbCam.HasMember("attributes") && gnbCam["attributes"].IsArray())
+                {
+                    const auto gnbCamAttributes = ModelConfigurationHelper::GetAttributes(
+                        gnbCamType,
+                        gnbCam["attributes"].GetArray());
+                    nrConfig->SetGnbChannelAccessManagerAttributes(gnbCamAttributes);
+                }
+            }
+        }
+
         // Parse UE antenna configuration
         if (jsonPhyLayer.HasMember("ueAntenna") && jsonPhyLayer["ueAntenna"].IsObject())
         {

@@ -93,11 +93,11 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <list>
 #include <map>
+#include <memory>
 #include <sys/resource.h>
 #include <vector>
-#include <memory>
-#include <list>
 
 namespace ns3
 {
@@ -617,6 +617,39 @@ Scenario::ConfigurePhy()
             for (auto& attr : nrConf->GetGnbBwpManagerAttributes())
             {
                 nrSim->GetNrHelper()->SetGnbBwpManagerAlgorithmAttribute(attr.name, *attr.value);
+            }
+
+            // Handover
+            if (nrConf->GetHandoverAlgorithmType().GetUid() != 0)
+            {
+                nrSim->GetNrHelper()->SetHandoverAlgorithmType(
+                    nrConf->GetHandoverAlgorithmType().GetName());
+                for (auto& attr : nrConf->GetHandoverAlgorithmAttributes())
+                {
+                    nrSim->GetNrHelper()->SetHandoverAlgorithmAttribute(attr.name, *attr.value);
+                }
+            }
+
+            // UE Channel Access Manager
+            if (nrConf->GetUeChannelAccessManagerType().GetUid() != 0)
+            {
+                nrSim->GetNrHelper()->SetUeChannelAccessManagerTypeId(
+                    nrConf->GetUeChannelAccessManagerType());
+                for (auto& attr : nrConf->GetUeChannelAccessManagerAttributes())
+                {
+                    nrSim->GetNrHelper()->SetUeChannelAccessManagerAttribute(attr.name, *attr.value);
+                }
+            }
+
+            // gNB Channel Access Manager
+            if (nrConf->GetGnbChannelAccessManagerType().GetUid() != 0)
+            {
+                nrSim->GetNrHelper()->SetGnbChannelAccessManagerTypeId(
+                    nrConf->GetGnbChannelAccessManagerType());
+                for (auto& attr : nrConf->GetGnbChannelAccessManagerAttributes())
+                {
+                    nrSim->GetNrHelper()->SetGnbChannelAccessManagerAttribute(attr.name, *attr.value);
+                }
             }
 
             for (auto bandConf : nrConf->GetBandsConfiguration())
@@ -1867,7 +1900,8 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
     std::string attachMethod = nrConf->GetAttachMethod();
 
-    NS_LOG_INFO("Attaching " << ueDevices.GetN() << " UE devices to gNBs using method: " << attachMethod);
+    NS_LOG_INFO("Attaching " << ueDevices.GetN()
+                             << " UE devices to gNBs using method: " << attachMethod);
 
     if (attachMethod == "closest")
     {
@@ -1876,8 +1910,8 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     else if (attachMethod == "max-rsrp")
     {
         // Workaround for segfault in NrHelper::AttachToMaxRsrpGnb(container)
-        // The helper captures an iterator to the container, which becomes invalid if the container is destroyed.
-        // We create a persistent container for each UE to ensure validity.
+        // The helper captures an iterator to the container, which becomes invalid if the container
+        // is destroyed. We create a persistent container for each UE to ensure validity.
         for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
         {
             Ptr<NetDevice> ueDevice = *i;
@@ -1899,8 +1933,8 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     {
         NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
     }
-}
 
+}
 } // namespace ns3
 
 int

@@ -339,6 +339,63 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
         const std::vector<ModelConfiguration::Attribute>& attributes);
 
     /**
+     * Set Handover Algorithm Type
+     */
+    void SetHandoverAlgorithmType(const TypeId& typeId);
+    /**
+     * Get Handover Algorithm Type
+     */
+    TypeId GetHandoverAlgorithmType() const;
+
+    /**
+     * Set Handover Algorithm Attributes
+     */
+    void SetHandoverAlgorithmAttributes(
+        const std::vector<ModelConfiguration::Attribute>& attributes);
+    /**
+     * Get Handover Algorithm Attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetHandoverAlgorithmAttributes() const;
+
+    /**
+     * Set UE Channel Access Manager Type
+     */
+    void SetUeChannelAccessManagerType(const TypeId& typeId);
+    /**
+     * Get UE Channel Access Manager Type
+     */
+    TypeId GetUeChannelAccessManagerType() const;
+
+    /**
+     * Set UE Channel Access Manager Attributes
+     */
+    void SetUeChannelAccessManagerAttributes(
+        const std::vector<ModelConfiguration::Attribute>& attributes);
+    /**
+     * Get UE Channel Access Manager Attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetUeChannelAccessManagerAttributes() const;
+
+    /**
+     * Set gNB Channel Access Manager Type
+     */
+    void SetGnbChannelAccessManagerType(const TypeId& typeId);
+    /**
+     * Get gNB Channel Access Manager Type
+     */
+    TypeId GetGnbChannelAccessManagerType() const;
+
+    /**
+     * Set gNB Channel Access Manager Attributes
+     */
+    void SetGnbChannelAccessManagerAttributes(
+        const std::vector<ModelConfiguration::Attribute>& attributes);
+    /**
+     * Get gNB Channel Access Manager Attributes
+     */
+    std::vector<ModelConfiguration::Attribute> GetGnbChannelAccessManagerAttributes() const;
+
+    /**
      * Set the attachment method
      * \param attachMethod The attachment method to use ("closest", "max-rsrp", "none")
      */
@@ -373,6 +430,12 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::vector<ModelConfiguration::Attribute> m_ueBwpManagerAttributes;
     TypeId m_gnbBwpManagerType = TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic");
     TypeId m_ueBwpManagerType = TypeId::LookupByName("ns3::BwpManagerAlgorithmStatic");
+    TypeId m_handoverAlgorithmType;
+    std::vector<ModelConfiguration::Attribute> m_handoverAlgorithmAttributes;
+    TypeId m_ueChannelAccessManagerType;
+    std::vector<ModelConfiguration::Attribute> m_ueChannelAccessManagerAttributes;
+    TypeId m_gnbChannelAccessManagerType;
+    std::vector<ModelConfiguration::Attribute> m_gnbChannelAccessManagerAttributes;
 };
 
 } // namespace ns3
