@@ -96,6 +96,8 @@
 #include <map>
 #include <sys/resource.h>
 #include <vector>
+#include <memory>
+#include <list>
 
 namespace ns3
 {
@@ -184,7 +186,7 @@ class Scenario
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
-    void AttachAllNrUesToClosestGnb(const uint32_t netId);
+    void AttachAllNrUesToGnbs(const uint32_t netId);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -204,6 +206,9 @@ class Scenario
 
     // Application statistics helper
     AppStatisticsHelper m_appStatsHelper;
+
+    // Persistent containers for NR attachment workaround
+    std::list<std::shared_ptr<NetDeviceContainer>> m_persistentContainers;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -1188,8 +1193,8 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     NetDeviceContainer gnbDevContainer(dev);
     m_nrGnbDevices[netId].push_back(gnbDevContainer);
 
-    // Re-attach all existing UEs to the closest gNB (including this new one)
-    AttachAllNrUesToClosestGnb(netId);
+    // Re-attach all existing UEs to the gNBs
+    AttachAllNrUesToGnbs(netId);
 }
 
 void
@@ -1264,7 +1269,7 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
     m_nrUeDevices[netId].push_back(dev);
 
     // Attach this UE to the closest gNB among all available gNBs
-    AttachAllNrUesToClosestGnb(netId);
+    AttachAllNrUesToGnbs(netId);
 
     // init bearers on UE
     for (auto& bearerConf : bearers)
@@ -1818,7 +1823,7 @@ Scenario::ConfigureSimulator()
 }
 
 void
-Scenario::AttachAllNrUesToClosestGnb(const uint32_t netId)
+Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
 {
     NS_LOG_FUNCTION(netId);
 
@@ -1854,9 +1859,46 @@ Scenario::AttachAllNrUesToClosestGnb(const uint32_t netId)
     {
         ueDevices.Add(ueDevice);
     }
-    NS_LOG_INFO("Attaching " << ueDevices.GetN() << " UE devices to closest gNB among "
-                             << allGnbDevices.GetN() << " available gNBs");
-    nrHelper->AttachToClosestGnb(ueDevices, allGnbDevices);
+
+    // Retrieve the configuration for this PHY layer to check the attachment method
+    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+    // Assuming netId maps directly to the index in the PHY layer configuration vector
+    // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
+    auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+    std::string attachMethod = nrConf->GetAttachMethod();
+
+    NS_LOG_INFO("Attaching " << ueDevices.GetN() << " UE devices to gNBs using method: " << attachMethod);
+
+    if (attachMethod == "closest")
+    {
+        nrHelper->AttachToClosestGnb(ueDevices, allGnbDevices);
+    }
+    else if (attachMethod == "max-rsrp")
+    {
+        // Workaround for segfault in NrHelper::AttachToMaxRsrpGnb(container)
+        // The helper captures an iterator to the container, which becomes invalid if the container is destroyed.
+        // We create a persistent container for each UE to ensure validity.
+        for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
+        {
+            Ptr<NetDevice> ueDevice = *i;
+            // Create a persistent container using shared_ptr and store it in the list
+            // This ensures automatic deallocation when Scenario is destroyed.
+            auto persistentContainer = std::make_shared<NetDeviceContainer>(ueDevice);
+            m_persistentContainers.push_back(persistentContainer);
+
+            // We call the container overload with a single device.
+            // The helper will schedule the attachment.
+            nrHelper->AttachToMaxRsrpGnb(*persistentContainer, allGnbDevices);
+        }
+    }
+    else if (attachMethod == "none")
+    {
+        NS_LOG_INFO("Skipping attachment as per configuration.");
+    }
+    else
+    {
+        NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
+    }
 }
 
 } // namespace ns3

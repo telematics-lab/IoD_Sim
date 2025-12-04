@@ -119,7 +119,7 @@
         "ns3"
     ],
     "jupyter.jupyterServerType": "local",
-    "cmake.sourceDirectory": "${workspaceFolder}/ns3",
+    "cmake.sourceDirectory": "/Users/domysh/repos/IoD_Sim",
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,

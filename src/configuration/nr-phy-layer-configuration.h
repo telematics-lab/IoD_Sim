@@ -338,7 +338,20 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     void SetBeamformingAlgorithmAttributes(
         const std::vector<ModelConfiguration::Attribute>& attributes);
 
+    /**
+     * Set the attachment method
+     * \param attachMethod The attachment method to use ("closest", "max-rsrp", "none")
+     */
+    void SetAttachMethod(const std::string& attachMethod);
+
+    /**
+     * Get the attachment method
+     * \return The attachment method
+     */
+    std::string GetAttachMethod() const;
+
   private:
+    std::string m_attachMethod = "max-rsrp";
     TypeId m_epcHelperType = TypeId::LookupByName("ns3::NrPointToPointEpcHelper");
     TypeId m_beamformingHelperType = TypeId::LookupByName("ns3::IdealBeamformingHelper");
     TypeId m_beamformingMethod = TypeId::LookupByName("ns3::IdealBeamformingAlgorithm");

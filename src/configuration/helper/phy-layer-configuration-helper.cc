@@ -178,6 +178,19 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                                                         jsonPhyLayer["attributes"].GetArray());
             nrConfig = Create<NrPhyLayerConfiguration>(phyType, phyAttributes);
         }
+
+        if (jsonPhyLayer.HasMember("attachMethod"))
+        {
+            NS_ASSERT_MSG(jsonPhyLayer["attachMethod"].IsString(),
+                          "NR PHY Layer 'attachMethod' must be a string.");
+            std::string attachMethod = jsonPhyLayer["attachMethod"].GetString();
+            if (attachMethod != "closest" && attachMethod != "max-rsrp" && attachMethod != "none")
+            {
+                NS_FATAL_ERROR("Invalid attachMethod: " << attachMethod
+                                                        << ". Valid values are: closest, max-rsrp, none");
+            }
+            nrConfig->SetAttachMethod(attachMethod);
+        }
         // Parse beamforming configuration
         if (jsonPhyLayer.HasMember("beamforming") && jsonPhyLayer["beamforming"].IsObject())
         {

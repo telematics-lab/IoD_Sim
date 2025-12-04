@@ -322,4 +322,16 @@ NrPhyLayerConfiguration::GetBeamformingAlgorithmAttributes() const
     return m_beamformingAlgorithmAttributes;
 }
 
+void
+NrPhyLayerConfiguration::SetAttachMethod(const std::string& attachMethod)
+{
+    m_attachMethod = attachMethod;
+}
+
+std::string
+NrPhyLayerConfiguration::GetAttachMethod() const
+{
+    return m_attachMethod;
+}
+
 } // namespace ns3

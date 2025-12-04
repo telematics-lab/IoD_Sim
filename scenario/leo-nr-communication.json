@@ -11,11 +11,11 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "10ms"
+      "value": "300ms"
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
-      "value": "10ms"
+      "value": "300ms"
     },
     {
       "name": "ns3::NrRlcUm::MaxTxBufferSize",
@@ -37,6 +37,7 @@
   "phyLayer": [
     {
       "type": "nr",
+      "attachMethod": "max-rsrp",
       "bands": [
         {
           "scenario": "NTN-Rural",
@@ -52,7 +53,7 @@
           "channelConditionAttributes": [
             {
               "name": "UpdatePeriod",
-              "value": "10ms"
+              "value": "300ms"
             }
           ],
           "frequencyBands": [
