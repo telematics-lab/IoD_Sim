@@ -1,10 +1,57 @@
 find_package(ZLIB REQUIRED)
 find_package(LibXml2 REQUIRED)
 
+find_package(fmt CONFIG REQUIRED)
+find_package(nameof CONFIG QUIET)
+
+if(NOT nameof_FOUND)
+  message(STATUS "nameof not found, fetching from git...")
+  include(FetchContent)
+  FetchContent_Declare(
+    nameof
+    GIT_REPOSITORY https://github.com/Neargye/nameof.git
+    GIT_TAG        v0.10.4
+  )
+  FetchContent_MakeAvailable(nameof)
+
+  # Install nameof for export
+  install(TARGETS nameof EXPORT ns3ExportTargets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  FetchContent_GetProperties(nameof)
+  if(nameof_POPULATED)
+    install(DIRECTORY ${nameof_SOURCE_DIR}/include/
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+  endif()
+endif()
+find_package(cpp_yyjson CONFIG QUIET)
+
+if(NOT cpp_yyjson_FOUND)
+  message(STATUS "cpp_yyjson not found, fetching from git...")
+  include(FetchContent)
+  FetchContent_Declare(
+    cpp_yyjson
+    GIT_REPOSITORY https://github.com/yosh-matsuda/cpp-yyjson.git
+    GIT_TAG        v0.6.0
+  )
+  FetchContent_MakeAvailable(cpp_yyjson)
+
+  # Install cpp_yyjson for export
+  install(TARGETS cpp_yyjson EXPORT ns3ExportTargets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  FetchContent_GetProperties(cpp_yyjson)
+  if(cpp_yyjson_POPULATED)
+    install(DIRECTORY ${cpp_yyjson_SOURCE_DIR}/include/
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+  endif()
+endif()
+
 find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
 
 include_directories(${LIBXML2_INCLUDE_DIR})
-# include_directories(${ICU_INCLUDE_DIRS})
 
 set(source_files
   application/drone-client-application.cc
@@ -269,6 +316,9 @@ build_lib(
                     ${LIBTAR_LIBRARY}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}
+                    fmt::fmt
+                    nameof::nameof
+                    cpp_yyjson::cpp_yyjson
 )
 
 build_exec(

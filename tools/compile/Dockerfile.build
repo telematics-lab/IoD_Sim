@@ -24,7 +24,8 @@ RUN apt update \
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev     \
+    libyyjson-dev     \
+    libfmt-dev        \
     libtar-dev        \
     doxygen           \
     graphviz          \
