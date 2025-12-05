@@ -19,22 +19,9 @@
 #define REMOTE_CONFIGURATION_HELPER_H
 
 #include <ns3/remote-configuration.h>
-
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
 
-    SUPPRESS_DEPRECATED_POP
-
-    namespace ns3
+namespace ns3
 {
     using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
 

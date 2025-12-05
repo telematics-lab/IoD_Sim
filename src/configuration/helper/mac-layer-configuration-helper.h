@@ -20,22 +20,9 @@
 
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/model-configuration.h>
-
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
 
-    SUPPRESS_DEPRECATED_POP
-
-    namespace ns3
+namespace ns3
 {
     /**
      * Helper to decode a MAC Layer from a JSON configuration file.

@@ -25,24 +25,11 @@
 #include <ns3/internet-module.h>
 #include <ns3/network-module.h>
 #include <ns3/storage-peripheral.h>
-
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-    SUPPRESS_DEPRECATED_POP
-
-    namespace ns3
+namespace ns3
 {
     NS_LOG_COMPONENT_DEFINE("DroneServerApplication");
 

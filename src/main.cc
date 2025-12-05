@@ -989,10 +989,13 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     }
     else if (entityKey == "leo-sats")
     {
-        mobility.Install(m_leoSats.Get(entityId));
+        auto node = m_leoSats.Get(entityId);
+        mobility.Install(node);
         std::ostringstream oss;
         oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
-        Config::Connect(oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
+
+        auto mob = node->GetObject<MobilityModel>();
+        mob->TraceConnect("CourseChange", oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
     }
     else if (entityKey == "vehicles")
     {

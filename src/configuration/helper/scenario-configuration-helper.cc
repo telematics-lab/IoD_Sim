@@ -32,32 +32,18 @@
 #include <ns3/log.h>
 #include <ns3/object-factory.h>
 #include <ns3/system-path.h>
-
 #include <chrono>
 #include <filesystem>
 #include <iomanip> /* put_time */
 #include <iostream>
 #include <unistd.h>
-
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/error/en.h>
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/pointer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
-    SUPPRESS_DEPRECATED_POP
-
-    namespace ns3
+namespace ns3
 {
     NS_LOG_COMPONENT_DEFINE_MASK("ScenarioConfigurationHelper", LOG_PREFIX_ALL);
 
@@ -875,13 +861,12 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
                     }
                     else if (hasConstellation)
                     {
-                        std::vector<rapidjson::Document> expandedObjects =
-                            ConstellationExpander::ExpandConstellation(obj, scenarioPath);
+                        std::vector<rapidjson::Value> expandedObjects =
+                            ConstellationExpander::ExpandConstellation(obj, scenarioPath, allocator);
                         for (auto& expandedObj : expandedObjects)
                         {
-                            rapidjson::Value objVal(rapidjson::kObjectType);
-                            objVal.CopyFrom(expandedObj, allocator);
-                            newArray.PushBack(objVal, allocator);
+                            // Values are already on the allocator's pool, just move them in
+                            newArray.PushBack(expandedObj, allocator);
                         }
                         expanded = true;
                     }

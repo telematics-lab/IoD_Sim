@@ -4,7 +4,7 @@ If you want to build IoD_Sim for using it as a library, you can use the followin
 
 ```bash
 # First install all the required dependencies
-./tools/install-dependencies.sh && ./tools/install-nr-dependencies.sh
+./tools/install-dependencies.sh
 # These commands works with fedora, debian based distro and arch linux
 # You can compile IoD_Sim also using mac-os but you need to skip
 # this command and install dependencies manually
@@ -28,7 +28,7 @@ Pay attention to the fact that the `ns3/build/ns3.45-scenario-default` executabl
 If you wanto to use IoD_Sim compiled in default mode use these command instead:
 
 ```bash
-./tools/install-dependencies.sh && ./tools/install-nr-dependencies.sh
+./tools/install-dependencies.sh
 ./tools/prepare-ns3.sh
 ./tools/configure-iodsim.sh --mode default
 cd ns3 && ./ns3 build

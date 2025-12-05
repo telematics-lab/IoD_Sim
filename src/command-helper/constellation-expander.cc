@@ -122,9 +122,10 @@ ConstellationExpander::HasConstellationParameter(const rapidjson::Value& satelli
     return satelliteConfig.IsObject() && satelliteConfig.HasMember("!constellation");
 }
 
-std::vector<rapidjson::Document>
+std::vector<rapidjson::Value>
 ConstellationExpander::ExpandConstellation(const rapidjson::Value& templateSat,
-                                           const std::string& scenarioPath)
+                                           const std::string& scenarioPath,
+                                           rapidjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -142,15 +143,15 @@ ConstellationExpander::ExpandConstellation(const rapidjson::Value& templateSat,
 
     if (distribution == "file")
     {
-        return ExpandFromFile(constellationDef, templateSat, scenarioPath);
+        return ExpandFromFile(constellationDef, templateSat, scenarioPath, allocator);
     }
     else if (distribution == "uniform-orbits")
     {
-        return ExpandUniformOrbits(constellationDef, templateSat);
+        return ExpandUniformOrbits(constellationDef, templateSat, allocator);
     }
     else if (distribution == "one")
     {
-        return ExpandSingleSat(constellationDef, templateSat);
+        return ExpandSingleSat(constellationDef, templateSat, allocator);
     }
     else
     {
@@ -159,10 +160,11 @@ ConstellationExpander::ExpandConstellation(const rapidjson::Value& templateSat,
     }
 }
 
-std::vector<rapidjson::Document>
+std::vector<rapidjson::Value>
 ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
                                       const rapidjson::Value& templateSat,
-                                      const std::string& scenarioPath)
+                                      const std::string& scenarioPath,
+                                      rapidjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -188,7 +190,7 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
         NS_FATAL_ERROR("'file' field must be a string or array of strings");
     }
 
-    std::vector<rapidjson::Document> satellites;
+    std::vector<rapidjson::Value> satellites;
 
     for (const auto& relativePath : filePaths)
     {
@@ -262,6 +264,9 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
 
         NS_LOG_INFO("Loaded " << tleEntries.size() << " satellites from " << fullPath);
 
+        // Reserve memory for satellites
+        satellites.reserve(satellites.size() + tleEntries.size());
+
         // Determine reference time
         // Determine reference time
         std::string timeRef = "tleEpoch";
@@ -292,10 +297,6 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
         // Create a satellite configuration for each TLE entry
         for (const auto& tleEntry : tleEntries)
         {
-            rapidjson::Document satDoc;
-            satDoc.SetObject();
-            auto& allocator = satDoc.GetAllocator();
-
             // Copy template without !constellation
             rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
 
@@ -339,8 +340,7 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
                     CreateMobilityAttributes(tle1, tle2, tleStartTime, allocator);
             }
 
-            satDoc.CopyFrom(satConfig, allocator);
-            satellites.push_back(std::move(satDoc));
+            satellites.push_back(std::move(satConfig));
         }
     }
 
@@ -348,9 +348,10 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
     return satellites;
 }
 
-std::vector<rapidjson::Document>
+std::vector<rapidjson::Value>
 ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellationDef,
-                                           const rapidjson::Value& templateSat)
+                                           const rapidjson::Value& templateSat,
+                                           rapidjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -364,7 +365,7 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
         model = constellationDef["model"].GetString();
     }
 
-    std::vector<rapidjson::Document> satellites;
+    std::vector<rapidjson::Value> satellites;
 
     for (const auto& orbitDef : constellationDef["orbits"].GetArray())
     {
@@ -405,10 +406,6 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
             for (uint32_t satIdx = 0; satIdx < satsPerOrbit; ++satIdx)
             {
                 double offset = (satIdx * 360.0) / satsPerOrbit;
-
-                rapidjson::Document satDoc;
-                satDoc.SetObject();
-                auto& allocator = satDoc.GetAllocator();
 
                 // Copy template without !constellation
                 rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
@@ -462,8 +459,7 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
                                                                            allocator);
                 }
 
-                satDoc.CopyFrom(satConfig, allocator);
-                satellites.push_back(std::move(satDoc));
+                satellites.push_back(std::move(satConfig));
             }
         }
     }
@@ -472,9 +468,10 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
     return satellites;
 }
 
-std::vector<rapidjson::Document>
+std::vector<rapidjson::Value>
 ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
-                                       const rapidjson::Value& templateSat)
+                                       const rapidjson::Value& templateSat,
+                                       rapidjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -508,10 +505,6 @@ ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
     {
         retrograde = orbitDef["retrograde-orbit"].GetBool();
     }
-
-    rapidjson::Document satDoc;
-    satDoc.SetObject();
-    auto& allocator = satDoc.GetAllocator();
 
     // Copy template without !constellation
     rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
@@ -563,10 +556,8 @@ ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
                                                                allocator);
     }
 
-    satDoc.CopyFrom(satConfig, allocator);
-
-    std::vector<rapidjson::Document> satellites;
-    satellites.push_back(std::move(satDoc));
+    std::vector<rapidjson::Value> satellites;
+    satellites.push_back(std::move(satConfig));
 
     NS_LOG_INFO("Expanded single satellite constellation");
     return satellites;

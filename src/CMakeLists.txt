@@ -1,57 +1,13 @@
 find_package(ZLIB REQUIRED)
 find_package(LibXml2 REQUIRED)
 
-find_package(fmt CONFIG REQUIRED)
-find_package(nameof CONFIG QUIET)
 
-if(NOT nameof_FOUND)
-  message(STATUS "nameof not found, fetching from git...")
-  include(FetchContent)
-  FetchContent_Declare(
-    nameof
-    GIT_REPOSITORY https://github.com/Neargye/nameof.git
-    GIT_TAG        v0.10.4
-  )
-  FetchContent_MakeAvailable(nameof)
+find_package(LibArchive REQUIRED)
 
-  # Install nameof for export
-  install(TARGETS nameof EXPORT ns3ExportTargets
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  )
-  FetchContent_GetProperties(nameof)
-  if(nameof_POPULATED)
-    install(DIRECTORY ${nameof_SOURCE_DIR}/include/
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-  endif()
-endif()
-find_package(cpp_yyjson CONFIG QUIET)
-
-if(NOT cpp_yyjson_FOUND)
-  message(STATUS "cpp_yyjson not found, fetching from git...")
-  include(FetchContent)
-  FetchContent_Declare(
-    cpp_yyjson
-    GIT_REPOSITORY https://github.com/yosh-matsuda/cpp-yyjson.git
-    GIT_TAG        v0.6.0
-  )
-  FetchContent_MakeAvailable(cpp_yyjson)
-
-  # Install cpp_yyjson for export
-  install(TARGETS cpp_yyjson EXPORT ns3ExportTargets
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  )
-  FetchContent_GetProperties(cpp_yyjson)
-  if(cpp_yyjson_POPULATED)
-    install(DIRECTORY ${cpp_yyjson_SOURCE_DIR}/include/
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-  endif()
-endif()
-
-find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
 
 include_directories(${LIBXML2_INCLUDE_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/json-interface)
+include_directories(${LibArchive_INCLUDE_DIRS})
 
 set(source_files
   application/drone-client-application.cc
@@ -301,6 +257,32 @@ set(header_files
   mobility/trace-based-mobility-model.h
 )
 
+
+if(NS3_STATIC)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+    # Libarchive static dependencies
+    find_package(BZip2 REQUIRED)
+    find_package(LibLZMA REQUIRED)
+    find_library(NETTLE_LIBRARY NAMES nettle REQUIRED)
+    find_library(ZSTD_LIBRARY NAMES zstd REQUIRED)
+    find_library(LZ4_LIBRARY NAMES lz4 REQUIRED)
+    find_library(ACL_LIBRARY NAMES acl REQUIRED)
+    find_library(XXHASH_LIBRARY NAMES xxhash REQUIRED)
+
+    set(STATIC_DEPS
+        ${BZIP2_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
+        ${NETTLE_LIBRARY}
+        ${ZSTD_LIBRARY}
+        ${LZ4_LIBRARY}
+        ${ACL_LIBRARY}
+        ${XXHASH_LIBRARY}
+    )
+endif()
+find_library(YYJSON_LIBRARY NAMES yyjson REQUIRED)
+
+
 build_lib(
   LIBNAME iodsim
   SOURCE_FILES ${source_files}
@@ -313,12 +295,11 @@ build_lib(
                     ${libmobility}
                     ${libnr}
                     ${libleo}
-                    ${LIBTAR_LIBRARY}
+                    ${LibArchive_LIBRARIES}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}
-                    fmt::fmt
-                    nameof::nameof
-                    cpp_yyjson::cpp_yyjson
+                    ${YYJSON_LIBRARY}
+                    ${STATIC_DEPS}
 )
 
 build_exec(
