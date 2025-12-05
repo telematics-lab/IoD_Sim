@@ -1,7 +1,6 @@
 find_package(ZLIB REQUIRED)
 find_package(LibXml2 REQUIRED)
 
-# find_package(ICU REQUIRED COMPONENTS uc data)
 find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
 
 include_directories(${LIBXML2_INCLUDE_DIR})
