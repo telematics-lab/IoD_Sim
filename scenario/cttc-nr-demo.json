@@ -21,6 +21,21 @@
   "phyLayer": [
     {
       "type": "nr",
+      "handover": {
+        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+        "attributes": []
+      },
+      "channelAccessManager": {
+        "ue": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        },
+        "gnb": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        }
+      },
+      "attachMethod": "closest",
       "bands": [
         {
           "scenario": "UMi",

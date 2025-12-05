@@ -408,7 +408,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::string GetAttachMethod() const;
 
   private:
-    std::string m_attachMethod = "max-rsrp";
+    std::string m_attachMethod = "closest";
     TypeId m_epcHelperType = TypeId::LookupByName("ns3::NrPointToPointEpcHelper");
     TypeId m_beamformingHelperType = TypeId::LookupByName("ns3::IdealBeamformingHelper");
     TypeId m_beamformingMethod = TypeId::LookupByName("ns3::IdealBeamformingAlgorithm");
