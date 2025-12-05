@@ -4,6 +4,30 @@
 # Use standard ns-3 module macros
 # include(ns3-module-macros)
 
+include(FetchContent)
+FetchContent_Declare(
+  sgp4
+  GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
+  GIT_TAG d176906dbfaf8361eee1f83bd1dc1bacc6582798
+)
+FetchContent_MakeAvailable(sgp4)
+
+message(STATUS "SGP4 Source Directory: ${sgp4_SOURCE_DIR}")
+include_directories(${sgp4_SOURCE_DIR})
+
+# Fix missing include directories in the upstream target
+target_include_directories(sgp4 PUBLIC
+  $<BUILD_INTERFACE:${sgp4_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>
+)
+
+# Export sgp4 target so it can be used by other modules (like leo) that are exported.
+install(TARGETS sgp4 EXPORT ns3ExportTargets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
 # List all public header files that should be installed
 # Note: Added 'model/leo-module.h' which was missing from the original wscript
 # but is required by examples.
@@ -57,22 +81,7 @@ set(sources
     model/mock-channel.cc
     model/isl-mock-channel.cc
     model/isl-propagation-loss-model.cc
-    sgp4/libsgp4/CoordGeodetic.cc
-    sgp4/libsgp4/CoordTopocentric.cc
-    sgp4/libsgp4/DateTime.cc
-    sgp4/libsgp4/DecayedException.cc
-    sgp4/libsgp4/Eci.cc
-    sgp4/libsgp4/Globals.cc
-    sgp4/libsgp4/Observer.cc
-    sgp4/libsgp4/OrbitalElements.cc
-    sgp4/libsgp4/SGP4.cc
-    sgp4/libsgp4/SatelliteException.cc
-    sgp4/libsgp4/SolarPosition.cc
-    sgp4/libsgp4/TimeSpan.cc
-    sgp4/libsgp4/Tle.cc
-    sgp4/libsgp4/TleException.cc
-    sgp4/libsgp4/Util.cc
-    sgp4/libsgp4/Vector.cc
+    model/isl-propagation-loss-model.cc
 )
 
 # List the other ns-3 modules this one depends on
@@ -89,6 +98,7 @@ set(dependencies
     ${libbuildings}
     ${libantenna}
     ${libmobility}
+    sgp4
 )
 
 build_lib(

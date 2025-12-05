@@ -843,7 +843,7 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
         JsonImporter::Process(m_config, scenarioPath);
 
         // Expand trace definitions if present in any supported object array
-        std::vector<std::string> keysToExpand = {"drones", "ZSPs", "remotes", "vehicles", "nodes"};
+        std::vector<std::string> keysToExpand = {"drones", "ZSPs", "remotes", "vehicles", "nodes", "leo-sats"};
         for (const auto& key : keysToExpand)
         {
             if (m_config.HasMember(key.c_str()) && m_config[key.c_str()].IsArray())
