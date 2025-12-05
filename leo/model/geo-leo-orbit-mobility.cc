@@ -18,9 +18,9 @@
 
 #include "geo-leo-orbit-mobility.h"
 
-#include "../sgp4/libsgp4/DateTime.h"
-#include "../sgp4/libsgp4/SGP4.h"
-#include "../sgp4/libsgp4/Tle.h"
+#include <libsgp4/DateTime.h>
+#include <libsgp4/SGP4.h>
+#include <libsgp4/Tle.h>
 #include "leo-orbit.h"
 #include "math.h"
 

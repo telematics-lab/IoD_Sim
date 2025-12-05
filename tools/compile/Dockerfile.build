@@ -15,6 +15,7 @@ RUN apt update \
     gcc               \
     git               \
     make              \
+    libboost-all-dev  \
     libgsl-dev        \
     libxml2-dev       \
     patch             \
@@ -32,7 +33,6 @@ RUN apt update \
     libeigen3-dev     \
     pybind11-dev      \
     liblzma-dev       \
-    libicu-dev        \
     libtar-dev        \
     xz-utils          \
     wget
