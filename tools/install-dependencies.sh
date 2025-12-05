@@ -7,6 +7,7 @@ if [ -z "$ID" ]; then
   source /etc/os-release
 fi
 
+function install_debian_deps() {
   sudo apt update \
   && sudo apt install -y --no-install-recommends \
     clang-format      \
