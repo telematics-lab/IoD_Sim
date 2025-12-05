@@ -46,7 +46,7 @@ EntityConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Entity configuration must be an object.");
     NS_ASSERT_MSG(json.HasMember("mobilityModel"),
-                  "Entity configuration must have 'mobilityModel'property.");
+                  "Entity configuration must have 'mobilityModel' property.");
 
     const auto netDevices = json.HasMember("netDevices")
                                 ? DecodeNetdeviceConfigurations(json["netDevices"])

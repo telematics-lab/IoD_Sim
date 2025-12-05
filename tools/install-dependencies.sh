@@ -25,7 +25,8 @@ function install_debian_deps() {
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev     \
+    libyyjson-dev     \
+    libfmt-dev        \
     libtar-dev        \
     doxygen           \
     graphviz          \
@@ -47,7 +48,8 @@ function install_fedora_deps() {
     pkgconf                    \
     python-unversioned-command \
     python3                    \
-    rapidjson-devel            \
+    yyjson-devel               \
+    fmt-devel                  \
     libtar-devel               \
     doxygen                    \
     graphviz                   \
@@ -69,7 +71,8 @@ function install_arch_deps() {
     patch                 \
     pkgconf               \
     python                \
-    rapidjson             \
+    yyjson                \
+    fmt                   \
     libtar                \
     doxygen-docs          \
     graphviz              \

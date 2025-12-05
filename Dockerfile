@@ -23,7 +23,7 @@ RUN apt-get update \
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev     \
+    libyyjson-dev     \
     doxygen           \
     graphviz
 
