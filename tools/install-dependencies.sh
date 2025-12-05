@@ -26,6 +26,7 @@ function install_debian_deps() {
     python3-venv      \
     python3-pip       \
     python-is-python3 \
+    libyyjson-dev     \
     libfmt-dev        \
     libarchive-dev    \
     doxygen           \
@@ -63,6 +64,7 @@ function install_fedora_deps() {
     python3                    \
     python3-devel              \
     python3-pip                \
+    yyjson-devel               \
     fmt-devel                  \
     libarchive-devel           \
     doxygen                    \
@@ -98,6 +100,7 @@ function install_arch_deps() {
     pkgconf               \
     python                \
     python-pip            \
+    yyjson                \
     fmt                   \
     libarchive            \
     doxygen               \
