@@ -48,11 +48,11 @@ RUN wget https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz &
     ./configure --enable-static --disable-shared --without-icu --without-python --prefix=/usr/local && \
     make -j$(nproc) && make install && cd / && rm -rf libxml2-2.15.1
 
-RUN wget https://github.com/ibireme/yyjson/archive/refs/tags/0.10.0.tar.gz && \
-    tar -xf 0.10.0.tar.gz && rm 0.10.0.tar.gz && cd yyjson-0.10.0 && \
+RUN wget https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz && \
+    tar -xf 0.12.0.tar.gz && rm 0.12.0.tar.gz && cd yyjson-0.12.0 && \
     cmake -B build -DCMAKE_BUILD_TYPE=Release -DYYJSON_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=/usr/local . && \
     cmake --build build --target install && \
-    cd / && rm -rf yyjson-0.10.0
+    cd / && rm -rf yyjson-0.12.0
 
 RUN mkdir /IoD_Sim
 COPY . /IoD_Sim/
