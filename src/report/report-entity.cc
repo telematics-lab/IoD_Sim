@@ -36,7 +36,7 @@
 #include <ns3/simulator.h>
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
@@ -152,7 +152,7 @@ namespace ns3
         PacketType packetType;
 
         constexpr const uint8_t bufferLength = 128;
-        rapidjson::Document d;
+        rapidyyjson::Document d;
         auto pCopy = packet->Copy();
         uint8_t* buf = (uint8_t*)calloc(bufferLength, sizeof(uint8_t));
 
@@ -245,7 +245,7 @@ namespace ns3
         PacketType packetType;
 
         constexpr const uint8_t bufferLength = 128;
-        rapidjson::Document d;
+        rapidyyjson::Document d;
         auto pCopy = packet->Copy();
         uint8_t* buf = (uint8_t*)calloc(bufferLength, sizeof(uint8_t));
 

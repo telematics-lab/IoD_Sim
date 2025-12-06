@@ -36,7 +36,7 @@
 #include <ns3/simulator.h>
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {

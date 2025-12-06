@@ -20,7 +20,7 @@
 
 #include <ns3/model-configuration.h>
 #include <ns3/phy-layer-configuration.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
@@ -42,7 +42,7 @@ namespace ns3
          * \return The configuration as a pointer to PhyLayerConfiguration to easily retrieve parsed
          * data.
          */
-        static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonPhyLayer);
+        static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonPhyLayer);
     };
 
 } // namespace ns3

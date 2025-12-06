@@ -23,13 +23,13 @@
 #include <optional>
 
 
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
-    using JsonArray = rapidjson::Value::ConstArray;
-    using JsonObject = rapidjson::Value::ConstObject;
-    using JsonValue = rapidjson::Value;
+    using JsonArray = rapidyyjson::Value::ConstArray;
+    using JsonObject = rapidyyjson::Value::ConstObject;
+    using JsonValue = rapidyyjson::Value;
 
     /**
      * Helper to decode a ns3 Model from a JSON configuration file and read the following
@@ -81,7 +81,7 @@ namespace ns3
         static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,
                                                              const JsonObject& jAttrs);
 
-        static const std::string ToString(rapidjson::Type t);
+        static const std::string ToString(rapidyyjson::Type t);
     };
 
 } // namespace ns3

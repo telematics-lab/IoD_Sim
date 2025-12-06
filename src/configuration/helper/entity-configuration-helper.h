@@ -24,11 +24,11 @@
 #include <ns3/nr-bearer-configuration.h>
 
 
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
-    using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
+    using JsonArray = rapidyyjson::GenericArray<true, rapidyyjson::Value>;
 
     /**
      * Helper to decode an Entity (i.e., Drone or ZSP) from a JSON configuration file and read the
@@ -49,27 +49,27 @@ namespace ns3
          * \return The configuration as a pointer to EntityConfiguration to easily retrieve parsed
          * data.
          */
-        static Ptr<EntityConfiguration> GetConfiguration(const rapidjson::Value& json);
+        static Ptr<EntityConfiguration> GetConfiguration(const rapidyyjson::Value& json);
 
       private:
         EntityConfigurationHelper();
 
         static const std::vector<Ptr<NetdeviceConfiguration>> DecodeNetdeviceConfigurations(
-            const rapidjson::Value& json);
+            const rapidyyjson::Value& json);
         static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
             const JsonArray& json);
         static const std::vector<NrBearerConfiguration> DecodeNrBearerConfigurations(
             const JsonArray& jsonArray);
         static const MobilityModelConfiguration DecodeMobilityConfiguration(
-            const rapidjson::Value& json);
-        static const std::optional<Vector> DecodeInitialPosition(const rapidjson::Value& json);
+            const rapidyyjson::Value& json);
+        static const std::optional<Vector> DecodeInitialPosition(const rapidyyjson::Value& json);
         static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
-            const rapidjson::Value& json);
-        static const ModelConfiguration DecodeMechanicsConfiguration(const rapidjson::Value& json);
-        static const ModelConfiguration DecodeBatteryConfiguration(const rapidjson::Value& json);
+            const rapidyyjson::Value& json);
+        static const ModelConfiguration DecodeMechanicsConfiguration(const rapidyyjson::Value& json);
+        static const ModelConfiguration DecodeBatteryConfiguration(const rapidyyjson::Value& json);
         static const std::vector<ModelConfiguration> DecodePeripheralConfigurations(
-            const rapidjson::Value& json);
-        static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& json);
+            const rapidyyjson::Value& json);
+        static const ModelConfiguration DecodeModelConfiguration(const rapidyyjson::Value& json);
     };
 
 } // namespace ns3

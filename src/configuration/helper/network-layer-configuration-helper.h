@@ -19,7 +19,7 @@
 #define NETWORK_LAYER_CONFIGURATION_HELPER_H
 
 #include <ns3/network-layer-configuration.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
@@ -41,7 +41,7 @@ namespace ns3
          * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve
          * parsed data.
          */
-        static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidjson::Value& json);
+        static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidyyjson::Value& json);
     };
 
 } // namespace ns3

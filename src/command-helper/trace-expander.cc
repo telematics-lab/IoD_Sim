@@ -31,13 +31,13 @@ namespace ns3
 NS_LOG_COMPONENT_DEFINE("TraceExpander");
 
 bool
-TraceExpander::HasTraceParameter(const rapidjson::Value& config)
+TraceExpander::HasTraceParameter(const rapidyyjson::Value& config)
 {
     return config.IsObject() && config.HasMember("!traceMobility");
 }
 
-std::vector<rapidjson::Document>
-TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::string& scenarioPath)
+std::vector<rapidyyjson::Document>
+TraceExpander::ExpandTrace(const rapidyyjson::Value& templateObj, const std::string& scenarioPath)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -96,7 +96,7 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
         }
     }
 
-    std::vector<rapidjson::Document> expandedObjects;
+    std::vector<rapidyyjson::Document> expandedObjects;
 
     for (const auto& deviceId : deviceIds)
     {
@@ -112,12 +112,12 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
             continue;
         }
 
-        rapidjson::Document objDoc;
+        rapidyyjson::Document objDoc;
         objDoc.SetObject();
         auto& allocator = objDoc.GetAllocator();
 
         // Copy template without !trace
-        rapidjson::Value objConfig = CreateObjectTemplate(templateObj, allocator);
+        rapidyyjson::Value objConfig = CreateObjectTemplate(templateObj, allocator);
 
         // Set name to deviceId if not present or append it?
         // Usually we want unique names. Let's append deviceId to the name if it exists,
@@ -130,30 +130,30 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
         }
         else
         {
-            objConfig.AddMember("name", rapidjson::Value(name.c_str(), allocator), allocator);
+            objConfig.AddMember("name", rapidyyjson::Value(name.c_str(), allocator), allocator);
         }
 
         // Configure MobilityModel
         if (!objConfig.HasMember("mobilityModel"))
         {
-            rapidjson::Value mobilityModel(rapidjson::kObjectType);
+            rapidyyjson::Value mobilityModel(rapidyyjson::kObjectType);
             mobilityModel.AddMember("name",
-                                    rapidjson::Value("ns3::TraceBasedMobilityModel", allocator),
+                                    rapidyyjson::Value("ns3::TraceBasedMobilityModel", allocator),
                                     allocator);
 
-            rapidjson::Value attributes(rapidjson::kArrayType);
+            rapidyyjson::Value attributes(rapidyyjson::kArrayType);
 
-            rapidjson::Value traceFileAttr(rapidjson::kObjectType);
+            rapidyyjson::Value traceFileAttr(rapidyyjson::kObjectType);
             traceFileAttr.AddMember("name", "TraceFile", allocator);
             traceFileAttr.AddMember("value",
-                                    rapidjson::Value(fullPath.c_str(), allocator),
+                                    rapidyyjson::Value(fullPath.c_str(), allocator),
                                     allocator);
             attributes.PushBack(traceFileAttr, allocator);
 
-            rapidjson::Value deviceIdAttr(rapidjson::kObjectType);
+            rapidyyjson::Value deviceIdAttr(rapidyyjson::kObjectType);
             deviceIdAttr.AddMember("name", "DeviceId", allocator);
             deviceIdAttr.AddMember("value",
-                                   rapidjson::Value(deviceId.c_str(), allocator),
+                                   rapidyyjson::Value(deviceId.c_str(), allocator),
                                    allocator);
             attributes.PushBack(deviceIdAttr, allocator);
 
@@ -173,7 +173,7 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
             if (!mobilityModel.HasMember("attributes"))
             {
                 mobilityModel.AddMember("attributes",
-                                        rapidjson::Value(rapidjson::kArrayType),
+                                        rapidyyjson::Value(rapidyyjson::kArrayType),
                                         allocator);
             }
 
@@ -182,17 +182,17 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
             // DeviceId. Safer to clear or recreate.
             attributes.SetArray();
 
-            rapidjson::Value traceFileAttr(rapidjson::kObjectType);
+            rapidyyjson::Value traceFileAttr(rapidyyjson::kObjectType);
             traceFileAttr.AddMember("name", "TraceFile", allocator);
             traceFileAttr.AddMember("value",
-                                    rapidjson::Value(fullPath.c_str(), allocator),
+                                    rapidyyjson::Value(fullPath.c_str(), allocator),
                                     allocator);
             attributes.PushBack(traceFileAttr, allocator);
 
-            rapidjson::Value deviceIdAttr(rapidjson::kObjectType);
+            rapidyyjson::Value deviceIdAttr(rapidyyjson::kObjectType);
             deviceIdAttr.AddMember("name", "DeviceId", allocator);
             deviceIdAttr.AddMember("value",
-                                   rapidjson::Value(deviceId.c_str(), allocator),
+                                   rapidyyjson::Value(deviceId.c_str(), allocator),
                                    allocator);
             attributes.PushBack(deviceIdAttr, allocator);
         }
@@ -205,19 +205,19 @@ TraceExpander::ExpandTrace(const rapidjson::Value& templateObj, const std::strin
     return expandedObjects;
 }
 
-rapidjson::Value
-TraceExpander::CreateObjectTemplate(const rapidjson::Value& templateObj,
-                                    rapidjson::Document::AllocatorType& allocator)
+rapidyyjson::Value
+TraceExpander::CreateObjectTemplate(const rapidyyjson::Value& templateObj,
+                                    rapidyyjson::Document::AllocatorType& allocator)
 {
-    rapidjson::Value objectConfig(rapidjson::kObjectType);
+    rapidyyjson::Value objectConfig(rapidyyjson::kObjectType);
 
     // Deep copy all members except "!traceMobility"
     for (auto it = templateObj.MemberBegin(); it != templateObj.MemberEnd(); ++it)
     {
         if (std::string(it->name.GetString()) != "!traceMobility")
         {
-            rapidjson::Value key(it->name, allocator);
-            rapidjson::Value value(it->value, allocator);
+            rapidyyjson::Value key(it->name, allocator);
+            rapidyyjson::Value value(it->value, allocator);
             objectConfig.AddMember(key, value, allocator);
         }
     }

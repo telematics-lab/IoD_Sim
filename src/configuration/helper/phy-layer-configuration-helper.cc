@@ -38,7 +38,7 @@ namespace ns3
 {
 
 Ptr<PhyLayerConfiguration>
-PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLayer)
+PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyLayer)
 
 {
     NS_ASSERT_MSG(jsonPhyLayer.IsObject(),
@@ -282,7 +282,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
         if (jsonPhyLayer.HasMember("error-model") && jsonPhyLayer["error-model"].IsArray())
         {
             const auto errorModels = jsonPhyLayer["error-model"].GetArray();
-            for (rapidjson::SizeType i = 0; i < errorModels.Size(); ++i)
+            for (rapidyyjson::SizeType i = 0; i < errorModels.Size(); ++i)
             {
                 const auto& errorModel = errorModels[i];
                 NS_ASSERT_MSG(errorModel.IsObject(), "Each error-model entry must be an object.");
@@ -539,7 +539,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                     "NR PHY Layer definition must have at least one band in 'bands' property.");
             }
             const auto bands = jsonPhyLayer["bands"].GetArray();
-            for (rapidjson::SizeType i = 0; i < bands.Size(); ++i)
+            for (rapidyyjson::SizeType i = 0; i < bands.Size(); ++i)
             {
                 const auto& band = bands[i];
                 NS_ASSERT_MSG(band.IsObject(), "NR band must be an object.");
@@ -620,7 +620,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonPhyLay
                     bandConfig.phasedSpectrumAttributes = phasedSpectrumAttributes;
                 }
 
-                for (rapidjson::SizeType j = 0; j < band["frequencyBands"].GetArray().Size(); ++j)
+                for (rapidyyjson::SizeType j = 0; j < band["frequencyBands"].GetArray().Size(); ++j)
                 {
                     const auto& freqBand = band["frequencyBands"].GetArray()[j];
                     NS_ASSERT_MSG(freqBand.IsObject(), "NR frequency band must be an object.");

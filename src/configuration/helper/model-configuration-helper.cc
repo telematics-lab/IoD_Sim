@@ -104,7 +104,7 @@ ModelConfigurationHelper::GetOptionalCoaleshed(const JsonObject& jObj,
 
 const std::vector<ModelConfiguration::Attribute>
 ModelConfigurationHelper::GetAttributes(const TypeId& model,
-                                        const rapidjson::Value::ConstArray& jAttrs)
+                                        const rapidyyjson::Value::ConstArray& jAttrs)
 {
     std::vector<ModelConfiguration::Attribute> attributes;
     attributes.reserve(jAttrs.Size());
@@ -161,7 +161,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
 
     switch (attrValueType)
     {
-    case rapidjson::Type::kStringType: {
+    case rapidyyjson::Type::kStringType: {
         const auto attrValueString = jAttr.GetString();
         const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
@@ -178,7 +178,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
     }
     break;
-    case rapidjson::Type::kNumberType: {
+    case rapidyyjson::Type::kNumberType: {
         if (jAttr.IsInt64())
         {
             const auto attrValueInt = jAttr.GetInt64();
@@ -263,7 +263,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
     }
     break;
-    case rapidjson::Type::kArrayType: {
+    case rapidyyjson::Type::kArrayType: {
         const auto arr = jAttr.GetArray();
         const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
@@ -461,13 +461,13 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
     }
 
     break;
-    case rapidjson::Type::kFalseType:
-    case rapidjson::Type::kTrueType: {
+    case rapidyyjson::Type::kFalseType:
+    case rapidyyjson::Type::kTrueType: {
         const auto attrValueBool = jAttr.GetBool();
         attrValue = attrInfo.checker->CreateValidValue(BooleanValue(attrValueBool));
     }
     break;
-    case rapidjson::Type::kObjectType:
+    case rapidyyjson::Type::kObjectType:
         if (attrInfo.checker->GetValueTypeName() == "ns3::PointerValue")
         {
             ObjectFactory factory;
@@ -488,7 +488,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                            << attrInfo.name << ": " << attrInfo.checker->GetValueTypeName());
         }
         break;
-    case rapidjson::Type::kNullType:
+    case rapidyyjson::Type::kNullType:
     default:
         NS_FATAL_ERROR("Cannot determine how to map JSON type "
                        << ToString(jAttr.GetType()) << " to an attribute value type of "
@@ -521,7 +521,7 @@ ModelConfigurationHelper::DecodeModelAggregates(const JsonArray& jAggs)
 }
 
 const ModelConfiguration::Attribute
-ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidjson::Value& el)
+ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidyyjson::Value& el)
 {
     NS_ASSERT_MSG(el.IsObject(),
                   "Attribute model definition must be an object, got " << el.GetType());
@@ -541,23 +541,23 @@ ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidj
 }
 
 const std::string
-ModelConfigurationHelper::ToString(rapidjson::Type t)
+ModelConfigurationHelper::ToString(rapidyyjson::Type t)
 {
     switch (t)
     {
-    case rapidjson::Type::kNullType:
+    case rapidyyjson::Type::kNullType:
         return "null";
-    case rapidjson::Type::kFalseType:
+    case rapidyyjson::Type::kFalseType:
         return "false";
-    case rapidjson::Type::kTrueType:
+    case rapidyyjson::Type::kTrueType:
         return "true";
-    case rapidjson::Type::kObjectType:
+    case rapidyyjson::Type::kObjectType:
         return "object";
-    case rapidjson::Type::kArrayType:
+    case rapidyyjson::Type::kArrayType:
         return "array";
-    case rapidjson::Type::kStringType:
+    case rapidyyjson::Type::kStringType:
         return "string";
-    case rapidjson::Type::kNumberType:
+    case rapidyyjson::Type::kNumberType:
         return "number";
     default:
         return "unknown";

@@ -34,7 +34,7 @@ namespace ns3
 {
 
 Ptr<RemoteConfiguration>
-RemoteConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
+RemoteConfigurationHelper::GetConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Remote configuration must be an object.");
     NS_ASSERT_MSG(json.HasMember("networkLayer"),
@@ -49,7 +49,7 @@ RemoteConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
 }
 
 const uint32_t
-RemoteConfigurationHelper::DecodeNetworkLayerId(const rapidjson::Value& json)
+RemoteConfigurationHelper::DecodeNetworkLayerId(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsInt() && json.GetInt() >= 0,
                   "Remote configuration 'networkLayer' property must be a positive integer.");
@@ -58,7 +58,7 @@ RemoteConfigurationHelper::DecodeNetworkLayerId(const rapidjson::Value& json)
 }
 
 const std::vector<ModelConfiguration>
-RemoteConfigurationHelper::DecodeApplicationConfigurations(const rapidjson::Value& json)
+RemoteConfigurationHelper::DecodeApplicationConfigurations(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsArray(), "Remote configuration 'applications' property must be an array.");
 

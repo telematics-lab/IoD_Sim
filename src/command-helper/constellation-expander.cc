@@ -31,8 +31,8 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
+#include <rapidyyjson/document.h>
+#include <rapidyyjson/stringbuffer.h>
 #include <sstream>
 #include <string>
 
@@ -117,15 +117,15 @@ GetReferenceTime(const std::string& timeRef)
 }
 
 bool
-ConstellationExpander::HasConstellationParameter(const rapidjson::Value& satelliteConfig)
+ConstellationExpander::HasConstellationParameter(const rapidyyjson::Value& satelliteConfig)
 {
     return satelliteConfig.IsObject() && satelliteConfig.HasMember("!constellation");
 }
 
-std::vector<rapidjson::Value>
-ConstellationExpander::ExpandConstellation(const rapidjson::Value& templateSat,
+std::vector<rapidyyjson::Value>
+ConstellationExpander::ExpandConstellation(const rapidyyjson::Value& templateSat,
                                            const std::string& scenarioPath,
-                                           rapidjson::Document::AllocatorType& allocator)
+                                           rapidyyjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -160,11 +160,11 @@ ConstellationExpander::ExpandConstellation(const rapidjson::Value& templateSat,
     }
 }
 
-std::vector<rapidjson::Value>
-ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
-                                      const rapidjson::Value& templateSat,
+std::vector<rapidyyjson::Value>
+ConstellationExpander::ExpandFromFile(const rapidyyjson::Value& constellationDef,
+                                      const rapidyyjson::Value& templateSat,
                                       const std::string& scenarioPath,
-                                      rapidjson::Document::AllocatorType& allocator)
+                                      rapidyyjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -190,7 +190,7 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
         NS_FATAL_ERROR("'file' field must be a string or array of strings");
     }
 
-    std::vector<rapidjson::Value> satellites;
+    std::vector<rapidyyjson::Value> satellites;
 
     for (const auto& relativePath : filePaths)
     {
@@ -298,7 +298,7 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
         for (const auto& tleEntry : tleEntries)
         {
             // Copy template without !constellation
-            rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
+            rapidyyjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
 
             // Get TLE lines (already cleaned)
             const std::string& tle1 = tleEntry.first;
@@ -307,11 +307,11 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
             // Create or update mobilityModel based on selected model
             if (!satConfig.HasMember("mobilityModel"))
             {
-                rapidjson::Value mobilityModel(rapidjson::kObjectType);
+                rapidyyjson::Value mobilityModel(rapidyyjson::kObjectType);
                 if (model == "sgp4")
                 {
                     mobilityModel.AddMember("name",
-                                            rapidjson::Value("ns3::GeoSGP4Mobility", allocator),
+                                            rapidyyjson::Value("ns3::GeoSGP4Mobility", allocator),
                                             allocator);
                     mobilityModel.AddMember(
                         "attributes",
@@ -321,7 +321,7 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
                 else // circular (default)
                 {
                     mobilityModel.AddMember("name",
-                                            rapidjson::Value("ns3::GeoLeoOrbitMobility", allocator),
+                                            rapidyyjson::Value("ns3::GeoLeoOrbitMobility", allocator),
                                             allocator);
                     // Reuse the same attribute creator for circular (altitude/inclination not
                     // needed here) For TLE based circular case we still use the TLE attribute
@@ -348,10 +348,10 @@ ConstellationExpander::ExpandFromFile(const rapidjson::Value& constellationDef,
     return satellites;
 }
 
-std::vector<rapidjson::Value>
-ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellationDef,
-                                           const rapidjson::Value& templateSat,
-                                           rapidjson::Document::AllocatorType& allocator)
+std::vector<rapidyyjson::Value>
+ConstellationExpander::ExpandUniformOrbits(const rapidyyjson::Value& constellationDef,
+                                           const rapidyyjson::Value& templateSat,
+                                           rapidyyjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -365,7 +365,7 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
         model = constellationDef["model"].GetString();
     }
 
-    std::vector<rapidjson::Value> satellites;
+    std::vector<rapidyyjson::Value> satellites;
 
     for (const auto& orbitDef : constellationDef["orbits"].GetArray())
     {
@@ -408,16 +408,16 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
                 double offset = (satIdx * 360.0) / satsPerOrbit;
 
                 // Copy template without !constellation
-                rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
+                rapidyyjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
 
                 // Create or update mobilityModel
                 if (!satConfig.HasMember("mobilityModel"))
                 {
-                    rapidjson::Value mobilityModel(rapidjson::kObjectType);
+                    rapidyyjson::Value mobilityModel(rapidyyjson::kObjectType);
                     if (model == "sgp4")
                     {
                         mobilityModel.AddMember("name",
-                                                rapidjson::Value("ns3::GeoSGP4Mobility", allocator),
+                                                rapidyyjson::Value("ns3::GeoSGP4Mobility", allocator),
                                                 allocator);
                         // For uniform-orbits with sgp4 we still need TLE lines; assume they are
                         // provided elsewhere. Here we fallback to circular attributes as
@@ -435,7 +435,7 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
                     {
                         mobilityModel.AddMember(
                             "name",
-                            rapidjson::Value("ns3::GeoLeoOrbitMobility", allocator),
+                            rapidyyjson::Value("ns3::GeoLeoOrbitMobility", allocator),
                             allocator);
                         mobilityModel.AddMember("attributes",
                                                 CreateMobilityAttributes(altitude,
@@ -468,10 +468,10 @@ ConstellationExpander::ExpandUniformOrbits(const rapidjson::Value& constellation
     return satellites;
 }
 
-std::vector<rapidjson::Value>
-ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
-                                       const rapidjson::Value& templateSat,
-                                       rapidjson::Document::AllocatorType& allocator)
+std::vector<rapidyyjson::Value>
+ConstellationExpander::ExpandSingleSat(const rapidyyjson::Value& constellationDef,
+                                       const rapidyyjson::Value& templateSat,
+                                       rapidyyjson::Document::AllocatorType& allocator)
 {
     NS_LOG_FUNCTION_NOARGS();
 
@@ -507,16 +507,16 @@ ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
     }
 
     // Copy template without !constellation
-    rapidjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
+    rapidyyjson::Value satConfig = CreateSatelliteTemplate(templateSat, allocator);
 
     // Create or update mobilityModel
     if (!satConfig.HasMember("mobilityModel"))
     {
-        rapidjson::Value mobilityModel(rapidjson::kObjectType);
+        rapidyyjson::Value mobilityModel(rapidyyjson::kObjectType);
         if (model == "sgp4")
         {
             mobilityModel.AddMember("name",
-                                    rapidjson::Value("ns3::GeoSGP4Mobility", allocator),
+                                    rapidyyjson::Value("ns3::GeoSGP4Mobility", allocator),
                                     allocator);
             // For single satellite sgp4 case we still need TLE lines; placeholder uses same
             // attribute creator.
@@ -532,7 +532,7 @@ ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
         else // circular default
         {
             mobilityModel.AddMember("name",
-                                    rapidjson::Value("ns3::GeoLeoOrbitMobility", allocator),
+                                    rapidyyjson::Value("ns3::GeoLeoOrbitMobility", allocator),
                                     allocator);
             mobilityModel.AddMember("attributes",
                                     CreateMobilityAttributes(altitude,
@@ -556,26 +556,26 @@ ConstellationExpander::ExpandSingleSat(const rapidjson::Value& constellationDef,
                                                                allocator);
     }
 
-    std::vector<rapidjson::Value> satellites;
+    std::vector<rapidyyjson::Value> satellites;
     satellites.push_back(std::move(satConfig));
 
     NS_LOG_INFO("Expanded single satellite constellation");
     return satellites;
 }
 
-rapidjson::Value
-ConstellationExpander::CreateSatelliteTemplate(const rapidjson::Value& templateSat,
-                                               rapidjson::Document::AllocatorType& allocator)
+rapidyyjson::Value
+ConstellationExpander::CreateSatelliteTemplate(const rapidyyjson::Value& templateSat,
+                                               rapidyyjson::Document::AllocatorType& allocator)
 {
-    rapidjson::Value satelliteConfig(rapidjson::kObjectType);
+    rapidyyjson::Value satelliteConfig(rapidyyjson::kObjectType);
 
     // Deep copy all members except "!constellation"
     for (auto it = templateSat.MemberBegin(); it != templateSat.MemberEnd(); ++it)
     {
         if (std::string(it->name.GetString()) != "!constellation")
         {
-            rapidjson::Value key(it->name, allocator);
-            rapidjson::Value value(it->value, allocator);
+            rapidyyjson::Value key(it->name, allocator);
+            rapidyyjson::Value value(it->value, allocator);
             satelliteConfig.AddMember(key, value, allocator);
         }
     }
@@ -583,42 +583,42 @@ ConstellationExpander::CreateSatelliteTemplate(const rapidjson::Value& templateS
     return satelliteConfig;
 }
 
-rapidjson::Value
+rapidyyjson::Value
 ConstellationExpander::CreateMobilityAttributes(double altitude,
                                                 double inclination,
                                                 double longitude,
                                                 double offset,
                                                 bool retrograde,
-                                                rapidjson::Document::AllocatorType& allocator)
+                                                rapidyyjson::Document::AllocatorType& allocator)
 {
-    rapidjson::Value attributes(rapidjson::kArrayType);
+    rapidyyjson::Value attributes(rapidyyjson::kArrayType);
 
     // Altitude
-    rapidjson::Value altitudeAttr(rapidjson::kObjectType);
+    rapidyyjson::Value altitudeAttr(rapidyyjson::kObjectType);
     altitudeAttr.AddMember("name", "Altitude", allocator);
     altitudeAttr.AddMember("value", altitude, allocator);
     attributes.PushBack(altitudeAttr, allocator);
 
     // Inclination
-    rapidjson::Value inclinationAttr(rapidjson::kObjectType);
+    rapidyyjson::Value inclinationAttr(rapidyyjson::kObjectType);
     inclinationAttr.AddMember("name", "Inclination", allocator);
     inclinationAttr.AddMember("value", inclination, allocator);
     attributes.PushBack(inclinationAttr, allocator);
 
     // Longitude
-    rapidjson::Value longitudeAttr(rapidjson::kObjectType);
+    rapidyyjson::Value longitudeAttr(rapidyyjson::kObjectType);
     longitudeAttr.AddMember("name", "Longitude", allocator);
     longitudeAttr.AddMember("value", longitude, allocator);
     attributes.PushBack(longitudeAttr, allocator);
 
     // Offset
-    rapidjson::Value offsetAttr(rapidjson::kObjectType);
+    rapidyyjson::Value offsetAttr(rapidyyjson::kObjectType);
     offsetAttr.AddMember("name", "Offset", allocator);
     offsetAttr.AddMember("value", offset, allocator);
     attributes.PushBack(offsetAttr, allocator);
 
     // RetrogradeOrbit
-    rapidjson::Value retrogradeAttr(rapidjson::kObjectType);
+    rapidyyjson::Value retrogradeAttr(rapidyyjson::kObjectType);
     retrogradeAttr.AddMember("name", "RetrogradeOrbit", allocator);
     retrogradeAttr.AddMember("value", retrograde, allocator);
     attributes.PushBack(retrogradeAttr, allocator);
@@ -626,30 +626,30 @@ ConstellationExpander::CreateMobilityAttributes(double altitude,
     return attributes;
 }
 
-rapidjson::Value
+rapidyyjson::Value
 ConstellationExpander::CreateMobilityAttributes(const std::string& tle1,
                                                 const std::string& tle2,
                                                 const std::string& sgp4Epoch,
-                                                rapidjson::Document::AllocatorType& allocator)
+                                                rapidyyjson::Document::AllocatorType& allocator)
 {
-    rapidjson::Value attributes(rapidjson::kArrayType);
+    rapidyyjson::Value attributes(rapidyyjson::kArrayType);
 
     // Add TLE attributes
-    rapidjson::Value tle1Attr(rapidjson::kObjectType);
+    rapidyyjson::Value tle1Attr(rapidyyjson::kObjectType);
     tle1Attr.AddMember("name", "TleLine1", allocator);
-    tle1Attr.AddMember("value", rapidjson::Value(tle1.c_str(), allocator), allocator);
+    tle1Attr.AddMember("value", rapidyyjson::Value(tle1.c_str(), allocator), allocator);
     attributes.PushBack(tle1Attr, allocator);
 
-    rapidjson::Value tle2Attr(rapidjson::kObjectType);
+    rapidyyjson::Value tle2Attr(rapidyyjson::kObjectType);
     tle2Attr.AddMember("name", "TleLine2", allocator);
-    tle2Attr.AddMember("value", rapidjson::Value(tle2.c_str(), allocator), allocator);
+    tle2Attr.AddMember("value", rapidyyjson::Value(tle2.c_str(), allocator), allocator);
     attributes.PushBack(tle2Attr, allocator);
 
     if (!sgp4Epoch.empty())
     {
-        rapidjson::Value epochAttr(rapidjson::kObjectType);
+        rapidyyjson::Value epochAttr(rapidyyjson::kObjectType);
         epochAttr.AddMember("name", "TleStartTime", allocator);
-        epochAttr.AddMember("value", rapidjson::Value(sgp4Epoch.c_str(), allocator), allocator);
+        epochAttr.AddMember("value", rapidyyjson::Value(sgp4Epoch.c_str(), allocator), allocator);
         attributes.PushBack(epochAttr, allocator);
     }
 

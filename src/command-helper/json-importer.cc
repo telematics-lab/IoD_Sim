@@ -24,9 +24,9 @@
 #include <ns3/object.h>
 #include <ns3/ptr.h>
 #include <filesystem>
-#include <rapidjson/document.h>
-#include <rapidjson/error/en.h>
-#include <rapidjson/filereadstream.h>
+#include <rapidyyjson/document.h>
+#include <rapidyyjson/error/en.h>
+#include <rapidyyjson/filereadstream.h>
 
 NS_LOG_COMPONENT_DEFINE("JsonImporter");
 
@@ -34,20 +34,20 @@ namespace ns3
 {
 
 void
-JsonImporter::Process(rapidjson::Document& doc, const std::string& basePath)
+JsonImporter::Process(rapidyyjson::Document& doc, const std::string& basePath)
 {
     NS_LOG_FUNCTION_NOARGS();
     ProcessValue(doc, doc.GetAllocator(), basePath);
 }
 
 void
-JsonImporter::ProcessValue(rapidjson::Value& val,
-                           rapidjson::Document::AllocatorType& allocator,
+JsonImporter::ProcessValue(rapidyyjson::Value& val,
+                           rapidyyjson::Document::AllocatorType& allocator,
                            const std::string& basePath)
 {
     if (val.IsArray())
     {
-        rapidjson::Value newArray(rapidjson::kArrayType);
+        rapidyyjson::Value newArray(rapidyyjson::kArrayType);
         bool modified = false;
 
         for (auto& element : val.GetArray())
@@ -76,7 +76,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                     fullPath = std::filesystem::path(basePath) / file;
                 }
 
-                rapidjson::Document importedDoc = LoadJson(fullPath.string());
+                rapidyyjson::Document importedDoc = LoadJson(fullPath.string());
                 NS_LOG_INFO("Loaded JSON from " << fullPath.string()
                                                 << ", IsArray=" << importedDoc.IsArray()
                                                 << ", IsObject=" << importedDoc.IsObject());
@@ -92,7 +92,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                                   "Imported JSON for expand in Array must be an array");
                     for (auto& importedElem : importedDoc.GetArray())
                     {
-                        rapidjson::Value v(importedElem, allocator);
+                        rapidyyjson::Value v(importedElem, allocator);
                         newArray.PushBack(v, allocator);
                     }
                     modified = true;
@@ -110,7 +110,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
             {
                 // Not an import command, recurse
                 ProcessValue(element, allocator, basePath);
-                rapidjson::Value v(element, allocator);
+                rapidyyjson::Value v(element, allocator);
                 newArray.PushBack(v, allocator);
             }
         }
@@ -122,7 +122,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
     }
     else if (val.IsObject())
     {
-        rapidjson::Value newObject(rapidjson::kObjectType);
+        rapidyyjson::Value newObject(rapidyyjson::kObjectType);
 
         // If `val` is the command object:
         if (val.HasMember("!importJson") && val.MemberCount() == 1)
@@ -137,7 +137,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
             else
                 fullPath = std::filesystem::path(basePath) / file;
 
-            rapidjson::Document importedDoc = LoadJson(fullPath.string());
+            rapidyyjson::Document importedDoc = LoadJson(fullPath.string());
             Process(importedDoc, std::filesystem::path(fullPath).parent_path().string());
 
             if (mode == "substituteWithKey")
@@ -147,8 +147,8 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                 std::string newKey = command["newKey"].GetString();
 
                 val.SetObject(); // Clear command
-                rapidjson::Value k(newKey.c_str(), allocator);
-                rapidjson::Value v(importedDoc, allocator);
+                rapidyyjson::Value k(newKey.c_str(), allocator);
+                rapidyyjson::Value v(importedDoc, allocator);
                 val.AddMember(k, v, allocator);
                 return;
             }
@@ -174,7 +174,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
             else
                 fullPath = std::filesystem::path(basePath) / file;
 
-            rapidjson::Document importedDoc = LoadJson(fullPath.string());
+            rapidyyjson::Document importedDoc = LoadJson(fullPath.string());
             Process(importedDoc, std::filesystem::path(fullPath).parent_path().string());
 
             if (mode == "expand")
@@ -188,8 +188,8 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                 // Merge
                 for (auto& m : importedDoc.GetObject())
                 {
-                    rapidjson::Value k(m.name, allocator);
-                    rapidjson::Value v(m.value, allocator);
+                    rapidyyjson::Value k(m.name, allocator);
+                    rapidyyjson::Value v(m.value, allocator);
 
                     if (val.HasMember(k.GetString()))
                     {
@@ -208,16 +208,16 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
 
                 val.RemoveMember("!importJson");
 
-                rapidjson::Value k(newKey.c_str(), allocator);
-                rapidjson::Value v(importedDoc, allocator);
+                rapidyyjson::Value k(newKey.c_str(), allocator);
+                rapidyyjson::Value v(importedDoc, allocator);
                 val.AddMember(k, v, allocator);
             }
         }
 
-        rapidjson::Value safeObject(rapidjson::kObjectType);
+        rapidyyjson::Value safeObject(rapidyyjson::kObjectType);
 
         // First, handle import if present
-        rapidjson::Document importedDoc;
+        rapidyyjson::Document importedDoc;
         bool imported = false;
         std::string mode;
         std::string newKey;
@@ -248,9 +248,9 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                 continue;
 
             NS_LOG_INFO("Processing member: " << name);
-            rapidjson::Value k(m.name, allocator); // Copy key
+            rapidyyjson::Value k(m.name, allocator); // Copy key
 
-            rapidjson::Value v(m.value, allocator);
+            rapidyyjson::Value v(m.value, allocator);
             ProcessValue(v, allocator, basePath);
 
             safeObject.AddMember(k, v, allocator);
@@ -264,8 +264,8 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
                 NS_ASSERT_MSG(importedDoc.IsObject(), "Imported JSON for expand must be an object");
                 for (auto& m : importedDoc.GetObject())
                 {
-                    rapidjson::Value k(m.name, allocator);
-                    rapidjson::Value v(m.value, allocator);
+                    rapidyyjson::Value k(m.name, allocator);
+                    rapidyyjson::Value v(m.value, allocator);
 
                     if (safeObject.HasMember(k.GetString()))
                     {
@@ -282,8 +282,8 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
             }
             else if (mode == "substituteWithKey")
             {
-                rapidjson::Value k(newKey.c_str(), allocator);
-                rapidjson::Value v(importedDoc, allocator);
+                rapidyyjson::Value k(newKey.c_str(), allocator);
+                rapidyyjson::Value v(importedDoc, allocator);
                 safeObject.AddMember(k, v, allocator);
             }
         }
@@ -292,7 +292,7 @@ JsonImporter::ProcessValue(rapidjson::Value& val,
     }
 }
 
-rapidjson::Document
+rapidyyjson::Document
 JsonImporter::LoadJson(const std::string& filePath)
 {
     FILE* fp = fopen(filePath.c_str(), "rb");
@@ -302,15 +302,15 @@ JsonImporter::LoadJson(const std::string& filePath)
     }
 
     char readBuffer[65536];
-    rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-    rapidjson::Document doc;
-    doc.ParseStream<rapidjson::kParseCommentsFlag>(is);
+    rapidyyjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+    rapidyyjson::Document doc;
+    doc.ParseStream<rapidyyjson::kParseCommentsFlag>(is);
     fclose(fp);
 
     if (doc.HasParseError())
     {
         NS_FATAL_ERROR("JSON parse error in " << filePath << ": "
-                                              << rapidjson::GetParseError_En(doc.GetParseError()));
+                                              << rapidyyjson::GetParseError_En(doc.GetParseError()));
     }
 
     return doc;

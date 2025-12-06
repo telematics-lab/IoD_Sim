@@ -41,7 +41,7 @@
 #include <ns3/storage-peripheral.h>
 #include <ns3/string.h>
 #include <ns3/udp-header.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {

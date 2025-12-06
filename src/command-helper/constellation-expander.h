@@ -20,7 +20,7 @@
 
 #include <ns3/log.h>
 
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 #include <string>
 #include <vector>
 
@@ -42,7 +42,7 @@ namespace ns3
          * \param satelliteConfig The JSON value representing a satellite configuration
          * \return true if the configuration has a "!constellation" member, false otherwise
          */
-        static bool HasConstellationParameter(const rapidjson::Value& satelliteConfig);
+        static bool HasConstellationParameter(const rapidyyjson::Value& satelliteConfig);
 
         /**
          * \brief Expand a constellation definition into individual satellite configurations.
@@ -51,10 +51,10 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating values
          * \return A vector of JSON values, each representing an individual satellite configuration
          */
-        static std::vector<rapidjson::Value> ExpandConstellation(
-            const rapidjson::Value& templateSat,
+        static std::vector<rapidyyjson::Value> ExpandConstellation(
+            const rapidyyjson::Value& templateSat,
             const std::string& scenarioPath,
-            rapidjson::Document::AllocatorType& allocator);
+            rapidyyjson::Document::AllocatorType& allocator);
 
       private:
         /**
@@ -65,11 +65,11 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating values
          * \return A vector of satellite configurations, one per TLE entry
          */
-        static std::vector<rapidjson::Value> ExpandFromFile(
-            const rapidjson::Value& constellationDef,
-            const rapidjson::Value& templateSat,
+        static std::vector<rapidyyjson::Value> ExpandFromFile(
+            const rapidyyjson::Value& constellationDef,
+            const rapidyyjson::Value& templateSat,
             const std::string& scenarioPath,
-            rapidjson::Document::AllocatorType& allocator);
+            rapidyyjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Expand constellation with uniform orbital distribution.
@@ -78,10 +78,10 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating values
          * \return A vector of satellite configurations distributed uniformly across orbits
          */
-        static std::vector<rapidjson::Value> ExpandUniformOrbits(
-            const rapidjson::Value& constellationDef,
-            const rapidjson::Value& templateSat,
-            rapidjson::Document::AllocatorType& allocator);
+        static std::vector<rapidyyjson::Value> ExpandUniformOrbits(
+            const rapidyyjson::Value& constellationDef,
+            const rapidyyjson::Value& templateSat,
+            rapidyyjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create a single satellite configuration.
@@ -90,10 +90,10 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating values
          * \return A vector containing a single satellite configuration
          */
-        static std::vector<rapidjson::Value> ExpandSingleSat(
-            const rapidjson::Value& constellationDef,
-            const rapidjson::Value& templateSat,
-            rapidjson::Document::AllocatorType& allocator);
+        static std::vector<rapidyyjson::Value> ExpandSingleSat(
+            const rapidyyjson::Value& constellationDef,
+            const rapidyyjson::Value& templateSat,
+            rapidyyjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create a copy of the template satellite without the constellation parameter.
@@ -101,9 +101,9 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating the copy
          * \return A JSON value that is a deep copy of templateSat without "!constellation"
          */
-        static rapidjson::Value CreateSatelliteTemplate(
-            const rapidjson::Value& templateSat,
-            rapidjson::Document::AllocatorType& allocator);
+        static rapidyyjson::Value CreateSatelliteTemplate(
+            const rapidyyjson::Value& templateSat,
+            rapidyyjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create GeoLeoOrbitMobility attributes from orbital parameters.
@@ -115,13 +115,13 @@ namespace ns3
          * \param allocator The JSON allocator to use
          * \return A JSON array of mobility model attributes
          */
-        static rapidjson::Value CreateMobilityAttributes(
+        static rapidyyjson::Value CreateMobilityAttributes(
             double altitude,
             double inclination,
             double longitude,
             double offset,
             bool retrograde,
-            rapidjson::Document::AllocatorType& allocator);
+            rapidyyjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create GeoLeoOrbitMobility attributes from TLE parameters.
@@ -131,11 +131,11 @@ namespace ns3
          * \param allocator The JSON allocator to use
          * \return A JSON array of mobility model attributes
          */
-        static rapidjson::Value CreateMobilityAttributes(
+        static rapidyyjson::Value CreateMobilityAttributes(
             const std::string& tle1,
             const std::string& tle2,
             const std::string& sgp4Epoch,
-            rapidjson::Document::AllocatorType& allocator);
+            rapidyyjson::Document::AllocatorType& allocator);
     };
 
 } // namespace ns3

@@ -2,14 +2,14 @@
  * RapidJSON wrapper using yyjson
  */
 
-#ifndef RAPIDJSON_WRITER_H_
-#define RAPIDJSON_WRITER_H_
+#ifndef RAPIDYYJSON_WRITER_H_
+#define RAPIDYYJSON_WRITER_H_
 
-#include "rapidjson.h"
+#include "rapidyyjson.h"
 #include <yyjson.h>
 #include <vector>
 
-namespace rapidjson {
+namespace rapidyyjson {
 
 template<typename OutputStream>
 class Writer {
@@ -105,6 +105,6 @@ private:
     std::vector<yyjson_mut_val*> m_stack;
     yyjson_mut_val* m_current_key;
 };
-} // namespace rapidjson
+} // namespace rapidyyjson
 
-#endif // RAPIDJSON_WRITER_H_
+#endif // RAPIDYYJSON_WRITER_H_

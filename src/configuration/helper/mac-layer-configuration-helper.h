@@ -20,7 +20,7 @@
 
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/model-configuration.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
@@ -42,10 +42,10 @@ namespace ns3
          * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
          * data.
          */
-        static Ptr<MacLayerConfiguration> GetConfiguration(const rapidjson::Value& jsonMacLayer);
+        static Ptr<MacLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonMacLayer);
 
       private:
-        static const ModelConfiguration DecodeModelConfiguration(const rapidjson::Value& jsonModel);
+        static const ModelConfiguration DecodeModelConfiguration(const rapidyyjson::Value& jsonModel);
     };
 
 } // namespace ns3

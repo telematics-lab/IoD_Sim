@@ -42,7 +42,7 @@ namespace ns3
 {
 
 Ptr<EntityConfiguration>
-EntityConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
+EntityConfigurationHelper::GetConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Entity configuration must be an object.");
     NS_ASSERT_MSG(json.HasMember("mobilityModel"),
@@ -93,7 +93,7 @@ EntityConfigurationHelper::EntityConfigurationHelper()
 }
 
 const std::vector<Ptr<NetdeviceConfiguration>>
-EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Value& json)
 {
     if (json.IsNull())
     {
@@ -385,7 +385,7 @@ EntityConfigurationHelper::DecodeNrBearerConfigurations(const JsonArray& jsonArr
 }
 
 const MobilityModelConfiguration
-EntityConfigurationHelper::DecodeMobilityConfiguration(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodeMobilityConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Entity mobility model configuration must be an object.");
 
@@ -396,7 +396,7 @@ EntityConfigurationHelper::DecodeMobilityConfiguration(const rapidjson::Value& j
 }
 
 const std::vector<ModelConfiguration>
-EntityConfigurationHelper::DecodeApplicationConfigurations(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodeApplicationConfigurations(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsArray(), "Entity configuration 'applications' property must be an array.");
 
@@ -412,7 +412,7 @@ EntityConfigurationHelper::DecodeApplicationConfigurations(const rapidjson::Valu
 }
 
 const ModelConfiguration
-EntityConfigurationHelper::DecodeMechanicsConfiguration(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodeMechanicsConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Entity mechanics configuration must be an object.");
 
@@ -420,7 +420,7 @@ EntityConfigurationHelper::DecodeMechanicsConfiguration(const rapidjson::Value& 
 }
 
 const ModelConfiguration
-EntityConfigurationHelper::DecodeBatteryConfiguration(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodeBatteryConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(), "Entity battery configuration must be an object.");
 
@@ -428,7 +428,7 @@ EntityConfigurationHelper::DecodeBatteryConfiguration(const rapidjson::Value& js
 }
 
 const std::vector<ModelConfiguration>
-EntityConfigurationHelper::DecodePeripheralConfigurations(const rapidjson::Value& json)
+EntityConfigurationHelper::DecodePeripheralConfigurations(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsArray(), "Entity configuration 'peripherals' property must be an array.");
 
@@ -444,7 +444,7 @@ EntityConfigurationHelper::DecodePeripheralConfigurations(const rapidjson::Value
 }
 
 const std::optional<Vector>
-EntityConfigurationHelper::DecodeInitialPosition(const rapidjson::Value& jsonModel)
+EntityConfigurationHelper::DecodeInitialPosition(const rapidyyjson::Value& jsonModel)
 {
     // Initial Position is optional as not all mobility models use it!
     if (!(jsonModel.HasMember("initialPosition")))

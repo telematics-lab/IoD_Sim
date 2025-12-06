@@ -2,12 +2,12 @@
  * RapidJSON wrapper using yyjson
  */
 
-#ifndef RAPIDJSON_STRINGBUFFER_H_
-#define RAPIDJSON_STRINGBUFFER_H_
+#ifndef RAPIDYYJSON_STRINGBUFFER_H_
+#define RAPIDYYJSON_STRINGBUFFER_H_
 
 #include <string>
 
-namespace rapidjson {
+namespace rapidyyjson {
 
 class StringBuffer {
 public:
@@ -41,6 +41,6 @@ private:
     std::string m_str;
 };
 
-} // namespace rapidjson
+} // namespace rapidyyjson
 
-#endif // RAPIDJSON_STRINGBUFFER_H_
+#endif // RAPIDYYJSON_STRINGBUFFER_H_

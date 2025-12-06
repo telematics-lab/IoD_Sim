@@ -25,9 +25,9 @@
 #include <ns3/internet-module.h>
 #include <ns3/network-module.h>
 #include <ns3/storage-peripheral.h>
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
+#include <rapidyyjson/document.h>
+#include <rapidyyjson/stringbuffer.h>
+#include <rapidyyjson/writer.h>
 
 namespace ns3
 {
@@ -150,7 +150,7 @@ namespace ns3
                 NS_LOG_INFO("[Node " << GetNode()->GetId()
                                      << "] packet contents: " << (char*)payload);
 
-                rapidjson::Document d;
+                rapidyyjson::Document d;
                 d.Parse((char*)payload);
                 if (d.HasParseError())
                 {
@@ -203,8 +203,8 @@ namespace ns3
 
         const std::string command = PacketType(PacketType::HELLO_ACK).ToString();
 
-        rapidjson::StringBuffer jsonBuf;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(jsonBuf);
+        rapidyyjson::StringBuffer jsonBuf;
+        rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
 
         writer.StartObject();
         writer.Key("cmd");
@@ -231,8 +231,8 @@ namespace ns3
 
         const std::string command = PacketType(PacketType::UPDATE_ACK).ToString();
 
-        rapidjson::StringBuffer jsonBuf;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(jsonBuf);
+        rapidyyjson::StringBuffer jsonBuf;
+        rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
 
         writer.StartObject();
         writer.Key("cmd");

@@ -19,11 +19,11 @@
 #define REMOTE_CONFIGURATION_HELPER_H
 
 #include <ns3/remote-configuration.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 
 namespace ns3
 {
-    using JsonArray = rapidjson::GenericArray<true, rapidjson::Value>;
+    using JsonArray = rapidyyjson::GenericArray<true, rapidyyjson::Value>;
 
     /**
      * Helper to decode an Remote from a JSON configuration file and read the following properties:
@@ -46,12 +46,12 @@ namespace ns3
          * \return The configuration as a pointer to RemoteConfiguration to easily retrieve parsed
          * data.
          */
-        static Ptr<RemoteConfiguration> GetConfiguration(const rapidjson::Value& json);
+        static Ptr<RemoteConfiguration> GetConfiguration(const rapidyyjson::Value& json);
 
       private:
-        static const uint32_t DecodeNetworkLayerId(const rapidjson::Value& json);
+        static const uint32_t DecodeNetworkLayerId(const rapidyyjson::Value& json);
         static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
-            const rapidjson::Value& json);
+            const rapidyyjson::Value& json);
     };
 
 } // namespace ns3

@@ -19,7 +19,7 @@
 #define TRACE_EXPANDER_H
 
 #include <ns3/log.h>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 #include <string>
 #include <vector>
 
@@ -40,7 +40,7 @@ namespace ns3
          * \param config The JSON value representing an object configuration
          * \return true if the configuration has a "!traceMobility" member, false otherwise
          */
-        static bool HasTraceParameter(const rapidjson::Value& config);
+        static bool HasTraceParameter(const rapidyyjson::Value& config);
 
         /**
          * \brief Expand a trace definition into individual object configurations.
@@ -48,7 +48,7 @@ namespace ns3
          * \param scenarioPath The base path for resolving relative file paths
          * \return A vector of JSON values, each representing an individual object configuration
          */
-        static std::vector<rapidjson::Document> ExpandTrace(const rapidjson::Value& templateObj,
+        static std::vector<rapidyyjson::Document> ExpandTrace(const rapidyyjson::Value& templateObj,
                                                             const std::string& scenarioPath);
 
       private:
@@ -58,8 +58,8 @@ namespace ns3
          * \param allocator The JSON allocator to use for creating the copy
          * \return A JSON value that is a deep copy of templateObj without "!traceMobility"
          */
-        static rapidjson::Value CreateObjectTemplate(const rapidjson::Value& templateObj,
-                                                     rapidjson::Document::AllocatorType& allocator);
+        static rapidyyjson::Value CreateObjectTemplate(const rapidyyjson::Value& templateObj,
+                                                     rapidyyjson::Document::AllocatorType& allocator);
     };
 
 } // namespace ns3

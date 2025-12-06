@@ -28,7 +28,7 @@ namespace ns3
 {
 
 Ptr<NetworkLayerConfiguration>
-NetworkLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& json)
+NetworkLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& json)
 {
     NS_ASSERT_MSG(json.IsObject(),
                   "Network Layer definition must be an object, got " << json.GetType());
