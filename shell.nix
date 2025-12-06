@@ -39,7 +39,7 @@ pkgs.mkShell {
     ninja
     pkg-config
     pythonEnv
-    rapidjson
+    yyjson
     valgrind
   ];
 

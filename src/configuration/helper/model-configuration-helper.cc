@@ -192,6 +192,10 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             {
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
             }
+            else if (acceptedType == "ns3::DoubleValue")
+            {
+                attrValue = attrInfo.checker->CreateValidValue(DoubleValue(static_cast<double>(attrValueInt)));
+            }
             else if (acceptedType == "ns3::TimeValue")
             {
                 attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueInt)));
@@ -215,6 +219,14 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             else if (acceptedType == "ns3::UintegerValue")
             {
                 attrValue = attrInfo.checker->CreateValidValue(UintegerValue(attrValueInt));
+            }
+            else if (acceptedType == "ns3::DoubleValue")
+            {
+                attrValue = attrInfo.checker->CreateValidValue(DoubleValue(static_cast<double>(attrValueInt)));
+            }
+            else if (acceptedType == "ns3::TimeValue")
+            {
+                attrValue = attrInfo.checker->CreateValidValue(TimeValue(Seconds(attrValueInt)));
             }
             else
             {
@@ -393,6 +405,23 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
 
             attrValue =
                 attrInfo.checker->CreateValidValue(ModelConfigurationMatrixValue(configurations));
+        }
+        else if (attrInfo.checker->GetValueTypeName() == "ns3::Vector3DValue")
+        {
+             if (arr.Size() == 3)
+            {
+                const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
+                attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
+            }
+        }
+        else if (attrInfo.checker->GetValueTypeName() == "ns3::DoubleVectorValue")
+        {
+             std::vector<double> els;
+            for (auto& c : arr)
+            {
+                els.push_back(c.GetDouble());
+            }
+            attrValue = attrInfo.checker->CreateValidValue(DoubleVectorValue(els));
         }
         else if (arr[0].IsInt())
         {

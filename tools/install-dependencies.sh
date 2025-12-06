@@ -17,6 +17,7 @@ function install_debian_deps() {
     gcc               \
     git               \
     make              \
+    libboost-all-dev  \
     libgsl-dev        \
     libxml2-dev       \
     patch             \
@@ -25,11 +26,24 @@ function install_debian_deps() {
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev     \
-    libtar-dev        \
+    libyyjson-dev     \
+    libfmt-dev        \
+    libarchive-dev    \
     doxygen           \
     graphviz          \
-    libtar-dev
+    libc6-dev         \
+    libsqlite3-dev    \
+    libeigen3-dev     \
+    pybind11-dev      \
+    liblzma-dev       \
+    xz-utils          \
+    nettle-dev        \
+    libbz2-dev        \
+    liblz4-dev        \
+    libzstd-dev       \
+    libacl1-dev       \
+    libxxhash-dev     \
+    wget
 }
 
 function install_fedora_deps() {
@@ -40,18 +54,33 @@ function install_fedora_deps() {
     gcc                        \
     gcc-c++                    \
     git                        \
+    make                       \
+    boost-devel                \
     gsl-devel                  \
     libxml2-devel              \
-    make                       \
     patch                      \
     pkgconf                    \
     python-unversioned-command \
     python3                    \
-    rapidjson-devel            \
-    libtar-devel               \
+    python3-devel              \
+    python3-pip                \
+    yyjson-devel               \
+    fmt-devel                  \
+    libarchive-devel           \
     doxygen                    \
     graphviz                   \
-    libtar-devel
+    sqlite-devel               \
+    eigen3-devel               \
+    pybind11-devel             \
+    xz-devel                   \
+    xz                         \
+    nettle-devel               \
+    bzip2-devel                \
+    lz4-devel                  \
+    libzstd-devel              \
+    libacl-devel               \
+    xxhash-devel               \
+    wget
 }
 
 function install_arch_deps() {
@@ -63,17 +92,30 @@ function install_arch_deps() {
     gdb                   \
     gcc                   \
     git                   \
-    gsl                   \
     make                  \
+    boost                 \
+    gsl                   \
     libxml2               \
     patch                 \
     pkgconf               \
     python                \
-    rapidjson             \
-    libtar                \
-    doxygen-docs          \
+    python-pip            \
+    yyjson                \
+    fmt                   \
+    libarchive            \
+    doxygen               \
     graphviz              \
-    libtar
+    sqlite                \
+    eigen                 \
+    pybind11              \
+    xz                    \
+    nettle                \
+    bzip2                 \
+    lz4                   \
+    zstd                  \
+    acl                   \
+    xxhash                \
+    wget
 }
 
 case "$ID" in

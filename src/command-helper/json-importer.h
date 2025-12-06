@@ -18,24 +18,11 @@
 #ifndef JSON_IMPORTER_H
 #define JSON_IMPORTER_H
 
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
-
-    SUPPRESS_DEPRECATED_POP
-
 #include <string>
 #include <vector>
 
-    namespace ns3
+namespace ns3
 {
     /**
      * \brief Helper class to process !importJson commands in JSON configuration.

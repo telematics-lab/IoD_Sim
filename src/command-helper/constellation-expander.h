@@ -20,24 +20,11 @@
 
 #include <ns3/log.h>
 
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
-
-    SUPPRESS_DEPRECATED_POP
-
 #include <string>
 #include <vector>
 
-    namespace ns3
+namespace ns3
 {
     /**
      * \brief Helper class to expand constellation definitions into individual satellite
@@ -61,11 +48,13 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
          * \brief Expand a constellation definition into individual satellite configurations.
          * \param templateSat The JSON value containing the constellation template
          * \param scenarioPath The base path for resolving relative file paths
+         * \param allocator The JSON allocator to use for creating values
          * \return A vector of JSON values, each representing an individual satellite configuration
          */
-        static std::vector<rapidjson::Document> ExpandConstellation(
+        static std::vector<rapidjson::Value> ExpandConstellation(
             const rapidjson::Value& templateSat,
-            const std::string& scenarioPath);
+            const std::string& scenarioPath,
+            rapidjson::Document::AllocatorType& allocator);
 
       private:
         /**
@@ -73,32 +62,38 @@ _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-de
          * \param constellationDef The "!constellation" object definition
          * \param templateSat The template satellite configuration (without constellation parameter)
          * \param scenarioPath The base path for resolving relative file paths
+         * \param allocator The JSON allocator to use for creating values
          * \return A vector of satellite configurations, one per TLE entry
          */
-        static std::vector<rapidjson::Document> ExpandFromFile(
+        static std::vector<rapidjson::Value> ExpandFromFile(
             const rapidjson::Value& constellationDef,
             const rapidjson::Value& templateSat,
-            const std::string& scenarioPath);
+            const std::string& scenarioPath,
+            rapidjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Expand constellation with uniform orbital distribution.
          * \param constellationDef The "!constellation" object definition
          * \param templateSat The template satellite configuration (without constellation parameter)
+         * \param allocator The JSON allocator to use for creating values
          * \return A vector of satellite configurations distributed uniformly across orbits
          */
-        static std::vector<rapidjson::Document> ExpandUniformOrbits(
+        static std::vector<rapidjson::Value> ExpandUniformOrbits(
             const rapidjson::Value& constellationDef,
-            const rapidjson::Value& templateSat);
+            const rapidjson::Value& templateSat,
+            rapidjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create a single satellite configuration.
          * \param constellationDef The "!constellation" object definition
          * \param templateSat The template satellite configuration (without constellation parameter)
+         * \param allocator The JSON allocator to use for creating values
          * \return A vector containing a single satellite configuration
          */
-        static std::vector<rapidjson::Document> ExpandSingleSat(
+        static std::vector<rapidjson::Value> ExpandSingleSat(
             const rapidjson::Value& constellationDef,
-            const rapidjson::Value& templateSat);
+            const rapidjson::Value& templateSat,
+            rapidjson::Document::AllocatorType& allocator);
 
         /**
          * \brief Create a copy of the template satellite without the constellation parameter.

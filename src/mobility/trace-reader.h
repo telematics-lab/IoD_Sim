@@ -7,7 +7,8 @@
 #include <cstdio>
 #include <deque>
 #include <fstream>
-#include <libtar.h>
+#include <archive.h>
+#include <archive_entry.h>
 #include <queue>
 #include <set>
 #include <string>
@@ -75,7 +76,7 @@ class TraceReader
 
     struct TraceFileState
     {
-        TAR* tar_handle;
+        struct archive* archive_handle;
         z_stream strm;
         bool finished;
         Time lastReadTime;

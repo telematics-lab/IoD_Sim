@@ -2,7 +2,7 @@
   "name": "leo-constellation-starlink",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 1,
+  "duration": 30,
   "appStatisticsReportInterval": 0.3,
   "staticNs3Config": [
     {

@@ -24,24 +24,11 @@
 #include <ns3/object.h>
 #include <ns3/ptr.h>
 #include <filesystem>
-
-#if defined(__clang__)
-_Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("clang diagnostic pop")
-#elif defined(__GNUC__)
-_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define SUPPRESS_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#else
-#define SUPPRESS_DEPRECATED_POP
-#endif
-
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/filereadstream.h>
 
-    SUPPRESS_DEPRECATED_POP
-
-    NS_LOG_COMPONENT_DEFINE("JsonImporter");
+NS_LOG_COMPONENT_DEFINE("JsonImporter");
 
 namespace ns3
 {

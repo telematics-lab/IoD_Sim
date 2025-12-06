@@ -56,7 +56,7 @@ models in Python visual blocks.
 
 ## Getting Started
 
-The following quick start has been tested on Ubuntu 22.04 LTS. Please note that
+The following quick start has been tested on Ubuntu 25.04 LTS. Please note that
 this process may be similar in other distros as well. In case of any difficulties,
 you are welcome to raise a pull request and propose some adjustments.
 

@@ -1,10 +1,17 @@
 find_package(ZLIB REQUIRED)
 find_package(LibXml2 REQUIRED)
 
-find_library(LIBTAR_LIBRARY NAMES tar libtar REQUIRED)
+# For apple users that installs libarchive via homebrew
+if(APPLE)
+    list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/libarchive")
+endif()
+
+find_package(LibArchive REQUIRED)
+
 
 include_directories(${LIBXML2_INCLUDE_DIR})
-# include_directories(${ICU_INCLUDE_DIRS})
+include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/json-interface)
+include_directories(${LibArchive_INCLUDE_DIRS})
 
 set(source_files
   application/drone-client-application.cc
@@ -73,6 +80,7 @@ set(source_files
   entity/zsp-list.cc
   entity/leo-sat-list.cc
   helper/app-statistics-helper.cc
+  helper/debug-helper.h
   helper/three-dimensional-rem-helper.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
@@ -105,6 +113,7 @@ set(source_files
   report/protocol-layer.cc
   report/report-container.cc
   report/report-data-stats.cc
+  report/report-default-iterator.h
   report/report-drone.cc
   report/report-entity.cc
   report/report-helper.cc
@@ -254,6 +263,32 @@ set(header_files
   mobility/trace-based-mobility-model.h
 )
 
+
+if(NS3_STATIC)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+    # Libarchive static dependencies
+    find_package(BZip2 REQUIRED)
+    find_package(LibLZMA REQUIRED)
+    find_library(NETTLE_LIBRARY NAMES nettle REQUIRED)
+    find_library(ZSTD_LIBRARY NAMES zstd REQUIRED)
+    find_library(LZ4_LIBRARY NAMES lz4 REQUIRED)
+    find_library(ACL_LIBRARY NAMES acl REQUIRED)
+    find_library(XXHASH_LIBRARY NAMES xxhash REQUIRED)
+
+    set(STATIC_DEPS
+        ${BZIP2_LIBRARIES}
+        ${LIBLZMA_LIBRARIES}
+        ${NETTLE_LIBRARY}
+        ${ZSTD_LIBRARY}
+        ${LZ4_LIBRARY}
+        ${ACL_LIBRARY}
+        ${XXHASH_LIBRARY}
+    )
+endif()
+find_library(YYJSON_LIBRARY NAMES yyjson REQUIRED)
+
+
 build_lib(
   LIBNAME iodsim
   SOURCE_FILES ${source_files}
@@ -266,9 +301,11 @@ build_lib(
                     ${libmobility}
                     ${libnr}
                     ${libleo}
-                    ${LIBTAR_LIBRARY}
+                    ${LibArchive_LIBRARIES}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}
+                    ${YYJSON_LIBRARY}
+                    ${STATIC_DEPS}
 )
 
 build_exec(

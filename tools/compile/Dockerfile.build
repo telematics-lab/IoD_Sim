@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
@@ -24,8 +24,8 @@ RUN apt update \
     python3-venv      \
     python3-pip       \
     python-is-python3 \
-    rapidjson-dev     \
-    libtar-dev        \
+    libfmt-dev        \
+    libarchive-dev    \
     doxygen           \
     graphviz          \
     libc6-dev         \
@@ -33,8 +33,13 @@ RUN apt update \
     libeigen3-dev     \
     pybind11-dev      \
     liblzma-dev       \
-    libtar-dev        \
     xz-utils          \
+    nettle-dev        \
+    libbz2-dev        \
+    liblz4-dev        \
+    libzstd-dev       \
+    libacl1-dev       \
+    libxxhash-dev     \
     wget
 
 
@@ -42,6 +47,12 @@ RUN wget https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz &
     tar -xf libxml2-2.15.1.tar.xz && rm libxml2-2.15.1.tar.xz && cd libxml2-2.15.1 && \
     ./configure --enable-static --disable-shared --without-icu --without-python --prefix=/usr/local && \
     make -j$(nproc) && make install && cd / && rm -rf libxml2-2.15.1
+
+RUN wget https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz && \
+    tar -xf 0.12.0.tar.gz && rm 0.12.0.tar.gz && cd yyjson-0.12.0 && \
+    cmake -B build -DCMAKE_BUILD_TYPE=Release -DYYJSON_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=/usr/local . && \
+    cmake --build build --target install && \
+    cd / && rm -rf yyjson-0.12.0
 
 RUN mkdir /IoD_Sim
 COPY . /IoD_Sim/

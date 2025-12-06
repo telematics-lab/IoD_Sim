@@ -2,7 +2,7 @@
   "name": "test-trace",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 600,
+  "duration": 50,
   "staticNs3Config": [
     {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",

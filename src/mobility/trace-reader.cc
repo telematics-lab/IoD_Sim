@@ -33,9 +33,9 @@ TraceReader::~TraceReader()
 {
     for (auto& pair : m_traceFiles)
     {
-        if (pair.second.tar_handle)
+        if (pair.second.archive_handle)
         {
-            tar_close(pair.second.tar_handle);
+            archive_read_free(pair.second.archive_handle);
         }
         inflateEnd(&pair.second.strm);
     }
@@ -106,31 +106,33 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
 {
     NS_LOG_FUNCTION(this << traceFile);
 
-    TAR* t;
-    if (tar_open(&t, const_cast<char*>(traceFile.c_str()), nullptr, O_RDONLY, 0, 0) == -1)
+    struct archive* a = archive_read_new();
+    archive_read_support_filter_all(a);
+    archive_read_support_format_tar(a);
+
+    if (archive_read_open_filename(a, traceFile.c_str(), 10240) != ARCHIVE_OK)
     {
-        NS_FATAL_ERROR("Failed to open trace file: " << traceFile);
+        NS_FATAL_ERROR("Failed to open trace file: " << traceFile << " (" << archive_error_string(a) << ")");
     }
 
     TraceFileState state;
-    state.tar_handle = t;
+    state.archive_handle = a;
     state.finished = false;
     state.lastReadTime = Seconds(0);
     state.fileFound = false;
     state.fileRemainingBytes = 0;
 
-    // Don't initialize zlib yet - we'll do it after finding traces.csv.gz
-    // to avoid having an idle stream that needs resetting
-
-    // Find and read nodes.csv.gz first
+    struct archive_entry* entry;
     bool nodesFound = false;
-    while (th_read(t) == 0)
+
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
-        std::string filename = th_get_pathname(t);
+        std::string filename = archive_entry_pathname(entry);
+
         if (filename.find("nodes.csv.gz") != std::string::npos)
         {
             nodesFound = true;
-            unsigned long nodesFileSize = th_get_size(t);
+            unsigned long nodesFileSize = archive_entry_size(entry);
             NS_LOG_INFO("Found nodes.csv.gz in " << traceFile << ", size: " << nodesFileSize);
 
             // Read and decompress nodes.csv.gz
@@ -146,23 +148,19 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
             }
 
             std::string nodesBuffer;
-            unsigned long nodesRemaining = nodesFileSize;
             unsigned char nodesInBuf[16384];
             unsigned char nodesOutBuf[16384];
 
-            while (nodesRemaining > 0)
+            while (true)
             {
-                char tar_block[T_BLOCKSIZE];
-                if (tar_block_read(t, tar_block) == -1)
-                {
-                    NS_FATAL_ERROR("Error reading tar block for nodes.csv.gz");
+                ssize_t len = archive_read_data(a, nodesInBuf, sizeof(nodesInBuf));
+                if (len < 0) {
+                     NS_FATAL_ERROR("Error reading nodes.csv.gz: " << archive_error_string(a));
                 }
+                if (len == 0) break; // EOF
 
-                size_t validBytes = std::min((size_t)T_BLOCKSIZE, (size_t)nodesRemaining);
-                memcpy(nodesInBuf, tar_block, validBytes);
-                nodesStrm.avail_in = validBytes;
+                nodesStrm.avail_in = len;
                 nodesStrm.next_in = (Bytef*)nodesInBuf;
-                nodesRemaining -= validBytes;
 
                 int ret;
                 do
@@ -178,10 +176,7 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
                     nodesBuffer.append((char*)nodesOutBuf, have);
                 } while (nodesStrm.avail_out == 0);
 
-                if (ret == Z_STREAM_END)
-                {
-                    break;
-                }
+                if (ret == Z_STREAM_END) break;
             }
 
             inflateEnd(&nodesStrm);
@@ -191,10 +186,7 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
             std::string line;
             while (std::getline(ss, line))
             {
-                if (line.empty())
-                {
-                    continue;
-                }
+                if (line.empty()) continue;
 
                 std::stringstream lineStream(line);
                 std::string segment;
@@ -205,12 +197,8 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
                     parts.push_back(segment);
                 }
 
-                if (parts.size() < 5)
-                {
-                    continue;
-                }
+                if (parts.size() < 5) continue;
 
-                // Format: node;first_relative_time;latitude;longitude;altitude
                 NodeInfo nodeInfo;
                 nodeInfo.nodeId = parts[0];
                 nodeInfo.initialPosition.x = std::stod(parts[2]); // latitude
@@ -223,21 +211,17 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
                                             << nodeInfo.initialPosition.y << ", "
                                             << nodeInfo.initialPosition.z << ")");
             }
-
             NS_LOG_INFO("Loaded " << state.availableNodes.size() << " nodes from nodes.csv.gz");
-            break;
+            continue; // Continue to search for traces.csv.gz
         }
 
-        // Skip this file
-        size_t size = th_get_size(t);
-        size_t blocks = (size + T_BLOCKSIZE - 1) / T_BLOCKSIZE;
-        for (size_t i = 0; i < blocks; ++i)
+        if (filename.find("traces.csv.gz") != std::string::npos)
         {
-            char buf[T_BLOCKSIZE];
-            if (tar_block_read(t, buf) == -1)
-            {
-                NS_FATAL_ERROR("Error reading tar block while skipping");
-            }
+            state.fileFound = true;
+            state.fileRemainingBytes = archive_entry_size(entry);
+            NS_LOG_INFO("Found traces.csv.gz in " << traceFile
+                                                  << ", size: " << state.fileRemainingBytes);
+            break; // Stop iteration, state.archive_handle is now positioned at traces.csv.gz data
         }
     }
 
@@ -245,51 +229,22 @@ TraceReader::OpenTraceFile(const std::string& traceFile)
     {
         NS_FATAL_ERROR("nodes.csv.gz not found in " << traceFile);
     }
-
-    // Now find traces.csv.gz
-    while (th_read(t) == 0)
-    {
-        std::string filename = th_get_pathname(t);
-        if (filename.find("traces.csv.gz") != std::string::npos)
-        {
-            state.fileFound = true;
-            state.fileRemainingBytes = th_get_size(t);
-            NS_LOG_INFO("Found traces.csv.gz in " << traceFile
-                                                  << ", size: " << state.fileRemainingBytes);
-            break;
-        }
-
-        // Skip this file
-        size_t size = th_get_size(t);
-        size_t blocks = (size + T_BLOCKSIZE - 1) / T_BLOCKSIZE;
-        for (size_t i = 0; i < blocks; ++i)
-        {
-            char buf[T_BLOCKSIZE];
-            if (tar_block_read(t, buf) == -1)
-            {
-                NS_FATAL_ERROR("Error reading tar block while skipping");
-            }
-        }
-    }
-
     if (!state.fileFound)
     {
         NS_FATAL_ERROR("traces.csv.gz not found in " << traceFile);
     }
 
-    // First, insert the state into the map
+    // Insert state map
     m_traceFiles[traceFile] = state;
 
-    // NOW initialize zlib for traces.csv.gz decompression
-    // IMPORTANT: Initialize AFTER inserting into map because z_stream
-    // contains internal pointers that must not be copied after initialization
+    // Initialize zlib for traces.csv.gz
     TraceFileState& finalState = m_traceFiles[traceFile];
     finalState.strm.zalloc = Z_NULL;
     finalState.strm.zfree = Z_NULL;
     finalState.strm.opaque = Z_NULL;
     finalState.strm.avail_in = 0;
     finalState.strm.next_in = Z_NULL;
-    if (inflateInit2(&finalState.strm, 16 + MAX_WBITS) != Z_OK) // 16+MAX_WBITS for gzip
+    if (inflateInit2(&finalState.strm, 16 + MAX_WBITS) != Z_OK)
     {
         NS_FATAL_ERROR("Failed to initialize zlib for traces.csv.gz");
     }
@@ -335,33 +290,32 @@ TraceReader::ReadUntil(const std::string& traceFile, const std::string& deviceId
                 break;
             }
 
-            // Read from tar
-            // We must read in 512 byte blocks for tar.
-            // tar_block_read reads T_BLOCKSIZE (512) bytes.
+            // Read from archive
+            NS_LOG_DEBUG("Reading archive data...");
 
-            NS_LOG_DEBUG("Reading tar block, fileRemainingBytes=" << state.fileRemainingBytes);
+            ssize_t len = archive_read_data(state.archive_handle, state.inBuffer, sizeof(state.inBuffer));
 
-            char tar_block_buf[T_BLOCKSIZE];
-            if (tar_block_read(state.tar_handle, tar_block_buf) == -1)
+            if (len < 0)
             {
-                NS_LOG_ERROR("Error reading tar block for " << traceFile);
+                NS_LOG_ERROR("Error reading archive data for " << traceFile << ": " << archive_error_string(state.archive_handle));
+                state.finished = true;
+                break;
+            }
+            if (len == 0)
+            {
                 state.finished = true;
                 break;
             }
 
-            // The file size might not be a multiple of 512.
-            // The last block is padded.
-            size_t validBytesInBlock =
-                std::min((size_t)T_BLOCKSIZE, (size_t)state.fileRemainingBytes);
+            NS_LOG_DEBUG("Read " << len << " bytes from archive");
 
-            NS_LOG_DEBUG("Read tar block, validBytesInBlock=" << validBytesInBlock);
-
-            // Copy valid bytes from the tar block into zlib's input buffer
-            memcpy(state.inBuffer, tar_block_buf, validBytesInBlock);
-            state.strm.avail_in = validBytesInBlock;
+            state.strm.avail_in = len;
             state.strm.next_in = (Bytef*)state.inBuffer;
 
-            state.fileRemainingBytes -= validBytesInBlock;
+            // Update remaining bytes just for info, though libarchive handles EOF
+            if (state.fileRemainingBytes >= (unsigned long)len)
+                 state.fileRemainingBytes -= len;
+            else state.fileRemainingBytes = 0;
         }
 
         // Decompress
