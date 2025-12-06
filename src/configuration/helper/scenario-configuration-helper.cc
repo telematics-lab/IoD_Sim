@@ -37,11 +37,11 @@
 #include <iomanip> /* put_time */
 #include <iostream>
 #include <unistd.h>
-#include <rapidjson/error/en.h>
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/pointer.h>
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h>
+#include <rapidyyjson/error/en.h>
+#include <rapidyyjson/filereadstream.h>
+#include <rapidyyjson/pointer.h>
+#include <rapidyyjson/prettywriter.h>
+#include <rapidyyjson/stringbuffer.h>
 
 namespace ns3
 {
@@ -815,14 +815,14 @@ namespace ns3
             NS_FATAL_ERROR("Cannot open " << configFilePath << ": " << std::strerror(errno));
         }
 
-        rapidjson::FileReadStream jsonFileStream(m_configFilePtr,
+        rapidyyjson::FileReadStream jsonFileStream(m_configFilePtr,
                                                  configFileBuffer,
                                                  configFileBufferSize);
-        m_config.ParseStream<rapidjson::kParseCommentsFlag>(jsonFileStream);
+        m_config.ParseStream<rapidyyjson::kParseCommentsFlag>(jsonFileStream);
 
         NS_ABORT_MSG_IF(m_config.HasParseError(),
                         "The given configuration schema is not valid JSON: "
-                            << rapidjson::GetParseError_En(m_config.GetParseError()));
+                            << rapidyyjson::GetParseError_En(m_config.GetParseError()));
 
         // Process !importJson commands
         std::string scenarioPath = std::filesystem::path(configFilePath).parent_path().string();
@@ -834,7 +834,7 @@ namespace ns3
         {
             if (m_config.HasMember(key.c_str()) && m_config[key.c_str()].IsArray())
             {
-                rapidjson::Value newArray(rapidjson::kArrayType);
+                rapidyyjson::Value newArray(rapidyyjson::kArrayType);
                 auto& allocator = m_config.GetAllocator();
                 bool expanded = false;
 
@@ -849,11 +849,11 @@ namespace ns3
                     }
                     if (hasTrace)
                     {
-                        std::vector<rapidjson::Document> expandedObjects =
+                        std::vector<rapidyyjson::Document> expandedObjects =
                             TraceExpander::ExpandTrace(obj, scenarioPath);
                         for (auto& expandedObj : expandedObjects)
                         {
-                            rapidjson::Value objVal(rapidjson::kObjectType);
+                            rapidyyjson::Value objVal(rapidyyjson::kObjectType);
                             objVal.CopyFrom(expandedObj, allocator);
                             newArray.PushBack(objVal, allocator);
                         }
@@ -861,7 +861,7 @@ namespace ns3
                     }
                     else if (hasConstellation)
                     {
-                        std::vector<rapidjson::Value> expandedObjects =
+                        std::vector<rapidyyjson::Value> expandedObjects =
                             ConstellationExpander::ExpandConstellation(obj, scenarioPath, allocator);
                         for (auto& expandedObj : expandedObjects)
                         {
@@ -872,7 +872,7 @@ namespace ns3
                     }
                     else
                     {
-                        rapidjson::Value objVal(rapidjson::kObjectType);
+                        rapidyyjson::Value objVal(rapidyyjson::kObjectType);
                         objVal.CopyFrom(obj, allocator);
                         newArray.PushBack(objVal, allocator);
                     }
@@ -888,8 +888,8 @@ namespace ns3
         // Handle expansion export
         if (doExpand)
         {
-            rapidjson::StringBuffer buffer;
-            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+            rapidyyjson::StringBuffer buffer;
+            rapidyyjson::PrettyWriter<rapidyyjson::StringBuffer> writer(buffer);
             m_config.Accept(writer);
 
             if (!expandOutputPath.empty())
@@ -1451,13 +1451,13 @@ namespace ns3
 
     bool ScenarioConfigurationHelper::CheckPath(const std::string& path) const
     {
-        return rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        return rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
     }
 
     const std::pair<bool, int32_t> ScenarioConfigurationHelper::GetInt(const std::string& path)
         const
     {
-        const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        const rapidyyjson::Value* value = rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
         if (!value)
         {
             return std::make_pair<bool, int32_t>(false, 0);
@@ -1471,7 +1471,7 @@ namespace ns3
     const std::pair<bool, uint32_t> ScenarioConfigurationHelper::GetUint(const std::string& path)
         const
     {
-        const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        const rapidyyjson::Value* value = rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
         if (!value)
         {
             return std::make_pair<bool, uint32_t>(false, 0);
@@ -1486,7 +1486,7 @@ namespace ns3
     const std::pair<bool, double> ScenarioConfigurationHelper::GetDouble(const std::string& path)
         const
     {
-        const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        const rapidyyjson::Value* value = rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
         if (!value)
         {
             return std::make_pair<bool, double>(false, 0.0);
@@ -1499,7 +1499,7 @@ namespace ns3
 
     const std::pair<bool, bool> ScenarioConfigurationHelper::GetBool(const std::string& path) const
     {
-        const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        const rapidyyjson::Value* value = rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
         if (!value)
         {
             return std::make_pair<bool, bool>(false, false);
@@ -1513,7 +1513,7 @@ namespace ns3
     const std::pair<bool, std::string> ScenarioConfigurationHelper::GetString(
         const std::string& path) const
     {
-        const rapidjson::Value* value = rapidjson::Pointer(MakePath(path).c_str()).Get(m_config);
+        const rapidyyjson::Value* value = rapidyyjson::Pointer(MakePath(path).c_str()).Get(m_config);
         if (!value)
         {
             return std::make_pair<bool, std::string>(false, "");

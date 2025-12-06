@@ -31,7 +31,7 @@ namespace ns3
 {
 
 Ptr<MacLayerConfiguration>
-MacLayerConfigurationHelper::GetConfiguration(const rapidjson::Value& jsonMacLayer)
+MacLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonMacLayer)
 {
     NS_ASSERT_MSG(jsonMacLayer.IsObject(),
                   "MAC Layer definition must be an object, got " << jsonMacLayer.GetType());

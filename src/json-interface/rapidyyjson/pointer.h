@@ -2,15 +2,15 @@
  * RapidJSON wrapper using yyjson
  */
 
-#ifndef RAPIDJSON_POINTER_H_
-#define RAPIDJSON_POINTER_H_
+#ifndef RAPIDYYJSON_POINTER_H_
+#define RAPIDYYJSON_POINTER_H_
 
-#include "rapidjson.h"
+#include "rapidyyjson.h"
 #include "document.h"
 #include <string>
 #include <vector>
 
-namespace rapidjson {
+namespace rapidyyjson {
 
 class Pointer {
 public:
@@ -81,6 +81,6 @@ private:
     std::string m_path;
 };
 
-} // namespace rapidjson
+} // namespace rapidyyjson
 
-#endif // RAPIDJSON_POINTER_H_
+#endif // RAPIDYYJSON_POINTER_H_

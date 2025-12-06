@@ -33,7 +33,7 @@
 #include <ns3/waypoint.h>
 
 #include <fstream>
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 #include <sstream>
 #include <string>
 
@@ -484,7 +484,7 @@ namespace ns3
         void EnableLogComponents() const;
 
         std::FILE* m_configFilePtr;   /// pointer to the JSON file
-        rapidjson::Document m_config; /// decoded JSON structure
+        rapidyyjson::Document m_config; /// decoded JSON structure
         std::ofstream m_out;          /// output stream for clog
         std::string m_name;           /// name of the simulation
         std::string m_dateTime;       /// cache for the current datetime

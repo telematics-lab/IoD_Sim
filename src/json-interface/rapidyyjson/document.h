@@ -2,10 +2,10 @@
  * RapidJSON wrapper using yyjson
  */
 
-#ifndef RAPIDJSON_DOCUMENT_H_
-#define RAPIDJSON_DOCUMENT_H_
+#ifndef RAPIDYYJSON_DOCUMENT_H_
+#define RAPIDYYJSON_DOCUMENT_H_
 
-#include "rapidjson.h"
+#include "rapidyyjson.h"
 #include <yyjson.h>
 #include <string>
 #include <vector>
@@ -20,7 +20,7 @@
 
 
 
-namespace rapidjson {
+namespace rapidyyjson {
 
 // Forward declarations
 struct GenericMember;
@@ -109,7 +109,7 @@ public:
     typedef GenericMemberIterator ConstMemberIterator;
     typedef GenericArrayIterator ValueIterator;
     typedef GenericArrayIterator ConstValueIterator;
-    typedef rapidjson::Allocator AllocatorType;
+    typedef rapidyyjson::Allocator AllocatorType;
 
     typedef GenericArray<true, Value> ConstArray;
     typedef GenericObject<true, Value> ConstObject;
@@ -1118,6 +1118,6 @@ inline Value& GenericArrayIterator::operator*() {
 inline Value* GenericArrayIterator::operator->() { return &(*m_parent)[(SizeType)m_idx]; }
 inline Value GenericArrayIterator::operator[](difference_type n) const { return (*m_parent)[(SizeType)(m_idx + n)]; }
 
-} // namespace rapidjson
+} // namespace rapidyyjson
 
-#endif // RAPIDJSON_DOCUMENT_H_
+#endif // RAPIDYYJSON_DOCUMENT_H_

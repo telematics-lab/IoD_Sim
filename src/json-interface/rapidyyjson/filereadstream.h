@@ -2,13 +2,13 @@
  * RapidJSON wrapper using yyjson
  */
 
-#ifndef RAPIDJSON_FILEREADSTREAM_H_
-#define RAPIDJSON_FILEREADSTREAM_H_
+#ifndef RAPIDYYJSON_FILEREADSTREAM_H_
+#define RAPIDYYJSON_FILEREADSTREAM_H_
 
 #include <cstdio>
 #include <cstddef>
 
-namespace rapidjson {
+namespace rapidyyjson {
 
 class FileReadStream {
 public:
@@ -18,6 +18,6 @@ private:
     std::FILE* m_fp;
 };
 
-} // namespace rapidjson
+} // namespace rapidyyjson
 
-#endif // RAPIDJSON_FILEREADSTREAM_H_
+#endif // RAPIDYYJSON_FILEREADSTREAM_H_

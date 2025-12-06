@@ -18,7 +18,7 @@
 #ifndef JSON_IMPORTER_H
 #define JSON_IMPORTER_H
 
-#include <rapidjson/document.h>
+#include <rapidyyjson/document.h>
 #include <string>
 #include <vector>
 
@@ -35,7 +35,7 @@ namespace ns3
          * \param doc The JSON document to process (modified in place).
          * \param basePath The base path for resolving relative file paths.
          */
-        static void Process(rapidjson::Document& doc, const std::string& basePath);
+        static void Process(rapidyyjson::Document& doc, const std::string& basePath);
 
       private:
         /**
@@ -44,16 +44,16 @@ namespace ns3
          * \param allocator The allocator for creating new values.
          * \param basePath The base path for resolving relative file paths.
          */
-        static void ProcessValue(rapidjson::Value& val,
-                                 rapidjson::Document::AllocatorType& allocator,
+        static void ProcessValue(rapidyyjson::Value& val,
+                                 rapidyyjson::Document::AllocatorType& allocator,
                                  const std::string& basePath);
 
         /**
          * \brief Load a JSON file.
          * \param filePath The path to the JSON file.
-         * \return A rapidjson::Document containing the file content.
+         * \return A rapidyyjson::Document containing the file content.
          */
-        static rapidjson::Document LoadJson(const std::string& filePath);
+        static rapidyyjson::Document LoadJson(const std::string& filePath);
     };
 
 } // namespace ns3
