@@ -1530,6 +1530,7 @@ namespace ns3
 
         if (!m_config.HasMember("world"))
         {
+            NS_LOG_WARN("Config has no 'world' member");
             return final_regions;
         }
 
@@ -1537,6 +1538,7 @@ namespace ns3
         if (world.HasMember("regionsOfInterest"))
         {
             const auto regions = world["regionsOfInterest"].GetArray();
+            NS_LOG_INFO("Found regionsOfInterest array of size: " << regions.Size());
             for (auto region = regions.Begin(); region != regions.End(); region++)
             {
                 const auto xMin = (*region)[0].GetDouble();
@@ -1545,8 +1547,11 @@ namespace ns3
                 const auto yMax = (*region)[3].GetDouble();
                 const auto zMin = (*region)[4].GetDouble();
                 const auto zMax = (*region)[5].GetDouble();
+                NS_LOG_INFO("Parsed region: " << xMin << ", " << xMax << ", " << yMin << ", " << yMax << ", " << zMin << ", " << zMax);
                 final_regions.push_back(DoubleVector({xMin, xMax, yMin, yMax, zMin, zMax}));
             }
+        } else {
+             NS_LOG_WARN("World has no 'regionsOfInterest' member");
         }
         return final_regions;
     }

@@ -1,4 +1,4 @@
-create_test_sourcelist(Tests
+set(Tests
   integrated_ntn.json
   irs_demo1.json
   irs_demo2.json
@@ -15,13 +15,13 @@ create_test_sourcelist(Tests
   irs_paper_s2.json
   irs_paper_s3-defined_1_all.json
   irs_paper_s3-defined_1_uncov.json
-  irs_paper_s3-defined_4_all_diff.json
   irs_paper_s3-defined_4_all_same.json
+  irs_paper_s3-defined_4_all_diff.json
   irs_paper_s3-defined_4_uncov_diff.json
   irs_paper_s3-defined_4_uncov_same.json
   irs_paper_s3-noIRS.json
-  irs_paper_s3-periodic_1_all.json
   irs_paper_s3-periodic_1_uncov.json
+  irs_paper_s3-periodic_1_all.json
   irs_paper_s3-periodic_4_all_diff.json
   irs_paper_s3-periodic_4_all_same.json
   irs_paper_s3-periodic_4_uncov_diff.json
@@ -48,10 +48,16 @@ create_test_sourcelist(Tests
   simple_relay.json
   simple_wifi-ofdm.json
   simple_wifi-threelog_pathloss.json
-  simple_wifi.json
   test_cadmm.json
+  simple_wifi.json
   test_periphstream-lte.json
   test_periphstream-wifi.json
+  cttc-nr-demo.json
+  leo-car-move-tracing.json
+  leo-constellation-uniform-orbits.json
+  leo-constellation-file.json
+  leo-nr-communication.json
+  taxi-all-example-trace.json
 )
 
 set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.45-scenario-debug)

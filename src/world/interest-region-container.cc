@@ -54,6 +54,10 @@ InterestRegionContainer::GetN(void) const
 Ptr<InterestRegion>
 InterestRegionContainer::GetRoI(uint32_t i)
 {
+    if (i >= m_interestRegions.size())
+    {
+        return nullptr;
+    }
     return m_interestRegions[i];
 }
 

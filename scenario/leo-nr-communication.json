@@ -2,7 +2,7 @@
   "name": "leo-nr-communication",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 3,
+  "duration": 1,
   "appStatisticsReportInterval": 0.3,
   "staticNs3Config": [
     {

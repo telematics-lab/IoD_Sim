@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <map>
 #include <optional>
+#include <limits>
 
 
 
@@ -67,7 +68,7 @@ public:
     ValueIterator end() const;
 
     SizeType Size() const;
-    ValueT operator[](SizeType index) const;
+    const ValueT& operator[](SizeType index) const;
 
 private:
     ValueT& m_value;
@@ -94,7 +95,7 @@ public:
 
     SizeType MemberCount() const;
     bool HasMember(const char* name) const;
-    ValueT operator[](const char* name) const;
+    const ValueT& operator[](const char* name) const;
 
 private:
     ValueT& m_value;
@@ -126,7 +127,7 @@ public:
     Value(int i) : m_type(kNumberType), m_val(nullptr), m_detached((int64_t)i) {}
     Value(unsigned u) : m_type(kNumberType), m_val(nullptr), m_detached((int64_t)u) {}
     Value(int64_t i) : m_type(kNumberType), m_val(nullptr), m_detached(i) {}
-    Value(uint64_t u) : m_type(kNumberType), m_val(nullptr), m_detached((int64_t)u) {}
+    Value(uint64_t u) : m_type(kNumberType), m_val(nullptr), m_detached(u) {}
     Value(double d) : m_type(kNumberType), m_val(nullptr), m_detached(d) {}
     Value(const char* s) : m_type(kStringType), m_val(nullptr), m_detached(std::string(s)) {}
     Value(const std::string& s) : m_type(kStringType), m_val(nullptr), m_detached(s) {}
@@ -162,12 +163,138 @@ public:
     bool IsNumber() const { return m_type == kNumberType; }
     bool IsString() const { return m_type == kStringType; }
 
-    bool IsInt() const { return IsNumber() && (m_val ? yyjson_mut_is_int(m_val) : std::holds_alternative<int64_t>(m_detached)); }
-    bool IsUint() const { return IsNumber() && (m_val ? yyjson_mut_is_uint(m_val) : (std::holds_alternative<int64_t>(m_detached) && std::get<int64_t>(m_detached) >= 0)); }
+    bool IsInt() const {
+        if (!IsNumber()) return false;
+        if (m_val) {
+            if (yyjson_mut_is_int(m_val)) {
+                int64_t v = yyjson_mut_get_sint(m_val);
+                return v >= std::numeric_limits<int32_t>::min() && v <= std::numeric_limits<int32_t>::max();
+            }
+            if (yyjson_mut_is_uint(m_val)) {
+                uint64_t v = yyjson_mut_get_uint(m_val);
+                return v <= static_cast<uint64_t>(std::numeric_limits<int32_t>::max());
+            }
+            if (yyjson_mut_is_real(m_val)) {
+                double d = yyjson_mut_get_real(m_val);
+                return d >= static_cast<double>(std::numeric_limits<int32_t>::min()) &&
+                       d <= static_cast<double>(std::numeric_limits<int32_t>::max()) &&
+                       d == static_cast<int32_t>(d);
+            }
+            return false;
+        }
+        if (std::holds_alternative<int64_t>(m_detached)) {
+             int64_t v = std::get<int64_t>(m_detached);
+             return v >= std::numeric_limits<int32_t>::min() && v <= std::numeric_limits<int32_t>::max();
+        }
+        if (std::holds_alternative<uint64_t>(m_detached)) {
+             uint64_t v = std::get<uint64_t>(m_detached);
+             return v <= static_cast<uint64_t>(std::numeric_limits<int32_t>::max());
+        }
+        if (std::holds_alternative<double>(m_detached)) {
+             double d = std::get<double>(m_detached);
+             return d >= static_cast<double>(std::numeric_limits<int32_t>::min()) &&
+                    d <= static_cast<double>(std::numeric_limits<int32_t>::max()) &&
+                    d == static_cast<int32_t>(d);
+        }
+        return false;
+    }
+
+    bool IsUint() const {
+        if (!IsNumber()) return false;
+        if (m_val) {
+             if (yyjson_mut_is_uint(m_val)) {
+                 uint64_t v = yyjson_mut_get_uint(m_val);
+                 return v <= std::numeric_limits<uint32_t>::max();
+             }
+             if (yyjson_mut_is_int(m_val)) {
+                 int64_t v = yyjson_mut_get_sint(m_val);
+                 return v >= 0 && v <= static_cast<int64_t>(std::numeric_limits<uint32_t>::max());
+             }
+             if (yyjson_mut_is_real(m_val)) {
+                double d = yyjson_mut_get_real(m_val);
+                return d >= 0 &&
+                       d <= static_cast<double>(std::numeric_limits<uint32_t>::max()) &&
+                       d == static_cast<uint32_t>(d);
+             }
+             return false;
+        }
+        if (std::holds_alternative<int64_t>(m_detached)) {
+             int64_t v = std::get<int64_t>(m_detached);
+             return v >= 0 && v <= static_cast<int64_t>(std::numeric_limits<uint32_t>::max());
+        }
+        if (std::holds_alternative<uint64_t>(m_detached)) {
+             uint64_t v = std::get<uint64_t>(m_detached);
+             return v <= static_cast<uint64_t>(std::numeric_limits<uint32_t>::max());
+        }
+        if (std::holds_alternative<double>(m_detached)) {
+            double d = std::get<double>(m_detached);
+            return d >= 0 &&
+                   d <= static_cast<double>(std::numeric_limits<uint32_t>::max()) &&
+                   d == static_cast<uint32_t>(d);
+        }
+        return false;
+    }
+
     bool IsDouble() const { return IsNumber(); }
 
-    bool IsInt64() const { return IsInt(); }
-    bool IsUint64() const { return IsUint(); }
+    bool IsInt64() const {
+        if (!IsNumber()) return false;
+        if (m_val) {
+            if (yyjson_mut_is_int(m_val)) return true;
+            if (yyjson_mut_is_uint(m_val)) {
+                 uint64_t v = yyjson_mut_get_uint(m_val);
+                 return v <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max());
+            }
+            if (yyjson_mut_is_real(m_val)) {
+                double d = yyjson_mut_get_real(m_val);
+                return d >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
+                       d <= static_cast<double>(std::numeric_limits<int64_t>::max()) &&
+                       d == static_cast<int64_t>(d);
+            }
+            return false;
+        }
+        if (std::holds_alternative<int64_t>(m_detached)) return true;
+        if (std::holds_alternative<uint64_t>(m_detached)) {
+            uint64_t v = std::get<uint64_t>(m_detached);
+            return v <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max());
+        }
+        if (std::holds_alternative<double>(m_detached)) {
+             double d = std::get<double>(m_detached);
+             return d >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
+                    d <= static_cast<double>(std::numeric_limits<int64_t>::max()) &&
+                    d == static_cast<int64_t>(d);
+        }
+        return false;
+    }
+
+    bool IsUint64() const {
+        if (!IsNumber()) return false;
+        if (m_val) {
+            if (yyjson_mut_is_uint(m_val)) return true;
+            if (yyjson_mut_is_int(m_val)) {
+                return yyjson_mut_get_sint(m_val) >= 0;
+            }
+            if (yyjson_mut_is_real(m_val)) {
+                double d = yyjson_mut_get_real(m_val);
+                return d >= 0 &&
+                       d <= static_cast<double>(std::numeric_limits<uint64_t>::max()) &&
+                       d == static_cast<uint64_t>(d);
+            }
+            return false;
+        }
+         if (std::holds_alternative<int64_t>(m_detached)) {
+             return std::get<int64_t>(m_detached) >= 0;
+         }
+         if (std::holds_alternative<uint64_t>(m_detached)) return true;
+        if (std::holds_alternative<double>(m_detached)) {
+            double d = std::get<double>(m_detached);
+            return d >= 0 &&
+                   d <= static_cast<double>(std::numeric_limits<uint64_t>::max()) &&
+                   d == static_cast<uint64_t>(d);
+        }
+         return false;
+    }
+
     bool IsFloat() const { return IsDouble(); }
 
     bool GetBool() const {
@@ -176,30 +303,63 @@ public:
         return false;
     }
     int GetInt() const {
-        if (m_val) return yyjson_mut_get_int(m_val);
+        if (m_val) {
+            if (yyjson_mut_is_int(m_val)) return (int)yyjson_mut_get_sint(m_val);
+            if (yyjson_mut_is_uint(m_val)) return (int)yyjson_mut_get_uint(m_val);
+            if (yyjson_mut_is_real(m_val)) return (int)yyjson_mut_get_real(m_val);
+            return 0;
+        }
         if (std::holds_alternative<int64_t>(m_detached)) return (int)std::get<int64_t>(m_detached);
+        if (std::holds_alternative<uint64_t>(m_detached)) return (int)std::get<uint64_t>(m_detached);
         if (std::holds_alternative<double>(m_detached)) return (int)std::get<double>(m_detached);
         return 0;
     }
     unsigned GetUint() const {
-        if (m_val) return yyjson_mut_get_uint(m_val);
+        if (m_val) {
+            if (yyjson_mut_is_uint(m_val)) return (unsigned)yyjson_mut_get_uint(m_val);
+            if (yyjson_mut_is_int(m_val)) return (unsigned)yyjson_mut_get_sint(m_val);
+            if (yyjson_mut_is_real(m_val)) return (unsigned)yyjson_mut_get_real(m_val);
+            return 0;
+        }
         if (std::holds_alternative<int64_t>(m_detached)) return (unsigned)std::get<int64_t>(m_detached);
+        if (std::holds_alternative<uint64_t>(m_detached)) return (unsigned)std::get<uint64_t>(m_detached);
+        if (std::holds_alternative<double>(m_detached)) return (unsigned)std::get<double>(m_detached);
         return 0;
     }
     int64_t GetInt64() const {
-       if (m_val) return yyjson_mut_get_sint(m_val);
+       if (m_val) {
+            if (yyjson_mut_is_int(m_val)) return yyjson_mut_get_sint(m_val);
+            if (yyjson_mut_is_uint(m_val)) return (int64_t)yyjson_mut_get_uint(m_val);
+            if (yyjson_mut_is_real(m_val)) return (int64_t)yyjson_mut_get_real(m_val);
+            return 0;
+       }
        if (std::holds_alternative<int64_t>(m_detached)) return std::get<int64_t>(m_detached);
+       if (std::holds_alternative<uint64_t>(m_detached)) return (int64_t)std::get<uint64_t>(m_detached);
+       if (std::holds_alternative<double>(m_detached)) return (int64_t)std::get<double>(m_detached);
        return 0;
     }
     uint64_t GetUint64() const {
-        if (m_val) return yyjson_mut_get_uint(m_val);
+        if (m_val) {
+            if (yyjson_mut_is_uint(m_val)) return yyjson_mut_get_uint(m_val);
+            if (yyjson_mut_is_int(m_val)) return (uint64_t)yyjson_mut_get_sint(m_val);
+            if (yyjson_mut_is_real(m_val)) return (uint64_t)yyjson_mut_get_real(m_val);
+            return 0;
+        }
         if (std::holds_alternative<int64_t>(m_detached)) return (uint64_t)std::get<int64_t>(m_detached);
+        if (std::holds_alternative<uint64_t>(m_detached)) return std::get<uint64_t>(m_detached);
+        if (std::holds_alternative<double>(m_detached)) return (uint64_t)std::get<double>(m_detached);
         return 0;
     }
     double GetDouble() const {
-        if (m_val) return yyjson_mut_get_real(m_val);
+        if (m_val) {
+            if (yyjson_mut_is_real(m_val)) return yyjson_mut_get_real(m_val);
+            if (yyjson_mut_is_int(m_val)) return (double)yyjson_mut_get_sint(m_val);
+            if (yyjson_mut_is_uint(m_val)) return (double)yyjson_mut_get_uint(m_val);
+            return 0.0;
+        }
         if (std::holds_alternative<double>(m_detached)) return std::get<double>(m_detached);
         if (std::holds_alternative<int64_t>(m_detached)) return (double)std::get<int64_t>(m_detached);
+        if (std::holds_alternative<uint64_t>(m_detached)) return (double)std::get<uint64_t>(m_detached);
         return 0.0;
     }
     float GetFloat() const { return (float)GetDouble(); }
@@ -292,7 +452,7 @@ public:
 
     using ObjectData = std::vector<std::pair<std::string, Value>>;
     using ArrayData = std::vector<Value>;
-    using DetachedData = std::variant<std::monostate, bool, int64_t, double, std::string, ObjectData, ArrayData>;
+    using DetachedData = std::variant<std::monostate, bool, int64_t, uint64_t, double, std::string, ObjectData, ArrayData>;
 
 protected:
     void UpdateTypeFromVal();
@@ -429,7 +589,7 @@ inline typename GenericArray<Const, ValueT>::ValueIterator GenericArray<Const, V
 template <bool Const, typename ValueT>
 inline SizeType GenericArray<Const, ValueT>::Size() const { return m_value.Size(); }
 template <bool Const, typename ValueT>
-inline ValueT GenericArray<Const, ValueT>::operator[](SizeType index) const { return m_value[index]; }
+inline const ValueT& GenericArray<Const, ValueT>::operator[](SizeType index) const { return m_value[index]; }
 
 template <bool Const, typename ValueT>
 inline typename GenericObject<Const, ValueT>::MemberIterator GenericObject<Const, ValueT>::MemberBegin() const { return m_value.MemberBegin(); }
@@ -444,7 +604,7 @@ inline SizeType GenericObject<Const, ValueT>::MemberCount() const { return m_val
 template <bool Const, typename ValueT>
 inline bool GenericObject<Const, ValueT>::HasMember(const char* name) const { return m_value.HasMember(name); }
 template <bool Const, typename ValueT>
-inline ValueT GenericObject<Const, ValueT>::operator[](const char* name) const { return m_value[name]; }
+inline const ValueT& GenericObject<Const, ValueT>::operator[](const char* name) const { return m_value[name]; }
 
 
 inline Value::Value(const Value& rhs, Allocator& allocator) : m_type(rhs.m_type), m_val(nullptr) {
@@ -547,7 +707,17 @@ inline void Value::RemoveMember(const char* name) {
 inline const Value& Value::operator[](const char* name) const {
     if (!m_children) m_children = std::make_shared<ChildrenCache>();
     auto it = m_children->stringMap.find(name);
-    if (it != m_children->stringMap.end()) return *it->second;
+    if (it != m_children->stringMap.end()) {
+        if (!it->second->m_val && m_val) {
+             // Check if it appeared
+             yyjson_mut_val* child = yyjson_mut_obj_get(m_val, name);
+             if (child) {
+                 // Update cache
+                 *it->second = Value(child);
+             }
+        }
+        return *it->second;
+    }
 
     Value v;
     if (m_val) v = Value(yyjson_mut_obj_get(m_val, name));
@@ -563,6 +733,14 @@ inline Value& Value::operator[](const char* name) {
      if (!m_children) m_children = std::make_shared<ChildrenCache>();
      auto it = m_children->stringMap.find(name);
      if (it != m_children->stringMap.end()) {
+         if (!it->second->m_val && m_val) {
+              // Check if it appeared
+              yyjson_mut_val* child = yyjson_mut_obj_get(m_val, name);
+              if (child) {
+                  // Update cache
+                  *it->second = Value(child);
+              }
+         }
          return *it->second;
      }
 
@@ -646,6 +824,7 @@ inline void Value::PushBack(Value& value, Allocator& allocator) {
 inline yyjson_mut_val* Value::ToYYVal(yyjson_mut_doc* doc) {
     if (m_val) return m_val;
     if (std::holds_alternative<int64_t>(m_detached)) return yyjson_mut_sint(doc, std::get<int64_t>(m_detached));
+    if (std::holds_alternative<uint64_t>(m_detached)) return yyjson_mut_uint(doc, std::get<uint64_t>(m_detached));
     if (std::holds_alternative<double>(m_detached)) return yyjson_mut_real(doc, std::get<double>(m_detached));
     if (std::holds_alternative<std::string>(m_detached)) return yyjson_mut_str(doc, std::get<std::string>(m_detached).c_str());
     if (std::holds_alternative<bool>(m_detached)) return yyjson_mut_bool(doc, std::get<bool>(m_detached));
@@ -661,7 +840,7 @@ inline yyjson_mut_val* Value::ToYYVal(yyjson_mut_doc* doc) {
     }
     return yyjson_mut_null(doc);
 }
-inline void Value::UpdateTypeFromVal() {
+    inline void Value::UpdateTypeFromVal() {
     if (!m_val) { m_type = kNullType; return; }
     if (yyjson_mut_is_null(m_val)) m_type = kNullType;
     else if (yyjson_mut_is_bool(m_val)) m_type = yyjson_mut_get_bool(m_val) ? kTrueType : kFalseType;
@@ -909,11 +1088,11 @@ public:
         FILE* fp = is.GetFP();
         if (fp) {
              yyjson_doc* temp = yyjson_read_fp(fp, flags, nullptr, nullptr);
-             if (temp) {
-                 m_doc = yyjson_doc_mut_copy(temp, nullptr);
-                 yyjson_doc_free(temp);
-                 Attach(yyjson_mut_doc_get_root(m_doc));
-             } else {
+                     if (temp) {
+                         m_doc = yyjson_doc_mut_copy(temp, nullptr);
+                         yyjson_doc_free(temp);
+                         Attach(yyjson_mut_doc_get_root(m_doc));
+                     } else {
                  m_doc = yyjson_mut_doc_new(nullptr);
                  Attach(nullptr);
                  m_type = kNullType;

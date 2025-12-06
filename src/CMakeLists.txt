@@ -1,6 +1,10 @@
 find_package(ZLIB REQUIRED)
 find_package(LibXml2 REQUIRED)
 
+# For apple users that installs libarchive via homebrew
+if(APPLE)
+    list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/libarchive")
+endif()
 
 find_package(LibArchive REQUIRED)
 
@@ -76,6 +80,7 @@ set(source_files
   entity/zsp-list.cc
   entity/leo-sat-list.cc
   helper/app-statistics-helper.cc
+  helper/debug-helper.h
   helper/three-dimensional-rem-helper.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
@@ -108,6 +113,7 @@ set(source_files
   report/protocol-layer.cc
   report/report-container.cc
   report/report-data-stats.cc
+  report/report-default-iterator.h
   report/report-drone.cc
   report/report-entity.cc
   report/report-helper.cc
