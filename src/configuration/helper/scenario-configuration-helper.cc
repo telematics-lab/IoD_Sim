@@ -792,10 +792,12 @@ namespace ns3
         constexpr const ssize_t configFileBufferSize = 64 * 1024; // KiB
         char configFileBuffer[configFileBufferSize];
         m_radioMap = 0; // no generation as default
+        m_nrRadioMap = 0; // no generation as default
         CommandLine cmd;
         cmd.AddValue("name", "Name of the scenario", m_name);
         cmd.AddValue("config", "Configuration file path", configFilePath);
         cmd.AddValue("radioMap", "Enables the generation of the EnvironmentRadioMap", m_radioMap);
+        cmd.AddValue("nrRadioMap", "Enables the generation of the EnvironmentRadioMap", m_nrRadioMap);
         cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
         cmd.AddValue("output",
                      "Output file path for expanded JSON (optional, default stdout)",
@@ -1395,6 +1397,11 @@ namespace ns3
         return m_radioMap;
     }
 
+    const uint32_t ScenarioConfigurationHelper::NrRadioMap() const
+    {
+        return m_nrRadioMap;
+    }
+
     const std::vector<std::pair<std::string, std::string>>
     ScenarioConfigurationHelper::GetRadioMapParameters() const
     {
@@ -1417,6 +1424,39 @@ namespace ns3
         }
 
         return parameters;
+    }
+
+    const std::vector<ScenarioConfigurationHelper::NrRadioMapConfig>
+    ScenarioConfigurationHelper::GetNrRadioMaps() const
+    {
+        std::vector<NrRadioMapConfig> maps;
+        NS_ASSERT_MSG(m_config.HasMember("nrRadioMaps"),
+                      "'nrRadioMaps' key is not present in the configuration file.");
+
+        NS_ASSERT_MSG(m_config["nrRadioMaps"].IsArray(),
+                      "Check 'nrRadioMaps': should be an array of objects.");
+
+        for (auto& obj : m_config["nrRadioMaps"].GetArray())
+        {
+            NrRadioMapConfig mapConfig;
+            NS_ASSERT_MSG(obj.HasMember("phyLayerId"),
+                          "Each radio map config must have 'phyLayerId'");
+            mapConfig.phyLayerIndex = obj["phyLayerId"].GetUint();
+
+            NS_ASSERT_MSG(obj.HasMember("bwpId"), "Each radio map config must have 'bwpId'");
+            mapConfig.bwpId = obj["bwpId"].GetUint();
+
+            NS_ASSERT_MSG(obj.HasMember("parameters"), "Each radio map config must have 'parameters'");
+            NS_ASSERT_MSG(obj["parameters"].IsObject(), "'parameters' must be an object");
+
+            for (auto& member : obj["parameters"].GetObject())
+            {
+                mapConfig.parameters.push_back({member.name.GetString(), member.value.GetString()});
+            }
+            maps.push_back(mapConfig);
+        }
+
+        return maps;
     }
 
     const std::string ScenarioConfigurationHelper::MakePath(const std::string& path1,

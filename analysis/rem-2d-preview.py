@@ -12,26 +12,33 @@ import numpy as np
 
 assert len(sys.argv) > 1, "Not enough arguments passed"
 
+isNrFile = "--nrMap" in sys.argv
+
 filepath = sys.argv[1]
 
-x, y, z, values = np.loadtxt(filepath).T
+loaded_data = np.loadtxt(filepath).T
+if isNrFile:
+    x, y, z, snr, values, rx_power, sir = loaded_data
+else:
+    x, y, z, values = loaded_data
 
-# print(x, y, z)
+#print(x, y, z, values)
 
 values = np.reshape(values, (len(set(x)), len(set(y)))).T
 values = np.flipud(values)
 
-# print(values)
+#print(values)
 
 minimum = values.min()
 maximum = values.max()
 
 
 def normalize(x):
+    #print(x)
     return (
         np.zeros(x.shape)
         if (x.mean() == 0 and maximum - minimum == 0)
-        else 100 * (10 * np.log10(x) - minimum) / (maximum - minimum)
+        else 100 * ((x if isNrFile else 10 * np.log10(x)) - minimum) / (maximum - minimum)
     )
 
 

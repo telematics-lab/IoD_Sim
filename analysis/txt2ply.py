@@ -1,6 +1,9 @@
 import sys
 
 assert len(sys.argv) > 1, "Not enough arguments passed"
+
+isNrFile = "--nrMap" in sys.argv
+
 txt_file_path = sys.argv[1]
 name = ".".join(txt_file_path.split(".")[:-1])
 ply_file_path = name + ".ply"
@@ -12,7 +15,7 @@ with open(txt_file_path, "r") as txt_file:
 vertices = []
 faces = []
 for line in txt_contents:
-    vertex = [float(x) for x in line.split("\t")]
+    vertex = [float(x) for x in line.strip().split("\t")]
     vertices.append(vertex)
 
 
@@ -28,5 +31,5 @@ with open(ply_file_path, "w") as ply_file:
     ply_file.write("end_header\n")
     for vertex in vertices:
         ply_file.write(
-            "{} {} {} {}\n".format(vertex[0], vertex[1], vertex[2], vertex[3])
+            "{} {} {} {}\n".format(vertex[0], vertex[1], vertex[2], vertex[3] if not isNrFile else vertex[4])
         )

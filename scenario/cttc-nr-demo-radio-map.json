@@ -1,0 +1,423 @@
+{
+  "name": "cttc_nr_demo",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1,
+  "nrRadioMaps": [
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "parameters": {
+        "XMin": "0",
+        "XMax": "1000",
+        "YMin": "0",
+        "YMax": "1000",
+        "Z": "1.5",
+        "XRes": "50",
+        "YRes": "50"
+      }
+    }
+  ],
+  "staticNs3Config": [
+    {
+      // Set it when UEs are too many to handle with default SrsPeriodicity value
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 999999999
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "1000",
+      "Y": "1000",
+      "Z": "100"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "nr",
+      "handover": {
+        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+        "attributes": []
+      },
+      "channelAccessManager": {
+        "ue": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        },
+        "gnb": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        }
+      },
+      "attachMethod": "closest",
+      "bands": [
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "frequencyBands": [
+            {
+              "centralFrequency": 28e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
+            }
+          ]
+        },
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "frequencyBands": [
+            {
+              "centralFrequency": 28.2e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
+            }
+          ]
+        }
+      ],
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 2
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 1
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 1
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 24.0
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 35.0
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    // This is not working due to UE & gNB ips are hardcoded in epc
+    {
+      "type": "ipv4",
+      "address": "1.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "1.0.0.1"
+    }
+  ],
+  "nodes": [
+    {
+      //LowLat UE
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              20.0,
+              10.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        }
+      ]
+    },
+    {
+      //Voice UE
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "GBR_CONV_VOICE"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              10.0,
+              20.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 4
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 31.989700043360187 // 10 * log10((bandwidthBand1 / totalBandwidth) * x) with x = pow(10, totalTxPower / 10) === 10 * log10((50e6 / 1e8) * 3162.2776601683795) with x = pow(10, 35 / 10) = 3162.2776601683795
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 2
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 31.989700043360187 // 10 * log10((bandwidthBand2 / totalBandwidth) * x) with x = pow(10, totalTxPower / 10) === 10 * log10((50e6 / 1e8) * 3162.2776601683795) with x = pow(10, 35 / 10) = 3162.2776601683795
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              10.0,
+              20.0,
+              10.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295 //0xffffffff
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.0001
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.3",
+                1235
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295 //0xffffffff
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.0001
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "logComponents": [
+    "UdpClient",
+    "UdpServer",
+    "NrPdcp",
+    "Scenario"
+  ]
+}

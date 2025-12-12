@@ -77,6 +77,7 @@
 #include <ns3/simple-net-device.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
+#include <ns3/nr-radio-environment-map-helper.h>
 #include <ns3/three-dimensional-rem-helper.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/three-gpp-phy-simulation-helper.h>
@@ -96,6 +97,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <ns3/net-device-container.h>
 #include <sys/resource.h>
 #include <vector>
 
@@ -119,6 +121,7 @@ class Scenario
 
   private:
     void GenerateRadioMap();
+    std::vector<std::string> GenerateNrRadioMap();
     void GenerateThreeDimensionalRem();
     void ApplyStaticConfig();
     void ConfigureWorld();
@@ -354,20 +357,40 @@ Scenario::operator()()
             this->GenerateRadioMap();
             Simulator::Run();
             Simulator::Destroy();
-            int plyRet = system(("python ../analysis/txt2ply.py " + CONFIGURATOR->GetResultsPath() +
+            int plyRet = system(("python " + CONFIGURATOR->GetResultsPath() + "../../analysis/txt2ply.py " + CONFIGURATOR->GetResultsPath() +
                                  CONFIGURATOR->GetName() + "-2D-REM.txt")
                                     .c_str());
             if (plyRet != 0)
             {
-                NS_ABORT_MSG("Something went wrong while generating the ply file");
+                NS_LOG_ERROR("Something went wrong while generating the ply file");
             }
             int plotRet =
-                system(("python ../analysis/rem-2d-preview.py " + CONFIGURATOR->GetResultsPath() +
+                system(("python " + CONFIGURATOR->GetResultsPath() + "../../analysis/rem-2d-preview.py " + CONFIGURATOR->GetResultsPath() +
                         CONFIGURATOR->GetName() + "-2D-REM.txt")
                            .c_str());
             if (plotRet != 0)
             {
-                NS_ABORT_MSG("Something went wrong while generating the plot");
+                NS_LOG_ERROR("Something went wrong while generating the plot");
+            }
+        }
+    }
+    else if (CONFIGURATOR->NrRadioMap() == 1)
+    {
+        std::vector<std::string> files = this->GenerateNrRadioMap();
+        Simulator::Run();
+        Simulator::Destroy();
+
+        for (std::string filepath : files){
+
+            int plyRet = system(("python "+ CONFIGURATOR->GetResultsPath() + "../../analysis/txt2ply.py " + filepath + ".out --nrMap").c_str());
+            if (plyRet == -1)
+            {
+                NS_LOG_ERROR("Something went wrong while generating the ply file");
+            }
+            int plotRet = system(("python "+ CONFIGURATOR->GetResultsPath() + "../../analysis/rem-2d-preview.py " + filepath + ".out --nrMap").c_str());
+            if (plotRet != 0)
+            {
+                NS_LOG_ERROR("Something went wrong while generating the plot");
             }
         }
     }
@@ -417,6 +440,66 @@ Scenario::GenerateRadioMap()
     }
 
     m_remHelper->Install();
+}
+
+std::vector<std::string>
+Scenario::GenerateNrRadioMap()
+{
+    auto maps = CONFIGURATOR->GetNrRadioMaps();
+    size_t i = 0;
+    std::vector<std::string> files(maps.size());
+    for (const auto& config : maps)
+    {
+        // One helper per map to avoid state pollution/issues
+        static Ptr<NrRadioEnvironmentMapHelper> m_remHelper = CreateObject<NrRadioEnvironmentMapHelper>();
+
+        // Set SimTag for unique filenames
+        std::stringstream ss;
+        ss << "Phy" << config.phyLayerIndex << "-Bwp" << config.bwpId << "-" << i+1;
+        m_remHelper->SetSimTag(ss.str());
+
+        for (auto par : config.parameters)
+        {
+            m_remHelper->SetAttribute(par.first, StringValue(par.second));
+        }
+
+        NetDeviceContainer txDevs;
+        for (auto const& [netId, containers] : m_nrGnbDevices)
+        {
+            if (netId != config.phyLayerIndex)
+            {
+                continue;
+            }
+            for (auto const& container : containers)
+            {
+                txDevs.Add(container);
+            }
+        }
+
+        Ptr<NetDevice> rxDev;
+        for (auto const& [netId, devices] : m_nrUeDevices)
+        {
+            if (netId != config.phyLayerIndex)
+            {
+                continue;
+            }
+            if (!devices.empty())
+            {
+                rxDev = devices.front();
+                break;
+            }
+        }
+
+        if (!rxDev)
+        {
+            NS_FATAL_ERROR("Cannot generate REM: No UEs found to serve as reference receiver.");
+        }
+
+        m_remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+        files[i] = (CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str());
+        i++;
+    }
+    return files;
 }
 
 void

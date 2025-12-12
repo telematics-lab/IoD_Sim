@@ -289,6 +289,24 @@ namespace ns3
         const uint32_t RadioMap() const;
 
         /**
+         * \return NR Radio Environment Map generation code, 0 for no generation, 1 for generation, 2
+         * for generation with map plot.
+         */
+        const uint32_t NrRadioMap() const;
+
+        struct NrRadioMapConfig
+        {
+            uint32_t phyLayerIndex;
+            uint32_t bwpId;
+            std::vector<std::pair<std::string, std::string>> parameters;
+        };
+
+        /**
+         * \return a list of configurations for the NR Radio Environment Map generator
+         */
+        const std::vector<NrRadioMapConfig> GetNrRadioMaps() const;
+
+        /**
          * \return a list of parameters for the Radio Environment Map generator
          */
         const std::vector<std::pair<std::string, std::string>> GetRadioMapParameters() const;
@@ -491,6 +509,7 @@ namespace ns3
         std::vector<std::pair<std::string, Ptr<AttributeValue>>>
             m_staticConfig;        /// cache for ns-3 static config params
         uint32_t m_radioMap;       /// a code for radio map generation options
+        uint32_t m_nrRadioMap;     /// a code for NR radio map generation options
         std::string m_currentPath; /// cache for the current path at initialization
     };
 

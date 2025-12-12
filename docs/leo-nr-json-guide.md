@@ -12,6 +12,7 @@ This document describes all configurable options in simulations using the leo an
 4. [Vehicles on Earth](#vehicles-on-earth)
 5. [LEO Satellites](#leo-satellites)
 6. [Configuration Examples](#configuration-examples)
+7. [NR Radio Environment Map](#nr-radio-environment-map)
 
 ---
 
@@ -1080,4 +1081,44 @@ Furthermore, also in this case we see specifically the geocentric mobility model
     }
   ]
 }
+```
+
+---
+
+## NR Radio Environment Map
+
+It is possible to generate Radio Environment Maps (REM) for the NR scenarios to visualize the SINR coverage. To enable the generation you need to specify the `--nrRadioMap` flag in the command line of the scenario executable.
+
+### `nrRadioMaps`
+**Type**: `array[object]`
+**Description**: List of Radio Map configurations. It allows generating multiple maps for different PHY layers or BWPs.
+
+Each object in the list contains:
+- `phyLayerId` (integer): ID of the PHY layer (usually 0).
+- `bwpId` (integer): ID of the Bandwidth Part to analyze.
+- `parameters` (object): Key-value pairs matching the `NrRadioEnvironmentMapHelper` attributes.
+
+**Common Parameters:**
+- `XMin`, `XMax`, `YMin`, `YMax`: Coordinates of the map boundaries (in meters).
+- `Z`: Altitude of the map plane (in meters).
+- `XRes`, `YRes`: Resolution (number of points) along X and Y axes.
+
+**Example:**
+```json
+"nrRadioMap": 2,
+"nrRadioMaps": [
+  {
+    "phyLayerId": 0,
+    "bwpId": 0,
+    "parameters": {
+      "XMin": "0",
+      "XMax": "1000",
+      "YMin": "0",
+      "YMax": "1000",
+      "Z": "1.5",
+      "XRes": "50",
+      "YRes": "50"
+    }
+  }
+]
 ```
