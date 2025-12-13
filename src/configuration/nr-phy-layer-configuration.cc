@@ -411,4 +411,16 @@ NrPhyLayerConfiguration::GetGnbChannelAccessManagerAttributes() const
     return m_gnbChannelAccessManagerAttributes;
 }
 
+void
+NrPhyLayerConfiguration::SetSinrDistanceAttachConfig(const SinrDistanceAttachConfig& config)
+{
+    m_sinrDistanceAttachConfig = config;
+}
+
+std::optional<SinrDistanceAttachConfig>
+NrPhyLayerConfiguration::GetSinrDistanceAttachConfig() const
+{
+    return m_sinrDistanceAttachConfig;
+}
+
 } // namespace ns3

@@ -109,6 +109,21 @@ struct NrAntennaConfiguration
 };
 
 /**
+ * Data structure for SINR-Distance Attachment configuration
+ */
+struct SinrDistanceTableEntry
+{
+    double maxDistance;
+    double minSinr;
+};
+
+struct SinrDistanceAttachConfig
+{
+    Time precision;
+    std::vector<SinrDistanceTableEntry> table;
+};
+
+/**
  * Data class to store information about the NR PHY Layer of a Scenario.
  * This class only stores configuration data and does not create or manage NR helpers.
  */
@@ -407,6 +422,18 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      */
     std::string GetAttachMethod() const;
 
+    /**
+     * Set the SINR-Distance attachment configuration
+     * \param config The configuration
+     */
+    void SetSinrDistanceAttachConfig(const SinrDistanceAttachConfig& config);
+
+    /**
+     * Get the SINR-Distance attachment configuration
+     * \return The configuration
+     */
+    std::optional<SinrDistanceAttachConfig> GetSinrDistanceAttachConfig() const;
+
   private:
     std::string m_attachMethod = "closest";
     TypeId m_epcHelperType = TypeId::LookupByName("ns3::NrPointToPointEpcHelper");
@@ -436,6 +463,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::vector<ModelConfiguration::Attribute> m_ueChannelAccessManagerAttributes;
     TypeId m_gnbChannelAccessManagerType;
     std::vector<ModelConfiguration::Attribute> m_gnbChannelAccessManagerAttributes;
+    std::optional<SinrDistanceAttachConfig> m_sinrDistanceAttachConfig;
 };
 
 } // namespace ns3

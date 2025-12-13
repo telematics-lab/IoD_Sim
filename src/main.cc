@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "ns3/ideal-beamforming-algorithm.h"
+#include <set>
 #include <ns3/app-statistics-helper.h>
 #include <ns3/buildings-helper.h>
 #include <ns3/config.h>
@@ -190,6 +191,7 @@ class Scenario
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs(const uint32_t netId);
+    void EvaluateSinrDistanceAttachment(const uint32_t netId);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -212,6 +214,9 @@ class Scenario
 
     // Persistent containers for NR attachment workaround
     std::list<std::shared_ptr<NetDeviceContainer>> m_persistentContainers;
+
+    // Track active SINR attachment loops to avoid duplicates
+    std::set<uint32_t> m_sinrAttachmentRunning;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -1984,6 +1989,19 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     // Assuming netId maps directly to the index in the PHY layer configuration vector
     // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
     auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+
+    // Check if SINR-Distance Attachment is configured
+    if (nrConf->GetSinrDistanceAttachConfig())
+    {
+        if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
+        {
+            NS_LOG_INFO("Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
+            Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+            m_sinrAttachmentRunning.insert(netId);
+        }
+        return;
+    }
+
     std::string attachMethod = nrConf->GetAttachMethod();
 
     NS_LOG_INFO("Attaching " << ueDevices.GetN()
@@ -2020,7 +2038,202 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
         NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
     }
 
+    // Check if SINR-Distance Attachment is configured and schedule it
+    if (nrConf->GetSinrDistanceAttachConfig())
+    {
+        Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+    }
+
 }
+
+void
+Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
+{
+    std::cout << "Evaluating SINR-Distance Attachment for netId " << netId << std::endl;
+    // Retrieve configuration
+    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+    if (netId >= phyLayerConfs.size()) return;
+
+    auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
+    if (!nrConf) return;
+
+    auto sdaConfigOpt = nrConf->GetSinrDistanceAttachConfig();
+
+    if (!sdaConfigOpt)
+    {
+        return;
+    }
+
+    const auto& sdaConfig = *sdaConfigOpt;
+
+    // Retrieve Devices
+    auto gnbIt = m_nrGnbDevices.find(netId);
+    auto ueIt = m_nrUeDevices.find(netId);
+
+    if (gnbIt == m_nrGnbDevices.end() || ueIt == m_nrUeDevices.end() ||
+        gnbIt->second.empty() || ueIt->second.empty())
+    {
+        // Reschedule if devices are not yet ready or empty
+         Simulator::Schedule(sdaConfig.precision,
+                            &Scenario::EvaluateSinrDistanceAttachment,
+                            this,
+                            netId);
+        return;
+    }
+
+    // Flatten gNB list for easier access
+     NetDeviceContainer allGnbDevices;
+    for (const auto& gnbContainer : gnbIt->second)
+    {
+        allGnbDevices.Add(gnbContainer);
+    }
+
+    auto nrPhySim = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrHelper = nrPhySim->GetNrHelper();
+
+    // Iterate over all UEs
+    for (auto ueDevicePtr : ueIt->second)
+    {
+        auto ueDevice = DynamicCast<NrUeNetDevice>(ueDevicePtr);
+        if (!ueDevice) continue;
+
+        Ptr<Node> ueNode = ueDevice->GetNode();
+        if (!ueNode) continue;
+
+        Ptr<MobilityModel> ueMobility = ueNode->GetObject<MobilityModel>();
+        if (!ueMobility) continue;
+
+        // Find best gNB
+        Ptr<NrGnbNetDevice> bestGnb = nullptr;
+        double bestSnr = -std::numeric_limits<double>::infinity();
+        double bestDistance = std::numeric_limits<double>::infinity();
+
+        // Check all gNBs
+        for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End(); ++gnbDeviceIt)
+        {
+             Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
+             if (!gnbDevice) continue;
+
+             Ptr<Node> gnbNode = gnbDevice->GetNode();
+             if (!gnbNode) continue;
+
+             Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
+             if (!gnbMobility) continue;
+
+             double distance = ueMobility->GetDistanceFrom(gnbMobility);
+
+             // Find required min SINR for this distance
+             double minSinrRequired = std::numeric_limits<double>::max();
+
+             const SinrDistanceTableEntry* bestEntry = nullptr;
+             double rangeDiff = std::numeric_limits<double>::max();
+
+             // Finding the best entry based on maxDistance (the minimum distance that is still within range)
+             for (const auto& entry : sdaConfig.table)
+             {
+                 if (distance <= entry.maxDistance)
+                 {
+                     if (entry.maxDistance < rangeDiff)
+                     {
+                         rangeDiff = entry.maxDistance;
+                         bestEntry = &entry;
+                     }
+                 }
+             }
+
+             // UE is too far for any rule
+             if (!bestEntry)
+             {
+                 continue;
+             }
+
+             minSinrRequired = bestEntry->minSinr;
+
+             // ---- CUSTOM SNR CALC ----
+
+             // Calculate SNR using LENA's ThreeGppPropgationLossModel if possible
+             auto gnbPhy = gnbDevice->GetPhy(0);
+             if (!gnbPhy) continue;
+
+             auto spectrumChannel = gnbPhy->GetSpectrumPhy()->GetSpectrumChannel();
+             auto propLossModel = spectrumChannel->GetPropagationLossModel();
+
+             if (!propLossModel) continue;
+
+             double txPowerDbm = gnbPhy->GetTxPower();
+             double rxPowerDbm = propLossModel->CalcRxPower(txPowerDbm, gnbMobility, ueMobility);
+
+             // Noise
+             auto uePhy = ueDevice->GetPhy(0);
+             if (!uePhy) continue;
+
+             double noiseFigure = uePhy->GetNoiseFigure(); // dB
+             double bandwidth = uePhy->GetChannelBandwidth(); // Hz
+
+             // Noise Power calculation (k * T * B * F)
+             // k = 1.380649e-23 J/K
+             // T = 290 K (std)
+             double k = 1.380649e-23;
+             double T = 290.0;
+             double noisePowerW = k * T * bandwidth * std::pow(10.0, noiseFigure/10.0);
+             double noisePowerDbm = 10.0 * std::log10(noisePowerW) + 30.0;
+
+             double estimatedSnr = rxPowerDbm - noisePowerDbm;
+
+             // ---- END OF CUSTOM SNR CALC ----
+
+             //Checking if SNR is above the required threshold
+             if (estimatedSnr >= minSinrRequired)
+             {
+                 if (estimatedSnr > bestSnr)
+                 {
+                    bestDistance = distance/1e3;
+                    bestSnr = estimatedSnr;
+                    bestGnb = gnbDevice;
+                 }
+             }
+        }
+
+        // Check if already attached
+        auto currentGnb = ueDevice->GetTargetGnb();
+
+        if (bestGnb)
+        {
+            // DEBUG: TODO REMOVE
+             std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB " << bestGnb->GetCellId() << " (SNR: " << bestSnr << " dB, distance: " << bestDistance << " km)" << " at " << Simulator::Now().GetSeconds() << std::endl;
+
+             // Check if we need to handover (if configured gNB is different)
+             if (currentGnb != nullptr)
+             {
+                 if (currentGnb == bestGnb)
+                 {
+                     // Already attached to this gNB. Do nothing.
+                 }
+                 else
+                 {
+
+                     // Needs handover. AttachToGnb likely crashes if context exists.
+                     // DEBUG: TODO REMOVE
+                     std::cout << "UE " << ueDevice->GetImsi() << " should switch to gNB " << bestGnb->GetCellId() << " but Handover is not implemented." << std::endl;
+                 }
+             }else{
+                // Not attached, safe to attach.
+                nrHelper->AttachToGnb(ueDevice, bestGnb);
+             }
+        }
+        else
+        {
+            std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to any gNB (No valid SINR/Distance match)" << std::endl;
+        }
+    }
+
+    // Schedule next
+    Simulator::Schedule(sdaConfig.precision,
+                        &Scenario::EvaluateSinrDistanceAttachment,
+                        this,
+                        netId);
+}
+
 } // namespace ns3
 
 int
