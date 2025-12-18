@@ -3,12 +3,7 @@
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 20,
-  "staticNs3Config": [
-    {
-      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
-      "value": "SPHERE"
-    }
-  ],
+  "staticNs3Config": [],
   "world": {
     "size": {
       "X": "40000000",

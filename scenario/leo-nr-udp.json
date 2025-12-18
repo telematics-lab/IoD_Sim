@@ -1,5 +1,5 @@
 {
-  "name": "leo-nr-communication",
+  "name": "leo-nr-udp",
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 3,

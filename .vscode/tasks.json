@@ -59,18 +59,9 @@
       "group": "test"
     },
     {
-      "label": "Generate 2D REM",
+      "label": "Generate REMs",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} --radioMap=1\"",
-      "options": {
-        "cwd": "${workspaceFolder}/ns3"
-      },
-      "group": "test"
-    },
-    {
-      "label": "Generate 3D REM",
-      "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} --radioMap=2\"",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && ./ns3 run \"scenario --config=${input:scenarioConfigurationFilepath} --radioMaps\"",
       "options": {
         "cwd": "${workspaceFolder}/ns3"
       },

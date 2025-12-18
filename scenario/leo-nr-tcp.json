@@ -1,9 +1,25 @@
 {
-  "name": "leo-nr-communication",
+  "name": "leo-nr-tcp",
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
   "appStatisticsReportInterval": 0.3,
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "parameters": {
+        "XMin": "0",
+        "XMax": "40000000",
+        "YMin": "0",
+        "YMax": "40000000",
+        "Z": "350000",
+        "XRes": "100",
+        "YRes": "100",
+        "RemMode": "UeCoverageArea"
+      }
+    }
+  ],
   "staticNs3Config": [
     {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
@@ -125,7 +141,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 200.0
+          "value": 5.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -447,7 +463,7 @@
     }
   ],
   "leo-sats": [
-    {
+    /*{
       "netDevices": [
         {
           "type": "nr",
@@ -621,7 +637,7 @@
         ]
       },
       "applications": []
-    },
+    },*/
     {
       "netDevices": [
         {

@@ -185,21 +185,19 @@
       ]
     }
   ],
-  "radioMapParameters": [
-    "XMin",
-    "0",
-    "XMax",
-    "1000",
-    "XRes",
-    "500",
-    "YMin",
-    "0",
-    "YMax",
-    "1000",
-    "YRes",
-    "500",
-    "ChannelPath",
-    "/ChannelList/2"
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "parameters": {
+        "XMin": "0",
+        "XMax": "1000",
+        "XRes": "500",
+        "YMin": "0",
+        "YMax": "1000",
+        "YRes": "500",
+        "ChannelPath": "/ChannelList/2"
+      }
+    }
   ],
   "logComponents": [
     "DroneServerApplication",

@@ -22,23 +22,25 @@ if isNrFile:
 else:
     x, y, z, values = loaded_data
 
-#print(x, y, z, values)
+# print(x, y, z, values)
 
 values = np.reshape(values, (len(set(x)), len(set(y)))).T
 values = np.flipud(values)
 
-#print(values)
+# print(values)
 
 minimum = values.min()
 maximum = values.max()
 
 
 def normalize(x):
-    #print(x)
+    # print(x)
     return (
         np.zeros(x.shape)
         if (x.mean() == 0 and maximum - minimum == 0)
-        else 100 * ((x if isNrFile else 10 * np.log10(x)) - minimum) / (maximum - minimum)
+        else 100
+        * ((x if isNrFile else 10 * np.log10(x)) - minimum)
+        / (maximum - minimum)
     )
 
 
@@ -52,12 +54,13 @@ ratio_y = y_range / np.gcd(x_range, y_range)
 # print(ratio_x, ratio_y)
 # plt.rcParams["figure.figsize"] = [ratio_x,ratio_y]
 
-plt.imshow(
+im = plt.imshow(
     values,
     extent=(x.min(), x.max(), y.min(), y.max()),
     interpolation="nearest",
     cmap=cm.plasma,
 )
+plt.colorbar(im, label="SINR (dB)" if isNrFile else "Value")
 # plt.axis("tight")
 
 

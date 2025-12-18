@@ -144,7 +144,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 200.0
+          "value": 10.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -154,7 +154,7 @@
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 200.0
+          "value": 20.0
         }
       ]
     }

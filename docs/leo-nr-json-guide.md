@@ -1087,15 +1087,15 @@ Furthermore, also in this case we see specifically the geocentric mobility model
 
 ## NR Radio Environment Map
 
-It is possible to generate Radio Environment Maps (REM) for the NR scenarios to visualize the SINR coverage. To enable the generation you need to specify the `--nrRadioMap` flag in the command line of the scenario executable.
+It is possible to generate Radio Environment Maps (REM) for the NR scenarios to visualize the SINR coverage. To enable the generation you need to specify the `--radioMaps` flag in the command line of the scenario executable.
 
-### `nrRadioMaps`
+### `radioMaps`
 **Type**: `array[object]`
-**Description**: List of Radio Map configurations. It allows generating multiple maps for different PHY layers or BWPs.
+**Description**: List of Radio Map configurations. It allows generating multiple maps for different PHY layers (lte or nr).
 
 Each object in the list contains:
 - `phyLayerId` (integer): ID of the PHY layer (usually 0).
-- `bwpId` (integer): ID of the Bandwidth Part to analyze.
+- `bwpId` (integer): ID of the Bandwidth Part to analyze (only nr).
 - `parameters` (object): Key-value pairs matching the `NrRadioEnvironmentMapHelper` attributes.
 
 **Common Parameters:**
@@ -1105,8 +1105,7 @@ Each object in the list contains:
 
 **Example:**
 ```json
-"nrRadioMap": 2,
-"nrRadioMaps": [
+"radioMaps": [
   {
     "phyLayerId": 0,
     "bwpId": 0,

@@ -708,26 +708,23 @@
     "NoBackhaulEpcHelper",
     "LteEnbNetDevice"
   ],
-  "radioMapParameters": [
-    "XMin",
-    "0",
-    "XMax",
-    "400",
-    "XRes",
-    "4000",
-    "YMin",
-    "0",
-    "YMax",
-    "400",
-    "YRes",
-    "4000",
-    "Z",
-    "1",
-    // "ZMin", "30",
-    // "ZMax", "170",
-    // "ZRes", "280",
-    // "Threshold", "46.02059991327963", // "40000" in linear scale
-    "ChannelPath",
-    "/ChannelList/2"
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "parameters": {
+        "XMin": "0",
+        "XMax": "400",
+        "XRes": "4000",
+        "YMin": "0",
+        "YMax": "400",
+        "YRes": "4000",
+        "Z": "1",
+        "ChannelPath": "/ChannelList/2"
+        // "ZMin": "30",
+        // "ZMax": "170",
+        // "ZRes": "280",
+        // "Threshold": "46.02059991327963", // "40000" in linear scale
+      }
+    }
   ]
 }

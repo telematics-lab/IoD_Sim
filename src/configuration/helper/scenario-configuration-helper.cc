@@ -791,13 +791,11 @@ namespace ns3
         bool doExpand = false;
         constexpr const ssize_t configFileBufferSize = 64 * 1024; // KiB
         char configFileBuffer[configFileBufferSize];
-        m_radioMap = 0; // no generation as default
-        m_nrRadioMap = 0; // no generation as default
+        m_generateRadioMaps = false; // no generation as default
         CommandLine cmd;
         cmd.AddValue("name", "Name of the scenario", m_name);
         cmd.AddValue("config", "Configuration file path", configFilePath);
-        cmd.AddValue("radioMap", "Enables the generation of the EnvironmentRadioMap", m_radioMap);
-        cmd.AddValue("nrRadioMap", "Enables the generation of the EnvironmentRadioMap", m_nrRadioMap);
+        cmd.AddValue("radioMaps", "Enables the generation of the Radio Maps", m_generateRadioMaps);
         cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
         cmd.AddValue("output",
                      "Output file path for expanded JSON (optional, default stdout)",
@@ -1392,72 +1390,71 @@ namespace ns3
         return GetAntennasInNetwork(GetObjectIndex("networks", net_name));
     }
 
-    const uint32_t ScenarioConfigurationHelper::RadioMap() const
+
+    bool ScenarioConfigurationHelper::GetGenerateRadioMaps() const
     {
-        return m_radioMap;
+        return m_generateRadioMaps;
     }
 
-    const uint32_t ScenarioConfigurationHelper::NrRadioMap() const
+    const std::vector<ScenarioConfigurationHelper::RadioMapConfig>
+    ScenarioConfigurationHelper::GetRadioMaps() const
     {
-        return m_nrRadioMap;
-    }
+        std::vector<RadioMapConfig> maps;
 
-    const std::vector<std::pair<std::string, std::string>>
-    ScenarioConfigurationHelper::GetRadioMapParameters() const
-    {
-        std::vector<std::pair<std::string, std::string>> parameters;
-        NS_ASSERT_MSG(m_config.HasMember("radioMapParameters"),
-                      "'radioMapParameters' key is not present in the configuration file.");
-
-        NS_ASSERT_MSG(m_config["radioMapParameters"].IsArray() &&
-                          m_config["radioMapParameters"].Size() % 2 == 0,
-                      "Check 'radioMapParameters': should be an array of even number elements.");
-
-        for (auto i = m_config["radioMapParameters"].Begin();
-             i != m_config["radioMapParameters"].End();
-             i += 2)
+        if (m_config.HasMember("radioMaps"))
         {
-            NS_ASSERT((*i).IsString());
-            NS_ASSERT((*(i + 1)).IsString());
+            NS_ASSERT_MSG(m_config["radioMaps"].IsArray(),
+                          "Check 'radioMaps': should be an array of objects.");
 
-            parameters.push_back({(*i).GetString(), (*(i + 1)).GetString()});
-        }
-
-        return parameters;
-    }
-
-    const std::vector<ScenarioConfigurationHelper::NrRadioMapConfig>
-    ScenarioConfigurationHelper::GetNrRadioMaps() const
-    {
-        std::vector<NrRadioMapConfig> maps;
-        NS_ASSERT_MSG(m_config.HasMember("nrRadioMaps"),
-                      "'nrRadioMaps' key is not present in the configuration file.");
-
-        NS_ASSERT_MSG(m_config["nrRadioMaps"].IsArray(),
-                      "Check 'nrRadioMaps': should be an array of objects.");
-
-        for (auto& obj : m_config["nrRadioMaps"].GetArray())
-        {
-            NrRadioMapConfig mapConfig;
-            NS_ASSERT_MSG(obj.HasMember("phyLayerId"),
-                          "Each radio map config must have 'phyLayerId'");
-            mapConfig.phyLayerIndex = obj["phyLayerId"].GetUint();
-
-            NS_ASSERT_MSG(obj.HasMember("bwpId"), "Each radio map config must have 'bwpId'");
-            mapConfig.bwpId = obj["bwpId"].GetUint();
-
-            NS_ASSERT_MSG(obj.HasMember("parameters"), "Each radio map config must have 'parameters'");
-            NS_ASSERT_MSG(obj["parameters"].IsObject(), "'parameters' must be an object");
-
-            for (auto& member : obj["parameters"].GetObject())
+            for (auto& obj : m_config["radioMaps"].GetArray())
             {
-                mapConfig.parameters.push_back({member.name.GetString(), member.value.GetString()});
+                RadioMapConfig mapConfig;
+                NS_ASSERT_MSG(obj.HasMember("phyLayerId"),
+                              "Each radio map config must have 'phyLayerId'");
+                mapConfig.phyLayerIndex = obj["phyLayerId"].GetUint();
+
+                // Infer type from phyLayer configuration
+                NS_ASSERT_MSG(m_config.HasMember("phyLayer") && m_config["phyLayer"].IsArray(),
+                              "Configuration must have 'phyLayer' array to infer type");
+                const auto& phyLayers = m_config["phyLayer"].GetArray();
+                NS_ASSERT_MSG(mapConfig.phyLayerIndex < phyLayers.Size(),
+                              "phyLayerId " << mapConfig.phyLayerIndex << " is out of bounds");
+
+                const auto& phyLayerConfig = phyLayers[mapConfig.phyLayerIndex];
+                NS_ASSERT_MSG(phyLayerConfig.HasMember("type"),
+                              "Phy layer config " << mapConfig.phyLayerIndex << " must have 'type'");
+                mapConfig.type = phyLayerConfig["type"].GetString();
+
+                if (obj.HasMember("is3d"))
+                {
+                    mapConfig.is3d = obj["is3d"].GetBool();
+                }
+
+                // bwpId is optional for some types but let's keep it usually required or 0 default
+                if (obj.HasMember("bwpId"))
+                {
+                    mapConfig.bwpId = obj["bwpId"].GetUint();
+                }
+                else
+                {
+                    mapConfig.bwpId = 0;
+                }
+
+                if (obj.HasMember("parameters"))
+                {
+                     NS_ASSERT_MSG(obj["parameters"].IsObject(), "'parameters' must be an object");
+                     for (auto& member : obj["parameters"].GetObject())
+                     {
+                         mapConfig.parameters.push_back({member.name.GetString(), member.value.GetString()});
+                     }
+                }
+                maps.push_back(mapConfig);
             }
-            maps.push_back(mapConfig);
         }
 
         return maps;
     }
+
 
     const std::string ScenarioConfigurationHelper::MakePath(const std::string& path1,
                                                             const std::string& path2 /* ="" */)
