@@ -3,6 +3,21 @@
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "parameters": {
+        "XMin": "0",
+        "XMax": "1000",
+        "YMin": "0",
+        "YMax": "1000",
+        "Z": "1.5",
+        "XRes": "200",
+        "YRes": "200"
+      }
+    }
+  ],
   "staticNs3Config": [
     {
       // Set it when UEs are too many to handle with default SrsPeriodicity value

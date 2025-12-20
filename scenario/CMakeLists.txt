@@ -56,7 +56,7 @@ set(Tests
   leo-car-move-tracing.json
   leo-constellation-uniform-orbits.json
   leo-constellation-file.json
-  leo-nr-communication.json
+  leo-nr-udp.json
   taxi-all-example-trace.json
 )
 

@@ -659,6 +659,44 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         NS_FATAL_ERROR("PHY Layer of Type " << phyType << " is not supported!");
     }
 
+    if (phyType == "nr" && jsonPhyLayer.HasMember("advancedOptions") &&
+        jsonPhyLayer["advancedOptions"].IsObject())
+    {
+        const auto& advancedOptions = jsonPhyLayer["advancedOptions"];
+        Ptr<NrPhyLayerConfiguration> nrConfigPtr =
+            DynamicCast<NrPhyLayerConfiguration>(phyConfig);
+
+        if (advancedOptions.HasMember("sinr-distance-attach") &&
+            advancedOptions["sinr-distance-attach"].IsObject())
+        {
+            const auto& sda = advancedOptions["sinr-distance-attach"];
+
+            SinrDistanceAttachConfig sdaConfig;
+
+            NS_ASSERT_MSG(sda.HasMember("precision") && sda["precision"].IsString(),
+                          "sinr-distance-attach must have 'precision' (TimeValue string)");
+            sdaConfig.precision = TimeValue(Time(sda["precision"].GetString())).Get();
+
+            NS_ASSERT_MSG(sda.HasMember("table") && sda["table"].IsArray(),
+                          "sinr-distance-attach must have 'table' array");
+
+            const auto& table = sda["table"].GetArray();
+            for (rapidyyjson::SizeType i = 0; i < table.Size(); ++i)
+            {
+                const auto& entry = table[i];
+                NS_ASSERT_MSG(entry.HasMember("maxDistance") && entry["maxDistance"].IsNumber(),
+                              "Table entry must have maxDistance");
+                NS_ASSERT_MSG(entry.HasMember("minSINR") && entry["minSINR"].IsNumber(),
+                              "Table entry must have minSINR");
+
+                sdaConfig.table.push_back(
+                    SinrDistanceTableEntry{entry["maxDistance"].GetDouble(),
+                                           entry["minSINR"].GetDouble()});
+            }
+            nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
+        }
+    }
+
     return phyConfig;
 }
 

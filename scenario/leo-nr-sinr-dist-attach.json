@@ -1,8 +1,8 @@
 {
-  "name": "leo-nr-communication",
+  "name": "leo-nr-sinr-dist-attach",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 1,
+  "duration": 0.7,
   "appStatisticsReportInterval": 0.3,
   "staticNs3Config": [
     {
@@ -34,10 +34,28 @@
     },
     "buildings": []
   },
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "coordinates": "geocentric",
+      "logGeocentricREM": true,
+      "parameters": {
+        "MinLon": "0.0",
+        "MaxLon": "360.0",
+        "MinLat": "-70.0",
+        "MaxLat": "70.0",
+        "Altitude": "2.0",
+        "XRes": "200",
+        "YRes": "200",
+        "RemMode": "CoverageArea",
+        "InstallationDelay": "0.1s"
+      }
+    }
+  ],
   "phyLayer": [
     {
       "type": "nr",
-      "attachMethod": "max-rsrp",
       "bands": [
         {
           "scenario": "NTN-Rural",
@@ -53,18 +71,39 @@
           "channelConditionAttributes": [
             {
               "name": "UpdatePeriod",
-              "value": "300ms"
+              "value": "100ms"
             }
           ],
           "frequencyBands": [
             {
               "centralFrequency": 28e9,
-              "bandwidth": 10e6,
-              "numComponentCarriers": 1
+              "bandwidth": 400e6,
+              "numComponentCarriers": 1,
+              "numBandwidthParts": 1
             }
           ]
         }
       ],
+      "attachMethod": "none",
+      "advancedOptions": {
+        "sinr-distance-attach": {
+          "precision": "100ms",
+          "table": [
+            {
+              "maxDistance": 50e3,
+              "minSINR": -30.0
+            },
+            {
+              "maxDistance": 100e3,
+              "minSINR": -20.0
+            },
+            {
+              "maxDistance": 500e3,
+              "minSINR": -10.0
+            }
+          ]
+        }
+      },
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [
@@ -125,7 +164,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 200.0
+          "value": 10.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -135,7 +174,7 @@
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 200.0
+          "value": 60.0
         }
       ]
     }
@@ -194,7 +233,7 @@
       },
       "applications": [
         {
-          "name": "ns3::PacketSink",
+          "name": "ns3::UdpServer",
           "attributes": [
             {
               "name": "StartTime",
@@ -205,20 +244,13 @@
               "value": 290.0
             },
             {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
-            },
-            {
-              "name": "Local",
-              "value": [
-                "0.0.0.0",
-                1234
-              ]
+              "name": "Port",
+              "value": 1234
             }
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -227,10 +259,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -240,12 +268,16 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         }
@@ -291,7 +323,7 @@
       },
       "applications": [
         {
-          "name": "ns3::PacketSink",
+          "name": "ns3::UdpServer",
           "attributes": [
             {
               "name": "StartTime",
@@ -302,20 +334,13 @@
               "value": 290.0
             },
             {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
-            },
-            {
-              "name": "Local",
-              "value": [
-                "0.0.0.0",
-                1235
-              ]
+              "name": "Port",
+              "value": 1235
             }
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -324,10 +349,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -337,12 +358,16 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         }
@@ -388,7 +413,7 @@
       },
       "applications": [
         {
-          "name": "ns3::PacketSink",
+          "name": "ns3::UdpServer",
           "attributes": [
             {
               "name": "StartTime",
@@ -399,20 +424,13 @@
               "value": 290.0
             },
             {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
-            },
-            {
-              "name": "Local",
-              "value": [
-                "0.0.0.0",
-                1236
-              ]
+              "name": "Port",
+              "value": 1236
             }
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -421,10 +439,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -434,12 +448,16 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         }
@@ -663,7 +681,7 @@
       "networkLayer": 0,
       "applications": [
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -672,10 +690,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -685,17 +699,21 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 512
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -704,10 +722,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -717,17 +731,21 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 512
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::UdpClient",
           "attributes": [
             {
               "name": "StartTime",
@@ -736,10 +754,6 @@
             {
               "name": "StopTime",
               "value": 290.0
-            },
-            {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
             },
             {
               "name": "Remote",
@@ -749,17 +763,21 @@
               ]
             },
             {
-              "name": "MaxBytes",
-              "value": 0
+              "name": "MaxPackets",
+              "value": 4294967295
             },
             {
-              "name": "SendSize",
-              "value": 1460
+              "name": "PacketSize",
+              "value": 512
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
             }
           ]
         },
         {
-          "name": "ns3::PacketSink",
+          "name": "ns3::UdpServer",
           "attributes": [
             {
               "name": "StartTime",
@@ -770,15 +788,8 @@
               "value": 290.0
             },
             {
-              "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
-            },
-            {
-              "name": "Local",
-              "value": [
-                "0.0.0.0",
-                5000
-              ]
+              "name": "Port",
+              "value": 5000
             }
           ]
         }
@@ -786,12 +797,14 @@
     }
   ],
   "logComponents": [
-    "BulkSendApplication",
-    "PacketSink",
-    "TcpSocketBase",
+    "UdpClient",
+    "UdpServer",
     "NrPdcp",
     "Scenario",
-    "TcpL4Protocol",
+    "UdpEchoClientApplication",
+    "UdpEchoServerApplication",
+    "PacketSink",
+    "UdpL4Protocol",
     "NrSpectrumPhy",
     "NrEesmErrorModel",
     "ThreeGppSpectrumPropagationLossModel"

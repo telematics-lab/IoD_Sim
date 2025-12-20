@@ -280,36 +280,30 @@ namespace ns3
          */
         const std::vector<DoubleVector> GetRegionsOfInterest() const;
 
-        //  LTE SPECIFIC CONFIGURATORS
 
-        /**
-         * \return Radio Environment Map generation code, 0 for no generation, 1 for generation, 2
-         * for generation with map plot.
-         */
-        const uint32_t RadioMap() const;
 
-        /**
-         * \return NR Radio Environment Map generation code, 0 for no generation, 1 for generation, 2
-         * for generation with map plot.
-         */
-        const uint32_t NrRadioMap() const;
-
-        struct NrRadioMapConfig
+        struct RadioMapConfig
         {
+            std::string type;
+            std::string coordinatesType = "cartesian";
+            bool is3d = false;
+            bool logGeocentricRem = false;
             uint32_t phyLayerIndex;
             uint32_t bwpId;
             std::vector<std::pair<std::string, std::string>> parameters;
         };
 
         /**
-         * \return a list of configurations for the NR Radio Environment Map generator
+         * \return a list of configurations for the Radio Environment Map generator
          */
-        const std::vector<NrRadioMapConfig> GetNrRadioMaps() const;
+        const std::vector<RadioMapConfig> GetRadioMaps() const;
 
         /**
-         * \return a list of parameters for the Radio Environment Map generator
+         * \return true if radio maps generation is enabled
          */
-        const std::vector<std::pair<std::string, std::string>> GetRadioMapParameters() const;
+        bool GetGenerateRadioMaps() const;
+
+
 
         /**
          * \return the number of antennas to be simulated.
@@ -508,8 +502,7 @@ namespace ns3
         std::string m_dateTime;       /// cache for the current datetime
         std::vector<std::pair<std::string, Ptr<AttributeValue>>>
             m_staticConfig;        /// cache for ns-3 static config params
-        uint32_t m_radioMap;       /// a code for radio map generation options
-        uint32_t m_nrRadioMap;     /// a code for NR radio map generation options
+        bool m_generateRadioMaps = false; /// toggle for radio map generation
         std::string m_currentPath; /// cache for the current path at initialization
     };
 

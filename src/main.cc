@@ -15,7 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include "ns3/beam-manager.h"
 #include "ns3/ideal-beamforming-algorithm.h"
+#include "ns3/uniform-planar-array.h"
 #include <ns3/app-statistics-helper.h>
 #include <ns3/buildings-helper.h>
 #include <ns3/config.h>
@@ -62,8 +64,9 @@
 #include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/nr-phy-rx-trace.h>
 #include <ns3/nr-phy-simulation-helper.h>
+#include <ns3/nr-radio-environment-map-helper.h>
+#include <ns3/nr-radio-geo-environment-map-helper.h>
 #include <ns3/nr-ue-net-device.h>
-#include <ns3/nr-ue-phy.h>
 #include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/null-ntn-demo-mac-layer-simulation-helper.h>
 #include <ns3/object-factory.h>
@@ -77,7 +80,6 @@
 #include <ns3/simple-net-device.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
-#include <ns3/nr-radio-environment-map-helper.h>
 #include <ns3/three-dimensional-rem-helper.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/three-gpp-phy-simulation-helper.h>
@@ -97,7 +99,7 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <ns3/net-device-container.h>
+#include <set>
 #include <sys/resource.h>
 #include <vector>
 
@@ -120,9 +122,6 @@ class Scenario
     void operator()();
 
   private:
-    void GenerateRadioMap();
-    std::vector<std::string> GenerateNrRadioMap();
-    void GenerateThreeDimensionalRem();
     void ApplyStaticConfig();
     void ConfigureWorld();
     void ConfigurePhy();
@@ -190,6 +189,7 @@ class Scenario
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs(const uint32_t netId);
+    void EvaluateSinrDistanceAttachment(const uint32_t netId);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -212,6 +212,9 @@ class Scenario
 
     // Persistent containers for NR attachment workaround
     std::list<std::shared_ptr<NetDeviceContainer>> m_persistentContainers;
+
+    // Track active SINR attachment loops to avoid duplicates
+    std::set<uint32_t> m_sinrAttachmentRunning;
 };
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
@@ -315,82 +318,186 @@ void
 Scenario::operator()()
 {
     NS_LOG_FUNCTION_NOARGS();
-    bool anyLte = false;
-    const auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
-    for (auto& phyLayerConf : phyLayerConfs)
-    {
-        if (phyLayerConf->GetType() == "lte")
-        {
-            anyLte = true;
-        }
-    }
 
-    if (CONFIGURATOR->RadioMap() > 0)
+    static std::vector<Ptr<RadioEnvironmentMapHelper>> lteRemHelpers;
+    static std::vector<Ptr<NrRadioEnvironmentMapHelper>> nrRemHelpers;
+    static std::vector<Ptr<NrRadioGeoEnvironmentMapHelper>> nrGeoRemHelpers;
+    auto radioMaps = CONFIGURATOR->GetRadioMaps();
+    if (CONFIGURATOR->GetGenerateRadioMaps() && !radioMaps.empty())
     {
-        NS_ASSERT_MSG(anyLte,
-                      "Environment Radio Map can be generated only if an LTE network is "
-                      "present. Aborting simulation.");
-        NS_LOG_INFO("Generating Environment Radio Map, simulation will not run.");
-        if (CONFIGURATOR->RadioMap() == 2)
+        struct RadioMapGenConfig
         {
-            this->GenerateThreeDimensionalRem();
-            Simulator::Run();
-            Simulator::Destroy();
-            int plyRet = system(("python ../analysis/txt2ply.py " + CONFIGURATOR->GetResultsPath() +
-                                 CONFIGURATOR->GetName() + "-3D-REM.txt")
-                                    .c_str());
-            if (plyRet == -1)
-            {
-                NS_ABORT_MSG("Something went wrong while generating the ply file");
-            }
-            int plotRet =
-                system(("python ../analysis/rem-3d-preview.py " + CONFIGURATOR->GetResultsPath() +
-                        CONFIGURATOR->GetName() + "-3D-REM.ply")
-                           .c_str());
-            if (plotRet != 0)
-            {
-                NS_ABORT_MSG("Something went wrong while generating the plot");
-            }
-        }
-        else if (CONFIGURATOR->RadioMap() == 1)
+            std::string file;
+            std::string type;
+            bool is3D;
+        };
+
+        NS_LOG_INFO("Generating Radio Maps...");
+
+        std::vector<std::string> generatedFiles;
+        std::vector<RadioMapGenConfig> plotFiles;
+
+        size_t mapIdx = 0;
+        for (const auto& config : radioMaps)
         {
-            this->GenerateRadioMap();
-            Simulator::Run();
-            Simulator::Destroy();
-            int plyRet = system(("python " + CONFIGURATOR->GetResultsPath() + "../../analysis/txt2ply.py " + CONFIGURATOR->GetResultsPath() +
-                                 CONFIGURATOR->GetName() + "-2D-REM.txt")
-                                    .c_str());
-            if (plyRet != 0)
+            if (config.type == "nr")
             {
-                NS_LOG_ERROR("Something went wrong while generating the ply file");
+                NetDeviceContainer txDevs;
+                for (const auto& [netId, containers] : m_nrGnbDevices)
+                {
+                    if (netId != config.phyLayerIndex)
+                    {
+                        continue;
+                    }
+                    for (const auto& container : containers)
+                    {
+                        txDevs.Add(container);
+                    }
+                }
+
+                Ptr<NetDevice> rxDev;
+                for (const auto& [netId, devices] : m_nrUeDevices)
+                {
+                    if (netId != config.phyLayerIndex)
+                    {
+                        continue;
+                    }
+                    if (!devices.empty())
+                    {
+                        rxDev = devices.front();
+                        break;
+                    }
+                }
+
+                if (!rxDev)
+                {
+                    NS_FATAL_ERROR(
+                        "Cannot generate REM: No UEs found to serve as reference receiver.");
+                }
+
+                std::stringstream ss;
+                ss << "Phy" << config.phyLayerIndex << "-Bwp" << config.bwpId << "-" << mapIdx + 1;
+
+                if (config.coordinatesType == "geocentric")
+                {
+                    Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
+                        CreateObject<NrRadioGeoEnvironmentMapHelper>();
+                    nrGeoRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetSimTag(ss.str());
+                    remHelper->SetLogGeocentricRem(config.logGeocentricRem);
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+                }
+                else
+                {
+                    Ptr<NrRadioEnvironmentMapHelper> remHelper =
+                        CreateObject<NrRadioEnvironmentMapHelper>();
+                    nrRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetSimTag(ss.str());
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+                }
+
+                // New helper outputs: nr-rem- + simTag + ".out"
+                std::string filename =
+                    CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str() + ".out";
+                generatedFiles.push_back(filename);
+                plotFiles.push_back({.file = filename, .type = "nr", .is3D = false});
             }
-            int plotRet =
-                system(("python " + CONFIGURATOR->GetResultsPath() + "../../analysis/rem-2d-preview.py " + CONFIGURATOR->GetResultsPath() +
-                        CONFIGURATOR->GetName() + "-2D-REM.txt")
-                           .c_str());
-            if (plotRet != 0)
+            else if (config.type == "lte")
             {
-                NS_LOG_ERROR("Something went wrong while generating the plot");
+                if (config.is3d)
+                {
+                    static std::vector<Ptr<ThreeDimensionalRemHelper>> lte3dRemHelpers;
+                    Ptr<ThreeDimensionalRemHelper> remHelper =
+                        CreateObject<ThreeDimensionalRemHelper>();
+                    lte3dRemHelpers.push_back(remHelper); // Keep alive
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    std::string filename = CONFIGURATOR->GetResultsPath() +
+                                           CONFIGURATOR->GetName() + "-lte-3d-rem-" +
+                                           std::to_string(mapIdx) + ".txt";
+                    remHelper->SetAttribute("OutputFile", StringValue(filename));
+                    remHelper->Install();
+                    generatedFiles.push_back(filename);
+                    plotFiles.push_back({.file = filename, .type = "lte", .is3D = true});
+                }
+                else
+                {
+                    Ptr<RadioEnvironmentMapHelper> remHelper =
+                        CreateObject<RadioEnvironmentMapHelper>();
+                    lteRemHelpers.push_back(remHelper); // Keep alive
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    std::string filename = CONFIGURATOR->GetResultsPath() +
+                                           CONFIGURATOR->GetName() + "-lte-rem-" +
+                                           std::to_string(mapIdx) + ".txt";
+                    remHelper->SetAttribute("OutputFile", StringValue(filename));
+                    remHelper->Install();
+                    generatedFiles.push_back(filename);
+                    plotFiles.push_back({.file = filename, .type = "lte", .is3D = false});
+                }
             }
+            else
+            {
+                NS_LOG_WARN("Unknown radio map type: " << config.type);
+            }
+            mapIdx++;
         }
-    }
-    else if (CONFIGURATOR->NrRadioMap() == 1)
-    {
-        std::vector<std::string> files = this->GenerateNrRadioMap();
+
         Simulator::Run();
         Simulator::Destroy();
 
-        for (std::string filepath : files){
+        for (const auto& plotConf : plotFiles)
+        {
+            std::string cmd = "python " + CONFIGURATOR->GetResultsPath() +
+                              "../../analysis/txt2ply.py " + plotConf.file;
 
-            int plyRet = system(("python "+ CONFIGURATOR->GetResultsPath() + "../../analysis/txt2ply.py " + filepath + ".out --nrMap").c_str());
-            if (plyRet == -1)
+            bool addNrFlag = plotConf.type == "nr";
+            if (addNrFlag)
             {
-                NS_LOG_ERROR("Something went wrong while generating the ply file");
+                cmd += " --nrMap";
             }
-            int plotRet = system(("python "+ CONFIGURATOR->GetResultsPath() + "../../analysis/rem-2d-preview.py " + filepath + ".out --nrMap").c_str());
+
+            int plyRet = system(cmd.c_str());
+            if (plyRet != 0)
+            {
+                NS_LOG_ERROR("Something went wrong while generating the ply file for "
+                             << plotConf.file);
+            }
+
+            std::string plotCmd = plotConf.is3D
+                                      ? "python " + CONFIGURATOR->GetResultsPath() +
+                                            "../../analysis/rem-3d-preview.py " + plotConf.file
+                                      : "python " + CONFIGURATOR->GetResultsPath() +
+                                            "../../analysis/rem-2d-preview.py " + plotConf.file;
+            if (addNrFlag)
+            {
+                plotCmd += " --nrMap";
+            }
+            int plotRet = system(plotCmd.c_str());
             if (plotRet != 0)
             {
-                NS_LOG_ERROR("Something went wrong while generating the plot");
+                NS_LOG_ERROR("Something went wrong while generating the plot for "
+                             << plotConf.file);
             }
         }
     }
@@ -422,102 +529,6 @@ Scenario::operator()()
         }
         Simulator::Destroy();
     }
-}
-
-void
-Scenario::GenerateRadioMap()
-{
-    // Making it static in order for it to be alive when simulation run
-    static Ptr<RadioEnvironmentMapHelper> m_remHelper = CreateObject<RadioEnvironmentMapHelper>();
-    m_remHelper->SetAttribute(
-        "OutputFile",
-        StringValue(CONFIGURATOR->GetResultsPath() + CONFIGURATOR->GetName() + "-2D-REM.txt"));
-
-    auto parameters = CONFIGURATOR->GetRadioMapParameters();
-    for (auto par : parameters)
-    {
-        m_remHelper->SetAttribute(par.first, StringValue(par.second));
-    }
-
-    m_remHelper->Install();
-}
-
-std::vector<std::string>
-Scenario::GenerateNrRadioMap()
-{
-    auto maps = CONFIGURATOR->GetNrRadioMaps();
-    size_t i = 0;
-    std::vector<std::string> files(maps.size());
-    for (const auto& config : maps)
-    {
-        // One helper per map to avoid state pollution/issues
-        static Ptr<NrRadioEnvironmentMapHelper> m_remHelper = CreateObject<NrRadioEnvironmentMapHelper>();
-
-        // Set SimTag for unique filenames
-        std::stringstream ss;
-        ss << "Phy" << config.phyLayerIndex << "-Bwp" << config.bwpId << "-" << i+1;
-        m_remHelper->SetSimTag(ss.str());
-
-        for (auto par : config.parameters)
-        {
-            m_remHelper->SetAttribute(par.first, StringValue(par.second));
-        }
-
-        NetDeviceContainer txDevs;
-        for (auto const& [netId, containers] : m_nrGnbDevices)
-        {
-            if (netId != config.phyLayerIndex)
-            {
-                continue;
-            }
-            for (auto const& container : containers)
-            {
-                txDevs.Add(container);
-            }
-        }
-
-        Ptr<NetDevice> rxDev;
-        for (auto const& [netId, devices] : m_nrUeDevices)
-        {
-            if (netId != config.phyLayerIndex)
-            {
-                continue;
-            }
-            if (!devices.empty())
-            {
-                rxDev = devices.front();
-                break;
-            }
-        }
-
-        if (!rxDev)
-        {
-            NS_FATAL_ERROR("Cannot generate REM: No UEs found to serve as reference receiver.");
-        }
-
-        m_remHelper->CreateRem(txDevs, rxDev, config.bwpId);
-        files[i] = (CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str());
-        i++;
-    }
-    return files;
-}
-
-void
-Scenario::GenerateThreeDimensionalRem()
-{
-    // Making it static in order for it to be alive when simulation run
-    static Ptr<ThreeDimensionalRemHelper> m_remHelper = CreateObject<ThreeDimensionalRemHelper>();
-    m_remHelper->SetAttribute(
-        "OutputFile",
-        StringValue(CONFIGURATOR->GetResultsPath() + CONFIGURATOR->GetName() + "-3D-REM.txt"));
-
-    auto parameters = CONFIGURATOR->GetRadioMapParameters();
-    for (auto par : parameters)
-    {
-        m_remHelper->SetAttribute(par.first, StringValue(par.second));
-    }
-
-    m_remHelper->Install();
 }
 
 void
@@ -720,7 +731,8 @@ Scenario::ConfigurePhy()
                     nrConf->GetUeChannelAccessManagerType());
                 for (auto& attr : nrConf->GetUeChannelAccessManagerAttributes())
                 {
-                    nrSim->GetNrHelper()->SetUeChannelAccessManagerAttribute(attr.name, *attr.value);
+                    nrSim->GetNrHelper()->SetUeChannelAccessManagerAttribute(attr.name,
+                                                                             *attr.value);
                 }
             }
 
@@ -731,7 +743,8 @@ Scenario::ConfigurePhy()
                     nrConf->GetGnbChannelAccessManagerType());
                 for (auto& attr : nrConf->GetGnbChannelAccessManagerAttributes())
                 {
-                    nrSim->GetNrHelper()->SetGnbChannelAccessManagerAttribute(attr.name, *attr.value);
+                    nrSim->GetNrHelper()->SetGnbChannelAccessManagerAttribute(attr.name,
+                                                                              *attr.value);
                 }
             }
 
@@ -1078,7 +1091,9 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
 
         auto mob = node->GetObject<MobilityModel>();
-        mob->TraceConnect("CourseChange", oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
+        mob->TraceConnect("CourseChange",
+                          oss.str(),
+                          MakeCallback(&Scenario::LeoSatCourseChange, this));
     }
     else if (entityKey == "vehicles")
     {
@@ -1276,7 +1291,7 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
         nrHelper->SetGnbAntennaTypeId(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
         {
-            nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+        nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
         }
     }
     auto entityNodeContainer = NodeContainer(entityNode);
@@ -1984,6 +1999,20 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     // Assuming netId maps directly to the index in the PHY layer configuration vector
     // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
     auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+
+    // Check if SINR-Distance Attachment is configured
+    if (nrConf->GetSinrDistanceAttachConfig())
+    {
+        if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
+        {
+            NS_LOG_INFO(
+                "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
+            Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+            m_sinrAttachmentRunning.insert(netId);
+        }
+        return;
+    }
+
     std::string attachMethod = nrConf->GetAttachMethod();
 
     NS_LOG_INFO("Attaching " << ueDevices.GetN()
@@ -2020,7 +2049,201 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
         NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
     }
 
+    // Check if SINR-Distance Attachment is configured and schedule it
+    if (nrConf->GetSinrDistanceAttachConfig())
+    {
+        Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+    }
 }
+
+void
+Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
+{
+    std::cout << "Evaluating SINR-Distance Attachment for netId " << netId << std::endl;
+    // Retrieve configuration
+    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+    if (netId >= phyLayerConfs.size())
+        return;
+
+    auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
+    if (!nrConf)
+        return;
+
+    auto sdaConfigOpt = nrConf->GetSinrDistanceAttachConfig();
+
+    if (!sdaConfigOpt)
+    {
+        return;
+    }
+
+    const auto& sdaConfig = *sdaConfigOpt;
+
+    // Retrieve Devices
+    auto gnbIt = m_nrGnbDevices.find(netId);
+    auto ueIt = m_nrUeDevices.find(netId);
+
+    if (gnbIt == m_nrGnbDevices.end() || ueIt == m_nrUeDevices.end() || gnbIt->second.empty() ||
+        ueIt->second.empty())
+    {
+        // Reschedule if devices are not yet ready or empty
+        Simulator::Schedule(sdaConfig.precision,
+                            &Scenario::EvaluateSinrDistanceAttachment,
+                            this,
+                            netId);
+        return;
+    }
+
+    // Flatten gNB list for easier access
+    NetDeviceContainer allGnbDevices;
+    for (const auto& gnbContainer : gnbIt->second)
+    {
+        allGnbDevices.Add(gnbContainer);
+    }
+
+    auto nrPhySim = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrHelper = nrPhySim->GetNrHelper();
+
+    // Prepare REM Helper for SINR calculations
+    Ptr<NrRadioGeoEnvironmentMapHelper> remHelper = CreateObject<NrRadioGeoEnvironmentMapHelper>();
+    remHelper->SetInterferers(allGnbDevices, 0); // Configure interferers (all gNBs)
+
+    // Iterate over all UEs
+    for (auto ueDevicePtr : ueIt->second)
+    {
+        auto ueDevice = DynamicCast<NrUeNetDevice>(ueDevicePtr);
+        if (!ueDevice)
+            continue;
+
+        Ptr<Node> ueNode = ueDevice->GetNode();
+        if (!ueNode)
+            continue;
+
+        Ptr<MobilityModel> ueMobility = ueNode->GetObject<MobilityModel>();
+        if (!ueMobility)
+            continue;
+
+        // Find best gNB
+        Ptr<NrGnbNetDevice> bestGnb = nullptr;
+        double bestSnr = -std::numeric_limits<double>::infinity();
+        double bestDistance = std::numeric_limits<double>::infinity();
+
+        // Check all gNBs
+        for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
+             ++gnbDeviceIt)
+        {
+            Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
+            if (!gnbDevice)
+                continue;
+
+            Ptr<Node> gnbNode = gnbDevice->GetNode();
+            if (!gnbNode)
+                continue;
+
+            Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
+            if (!gnbMobility)
+                continue;
+
+            double distance = ueMobility->GetDistanceFrom(gnbMobility);
+
+            // Find required min SINR for this distance
+            double minSinrRequired = std::numeric_limits<double>::max();
+
+            const SinrDistanceTableEntry* bestEntry = nullptr;
+            double rangeDiff = std::numeric_limits<double>::max();
+
+            // Finding the best entry based on maxDistance (the minimum distance that is still
+            // within range)
+            for (const auto& entry : sdaConfig.table)
+            {
+                if (distance <= entry.maxDistance)
+                {
+                    if (entry.maxDistance < rangeDiff)
+                    {
+                        rangeDiff = entry.maxDistance;
+                        bestEntry = &entry;
+                    }
+                }
+            }
+
+            // UE is too far for any rule
+            if (!bestEntry)
+            {
+                continue;
+            }
+
+            minSinrRequired = bestEntry->minSinr;
+
+            // ---- CUSTOM SNR CALC REPLACED BY HELPER ----
+            // Use IsDl = true (Downlink) for attachment decision normally
+            double estimatedSnr = remHelper->GetSinr(ueDevice, gnbDevice, 0, true);
+
+            // ---- END OF CUSTOM SNR CALC ----
+
+            // Checking if SNR is above the required threshold
+            if (estimatedSnr >= minSinrRequired)
+            {
+                if (estimatedSnr > bestSnr)
+                {
+                    bestDistance = distance / 1e3;
+                    bestSnr = estimatedSnr;
+                    bestGnb = gnbDevice;
+                }
+            }
+            else
+            {
+                 std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to gNB "
+                           << gnbDevice->GetCellId() << " (SNR: " << estimatedSnr
+                           << " dB < required: " << minSinrRequired << " dB, distance: " << distance / 1e3 << " km)" << std::endl;
+            }
+        }
+
+        // Check if already attached
+        auto currentGnb = ueDevice->GetTargetGnb();
+
+        if (bestGnb)
+        {
+            // DEBUG: TODO REMOVE
+            std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
+                      << bestGnb->GetCellId() << " (SNR: " << bestSnr
+                      << " dB, distance: " << bestDistance << " km)" << " at "
+                      << Simulator::Now().GetSeconds() << std::endl;
+
+            // Check if we need to handover (if configured gNB is different)
+            if (currentGnb != nullptr)
+            {
+                if (currentGnb == bestGnb)
+                {
+                    // Already attached to this gNB. Do nothing.
+                }
+                else
+                {
+                    // Needs handover. AttachToGnb likely crashes if context exists.
+                    // DEBUG: TODO REMOVE
+                    std::cout << "UE " << ueDevice->GetImsi() << " should switch to gNB "
+                              << bestGnb->GetCellId() << " but Handover is not implemented."
+                              << std::endl;
+                }
+            }
+            else
+            {
+                // Not attached, safe to attach.
+                nrHelper->AttachToGnb(ueDevice, bestGnb);
+            }
+        }
+        else
+        {
+            std::cout << "UE " << ueDevice->GetImsi()
+                      << " CANNOT connect to any gNB (No valid SINR/Distance match)" << std::endl;
+        }
+    }
+
+    // Schedule next
+    Simulator::Schedule(sdaConfig.precision,
+                        &Scenario::EvaluateSinrDistanceAttachment,
+                        this,
+                        netId);
+}
+
 } // namespace ns3
 
 int

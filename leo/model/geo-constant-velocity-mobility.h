@@ -166,6 +166,30 @@ class GeoConstantVelocityMobility : public GeocentricMobilityModel
      * \return position that will be returned upon next call to DoGetPosition
      */
     Vector Update();
+
+    /**
+     * \brief Set the initial latitude
+     * \param latitude in degrees
+     */
+    void SetInitialLatitude(double latitude);
+
+    /**
+     * \brief Get the initial latitude
+     * \return latitude in degrees
+     */
+    double GetInitialLatitude() const;
+
+    /**
+     * \brief Set the initial longitude
+     * \param longitude in degrees
+     */
+    void SetInitialLongitude(double longitude);
+
+    /**
+     * \brief Get the initial longitude
+     * \return longitude in degrees
+     */
+    double GetInitialLongitude() const;
 };
 
 } // namespace ns3

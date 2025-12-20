@@ -1,0 +1,257 @@
+{
+  "name": "leo-nr-radio-map",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1,
+  "appStatisticsReportInterval": 0.3,
+  "radioMaps": [
+    /*{
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "coordinates": "geocentric",
+      "logGeocentricREM": true,
+      "parameters": {
+        "MinLon": "100.0",
+        "MaxLon": "105.0",
+        "MinLat": "25.0",
+        "MaxLat": "35.0",
+        "Altitude": "2.0",
+        "XRes": "200",
+        "YRes": "200",
+        "RemMode": "CoverageArea",
+        "InstallationDelay": "0.1s"
+      }
+    }*/
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "coordinates": "geocentric",
+      "logGeocentricREM": true,
+      "parameters": {
+        "MinLon": "0.0",
+        "MaxLon": "360.0",
+        "MinLat": "-70.0",
+        "MaxLat": "70.0",
+        "Altitude": "2.0",
+        "XRes": "100",
+        "YRes": "100",
+        "RemMode": "CoverageArea",
+        "InstallationDelay": "0.1s"
+      }
+    }
+  ],
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    },
+    {
+      "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
+      "value": false
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "50ms"
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "50ms"
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "nr",
+      "attachMethod": "max-rsrp",
+      "bands": [
+        {
+          "scenario": "NTN-Rural",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "contiguousCc": true,
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "frequencyBands": [
+            {
+              "centralFrequency": 28e9,
+              "bandwidth": 10e6,
+              "numComponentCarriers": 1
+            }
+          ]
+        }
+      ],
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::CosineAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::CosineAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 8
+          },
+          {
+            "name": "NumColumns",
+            "value": 16
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 23.0
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 60.0
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  "vehicles": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLongitude",
+            "value": 102.33
+          },
+          {
+            "name": "InitialLatitude",
+            "value": 30.0
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 0.0
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "leo-sats": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB"
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 350.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": 102.0
+          },
+          {
+            "name": "Offset",
+            "value": 0.0
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "remotes": [],
+  "logComponents": []
+}
