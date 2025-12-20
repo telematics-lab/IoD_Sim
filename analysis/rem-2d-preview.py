@@ -14,6 +14,7 @@ assert len(sys.argv) > 1, "Not enough arguments passed"
 
 isNrFile = "--nrMap" in sys.argv
 
+
 filepath = sys.argv[1]
 
 loaded_data = np.loadtxt(filepath).T
@@ -22,29 +23,13 @@ if isNrFile:
 else:
     x, y, z, values = loaded_data
 
+
 # print(x, y, z, values)
 
 values = np.reshape(values, (len(set(x)), len(set(y)))).T
 values = np.flipud(values)
-
-# print(values)
-
 minimum = values.min()
 maximum = values.max()
-
-
-def normalize(x):
-    # print(x)
-    return (
-        np.zeros(x.shape)
-        if (x.mean() == 0 and maximum - minimum == 0)
-        else 100
-        * ((x if isNrFile else 10 * np.log10(x)) - minimum)
-        / (maximum - minimum)
-    )
-
-
-values = normalize(values)
 
 x_range = int(x.max() - x.min())
 y_range = int(y.max() - y.min())
@@ -56,11 +41,14 @@ ratio_y = y_range / np.gcd(x_range, y_range)
 
 im = plt.imshow(
     values,
+    vmin=-50,
+    vmax=50,
     extent=(x.min(), x.max(), y.min(), y.max()),
     interpolation="nearest",
-    cmap=cm.plasma,
+    cmap=cm.inferno,
 )
-plt.colorbar(im, label="SINR (dB)" if isNrFile else "Value")
+
+cbar = plt.colorbar(im, label="SINR (dB)" if isNrFile else "SNR (dB)")
 # plt.axis("tight")
 
 

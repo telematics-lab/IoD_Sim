@@ -1440,6 +1440,16 @@ namespace ns3
                     mapConfig.bwpId = 0;
                 }
 
+                if (obj.HasMember("coordinates"))
+                {
+                    mapConfig.coordinatesType = obj["coordinates"].GetString();
+                }
+
+                if (obj.HasMember("logGeocentricREM"))
+                {
+                    mapConfig.logGeocentricRem = obj["logGeocentricREM"].GetBool();
+                }
+
                 if (obj.HasMember("parameters"))
                 {
                      NS_ASSERT_MSG(obj["parameters"].IsObject(), "'parameters' must be an object");

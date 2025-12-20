@@ -3,7 +3,7 @@
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
-  "nrRadioMaps": [
+  "radioMaps": [
     {
       "phyLayerId": 0,
       "bwpId": 0,
@@ -13,8 +13,8 @@
         "YMin": "0",
         "YMax": "1000",
         "Z": "1.5",
-        "XRes": "50",
-        "YRes": "50"
+        "XRes": "200",
+        "YRes": "200"
       }
     }
   ],

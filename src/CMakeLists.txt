@@ -82,6 +82,7 @@ set(source_files
   helper/app-statistics-helper.cc
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.cc
+  helper/nr-radio-geo-environment-map-helper.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
   irs/serving-configurator/defined-serving-configurator.cc
@@ -206,6 +207,7 @@ set(header_files
   helper/app-statistics-helper.h
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.h
+  helper/nr-radio-geo-environment-map-helper.h
   irs/patch-configurator/defined-patch-configurator.h
   irs/patch-configurator/patch-configurator.h
   irs/serving-configurator/defined-serving-configurator.h

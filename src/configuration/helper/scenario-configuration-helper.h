@@ -285,7 +285,9 @@ namespace ns3
         struct RadioMapConfig
         {
             std::string type;
+            std::string coordinatesType = "cartesian";
             bool is3d = false;
+            bool logGeocentricRem = false;
             uint32_t phyLayerIndex;
             uint32_t bwpId;
             std::vector<std::pair<std::string, std::string>> parameters;

@@ -1,0 +1,38 @@
+From d6145255d8422d0a5486b45ebc9e95a1498353e5 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Sat, 20 Dec 2025 10:46:45 +0100
+Subject: [PATCH] Geocentric position on sphere model
+
+---
+ src/mobility/model/geocentric-mobility-model.cc | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
+index f763670e3..2cb31f86a 100644
+--- a/src/mobility/model/geocentric-mobility-model.cc
++++ b/src/mobility/model/geocentric-mobility-model.cc
+@@ -120,10 +120,17 @@ GeocentricMobilityModel::GetEarthSpheroidType() const
+ Vector
+ GeocentricMobilityModel::DoGetPosition() const
+ {
+-    // TODO: we should implement a proper way to understand what projection to use
+-    return (GetEarthSpheroidType() == GeographicPositions::EarthSpheroidType::WGS84)
+-               ? DoGetPosition(PositionType::PROJECTED)
+-               : DoGetPosition(PositionType::TOPOCENTRIC);
++    auto model = GetEarthSpheroidType();
++    if (model == GeographicPositions::EarthSpheroidType::SPHERE)
++    {
++        return DoGetPosition(PositionType::GEOCENTRIC);
++    }else if (model == GeographicPositions::EarthSpheroidType::WGS84)
++    {
++        return DoGetPosition(PositionType::PROJECTED);
++    }else
++    {
++        return DoGetPosition(PositionType::TOPOCENTRIC);
++    }
+ }
+ 
+ void
+-- 
+2.50.1 (Apple Git-155)
+

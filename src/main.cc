@@ -15,8 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include "ns3/beam-manager.h"
 #include "ns3/ideal-beamforming-algorithm.h"
-#include <set>
+#include "ns3/uniform-planar-array.h"
 #include <ns3/app-statistics-helper.h>
 #include <ns3/buildings-helper.h>
 #include <ns3/config.h>
@@ -63,9 +64,9 @@
 #include <ns3/nr-phy-layer-configuration.h>
 #include <ns3/nr-phy-rx-trace.h>
 #include <ns3/nr-phy-simulation-helper.h>
+#include <ns3/nr-radio-environment-map-helper.h>
+#include <ns3/nr-radio-geo-environment-map-helper.h>
 #include <ns3/nr-ue-net-device.h>
-#include "ns3/beam-manager.h"
-#include "ns3/uniform-planar-array.h"
 #include <ns3/null-ntn-demo-mac-layer-configuration.h>
 #include <ns3/null-ntn-demo-mac-layer-simulation-helper.h>
 #include <ns3/object-factory.h>
@@ -79,7 +80,6 @@
 #include <ns3/simple-net-device.h>
 #include <ns3/ssid.h>
 #include <ns3/string.h>
-#include <ns3/nr-radio-environment-map-helper.h>
 #include <ns3/three-dimensional-rem-helper.h>
 #include <ns3/three-gpp-phy-layer-configuration.h>
 #include <ns3/three-gpp-phy-simulation-helper.h>
@@ -99,10 +99,9 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <ns3/net-device-container.h>
+#include <set>
 #include <sys/resource.h>
 #include <vector>
-
 
 namespace ns3
 {
@@ -229,9 +228,6 @@ Scenario::Scenario(int argc, char** argv)
                        TimeValue(MilliSeconds(1))); // update the channel at each iteration
     Config::SetDefault("ns3::ThreeGppChannelConditionModel::UpdatePeriod",
                        TimeValue(MilliSeconds(1))); // do not update the channel condition
-    // Force SPHERE model for local Cartesian scenarios (fixes LTE REM coordinate scaling)
-    Config::SetDefault("ns3::GeocentricMobilityModel::EarthSpheroidType",
-                       EnumValue(GeographicPositions::SPHERE));
 
     CONFIGURATOR->Initialize(argc, argv);
     m_plainNodes.Create(CONFIGURATOR->GetN("nodes"));
@@ -325,12 +321,21 @@ Scenario::operator()()
 
     static std::vector<Ptr<RadioEnvironmentMapHelper>> lteRemHelpers;
     static std::vector<Ptr<NrRadioEnvironmentMapHelper>> nrRemHelpers;
+    static std::vector<Ptr<NrRadioGeoEnvironmentMapHelper>> nrGeoRemHelpers;
     auto radioMaps = CONFIGURATOR->GetRadioMaps();
     if (CONFIGURATOR->GetGenerateRadioMaps() && !radioMaps.empty())
     {
+        struct RadioMapGenConfig
+        {
+            std::string file;
+            std::string type;
+            bool is3D;
+        };
+
         NS_LOG_INFO("Generating Radio Maps...");
+
         std::vector<std::string> generatedFiles;
-        std::vector<std::pair<std::string, std::string>> plotFiles;
+        std::vector<RadioMapGenConfig> plotFiles;
 
         size_t mapIdx = 0;
         for (const auto& config : radioMaps)
@@ -338,20 +343,20 @@ Scenario::operator()()
             if (config.type == "nr")
             {
                 NetDeviceContainer txDevs;
-                for (auto const& [netId, containers] : m_nrGnbDevices)
+                for (const auto& [netId, containers] : m_nrGnbDevices)
                 {
                     if (netId != config.phyLayerIndex)
                     {
                         continue;
                     }
-                    for (auto const& container : containers)
+                    for (const auto& container : containers)
                     {
                         txDevs.Add(container);
                     }
                 }
 
                 Ptr<NetDevice> rxDev;
-                for (auto const& [netId, devices] : m_nrUeDevices)
+                for (const auto& [netId, devices] : m_nrUeDevices)
                 {
                     if (netId != config.phyLayerIndex)
                     {
@@ -366,35 +371,56 @@ Scenario::operator()()
 
                 if (!rxDev)
                 {
-                    NS_FATAL_ERROR("Cannot generate REM: No UEs found to serve as reference receiver.");
+                    NS_FATAL_ERROR(
+                        "Cannot generate REM: No UEs found to serve as reference receiver.");
                 }
 
                 std::stringstream ss;
                 ss << "Phy" << config.phyLayerIndex << "-Bwp" << config.bwpId << "-" << mapIdx + 1;
 
-
-                Ptr<NrRadioEnvironmentMapHelper> remHelper = CreateObject<NrRadioEnvironmentMapHelper>();
-                nrRemHelpers.push_back(remHelper); // Keep alive
-                remHelper->SetSimTag(ss.str());
-
-                for (auto par : config.parameters)
+                if (config.coordinatesType == "geocentric")
                 {
-                    remHelper->SetAttribute(par.first, StringValue(par.second));
+                    Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
+                        CreateObject<NrRadioGeoEnvironmentMapHelper>();
+                    nrGeoRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetSimTag(ss.str());
+                    remHelper->SetLogGeocentricRem(config.logGeocentricRem);
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+                }
+                else
+                {
+                    Ptr<NrRadioEnvironmentMapHelper> remHelper =
+                        CreateObject<NrRadioEnvironmentMapHelper>();
+                    nrRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetSimTag(ss.str());
+
+                    for (auto par : config.parameters)
+                    {
+                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                    }
+
+                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
                 }
 
-                remHelper->CreateRem(txDevs, rxDev, config.bwpId);
-
                 // New helper outputs: nr-rem- + simTag + ".out"
-                std::string filename = CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str() + ".out";
+                std::string filename =
+                    CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str() + ".out";
                 generatedFiles.push_back(filename);
-                plotFiles.push_back({filename, "nr"});
+                plotFiles.push_back({.file = filename, .type = "nr", .is3D = false});
             }
             else if (config.type == "lte")
             {
                 if (config.is3d)
                 {
                     static std::vector<Ptr<ThreeDimensionalRemHelper>> lte3dRemHelpers;
-                    Ptr<ThreeDimensionalRemHelper> remHelper = CreateObject<ThreeDimensionalRemHelper>();
+                    Ptr<ThreeDimensionalRemHelper> remHelper =
+                        CreateObject<ThreeDimensionalRemHelper>();
                     lte3dRemHelpers.push_back(remHelper); // Keep alive
 
                     for (auto par : config.parameters)
@@ -402,15 +428,18 @@ Scenario::operator()()
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
 
-                    std::string filename = CONFIGURATOR->GetResultsPath() + CONFIGURATOR->GetName() + "-lte-3d-rem-" + std::to_string(mapIdx) + ".txt";
+                    std::string filename = CONFIGURATOR->GetResultsPath() +
+                                           CONFIGURATOR->GetName() + "-lte-3d-rem-" +
+                                           std::to_string(mapIdx) + ".txt";
                     remHelper->SetAttribute("OutputFile", StringValue(filename));
                     remHelper->Install();
                     generatedFiles.push_back(filename);
-                    plotFiles.push_back({filename, "lte"});
+                    plotFiles.push_back({.file = filename, .type = "lte", .is3D = true});
                 }
                 else
                 {
-                    Ptr<RadioEnvironmentMapHelper> remHelper = CreateObject<RadioEnvironmentMapHelper>();
+                    Ptr<RadioEnvironmentMapHelper> remHelper =
+                        CreateObject<RadioEnvironmentMapHelper>();
                     lteRemHelpers.push_back(remHelper); // Keep alive
 
                     for (auto par : config.parameters)
@@ -418,12 +447,13 @@ Scenario::operator()()
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
 
-
-                    std::string filename = CONFIGURATOR->GetResultsPath() + CONFIGURATOR->GetName() + "-lte-rem-" + std::to_string(mapIdx) + ".txt";
+                    std::string filename = CONFIGURATOR->GetResultsPath() +
+                                           CONFIGURATOR->GetName() + "-lte-rem-" +
+                                           std::to_string(mapIdx) + ".txt";
                     remHelper->SetAttribute("OutputFile", StringValue(filename));
                     remHelper->Install();
                     generatedFiles.push_back(filename);
-                    plotFiles.push_back({filename, "lte"});
+                    plotFiles.push_back({.file = filename, .type = "lte", .is3D = false});
                 }
             }
             else
@@ -436,31 +466,40 @@ Scenario::operator()()
         Simulator::Run();
         Simulator::Destroy();
 
-        for (const auto& [file, mapType] : plotFiles)
+        for (const auto& plotConf : plotFiles)
         {
-            std::string cmd = "python " + CONFIGURATOR->GetResultsPath() + "../../analysis/txt2ply.py " + file;
+            std::string cmd = "python " + CONFIGURATOR->GetResultsPath() +
+                              "../../analysis/txt2ply.py " + plotConf.file;
 
-            if (mapType == "nr") {
+            bool addNrFlag = plotConf.type == "nr";
+            if (addNrFlag)
+            {
                 cmd += " --nrMap";
             }
 
             int plyRet = system(cmd.c_str());
             if (plyRet != 0)
             {
-                 NS_LOG_ERROR("Something went wrong while generating the ply file for " << file);
+                NS_LOG_ERROR("Something went wrong while generating the ply file for "
+                             << plotConf.file);
             }
 
-            std::string plotCmd = "python " + CONFIGURATOR->GetResultsPath() + "../../analysis/rem-2d-preview.py " + file;
-            if (mapType == "nr") {
+            std::string plotCmd = plotConf.is3D
+                                      ? "python " + CONFIGURATOR->GetResultsPath() +
+                                            "../../analysis/rem-3d-preview.py " + plotConf.file
+                                      : "python " + CONFIGURATOR->GetResultsPath() +
+                                            "../../analysis/rem-2d-preview.py " + plotConf.file;
+            if (addNrFlag)
+            {
                 plotCmd += " --nrMap";
             }
             int plotRet = system(plotCmd.c_str());
             if (plotRet != 0)
             {
-                NS_LOG_ERROR("Something went wrong while generating the plot for " << file);
+                NS_LOG_ERROR("Something went wrong while generating the plot for "
+                             << plotConf.file);
             }
         }
-
     }
     else
     {
@@ -491,7 +530,6 @@ Scenario::operator()()
         Simulator::Destroy();
     }
 }
-
 
 void
 Scenario::ApplyStaticConfig()
@@ -693,7 +731,8 @@ Scenario::ConfigurePhy()
                     nrConf->GetUeChannelAccessManagerType());
                 for (auto& attr : nrConf->GetUeChannelAccessManagerAttributes())
                 {
-                    nrSim->GetNrHelper()->SetUeChannelAccessManagerAttribute(attr.name, *attr.value);
+                    nrSim->GetNrHelper()->SetUeChannelAccessManagerAttribute(attr.name,
+                                                                             *attr.value);
                 }
             }
 
@@ -704,7 +743,8 @@ Scenario::ConfigurePhy()
                     nrConf->GetGnbChannelAccessManagerType());
                 for (auto& attr : nrConf->GetGnbChannelAccessManagerAttributes())
                 {
-                    nrSim->GetNrHelper()->SetGnbChannelAccessManagerAttribute(attr.name, *attr.value);
+                    nrSim->GetNrHelper()->SetGnbChannelAccessManagerAttribute(attr.name,
+                                                                              *attr.value);
                 }
             }
 
@@ -1051,7 +1091,9 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
 
         auto mob = node->GetObject<MobilityModel>();
-        mob->TraceConnect("CourseChange", oss.str(), MakeCallback(&Scenario::LeoSatCourseChange, this));
+        mob->TraceConnect("CourseChange",
+                          oss.str(),
+                          MakeCallback(&Scenario::LeoSatCourseChange, this));
     }
     else if (entityKey == "vehicles")
     {
@@ -1249,7 +1291,7 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
         nrHelper->SetGnbAntennaTypeId(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
         {
-            nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+        nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
         }
     }
     auto entityNodeContainer = NodeContainer(entityNode);
@@ -1963,7 +2005,8 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     {
         if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
         {
-            NS_LOG_INFO("Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
+            NS_LOG_INFO(
+                "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
             Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
             m_sinrAttachmentRunning.insert(netId);
         }
@@ -2011,7 +2054,6 @@ Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
     {
         Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
     }
-
 }
 
 void
@@ -2020,10 +2062,12 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     std::cout << "Evaluating SINR-Distance Attachment for netId " << netId << std::endl;
     // Retrieve configuration
     auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
-    if (netId >= phyLayerConfs.size()) return;
+    if (netId >= phyLayerConfs.size())
+        return;
 
     auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
-    if (!nrConf) return;
+    if (!nrConf)
+        return;
 
     auto sdaConfigOpt = nrConf->GetSinrDistanceAttachConfig();
 
@@ -2038,11 +2082,11 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     auto gnbIt = m_nrGnbDevices.find(netId);
     auto ueIt = m_nrUeDevices.find(netId);
 
-    if (gnbIt == m_nrGnbDevices.end() || ueIt == m_nrUeDevices.end() ||
-        gnbIt->second.empty() || ueIt->second.empty())
+    if (gnbIt == m_nrGnbDevices.end() || ueIt == m_nrUeDevices.end() || gnbIt->second.empty() ||
+        ueIt->second.empty())
     {
         // Reschedule if devices are not yet ready or empty
-         Simulator::Schedule(sdaConfig.precision,
+        Simulator::Schedule(sdaConfig.precision,
                             &Scenario::EvaluateSinrDistanceAttachment,
                             this,
                             netId);
@@ -2050,7 +2094,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     }
 
     // Flatten gNB list for easier access
-     NetDeviceContainer allGnbDevices;
+    NetDeviceContainer allGnbDevices;
     for (const auto& gnbContainer : gnbIt->second)
     {
         allGnbDevices.Add(gnbContainer);
@@ -2059,17 +2103,24 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     auto nrPhySim = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
     auto nrHelper = nrPhySim->GetNrHelper();
 
+    // Prepare REM Helper for SINR calculations
+    Ptr<NrRadioGeoEnvironmentMapHelper> remHelper = CreateObject<NrRadioGeoEnvironmentMapHelper>();
+    remHelper->SetInterferers(allGnbDevices, 0); // Configure interferers (all gNBs)
+
     // Iterate over all UEs
     for (auto ueDevicePtr : ueIt->second)
     {
         auto ueDevice = DynamicCast<NrUeNetDevice>(ueDevicePtr);
-        if (!ueDevice) continue;
+        if (!ueDevice)
+            continue;
 
         Ptr<Node> ueNode = ueDevice->GetNode();
-        if (!ueNode) continue;
+        if (!ueNode)
+            continue;
 
         Ptr<MobilityModel> ueMobility = ueNode->GetObject<MobilityModel>();
-        if (!ueMobility) continue;
+        if (!ueMobility)
+            continue;
 
         // Find best gNB
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
@@ -2077,118 +2128,73 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         double bestDistance = std::numeric_limits<double>::infinity();
 
         // Check all gNBs
-        for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End(); ++gnbDeviceIt)
+        for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
+             ++gnbDeviceIt)
         {
-             Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
-             if (!gnbDevice) continue;
+            Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
+            if (!gnbDevice)
+                continue;
 
-             Ptr<Node> gnbNode = gnbDevice->GetNode();
-             if (!gnbNode) continue;
+            Ptr<Node> gnbNode = gnbDevice->GetNode();
+            if (!gnbNode)
+                continue;
 
-             Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
-             if (!gnbMobility) continue;
+            Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
+            if (!gnbMobility)
+                continue;
 
-             double distance = ueMobility->GetDistanceFrom(gnbMobility);
+            double distance = ueMobility->GetDistanceFrom(gnbMobility);
 
-             // Find required min SINR for this distance
-             double minSinrRequired = std::numeric_limits<double>::max();
+            // Find required min SINR for this distance
+            double minSinrRequired = std::numeric_limits<double>::max();
 
-             const SinrDistanceTableEntry* bestEntry = nullptr;
-             double rangeDiff = std::numeric_limits<double>::max();
+            const SinrDistanceTableEntry* bestEntry = nullptr;
+            double rangeDiff = std::numeric_limits<double>::max();
 
-             // Finding the best entry based on maxDistance (the minimum distance that is still within range)
-             for (const auto& entry : sdaConfig.table)
-             {
-                 if (distance <= entry.maxDistance)
-                 {
-                     if (entry.maxDistance < rangeDiff)
-                     {
-                         rangeDiff = entry.maxDistance;
-                         bestEntry = &entry;
-                     }
-                 }
-             }
+            // Finding the best entry based on maxDistance (the minimum distance that is still
+            // within range)
+            for (const auto& entry : sdaConfig.table)
+            {
+                if (distance <= entry.maxDistance)
+                {
+                    if (entry.maxDistance < rangeDiff)
+                    {
+                        rangeDiff = entry.maxDistance;
+                        bestEntry = &entry;
+                    }
+                }
+            }
 
-             // UE is too far for any rule
-             if (!bestEntry)
-             {
-                 continue;
-             }
+            // UE is too far for any rule
+            if (!bestEntry)
+            {
+                continue;
+            }
 
-             minSinrRequired = bestEntry->minSinr;
+            minSinrRequired = bestEntry->minSinr;
 
-             // ---- CUSTOM SNR CALC ----
+            // ---- CUSTOM SNR CALC REPLACED BY HELPER ----
+            // Use IsDl = true (Downlink) for attachment decision normally
+            double estimatedSnr = remHelper->GetSinr(ueDevice, gnbDevice, 0, true);
 
-             // Calculate SNR using LENA's ThreeGppPropgationLossModel if possible
-             auto gnbPhy = gnbDevice->GetPhy(0);
-             if (!gnbPhy) continue;
+            // ---- END OF CUSTOM SNR CALC ----
 
-             auto spectrumChannel = gnbPhy->GetSpectrumPhy()->GetSpectrumChannel();
-             auto propLossModel = spectrumChannel->GetPropagationLossModel();
-
-             if (!propLossModel) continue;
-
-             double txPowerDbm = gnbPhy->GetTxPower();
-
-             // Estimate Beamforming Gain
-             double gnbGain = 0.0;
-             double ueGain = 0.0;
-
-             Ptr<BeamManager> gnbBm = gnbPhy->GetSpectrumPhy()->GetBeamManager();
-             if (gnbBm)
-             {
-                 Ptr<const UniformPlanarArray> gnbAntenna = gnbBm->GetAntenna();
-                 if (gnbAntenna)
-                 {
-                     gnbGain = 10 * log10(gnbAntenna->GetNumElems());
-                 }
-             }
-
-             Ptr<BeamManager> ueBm = ueDevice->GetPhy(0)->GetSpectrumPhy()->GetBeamManager();
-             if (ueBm)
-             {
-                 Ptr<const UniformPlanarArray> ueAntenna = ueBm->GetAntenna();
-                 if (ueAntenna)
-                 {
-                     ueGain = 10 * log10(ueAntenna->GetNumElems());
-                 }
-             }
-
-             double rxPowerDbm = propLossModel->CalcRxPower(txPowerDbm + gnbGain + ueGain, gnbMobility, ueMobility);
-
-             std::cout << "Received Power: " << rxPowerDbm << " dBm (Tx:" << txPowerDbm
-                       << " + GnbGain:" << gnbGain << " + UeGain:" << ueGain << ") from gNB "
-                       << gnbDevice->GetCellId() << " at " << Simulator::Now().GetSeconds() << std::endl;
-
-             // Noise
-             auto uePhy = ueDevice->GetPhy(0);
-             if (!uePhy) continue;
-
-             double noiseFigure = uePhy->GetNoiseFigure(); // dB
-             double bandwidth = uePhy->GetChannelBandwidth(); // Hz
-
-             // Noise Power calculation (k * T * B * F)
-             // k = 1.380649e-23 J/K
-             // T = 290 K (std)
-             double k = 1.380649e-23;
-             double T = 290.0;
-             double noisePowerW = k * T * bandwidth * std::pow(10.0, noiseFigure/10.0);
-             double noisePowerDbm = 10.0 * std::log10(noisePowerW) + 30.0;
-
-             double estimatedSnr = rxPowerDbm - noisePowerDbm;
-
-             // ---- END OF CUSTOM SNR CALC ----
-
-             //Checking if SNR is above the required threshold
-             if (estimatedSnr >= minSinrRequired)
-             {
-                 if (estimatedSnr > bestSnr)
-                 {
-                    bestDistance = distance/1e3;
+            // Checking if SNR is above the required threshold
+            if (estimatedSnr >= minSinrRequired)
+            {
+                if (estimatedSnr > bestSnr)
+                {
+                    bestDistance = distance / 1e3;
                     bestSnr = estimatedSnr;
                     bestGnb = gnbDevice;
-                 }
-             }
+                }
+            }
+            else
+            {
+                 std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to gNB "
+                           << gnbDevice->GetCellId() << " (SNR: " << estimatedSnr
+                           << " dB < required: " << minSinrRequired << " dB, distance: " << distance / 1e3 << " km)" << std::endl;
+            }
         }
 
         // Check if already attached
@@ -2197,30 +2203,37 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         if (bestGnb)
         {
             // DEBUG: TODO REMOVE
-             std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB " << bestGnb->GetCellId() << " (SNR: " << bestSnr << " dB, distance: " << bestDistance << " km)" << " at " << Simulator::Now().GetSeconds() << std::endl;
+            std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
+                      << bestGnb->GetCellId() << " (SNR: " << bestSnr
+                      << " dB, distance: " << bestDistance << " km)" << " at "
+                      << Simulator::Now().GetSeconds() << std::endl;
 
-             // Check if we need to handover (if configured gNB is different)
-             if (currentGnb != nullptr)
-             {
-                 if (currentGnb == bestGnb)
-                 {
-                     // Already attached to this gNB. Do nothing.
-                 }
-                 else
-                 {
-
-                     // Needs handover. AttachToGnb likely crashes if context exists.
-                     // DEBUG: TODO REMOVE
-                     std::cout << "UE " << ueDevice->GetImsi() << " should switch to gNB " << bestGnb->GetCellId() << " but Handover is not implemented." << std::endl;
-                 }
-             }else{
+            // Check if we need to handover (if configured gNB is different)
+            if (currentGnb != nullptr)
+            {
+                if (currentGnb == bestGnb)
+                {
+                    // Already attached to this gNB. Do nothing.
+                }
+                else
+                {
+                    // Needs handover. AttachToGnb likely crashes if context exists.
+                    // DEBUG: TODO REMOVE
+                    std::cout << "UE " << ueDevice->GetImsi() << " should switch to gNB "
+                              << bestGnb->GetCellId() << " but Handover is not implemented."
+                              << std::endl;
+                }
+            }
+            else
+            {
                 // Not attached, safe to attach.
                 nrHelper->AttachToGnb(ueDevice, bestGnb);
-             }
+            }
         }
         else
         {
-            std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to any gNB (No valid SINR/Distance match)" << std::endl;
+            std::cout << "UE " << ueDevice->GetImsi()
+                      << " CANNOT connect to any gNB (No valid SINR/Distance match)" << std::endl;
         }
     }
 
