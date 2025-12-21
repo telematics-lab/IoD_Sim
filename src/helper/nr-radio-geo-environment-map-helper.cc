@@ -25,6 +25,7 @@
 #include "ns3/spectrum-converter.h"
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
+#include "ns3/uniform-planar-array.h"
 
 #include <fstream>
 #include <limits>
@@ -614,7 +615,7 @@ NrRadioGeoEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(
 {
     m_deviceToAntenna.insert(std::make_pair(
         rrdDevice,
-        Copy(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+        ConfigureObjectFactory(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>()));
     for (NetDeviceContainer::Iterator rtdNetDevIt = rtdNetDev.Begin();
          rtdNetDevIt != rtdNetDev.End();
          ++rtdNetDevIt)
@@ -622,7 +623,7 @@ NrRadioGeoEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(
         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*rtdNetDevIt)->second;
         m_deviceToAntenna.insert(std::make_pair(
             *rtdNetDevIt,
-            Copy(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+            ConfigureObjectFactory(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>()));
     }
 }
 
@@ -831,6 +832,8 @@ NrRadioGeoEnvironmentMapHelper::CalculateSnr(const Ptr<SpectrumValue>& usefulSig
     return RatioToDb(Sum(snr) / snr.GetSpectrumModel()->GetNumBands());
 }
 
+
+
 void
 NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interferers, uint8_t bwpId)
 {
@@ -869,8 +872,8 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
         auto spectrumPhy = phy->GetSpectrumPhy();
         if (spectrumPhy && spectrumPhy->GetAntenna())
         {
-            remDev.antenna = ConstCast<UniformPlanarArray>(
-                spectrumPhy->GetAntenna()->GetObject<UniformPlanarArray>());
+            // COPY the antenna so we can modify beamforming without affecting the live device
+            remDev.antenna = ConfigureObjectFactory(spectrumPhy->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
         }
 
         if (remDev.mob)
@@ -918,15 +921,13 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = ueDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = uePhy->GetSpectrumModel();
-        rxDevice.antenna = ConstCast<UniformPlanarArray>(
-            uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>());
+        rxDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
 
         // Transmitter (gNB)
         txDevice.node = gnbDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        txDevice.antenna = ConstCast<UniformPlanarArray>(
-            gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>());
+        txDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
         txDevice.txPower = gnbPhy->GetTxPower();
 
         // Prepare Noise (at Rx: UE)
@@ -943,15 +944,13 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = gnbDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        rxDevice.antenna = ConstCast<UniformPlanarArray>(
-            gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>());
+        rxDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
 
         // Transmitter (UE)
         txDevice.node = ueDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = uePhy->GetSpectrumModel();
-        txDevice.antenna = ConstCast<UniformPlanarArray>(
-            uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>());
+        txDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
         txDevice.txPower = uePhy->GetTxPower();
 
         // Prepare Noise (at Rx: gNB)
@@ -961,6 +960,10 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
                                                                                  rxDevice.spectrumModel);
         }
     }
+
+    // Configure Ideal Beamforming (Direct Path) for the active link
+    ConfigureDirectPathBfv(txDevice, rxDevice, txDevice.antenna);
+    ConfigureDirectPathBfv(rxDevice, txDevice, rxDevice.antenna);
 
     // Calculate Signal
     Ptr<SpectrumValue> usefulSignal = CalcRxPsdValue(txDevice, rxDevice);
@@ -974,10 +977,10 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         {
             continue;
         }
-        // m_remDev usually contains configured transmitters.
-        // For DL map, m_remDev has gNBs. For UL, it should have UEs.
-        // If m_remDev is not populated correctly for the scenario (e.g. UL interference),
-        // interferenceSignals will be empty, effectively calculating SNR.
+
+        // Configure Interferer beam to point to the Victim Receiver (Worst Case)
+        ConfigureDirectPathBfv(intDev, rxDevice, intDev.antenna);
+
         interferenceSignals.push_back(CalcRxPsdValue(intDev, rxDevice));
     }
 

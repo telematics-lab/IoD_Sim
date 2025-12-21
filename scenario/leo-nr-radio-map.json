@@ -5,7 +5,7 @@
   "duration": 1,
   "appStatisticsReportInterval": 0.3,
   "radioMaps": [
-    /*{
+    {
       "phyLayerId": 0,
       "bwpId": 0,
       "coordinates": "geocentric",
@@ -21,7 +21,7 @@
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.1s"
       }
-    }*/
+    } /* ALl the earth map
     {
       "phyLayerId": 0,
       "bwpId": 0,
@@ -33,12 +33,12 @@
         "MinLat": "-70.0",
         "MaxLat": "70.0",
         "Altitude": "2.0",
-        "XRes": "100",
-        "YRes": "100",
+        "XRes": "200",
+        "YRes": "200",
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.1s"
       }
-    }
+    }*/
   ],
   "staticNs3Config": [
     {
@@ -113,7 +113,6 @@
         "attributes": []
       },
       "ueAntenna": {
-        "type": "ns3::CosineAntennaModel",
         "arrayProperties": [
           {
             "name": "NumRows",
@@ -126,7 +125,6 @@
         ]
       },
       "gnbAntenna": {
-        "type": "ns3::CosineAntennaModel",
         "arrayProperties": [
           {
             "name": "NumRows",
