@@ -11,17 +11,17 @@
       "coordinates": "geocentric",
       "logGeocentricREM": true,
       "parameters": {
-        "MinLon": "100.0",
-        "MaxLon": "105.0",
-        "MinLat": "25.0",
-        "MaxLat": "35.0",
+        "MinLon": "80.0",
+        "MaxLon": "130.0",
+        "MinLat": "0.0",
+        "MaxLat": "60.0",
         "Altitude": "2.0",
         "XRes": "200",
         "YRes": "200",
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.1s"
       }
-    } /* ALl the earth map
+    } /* All the earth map
     {
       "phyLayerId": 0,
       "bwpId": 0,
@@ -90,7 +90,7 @@
           ],
           "frequencyBands": [
             {
-              "centralFrequency": 28e9,
+              "centralFrequency": 16e9,
               "bandwidth": 10e6,
               "numComponentCarriers": 1
             }
@@ -116,23 +116,38 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 4
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 8
+            "value": 1
           }
         ]
       },
       "gnbAntenna": {
+        "type": "ns3::ParabolicAntennaModel",
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 8
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 16
+            "value": 1
+          }
+        ],
+        "properties": [
+          {
+            "name": "Beamwidth",
+            "value": 60
+          },
+          {
+            "name": "Orientation",
+            "value": -85
+          },
+          {
+            "name": "Elevation",
+            "value": 0 //30
           }
         ]
       },

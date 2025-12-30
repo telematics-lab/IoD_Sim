@@ -1,0 +1,115 @@
+From cc37a244efd6e1e5e0e64153d94cceecf4f453dd Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 30 Dec 2025 14:54:35 +0100
+Subject: [PATCH] Improvement: Parabolic Antenna Elevation Tilt
+
+---
+ src/antenna/model/parabolic-antenna-model.cc | 47 ++++++++++++++++----
+ src/antenna/model/parabolic-antenna-model.h  | 11 +++++
+ 2 files changed, 49 insertions(+), 9 deletions(-)
+
+diff --git a/src/antenna/model/parabolic-antenna-model.cc b/src/antenna/model/parabolic-antenna-model.cc
+index 5cbeabcb4..ea46c8491 100644
+--- a/src/antenna/model/parabolic-antenna-model.cc
++++ b/src/antenna/model/parabolic-antenna-model.cc
+@@ -43,6 +43,13 @@ ParabolicAntennaModel::GetTypeId()
+                           MakeDoubleAccessor(&ParabolicAntennaModel::SetOrientation,
+                                              &ParabolicAntennaModel::GetOrientation),
+                           MakeDoubleChecker<double>(-360, 360))
++            .AddAttribute("Elevation",
++                          "The angle (degrees) that expresses the elevation of the antenna "
++                          "relative to the x-y plane",
++                          DoubleValue(0.0),
++                          MakeDoubleAccessor(&ParabolicAntennaModel::SetElevation,
++                                             &ParabolicAntennaModel::GetElevation),
++                          MakeDoubleChecker<double>(-90, 90))
+             .AddAttribute("MaxAttenuation",
+                           "The maximum attenuation (dB) of the antenna radiation pattern.",
+                           DoubleValue(20.0),
+@@ -77,26 +84,48 @@ ParabolicAntennaModel::GetOrientation() const
+     return RadiansToDegrees(m_orientationRadians);
+ }
+ 
++void
++ParabolicAntennaModel::SetElevation(double elevationDegrees)
++{
++    NS_LOG_FUNCTION(this << elevationDegrees);
++    m_elevationRadians = DegreesToRadians(elevationDegrees);
++}
++
++double
++ParabolicAntennaModel::GetElevation() const
++{
++    return RadiansToDegrees(m_elevationRadians);
++}
++
+ double
+ ParabolicAntennaModel::GetGainDb(Angles a)
+ {
+     NS_LOG_FUNCTION(this << a);
+-    // azimuth angle w.r.t. the reference system of the antenna
+-    double phi = a.GetAzimuth() - m_orientationRadians;
+ 
+-    // make sure phi is in (-pi, pi]
+-    while (phi <= -M_PI)
++    double azimuthAngle = a.GetAzimuth();
++    double inclinationAngle = a.GetInclination();
++
++    double antennaAzimuth = m_orientationRadians;
++    double antennaInclination = M_PI_2 - m_elevationRadians;
++
++    double cosPsi = std::cos(inclinationAngle) * std::cos(antennaInclination) +
++                    std::sin(inclinationAngle) * std::sin(antennaInclination) * std::cos(azimuthAngle - antennaAzimuth);
++
++    // Clamp to avoid domain errors
++    if (cosPsi < -1.0)
+     {
+-        phi += M_PI + M_PI;
++        cosPsi = -1.0;
+     }
+-    while (phi > M_PI)
++    else if (cosPsi > 1.0)
+     {
+-        phi -= M_PI + M_PI;
++        cosPsi = 1.0;
+     }
+ 
+-    NS_LOG_LOGIC("phi = " << phi);
++    double psi = std::acos(cosPsi);
++
++    NS_LOG_LOGIC("psi = " << psi);
+ 
+-    double gainDb = -std::min(12 * pow(phi / m_beamwidthRadians, 2), m_maxAttenuation);
++    double gainDb = -std::min(12 * pow(psi / m_beamwidthRadians, 2), m_maxAttenuation);
+ 
+     NS_LOG_LOGIC("gain = " << gainDb);
+     return gainDb;
+diff --git a/src/antenna/model/parabolic-antenna-model.h b/src/antenna/model/parabolic-antenna-model.h
+index e54adacc8..0604511fd 100644
+--- a/src/antenna/model/parabolic-antenna-model.h
++++ b/src/antenna/model/parabolic-antenna-model.h
+@@ -65,10 +65,21 @@ class ParabolicAntennaModel : public AntennaModel
+      * @return antenna orientation in degrees
+      */
+     double GetOrientation() const;
++    /**
++     * Set the antenna elevation
++     * @param elevationDegrees antenna elevation in degrees
++     */
++    void SetElevation(double elevationDegrees);
++    /**
++     * Get the antenna elevation
++     * @return antenna elevation in degrees
++     */
++    double GetElevation() const;
+ 
+   private:
+     double m_beamwidthRadians;   //!< Beam width in radians
+     double m_orientationRadians; //!< Antenna orientation in radians
++    double m_elevationRadians;   //!< Antenna elevation in radians
+     double m_maxAttenuation;     //!< Max attenuation
+ };
+ 
+-- 
+2.50.1 (Apple Git-155)
+

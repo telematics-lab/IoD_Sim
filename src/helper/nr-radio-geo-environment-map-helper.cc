@@ -6,13 +6,13 @@
 
 #include "ns3/abort.h"
 #include "ns3/beamforming-vector.h"
+#include "ns3/boolean.h"
 #include "ns3/buildings-module.h"
 #include "ns3/config.h"
 #include "ns3/double.h"
 #include "ns3/enum.h"
 #include "ns3/geocentric-mobility-model.h"
 #include "ns3/geographic-positions.h"
-#include "ns3/boolean.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
@@ -236,6 +236,7 @@ NrRadioGeoEnvironmentMapHelper::SetLogGeocentricRem(bool logGeocentricRem)
 {
     m_logGeocentricRem = logGeocentricRem;
 }
+
 bool
 NrRadioGeoEnvironmentMapHelper::GetLogGeocentricRem() const
 {
@@ -324,10 +325,12 @@ NrRadioGeoEnvironmentMapHelper::ConfigureRrd(const Ptr<NetDevice>& rrdDevice)
     m_rrd.spectrumModel = m_rrdPhy->GetSpectrumModel();
     // Enforce GeocentricMobilityModel
     Ptr<MobilityModel> mobility = rrdDevice->GetNode()->GetObject<MobilityModel>();
-    Ptr<GeocentricMobilityModel> geocentricMobility = DynamicCast<GeocentricMobilityModel>(mobility);
+    Ptr<GeocentricMobilityModel> geocentricMobility =
+        DynamicCast<GeocentricMobilityModel>(mobility);
     if (!geocentricMobility)
     {
-        NS_FATAL_ERROR("NrRadioGeoEnvironmentMapHelper requires GeocentricMobilityModel for RRD device");
+        NS_FATAL_ERROR(
+            "NrRadioGeoEnvironmentMapHelper requires GeocentricMobilityModel for RRD device");
     }
 
     // Retrieve position using Geocentric (ECEF) coordinates
@@ -383,10 +386,12 @@ NrRadioGeoEnvironmentMapHelper::ConfigureRtdList(const NetDeviceContainer& rtdDe
         rtd.spectrumModel = rtdPhy->GetSpectrumModel();
         // Enforce GeocentricMobilityModel
         Ptr<MobilityModel> mobility = (*netDevIt)->GetNode()->GetObject<MobilityModel>();
-        Ptr<GeocentricMobilityModel> geocentricMobility = DynamicCast<GeocentricMobilityModel>(mobility);
+        Ptr<GeocentricMobilityModel> geocentricMobility =
+            DynamicCast<GeocentricMobilityModel>(mobility);
         if (!geocentricMobility)
         {
-            NS_FATAL_ERROR("NrRadioGeoEnvironmentMapHelper requires GeocentricMobilityModel for RTD device");
+            NS_FATAL_ERROR(
+                "NrRadioGeoEnvironmentMapHelper requires GeocentricMobilityModel for RTD device");
         }
 
         // Get Geocentric (ECEF) coordinates directly from the model
@@ -503,19 +508,25 @@ NrRadioGeoEnvironmentMapHelper::ConfigureObjectFactory(const Ptr<Object>& object
                     NS_LOG_INFO("Skipping to copy ChannelConditionModel."
                                 "According to REM design it should be created "
                                 "as a new object (not copied).");
+                    continue;
                 }
                 else if (attributeInfo.name == "ChannelModel")
                 {
                     NS_LOG_INFO("Skipping to copy ChannelModel."
                                 "According to REM design it should be created "
                                 "as a new object (not copied).");
+                    continue;
+                }
+                else if (attributeInfo.name == "AntennaElement")
+                {
+                    NS_LOG_INFO("Copying AntennaElement pointer.");
                 }
                 else
                 {
                     NS_LOG_WARN("This factory has a PointerValue attribute that "
                                 "is not compatible with this REM helper version.");
+                    continue;
                 }
-                continue;
             }
 
             // create initial attribute value to store attribute
@@ -613,17 +624,28 @@ NrRadioGeoEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(
     const NetDeviceContainer& rtdNetDev,
     const Ptr<NetDevice>& rrdDevice)
 {
-    m_deviceToAntenna.insert(std::make_pair(
-        rrdDevice,
-        ConfigureObjectFactory(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>()));
+    // RRD
+    auto originalRrdAntenna =
+        m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>();
+    auto rrdAntennaCopy = ConfigureObjectFactory(originalRrdAntenna).Create<UniformPlanarArray>();
+
+    // Copy BF vector if valid (snapshot)
+    rrdAntennaCopy->SetBeamformingVector(originalRrdAntenna->GetBeamformingVector());
+    m_deviceToAntenna.insert(std::make_pair(rrdDevice, rrdAntennaCopy));
+
+    // RTDs
     for (NetDeviceContainer::Iterator rtdNetDevIt = rtdNetDev.Begin();
          rtdNetDevIt != rtdNetDev.End();
          ++rtdNetDevIt)
     {
         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*rtdNetDevIt)->second;
-        m_deviceToAntenna.insert(std::make_pair(
-            *rtdNetDevIt,
-            ConfigureObjectFactory(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>()));
+        auto originalRtdAntenna =
+            rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>();
+        auto rtdAntennaCopy =
+            ConfigureObjectFactory(originalRtdAntenna).Create<UniformPlanarArray>();
+        rtdAntennaCopy->SetBeamformingVector(originalRtdAntenna->GetBeamformingVector());
+
+        m_deviceToAntenna.insert(std::make_pair(*rtdNetDevIt, rtdAntennaCopy));
     }
 }
 
@@ -832,8 +854,6 @@ NrRadioGeoEnvironmentMapHelper::CalculateSnr(const Ptr<SpectrumValue>& usefulSig
     return RatioToDb(Sum(snr) / snr.GetSpectrumModel()->GetNumBands());
 }
 
-
-
 void
 NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interferers, uint8_t bwpId)
 {
@@ -843,7 +863,8 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
     for (auto it = interferers.Begin(); it != interferers.End(); ++it)
     {
         Ptr<NetDevice> dev = *it;
-        if (!dev) continue;
+        if (!dev)
+            continue;
 
         Ptr<NrPhy> phy = nullptr;
 
@@ -861,7 +882,8 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
             }
         }
 
-        if (!phy) continue;
+        if (!phy)
+            continue;
 
         RemDevice remDev;
         remDev.node = dev->GetNode();
@@ -873,7 +895,9 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
         if (spectrumPhy && spectrumPhy->GetAntenna())
         {
             // COPY the antenna so we can modify beamforming without affecting the live device
-            remDev.antenna = ConfigureObjectFactory(spectrumPhy->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
+            remDev.antenna =
+                ConfigureObjectFactory(spectrumPhy->GetAntenna()->GetObject<UniformPlanarArray>())
+                    .Create<UniformPlanarArray>();
         }
 
         if (remDev.mob)
@@ -921,20 +945,27 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = ueDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = uePhy->GetSpectrumModel();
-        rxDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
+        rxDevice.antenna =
+            ConfigureObjectFactory(
+                uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
+                .Create<UniformPlanarArray>();
 
         // Transmitter (gNB)
         txDevice.node = gnbDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        txDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
+        txDevice.antenna =
+            ConfigureObjectFactory(
+                gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
+                .Create<UniformPlanarArray>();
         txDevice.txPower = gnbPhy->GetTxPower();
 
         // Prepare Noise (at Rx: UE)
         if (!m_noisePsd)
         {
-             m_noisePsd = NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(uePhy->GetNoiseFigure(),
-                                                                                 rxDevice.spectrumModel);
+            m_noisePsd =
+                NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(uePhy->GetNoiseFigure(),
+                                                                       rxDevice.spectrumModel);
         }
     }
     else
@@ -944,20 +975,27 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = gnbDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        rxDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
+        rxDevice.antenna =
+            ConfigureObjectFactory(
+                gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
+                .Create<UniformPlanarArray>();
 
         // Transmitter (UE)
         txDevice.node = ueDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = uePhy->GetSpectrumModel();
-        txDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>()).Create<UniformPlanarArray>();
+        txDevice.antenna =
+            ConfigureObjectFactory(
+                uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
+                .Create<UniformPlanarArray>();
         txDevice.txPower = uePhy->GetTxPower();
 
         // Prepare Noise (at Rx: gNB)
         if (!m_noisePsd)
         {
-             m_noisePsd = NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(gnbPhy->GetNoiseFigure(),
-                                                                                 rxDevice.spectrumModel);
+            m_noisePsd =
+                NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(gnbPhy->GetNoiseFigure(),
+                                                                       rxDevice.spectrumModel);
         }
     }
 
@@ -1292,7 +1330,7 @@ NrRadioGeoEnvironmentMapHelper::CalcCoverageAreaRemMap()
                 // we need to calculate received PSD for each RTD using this beam at RRD
                 for (auto& itRtdCalc : m_remDev)
                 {
-                    // increase counter de calcRXPsd calls
+                    // increase counter of calcRxPsd calls
                     calcRxPsdCounter++;
                     // calculate received power from the current RTD device
                     Ptr<SpectrumValue> receivedPower = CalcRxPsdValue(itRtdCalc, m_rrd);
@@ -1622,12 +1660,13 @@ NrRadioGeoEnvironmentMapHelper::PrintGeocentricRemToFile()
         // it.pos is already in ECEF (Geocentric) coordinates
 
         // Calculate Lat/Lon/Alt for this point
-        Vector geo = GeographicPositions::CartesianToGeographicCoordinates(it.pos, GeographicPositions::SPHERE);
+        Vector geo =
+            GeographicPositions::CartesianToGeographicCoordinates(it.pos,
+                                                                  GeographicPositions::SPHERE);
 
-        outFile << it.pos.x << "\t" << it.pos.y << "\t" << it.pos.z << "\t"
-                << it.avgSnrDb << "\t" << it.avgSinrDb << "\t"
-                << it.avRxPowerDbm << "\t" << it.avgSirDb << "\t"
-                << geo.x << "\t" << geo.y << "\t" << geo.z // Latitude, Longitude, Altitude
+        outFile << it.pos.x << "\t" << it.pos.y << "\t" << it.pos.z << "\t" << it.avgSnrDb << "\t"
+                << it.avgSinrDb << "\t" << it.avRxPowerDbm << "\t" << it.avgSirDb << "\t" << geo.x
+                << "\t" << geo.y << "\t" << geo.z // Latitude, Longitude, Altitude
                 << std::endl;
     }
 

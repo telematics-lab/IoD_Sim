@@ -1,0 +1,177 @@
+{
+  "name": "parabolic-antenna-radio-map",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1,
+  "radioMaps": [
+    {
+      "phyLayerId": 0,
+      "bwpId": 0,
+      "parameters": {
+        "XMin": "0.0",
+        "XMax": "50.0",
+        "YMin": "0.0",
+        "YMax": "50.0",
+        "Z": "1.5",
+        "XRes": "100",
+        "YRes": "100",
+        "RemMode": "BeamShape",
+        "InstallationDelay": "0.1s"
+      }
+    }
+  ],
+  "phyLayer": [
+    {
+      "type": "nr",
+      "bands": [
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "frequencyBands": [
+            {
+              "centralFrequency": 28e9,
+              "bandwidth": 50e6,
+              "numComponentCarriers": 1
+            }
+          ]
+        }
+      ],
+      "gnbAntenna": {
+        "type": "ns3::ParabolicAntennaModel",
+        "properties": [
+          {
+            "name": "Orientation",
+            "value": 90.0
+          },
+          {
+            "name": "Elevation",
+            "value": -30.0
+          }
+        ],
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 1
+          },
+          {
+            "name": "NumColumns",
+            "value": 1
+          }
+        ]
+      },
+      "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 1
+          },
+          {
+            "name": "NumColumns",
+            "value": 1
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 23.0
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 30.0
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  "nodes": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "UE",
+          "networkLayer": 0,
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              25.0,
+              40.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 30.0
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              25.0,
+              25.0,
+              5.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ]
+}
