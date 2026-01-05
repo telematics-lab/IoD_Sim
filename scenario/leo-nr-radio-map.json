@@ -16,8 +16,8 @@
         "MinLat": "0.0",
         "MaxLat": "60.0",
         "Altitude": "2.0",
-        "XRes": "200",
-        "YRes": "200",
+        "XRes": "100",
+        "YRes": "100",
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.1s"
       }

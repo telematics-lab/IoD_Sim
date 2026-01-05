@@ -131,6 +131,9 @@ class NrPhySimulationHelper : public Object
                       const std::vector<ModelConfiguration::Attribute>& antennaProps = {},
                       const std::vector<ModelConfiguration::Attribute>& antennaArrayProps = {});
 
+    void ResetGnbAntenna();
+    void ResetUeAntenna();
+
     void SetUePhyAttributes(const std::vector<ModelConfiguration::Attribute>& uePhyAttributes);
     void SetGnbPhyAttributes(const std::vector<ModelConfiguration::Attribute>& gnbPhyAttributes);
 

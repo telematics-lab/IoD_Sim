@@ -1073,7 +1073,10 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         mobility.Install(m_drones.Get(entityId));
         std::ostringstream oss;
         oss << "/DroneList/" << entityId << "/$ns3::MobilityModel/CourseChange";
-        Config::Connect(oss.str(), MakeCallback(&Scenario::DroneCourseChange, this));
+        auto mob = m_drones.Get(entityId)->GetObject<MobilityModel>();
+        mob->TraceConnect("CourseChange",
+                          oss.str(),
+                          MakeCallback(&Scenario::DroneCourseChange, this));
     }
     else if (entityKey == "ZSPs")
     {
@@ -1100,8 +1103,11 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
         auto vehicle = m_vehicles.Get(entityId);
         mobility.Install(vehicle);
         std::ostringstream oss;
-        oss << "/NodeList/" << vehicle->GetId() << "/$ns3::MobilityModel/CourseChange";
-        Config::Connect(oss.str(), MakeCallback(&Scenario::VehicleCourseChange, this));
+        oss << "/VehicleList/" << entityId << "/$ns3::MobilityModel/CourseChange";
+        auto mob = vehicle->GetObject<MobilityModel>();
+        mob->TraceConnect("CourseChange",
+                          oss.str(),
+                          MakeCallback(&Scenario::VehicleCourseChange, this));
     }
     else
     {
@@ -1279,20 +1285,32 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const std::optional<ModelConfiguration> antennaModel,
                          const std::vector<ns3::NrPhyProperty> phyConf)
 {
-    // !NOTICE: no checks are made for backbone/netid combination that do not represent an LTE
-    // backbone!
     static std::vector<NodeContainer> backbonePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrPhyConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(
+        CONFIGURATOR->GetPhyLayers()[netId]);
     auto nrHelper = nrPhy->GetNrHelper();
 
-    // TODO allow better substitution of default antenna model
+    nrPhy->ResetGnbAntenna();
     if (antennaModel)
     {
+        // The Antenna Model is built with a UniformPlanarArray and will have an antenna element
+        // built according to the specified model. The syntax will be the same of the ue and gnb on
+        // phy layer antenna configuration
         nrHelper->SetGnbAntennaTypeId(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
         {
-        nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+            nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
         }
+    }
+    else
+    {
+        // Rebuild the antenna every time such that any antenna has a AntennaElement indipendent
+        // from the other nr node antennas
+        auto gnbAntennaConf = nrPhyConf->GetGnbAntenna();
+        nrPhy->SetGnbAntenna(gnbAntennaConf.type,
+                             gnbAntennaConf.properties,
+                             gnbAntennaConf.arrayProperties);
     }
     auto entityNodeContainer = NodeContainer(entityNode);
     auto dev =
@@ -1338,21 +1356,35 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::optional<ModelConfiguration> antennaModel,
                         const std::vector<ns3::NrPhyProperty> phyConf)
 {
-    // NOTICE: no checks are made for ue/netid combination that do not represent an LTE backbone!
     static std::vector<NodeContainer> uePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
+    auto nrPhyConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(
+        CONFIGURATOR->GetPhyLayers()[netId]);
     auto nrHelper = nrPhy->GetNrHelper();
-    Ipv4StaticRoutingHelper routingHelper;
 
+    nrPhy->ResetUeAntenna();
     if (antennaModel)
     {
+        // The Antenna Model is built with a UniformPlanarArray and will have an antenna element
+        // built according to the specified model. The syntax will be the same of the ue and gnb on
+        // phy layer antenna configuration
         nrHelper->SetUeAntennaTypeId(antennaModel->GetName());
         for (auto& attr : antennaModel->GetAttributes())
         {
             nrHelper->SetUeAntennaAttribute(attr.name, *attr.value);
         }
     }
+    else
+    {
+        // Rebuild the antenna every time such that any antenna has a AntennaElement indipendent
+        // from the other nr node antennas
+        auto ueAntennaConf = nrPhyConf->GetUeAntenna();
+        nrPhy->SetUeAntenna(ueAntennaConf.type,
+                            ueAntennaConf.properties,
+                            ueAntennaConf.arrayProperties);
+    }
 
+    Ipv4StaticRoutingHelper routingHelper;
     auto entityNodeContainer = NodeContainer(entityNode);
     auto dev =
         StaticCast<NrUeNetDevice, NetDevice>(nrPhy->InstallUeDevices(entityNodeContainer).Get(0));
@@ -1374,9 +1406,9 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
         }
     }
 
-    // Install network layer in order to proceed with IPv4 LTE configuration
+    // Install network layer in order to proceed with IPv4 NR configuration
     InstallEntityIpv4(entityNode, dev, netId);
-    // Register UEs into network 1.0.0.0/8
+    // Register UEs into network 7.0.0.0/8
     // unfortunately this is hardwired into EpcHelper implementation
 
     auto assignedIpAddrs = nrPhy->GetNrEpcHelper()->AssignUeIpv4Address(NetDeviceContainer(dev));
@@ -2191,9 +2223,10 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             }
             else
             {
-                 std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to gNB "
-                           << gnbDevice->GetCellId() << " (SNR: " << estimatedSnr
-                           << " dB < required: " << minSinrRequired << " dB, distance: " << distance / 1e3 << " km)" << std::endl;
+                std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to gNB "
+                          << gnbDevice->GetCellId() << " (SNR: " << estimatedSnr
+                          << " dB < required: " << minSinrRequired
+                          << " dB, distance: " << distance / 1e3 << " km)" << std::endl;
             }
         }
 

@@ -21,6 +21,8 @@
 
 #include <ns3/boolean.h>
 #include <ns3/cc-bwp-helper.h>
+#include <ns3/double.h>
+#include <ns3/isotropic-antenna-model.h>
 #include <ns3/net-device-container.h>
 #include <ns3/node-container.h>
 #include <ns3/nr-channel-helper.h>
@@ -28,6 +30,7 @@
 #include <ns3/pointer.h>
 #include <ns3/string.h>
 #include <ns3/type-id.h>
+#include <ns3/uinteger.h>
 
 namespace ns3
 {
@@ -277,6 +280,48 @@ NrPhySimulationHelper::SetUeAntenna(
         Ptr<Object> antenna = antennaFactory.Create();
         m_nr->SetUeAntennaAttribute("AntennaElement", PointerValue(antenna));
     }
+}
+
+
+
+void
+NrPhySimulationHelper::ResetGnbAntenna()
+{
+    // Reset type to UniformPlanarArray
+    m_nr->SetGnbAntennaTypeId("ns3::UniformPlanarArray");
+    m_nr->SetGnbAntennaAttribute("NumRows", UintegerValue(4));
+    m_nr->SetGnbAntennaAttribute("NumColumns", UintegerValue(4));
+    m_nr->SetGnbAntennaAttribute("NumHorizontalPorts", UintegerValue(1));
+    m_nr->SetGnbAntennaAttribute("NumVerticalPorts", UintegerValue(1));
+    m_nr->SetGnbAntennaAttribute("IsDualPolarized", BooleanValue(false));
+    m_nr->SetGnbAntennaAttribute("PolSlantAngle", DoubleValue(0.0));
+    m_nr->SetGnbAntennaAttribute("DowntiltAngle", DoubleValue(0.0));
+    m_nr->SetGnbAntennaAttribute("BearingAngle", DoubleValue(0.0));
+    m_nr->SetGnbAntennaAttribute("AntennaHorizontalSpacing", DoubleValue(0.5));
+    m_nr->SetGnbAntennaAttribute("AntennaVerticalSpacing", DoubleValue(0.5));
+    // Reset AntennaElement to Isotropic
+    Ptr<Object> iso = CreateObject<IsotropicAntennaModel>();
+    m_nr->SetGnbAntennaAttribute("AntennaElement", PointerValue(iso));
+}
+
+void
+NrPhySimulationHelper::ResetUeAntenna()
+{
+    // Reset type to UniformPlanarArray
+    m_nr->SetUeAntennaTypeId("ns3::UniformPlanarArray");
+    m_nr->SetUeAntennaAttribute("NumRows", UintegerValue(4));
+    m_nr->SetUeAntennaAttribute("NumColumns", UintegerValue(4));
+    m_nr->SetUeAntennaAttribute("NumHorizontalPorts", UintegerValue(1));
+    m_nr->SetUeAntennaAttribute("NumVerticalPorts", UintegerValue(1));
+    m_nr->SetUeAntennaAttribute("IsDualPolarized", BooleanValue(false));
+    m_nr->SetUeAntennaAttribute("PolSlantAngle", DoubleValue(0.0));
+    m_nr->SetUeAntennaAttribute("DowntiltAngle", DoubleValue(0.0));
+    m_nr->SetUeAntennaAttribute("BearingAngle", DoubleValue(0.0));
+    m_nr->SetUeAntennaAttribute("AntennaHorizontalSpacing", DoubleValue(0.5));
+    m_nr->SetUeAntennaAttribute("AntennaVerticalSpacing", DoubleValue(0.5));
+    // Reset AntennaElement to Isotropic
+    Ptr<Object> iso = CreateObject<IsotropicAntennaModel>();
+    m_nr->SetUeAntennaAttribute("AntennaElement", PointerValue(iso));
 }
 
 NetDeviceContainer

@@ -927,6 +927,25 @@ When we go to configure the various network devices, it is possible to configure
         "type": "NGBR_LOW_LAT_EMBB"
       }
     ],
+    "antennaModel": {
+      "type": "ns3::IsotropicAntennaModel",
+      "arrayProperties": [
+        {
+          "name": "NumRows",
+          "value": 2
+        },
+        {
+          "name": "NumColumns",
+          "value": 4
+        }
+      ],
+      "properties": [
+        {
+          "name": "Gain",
+          "value": 10
+        }
+      ]
+    },
     "phy": [
       {
         "bwpId": 0, // Optional, if not specified, this is applied to all BWPs
@@ -940,9 +959,9 @@ When we go to configure the various network devices, it is possible to configure
 
 As you can see, it is possible to specify the type of bearer (flow) you want to use among those supported by 5g-lena.
 
-Furthermore, it is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device.
+It is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device. The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
 
-The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
+Furthermore, using the `antennaModel` parameter, it is possible to specify the antenna model of the device with the same kind of attributes as the `ueAntenna` and `gnbAntenna` parameters.
 
 ---
 
@@ -1117,6 +1136,43 @@ Each object in the list contains:
       "Z": "1.5",
       "XRes": "50",
       "YRes": "50"
+    }
+  }
+]
+```
+
+#### Geocentric Radio Map
+
+For LEO satellite scenarios, it is often necessary to generate a global radio map using geocentric coordinates (latitude/longitude). This can be achieved by specifying the `coordinates` parameter and configuring the map boundaries in degrees.
+
+**Additional Parameters:**
+- `coordinates` (string): Set to `"geocentric"` to enable geocentric mode.
+- `logGeocentricREM` (boolean): If `true`, the geocentric REM (ECEF coordinates) will be saved to a file.
+
+**Geocentric Parameters:**
+- `MinLon`, `MaxLon`: Longitude range in degrees.
+- `MinLat`, `MaxLat`: Latitude range in degrees.
+- `Altitude`: Altitude in meters from the earth surface.
+- `XRes`, `YRes`: Resolution (number of points) along Longitude and Latitude.
+
+**Example:**
+```json
+"radioMaps": [
+  {
+    "phyLayerId": 0,
+    "bwpId": 0,
+    "coordinates": "geocentric",
+    "logGeocentricREM": true,
+    "parameters": {
+      "MinLon": "-180.0",
+      "MaxLon": "180.0",
+      "MinLat": "-90.0",
+      "MaxLat": "90.0",
+      "Altitude": "2.0",
+      "XRes": "100",
+      "YRes": "50",
+      "RemMode": "CoverageArea",
+      "InstallationDelay": "0.1s"
     }
   }
 ]

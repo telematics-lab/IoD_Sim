@@ -34,6 +34,7 @@
 #include <ns3/rectangle.h>
 #include <ns3/string.h>
 #include <ns3/vector.h>
+#include <ns3/pointer.h>
 #include <ns3/wifi-netdevice-configuration.h>
 
 #include <optional>
@@ -126,8 +127,55 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             return std::nullopt;
         }();
 
-        const auto antennaModel =
-            ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
+        std::optional<ModelConfiguration> antennaModel;
+
+        if (type == "nr")
+        {
+            if (netdev.HasMember("antennaModel") && netdev["antennaModel"].IsObject())
+            {
+                const auto& antennaModelJson = netdev["antennaModel"];
+                ObjectFactory antennaElementFactory;
+                antennaElementFactory.SetTypeId("ns3::IsotropicAntennaModel");
+                if (antennaModelJson.HasMember("type") && antennaModelJson["type"].IsString())
+                {
+                    antennaElementFactory.SetTypeId(antennaModelJson["type"].GetString());
+                }
+
+                std::vector<ModelConfiguration::Attribute> arrayProps;
+
+                if (antennaModelJson.HasMember("properties") &&
+                    antennaModelJson["properties"].IsArray())
+                {
+                    for (auto& prop : antennaModelJson["properties"].GetArray())
+                    {
+                        NS_ASSERT_MSG(
+                            prop.IsObject(),
+                            "Entity NR Network Device 'antennaModel' 'properties' must be an array "
+                            "of objects.");
+                        const auto attr = ModelConfigurationHelper::DecodeModelAttribute(
+                            antennaElementFactory.GetTypeId(),
+                            prop);
+                        antennaElementFactory.Set(attr.name, *attr.value);
+                    }
+                }
+
+                if (antennaModelJson.HasMember("arrayProperties") &&
+                    antennaModelJson["arrayProperties"].IsArray())
+                {
+                    arrayProps = ModelConfigurationHelper::GetAttributes(
+                        TypeId::LookupByName("ns3::UniformPlanarArray"),
+                        antennaModelJson["arrayProperties"].GetArray());
+                }
+                arrayProps.push_back(ModelConfiguration::Attribute("AntennaElement",
+                                                                   Create<PointerValue>(antennaElementFactory.Create())));
+                antennaModel = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
+            }
+        }
+        else
+        {
+            antennaModel =
+                ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
+        }
 
         if (type == "wifi")
         {
