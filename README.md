@@ -49,12 +49,8 @@ to use [Docker](https://www.docker.com/),
 (pseudo)virtualization platform that can provide you a stable Linux-based work
 environment. You are welcome to provide new compatibility solutions any time.
 
-Want to build scenarios through a GUI? [Airflow](https://github.com/GiovanniGrieco/IoD_Sim-airflow)
-is a Visual Programming Editor ad-hoc for IoD_Sim! It relies on
-[splash](https://github.com/GiovanniGrieco/IoD_Sim-splash) to transpile C++
-models in Python visual blocks.
 
-## Getting Started
+## Quick Start
 
 The following quick start has been tested on Ubuntu 25.04 LTS. Please note that
 this process may be similar in other distros as well. In case of any difficulties,
@@ -65,20 +61,8 @@ the following tasks:
 
 1. Install dependencies,
 2. Integrate IoD Sim with ns3
-3. Integrate ns3 with nr
-4. Configure IoD Sim
-5. Build IoD Sim
-
-Otherwise, run the following commands:
-
-```
-./tools/install-dependencies.sh
-./tools/prepare-ns3.sh
-./tools/configure-iodsim.sh
-cd ns3/
-./ns3 configure --enable-examples --disable-mpi --disable-python --enable-modules=iodsim,point-to-point-layout
-./ns3 build
-```
+3. Configure IoD Sim
+4. Build IoD Sim
 
 To run a JSON scenario configuration, execute the following command:
 
@@ -86,6 +70,42 @@ To run a JSON scenario configuration, execute the following command:
 cd ns3/
 ./ns3 run scenario -- --config=../scenario/simple_wifi.json
 ```
+## Getting Started (Manual configuration)
+
+To build IoD_Sim as a library, launch the following commands in the root folder of the project:
+```bash
+# Install all the required dependencies (working for Fedora, Arch Linux and Debian-based distros, manual installation required for MacOS users)
+./tools/install-dependencies.sh
+
+# Clone ns3 and apply IoD_Sim patches
+./tools/prepare-ns3.sh
+
+# Configure IoD_Sim (debug mode, add "--mode default" for default one, release not yet supported)
+./tools/configure-iodsim.sh
+
+# Move to ns3 folder and build IoD_Sim
+cd ns3 && ./ns3 build
+```
+
+After the build, binaries can be found in the `ns3/build` folder.
+
+In particular, to run a JSON scenarios the `ns3/build/ns3.45-scenario-debug` (`ns3/build/ns3.45-scenario-debug`) executable can be used in this way:
+```bash
+./ns3/build/ns3.45-scenario-default --config=/path/to/scenario.json
+# You can also use ./ns3 script using:
+./ns3 run "scenario --config=/path/to/scenario.json"
+```
+
+The results output directory can be defined in the JSON scenario with the "resultsPath" key.
+In the examples, you will usually find the path to "../results/". In this folder there will be a folder for every execution with this name format: "<scenario_name>-<date>.<time>" (e.g. test-trace-2025-11-27.20-34-52).
+
+If you want a statically compiled binary usable on any system, you can use the docker builder as:
+```bash
+cd tools/compile && docker compose up --build && docker compose rm -f -s -v
+```
+After this command you will find the static binary in tools/compile/bin folder.
+
+You can use the static binary as with the binary before, but you will not need to install any dependencies on the system where you want to run the binary.
 
 ## Generate documentation
 
