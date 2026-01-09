@@ -10,9 +10,12 @@ points, and Zone Service Provider), a standard-compliant communication stack
 based on the IEEE 802.11 and LTE technology, and scenarios with various mobility
 models.
 
-The source code presents the implementation of models and examples scripts,
+Starting from version 4.1.0, support for satellite nodes (i.e., LEO and GEO) has been added, as well as the 5G NR protocol stack enabled by the ns3 [nr module](https://gitlab.com/cttc-lena/nr).
+More details regarding the configuration of scenarios that include satellites and 5G NR nodes can be found in the [dedicated documentation](docs/leo-nr-json-guide.md).
+
+The source code presents the implementation of models and examples JSON configuration files,
 also known as _scenarios_, that use such models to simulate a variable number
-of drones that:
+of generic nodes, drones or satellites that:
 
 - Move according to the mobility model associated to the reference scenario.
 - Exchange messages with network access points deployed on a cartesian or geographic 3D space.
@@ -41,7 +44,7 @@ ways in which you can participate in the project, for example:
 - Review the [documentation](https://github.com/telematics-lab/IoD_Sim/tree/main/docs) and make pull requests for anything, from
   typos to new content.
 
-IoD_Sim is primarily compatible with **Linux**-based operating systems. You can
+IoD_Sim is primarily compatible with **Linux**-based operating systems (Debian, Ubuntu, Fedora, Arch Linux). You can
 test it on macOS, altough we are not focused on providing first-class support
 for it. For macOS, Windows, or any other operating system, you are encouraged
 to use [Docker](https://www.docker.com/),
@@ -138,7 +141,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | 5G LENA version | Build system  | Release date       |
 | :------------: | :-----------:| :-----------:   | :-----------: |--------------------|
-| v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | Under development  |
+| v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | January 9, 2026  |
 | v4.0.2         | ns-3.42      |      N/A        | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      |      N/A        | cmake         | June 5, 2024       |
 | v4.0.0         | ns-3.42      |      N/A        | cmake         | June 2, 2024       |
@@ -149,7 +152,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 ## License
 
-Copyright (C) 2018-2025 [The IoD_Sim Authors](AUTHORS).
+Copyright (C) 2018-2026 [The IoD_Sim Authors](AUTHORS).
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

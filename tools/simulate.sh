@@ -18,6 +18,6 @@ elif [[ ! -f "./scenario/$1.json" ]]; then
     echo "Error: File '$1.json' doesn't exist."
     usage
 else
-    source .venv/bin/activate && ./ns3/ns3 run "iodsim --config=../scenario/$1.json"
+    source .venv/bin/activate && ./ns3/ns3 run "scenario --config=../scenario/$1.json"
     chmod -R 777 ./results/*
 fi
