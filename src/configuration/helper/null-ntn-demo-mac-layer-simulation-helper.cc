@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  * Copyright (c) 2023 SIGNET Lab, Department of Information Engineering,
  * University of Padova
  *

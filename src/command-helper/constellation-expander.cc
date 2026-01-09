@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -320,9 +320,10 @@ ConstellationExpander::ExpandFromFile(const rapidyyjson::Value& constellationDef
                 }
                 else // circular (default)
                 {
-                    mobilityModel.AddMember("name",
-                                            rapidyyjson::Value("ns3::GeoLeoOrbitMobility", allocator),
-                                            allocator);
+                    mobilityModel.AddMember(
+                        "name",
+                        rapidyyjson::Value("ns3::GeoLeoOrbitMobility", allocator),
+                        allocator);
                     // Reuse the same attribute creator for circular (altitude/inclination not
                     // needed here) For TLE based circular case we still use the TLE attribute
                     // overload
@@ -416,9 +417,10 @@ ConstellationExpander::ExpandUniformOrbits(const rapidyyjson::Value& constellati
                     rapidyyjson::Value mobilityModel(rapidyyjson::kObjectType);
                     if (model == "sgp4")
                     {
-                        mobilityModel.AddMember("name",
-                                                rapidyyjson::Value("ns3::GeoSGP4Mobility", allocator),
-                                                allocator);
+                        mobilityModel.AddMember(
+                            "name",
+                            rapidyyjson::Value("ns3::GeoSGP4Mobility", allocator),
+                            allocator);
                         // For uniform-orbits with sgp4 we still need TLE lines; assume they are
                         // provided elsewhere. Here we fallback to circular attributes as
                         // placeholder.

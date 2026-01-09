@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@
 #include <ns3/log.h>
 #include <ns3/object.h>
 #include <ns3/ptr.h>
+
 #include <filesystem>
 #include <rapidyyjson/document.h>
 #include <rapidyyjson/error/en.h>
@@ -309,8 +310,8 @@ JsonImporter::LoadJson(const std::string& filePath)
 
     if (doc.HasParseError())
     {
-        NS_FATAL_ERROR("JSON parse error in " << filePath << ": "
-                                              << rapidyyjson::GetParseError_En(doc.GetParseError()));
+        NS_FATAL_ERROR("JSON parse error in "
+                       << filePath << ": " << rapidyyjson::GetParseError_En(doc.GetParseError()));
     }
 
     return doc;

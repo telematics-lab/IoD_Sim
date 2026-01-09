@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,30 +19,31 @@
 #define NETWORK_LAYER_CONFIGURATION_HELPER_H
 
 #include <ns3/network-layer-configuration.h>
+
 #include <rapidyyjson/document.h>
 
 namespace ns3
 {
+/**
+ * Helper to decode a Network Layer from a JSON configuration file.
+ */
+class NetworkLayerConfigurationHelper
+{
+  public:
     /**
-     * Helper to decode a Network Layer from a JSON configuration file.
+     * NetworkLayerConfigurationHelper can't be instantiated, as it is an utility class.
      */
-    class NetworkLayerConfigurationHelper
-    {
-      public:
-        /**
-         * NetworkLayerConfigurationHelper can't be instantiated, as it is an utility class.
-         */
-        NetworkLayerConfigurationHelper() = delete;
-        /**
-         * Parse a Network configuration from a given JSON tree and map it on a
-         * NetworkLayerConfiguration data class.
-         *
-         * \param json The JSON tree to parse.
-         * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve
-         * parsed data.
-         */
-        static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidyyjson::Value& json);
-    };
+    NetworkLayerConfigurationHelper() = delete;
+    /**
+     * Parse a Network configuration from a given JSON tree and map it on a
+     * NetworkLayerConfiguration data class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to NetworkLayerConfiguration to easily retrieve
+     * parsed data.
+     */
+    static Ptr<NetworkLayerConfiguration> GetConfiguration(const rapidyyjson::Value& json);
+};
 
 } // namespace ns3
 

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -26,117 +26,117 @@
 
 namespace ns3
 {
+/**
+ * \brief Helper class to expand constellation definitions into individual satellite
+ * configurations.
+ *
+ * This class provides utilities to process the special "!constellation" parameter in leo-sats
+ * JSON configurations and expand them into multiple individual satellite configurations based
+ * on different distribution patterns (file, uniform-orbits, one).
+ */
+class ConstellationExpander
+{
+  public:
     /**
-     * \brief Helper class to expand constellation definitions into individual satellite
-     * configurations.
-     *
-     * This class provides utilities to process the special "!constellation" parameter in leo-sats
-     * JSON configurations and expand them into multiple individual satellite configurations based
-     * on different distribution patterns (file, uniform-orbits, one).
+     * \brief Check if a satellite configuration contains a constellation parameter.
+     * \param satelliteConfig The JSON value representing a satellite configuration
+     * \return true if the configuration has a "!constellation" member, false otherwise
      */
-    class ConstellationExpander
-    {
-      public:
-        /**
-         * \brief Check if a satellite configuration contains a constellation parameter.
-         * \param satelliteConfig The JSON value representing a satellite configuration
-         * \return true if the configuration has a "!constellation" member, false otherwise
-         */
-        static bool HasConstellationParameter(const rapidyyjson::Value& satelliteConfig);
+    static bool HasConstellationParameter(const rapidyyjson::Value& satelliteConfig);
 
-        /**
-         * \brief Expand a constellation definition into individual satellite configurations.
-         * \param templateSat The JSON value containing the constellation template
-         * \param scenarioPath The base path for resolving relative file paths
-         * \param allocator The JSON allocator to use for creating values
-         * \return A vector of JSON values, each representing an individual satellite configuration
-         */
-        static std::vector<rapidyyjson::Value> ExpandConstellation(
-            const rapidyyjson::Value& templateSat,
-            const std::string& scenarioPath,
-            rapidyyjson::Document::AllocatorType& allocator);
+    /**
+     * \brief Expand a constellation definition into individual satellite configurations.
+     * \param templateSat The JSON value containing the constellation template
+     * \param scenarioPath The base path for resolving relative file paths
+     * \param allocator The JSON allocator to use for creating values
+     * \return A vector of JSON values, each representing an individual satellite configuration
+     */
+    static std::vector<rapidyyjson::Value> ExpandConstellation(
+        const rapidyyjson::Value& templateSat,
+        const std::string& scenarioPath,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-      private:
-        /**
-         * \brief Expand constellation from TLE/TSE file(s).
-         * \param constellationDef The "!constellation" object definition
-         * \param templateSat The template satellite configuration (without constellation parameter)
-         * \param scenarioPath The base path for resolving relative file paths
-         * \param allocator The JSON allocator to use for creating values
-         * \return A vector of satellite configurations, one per TLE entry
-         */
-        static std::vector<rapidyyjson::Value> ExpandFromFile(
-            const rapidyyjson::Value& constellationDef,
-            const rapidyyjson::Value& templateSat,
-            const std::string& scenarioPath,
-            rapidyyjson::Document::AllocatorType& allocator);
+  private:
+    /**
+     * \brief Expand constellation from TLE/TSE file(s).
+     * \param constellationDef The "!constellation" object definition
+     * \param templateSat The template satellite configuration (without constellation parameter)
+     * \param scenarioPath The base path for resolving relative file paths
+     * \param allocator The JSON allocator to use for creating values
+     * \return A vector of satellite configurations, one per TLE entry
+     */
+    static std::vector<rapidyyjson::Value> ExpandFromFile(
+        const rapidyyjson::Value& constellationDef,
+        const rapidyyjson::Value& templateSat,
+        const std::string& scenarioPath,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-        /**
-         * \brief Expand constellation with uniform orbital distribution.
-         * \param constellationDef The "!constellation" object definition
-         * \param templateSat The template satellite configuration (without constellation parameter)
-         * \param allocator The JSON allocator to use for creating values
-         * \return A vector of satellite configurations distributed uniformly across orbits
-         */
-        static std::vector<rapidyyjson::Value> ExpandUniformOrbits(
-            const rapidyyjson::Value& constellationDef,
-            const rapidyyjson::Value& templateSat,
-            rapidyyjson::Document::AllocatorType& allocator);
+    /**
+     * \brief Expand constellation with uniform orbital distribution.
+     * \param constellationDef The "!constellation" object definition
+     * \param templateSat The template satellite configuration (without constellation parameter)
+     * \param allocator The JSON allocator to use for creating values
+     * \return A vector of satellite configurations distributed uniformly across orbits
+     */
+    static std::vector<rapidyyjson::Value> ExpandUniformOrbits(
+        const rapidyyjson::Value& constellationDef,
+        const rapidyyjson::Value& templateSat,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-        /**
-         * \brief Create a single satellite configuration.
-         * \param constellationDef The "!constellation" object definition
-         * \param templateSat The template satellite configuration (without constellation parameter)
-         * \param allocator The JSON allocator to use for creating values
-         * \return A vector containing a single satellite configuration
-         */
-        static std::vector<rapidyyjson::Value> ExpandSingleSat(
-            const rapidyyjson::Value& constellationDef,
-            const rapidyyjson::Value& templateSat,
-            rapidyyjson::Document::AllocatorType& allocator);
+    /**
+     * \brief Create a single satellite configuration.
+     * \param constellationDef The "!constellation" object definition
+     * \param templateSat The template satellite configuration (without constellation parameter)
+     * \param allocator The JSON allocator to use for creating values
+     * \return A vector containing a single satellite configuration
+     */
+    static std::vector<rapidyyjson::Value> ExpandSingleSat(
+        const rapidyyjson::Value& constellationDef,
+        const rapidyyjson::Value& templateSat,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-        /**
-         * \brief Create a copy of the template satellite without the constellation parameter.
-         * \param templateSat The original template satellite configuration
-         * \param allocator The JSON allocator to use for creating the copy
-         * \return A JSON value that is a deep copy of templateSat without "!constellation"
-         */
-        static rapidyyjson::Value CreateSatelliteTemplate(
-            const rapidyyjson::Value& templateSat,
-            rapidyyjson::Document::AllocatorType& allocator);
+    /**
+     * \brief Create a copy of the template satellite without the constellation parameter.
+     * \param templateSat The original template satellite configuration
+     * \param allocator The JSON allocator to use for creating the copy
+     * \return A JSON value that is a deep copy of templateSat without "!constellation"
+     */
+    static rapidyyjson::Value CreateSatelliteTemplate(
+        const rapidyyjson::Value& templateSat,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-        /**
-         * \brief Create GeoLeoOrbitMobility attributes from orbital parameters.
-         * \param altitude Altitude in kilometers
-         * \param inclination Inclination in degrees
-         * \param longitude Longitude in degrees
-         * \param offset Offset in degrees
-         * \param retrograde Whether the orbit is retrograde
-         * \param allocator The JSON allocator to use
-         * \return A JSON array of mobility model attributes
-         */
-        static rapidyyjson::Value CreateMobilityAttributes(
-            double altitude,
-            double inclination,
-            double longitude,
-            double offset,
-            bool retrograde,
-            rapidyyjson::Document::AllocatorType& allocator);
+    /**
+     * \brief Create GeoLeoOrbitMobility attributes from orbital parameters.
+     * \param altitude Altitude in kilometers
+     * \param inclination Inclination in degrees
+     * \param longitude Longitude in degrees
+     * \param offset Offset in degrees
+     * \param retrograde Whether the orbit is retrograde
+     * \param allocator The JSON allocator to use
+     * \return A JSON array of mobility model attributes
+     */
+    static rapidyyjson::Value CreateMobilityAttributes(
+        double altitude,
+        double inclination,
+        double longitude,
+        double offset,
+        bool retrograde,
+        rapidyyjson::Document::AllocatorType& allocator);
 
-        /**
-         * \brief Create GeoLeoOrbitMobility attributes from TLE parameters.
-         * \param tle1 TLE Line 1
-         * \param tle2 TLE Line 2
-         * \param sgp4Epoch SGP4 Epoch string
-         * \param allocator The JSON allocator to use
-         * \return A JSON array of mobility model attributes
-         */
-        static rapidyyjson::Value CreateMobilityAttributes(
-            const std::string& tle1,
-            const std::string& tle2,
-            const std::string& sgp4Epoch,
-            rapidyyjson::Document::AllocatorType& allocator);
-    };
+    /**
+     * \brief Create GeoLeoOrbitMobility attributes from TLE parameters.
+     * \param tle1 TLE Line 1
+     * \param tle2 TLE Line 2
+     * \param sgp4Epoch SGP4 Epoch string
+     * \param allocator The JSON allocator to use
+     * \return A JSON array of mobility model attributes
+     */
+    static rapidyyjson::Value CreateMobilityAttributes(
+        const std::string& tle1,
+        const std::string& tle2,
+        const std::string& sgp4Epoch,
+        rapidyyjson::Document::AllocatorType& allocator);
+};
 
 } // namespace ns3
 

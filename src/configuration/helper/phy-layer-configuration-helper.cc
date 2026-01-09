@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -186,8 +186,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             std::string attachMethod = jsonPhyLayer["attachMethod"].GetString();
             if (attachMethod != "closest" && attachMethod != "max-rsrp" && attachMethod != "none")
             {
-                NS_FATAL_ERROR("Invalid attachMethod: " << attachMethod
-                                                        << ". Valid values are: closest, max-rsrp, none");
+                NS_FATAL_ERROR("Invalid attachMethod: "
+                               << attachMethod << ". Valid values are: closest, max-rsrp, none");
             }
             nrConfig->SetAttachMethod(attachMethod);
         }
@@ -387,9 +387,9 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
 
             if (handover.HasMember("attributes") && handover["attributes"].IsArray())
             {
-                const auto handoverAttributes = ModelConfigurationHelper::GetAttributes(
-                    algoType,
-                    handover["attributes"].GetArray());
+                const auto handoverAttributes =
+                    ModelConfigurationHelper::GetAttributes(algoType,
+                                                            handover["attributes"].GetArray());
                 nrConfig->SetHandoverAlgorithmAttributes(handoverAttributes);
             }
         }
@@ -415,9 +415,9 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
 
                 if (ueCam.HasMember("attributes") && ueCam["attributes"].IsArray())
                 {
-                    const auto ueCamAttributes = ModelConfigurationHelper::GetAttributes(
-                        ueCamType,
-                        ueCam["attributes"].GetArray());
+                    const auto ueCamAttributes =
+                        ModelConfigurationHelper::GetAttributes(ueCamType,
+                                                                ueCam["attributes"].GetArray());
                     nrConfig->SetUeChannelAccessManagerAttributes(ueCamAttributes);
                 }
             }
@@ -437,9 +437,9 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
 
                 if (gnbCam.HasMember("attributes") && gnbCam["attributes"].IsArray())
                 {
-                    const auto gnbCamAttributes = ModelConfigurationHelper::GetAttributes(
-                        gnbCamType,
-                        gnbCam["attributes"].GetArray());
+                    const auto gnbCamAttributes =
+                        ModelConfigurationHelper::GetAttributes(gnbCamType,
+                                                                gnbCam["attributes"].GetArray());
                     nrConfig->SetGnbChannelAccessManagerAttributes(gnbCamAttributes);
                 }
             }
@@ -663,8 +663,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         jsonPhyLayer["advancedOptions"].IsObject())
     {
         const auto& advancedOptions = jsonPhyLayer["advancedOptions"];
-        Ptr<NrPhyLayerConfiguration> nrConfigPtr =
-            DynamicCast<NrPhyLayerConfiguration>(phyConfig);
+        Ptr<NrPhyLayerConfiguration> nrConfigPtr = DynamicCast<NrPhyLayerConfiguration>(phyConfig);
 
         if (advancedOptions.HasMember("sinr-distance-attach") &&
             advancedOptions["sinr-distance-attach"].IsObject())
@@ -689,9 +688,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                 NS_ASSERT_MSG(entry.HasMember("minSINR") && entry["minSINR"].IsNumber(),
                               "Table entry must have minSINR");
 
-                sdaConfig.table.push_back(
-                    SinrDistanceTableEntry{entry["maxDistance"].GetDouble(),
-                                           entry["minSINR"].GetDouble()});
+                sdaConfig.table.push_back(SinrDistanceTableEntry{entry["maxDistance"].GetDouble(),
+                                                                 entry["minSINR"].GetDouble()});
             }
             nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
         }

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -19,40 +19,41 @@
 #define REMOTE_CONFIGURATION_HELPER_H
 
 #include <ns3/remote-configuration.h>
+
 #include <rapidyyjson/document.h>
 
 namespace ns3
 {
-    using JsonArray = rapidyyjson::GenericArray<true, rapidyyjson::Value>;
+using JsonArray = rapidyyjson::GenericArray<true, rapidyyjson::Value>;
+
+/**
+ * Helper to decode an Remote from a JSON configuration file and read the following properties:
+ *   - Its Network Layer Identifier
+ *   - Its Applications
+ */
+class RemoteConfigurationHelper
+{
+  public:
+    /**
+     * RemoteConfigurationHelper can't be instantiated, as it is an utility class.
+     */
+    RemoteConfigurationHelper() = delete;
 
     /**
-     * Helper to decode an Remote from a JSON configuration file and read the following properties:
-     *   - Its Network Layer Identifier
-     *   - Its Applications
+     * Parse an entity configuration from a given JSON tree and map it on an RemoteConfiguration
+     * data class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to RemoteConfiguration to easily retrieve parsed
+     * data.
      */
-    class RemoteConfigurationHelper
-    {
-      public:
-        /**
-         * RemoteConfigurationHelper can't be instantiated, as it is an utility class.
-         */
-        RemoteConfigurationHelper() = delete;
+    static Ptr<RemoteConfiguration> GetConfiguration(const rapidyyjson::Value& json);
 
-        /**
-         * Parse an entity configuration from a given JSON tree and map it on an RemoteConfiguration
-         * data class.
-         *
-         * \param json The JSON tree to parse.
-         * \return The configuration as a pointer to RemoteConfiguration to easily retrieve parsed
-         * data.
-         */
-        static Ptr<RemoteConfiguration> GetConfiguration(const rapidyyjson::Value& json);
-
-      private:
-        static const uint32_t DecodeNetworkLayerId(const rapidyyjson::Value& json);
-        static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
-            const rapidyyjson::Value& json);
-    };
+  private:
+    static const uint32_t DecodeNetworkLayerId(const rapidyyjson::Value& json);
+    static const std::vector<ModelConfiguration> DecodeApplicationConfigurations(
+        const rapidyyjson::Value& json);
+};
 
 } // namespace ns3
 

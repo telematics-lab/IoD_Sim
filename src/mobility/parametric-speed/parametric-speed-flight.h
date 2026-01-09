@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -27,7 +27,8 @@ namespace ns3
 
 /**
  * \ingroup mobility
- * \brief a partial curvilinear trajectory between two rest points (i.e., Interest Points with I. Level set to 0).
+ * \brief a partial curvilinear trajectory between two rest points (i.e., Interest Points with I.
+ * Level set to 0).
  */
 class ParametricSpeedFlight : public Curve
 {

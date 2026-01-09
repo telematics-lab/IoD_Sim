@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -25,227 +25,230 @@
 #include <ns3/internet-module.h>
 #include <ns3/network-module.h>
 #include <ns3/storage-peripheral.h>
+
 #include <rapidyyjson/document.h>
 #include <rapidyyjson/stringbuffer.h>
 #include <rapidyyjson/writer.h>
 
 namespace ns3
 {
-    NS_LOG_COMPONENT_DEFINE("DroneServerApplication");
+NS_LOG_COMPONENT_DEFINE("DroneServerApplication");
 
-    NS_OBJECT_ENSURE_REGISTERED(DroneServerApplication);
+NS_OBJECT_ENSURE_REGISTERED(DroneServerApplication);
 
-    TypeId DroneServerApplication::GetTypeId()
+TypeId
+DroneServerApplication::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::DroneServerApplication")
+                            .SetParent<Application>()
+                            .AddConstructor<DroneServerApplication>()
+                            .AddAttribute("Port",
+                                          "Listening port.",
+                                          UintegerValue(80),
+                                          MakeUintegerAccessor(&DroneServerApplication::m_port),
+                                          MakeUintegerChecker<uint32_t>())
+                            .AddAttribute("StoreData",
+                                          "Store data if the StoragePeripheral is available.",
+                                          BooleanValue(false),
+                                          MakeBooleanAccessor(&DroneServerApplication::m_storage),
+                                          MakeBooleanChecker());
+
+    return tid;
+}
+
+DroneServerApplication::DroneServerApplication()
+    : m_state{SERVER_CLOSED},
+      m_sequenceNumber{0}
+{
+}
+
+void
+DroneServerApplication::DoDispose()
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+    if (m_socket)
+        m_socket->Close();
+
+    m_state = SERVER_CLOSED;
+
+    Application::DoDispose();
+}
+
+void
+DroneServerApplication::StartApplication()
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+    if (m_state == SERVER_CLOSED)
     {
-        static TypeId tid =
-            TypeId("ns3::DroneServerApplication")
-                .SetParent<Application>()
-                .AddConstructor<DroneServerApplication>()
-                .AddAttribute("Port",
-                              "Listening port.",
-                              UintegerValue(80),
-                              MakeUintegerAccessor(&DroneServerApplication::m_port),
-                              MakeUintegerChecker<uint32_t>())
-                .AddAttribute("StoreData",
-                              "Store data if the StoragePeripheral is available.",
-                              BooleanValue(false),
-                              MakeBooleanAccessor(&DroneServerApplication::m_storage),
-                              MakeBooleanChecker());
-
-        return tid;
-    }
-
-    DroneServerApplication::DroneServerApplication()
-        : m_state{SERVER_CLOSED},
-          m_sequenceNumber{0}
-    {
-    }
-
-    void DroneServerApplication::DoDispose()
-    {
-        NS_LOG_FUNCTION_NOARGS();
-
-        if (m_socket)
-            m_socket->Close();
-
-        m_state = SERVER_CLOSED;
-
-        Application::DoDispose();
-    }
-
-    void DroneServerApplication::StartApplication()
-    {
-        NS_LOG_FUNCTION_NOARGS();
-
-        if (m_state == SERVER_CLOSED)
+        if (!m_socket)
         {
-            if (!m_socket)
+            Ptr<SocketFactory> socketFactory =
+                GetNode()->GetObject<SocketFactory>(UdpSocketFactory::GetTypeId());
+
+            m_socket = socketFactory->CreateSocket();
+
+            m_socket->SetAllowBroadcast(true);
+            m_socket->Bind(InetSocketAddress(Ipv4Address::GetAny(), m_port));
+            m_socket->SetRecvCallback(MakeCallback(&DroneServerApplication::ReceivePacket, this));
+
+            NS_LOG_INFO("[Node " << GetNode()->GetId()
+                                 << "] "
+                                    "new server socket ("
+                                 << m_socket << ")");
+        }
+
+        m_state = SERVER_LISTEN;
+
+        Simulator::Cancel(m_sendEvent);
+    }
+}
+
+void
+DroneServerApplication::StopApplication()
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+    if (m_socket && m_state == SERVER_LISTEN)
+    {
+        NS_LOG_LOGIC("[Node " << GetNode()->GetId() << "] Closing server socket");
+        m_socket->Close();
+    }
+}
+
+void
+DroneServerApplication::ReceivePacket(const Ptr<Socket> socket) const
+{
+    NS_LOG_FUNCTION(socket);
+
+    Ptr<Packet> packet;
+    Address senderAddr;
+
+    while ((packet = socket->RecvFrom(senderAddr)))
+    {
+        if (InetSocketAddress::IsMatchingType(senderAddr))
+        {
+            const auto sockAddr = InetSocketAddress::ConvertFrom(senderAddr);
+            const auto senderIpv4 = sockAddr.GetIpv4();
+            const auto senderPort = sockAddr.GetPort();
+
+            NS_LOG_INFO("[Node " << GetNode()->GetId() << "] received " << packet->GetSize()
+                                 << " bytes from " << senderIpv4);
+
+            uint8_t* payload = (uint8_t*)calloc(packet->GetSize() + 1, sizeof(uint8_t));
+
+            packet->CopyData(payload, packet->GetSize());
+            if (GetNode()->GetInstanceTypeId().GetName() == "ns3::Drone" &&
+                DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->ThereIsStorage() &&
+                m_storage)
             {
-                Ptr<SocketFactory> socketFactory =
-                    GetNode()->GetObject<SocketFactory>(UdpSocketFactory::GetTypeId());
-
-                m_socket = socketFactory->CreateSocket();
-
-                m_socket->SetAllowBroadcast(true);
-                m_socket->Bind(InetSocketAddress(Ipv4Address::GetAny(), m_port));
-                m_socket->SetRecvCallback(
-                    MakeCallback(&DroneServerApplication::ReceivePacket, this));
-
-                NS_LOG_INFO("[Node " << GetNode()->GetId()
-                                     << "] "
-                                        "new server socket ("
-                                     << m_socket << ")");
+                Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral, DronePeripheral>(
+                    DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->Get(0));
+                if (storage->Alloc(strlen((char*)payload) * sizeof(char), StoragePeripheral::byte))
+                    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] Stored "
+                                         << strlen((char*)payload) * sizeof(char) << " bytes ");
             }
 
-            m_state = SERVER_LISTEN;
+            NS_LOG_INFO("[Node " << GetNode()->GetId() << "] packet contents: " << (char*)payload);
 
-            Simulator::Cancel(m_sendEvent);
-        }
-    }
-
-    void DroneServerApplication::StopApplication()
-    {
-        NS_LOG_FUNCTION_NOARGS();
-
-        if (m_socket && m_state == SERVER_LISTEN)
-        {
-            NS_LOG_LOGIC("[Node " << GetNode()->GetId() << "] Closing server socket");
-            m_socket->Close();
-        }
-    }
-
-    void DroneServerApplication::ReceivePacket(const Ptr<Socket> socket) const
-    {
-        NS_LOG_FUNCTION(socket);
-
-        Ptr<Packet> packet;
-        Address senderAddr;
-
-        while ((packet = socket->RecvFrom(senderAddr)))
-        {
-            if (InetSocketAddress::IsMatchingType(senderAddr))
+            rapidyyjson::Document d;
+            d.Parse((char*)payload);
+            if (d.HasParseError())
             {
-                const auto sockAddr = InetSocketAddress::ConvertFrom(senderAddr);
-                const auto senderIpv4 = sockAddr.GetIpv4();
-                const auto senderPort = sockAddr.GetPort();
-
-                NS_LOG_INFO("[Node " << GetNode()->GetId() << "] received " << packet->GetSize()
-                                     << " bytes from " << senderIpv4);
-
-                uint8_t* payload = (uint8_t*)calloc(packet->GetSize() + 1, sizeof(uint8_t));
-
-                packet->CopyData(payload, packet->GetSize());
-                if (GetNode()->GetInstanceTypeId().GetName() == "ns3::Drone" &&
-                    DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->ThereIsStorage() &&
-                    m_storage)
-                {
-                    Ptr<StoragePeripheral> storage = StaticCast<StoragePeripheral, DronePeripheral>(
-                        DroneList::GetDrone(GetNode()->GetId())->GetPeripherals()->Get(0));
-                    if (storage->Alloc(strlen((char*)payload) * sizeof(char),
-                                       StoragePeripheral::byte))
-                        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] Stored "
-                                             << strlen((char*)payload) * sizeof(char) << " bytes ");
-                }
-
-                NS_LOG_INFO("[Node " << GetNode()->GetId()
-                                     << "] packet contents: " << (char*)payload);
-
-                rapidyyjson::Document d;
-                d.Parse((char*)payload);
-                if (d.HasParseError())
-                {
-                    NS_LOG_INFO("[Node " << GetNode()->GetId()
-                                         << "] Received malformed packet! DROP");
-                }
-                else
-                {
-                    const char* commandStr = d["cmd"].GetString();
-                    const PacketType command = PacketType(commandStr);
-
-                    switch (command)
-                    {
-                    case PacketType::HELLO:
-                        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] HELLO packet!");
-                        m_sendEvent = Simulator::ScheduleNow(&DroneServerApplication::SendHelloAck,
-                                                             this,
-                                                             socket,
-                                                             senderIpv4,
-                                                             senderPort);
-                        break;
-                    case PacketType::UPDATE:
-                        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] UPDATE packet!");
-                        m_sendEvent = Simulator::ScheduleNow(&DroneServerApplication::SendUpdateAck,
-                                                             this,
-                                                             socket,
-                                                             senderIpv4,
-                                                             senderPort);
-                        break;
-                    case PacketType::UPDATE_ACK:
-                        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] UPDATE_ACK received!");
-                        break;
-                    default:
-                        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] unknown packet received!");
-                    }
-                }
-
-                free(payload);
+                NS_LOG_INFO("[Node " << GetNode()->GetId() << "] Received malformed packet! DROP");
             }
+            else
+            {
+                const char* commandStr = d["cmd"].GetString();
+                const PacketType command = PacketType(commandStr);
+
+                switch (command)
+                {
+                case PacketType::HELLO:
+                    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] HELLO packet!");
+                    m_sendEvent = Simulator::ScheduleNow(&DroneServerApplication::SendHelloAck,
+                                                         this,
+                                                         socket,
+                                                         senderIpv4,
+                                                         senderPort);
+                    break;
+                case PacketType::UPDATE:
+                    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] UPDATE packet!");
+                    m_sendEvent = Simulator::ScheduleNow(&DroneServerApplication::SendUpdateAck,
+                                                         this,
+                                                         socket,
+                                                         senderIpv4,
+                                                         senderPort);
+                    break;
+                case PacketType::UPDATE_ACK:
+                    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] UPDATE_ACK received!");
+                    break;
+                default:
+                    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] unknown packet received!");
+                }
+            }
+
+            free(payload);
         }
     }
+}
 
-    void DroneServerApplication::SendHelloAck(const Ptr<Socket> socket,
-                                              const Ipv4Address senderAddr,
-                                              const uint32_t senderPort) const
-    {
-        NS_LOG_FUNCTION(socket << senderAddr);
+void
+DroneServerApplication::SendHelloAck(const Ptr<Socket> socket,
+                                     const Ipv4Address senderAddr,
+                                     const uint32_t senderPort) const
+{
+    NS_LOG_FUNCTION(socket << senderAddr);
 
-        NS_LOG_INFO("[Node " << GetNode()->GetId() << "] sending HELLO ACK back.");
+    NS_LOG_INFO("[Node " << GetNode()->GetId() << "] sending HELLO ACK back.");
 
-        const std::string command = PacketType(PacketType::HELLO_ACK).ToString();
+    const std::string command = PacketType(PacketType::HELLO_ACK).ToString();
 
-        rapidyyjson::StringBuffer jsonBuf;
-        rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
+    rapidyyjson::StringBuffer jsonBuf;
+    rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
 
-        writer.StartObject();
-        writer.Key("cmd");
-        writer.String(command.c_str());
-        writer.Key("sn");
-        writer.Int(m_sequenceNumber++);
-        writer.EndObject();
+    writer.StartObject();
+    writer.Key("cmd");
+    writer.String(command.c_str());
+    writer.Key("sn");
+    writer.Int(m_sequenceNumber++);
+    writer.EndObject();
 
-        const char* json = jsonBuf.GetString();
-        const auto packet = Create<Packet>((const uint8_t*)json, strlen(json) * sizeof(char));
+    const char* json = jsonBuf.GetString();
+    const auto packet = Create<Packet>((const uint8_t*)json, strlen(json) * sizeof(char));
 
-        socket->SendTo(packet, 0, InetSocketAddress(senderAddr, senderPort));
-        m_txTrace(packet);
-    }
+    socket->SendTo(packet, 0, InetSocketAddress(senderAddr, senderPort));
+    m_txTrace(packet);
+}
 
-    void DroneServerApplication::SendUpdateAck(const Ptr<Socket> socket,
-                                               const Ipv4Address senderAddr,
-                                               const uint32_t senderPort) const
-    {
-        NS_LOG_FUNCTION(socket << senderAddr);
-        NS_LOG_INFO("[Node " << GetNode()->GetId()
-                             << "] "
-                                "sending UPDATE ACK back.");
+void
+DroneServerApplication::SendUpdateAck(const Ptr<Socket> socket,
+                                      const Ipv4Address senderAddr,
+                                      const uint32_t senderPort) const
+{
+    NS_LOG_FUNCTION(socket << senderAddr);
+    NS_LOG_INFO("[Node " << GetNode()->GetId()
+                         << "] "
+                            "sending UPDATE ACK back.");
 
-        const std::string command = PacketType(PacketType::UPDATE_ACK).ToString();
+    const std::string command = PacketType(PacketType::UPDATE_ACK).ToString();
 
-        rapidyyjson::StringBuffer jsonBuf;
-        rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
+    rapidyyjson::StringBuffer jsonBuf;
+    rapidyyjson::Writer<rapidyyjson::StringBuffer> writer(jsonBuf);
 
-        writer.StartObject();
-        writer.Key("cmd");
-        writer.String(command.c_str());
-        writer.Key("sn");
-        writer.Int(m_sequenceNumber++);
-        writer.EndObject();
+    writer.StartObject();
+    writer.Key("cmd");
+    writer.String(command.c_str());
+    writer.Key("sn");
+    writer.Int(m_sequenceNumber++);
+    writer.EndObject();
 
-        const char* json = jsonBuf.GetString();
-        const auto packet = Create<Packet>((const uint8_t*)json, strlen(json) * sizeof(char));
+    const char* json = jsonBuf.GetString();
+    const auto packet = Create<Packet>((const uint8_t*)json, strlen(json) * sizeof(char));
 
-        socket->SendTo(packet, 0, InetSocketAddress(senderAddr, senderPort));
-        m_txTrace(packet);
-    }
+    socket->SendTo(packet, 0, InetSocketAddress(senderAddr, senderPort));
+    m_txTrace(packet);
+}
 
 } // namespace ns3

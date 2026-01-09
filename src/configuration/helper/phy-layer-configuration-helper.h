@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,30 +20,31 @@
 
 #include <ns3/model-configuration.h>
 #include <ns3/phy-layer-configuration.h>
+
 #include <rapidyyjson/document.h>
 
 namespace ns3
 {
+/**
+ * Helper to decode a PHY Layer from a JSON configuration file.
+ */
+class PhyLayerConfigurationHelper
+{
+  public:
     /**
-     * Helper to decode a PHY Layer from a JSON configuration file.
+     * PhyLayerConfigurationHelper can't be instantiated, as it is an utility class.
      */
-    class PhyLayerConfigurationHelper
-    {
-      public:
-        /**
-         * PhyLayerConfigurationHelper can't be instantiated, as it is an utility class.
-         */
-        PhyLayerConfigurationHelper() = delete;
-        /**
-         * Parse a PHY configuration from a given JSON tree and map it on a PhyLayerConfiguration
-         * data class.
-         *
-         * \param jsonPhyLayer The JSON tree to parse.
-         * \return The configuration as a pointer to PhyLayerConfiguration to easily retrieve parsed
-         * data.
-         */
-        static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonPhyLayer);
-    };
+    PhyLayerConfigurationHelper() = delete;
+    /**
+     * Parse a PHY configuration from a given JSON tree and map it on a PhyLayerConfiguration
+     * data class.
+     *
+     * \param jsonPhyLayer The JSON tree to parse.
+     * \return The configuration as a pointer to PhyLayerConfiguration to easily retrieve parsed
+     * data.
+     */
+    static Ptr<PhyLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonPhyLayer);
+};
 
 } // namespace ns3
 

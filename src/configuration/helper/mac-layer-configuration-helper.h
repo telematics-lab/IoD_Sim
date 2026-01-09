@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,33 +20,34 @@
 
 #include <ns3/mac-layer-configuration.h>
 #include <ns3/model-configuration.h>
+
 #include <rapidyyjson/document.h>
 
 namespace ns3
 {
+/**
+ * Helper to decode a MAC Layer from a JSON configuration file.
+ */
+class MacLayerConfigurationHelper
+{
+  public:
     /**
-     * Helper to decode a MAC Layer from a JSON configuration file.
+     * MacLayerConfigurationHelper can't be instantiated, as it is an utility class.
      */
-    class MacLayerConfigurationHelper
-    {
-      public:
-        /**
-         * MacLayerConfigurationHelper can't be instantiated, as it is an utility class.
-         */
-        MacLayerConfigurationHelper() = default;
-        /**
-         * Parse a MAC Layer configuration from a given JSON tree and map it on a
-         * MacLayerConfiguration data class.
-         *
-         * \param jsonMacLayer The JSON tree to parse.
-         * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
-         * data.
-         */
-        static Ptr<MacLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonMacLayer);
+    MacLayerConfigurationHelper() = default;
+    /**
+     * Parse a MAC Layer configuration from a given JSON tree and map it on a
+     * MacLayerConfiguration data class.
+     *
+     * \param jsonMacLayer The JSON tree to parse.
+     * \return The configuration as a pointer to MacLayerConfiguration to easily retrieve parsed
+     * data.
+     */
+    static Ptr<MacLayerConfiguration> GetConfiguration(const rapidyyjson::Value& jsonMacLayer);
 
-      private:
-        static const ModelConfiguration DecodeModelConfiguration(const rapidyyjson::Value& jsonModel);
-    };
+  private:
+    static const ModelConfiguration DecodeModelConfiguration(const rapidyyjson::Value& jsonModel);
+};
 
 } // namespace ns3
 

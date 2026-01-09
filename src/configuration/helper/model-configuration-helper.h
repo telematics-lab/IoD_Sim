@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,69 +20,67 @@
 
 #include <ns3/model-configuration.h>
 #include <ns3/type-id.h>
+
 #include <optional>
-
-
 #include <rapidyyjson/document.h>
 
 namespace ns3
 {
-    using JsonArray = rapidyyjson::Value::ConstArray;
-    using JsonObject = rapidyyjson::Value::ConstObject;
-    using JsonValue = rapidyyjson::Value;
+using JsonArray = rapidyyjson::Value::ConstArray;
+using JsonObject = rapidyyjson::Value::ConstObject;
+using JsonValue = rapidyyjson::Value;
+
+/**
+ * Helper to decode a ns3 Model from a JSON configuration file and read the following
+ * properties:
+ *   - Its name
+ *   - Its set of attributes and values
+ */
+class ModelConfigurationHelper
+{
+  public:
+    /**
+     * ModelConfigurationHelper is a utility class with only static members, thus it can't be
+     * initialized.
+     */
+    ModelConfigurationHelper() = delete;
 
     /**
-     * Helper to decode a ns3 Model from a JSON configuration file and read the following
-     * properties:
-     *   - Its name
-     *   - Its set of attributes and values
+     * Parse a model configuration from a given JSON tree and map it on an ModelConfiguration
+     * data class.
+     *
+     * \param json The JSON tree to parse.
+     * \return The configuration as a pointer to ModelConfiguration to easily retrieve parsed
+     * data.
      */
-    class ModelConfigurationHelper
-    {
-      public:
-        /**
-         * ModelConfigurationHelper is a utility class with only static members, thus it can't be
-         * initialized.
-         */
-        ModelConfigurationHelper() = delete;
+    static const ModelConfiguration Get(const JsonValue& json);
 
-        /**
-         * Parse a model configuration from a given JSON tree and map it on an ModelConfiguration
-         * data class.
-         *
-         * \param json The JSON tree to parse.
-         * \return The configuration as a pointer to ModelConfiguration to easily retrieve parsed
-         * data.
-         */
-        static const ModelConfiguration Get(const JsonValue& json);
+    static const std::optional<ModelConfiguration> GetOptional(const JsonObject& jsonObject,
+                                                               const std::string& key);
 
-        static const std::optional<ModelConfiguration> GetOptional(const JsonObject& jsonObject,
-                                                                   const std::string& key);
+    static const std::optional<ModelConfiguration> GetOptionalCoaleshed(
+        const JsonObject& jsonObject,
+        const std::string& key,
+        const ns3::TypeId& tid);
 
-        static const std::optional<ModelConfiguration> GetOptionalCoaleshed(
-            const JsonObject& jsonObject,
-            const std::string& key,
-            const ns3::TypeId& tid);
+    static const std::vector<ModelConfiguration::Attribute> GetAttributes(const TypeId& model,
+                                                                          const JsonArray& jAttrs);
+    static const Ptr<AttributeValue> DecodeAttributeValue(
+        const std::string& modelName,
+        const JsonValue& jAttr,
+        const TypeId::AttributeInformation& checker);
 
-        static const std::vector<ModelConfiguration::Attribute> GetAttributes(
-            const TypeId& model,
-            const JsonArray& jAttrs);
-        static const Ptr<AttributeValue> DecodeAttributeValue(
-            const std::string& modelName,
-            const JsonValue& jAttr,
-            const TypeId::AttributeInformation& checker);
+    static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
+                                                                    const JsonValue& jAttr);
 
-        static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
-                                                                        const JsonValue& jAttr);
+  private:
+    static const std::vector<ModelConfiguration> DecodeModelAggregates(const JsonArray& jAggs);
 
-      private:
-        static const std::vector<ModelConfiguration> DecodeModelAggregates(const JsonArray& jAggs);
+    static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,
+                                                         const JsonObject& jAttrs);
 
-        static const ModelConfiguration DecodeCoaleshedModel(const ns3::TypeId& model,
-                                                             const JsonObject& jAttrs);
-
-        static const std::string ToString(rapidyyjson::Type t);
-    };
+    static const std::string ToString(rapidyyjson::Type t);
+};
 
 } // namespace ns3
 

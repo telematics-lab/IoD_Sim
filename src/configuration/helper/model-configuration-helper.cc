@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -194,7 +194,8 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             }
             else if (acceptedType == "ns3::DoubleValue")
             {
-                attrValue = attrInfo.checker->CreateValidValue(DoubleValue(static_cast<double>(attrValueInt)));
+                attrValue = attrInfo.checker->CreateValidValue(
+                    DoubleValue(static_cast<double>(attrValueInt)));
             }
             else if (acceptedType == "ns3::TimeValue")
             {
@@ -222,7 +223,8 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             }
             else if (acceptedType == "ns3::DoubleValue")
             {
-                attrValue = attrInfo.checker->CreateValidValue(DoubleValue(static_cast<double>(attrValueInt)));
+                attrValue = attrInfo.checker->CreateValidValue(
+                    DoubleValue(static_cast<double>(attrValueInt)));
             }
             else if (acceptedType == "ns3::TimeValue")
             {
@@ -408,7 +410,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
         else if (attrInfo.checker->GetValueTypeName() == "ns3::Vector3DValue")
         {
-             if (arr.Size() == 3)
+            if (arr.Size() == 3)
             {
                 const Vector3D vec{arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble()};
                 attrValue = attrInfo.checker->CreateValidValue(Vector3DValue(vec));
@@ -416,7 +418,7 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
         else if (attrInfo.checker->GetValueTypeName() == "ns3::DoubleVectorValue")
         {
-             std::vector<double> els;
+            std::vector<double> els;
             for (auto& c : arr)
             {
                 els.push_back(c.GetDouble());

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (C) 2018-2024 The IoD_Sim Authors.
+ * Copyright (C) 2018-2026 The IoD_Sim Authors.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -31,10 +31,10 @@
 #include <ns3/nr-netdevice-configuration.h>
 #include <ns3/nr-ue-phy.h>
 #include <ns3/object-factory.h>
+#include <ns3/pointer.h>
 #include <ns3/rectangle.h>
 #include <ns3/string.h>
 #include <ns3/vector.h>
-#include <ns3/pointer.h>
 #include <ns3/wifi-netdevice-configuration.h>
 
 #include <optional>
@@ -166,8 +166,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                         TypeId::LookupByName("ns3::UniformPlanarArray"),
                         antennaModelJson["arrayProperties"].GetArray());
                 }
-                arrayProps.push_back(ModelConfiguration::Attribute("AntennaElement",
-                                                                   Create<PointerValue>(antennaElementFactory.Create())));
+                arrayProps.push_back(ModelConfiguration::Attribute(
+                    "AntennaElement",
+                    Create<PointerValue>(antennaElementFactory.Create())));
                 antennaModel = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
             }
         }
