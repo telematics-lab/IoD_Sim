@@ -40,8 +40,9 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<NrBearerConfiguration> bearers,
     const std::vector<NrPhyProperty> phyProperties,
     const std::optional<uint32_t> networkLayerId,
-    const std::optional<ModelConfiguration> antennaModel)
-    : NetdeviceConfiguration{type, networkLayerId, antennaModel},
+    const std::optional<ModelConfiguration> antennaModel,
+    const std::optional<DirectivityConfiguration> directivity)
+    : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
       m_phyProperties{phyProperties}

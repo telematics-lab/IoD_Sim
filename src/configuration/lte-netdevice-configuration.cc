@@ -40,8 +40,9 @@ LteNetdeviceConfiguration::LteNetdeviceConfiguration(
     const std::vector<LteBearerConfiguration> bearers,
     const std::optional<uint32_t> networkLayerId,
     const std::optional<ModelConfiguration> antennaModel,
-    const std::optional<ModelConfiguration> phyModel)
-    : NetdeviceConfiguration{type, networkLayerId, antennaModel},
+    const std::optional<ModelConfiguration> phyModel,
+    const std::optional<DirectivityConfiguration> directivity)
+    : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
       m_role{LteNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
       m_phyModel{phyModel}

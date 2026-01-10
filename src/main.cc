@@ -17,6 +17,13 @@
  */
 #include "ns3/beam-manager.h"
 #include "ns3/ideal-beamforming-algorithm.h"
+#include "ns3/lte-spectrum-phy.h"
+#include "ns3/nr-spectrum-phy.h"
+#include "ns3/nr-gnb-net-device.h"
+#include "ns3/nr-ue-net-device.h"
+#include "ns3/parabolic-antenna-model.h"
+#include "ns3/isotropic-antenna-model.h"
+#include "ns3/spectrum-wifi-phy.h"
 #include "ns3/uniform-planar-array.h"
 #include <ns3/app-statistics-helper.h>
 #include <ns3/buildings-helper.h>
@@ -190,6 +197,16 @@ class Scenario
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs(const uint32_t netId);
     void EvaluateSinrDistanceAttachment(const uint32_t netId);
+    void UpdateAntennaDirectivity(Ptr<NetDevice> dev,
+                                  DirectivityConfiguration config,
+                                  std::string deviceType,
+                                  std::optional<uint32_t> netId,
+                                  std::string context,
+                                  Ptr<const MobilityModel> model);
+    void RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
+                                           double azimuth,
+                                           double elevation,
+                                           bool isNr);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -216,6 +233,265 @@ class Scenario
     // Track active SINR attachment loops to avoid duplicates
     std::set<uint32_t> m_sinrAttachmentRunning;
 };
+
+void
+Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
+                                   DirectivityConfiguration config,
+                                   std::string deviceType,
+                                   std::optional<uint32_t> netId,
+                                   std::string context,
+                                   Ptr<const MobilityModel> model)
+{
+    // Extract Node ID from context "/NodeList/X/..."
+    size_t start = context.find("/NodeList/") + 10;
+    size_t end = context.find("/", start);
+    if (start == std::string::npos || end == std::string::npos)
+    {
+        return;
+    }
+    uint32_t nodeId = std::stoul(context.substr(start, end - start));
+
+    Vector currentPos = model->GetPosition();
+    Vector targetPos;
+    bool targetFound = false;
+
+    if (config.mode == "nearest-gnb")
+    {
+        NS_ASSERT_MSG(deviceType == "nr", "Only NR devices can use nearest-gnb directivity mode");
+        double minDist = std::numeric_limits<double>::max();
+
+        if (netId.has_value())
+        {
+            auto it = m_nrGnbDevices.find(*netId);
+            if (it != m_nrGnbDevices.end())
+            {
+                // Iterate only over gNBs for this netId
+                for (const auto& devContainer : it->second)
+                {
+                    for (uint32_t i = 0; i < devContainer.GetN(); ++i)
+                    {
+                        Ptr<NetDevice> gnbDev = devContainer.Get(i);
+                        if (!gnbDev)
+                            continue;
+                        Ptr<Node> gnbNode = gnbDev->GetNode();
+                        if (!gnbNode || gnbNode->GetId() == nodeId)
+                            continue;
+
+                        Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
+                        if (gnbMob)
+                        {
+                            double dist = gnbMob->GetDistanceFrom(model);
+                            if (dist < minDist)
+                            {
+                                minDist = dist;
+                                targetPos = gnbMob->GetPosition();
+                                targetFound = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (config.mode == "nearest-ue")
+    {
+        // TARGET_UE
+        NS_ASSERT_MSG(deviceType == "nr", "Only NR devices can use nearest-ue directivity mode");
+        double minDist = std::numeric_limits<double>::max();
+
+        if (netId.has_value())
+        {
+            auto it = m_nrUeDevices.find(*netId);
+            if (it != m_nrUeDevices.end())
+            {
+                // Iterate only over UEs for this netId
+                // m_nrUeDevices is map<uint32_t, std::vector<Ptr<NetDevice>>>
+                for (const auto& ueDev : it->second)
+                {
+                    if (!ueDev)
+                        continue;
+                    Ptr<Node> ueNode = ueDev->GetNode();
+                    if (!ueNode || ueNode->GetId() == nodeId)
+                        continue;
+
+                    Ptr<MobilityModel> ueMob = ueNode->GetObject<MobilityModel>();
+                    if (ueMob)
+                    {
+                        double dist = ueMob->GetDistanceFrom(model);
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                            targetPos = ueMob->GetPosition();
+                            targetFound = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (config.mode == "earth-centered")
+    {
+        targetPos = Vector(0, 0, 0);
+        targetFound = true;
+    }
+    else if (config.mode == "point")
+    {
+        // Assuming config.position is in the simulation coordinate system
+        if (config.coordinates == "geocentric")
+        {
+            targetPos = config.position;
+        }
+        else if (config.coordinates == "geographic")
+        {
+            targetPos =
+                GeographicPositions::GeographicToCartesianCoordinates(config.position.x,
+                                                                      config.position.y,
+                                                                      config.position.z,
+                                                                      GeographicPositions::SPHERE);
+        }
+        else
+        {
+            NS_ASSERT_MSG(
+                false,
+                "Unknown coordinate system for directivity point: " << config.coordinates);
+        }
+        targetFound = true;
+    }
+
+    if (!targetFound)
+        return;
+
+    Vector dir = targetPos - currentPos;
+    // Calculate angles in radians
+    // Azimuth: Angle in XY plane from X axis
+    double azimuth = std::atan2(dir.y, dir.x);
+    // Elevation: Angle from XY plane towards Z axis
+    double dist2d = std::hypot(dir.x, dir.y);
+    double elevation = std::atan2(dir.z, dist2d);
+
+    // Update Antenna based on Device Type
+    Ptr<Object> antennaObj = nullptr;
+
+    if (deviceType == "nr")
+    {
+        if (Ptr<NrUeNetDevice> nrUe = DynamicCast<NrUeNetDevice>(dev))
+        {
+            // The AntennaElement should be the same in every bwp
+            // So we need to change it one time only
+            auto phy = nrUe->GetPhy(0);
+            if (phy)
+            {
+                auto spectrumPhy = phy->GetSpectrumPhy();
+                if (spectrumPhy)
+                {
+                    antennaObj = spectrumPhy->GetAntenna();
+                }
+            }
+        }else if (Ptr<NrGnbNetDevice> nrGnb = DynamicCast<NrGnbNetDevice>(dev)){
+            // The AntennaElement should be the same in every bwp
+            // So we need to change it one time only
+            auto phy = nrGnb->GetPhy(0);
+            if (phy)
+            {
+                auto spectrumPhy = phy->GetSpectrumPhy();
+                if (spectrumPhy)
+                {
+                    antennaObj = spectrumPhy->GetAntenna();
+                }
+            }
+        }
+    }
+    else if (deviceType == "lte")
+    {
+        // TODO test and verify
+        if (Ptr<LteNetDevice> lteDev = DynamicCast<LteNetDevice>(dev))
+        {
+            if (Ptr<LteEnbNetDevice> lteEnb = DynamicCast<LteEnbNetDevice>(dev))
+            {
+                auto phy = lteEnb->GetPhy();
+                if (phy)
+                {
+                    // LteEnbPhy has GetDlSpectrumPhy
+                    auto specPhy = phy->GetDlSpectrumPhy();
+                    if (specPhy)
+                        antennaObj = specPhy->GetAntenna();
+                }
+            }
+            else if (Ptr<LteUeNetDevice> lteUe = DynamicCast<LteUeNetDevice>(dev))
+            {
+                auto phy = lteEnb->GetPhy();
+                if (phy)
+                {
+                    // LteEnbPhy has GetDlSpectrumPhy
+                    auto specPhy = phy->GetDlSpectrumPhy();
+                    if (specPhy)
+                        antennaObj = specPhy->GetAntenna();
+                }
+            }
+        }
+    }
+    else if (deviceType == "wifi")
+    {
+        // TODO test and verify
+        if (Ptr<WifiNetDevice> wifiDev = DynamicCast<WifiNetDevice>(dev))
+        {
+            auto phy = wifiDev->GetPhy();
+            if (phy)
+            {
+                Ptr<SpectrumWifiPhy> specPhy = DynamicCast<SpectrumWifiPhy>(phy);
+                if (specPhy)
+                {
+                    antennaObj = specPhy->GetAntenna();
+                }
+            }
+        }
+    }
+
+    if (antennaObj)
+    {
+        bool steerArrays = deviceType != "nr";
+        RecursiveUpdateAntennaDirectivity(antennaObj, azimuth, elevation, steerArrays);
+    }
+}
+
+void
+Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
+                                            double azimuth,
+                                            double elevation,
+                                            bool steerArrays)
+{
+    if (!antennaObj)
+        return;
+
+    // Try Parabolic
+    if (Ptr<ParabolicAntennaModel> parabolic = DynamicCast<ParabolicAntennaModel>(antennaObj))
+    {
+        parabolic->SetOrientation(azimuth * 180.0 / M_PI);
+        parabolic->SetElevation(elevation * 180.0 / M_PI);
+    }
+    else if (Ptr<UniformPlanarArray> upa = DynamicCast<UniformPlanarArray>(antennaObj))
+    {
+        if (steerArrays)
+        {
+            // TODO verify is correct to set azimuth and elevation here in this way
+            upa->SetAlpha(azimuth);
+            upa->SetBeta(-elevation);
+        }
+
+        // Recurse on element
+        Ptr<const AntennaModel> elem = upa->GetAntennaElement();
+        if (elem)
+        {
+            // ConstCast is needed because GetAntennaElement returns const pointer
+            Ptr<AntennaModel> mutableElem = ConstCast<AntennaModel>(elem);
+            RecursiveUpdateAntennaDirectivity(mutableElem, azimuth, elevation, steerArrays);
+        }
+    }else if (Ptr<IsotropicAntennaModel> array = DynamicCast<IsotropicAntennaModel>(antennaObj)) {
+        // Do nothing
+    }else{
+        NS_ASSERT_MSG(false, "Unsupported antenna model for directivity update");
+    }
+}
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
 
@@ -1031,6 +1307,32 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
             {
                 NS_FATAL_ERROR(
                     "Unsupported Drone Network Device Type: " << entityNetDev->GetType());
+            }
+
+            if (const auto& dirConfig = entityNetDev->GetDirectivity())
+            {
+                NS_LOG_INFO("Configuring Directivity for Entity " << entityId << " Device "
+                                                                  << deviceId);
+                // Connect CourseChange trace for this node/device/config
+                auto mob = entityNode->GetObject<MobilityModel>();
+                if (mob)
+                {
+                    std::ostringstream oss;
+                    oss << "/NodeList/" << entityNode->GetId()
+                        << "/$ns3::MobilityModel/CourseChange";
+                    mob->TraceConnect(
+                        "CourseChange",
+                        oss.str(),
+                        Callback<void, std::string, Ptr<const MobilityModel>>(
+                            [this,
+                             dev = entityNode->GetDevice(deviceId),
+                             config = *dirConfig,
+                             type = entityNetDev->GetType(),
+                             netId = entityNetDev->GetNetworkLayerId()](std::string context,
+                                                             Ptr<const MobilityModel> model) {
+                                this->UpdateAntennaDirectivity(dev, config, type, netId, context, model);
+                            }));
+                }
             }
 
             ++deviceId;

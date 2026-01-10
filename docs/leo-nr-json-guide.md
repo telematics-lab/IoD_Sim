@@ -952,7 +952,10 @@ When we go to configure the various network devices, it is possible to configure
         "name": "TxPower",
         "value": 23.0
       }
-    ]
+    ],
+    "directivity": {
+        "mode": "nearest-gnb"
+    }
   }
 ]
 ```
@@ -962,6 +965,38 @@ As you can see, it is possible to specify the type of bearer (flow) you want to 
 It is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device. The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
 
 Furthermore, using the `antennaModel` parameter, it is possible to specify the antenna model of the device with the same kind of attributes as the `ueAntenna` and `gnbAntenna` parameters.
+
+### `netDevices[i].directivity`
+**Description:** Configuration for automatic antenna directivity updates.
+
+This optional parameter allows the antenna orientation to be automatically updated during the simulation based on the node's movement or a specific target.
+
+**Example:**
+```json
+"directivity": {
+  "mode": "point",
+  "coordinates": "geocentric",
+  "position": {
+    "x": 100.0,
+    "y": 200.0,
+    "z": 0.0
+  }
+}
+```
+
+**Properties:**
+
+| Name | Type | Options | Description |
+|------|------|---------|-------------|
+| `mode` | string | `nearest-gnb`, `nearest-ue`, `earth-centered`, `point` | The directivity mode. |
+| `coordinates` | string | `geocentric`, `geographic` | Coordinate system for `point` mode (optional). |
+| `position` | object | `{ "x": ..., "y": ..., "z": ... }` | Target position for `point` mode (optional). |
+
+**Modes:**
+- `nearest-gnb`: The antenna constantly points to the nearest gNB (considering only gNBs of the same `networkLayer` ID). This mode is specific to `NR` devices.
+- `nearest-ue`: The antenna constantly points to the nearest UE (considering only UEs of the same `networkLayer` ID). This mode is specific to `NR` devices.
+- `earth-centered`: The antenna points towards the center of the earth (0, 0, 0).
+- `point`: The antenna points towards a fixed point specified by `position` and `coordinates`.
 
 ---
 

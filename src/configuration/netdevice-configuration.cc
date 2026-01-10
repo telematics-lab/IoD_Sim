@@ -22,10 +22,12 @@ namespace ns3
 
 NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
                                                const std::optional<uint32_t> networkLayerId,
-                                               const std::optional<ModelConfiguration> antennaModel)
+                                               const std::optional<ModelConfiguration> antennaModel,
+                                               const std::optional<DirectivityConfiguration> directivity)
     : m_type{type},
       m_networkLayerId{networkLayerId},
-      m_antennaModel{antennaModel}
+      m_antennaModel{antennaModel},
+      m_directivity{directivity}
 {
 }
 
@@ -45,6 +47,12 @@ std::optional<ModelConfiguration>
 NetdeviceConfiguration::GetAntennaModel() const
 {
     return m_antennaModel;
+}
+
+std::optional<DirectivityConfiguration>
+NetdeviceConfiguration::GetDirectivity() const
+{
+    return m_directivity;
 }
 
 } // namespace ns3

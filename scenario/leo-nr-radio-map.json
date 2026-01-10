@@ -139,15 +139,7 @@
         "properties": [
           {
             "name": "Beamwidth",
-            "value": 60
-          },
-          {
-            "name": "Orientation",
-            "value": -85
-          },
-          {
-            "name": "Elevation",
-            "value": 0 //30
+            "value": 20
           }
         ]
       },
@@ -205,7 +197,10 @@
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
-          ]
+          ],
+          "directivity": {
+            "mode": "nearest-gnb"
+          }
         }
       ],
       "mobilityModel": {
@@ -238,7 +233,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {

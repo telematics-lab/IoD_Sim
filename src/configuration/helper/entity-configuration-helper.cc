@@ -178,6 +178,41 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
         }
 
+        std::optional<DirectivityConfiguration> directivity;
+        if (netdev.HasMember("directivity"))
+        {
+            NS_ASSERT_MSG(netdev["directivity"].IsObject(),
+                          "Entity Network Device 'directivity' property must be an object.");
+
+            const auto& dirJson = netdev["directivity"];
+            NS_ASSERT_MSG(dirJson.HasMember("mode"),
+                          "Directivity configuration must have 'mode' property.");
+            NS_ASSERT_MSG(dirJson["mode"].IsString(),
+                          "Directivity 'mode' property must be a string.");
+
+            DirectivityConfiguration dirConfig;
+            dirConfig.mode = dirJson["mode"].GetString();
+
+            if (dirJson.HasMember("coordinates"))
+            {
+                NS_ASSERT_MSG(dirJson["coordinates"].IsString(),
+                              "Directivity 'coordinates' property must be a string.");
+                dirConfig.coordinates = dirJson["coordinates"].GetString();
+            }
+
+            if (dirJson.HasMember("position"))
+            {
+                NS_ASSERT_MSG(dirJson["position"].IsArray(),
+                              "Directivity 'position' property must be an array.");
+                auto arr = dirJson["position"].GetArray();
+                NS_ASSERT_MSG(arr.Size() == 3,
+                              "Directivity 'position' array must have 3 elements.");
+                dirConfig.position = Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
+            }
+
+            directivity = dirConfig;
+        }
+
         if (type == "wifi")
         {
             NS_ASSERT_MSG(netdev.HasMember("macLayer"),
@@ -190,7 +225,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             confs.push_back(CreateObject<WifiNetdeviceConfiguration>(type,
                                                                      macLayer,
                                                                      networkLayerId,
-                                                                     antennaModel));
+                                                                     antennaModel,
+                                                                     directivity));
         }
         else if (type == "lte")
         {
@@ -217,7 +253,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                                                     bearers,
                                                                     networkLayerId,
                                                                     antennaModel,
-                                                                    phyModel));
+                                                                    phyModel,
+                                                                    directivity));
         }
         else if (type == "nr")
         {
@@ -294,12 +331,13 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                                                    bearers,
                                                                    phyProperties,
                                                                    networkLayerId,
-                                                                   antennaModel));
+                                                                   antennaModel,
+                                                                   directivity));
         }
         else if (type == "simple")
         {
             confs.push_back(
-                CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel));
+                CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel, directivity));
         }
         else
         {

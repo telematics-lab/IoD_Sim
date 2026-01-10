@@ -23,9 +23,17 @@
 
 #include <optional>
 #include <vector>
+#include <ns3/vector.h>
 
 namespace ns3
 {
+
+struct DirectivityConfiguration
+{
+    std::string mode;
+    std::string coordinates;
+    Vector position;
+};
 
 /**
  * \brief Data class to recnognize and configure a Network Device for an entity to be simulated.
@@ -43,18 +51,22 @@ class NetdeviceConfiguration : public Object
      */
     NetdeviceConfiguration(const std::string type,
                            const std::optional<uint32_t> networkLayerId,
-                           const std::optional<ModelConfiguration> antennaModel);
+                           const std::optional<ModelConfiguration> antennaModel,
+                           const std::optional<DirectivityConfiguration> directivity = std::nullopt);
     /** \return The type of the Network Device. */
     const std::string GetType() const;
     /** \return The reference network layer identifier. */
     virtual const std::optional<uint32_t> GetNetworkLayerId() const;
     /** \return The antenna model configuration for the Network Device. */
     std::optional<ModelConfiguration> GetAntennaModel() const;
+    /** \return The directivity configuration for the Network Device. */
+    std::optional<DirectivityConfiguration> GetDirectivity() const;
 
   private:
     const std::string m_type;
     const std::optional<uint32_t> m_networkLayerId;
     const std::optional<ModelConfiguration> m_antennaModel;
+    const std::optional<DirectivityConfiguration> m_directivity;
 };
 
 } // namespace ns3

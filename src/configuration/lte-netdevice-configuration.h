@@ -62,7 +62,8 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
                               const std::vector<LteBearerConfiguration> bearers,
                               const std::optional<uint32_t> networkLayerId,
                               const std::optional<ModelConfiguration> antennaModel,
-                              const std::optional<ModelConfiguration> phyModel);
+                              const std::optional<ModelConfiguration> phyModel,
+                              const std::optional<DirectivityConfiguration> directivity = std::nullopt);
     /**
      * \return The role of the Network Device in the LTE network.
      */

@@ -60,7 +60,8 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
                              const std::vector<NrBearerConfiguration> bearers,
                              const std::vector<NrPhyProperty> phyProperties,
                              const std::optional<uint32_t> networkLayerId,
-                             const std::optional<ModelConfiguration> antennaModel);
+                             const std::optional<ModelConfiguration> antennaModel,
+                             const std::optional<DirectivityConfiguration> directivity = std::nullopt);
     /** Default destructor */
     ~NrNetdeviceConfiguration();
 
