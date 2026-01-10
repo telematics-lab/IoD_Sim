@@ -19,11 +19,12 @@
 #define NETDEVICE_CONFIGURATION_H
 
 #include <ns3/model-configuration.h>
+#include <ns3/nstime.h>
 #include <ns3/object.h>
+#include <ns3/vector.h>
 
 #include <optional>
 #include <vector>
-#include <ns3/vector.h>
 
 namespace ns3
 {
@@ -31,8 +32,9 @@ namespace ns3
 struct DirectivityConfiguration
 {
     std::string mode;
-    std::string coordinates;
-    Vector position;
+    std::string coordinates = "geocentric";
+    Vector position = Vector(0, 0, 0);
+    Time precision = MilliSeconds(100);
 };
 
 /**
@@ -49,10 +51,11 @@ class NetdeviceConfiguration : public Object
      * device. \param networkLayerId The identifier for the Network Layer that has been defined for
      * this simulation. It must be compatible with the given type and macLayer.
      */
-    NetdeviceConfiguration(const std::string type,
-                           const std::optional<uint32_t> networkLayerId,
-                           const std::optional<ModelConfiguration> antennaModel,
-                           const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+    NetdeviceConfiguration(
+        const std::string type,
+        const std::optional<uint32_t> networkLayerId,
+        const std::optional<ModelConfiguration> antennaModel,
+        const std::optional<DirectivityConfiguration> directivity = std::nullopt);
     /** \return The type of the Network Device. */
     const std::string GetType() const;
     /** \return The reference network layer identifier. */

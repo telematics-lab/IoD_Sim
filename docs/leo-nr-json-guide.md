@@ -976,11 +976,8 @@ This optional parameter allows the antenna orientation to be automatically updat
 "directivity": {
   "mode": "point",
   "coordinates": "geocentric",
-  "position": {
-    "x": 100.0,
-    "y": 200.0,
-    "z": 0.0
-  }
+  "position": [100.0, 200.0, 0.0],
+  "precision": "100ms"
 }
 ```
 
@@ -990,7 +987,8 @@ This optional parameter allows the antenna orientation to be automatically updat
 |------|------|---------|-------------|
 | `mode` | string | `nearest-gnb`, `nearest-ue`, `earth-centered`, `point` | The directivity mode. |
 | `coordinates` | string | `geocentric`, `geographic` | Coordinate system for `point` mode (optional). |
-| `position` | object | `{ "x": ..., "y": ..., "z": ... }` | Target position for `point` mode (optional). |
+| `position` | array | `[x, y, z]` | Target position for `point` mode (optional). |
+| `precision` | string | - | The update interval (e.g., "100ms", "1s"). Default: "100ms". |
 
 **Modes:**
 - `nearest-gnb`: The antenna constantly points to the nearest gNB (considering only gNBs of the same `networkLayer` ID). This mode is specific to `NR` devices.

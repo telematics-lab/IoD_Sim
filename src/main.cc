@@ -17,15 +17,15 @@
  */
 #include "ns3/beam-manager.h"
 #include "ns3/ideal-beamforming-algorithm.h"
-#include "ns3/lte-spectrum-phy.h"
-#include "ns3/nr-spectrum-phy.h"
-#include "ns3/nr-gnb-net-device.h"
-#include "ns3/nr-ue-net-device.h"
-#include "ns3/nr-gnb-rrc.h"
-#include "ns3/nr-ue-rrc.h"
-#include "ns3/nr-epc-ue-nas.h"
-#include "ns3/parabolic-antenna-model.h"
 #include "ns3/isotropic-antenna-model.h"
+#include "ns3/lte-spectrum-phy.h"
+#include "ns3/nr-epc-ue-nas.h"
+#include "ns3/nr-gnb-net-device.h"
+#include "ns3/nr-gnb-rrc.h"
+#include "ns3/nr-spectrum-phy.h"
+#include "ns3/nr-ue-net-device.h"
+#include "ns3/nr-ue-rrc.h"
+#include "ns3/parabolic-antenna-model.h"
 #include "ns3/spectrum-wifi-phy.h"
 #include "ns3/uniform-planar-array.h"
 #include <ns3/app-statistics-helper.h>
@@ -204,7 +204,6 @@ class Scenario
                                   DirectivityConfiguration config,
                                   std::string deviceType,
                                   std::optional<uint32_t> netId,
-                                  std::string context,
                                   Ptr<const MobilityModel> model);
     void RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
                                            double azimuth,
@@ -242,17 +241,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                    DirectivityConfiguration config,
                                    std::string deviceType,
                                    std::optional<uint32_t> netId,
-                                   std::string context,
                                    Ptr<const MobilityModel> model)
 {
-    // Extract Node ID from context "/NodeList/X/..."
-    size_t start = context.find("/NodeList/") + 10;
-    size_t end = context.find("/", start);
-    if (start == std::string::npos || end == std::string::npos)
-    {
-        return;
-    }
-    uint32_t nodeId = std::stoul(context.substr(start, end - start));
+    uint32_t nodeId = model->GetObject<Node>()->GetId();
 
     Vector currentPos = model->GetPosition();
     Vector targetPos;
@@ -390,7 +381,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     antennaObj = spectrumPhy->GetAntenna();
                 }
             }
-        }else if (Ptr<NrGnbNetDevice> nrGnb = DynamicCast<NrGnbNetDevice>(dev)){
+        }
+        else if (Ptr<NrGnbNetDevice> nrGnb = DynamicCast<NrGnbNetDevice>(dev))
+        {
             // The AntennaElement should be the same in every bwp
             // So we need to change it one time only
             auto phy = nrGnb->GetPhy(0);
@@ -455,6 +448,16 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
         bool steerArrays = deviceType != "nr";
         RecursiveUpdateAntennaDirectivity(antennaObj, azimuth, elevation, steerArrays);
     }
+
+    // Schedule next update
+    Simulator::Schedule(config.precision,
+                        &Scenario::UpdateAntennaDirectivity,
+                        this,
+                        dev,
+                        config,
+                        deviceType,
+                        netId,
+                        model);
 }
 
 void
@@ -489,7 +492,9 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
             Ptr<AntennaModel> mutableElem = ConstCast<AntennaModel>(elem);
             RecursiveUpdateAntennaDirectivity(mutableElem, azimuth, elevation, steerArrays);
         }
-    }else if (Ptr<IsotropicAntennaModel> array = DynamicCast<IsotropicAntennaModel>(antennaObj)) {
+    }
+    else if (Ptr<IsotropicAntennaModel> array = DynamicCast<IsotropicAntennaModel>(antennaObj))
+    {
         // Do nothing
     }
 }
@@ -1314,25 +1319,15 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
             {
                 NS_LOG_INFO("Configuring Directivity for Entity " << entityId << " Device "
                                                                   << deviceId);
-                // Connect CourseChange trace for this node/device/config
+                // Schedule initial directivity update
                 auto mob = entityNode->GetObject<MobilityModel>();
                 if (mob)
                 {
-                    std::ostringstream oss;
-                    oss << "/NodeList/" << entityNode->GetId()
-                        << "/$ns3::MobilityModel/CourseChange";
-                    mob->TraceConnect(
-                        "CourseChange",
-                        oss.str(),
-                        Callback<void, std::string, Ptr<const MobilityModel>>(
-                            [this,
-                             dev = entityNode->GetDevice(deviceId),
-                             config = *dirConfig,
-                             type = entityNetDev->GetType(),
-                             netId = entityNetDev->GetNetworkLayerId()](std::string context,
-                                                             Ptr<const MobilityModel> model) {
-                                this->UpdateAntennaDirectivity(dev, config, type, netId, context, model);
-                            }));
+                    Scenario::UpdateAntennaDirectivity(entityNode->GetDevice(deviceId),
+                                                       *dirConfig,
+                                                       entityNetDev->GetType(),
+                                                       entityNetDev->GetNetworkLayerId(),
+                                                       mob);
                 }
             }
 
@@ -2554,26 +2549,33 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 else
                 {
                     // Needs handover.
-                    // Check if source gNB actually has the UE context (it might have timed out or been released)
+                    // Check if source gNB actually has the UE context (it might have timed out or
+                    // been released)
                     Ptr<NrGnbRrc> srcRrc = currentGnb->GetObject<NrGnbNetDevice>()->GetRrc();
                     uint16_t rnti = ueDevice->GetRrc()->GetRnti();
 
                     if (rnti != 0 && srcRrc->HasUeManager(rnti))
                     {
-                        std::cout << "UE " << ueDevice->GetImsi() << " requesting handover from gNB "
-                                  << currentGnb->GetCellId() << " to gNB " << bestGnb->GetCellId()
-                                  << " (SNR: " << bestSnr << " dB, distance: " << bestDistance
-                                  << " km)" << std::endl;
+                        std::cout << "UE " << ueDevice->GetImsi()
+                                  << " requesting handover from gNB " << currentGnb->GetCellId()
+                                  << " to gNB " << bestGnb->GetCellId() << " (SNR: " << bestSnr
+                                  << " dB, distance: " << bestDistance << " km)" << std::endl;
 
-                         nrHelper->HandoverRequest(Seconds(0), ueDevice, ConstCast<NrGnbNetDevice>(currentGnb), bestGnb);
+                        nrHelper->HandoverRequest(Seconds(0),
+                                                  ueDevice,
+                                                  ConstCast<NrGnbNetDevice>(currentGnb),
+                                                  bestGnb);
                     }
                     else
                     {
                         std::cout << "UE " << ueDevice->GetImsi() << " should be connected to "
-                                  << bestGnb->GetCellId() << " of gNB " << bestGnb->GetNode()->GetId() << " but is connected to " << currentGnb->GetCellId() << " (RNTI " << rnti << "). "
-                                  << "after handover: new gNB has not received the UE context." << std::endl;
+                                  << bestGnb->GetCellId() << " of gNB "
+                                  << bestGnb->GetNode()->GetId() << " but is connected to "
+                                  << currentGnb->GetCellId() << " (RNTI " << rnti << "). "
+                                  << "after handover: new gNB has not received the UE context."
+                                  << std::endl;
 
-                        //nrHelper->AttachToGnb(ueDevice, bestGnb);
+                        // nrHelper->AttachToGnb(ueDevice, bestGnb);
                     }
                 }
             }

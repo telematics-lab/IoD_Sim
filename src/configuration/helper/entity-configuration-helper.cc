@@ -210,6 +210,13 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 dirConfig.position = Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
             }
 
+            if (dirJson.HasMember("precision"))
+            {
+                NS_ASSERT_MSG(dirJson["precision"].IsString(),
+                              "Directivity 'precision' property must be a string (e.g., '100ms').");
+                dirConfig.precision = Time(dirJson["precision"].GetString());
+            }
+
             directivity = dirConfig;
         }
 
