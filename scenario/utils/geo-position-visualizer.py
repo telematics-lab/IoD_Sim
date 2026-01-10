@@ -222,6 +222,7 @@ if not df.empty:
             for idx in node_df.index:
                 text = (
                     f"Type: {type_names.get(data_type, data_type)}<br>"
+                    f"Time: {node_df.loc[idx, 'Time']:.3f} s<br>"
                     f"Node: {nodo}<br>"
                     f"Lat: {node_df.loc[idx, 'Latitude']:.3f}°<br>"
                     f"Lon: {node_df.loc[idx, 'Longitude']:.3f}°<br>"

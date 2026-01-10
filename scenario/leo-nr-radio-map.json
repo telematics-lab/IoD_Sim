@@ -90,8 +90,8 @@
           ],
           "frequencyBands": [
             {
-              "centralFrequency": 16e9,
-              "bandwidth": 10e6,
+              "centralFrequency": 2e9,
+              "bandwidth": 20e6,
               "numComponentCarriers": 1
             }
           ]

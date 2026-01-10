@@ -84,6 +84,19 @@
           ]
         }
       ],
+      "handover": {
+        "algorithm": "ns3::NrA2A4RsrqHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "ServingCellThreshold",
+            "value": 30
+          },
+          {
+            "name": "NeighbourCellOffset",
+            "value": 1
+          }
+        ]
+      },
       "attachMethod": "none",
       "advancedOptions": {
         "sinr-distance-attach": {
@@ -135,7 +148,7 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 4
+            "value": 8
           },
           {
             "name": "NumColumns",
@@ -201,7 +214,10 @@
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
-          ]
+          ],
+          "directivity": {
+            "mode": "nearest-gnb"
+          }
         }
       ],
       "mobilityModel": {
@@ -291,7 +307,10 @@
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
-          ]
+          ],
+          "directivity": {
+            "mode": "nearest-gnb"
+          }
         }
       ],
       "mobilityModel": {
@@ -381,7 +400,10 @@
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
-          ]
+          ],
+          "directivity": {
+            "mode": "nearest-gnb"
+          }
         }
       ],
       "mobilityModel": {
@@ -468,7 +490,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -503,7 +528,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -538,7 +566,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -573,7 +604,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -608,7 +642,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -643,7 +680,10 @@
         {
           "type": "nr",
           "networkLayer": 0,
-          "role": "gNB"
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
         }
       ],
       "mobilityModel": {
@@ -664,6 +704,44 @@
           {
             "name": "Offset",
             "value": 150.0
+          },
+          {
+            "name": "RetrogradeOrbit",
+            "value": false
+          }
+        ]
+      },
+      "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination",
+            "value": 20.0
+          },
+          {
+            "name": "Longitude",
+            "value": 0.0
+          },
+          {
+            "name": "Offset",
+            "value": 2.910989972200442 // At 0.3s this gNB will be not the best for the UE under this position
           },
           {
             "name": "RetrogradeOrbit",

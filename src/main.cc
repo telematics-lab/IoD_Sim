@@ -21,6 +21,9 @@
 #include "ns3/nr-spectrum-phy.h"
 #include "ns3/nr-gnb-net-device.h"
 #include "ns3/nr-ue-net-device.h"
+#include "ns3/nr-gnb-rrc.h"
+#include "ns3/nr-ue-rrc.h"
+#include "ns3/nr-epc-ue-nas.h"
 #include "ns3/parabolic-antenna-model.h"
 #include "ns3/isotropic-antenna-model.h"
 #include "ns3/spectrum-wifi-phy.h"
@@ -488,8 +491,6 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
         }
     }else if (Ptr<IsotropicAntennaModel> array = DynamicCast<IsotropicAntennaModel>(antennaObj)) {
         // Do nothing
-    }else{
-        NS_ASSERT_MSG(false, "Unsupported antenna model for directivity update");
     }
 }
 
@@ -2552,11 +2553,28 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 }
                 else
                 {
-                    // Needs handover. AttachToGnb likely crashes if context exists.
-                    // DEBUG: TODO REMOVE
-                    std::cout << "UE " << ueDevice->GetImsi() << " should switch to gNB "
-                              << bestGnb->GetCellId() << " but Handover is not implemented."
-                              << std::endl;
+                    // Needs handover.
+                    // Check if source gNB actually has the UE context (it might have timed out or been released)
+                    Ptr<NrGnbRrc> srcRrc = currentGnb->GetObject<NrGnbNetDevice>()->GetRrc();
+                    uint16_t rnti = ueDevice->GetRrc()->GetRnti();
+
+                    if (rnti != 0 && srcRrc->HasUeManager(rnti))
+                    {
+                        std::cout << "UE " << ueDevice->GetImsi() << " requesting handover from gNB "
+                                  << currentGnb->GetCellId() << " to gNB " << bestGnb->GetCellId()
+                                  << " (SNR: " << bestSnr << " dB, distance: " << bestDistance
+                                  << " km)" << std::endl;
+
+                         nrHelper->HandoverRequest(Seconds(0), ueDevice, ConstCast<NrGnbNetDevice>(currentGnb), bestGnb);
+                    }
+                    else
+                    {
+                        std::cout << "UE " << ueDevice->GetImsi() << " should be connected to "
+                                  << bestGnb->GetCellId() << " of gNB " << bestGnb->GetNode()->GetId() << " but is connected to " << currentGnb->GetCellId() << " (RNTI " << rnti << "). "
+                                  << "after handover: new gNB has not received the UE context." << std::endl;
+
+                        //nrHelper->AttachToGnb(ueDevice, bestGnb);
+                    }
                 }
             }
             else
