@@ -25,6 +25,7 @@
 #include "ns3/nr-spectrum-phy.h"
 #include "ns3/nr-ue-net-device.h"
 #include "ns3/nr-ue-rrc.h"
+#include "ns3/circular-aperture-antenna-model.h"
 #include "ns3/parabolic-antenna-model.h"
 #include "ns3/spectrum-wifi-phy.h"
 #include "ns3/uniform-planar-array.h"
@@ -474,6 +475,11 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
     {
         parabolic->SetOrientation(azimuth * 180.0 / M_PI);
         parabolic->SetElevation(elevation * 180.0 / M_PI);
+    }
+    else if (Ptr<CircularApertureAntennaModel> circular = DynamicCast<CircularApertureAntennaModel>(antennaObj))
+    {
+        circular->SetBoresightAzimuth(azimuth);
+        circular->SetBoresightInclination(M_PI_2 - elevation);
     }
     else if (Ptr<UniformPlanarArray> upa = DynamicCast<UniformPlanarArray>(antennaObj))
     {
