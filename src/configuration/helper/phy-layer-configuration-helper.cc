@@ -530,40 +530,36 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             nrConfig->SetGnbPhyAttributes(gnbPhyAttributes);
         }
 
-        if (jsonPhyLayer.HasMember("bands") && jsonPhyLayer["bands"].IsArray())
+        if (jsonPhyLayer.HasMember("channels") && jsonPhyLayer["channels"].IsArray())
         {
-            if (!jsonPhyLayer.HasMember("bands") || !jsonPhyLayer["bands"].IsArray() ||
-                jsonPhyLayer["bands"].GetArray().Size() == 0)
+            if (!jsonPhyLayer.HasMember("channels") || !jsonPhyLayer["channels"].IsArray() ||
+                jsonPhyLayer["channels"].GetArray().Size() == 0)
             {
-                NS_FATAL_ERROR(
-                    "NR PHY Layer definition must have at least one band in 'bands' property.");
+                NS_FATAL_ERROR("NR PHY Layer definition must have at least one channel in "
+                               "'channels' property.");
             }
-            const auto bands = jsonPhyLayer["bands"].GetArray();
-            for (rapidyyjson::SizeType i = 0; i < bands.Size(); ++i)
+            const auto channels = jsonPhyLayer["channels"].GetArray();
+            for (rapidyyjson::SizeType i = 0; i < channels.Size(); ++i)
             {
-                const auto& band = bands[i];
-                NS_ASSERT_MSG(band.IsObject(), "NR band must be an object.");
+                const auto& channel = channels[i];
+                NS_ASSERT_MSG(channel.IsObject(), "NR channel must be an object.");
 
                 NrBandConfiguration bandConfig;
-                bandConfig.contiguousCc =
-                    band.HasMember("contiguousCc") && band["contiguousCc"].IsBool()
-                        ? band["contiguousCc"].GetBool()
-                        : true;
                 bandConfig.channel.scenario =
-                    band.HasMember("scenario") && band["scenario"].IsString()
-                        ? band["scenario"].GetString()
+                    channel.HasMember("scenario") && channel["scenario"].IsString()
+                        ? channel["scenario"].GetString()
                         : "UMi-StreetCanyon";
                 bandConfig.channel.conditionModel =
-                    band.HasMember("conditionModel") && band["conditionModel"].IsString()
-                        ? band["conditionModel"].GetString()
+                    channel.HasMember("conditionModel") && channel["conditionModel"].IsString()
+                        ? channel["conditionModel"].GetString()
                         : "Default";
                 bandConfig.channel.propagationModel =
-                    band.HasMember("propagationModel") && band["propagationModel"].IsString()
-                        ? band["propagationModel"].GetString()
+                    channel.HasMember("propagationModel") && channel["propagationModel"].IsString()
+                        ? channel["propagationModel"].GetString()
                         : "ThreeGpp";
                 bandConfig.channel.configFlags =
-                    band.HasMember("configFlags") && band["configFlags"].IsUint()
-                        ? static_cast<uint8_t>(band["configFlags"].GetUint())
+                    channel.HasMember("configFlags") && channel["configFlags"].IsUint()
+                        ? static_cast<uint8_t>(channel["configFlags"].GetUint())
                         : (NrChannelHelper::INIT_PROPAGATION | NrChannelHelper::INIT_FADING);
 
                 // We should know what is the typeid of the channel and pathloss model to set
@@ -594,59 +590,92 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                 auto phasedSpectrumTypeId = nrChannelQ->m_spectrumModel.GetTypeId();
                 auto channelConditionTypeId = nrChannelQ->m_channelConditionModel.GetTypeId();
 
-                if (band.HasMember("channelConditionAttributes") &&
-                    band["channelConditionAttributes"].IsArray())
+                if (channel.HasMember("channelConditionAttributes") &&
+                    channel["channelConditionAttributes"].IsArray())
                 {
                     const auto channelConditionAttributes = ModelConfigurationHelper::GetAttributes(
                         channelConditionTypeId,
-                        band["channelConditionAttributes"].GetArray());
+                        channel["channelConditionAttributes"].GetArray());
                     bandConfig.channelConditionAttributes = channelConditionAttributes;
                 }
 
-                if (band.HasMember("pathlossAttributes") && band["pathlossAttributes"].IsArray())
+                if (channel.HasMember("pathlossAttributes") && channel["pathlossAttributes"].IsArray())
                 {
                     const auto pathlossAttributes = ModelConfigurationHelper::GetAttributes(
                         propagationLossTypeId,
-                        band["pathlossAttributes"].GetArray());
+                        channel["pathlossAttributes"].GetArray());
                     bandConfig.pathlossAttributes = pathlossAttributes;
                 }
 
-                if (band.HasMember("phasedSpectrumAttributes") &&
-                    band["phasedSpectrumAttributes"].IsArray())
+                if (channel.HasMember("phasedSpectrumAttributes") &&
+                    channel["phasedSpectrumAttributes"].IsArray())
                 {
                     const auto phasedSpectrumAttributes = ModelConfigurationHelper::GetAttributes(
                         phasedSpectrumTypeId,
-                        band["phasedSpectrumAttributes"].GetArray());
+                        channel["phasedSpectrumAttributes"].GetArray());
                     bandConfig.phasedSpectrumAttributes = phasedSpectrumAttributes;
                 }
 
-                for (rapidyyjson::SizeType j = 0; j < band["frequencyBands"].GetArray().Size(); ++j)
+                if (channel.HasMember("bands") && channel["bands"].IsArray())
                 {
-                    const auto& freqBand = band["frequencyBands"].GetArray()[j];
-                    NS_ASSERT_MSG(freqBand.IsObject(), "NR frequency band must be an object.");
+                    const auto freqBands = channel["bands"].GetArray();
+                    for (rapidyyjson::SizeType j = 0; j < freqBands.Size(); ++j)
+                    {
+                        const auto& fb = freqBands[j];
+                        NS_ASSERT_MSG(fb.IsObject(), "Band must be an object");
+                        NS_ASSERT_MSG(fb.HasMember("type") && fb["type"].IsString(),
+                                      "Band must have a type");
 
-                    NrFrequencyBand freqBandConfig;
-                    freqBandConfig.centralFrequency =
-                        freqBand.HasMember("centralFrequency") &&
-                                freqBand["centralFrequency"].IsNumber()
-                            ? freqBand["centralFrequency"].GetDouble()
-                            : 28e9;
-                    freqBandConfig.bandwidth =
-                        freqBand.HasMember("bandwidth") && freqBand["bandwidth"].IsNumber()
-                            ? freqBand["bandwidth"].GetDouble()
-                            : 100e6;
-                    freqBandConfig.numComponentCarriers =
-                        freqBand.HasMember("numComponentCarriers") &&
-                                freqBand["numComponentCarriers"].IsUint()
-                            ? static_cast<uint8_t>(freqBand["numComponentCarriers"].GetUint())
-                            : 1;
-                    freqBandConfig.numBandwidthParts =
-                        freqBand.HasMember("numBandwidthParts") &&
-                                freqBand["numBandwidthParts"].IsUint()
-                            ? static_cast<uint8_t>(freqBand["numBandwidthParts"].GetUint())
-                            : 1;
+                        NrOperationBand opBand;
+                        std::string type = fb["type"].GetString();
 
-                    bandConfig.frequencyBands.push_back(freqBandConfig);
+                        auto parseCarrier = [](const rapidyyjson::Value& val) -> NrFrequencyBand {
+                            NrFrequencyBand fbc;
+                            fbc.centralFrequency = val.HasMember("centralFrequency") &&
+                                                           val["centralFrequency"].IsNumber()
+                                                       ? val["centralFrequency"].GetDouble()
+                                                       : 28e9;
+                            fbc.bandwidth =
+                                val.HasMember("bandwidth") && val["bandwidth"].IsNumber()
+                                    ? val["bandwidth"].GetDouble()
+                                    : 100e6;
+                            fbc.numComponentCarriers =
+                                val.HasMember("numComponentCarriers") &&
+                                        val["numComponentCarriers"].IsUint()
+                                    ? static_cast<uint8_t>(val["numComponentCarriers"].GetUint())
+                                    : 1;
+                            fbc.numBandwidthParts =
+                                val.HasMember("numBandwidthParts") &&
+                                        val["numBandwidthParts"].IsUint()
+                                    ? static_cast<uint8_t>(val["numBandwidthParts"].GetUint())
+                                    : 1;
+                            return fbc;
+                        };
+
+                        if (type == "contiguous")
+                        {
+                            opBand.type = NrOperationBand::CONTIGUOUS;
+                            NS_ASSERT_MSG(fb.HasMember("carrier") && fb["carrier"].IsObject(),
+                                          "contiguous type must have 'carrier' object");
+                            opBand.carriers.push_back(parseCarrier(fb["carrier"]));
+                        }
+                        else if (type == "non-contiguous")
+                        {
+                            opBand.type = NrOperationBand::NON_CONTIGUOUS;
+                            NS_ASSERT_MSG(fb.HasMember("carriers") && fb["carriers"].IsArray(),
+                                          "non-contiguous type must have 'carriers' array");
+                            const auto& bList = fb["carriers"].GetArray();
+                            for (auto& b : bList)
+                            {
+                                opBand.carriers.push_back(parseCarrier(b));
+                            }
+                        }
+                        else
+                        {
+                            NS_FATAL_ERROR("Unknown band type: " << type);
+                        }
+                        bandConfig.bands.push_back(opBand);
+                    }
                 }
                 nrConfig->AddBandConfiguration(bandConfig);
             }

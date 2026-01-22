@@ -333,13 +333,52 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 }
             }
 
+            std::vector<OutputLinkConfiguration> outputLinks;
+            if (netdev.HasMember("outputLinks"))
+            {
+                NS_ASSERT_MSG(netdev["outputLinks"].IsArray(),
+                              "Entity NR Network Device 'outputLinks' must be an array.");
+                for (auto& link : netdev["outputLinks"].GetArray())
+                {
+                    NS_ASSERT_MSG(link.IsObject(),
+                                  "Entity NR Network Device 'outputLinks' elements must be objects.");
+                    NS_ASSERT_MSG(link.HasMember("sourceBwp") && link.HasMember("targetBwp"),
+                                  "OutputLink must have 'sourceBwp' and 'targetBwp'.");
+                    OutputLinkConfiguration config;
+                    config.sourceBwp = link["sourceBwp"].GetUint();
+                    config.targetBwp = link["targetBwp"].GetUint();
+                    outputLinks.push_back(config);
+                }
+            }
+
+            uint32_t channelId = 0;
+            if (netdev.HasMember("channelId"))
+            {
+                NS_ASSERT_MSG(netdev["channelId"].IsUint(), "channelId must be an unsigned integer");
+                channelId = netdev["channelId"].GetUint();
+            }
+
+            std::vector<uint32_t> channelBands;
+            if (netdev.HasMember("channelBands"))
+            {
+                NS_ASSERT_MSG(netdev["channelBands"].IsArray(), "channelBands must be an array");
+                for (auto& band : netdev["channelBands"].GetArray())
+                {
+                    NS_ASSERT_MSG(band.IsUint(), "channelBands elements must be unsigned integers");
+                    channelBands.push_back(band.GetUint());
+                }
+            }
+
             confs.push_back(CreateObject<NrNetdeviceConfiguration>(type,
                                                                    role,
                                                                    bearers,
                                                                    phyProperties,
                                                                    networkLayerId,
                                                                    antennaModel,
-                                                                   directivity));
+                                                                   outputLinks,
+                                                                   directivity,
+                                                                   channelId,
+                                                                   channelBands));
         }
         else if (type == "simple")
         {

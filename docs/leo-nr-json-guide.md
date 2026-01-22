@@ -100,26 +100,26 @@ In the `phyLayer` settings, we can configure a physical layer of type `nr` which
 - `max-rsrp`: Attaches the UE to the gNB with the strongest signal (RSRP).
 - `none`: Does not perform attachment.
 
-### `bands`
-**Description:** Array of frequency bands available for communication.
+### `channels`
+**Description:** Array of channels (Operation Bands) available for communication.
 
-## NR Band Configurations
+## NR Channel Configurations
 
-We have the possibility to configure various NR bands with different scenarios, propagation models, and frequencies.
+We have the possibility to configure various NR channels with different scenarios, propagation models, and frequencies.
 
-In particular, for the single band, we have the following configurable parameters:
+In particular, for the single channel, we have the following configurable parameters:
 
-### `bands[i].scenario`
+### `channels[i].scenario`
 **Type**: `string`
 **Options:** `InF`, `InH`, `UMa`, `UMi`, `RMa`, `InH-OfficeMixed`, `InH-OfficeOpen`, `V2V-Highway`, `V2V-Urban`, `NTN-DenseUrban`, `NTN-Urban`, `NTN-Suburban`, `NTN-Rural`
-**Description:** Propagation scenario for the NR band.
+**Description:** Propagation scenario for the NR channel.
 
 In the scenarios of our interest for LEO-satellite communications, it is convenient to use `NTN-*` scenarios such as `NTN-Suburban`, `NTN-Urban`, `NTN-DenseUrban`, or `NTN-Rural` depending on the type of terrestrial environment where the vehicles are located.
 
-### `bands[i].propagationModel`
+### `channels[i].propagationModel`
 **Type:** `string`
 **Options:** `NYU`, `TwoRay`, `ThreeGpp`
-**Description:** Propagation model for the NR band.
+**Description:** Propagation model for the NR channel.
 
 The choice of scenario, model conditions, and propagation model type will influence the calculation of path loss and channel quality between nodes, defining the ns3 ChannelModel according to a table.
 
@@ -130,10 +130,10 @@ In particular, with this parameter, we define the "Spectrum Propagation Loss Mod
 | ChannelModel::TwoRay | TwoRaySpectrumPropagationLossModel |
 | ChannelModel::NYU | NYUSpectrumPropagationLossModel |
 
-### `bands[i].conditionModel`
+### `channels[i].conditionModel`
 **Type:** `string`
 **Options:** `NLOS`, `LOS`, `Buildings`, `Default`
-**Description:** Channel condition model for the NR band.
+**Description:** Channel condition model for the NR channel.
 
 With this option, we can specify a specific Channel Condition Model. If we select 'Default', this will be automatically chosen based on the selected scenario and propagation model.
 
@@ -184,14 +184,9 @@ If conditionModel is set to a value other than "Default", the Channel Condition 
 | LOS        | AlwaysLosChannelConditionModel |
 | Buildings  | BuildingsChannelConditionModel |
 
-### `bands[i].contiguousCc`
-**Type:** `boolean`
-**Description:** If `true`, component carriers (CC) are allocated contiguously in the spectrum; if `false`, they can be allocated non-contiguously.
-**Note:** This parameter affects radio resource management and frequency band planning: if true, it will be possible to set only 1 frequency range for the CCs, while if false, CCs can be in separate ranges.
-
-### `bands[i].pathlossAttributes`
+### `channels[i].pathlossAttributes`
 **Type:** `array`
-**Description:** List of path loss attributes for the specified band. Each path loss attribute is defined by an object specifying the attribute name and value.
+**Description:** List of path loss attributes for the specified channel. Each path loss attribute is defined by an object specifying the attribute name and value.
 **Notes:** These attributes are passed to the selected PropagationLoss model, so the available parameters depend on the chosen propagation model.
 
 In general, for ThreeGpp (or TwoRay) models, we have these attributes taken from the generic ThreeGppPropagationLossModel:
@@ -218,8 +213,8 @@ While for NYU models, we have these attributes taken from the generic NYUPropaga
 
 For specific models, there might be additional more specific attributes available, for which reference is made to the ns-3 and 5g-lena documentation.
 
-### `bands[i].channelConditionAttributes`
-**Description:** Channel condition attributes for the specified band. Each channel condition attribute is defined by an object specifying the attribute name and value.
+### `channels[i].channelConditionAttributes`
+**Description:** Channel condition attributes for the specified channel. Each channel condition attribute is defined by an object specifying the attribute name and value.
 
 Also in this case, the available attributes depend on the selected channel condition model.
 
@@ -241,24 +236,70 @@ In the case of NYU models, we have these common attributes (from NYUPropagationL
 While for NLOS, LOS, and Buildings models, we do not have specifiable attributes.
 
 
-### `bands[i].phasedSpectrumAttributes`
-**Description:** Phased spectrum attributes for the specified band. Each phased spectrum attribute is defined by an object specifying the attribute name and value.
+### `channels[i].phasedSpectrumAttributes`
+**Description:** Phased spectrum attributes for the specified channel. Each phased spectrum attribute is defined by an object specifying the attribute name and value.
 
 Here we can specify attributes for the Spectrum PropagationLossModel. In particular, however, there are no useful attributes associated with these models.
 The possibility to use this functionality derived from the 5g-lena nr helper is still left open.
 
-### `bands[i].frequencyBands`
+### `channels[i].bands`
 **Type:** `array`
-**Description:** List of frequency bands for the specified NR band. Each frequency band is defined by an object specifying the central frequency, bandwidth, number of component carriers, and number of bandwidth parts.
+**Description:** List of operation bands for the specified NR channel. Each band can be configured as contiguous or non-contiguous.
 
-Example of a frequencyBands object:
+Each band object structure depends on its `type`:
+
+#### Contiguous Band
+**Type:** `contiguous`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `type` | string | Must be `contiguous`. |
+| `carrier` | object | Configuration of the single carrier. |
+
+#### Non-Contiguous Band
+**Type:** `non-contiguous`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `type` | string | Must be `non-contiguous`. |
+| `carriers` | array | List of carrier configurations. |
+
+#### Carrier Configuration
+Each carrier object (inside `carrier` or `carriers`) has the following parameters:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `centralFrequency` | double | 28e9 | Central frequency in Hz. |
+| `bandwidth` | double | 100e6 | Bandwidth in Hz. |
+| `numComponentCarriers` | uint8_t | 1 | Number of component carriers. |
+| `numBandwidthParts` | uint8_t | 1 | Number of bandwidth parts. |
+
+**Example:**
 ```json
-{
-  "centralFrequency": 28e9,
-  "bandwidth": 10e6,
-  "numComponentCarriers": 1,
-  "numBandwidthParts": 1
-}
+"bands": [
+  {
+    "type": "contiguous",
+    "carrier": {
+      "centralFrequency": 28e9,
+      "bandwidth": 100e6,
+      "numComponentCarriers": 1,
+      "numBandwidthParts": 2
+    }
+  },
+  {
+    "type": "non-contiguous",
+    "carriers": [
+      {
+         "centralFrequency": 30e9,
+         "bandwidth": 50e6
+      },
+      {
+         "centralFrequency": 30.1e9,
+         "bandwidth": 50e6
+      }
+    ]
+  }
+]
 ```
 
 ### `phyLayer[0].scheduler`
@@ -785,12 +826,11 @@ Here is a complete example of NR physical layer configuration in JSON format:
 "phyLayer": [
    {
       "type": "nr",
-      "bands": [
+      "channels": [
         {
           "scenario": "NTN-Suburban",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
-          "contiguousCc": true,
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
@@ -803,11 +843,14 @@ Here is a complete example of NR physical layer configuration in JSON format:
               "value": "100ms"
             }
           ],
-          "frequencyBands": [
+          "bands": [
             {
-              "centralFrequency": 28e9,
-              "bandwidth": 10e6,
-              "numComponentCarriers": 1
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28e9,
+                "bandwidth": 10e6,
+                "numComponentCarriers": 1
+              }
             }
           ]
         }
@@ -922,6 +965,8 @@ When we go to configure the various network devices, it is possible to configure
     "type": "nr",
     "networkLayer": 0, // ID of the nr layer
     "role": "UE", // Role: UE or gNB
+    "channelId": 0, // Optional: Channel ID to use (default: 0)
+    "channelBands": [0, 1], // Optional: List of band indices to use (default: all)
     "bearers": [
       {
         "type": "NGBR_LOW_LAT_EMBB"
@@ -966,6 +1011,16 @@ It is possible to specify attributes in the physical layer specific to that NR n
 
 Furthermore, using the `antennaModel` parameter, it is possible to specify the antenna model of the device with the same kind of attributes as the `ueAntenna` and `gnbAntenna` parameters.
 
+### `netDevices[i].channelId`
+**Type:** `uint32_t`
+**Default:** `0`
+**Description:** The ID of the channel to which the device will tune. This corresponds to the index of the channel configuration in the `bands` array.
+
+### `netDevices[i].channelBands`
+**Type:** `array[uint32_t]`
+**Default:** `[]` (all bands)
+**Description:** A list of indices of the bands within the selected channel that the device should use. If empty or not specified, the device will be configured to use all available bands in the channel.
+
 ### `netDevices[i].directivity`
 **Description:** Configuration for automatic antenna directivity updates.
 
@@ -995,6 +1050,30 @@ This optional parameter allows the antenna orientation to be automatically updat
 - `nearest-ue`: The antenna constantly points to the nearest UE (considering only UEs of the same `networkLayer` ID). This mode is specific to `NR` devices.
 - `earth-centered`: The antenna points towards the center of the earth (0, 0, 0).
 - `point`: The antenna points towards a fixed point specified by `position` and `coordinates`.
+
+### `netDevices[i].outputLinks`
+**Description:** Configuration of output links for BWP routing.
+
+This optional parameter allows defining a mapping for routing control messages between Bandwidth Parts (BWPs). It is useful when control messages generated in one BWP need to be transmitted on another BWP.
+
+**Example:**
+```json
+"outputLinks": [
+  {
+    "sourceBwp": 0,
+    "targetBwp": 1
+  }
+]
+```
+
+**Properties:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `sourceBwp` | uint32_t | The ID of the source BWP from which messages originate. |
+| `targetBwp` | uint32_t | The ID of the target BWP to which messages are routed. |
+
+**Note:** This configuration applies to both gNB and UE devices. It utilizes the `SetOutputLink` method of the `BwpManager`.
 
 ---
 

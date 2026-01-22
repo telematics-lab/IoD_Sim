@@ -179,35 +179,39 @@ NrPhySimulationHelper::SetBeamformingMethod(const TypeId& beamformingMethod)
     SetBeamformingMethod(beamformingMethod, {});
 }
 
-OperationBandInfo
-NrPhySimulationHelper::CreateOperationBand(
-    const std::vector<CcBwpCreator::SimpleOperationBandConf>& bandConf,
+void
+NrPhySimulationHelper::CreateChannel(
+    const std::vector<ChannelOperationBandConf>& freqBands,
     const std::string& bandScenario,
     const std::string& bandCondition,
     const std::string& bandModel,
-    bool contiguousCc,
     std::vector<ModelConfiguration::Attribute> channelAttributes,
     std::vector<ModelConfiguration::Attribute> pathlossAttributes,
     std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
     uint8_t channelConfigFlags)
 {
     CcBwpCreator ccBwpCreator;
-    OperationBandInfo res;
+    std::vector<OperationBandInfo> opBands;
     auto nrChannel = CreateObject<NrChannelHelper>();
     nrChannel->ConfigureFactories(bandScenario, bandCondition, bandModel);
-    if (contiguousCc)
+
+    for (const auto& fb : freqBands)
     {
-        NS_ASSERT_MSG(bandConf.size() == 1,
-                      "When using contiguous CC, only one band configuration must be provided");
-        res = ccBwpCreator.CreateOperationBandContiguousCc(bandConf[0]);
+        if (fb.contiguous)
+        {
+            NS_ASSERT_MSG(fb.carrierConfs.size() == 1,
+                          "When using contiguous CC, one carrier configuration must be provided");
+            opBands.push_back(ccBwpCreator.CreateOperationBandContiguousCc(fb.carrierConfs[0]));
+        }
+        else
+        {
+            NS_ASSERT_MSG(fb.carrierConfs.size() > 0,
+                          "When using non-contiguous CC, at least one carrier configuration must "
+                          "be provided");
+            opBands.push_back(ccBwpCreator.CreateOperationBandNonContiguousCc(fb.carrierConfs));
+        }
     }
-    else
-    {
-        NS_ASSERT_MSG(
-            bandConf.size() > 0,
-            "When using non-contiguous CC, at least one band configuration must be provided");
-        res = ccBwpCreator.CreateOperationBandNonContiguousCc(bandConf);
-    }
+
     for (const auto& attr : channelAttributes)
     {
         nrChannel->SetChannelConditionModelAttribute(attr.name, *attr.value);
@@ -221,20 +225,42 @@ NrPhySimulationHelper::CreateOperationBand(
         nrChannel->SetPhasedArraySpectrumPropagationLossModelAttribute(attr.name, *attr.value);
     }
 
-    nrChannel->AssignChannelsToBands({res}, channelConfigFlags);
-    m_bands.push_back(std::move(res));
-    return res;
+    std::vector<std::reference_wrapper<OperationBandInfo>> refBands;
+    refBands.reserve(opBands.size());
+    for (auto& band : opBands)
+    {
+        refBands.emplace_back(band);
+    }
+
+    nrChannel->AssignChannelsToBands(refBands, channelConfigFlags);
+    m_channelsBands.push_back(std::move(opBands));
 }
 
 BandwidthPartInfoPtrVector
-NrPhySimulationHelper::GetAllBwps() const
+NrPhySimulationHelper::GetBwps(uint32_t channelId, const std::vector<uint32_t>& bandIndices) const
 {
+    NS_ASSERT_MSG(channelId < m_channelsBands.size(), "Channel ID out of range");
+
     std::vector<std::reference_wrapper<OperationBandInfo>> refs;
-    refs.reserve(m_bands.size());
-    for (const auto& band : m_bands)
+    const auto& channel = m_channelsBands[channelId];
+
+    if (bandIndices.empty())
     {
-        refs.push_back(std::ref(const_cast<OperationBandInfo&>(band)));
+        // If no specific bands are requested, return all bands in the channel
+        for (const auto& band : channel)
+        {
+            refs.push_back(std::ref(const_cast<OperationBandInfo&>(band)));
+        }
     }
+    else
+    {
+        for (const auto& index : bandIndices)
+        {
+            NS_ASSERT_MSG(index < channel.size(), "Band index out of range");
+            refs.push_back(std::ref(const_cast<OperationBandInfo&>(channel[index])));
+        }
+    }
+
     return CcBwpCreator::GetAllBwps(refs);
 }
 
@@ -329,21 +355,9 @@ NrPhySimulationHelper::InstallGnbDevices(NodeContainer& gnbNode, BandwidthPartIn
 }
 
 NetDeviceContainer
-NrPhySimulationHelper::InstallGnbDevices(NodeContainer& gnbNode)
-{
-    return InstallGnbDevices(gnbNode, GetAllBwps());
-}
-
-NetDeviceContainer
 NrPhySimulationHelper::InstallUeDevices(NodeContainer& ueNodes, BandwidthPartInfoPtrVector allBwps)
 {
     return m_nr->InstallUeDevice(ueNodes, allBwps);
-}
-
-NetDeviceContainer
-NrPhySimulationHelper::InstallUeDevices(NodeContainer& ueNodes)
-{
-    return InstallUeDevices(ueNodes, GetAllBwps());
 }
 
 std::pair<NetDeviceContainer, NetDeviceContainer>
@@ -352,12 +366,6 @@ NrPhySimulationHelper::InstallDevices(NodeContainer& gnbNode,
                                       BandwidthPartInfoPtrVector allBwps)
 {
     return std::make_pair(InstallGnbDevices(gnbNode, allBwps), InstallUeDevices(ueNodes, allBwps));
-}
-
-std::pair<NetDeviceContainer, NetDeviceContainer>
-NrPhySimulationHelper::InstallDevices(NodeContainer& gnbNode, NodeContainer& ueNodes)
-{
-    return InstallDevices(gnbNode, ueNodes, GetAllBwps());
 }
 
 void

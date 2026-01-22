@@ -41,11 +41,17 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<NrPhyProperty> phyProperties,
     const std::optional<uint32_t> networkLayerId,
     const std::optional<ModelConfiguration> antennaModel,
-    const std::optional<DirectivityConfiguration> directivity)
+    const std::vector<OutputLinkConfiguration> outputLinks,
+    const std::optional<DirectivityConfiguration> directivity,
+    const uint32_t channelId,
+    const std::vector<uint32_t> channelBands)
     : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
-      m_phyProperties{phyProperties}
+      m_phyProperties{phyProperties},
+      m_outputLinks{outputLinks},
+      m_channelId{channelId},
+      m_channelBands{channelBands}
 {
 }
 
@@ -69,6 +75,24 @@ const std::vector<NrPhyProperty>
 NrNetdeviceConfiguration::GetPhyProperties() const
 {
     return m_phyProperties;
+}
+
+const std::vector<OutputLinkConfiguration>
+NrNetdeviceConfiguration::GetOutputLinks() const
+{
+    return m_outputLinks;
+}
+
+const uint32_t
+NrNetdeviceConfiguration::GetChannelId() const
+{
+    return m_channelId;
+}
+
+const std::vector<uint32_t>
+NrNetdeviceConfiguration::GetChannelBands() const
+{
+    return m_channelBands;
 }
 
 } // namespace ns3

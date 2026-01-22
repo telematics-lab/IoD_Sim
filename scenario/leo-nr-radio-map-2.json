@@ -1,5 +1,5 @@
 {
-  "name": "leo-nr-radio-map",
+  "name": "leo-nr-radio-map-2",
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
@@ -70,12 +70,11 @@
     {
       "type": "nr",
       "attachMethod": "max-rsrp",
-      "bands": [
+      "channels": [
         {
           "scenario": "NTN-Rural",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
-          "contiguousCc": true,
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
@@ -88,11 +87,14 @@
               "value": "0ms"
             }
           ],
-          "frequencyBands": [
+          "bands": [
             {
-              "centralFrequency": 2e9,
-              "bandwidth": 20e6,
-              "numComponentCarriers": 1
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 2e9,
+                "bandwidth": 20e6,
+                "numComponentCarriers": 1
+              }
             }
           ]
         }

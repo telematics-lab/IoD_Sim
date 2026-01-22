@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "ns3/beam-manager.h"
+#include "ns3/bwp-manager-gnb.h"
+#include "ns3/bwp-manager-ue.h"
+#include "ns3/circular-aperture-antenna-model.h"
 #include "ns3/ideal-beamforming-algorithm.h"
 #include "ns3/isotropic-antenna-model.h"
 #include "ns3/lte-spectrum-phy.h"
@@ -25,7 +28,6 @@
 #include "ns3/nr-spectrum-phy.h"
 #include "ns3/nr-ue-net-device.h"
 #include "ns3/nr-ue-rrc.h"
-#include "ns3/circular-aperture-antenna-model.h"
 #include "ns3/parabolic-antenna-model.h"
 #include "ns3/spectrum-wifi-phy.h"
 #include "ns3/uniform-planar-array.h"
@@ -162,13 +164,19 @@ class Scenario
     void ConfigureNrGnb(Ptr<Node> entityNode,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
-                        const std::vector<ns3::NrPhyProperty> phyConf);
+                        const std::vector<ns3::NrPhyProperty> phyConf,
+                        const std::vector<OutputLinkConfiguration> outputLinks,
+                        const uint32_t channelId,
+                        const std::vector<uint32_t> channelBands);
 
     void ConfigureNrUe(Ptr<Node> entityNode,
                        const std::vector<NrBearerConfiguration> bearers,
                        const uint32_t netId,
                        const std::optional<ModelConfiguration> antennaModel,
-                       const std::vector<ns3::NrPhyProperty> phyConf);
+                       const std::vector<ns3::NrPhyProperty> phyConf,
+                       const std::vector<OutputLinkConfiguration> outputLinks,
+                       const uint32_t channelId,
+                       const std::vector<uint32_t> channelBands);
 
     void InstallEntityIpv4(Ptr<Node> entityNode,
                            NetDeviceContainer netDevices,
@@ -199,7 +207,7 @@ class Scenario
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
-    void AttachAllNrUesToGnbs(const uint32_t netId);
+    void AttachAllNrUesToGnbs();
     void EvaluateSinrDistanceAttachment(const uint32_t netId);
     void UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                   DirectivityConfiguration config,
@@ -476,7 +484,8 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
         parabolic->SetOrientation(azimuth * 180.0 / M_PI);
         parabolic->SetElevation(elevation * 180.0 / M_PI);
     }
-    else if (Ptr<CircularApertureAntennaModel> circular = DynamicCast<CircularApertureAntennaModel>(antennaObj))
+    else if (Ptr<CircularApertureAntennaModel> circular =
+                 DynamicCast<CircularApertureAntennaModel>(antennaObj))
     {
         circular->SetBoresightAzimuth(azimuth);
         circular->SetBoresightInclination(M_PI_2 - elevation);
@@ -564,6 +573,9 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureEntities("vehicles", m_vehicles);
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
+
+    AttachAllNrUesToGnbs();
+
     EnablePhyLteTraces();
     EnablePhyNrTraces();
 
@@ -1038,24 +1050,33 @@ Scenario::ConfigurePhy()
 
             for (auto bandConf : nrConf->GetBandsConfiguration())
             {
-                std::vector<CcBwpCreator::SimpleOperationBandConf> freqs;
-                for (auto& attr : bandConf.frequencyBands)
+                std::vector<NrPhySimulationHelper::ChannelOperationBandConf> channelOpBands;
+
+                for (auto& opBand : bandConf.bands)
                 {
-                    auto conf = CcBwpCreator::SimpleOperationBandConf(attr.centralFrequency,
-                                                                      attr.bandwidth,
-                                                                      attr.numComponentCarriers);
-                    conf.m_numBwp = attr.numBandwidthParts;
-                    freqs.push_back(conf);
+                    NrPhySimulationHelper::ChannelOperationBandConf cobc;
+                    cobc.contiguous = (opBand.type == NrOperationBand::CONTIGUOUS);
+
+                    for (auto& attr : opBand.carriers)
+                    {
+                        auto conf =
+                            CcBwpCreator::SimpleOperationBandConf(attr.centralFrequency,
+                                                                  attr.bandwidth,
+                                                                  attr.numComponentCarriers);
+                        conf.m_numBwp = attr.numBandwidthParts;
+                        cobc.carrierConfs.push_back(conf);
+                    }
+                    channelOpBands.push_back(cobc);
                 }
-                nrSim->CreateOperationBand(freqs,
-                                           bandConf.channel.scenario,
-                                           bandConf.channel.conditionModel,
-                                           bandConf.channel.propagationModel,
-                                           bandConf.contiguousCc,
-                                           bandConf.channelConditionAttributes,
-                                           bandConf.pathlossAttributes,
-                                           bandConf.phasedSpectrumAttributes,
-                                           bandConf.channel.configFlags);
+
+                nrSim->CreateChannel(channelOpBands,
+                                     bandConf.channel.scenario,
+                                     bandConf.channel.conditionModel,
+                                     bandConf.channel.propagationModel,
+                                     bandConf.channelConditionAttributes,
+                                     bandConf.pathlossAttributes,
+                                     bandConf.phasedSpectrumAttributes,
+                                     bandConf.channel.configFlags);
             }
 
             nrSim->SetScheduler(nrConf->GetSchedulerType(), nrConf->GetSchedulerAttributes());
@@ -1073,15 +1094,6 @@ Scenario::ConfigurePhy()
                 nrSim->SetUlErrorModel(nrConf->GetUlErrorModelType(),
                                        nrConf->GetUlErrorModelAttributes());
             }
-
-            auto gnbAntennaConf = nrConf->GetGnbAntenna();
-            nrSim->SetGnbAntenna(gnbAntennaConf.type,
-                                 gnbAntennaConf.properties,
-                                 gnbAntennaConf.arrayProperties);
-            auto ueAntennaConf = nrConf->GetUeAntenna();
-            nrSim->SetUeAntenna(ueAntennaConf.type,
-                                ueAntennaConf.properties,
-                                ueAntennaConf.arrayProperties);
 
             nrSim->SetGnbPhyAttributes(nrConf->GetGnbPhyAttributes());
             nrSim->SetUePhyAttributes(nrConf->GetUePhyAttributes());
@@ -1277,18 +1289,28 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 const auto role = entityNrDevConf->GetRole();
                 const auto antennaModel = entityNrDevConf->GetAntennaModel();
                 const auto phyConf = entityNrDevConf->GetPhyProperties();
+                const auto outputLinks = entityNrDevConf->GetOutputLinks();
 
                 switch (role)
                 {
                 case NrRole::gNB:
-                    ConfigureNrGnb(entityNode, *netId, antennaModel, phyConf);
+                    ConfigureNrGnb(entityNode,
+                                   *netId,
+                                   antennaModel,
+                                   phyConf,
+                                   outputLinks,
+                                   entityNrDevConf->GetChannelId(),
+                                   entityNrDevConf->GetChannelBands());
                     break;
                 case NrRole::nrUE:
                     ConfigureNrUe(entityNode,
                                   entityNrDevConf->GetBearers(),
                                   *netId,
                                   antennaModel,
-                                  phyConf);
+                                  phyConf,
+                                  outputLinks,
+                                  entityNrDevConf->GetChannelId(),
+                                  entityNrDevConf->GetChannelBands());
                     break;
                 default:
                     NS_FATAL_ERROR("Unrecognized NR role for entity ID " << entityId);
@@ -1587,7 +1609,10 @@ void
 Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const uint32_t netId,
                          const std::optional<ModelConfiguration> antennaModel,
-                         const std::vector<ns3::NrPhyProperty> phyConf)
+                         const std::vector<ns3::NrPhyProperty> phyConf,
+                         const std::vector<OutputLinkConfiguration> outputLinks,
+                         const uint32_t channelId,
+                         const std::vector<uint32_t> channelBands)
 {
     static std::vector<NodeContainer> backbonePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
@@ -1617,8 +1642,11 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                              gnbAntennaConf.arrayProperties);
     }
     auto entityNodeContainer = NodeContainer(entityNode);
-    auto dev =
-        StaticCast<NrGnbNetDevice, NetDevice>(nrPhy->InstallGnbDevices(entityNodeContainer).Get(0));
+    auto bwps = nrPhy->GetBwps(channelId, channelBands);
+    auto dev = StaticCast<NrGnbNetDevice, NetDevice>(
+        nrPhy->InstallGnbDevices(entityNodeContainer, bwps).Get(0));
+
+
 
     for (const auto& attr : phyConf)
     {
@@ -1629,12 +1657,18 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
         }
         else
         {
-            for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
+            for (size_t i = 0; i < bwps.size(); i++)
             {
                 nrHelper->GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
                                                           *attr.attribute.value);
             }
         }
+    }
+
+    // Configure Output Links
+    for (const auto& link : outputLinks)
+    {
+        NrHelper::GetBwpManagerGnb(dev)->SetOutputLink(link.sourceBwp, link.targetBwp);
     }
 
     for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin();
@@ -1648,9 +1682,6 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     // Store gNB device for later attachment operations
     NetDeviceContainer gnbDevContainer(dev);
     m_nrGnbDevices[netId].push_back(gnbDevContainer);
-
-    // Re-attach all existing UEs to the gNBs
-    AttachAllNrUesToGnbs(netId);
 }
 
 void
@@ -1658,7 +1689,10 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::vector<NrBearerConfiguration> bearers,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
-                        const std::vector<ns3::NrPhyProperty> phyConf)
+                        const std::vector<ns3::NrPhyProperty> phyConf,
+                        const std::vector<OutputLinkConfiguration> outputLinks,
+                        const uint32_t channelId,
+                        const std::vector<uint32_t> channelBands)
 {
     static std::vector<NodeContainer> uePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
@@ -1690,8 +1724,11 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
 
     Ipv4StaticRoutingHelper routingHelper;
     auto entityNodeContainer = NodeContainer(entityNode);
-    auto dev =
-        StaticCast<NrUeNetDevice, NetDevice>(nrPhy->InstallUeDevices(entityNodeContainer).Get(0));
+    auto bwps = nrPhy->GetBwps(channelId, channelBands);
+    auto dev = StaticCast<NrUeNetDevice, NetDevice>(
+        nrPhy->InstallUeDevices(entityNodeContainer, bwps).Get(0));
+
+
 
     for (const auto& attr : phyConf)
     {
@@ -1702,12 +1739,18 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
         }
         else
         {
-            for (size_t i = 0; i < nrPhy->GetAllBwps().size(); i++)
+            for (size_t i = 0; i < bwps.size(); i++)
             {
                 nrHelper->GetUePhy(dev, i)->SetAttribute(attr.attribute.name,
                                                          *attr.attribute.value);
             }
         }
+    }
+
+    // Configure Output Links
+    for (const auto& link : outputLinks)
+    {
+        NrHelper::GetBwpManagerUe(dev)->SetOutputLink(link.sourceBwp, link.targetBwp);
     }
 
     // Install network layer in order to proceed with IPv4 NR configuration
@@ -1737,9 +1780,6 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
 
     // Store UE device for later attachment operations
     m_nrUeDevices[netId].push_back(dev);
-
-    // Attach this UE to the closest gNB among all available gNBs
-    AttachAllNrUesToGnbs(netId);
 
     // init bearers on UE
     for (auto& bearerConf : bearers)
@@ -2293,102 +2333,110 @@ Scenario::ConfigureSimulator()
 }
 
 void
-Scenario::AttachAllNrUesToGnbs(const uint32_t netId)
+Scenario::AttachAllNrUesToGnbs()
 {
-    NS_LOG_FUNCTION(netId);
+    NS_LOG_FUNCTION_NOARGS();
 
-    auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
-    auto nrHelper = nrPhy->GetNrHelper();
-
-    // Check if we have gNBs for this netId
-    auto gnbIt = m_nrGnbDevices.find(netId);
-    if (gnbIt == m_nrGnbDevices.end() || gnbIt->second.empty())
+    for (size_t netId = 0; netId < m_protocolStacks[PHY_LAYER].size(); ++netId)
     {
-        NS_LOG_INFO("No gNBs available for attachment in stack " << netId);
-        return;
-    }
-
-    // Collect all gNB devices for this network stack
-    NetDeviceContainer allGnbDevices;
-    for (const auto& gnbContainer : gnbIt->second)
-    {
-        allGnbDevices.Add(gnbContainer);
-    }
-
-    // Check if we have UEs for this netId
-    auto ueIt = m_nrUeDevices.find(netId);
-    if (ueIt == m_nrUeDevices.end() || ueIt->second.empty())
-    {
-        NS_LOG_INFO("No UEs available for attachment in stack " << netId);
-        return;
-    }
-
-    // Attach all UEs to closest gNB
-    NetDeviceContainer ueDevices;
-    for (auto ueDevice : ueIt->second)
-    {
-        ueDevices.Add(ueDevice);
-    }
-
-    // Retrieve the configuration for this PHY layer to check the attachment method
-    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
-    // Assuming netId maps directly to the index in the PHY layer configuration vector
-    // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
-    auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
-
-    // Check if SINR-Distance Attachment is configured
-    if (nrConf->GetSinrDistanceAttachConfig())
-    {
-        if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
+        auto nrPhy = DynamicCast<NrPhySimulationHelper>(m_protocolStacks[PHY_LAYER][netId]);
+        if (!nrPhy)
         {
-            NS_LOG_INFO(
-                "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
+            continue;
+        }
+
+        auto nrHelper = nrPhy->GetNrHelper();
+
+        // Check if we have gNBs for this netId
+        auto gnbIt = m_nrGnbDevices.find(netId);
+        if (gnbIt == m_nrGnbDevices.end() || gnbIt->second.empty())
+        {
+            NS_LOG_INFO("No gNBs available for attachment in stack " << netId);
+            continue;
+        }
+
+        // Collect all gNB devices for this network stack
+        NetDeviceContainer allGnbDevices;
+        for (const auto& gnbContainer : gnbIt->second)
+        {
+            allGnbDevices.Add(gnbContainer);
+        }
+
+        // Check if we have UEs for this netId
+        auto ueIt = m_nrUeDevices.find(netId);
+        if (ueIt == m_nrUeDevices.end() || ueIt->second.empty())
+        {
+            NS_LOG_INFO("No UEs available for attachment in stack " << netId);
+            continue;
+        }
+
+        // Attach all UEs to closest gNB
+        NetDeviceContainer ueDevices;
+        for (auto ueDevice : ueIt->second)
+        {
+            ueDevices.Add(ueDevice);
+        }
+
+        // Retrieve the configuration for this PHY layer to check the attachment method
+        auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+        // Assuming netId maps directly to the index in the PHY layer configuration vector
+        // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
+        auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+
+        // Check if SINR-Distance Attachment is configured
+        if (nrConf->GetSinrDistanceAttachConfig())
+        {
+            if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
+            {
+                NS_LOG_INFO(
+                    "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
+                Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+                m_sinrAttachmentRunning.insert(netId);
+            }
+            continue;
+        }
+
+        std::string attachMethod = nrConf->GetAttachMethod();
+
+        NS_LOG_INFO("Attaching " << ueDevices.GetN()
+                                 << " UE devices to gNBs using method: " << attachMethod);
+
+        if (attachMethod == "closest")
+        {
+            nrHelper->AttachToClosestGnb(ueDevices, allGnbDevices);
+        }
+        else if (attachMethod == "max-rsrp")
+        {
+            // Workaround for segfault in NrHelper::AttachToMaxRsrpGnb(container)
+            // The helper captures an iterator to the container, which becomes invalid if the container
+            // is destroyed. We create a persistent container for each UE to ensure validity.
+            for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
+            {
+                Ptr<NetDevice> ueDevice = *i;
+                // Create a persistent container using shared_ptr and store it in the list
+                // This ensures automatic deallocation when Scenario is destroyed.
+                auto persistentContainer = std::make_shared<NetDeviceContainer>(ueDevice);
+                m_persistentContainers.push_back(persistentContainer);
+
+                // We call the container overload with a single device.
+                // The helper will schedule the attachment.
+                nrHelper->AttachToMaxRsrpGnb(*persistentContainer, allGnbDevices);
+            }
+        }
+        else if (attachMethod == "none")
+        {
+            NS_LOG_INFO("Skipping attachment as per configuration.");
+        }
+        else
+        {
+            NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
+        }
+
+        // Check if SINR-Distance Attachment is configured and schedule it
+        if (nrConf->GetSinrDistanceAttachConfig())
+        {
             Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
-            m_sinrAttachmentRunning.insert(netId);
         }
-        return;
-    }
-
-    std::string attachMethod = nrConf->GetAttachMethod();
-
-    NS_LOG_INFO("Attaching " << ueDevices.GetN()
-                             << " UE devices to gNBs using method: " << attachMethod);
-
-    if (attachMethod == "closest")
-    {
-        nrHelper->AttachToClosestGnb(ueDevices, allGnbDevices);
-    }
-    else if (attachMethod == "max-rsrp")
-    {
-        // Workaround for segfault in NrHelper::AttachToMaxRsrpGnb(container)
-        // The helper captures an iterator to the container, which becomes invalid if the container
-        // is destroyed. We create a persistent container for each UE to ensure validity.
-        for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
-        {
-            Ptr<NetDevice> ueDevice = *i;
-            // Create a persistent container using shared_ptr and store it in the list
-            // This ensures automatic deallocation when Scenario is destroyed.
-            auto persistentContainer = std::make_shared<NetDeviceContainer>(ueDevice);
-            m_persistentContainers.push_back(persistentContainer);
-
-            // We call the container overload with a single device.
-            // The helper will schedule the attachment.
-            nrHelper->AttachToMaxRsrpGnb(*persistentContainer, allGnbDevices);
-        }
-    }
-    else if (attachMethod == "none")
-    {
-        NS_LOG_INFO("Skipping attachment as per configuration.");
-    }
-    else
-    {
-        NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
-    }
-
-    // Check if SINR-Distance Attachment is configured and schedule it
-    if (nrConf->GetSinrDistanceAttachConfig())
-    {
-        Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
     }
 }
 

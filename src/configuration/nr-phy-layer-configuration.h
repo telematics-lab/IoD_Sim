@@ -85,12 +85,25 @@ struct NrFrequencyBand
 };
 
 /**
+ * Data structure for NR usage of frequency band
+ */
+struct NrOperationBand
+{
+    enum Type
+    {
+        CONTIGUOUS,
+        NON_CONTIGUOUS
+    };
+    Type type = CONTIGUOUS;
+    std::vector<NrFrequencyBand> carriers;
+};
+
+/**
  * Data structure for NR band configuration
  */
 struct NrBandConfiguration
 {
-    std::vector<NrFrequencyBand> frequencyBands;
-    bool contiguousCc = true;
+    std::vector<NrOperationBand> bands;
     // Channel configuration for this band
     NrChannelConfiguration channel;
     std::vector<ModelConfiguration::Attribute> channelConditionAttributes;

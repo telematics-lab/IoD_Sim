@@ -51,12 +51,11 @@
         }
       },
       "attachMethod": "closest",
-      "bands": [
+      "channels": [
         {
           "scenario": "UMi",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
-          "contiguousCc": true,
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
@@ -69,11 +68,14 @@
               "value": "0ms"
             }
           ],
-          "frequencyBands": [
+          "bands": [
             {
-              "centralFrequency": 28e9,
-              "bandwidth": 50e6,
-              "numComponentCarriers": 1
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28e9,
+                "bandwidth": 50e6,
+                "numComponentCarriers": 1
+              }
             }
           ]
         },
@@ -81,7 +83,6 @@
           "scenario": "UMi",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
-          "contiguousCc": true,
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
@@ -94,11 +95,14 @@
               "value": "0ms"
             }
           ],
-          "frequencyBands": [
+          "bands": [
             {
-              "centralFrequency": 28.2e9,
-              "bandwidth": 50e6,
-              "numComponentCarriers": 1
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28.2e9,
+                "bandwidth": 50e6,
+                "numComponentCarriers": 1
+              }
             }
           ]
         }

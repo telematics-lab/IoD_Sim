@@ -56,12 +56,11 @@
   "phyLayer": [
     {
       "type": "nr",
-      "bands": [
+      "channels": [
         {
           "scenario": "NTN-Rural",
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
-          "contiguousCc": true,
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
@@ -74,12 +73,15 @@
               "value": "100ms"
             }
           ],
-          "frequencyBands": [
+          "bands": [
             {
-              "centralFrequency": 28e9,
-              "bandwidth": 400e6,
-              "numComponentCarriers": 1,
-              "numBandwidthParts": 1
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28e9,
+                "bandwidth": 400e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 1
+              }
             }
           ]
         }

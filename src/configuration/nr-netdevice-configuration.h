@@ -61,7 +61,10 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
                              const std::vector<NrPhyProperty> phyProperties,
                              const std::optional<uint32_t> networkLayerId,
                              const std::optional<ModelConfiguration> antennaModel,
-                             const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+                             const std::vector<OutputLinkConfiguration> outputLinks = {},
+                             const std::optional<DirectivityConfiguration> directivity = std::nullopt,
+                             const uint32_t channelId = 0,
+                             const std::vector<uint32_t> channelBands = {});
     /** Default destructor */
     ~NrNetdeviceConfiguration();
 
@@ -75,11 +78,21 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     const std::vector<NrBearerConfiguration> GetBearers() const;
     /** \return The phy properties configuration for the Network Device. */
     const std::vector<NrPhyProperty> GetPhyProperties() const;
+    /** \return The output links configuration for the Network Device. */
+    const std::vector<OutputLinkConfiguration> GetOutputLinks() const;
+
+    /** \return The channel ID for the Network Device. */
+    const uint32_t GetChannelId() const;
+    /** \return The channel bands indices for the Network Device. */
+    const std::vector<uint32_t> GetChannelBands() const;
 
   private:
     const NrRole m_role;
     const std::vector<NrBearerConfiguration> m_bearers;
     const std::vector<NrPhyProperty> m_phyProperties;
+    const std::vector<OutputLinkConfiguration> m_outputLinks;
+    const uint32_t m_channelId;
+    const std::vector<uint32_t> m_channelBands;
 };
 
 } // namespace ns3

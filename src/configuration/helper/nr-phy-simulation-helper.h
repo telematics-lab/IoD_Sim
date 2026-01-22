@@ -111,12 +111,17 @@ class NrPhySimulationHelper : public Object
     void SetUlErrorModel(const TypeId& ulErrorModelType,
                          const std::vector<ModelConfiguration::Attribute>& attributes = {});
 
-    OperationBandInfo CreateOperationBand(
-        const std::vector<CcBwpCreator::SimpleOperationBandConf>& bandConf,
+    struct ChannelOperationBandConf
+    {
+        bool contiguous;
+        std::vector<CcBwpCreator::SimpleOperationBandConf> carrierConfs;
+    };
+
+    void CreateChannel(
+        const std::vector<ChannelOperationBandConf>& freqBands,
         const std::string& bandScenario,
         const std::string& bandCondition,
         const std::string& bandModel,
-        bool contiguousCc,
         std::vector<ModelConfiguration::Attribute> channelAttributes,
         std::vector<ModelConfiguration::Attribute> pathlossAttributes,
         std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
@@ -137,20 +142,16 @@ class NrPhySimulationHelper : public Object
     void SetUePhyAttributes(const std::vector<ModelConfiguration::Attribute>& uePhyAttributes);
     void SetGnbPhyAttributes(const std::vector<ModelConfiguration::Attribute>& gnbPhyAttributes);
 
-    BandwidthPartInfoPtrVector GetAllBwps() const;
+    BandwidthPartInfoPtrVector GetBwps(uint32_t channelId, const std::vector<uint32_t>& bandIndices) const;
 
     NetDeviceContainer InstallGnbDevices(NodeContainer& gnbNode,
                                          BandwidthPartInfoPtrVector allBwps);
-    NetDeviceContainer InstallGnbDevices(NodeContainer& gnbNode);
     NetDeviceContainer InstallUeDevices(NodeContainer& ueNodes, BandwidthPartInfoPtrVector allBwps);
-    NetDeviceContainer InstallUeDevices(NodeContainer& ueNodes);
 
     std::pair<NetDeviceContainer, NetDeviceContainer> InstallDevices(
         NodeContainer& gnbNode,
         NodeContainer& ueNodes,
         BandwidthPartInfoPtrVector allBwps);
-    std::pair<NetDeviceContainer, NetDeviceContainer> InstallDevices(NodeContainer& gnbNode,
-                                                                     NodeContainer& ueNodes);
 
     void SetEpcHelper(TypeId epc, std::vector<ModelConfiguration::Attribute> attributes);
     void SetBeamformingHelper(TypeId beam, std::vector<ModelConfiguration::Attribute> attributes);
@@ -159,7 +160,7 @@ class NrPhySimulationHelper : public Object
     Ptr<NrHelper> m_nr;
     Ptr<NrEpcHelper> m_nr_epc;
     Ptr<BeamformingHelperBase> m_beamHelper;
-    std::vector<OperationBandInfo> m_bands;
+    std::vector<std::vector<OperationBandInfo>> m_channelsBands;
     size_t m_stackId = 0;
 };
 

@@ -1,0 +1,1204 @@
+{
+  "name": "cttc_3gpp_channel_nums_fdm",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1.4,
+  "staticNs3Config": [
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 999999999
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "1000",
+      "Y": "1000",
+      "Z": "100"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "nr",
+      "handover": {
+        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+        "attributes": []
+      },
+      "channelAccessManager": {
+        "ue": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        },
+        "gnb": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        }
+      },
+      "attachMethod": "closest",
+      "channels": [
+        {
+          "scenario": "UMi",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28e9,
+                "bandwidth": 100e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 1
+              }
+            },
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28.2e9,
+                "bandwidth": 100e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 2
+              }
+            }
+          ]
+        }
+      ],
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 2
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VIDEO",
+            "value": 1
+          },
+          {
+            "name": "GBR_GAMING",
+            "value": 2
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "GBR_CONV_VOICE",
+            "value": 0
+          },
+          {
+            "name": "GBR_CONV_VIDEO",
+            "value": 1
+          },
+          {
+            "name": "GBR_GAMING",
+            "value": 2
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 24.0
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 4.0
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              0.0,
+              0.0,
+              10.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 1
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 1
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 1
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              0.0,
+              5.0,
+              10.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 2
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 2
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 2
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              5.0,
+              0.0,
+              10.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0,
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 3
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 3
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 3
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              5.0,
+              5.0,
+              10.0
+            ]
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "nodes": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO"
+            },
+            {
+              "type": "GBR_CONV_VOICE"
+            },
+            {
+              "type": "GBR_GAMING"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              0.0,
+              0.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.1",
+                1236
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 500
+            },
+            {
+              "name": "Interval",
+              "value": 0.004
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO"
+            },
+            {
+              "type": "GBR_CONV_VOICE"
+            },
+            {
+              "type": "GBR_GAMING"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              0.0,
+              5.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.1",
+                1236
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 500
+            },
+            {
+              "name": "Interval",
+              "value": 0.004
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO"
+            },
+            {
+              "type": "GBR_CONV_VOICE"
+            },
+            {
+              "type": "GBR_GAMING"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              5.0,
+              0.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.1",
+                1236
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 500
+            },
+            {
+              "name": "Interval",
+              "value": 0.004
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "GBR_CONV_VIDEO"
+            },
+            {
+              "type": "GBR_CONV_VOICE"
+            },
+            {
+              "type": "GBR_GAMING"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [
+          {
+            "name": "Position",
+            "value": [
+              5.0,
+              5.0,
+              1.5
+            ]
+          }
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1235
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.1",
+                1236
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 500
+            },
+            {
+              "name": "Interval",
+              "value": 0.004
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Port",
+              "value": 1236
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.3",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.4",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.5",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 100
+            },
+            {
+              "name": "Interval",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1235
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.01
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.3",
+                1235
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.01
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.4",
+                1235
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.01
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.4
+            },
+            {
+              "name": "StopTime",
+              "value": 1.4
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.5",
+                1235
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 1252
+            },
+            {
+              "name": "Interval",
+              "value": 0.01
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "logComponents": [
+    "UdpClient",
+    "UdpServer",
+    "NrPdcp",
+    "NrBearerStatsConnector",
+    "Scenario"
+  ]
+}

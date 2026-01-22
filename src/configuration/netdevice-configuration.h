@@ -37,6 +37,12 @@ struct DirectivityConfiguration
     Time precision = MilliSeconds(100);
 };
 
+struct OutputLinkConfiguration
+{
+    uint32_t sourceBwp;
+    uint32_t targetBwp;
+};
+
 /**
  * \brief Data class to recnognize and configure a Network Device for an entity to be simulated.
  */
