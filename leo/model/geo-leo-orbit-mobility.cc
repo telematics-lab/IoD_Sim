@@ -497,7 +497,6 @@ GeoLeoOrbitMobility::GetInclination() const
 void
 GeoLeoOrbitMobility::SetInclination(double incl)
 {
-    NS_ASSERT_MSG(incl != 0.0, "Plane must not be orthogonal to axis");
     m_inclination = DegreesToRadians(incl);
     Update();
 }

@@ -421,4 +421,16 @@ NrPhyLayerConfiguration::GetSinrDistanceAttachConfig() const
     return m_sinrDistanceAttachConfig;
 }
 
+void
+NrPhyLayerConfiguration::SetFullMeshX2Links(bool enable)
+{
+    m_fullMeshX2Links = enable;
+}
+
+bool
+NrPhyLayerConfiguration::GetFullMeshX2Links() const
+{
+    return m_fullMeshX2Links;
+}
+
 } // namespace ns3

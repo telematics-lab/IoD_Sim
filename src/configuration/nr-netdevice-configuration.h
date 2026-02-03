@@ -40,6 +40,12 @@ struct NrPhyProperty
     std::optional<uint32_t> bwpId;
 };
 
+struct X2NeighborConfiguration
+{
+    std::string key;
+    uint32_t index;
+};
+
 /**
  * Data class to recnognize and configure an NR Network Device for an entity to be simulated.
  */
@@ -64,7 +70,9 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
                              const std::vector<OutputLinkConfiguration> outputLinks = {},
                              const std::optional<DirectivityConfiguration> directivity = std::nullopt,
                              const uint32_t channelId = 0,
-                             const std::vector<uint32_t> channelBands = {});
+                             const std::vector<uint32_t> channelBands = {},
+                             const std::vector<NrPhyProperty> rrcProperties = {},
+                             const std::vector<X2NeighborConfiguration> x2Neighbors = {});
     /** Default destructor */
     ~NrNetdeviceConfiguration();
 
@@ -78,8 +86,12 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     const std::vector<NrBearerConfiguration> GetBearers() const;
     /** \return The phy properties configuration for the Network Device. */
     const std::vector<NrPhyProperty> GetPhyProperties() const;
+    /** \return The rrc properties configuration for the Network Device. */
+    const std::vector<NrPhyProperty> GetRrcProperties() const;
     /** \return The output links configuration for the Network Device. */
     const std::vector<OutputLinkConfiguration> GetOutputLinks() const;
+    /** \return The X2 neighbors configuration for the Network Device. */
+    const std::vector<X2NeighborConfiguration> GetX2Neighbors() const;
 
     /** \return The channel ID for the Network Device. */
     const uint32_t GetChannelId() const;
@@ -90,7 +102,9 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     const NrRole m_role;
     const std::vector<NrBearerConfiguration> m_bearers;
     const std::vector<NrPhyProperty> m_phyProperties;
+    const std::vector<NrPhyProperty> m_rrcProperties;
     const std::vector<OutputLinkConfiguration> m_outputLinks;
+    const std::vector<X2NeighborConfiguration> m_x2Neighbors;
     const uint32_t m_channelId;
     const std::vector<uint32_t> m_channelBands;
 };

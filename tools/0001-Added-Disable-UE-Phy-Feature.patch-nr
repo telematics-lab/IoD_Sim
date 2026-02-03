@@ -1,0 +1,136 @@
+From c7960537f5b5a7bdb42b65dba946e27069714f1f Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 2 Feb 2026 21:47:43 +0100
+Subject: [PATCH] Added Disable UE Phy Feature
+
+---
+ model/nr-ue-phy.cc | 43 +++++++++++++++++++++++++++++++++++++++++++
+ model/nr-ue-phy.h  | 16 ++++++++++++++++
+ 2 files changed, 59 insertions(+)
+
+diff --git a/model/nr-ue-phy.cc b/model/nr-ue-phy.cc
+index 7909f594..f0ec7406 100644
+--- a/model/nr-ue-phy.cc
++++ b/model/nr-ue-phy.cc
+@@ -41,6 +41,7 @@ NS_OBJECT_ENSURE_REGISTERED(NrUePhy);
+ NrUePhy::NrUePhy()
+ {
+     NS_LOG_FUNCTION(this);
++    m_phyEnabled = true;
+     m_wbCqiLast = Simulator::Now();
+     m_ueCphySapProvider = new MemberNrUeCphySapProvider<NrUePhy>(this);
+     m_powerControl = CreateObject<NrUePowerControl>(this);
+@@ -289,6 +290,23 @@ NrUePhy::GetTxPower() const
+     return m_txPower;
+ }
+ 
++void
++NrUePhy::SetPhyEnabled(bool enable)
++{
++    NS_LOG_FUNCTION(this << enable);
++    m_phyEnabled = enable;
++    if (!m_phyEnabled)
++    {
++         NS_LOG_INFO("PHY disabled, stopping ongoing processes if any (not fully implemented cleanup, just blocking IO)");
++    }
++}
++
++bool
++NrUePhy::IsPhyEnabled() const
++{
++    return m_phyEnabled;
++}
++
+ double
+ NrUePhy::GetRsrp() const
+ {
+@@ -546,6 +564,11 @@ void
+ NrUePhy::PhyCtrlMessagesReceived(const Ptr<NrControlMessage>& msg)
+ {
+     NS_LOG_FUNCTION(this);
++    if (!m_phyEnabled)
++    {
++        NS_LOG_DEBUG("PHY disabled, ignoring received control message");
++        return;
++    }
+ 
+     if (msg->GetMessageType() == NrControlMessage::DL_DCI)
+     {
+@@ -1216,6 +1239,11 @@ NrUePhy::EndVarTti(const std::shared_ptr<DciInfoElementTdma>& dci)
+ void
+ NrUePhy::PhyDataPacketReceived(const Ptr<Packet>& p)
+ {
++    if (!m_phyEnabled)
++    {
++        NS_LOG_DEBUG("PHY disabled, ignoring received data packet");
++        return;
++    }
+     Simulator::ScheduleWithContext(m_netDevice->GetNode()->GetId(),
+                                    GetTbDecodeLatency(),
+                                    &NrUePhySapUser::ReceivePhyPdu,
+@@ -1230,6 +1258,12 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
+                           const std::shared_ptr<DciInfoElementTdma>& dci,
+                           const Time& duration)
+ {
++    if (!m_phyEnabled)
++    {
++        NS_LOG_DEBUG("PHY disabled, skipping data transmission");
++        return;
++    }
++
+     if (pb->GetNPackets() > 0)
+     {
+         NrRadioBearerTag tag;
+@@ -1245,6 +1279,15 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
+ void
+ NrUePhy::SendCtrlChannels(Time duration)
+ {
++    if (!m_phyEnabled)
++    {
++        NS_LOG_DEBUG("PHY disabled, skipping control transmission");
++        // Clear control messages even if not sent, to avoid accumulation?
++        // Or keep them for when enabled?
++        // Clearing is safer to avoid sending outdated control info later.
++        m_ctrlMsgs.clear();
++        return;
++    }
+     m_spectrumPhy->StartTxUlControlFrames(m_ctrlMsgs, duration);
+     m_ctrlMsgs.clear();
+ }
+diff --git a/model/nr-ue-phy.h b/model/nr-ue-phy.h
+index 4bb67dfa..1bcf9ba4 100644
+--- a/model/nr-ue-phy.h
++++ b/model/nr-ue-phy.h
+@@ -254,6 +254,20 @@ class NrUePhy : public NrPhy
+      */
+     void GenerateDlCqiReport(const SpectrumValue& sinr);
+ 
++    /**
++     * @brief Set the PHY enabled or disabled.
++     * @param enable true if the PHY should be enabled, false otherwise.
++     *
++     * When disabled, the PHY will not transmit or receive any signals.
++     */
++    void SetPhyEnabled(bool enable);
++
++    /**
++     * @brief Check if the PHY is enabled.
++     * @return true if enabled, false otherwise.
++     */
++    bool IsPhyEnabled() const;
++
+     /**
+      * @brief Get the current RNTI of the user
+      *
+@@ -607,6 +621,8 @@ class NrUePhy : public NrPhy
+      */
+     void ReportUeMeasurements();
+ 
++    bool m_phyEnabled; //!< True if the PHY is enabled (default)
++
+     /**
+      * @brief A function called by NrHelper to configure in NrUePhy what is the CSI feedback type.
+      * @param csiFeedbackType CSI feedback type that is configured by NrHelper
+-- 
+2.50.1 (Apple Git-155)
+

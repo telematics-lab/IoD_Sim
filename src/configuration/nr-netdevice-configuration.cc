@@ -44,12 +44,16 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<OutputLinkConfiguration> outputLinks,
     const std::optional<DirectivityConfiguration> directivity,
     const uint32_t channelId,
-    const std::vector<uint32_t> channelBands)
+    const std::vector<uint32_t> channelBands,
+    const std::vector<NrPhyProperty> rrcProperties,
+    const std::vector<X2NeighborConfiguration> x2Neighbors)
     : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_bearers{bearers},
       m_phyProperties{phyProperties},
+      m_rrcProperties{rrcProperties},
       m_outputLinks{outputLinks},
+      m_x2Neighbors{x2Neighbors},
       m_channelId{channelId},
       m_channelBands{channelBands}
 {
@@ -75,6 +79,18 @@ const std::vector<NrPhyProperty>
 NrNetdeviceConfiguration::GetPhyProperties() const
 {
     return m_phyProperties;
+}
+
+const std::vector<NrPhyProperty>
+NrNetdeviceConfiguration::GetRrcProperties() const
+{
+    return m_rrcProperties;
+}
+
+const std::vector<X2NeighborConfiguration>
+NrNetdeviceConfiguration::GetX2Neighbors() const
+{
+    return m_x2Neighbors;
 }
 
 const std::vector<OutputLinkConfiguration>

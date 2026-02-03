@@ -100,6 +100,12 @@ In the `phyLayer` settings, we can configure a physical layer of type `nr` which
 - `max-rsrp`: Attaches the UE to the gNB with the strongest signal (RSRP).
 - `none`: Does not perform attachment.
 
+### `fullMeshX2Links`
+**Optional**
+**Type:** `boolean`
+**Default:** `true`
+**Description:** If set to `true`, the simulation will automatically create X2 interfaces between all pairs of gNBs configured within this PHY layer, creating a full mesh topology. This enables X2 handovers between any pair of gNBs.
+
 ### `channels`
 **Description:** Array of channels (Operation Bands) available for communication.
 
@@ -1022,16 +1028,25 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 **Description:** A list of indices of the bands within the selected channel that the device should use. If empty or not specified, the device will be configured to use all available bands in the channel.
 
 ### `netDevices[i].directivity`
-**Description:** Configuration for automatic antenna directivity updates.
+**Description:** Configuration of the initial antenna pointing direction.
+- `mode`: Directivity mode string. Options:
+  - `nearest-gnb`: Points towards the nearest gNB (only for UE).
+  - `nearest-ue`: Points towards the nearest UE (only for gNB).
+  - `earth-centered`: Points towards the center of the Earth (0,0,0).
+  - `point`: Points towards a specific fixed coordinate.
+  - `node`: Points towards a specific node in the simulation at each instant.
+- `key`: (Only for `mode="node"`) The type of node target. Options: `leo-sats`, `nodes`, `vehicles`, `drones`, `zsps`, `remote-nodes`, `backbone`.
+- `index`: (Only for `mode="node"`) The index of the node in the container (0, 1, ...).
+- `coordinates`: Coordinate system for `point` mode (default: `geocentric`, optional `geographic`).
+- `position`: Coordinates [x, y, z] for `point` mode.
+- `precision`: Update interval for directivity (e.g., "100ms").
 
-This optional parameter allows the antenna orientation to be automatically updated during the simulation based on the node's movement or a specific target.
-
-**Example:**
+**Example (Node Mode):**
 ```json
 "directivity": {
-  "mode": "point",
-  "coordinates": "geocentric",
-  "position": [100.0, 200.0, 0.0],
+  "mode": "node",
+  "key": "leo-sats",
+  "index": 0,
   "precision": "100ms"
 }
 ```
@@ -1074,6 +1089,52 @@ This optional parameter allows defining a mapping for routing control messages b
 | `targetBwp` | uint32_t | The ID of the target BWP to which messages are routed. |
 
 **Note:** This configuration applies to both gNB and UE devices. It utilizes the `SetOutputLink` method of the `BwpManager`.
+
+---
+### `netDevices[i].rrcAttributes`
+**Description:** List of attributes to configure on the RRC layer of the NetDevice.
+
+**Example:**
+```json
+"rrcAttributes": [
+  {
+    "name": "AdmitHandoverRequest",
+    "value": "true"
+  }
+]
+```
+
+**Properties:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `name` | string | The name of the RRC attribute to set. |
+| `value` | string | The value of the attribute. |
+
+---
+### `netDevices[i].x2Links`
+**Description:** List of other gNB nodes to establish an X2 interface with. This is useful for configuring neighbor relations for handovers and coordination.
+
+**Example:**
+```json
+"x2Links": [
+  {
+    "key": "leo-sats",
+    "index": 1
+  },
+  {
+    "key": "nodes",
+    "index": 0
+  }
+]
+```
+
+**Properties:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `key` | string | The key of the node container (e.g., "leo-sats", "nodes", "vehicles"). |
+| `index` | uint32_t | The index of the node within the specified container. |
 
 ---
 

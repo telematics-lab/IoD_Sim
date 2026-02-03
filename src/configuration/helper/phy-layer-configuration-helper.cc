@@ -191,6 +191,14 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             }
             nrConfig->SetAttachMethod(attachMethod);
         }
+
+        if (jsonPhyLayer.HasMember("fullMeshX2Links"))
+        {
+            NS_ASSERT_MSG(jsonPhyLayer["fullMeshX2Links"].IsBool(),
+                          "NR PHY Layer 'fullMeshX2Links' must be a boolean.");
+            nrConfig->SetFullMeshX2Links(jsonPhyLayer["fullMeshX2Links"].GetBool());
+        }
+
         // Parse beamforming configuration
         if (jsonPhyLayer.HasMember("beamforming") && jsonPhyLayer["beamforming"].IsObject())
         {

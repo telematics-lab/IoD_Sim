@@ -87,17 +87,8 @@
         }
       ],
       "handover": {
-        "algorithm": "ns3::NrA2A4RsrqHandoverAlgorithm",
-        "attributes": [
-          {
-            "name": "ServingCellThreshold",
-            "value": 30
-          },
-          {
-            "name": "NeighbourCellOffset",
-            "value": 1
-          }
-        ]
+        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+        "attributes": []
       },
       "attachMethod": "none",
       "advancedOptions": {

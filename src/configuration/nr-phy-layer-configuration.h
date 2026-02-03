@@ -447,6 +447,18 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      */
     std::optional<SinrDistanceAttachConfig> GetSinrDistanceAttachConfig() const;
 
+    /**
+     * Set if full mesh X2 links should be created among gNBs
+     * \param enable True if full mesh X2 links should be enabled
+     */
+    void SetFullMeshX2Links(bool enable);
+
+    /**
+     * Get if full mesh X2 links should be created among gNBs
+     * \return True if full mesh X2 links are enabled
+     */
+    bool GetFullMeshX2Links() const;
+
   private:
     std::string m_attachMethod = "closest";
     TypeId m_epcHelperType = TypeId::LookupByName("ns3::NrPointToPointEpcHelper");
@@ -477,6 +489,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     TypeId m_gnbChannelAccessManagerType;
     std::vector<ModelConfiguration::Attribute> m_gnbChannelAccessManagerAttributes;
     std::optional<SinrDistanceAttachConfig> m_sinrDistanceAttachConfig;
+    bool m_fullMeshX2Links = true;
 };
 
 } // namespace ns3

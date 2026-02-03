@@ -85,6 +85,13 @@ fi
 
 git am ../tools/*.patch
 
+# Apply patches to contrib/nr
+if ls ../tools/*.patch-nr 1> /dev/null 2>&1; then
+    pushd contrib/nr > /dev/null
+    git am ../../../tools/*.patch-nr
+    popd > /dev/null
+fi
+
 # Retrieve the ns3 script from a future commit to avoid python3.14 crashes
 git checkout 30eb4168f63ee7263a046d5851ce99913e84d42a -- ns3
 chmod +x ns3

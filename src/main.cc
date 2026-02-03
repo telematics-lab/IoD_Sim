@@ -165,7 +165,9 @@ class Scenario
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
                         const std::vector<ns3::NrPhyProperty> phyConf,
+                        const std::vector<ns3::NrPhyProperty> rrcConf,
                         const std::vector<OutputLinkConfiguration> outputLinks,
+                        const std::vector<X2NeighborConfiguration> x2Neighbors,
                         const uint32_t channelId,
                         const std::vector<uint32_t> channelBands);
 
@@ -174,6 +176,7 @@ class Scenario
                        const uint32_t netId,
                        const std::optional<ModelConfiguration> antennaModel,
                        const std::vector<ns3::NrPhyProperty> phyConf,
+                       const std::vector<ns3::NrPhyProperty> rrcConf,
                        const std::vector<OutputLinkConfiguration> outputLinks,
                        const uint32_t channelId,
                        const std::vector<uint32_t> channelBands);
@@ -208,6 +211,7 @@ class Scenario
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs();
+    void ConfigureFullMeshX2Links();
     void EvaluateSinrDistanceAttachment(const uint32_t netId);
     void UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                   DirectivityConfiguration config,
@@ -218,6 +222,7 @@ class Scenario
                                            double azimuth,
                                            double elevation,
                                            bool isNr);
+    Ptr<Node> GetNodeByKey(std::string key, uint32_t index);
 
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
@@ -244,6 +249,66 @@ class Scenario
     // Track active SINR attachment loops to avoid duplicates
     std::set<uint32_t> m_sinrAttachmentRunning;
 };
+
+Ptr<Node>
+Scenario::GetNodeByKey(std::string key, uint32_t index)
+{
+    Ptr<Node> targetNode = nullptr;
+    if (key == "leo-sats")
+    {
+        if (index < m_leoSats.GetN())
+        {
+            targetNode = m_leoSats.Get(index);
+        }
+    }
+    else if (key == "vehicles")
+    {
+        if (index < m_vehicles.GetN())
+        {
+            targetNode = m_vehicles.Get(index);
+        }
+    }
+    else if (key == "nodes")
+    {
+        if (index < m_plainNodes.GetN())
+        {
+            targetNode = m_plainNodes.Get(index);
+        }
+    }
+    else if (key == "drones")
+    {
+        if (index < m_drones.GetN())
+        {
+            targetNode = m_drones.Get(index);
+        }
+    }
+    else if (key == "zsps")
+    {
+        if (index < m_zsps.GetN())
+        {
+            targetNode = m_zsps.Get(index);
+        }
+    }
+    else if (key == "remote-nodes")
+    {
+        if (index < m_remoteNodes.GetN())
+        {
+            targetNode = m_remoteNodes.Get(index);
+        }
+    }
+    else if (key == "backbone")
+    {
+        if (index < m_backbone.GetN())
+        {
+            targetNode = m_backbone.Get(index);
+        }
+    }
+    else
+    {
+        NS_FATAL_ERROR("Unknown node key for directivity: " << key);
+    }
+    return targetNode;
+}
 
 void
 Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
@@ -359,6 +424,20 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                 "Unknown coordinate system for directivity point: " << config.coordinates);
         }
         targetFound = true;
+    }
+    else if (config.mode == "node")
+    {
+        Ptr<Node> targetNode = GetNodeByKey(config.key, config.index);
+
+        if (targetNode)
+        {
+            Ptr<MobilityModel> targetMob = targetNode->GetObject<MobilityModel>();
+            if (targetMob)
+            {
+                targetPos = targetMob->GetPosition();
+                targetFound = true;
+            }
+        }
     }
 
     if (!targetFound)
@@ -574,7 +653,9 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
 
+    ConfigureFullMeshX2Links();
     AttachAllNrUesToGnbs();
+
 
     EnablePhyLteTraces();
     EnablePhyNrTraces();
@@ -1289,7 +1370,9 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 const auto role = entityNrDevConf->GetRole();
                 const auto antennaModel = entityNrDevConf->GetAntennaModel();
                 const auto phyConf = entityNrDevConf->GetPhyProperties();
+                const auto rrcConf = entityNrDevConf->GetRrcProperties();
                 const auto outputLinks = entityNrDevConf->GetOutputLinks();
+                const auto x2Neighbors = entityNrDevConf->GetX2Neighbors();
 
                 switch (role)
                 {
@@ -1298,7 +1381,9 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                                    *netId,
                                    antennaModel,
                                    phyConf,
+                                   rrcConf,
                                    outputLinks,
+                                   x2Neighbors,
                                    entityNrDevConf->GetChannelId(),
                                    entityNrDevConf->GetChannelBands());
                     break;
@@ -1308,6 +1393,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                                   *netId,
                                   antennaModel,
                                   phyConf,
+                                  rrcConf,
                                   outputLinks,
                                   entityNrDevConf->GetChannelId(),
                                   entityNrDevConf->GetChannelBands());
@@ -1610,7 +1696,9 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const uint32_t netId,
                          const std::optional<ModelConfiguration> antennaModel,
                          const std::vector<ns3::NrPhyProperty> phyConf,
+                         const std::vector<ns3::NrPhyProperty> rrcConf,
                          const std::vector<OutputLinkConfiguration> outputLinks,
+                         const std::vector<X2NeighborConfiguration> x2Neighbors,
                          const uint32_t channelId,
                          const std::vector<uint32_t> channelBands)
 {
@@ -1665,18 +1753,33 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
         }
     }
 
+    // Configure RRC attributes
+    for (const auto& attr : rrcConf)
+    {
+        dev->GetRrc()->SetAttribute(attr.attribute.name, *attr.attribute.value);
+    }
+
     // Configure Output Links
     for (const auto& link : outputLinks)
     {
         NrHelper::GetBwpManagerGnb(dev)->SetOutputLink(link.sourceBwp, link.targetBwp);
     }
 
-    for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin();
-         eNB != backbonePerStack[netId].End();
-         eNB++)
+    // Configure X2 Neighbors
+    for (const auto& neighbor : x2Neighbors)
     {
-        nrPhy->GetNrHelper()->AddX2Interface(entityNode, *eNB);
+        Ptr<Node> targetNode = GetNodeByKey(neighbor.key, neighbor.index);
+        if (targetNode)
+        {
+            nrPhy->GetNrHelper()->AddX2Interface(entityNode, targetNode);
+        }
+        else
+        {
+            NS_LOG_WARN("Could not find target node for X2 link: " << neighbor.key << " index "
+                                                                   << neighbor.index);
+        }
     }
+
     backbonePerStack[netId].Add(entityNode);
 
     // Store gNB device for later attachment operations
@@ -1690,6 +1793,7 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const uint32_t netId,
                         const std::optional<ModelConfiguration> antennaModel,
                         const std::vector<ns3::NrPhyProperty> phyConf,
+                        const std::vector<ns3::NrPhyProperty> rrcConf,
                         const std::vector<OutputLinkConfiguration> outputLinks,
                         const uint32_t channelId,
                         const std::vector<uint32_t> channelBands)
@@ -1728,7 +1832,24 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
     auto dev = StaticCast<NrUeNetDevice, NetDevice>(
         nrPhy->InstallUeDevices(entityNodeContainer, bwps).Get(0));
 
+    // Install network layer in order to proceed with IPv4 configuration
+    InstallEntityIpv4(entityNode, dev, netId);
 
+    // Register UEs into network 7.0.0.0/8
+    // unfortunately this is hardwired into EpcHelper implementation
+    auto assignedIpAddrs = nrPhy->GetNrEpcHelper()->AssignUeIpv4Address(NetDeviceContainer(dev));
+
+    for (auto assignedIpIter = assignedIpAddrs.Begin(); assignedIpIter != assignedIpAddrs.End();
+         assignedIpIter++)
+    {
+        NS_LOG_LOGIC("Assigned IPv4 Address to UE with Node ID "
+                     << entityNode->GetId() << ":" << " Iface " << assignedIpIter->second);
+
+        for (uint32_t i = 0; i < assignedIpIter->first->GetNAddresses(assignedIpIter->second); i++)
+        {
+            NS_LOG_LOGIC(" Addr " << assignedIpIter->first->GetAddress(assignedIpIter->second, i));
+        }
+    }
 
     for (const auto& attr : phyConf)
     {
@@ -1747,29 +1868,18 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
         }
     }
 
+    // Configure RRC attributes
+    for (const auto& attr : rrcConf)
+    {
+        dev->GetRrc()->SetAttribute(attr.attribute.name, *attr.attribute.value);
+    }
+
     // Configure Output Links
     for (const auto& link : outputLinks)
     {
         NrHelper::GetBwpManagerUe(dev)->SetOutputLink(link.sourceBwp, link.targetBwp);
     }
 
-    // Install network layer in order to proceed with IPv4 NR configuration
-    InstallEntityIpv4(entityNode, dev, netId);
-    // Register UEs into network 7.0.0.0/8
-    // unfortunately this is hardwired into EpcHelper implementation
-
-    auto assignedIpAddrs = nrPhy->GetNrEpcHelper()->AssignUeIpv4Address(NetDeviceContainer(dev));
-    for (auto assignedIpIter = assignedIpAddrs.Begin(); assignedIpIter != assignedIpAddrs.End();
-         assignedIpIter++)
-    {
-        NS_LOG_LOGIC("Assigned IPv4 Address to UE with Node ID "
-                     << entityNode->GetId() << ":" << " Iface " << assignedIpIter->second);
-
-        for (uint32_t i = 0; i < assignedIpIter->first->GetNAddresses(assignedIpIter->second); i++)
-        {
-            NS_LOG_LOGIC(" Addr " << assignedIpIter->first->GetAddress(assignedIpIter->second, i));
-        }
-    }
 
     // create a static route for each UE to the SGW/PGW in order to communicate
     // with the internet
@@ -2441,9 +2551,62 @@ Scenario::AttachAllNrUesToGnbs()
 }
 
 void
+Scenario::ConfigureFullMeshX2Links()
+{
+    NS_LOG_FUNCTION(this);
+
+    // Retrieve configuration
+    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+
+    for (size_t netId = 0; netId < m_protocolStacks[PHY_LAYER].size(); ++netId)
+    {
+        if (netId >= phyLayerConfs.size())
+        {
+            continue;
+        }
+
+        auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
+        if (!nrConf || !nrConf->GetFullMeshX2Links())
+        {
+             continue;
+        }
+
+        auto nrPhySim = DynamicCast<NrPhySimulationHelper>(m_protocolStacks[PHY_LAYER][netId]);
+        if (!nrPhySim)
+        {
+             continue;
+        }
+
+        NS_LOG_INFO("Configuring full mesh X2 links for netId " << netId);
+
+        NodeContainer gnbNodes;
+        auto it = m_nrGnbDevices.find(netId);
+        if (it != m_nrGnbDevices.end())
+        {
+             for (const auto& devContainer : it->second)
+             {
+                 for (uint32_t i = 0; i < devContainer.GetN(); ++i)
+                 {
+                     Ptr<NetDevice> dev = devContainer.Get(i);
+                     if (dev)
+                     {
+                         gnbNodes.Add(dev->GetNode());
+                     }
+                 }
+             }
+        }
+
+        // AddX2Interface creates links between all pairs in the container
+        if (gnbNodes.GetN() > 1)
+        {
+            nrPhySim->GetNrHelper()->AddX2Interface(gnbNodes);
+        }
+    }
+}
+
+void
 Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 {
-    std::cout << "Evaluating SINR-Distance Attachment for netId " << netId << std::endl;
     // Retrieve configuration
     auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
     if (netId >= phyLayerConfs.size())
@@ -2509,7 +2672,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         // Find best gNB
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
         double bestSnr = -std::numeric_limits<double>::infinity();
-        double bestDistance = std::numeric_limits<double>::infinity();
+        //double bestDistance = std::numeric_limits<double>::infinity();
 
         // Check all gNBs
         for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
@@ -2556,101 +2719,96 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             }
 
             minSinrRequired = bestEntry->minSinr;
-
-            // ---- CUSTOM SNR CALC REPLACED BY HELPER ----
-            // Use IsDl = true (Downlink) for attachment decision normally
             double estimatedSnr = remHelper->GetSinr(ueDevice, gnbDevice, 0, true);
-
-            // ---- END OF CUSTOM SNR CALC ----
 
             // Checking if SNR is above the required threshold
             if (estimatedSnr >= minSinrRequired)
             {
                 if (estimatedSnr > bestSnr)
                 {
-                    bestDistance = distance / 1e3;
+                    //bestDistance = distance / 1e3;
                     bestSnr = estimatedSnr;
                     bestGnb = gnbDevice;
                 }
             }
-            else
-            {
-                std::cout << "UE " << ueDevice->GetImsi() << " CANNOT connect to gNB "
-                          << gnbDevice->GetCellId() << " (SNR: " << estimatedSnr
-                          << " dB < required: " << minSinrRequired
-                          << " dB, distance: " << distance / 1e3 << " km)" << std::endl;
-            }
         }
 
         // Check if already attached
-        auto currentGnb = ueDevice->GetTargetGnb();
+        // We use the RRC to get the current CellID because GetTargetGnb() in NetDevice
+        // might not be updated after a handover.
+        uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
+        Ptr<NrGnbNetDevice> currentGnb = nullptr;
+
+        // Find the gNB object corresponding to the current Cell ID
+        if (ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_NORMALLY ||
+            ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_HANDOVER)
+        {
+             for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
+             {
+                 auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
+                 if (gnb && gnb->GetCellId() == currentCellId)
+                 {
+                     currentGnb = gnb;
+                     break;
+                 }
+             }
+        }
 
         if (bestGnb)
         {
-            // DEBUG: TODO REMOVE
-            std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
+            /*std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
                       << bestGnb->GetCellId() << " (SNR: " << bestSnr
                       << " dB, distance: " << bestDistance << " km)" << " at "
-                      << Simulator::Now().GetSeconds() << std::endl;
+                      << Simulator::Now().GetSeconds() << std::endl;*/
+
+            for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
+            {
+               auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
+               if (uePhy && !uePhy->IsPhyEnabled())
+               {
+                   uePhy->SetPhyEnabled(true);
+               }
+            }
 
             // Check if we need to handover (if configured gNB is different)
             if (currentGnb != nullptr)
             {
-                if (currentGnb == bestGnb)
+                if (currentGnb != bestGnb)
                 {
-                    // Already attached to this gNB. Do nothing.
-                }
-                else
-                {
-                    // Needs handover.
-                    // Check if source gNB actually has the UE context (it might have timed out or
-                    // been released)
-                    Ptr<NrGnbRrc> srcRrc = currentGnb->GetObject<NrGnbNetDevice>()->GetRrc();
-                    uint16_t rnti = ueDevice->GetRrc()->GetRnti();
-
-                    if (rnti != 0 && srcRrc->HasUeManager(rnti))
-                    {
-                        std::cout << "UE " << ueDevice->GetImsi()
-                                  << " requesting handover from gNB " << currentGnb->GetCellId()
-                                  << " to gNB " << bestGnb->GetCellId() << " (SNR: " << bestSnr
-                                  << " dB, distance: " << bestDistance << " km)" << std::endl;
-
-                        nrHelper->HandoverRequest(Seconds(0),
-                                                  ueDevice,
-                                                  ConstCast<NrGnbNetDevice>(currentGnb),
-                                                  bestGnb);
-                    }
-                    else
-                    {
-                        std::cout << "UE " << ueDevice->GetImsi() << " should be connected to "
-                                  << bestGnb->GetCellId() << " of gNB "
-                                  << bestGnb->GetNode()->GetId() << " but is connected to "
-                                  << currentGnb->GetCellId() << " (RNTI " << rnti << "). "
-                                  << "after handover: new gNB has not received the UE context."
-                                  << std::endl;
-
-                        // nrHelper->AttachToGnb(ueDevice, bestGnb);
-                    }
+                    /*std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
+                              << currentGnb->GetCellId() << " to gNB " << bestGnb->GetCellId()
+                              << std::endl;*/
+                    nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
                 }
             }
             else
             {
-                // Not attached, safe to attach.
                 nrHelper->AttachToGnb(ueDevice, bestGnb);
             }
         }
         else
         {
-            std::cout << "UE " << ueDevice->GetImsi()
-                      << " CANNOT connect to any gNB (No valid SINR/Distance match)" << std::endl;
+             // No suitable gNB found. If currently connected, disconnect.
+             if (currentGnb != nullptr)
+             {
+                 /*std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
+                           << currentGnb->GetCellId() << " (No suitable gNB found)"
+                           << " at " << Simulator::Now().GetSeconds() << std::endl;*/
+
+                 for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
+                 {
+                    auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
+                    if (uePhy)
+                    {
+                        uePhy->SetPhyEnabled(false);
+                    }
+                 }
+             }
         }
     }
 
-    // Schedule next
-    Simulator::Schedule(sdaConfig.precision,
-                        &Scenario::EvaluateSinrDistanceAttachment,
-                        this,
-                        netId);
+    // Reschedule
+    Simulator::Schedule(sdaConfig.precision, &Scenario::EvaluateSinrDistanceAttachment, this, netId);
 }
 
 } // namespace ns3

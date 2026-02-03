@@ -35,6 +35,8 @@ struct DirectivityConfiguration
     std::string coordinates = "geocentric";
     Vector position = Vector(0, 0, 0);
     Time precision = MilliSeconds(100);
+    std::string key = "";
+    uint32_t index = 0;
 };
 
 struct OutputLinkConfiguration

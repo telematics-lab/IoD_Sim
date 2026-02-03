@@ -217,6 +217,23 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 dirConfig.precision = Time(dirJson["precision"].GetString());
             }
 
+            if (dirConfig.mode == "node")
+            {
+                NS_ASSERT_MSG(
+                    dirJson.HasMember("key"),
+                    "Directivity configuration must have 'key' property when mode is 'node'.");
+                NS_ASSERT_MSG(dirJson["key"].IsString(),
+                              "Directivity 'key' property must be a string.");
+                dirConfig.key = dirJson["key"].GetString();
+
+                NS_ASSERT_MSG(
+                    dirJson.HasMember("index"),
+                    "Directivity configuration must have 'index' property when mode is 'node'.");
+                NS_ASSERT_MSG(dirJson["index"].IsUint(),
+                              "Directivity 'index' property must be an unsigned integer.");
+                dirConfig.index = dirJson["index"].GetUint();
+            }
+
             directivity = dirConfig;
         }
 
@@ -369,6 +386,56 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 }
             }
 
+            std::vector<NrPhyProperty> rrcProperties;
+            if (netdev.HasMember("rrcAttributes") && netdev["rrcAttributes"].IsArray())
+            {
+                TypeId rrcTypeId;
+                if (role == "gNB")
+                {
+                    rrcTypeId = TypeId::LookupByName("ns3::NrGnbRrc");
+                }
+                else
+                {
+                    rrcTypeId = TypeId::LookupByName("ns3::NrUeRrc");
+                }
+
+                for (auto& prop : netdev["rrcAttributes"].GetArray())
+                {
+                    NS_ASSERT_MSG(prop.IsObject(),
+                                  "Entity NR Network Device 'rrc' must be an array of objects.");
+                    if (prop.HasMember("name") && prop["name"].IsString() &&
+                        prop.HasMember("value"))
+                    {
+                        NrPhyProperty rrcProp;
+                        rrcProp.bwpId = std::nullopt; // RRC attributes are not BWP-specific
+                        rrcProp.attribute =
+                            ModelConfigurationHelper::DecodeModelAttribute(rrcTypeId, prop);
+                        rrcProperties.push_back(rrcProp);
+                    }
+                    else
+                    {
+                        NS_FATAL_ERROR("Entity NR Network Device 'rrcAttributes' object must have "
+                                       "'name' (string) and 'value' properties defined.");
+                    }
+                }
+            }
+
+            std::vector<X2NeighborConfiguration> x2Neighbors;
+            if (netdev.HasMember("x2Links") && netdev["x2Links"].IsArray())
+            {
+                for (const auto& neighbor : netdev["x2Links"].GetArray())
+                {
+                    if (neighbor.IsObject() && neighbor.HasMember("key") &&
+                        neighbor.HasMember("index"))
+                    {
+                        X2NeighborConfiguration config;
+                        config.key = neighbor["key"].GetString();
+                        config.index = neighbor["index"].GetUint();
+                        x2Neighbors.push_back(config);
+                    }
+                }
+            }
+
             confs.push_back(CreateObject<NrNetdeviceConfiguration>(type,
                                                                    role,
                                                                    bearers,
@@ -378,7 +445,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                                                    outputLinks,
                                                                    directivity,
                                                                    channelId,
-                                                                   channelBands));
+                                                                   channelBands,
+                                                                   rrcProperties,
+                                                                   x2Neighbors));
         }
         else if (type == "simple")
         {
