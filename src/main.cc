@@ -323,10 +323,72 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
     Vector targetPos;
     bool targetFound = false;
 
-    if (config.mode == "nearest-gnb")
+    if (config.mode == "serving-gnb" || config.mode == "nearest-gnb")
     {
-        NS_ASSERT_MSG(deviceType == "nr", "Only NR devices can use nearest-gnb directivity mode");
-        double minDist = std::numeric_limits<double>::max();
+        NS_ASSERT_MSG(deviceType == "nr", "Only NR devices can use serving-gnb/nearest-gnb directivity mode");
+
+        bool useNearestGnb = (config.mode == "nearest-gnb");
+
+        // Try serving-gnb logic first if requested
+        if (config.mode == "serving-gnb")
+        {
+           if (Ptr<NrUeNetDevice> ueDevice = DynamicCast<NrUeNetDevice>(dev))
+           {
+               auto rrcState = ueDevice->GetRrc()->GetState();
+               //std::cout << "UE " << ueDevice->GetImsi() << " RRC State: " << rrcState << " CellID: " << ueDevice->GetRrc()->GetCellId() << std::endl;
+
+               if (rrcState == NrUeRrc::CONNECTED_NORMALLY ||
+                   rrcState == NrUeRrc::CONNECTED_HANDOVER)
+               {
+                   uint16_t cellId = ueDevice->GetRrc()->GetCellId();
+
+                   // Find the gNB with this CellID
+                   if (netId.has_value())
+                   {
+                        auto it = m_nrGnbDevices.find(*netId);
+                        if (it != m_nrGnbDevices.end())
+                        {
+                            for (const auto& devContainer : it->second)
+                            {
+                                for (uint32_t i = 0; i < devContainer.GetN(); ++i)
+                                {
+                                    Ptr<NetDevice> gnbNetDev = devContainer.Get(i);
+                                    if (auto gnbDev = DynamicCast<NrGnbNetDevice>(gnbNetDev))
+                                    {
+                                        if (gnbDev->GetCellId() == cellId)
+                                        {
+                                            Ptr<Node> gnbNode = gnbDev->GetNode();
+                                            if (gnbNode)
+                                            {
+                                                Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
+                                                if (gnbMob)
+                                                {
+                                                    targetPos = gnbMob->GetPosition();
+                                                    targetFound = true;
+                                                    //std::cout << "UE " << ueDevice->GetImsi() << " Steering to Serving gNB " << cellId << std::endl;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                   }
+               }
+           }
+
+           if (!targetFound)
+           {
+               //std::cout << "UE Falling back to nearest-gnb" << std::endl;
+               // Fallback to nearest-gnb if not connected or gNB not found
+               useNearestGnb = true;
+           }
+        }
+
+        if (useNearestGnb)
+        {
+            double minDist = std::numeric_limits<double>::max();
+
 
         if (netId.has_value())
         {
@@ -359,6 +421,7 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     }
                 }
             }
+        }
         }
     }
     else if (config.mode == "nearest-ue")
@@ -503,10 +566,10 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
             }
             else if (Ptr<LteUeNetDevice> lteUe = DynamicCast<LteUeNetDevice>(dev))
             {
-                auto phy = lteEnb->GetPhy();
+                auto phy = lteUe->GetPhy();
                 if (phy)
                 {
-                    // LteEnbPhy has GetDlSpectrumPhy
+                    // LteUePhy has GetDlSpectrumPhy
                     auto specPhy = phy->GetDlSpectrumPhy();
                     if (specPhy)
                         antennaObj = specPhy->GetAntenna();
@@ -2756,10 +2819,10 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
         if (bestGnb)
         {
-            /*std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
-                      << bestGnb->GetCellId() << " (SNR: " << bestSnr
-                      << " dB, distance: " << bestDistance << " km)" << " at "
-                      << Simulator::Now().GetSeconds() << std::endl;*/
+            //std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
+                         //<< bestGnb->GetCellId() << " (SNR: " << bestSnr
+                      //<< " dB, distance: " << bestDistance << " km)" << " at "
+                      //<< Simulator::Now().GetSeconds() << std::endl;
 
             for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
             {
@@ -2775,9 +2838,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             {
                 if (currentGnb != bestGnb)
                 {
-                    /*std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
+                    std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
                               << currentGnb->GetCellId() << " to gNB " << bestGnb->GetCellId()
-                              << std::endl;*/
+                              << std::endl;
                     nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
                 }
             }
@@ -2791,9 +2854,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
              // No suitable gNB found. If currently connected, disconnect.
              if (currentGnb != nullptr)
              {
-                 /*std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
+                 std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
                            << currentGnb->GetCellId() << " (No suitable gNB found)"
-                           << " at " << Simulator::Now().GetSeconds() << std::endl;*/
+                           << " at " << Simulator::Now().GetSeconds() << std::endl;
 
                  for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
                  {

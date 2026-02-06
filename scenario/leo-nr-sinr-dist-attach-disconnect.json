@@ -210,7 +210,7 @@
             }
           ],
           "directivity": {
-            "mode": "nearest-gnb"
+            "mode": "serving-gnb"
           }
         }
       ],

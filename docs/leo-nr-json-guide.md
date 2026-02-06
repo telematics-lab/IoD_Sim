@@ -1031,6 +1031,7 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 **Description:** Configuration of the initial antenna pointing direction.
 - `mode`: Directivity mode string. Options:
   - `nearest-gnb`: Points towards the nearest gNB (only for UE).
+  - `serving-gnb`: Points towards the currently connected gNB (only for UE).
   - `nearest-ue`: Points towards the nearest UE (only for gNB).
   - `earth-centered`: Points towards the center of the Earth (0,0,0).
   - `point`: Points towards a specific fixed coordinate.
@@ -1055,12 +1056,13 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 
 | Name | Type | Options | Description |
 |------|------|---------|-------------|
-| `mode` | string | `nearest-gnb`, `nearest-ue`, `earth-centered`, `point` | The directivity mode. |
+| `mode` | string | `nearest-gnb`, `serving-gnb`, `nearest-ue`, `earth-centered`, `point` | The directivity mode. |
 | `coordinates` | string | `geocentric`, `geographic` | Coordinate system for `point` mode (optional). |
 | `position` | array | `[x, y, z]` | Target position for `point` mode (optional). |
 | `precision` | string | - | The update interval (e.g., "100ms", "1s"). Default: "100ms". |
 
 **Modes:**
+- `serving-gnb`: The antenna points to the currently connected (serving) gNB. If the UE is not connected or the serving gNB cannot be found, it falls back to `nearest-gnb` behavior. This mode is specific to `NR` UEs and ensures beam alignment after handovers.
 - `nearest-gnb`: The antenna constantly points to the nearest gNB (considering only gNBs of the same `networkLayer` ID). This mode is specific to `NR` devices.
 - `nearest-ue`: The antenna constantly points to the nearest UE (considering only UEs of the same `networkLayer` ID). This mode is specific to `NR` devices.
 - `earth-centered`: The antenna points towards the center of the earth (0, 0, 0).

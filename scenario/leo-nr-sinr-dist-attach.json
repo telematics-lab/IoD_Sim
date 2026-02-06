@@ -209,7 +209,7 @@
             }
           ],
           "directivity": {
-            "mode": "nearest-gnb"
+            "mode": "serving-gnb"
           }
         }
       ],
@@ -244,7 +244,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -302,7 +302,7 @@
             }
           ],
           "directivity": {
-            "mode": "nearest-gnb"
+            "mode": "serving-gnb"
           }
         }
       ],
@@ -337,7 +337,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -395,7 +395,7 @@
             }
           ],
           "directivity": {
-            "mode": "nearest-gnb"
+            "mode": "serving-gnb"
           }
         }
       ],
@@ -430,7 +430,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -754,7 +754,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -786,7 +786,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -818,7 +818,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
@@ -850,7 +850,7 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.5
+              "value": 0.1
             },
             {
               "name": "StopTime",
