@@ -1501,6 +1501,119 @@ ScenarioConfigurationHelper::GetRadioMaps() const
                         {member.name.GetString(), member.value.GetString()});
                 }
             }
+
+            if (obj.HasMember("txNodes"))
+            {
+                if (obj["txNodes"].IsString())
+                {
+                    std::string val = obj["txNodes"].GetString();
+                    RadioMapConfig::NodeSelection selection;
+                    if (val == "gNB" || val == "eNB")
+                    {
+                        selection.key = "ALL_GNB";
+                        mapConfig.txNodes.push_back(selection);
+                    }
+                    else if (val == "UE")
+                    {
+                        selection.key = "ALL_UE";
+                        mapConfig.txNodes.push_back(selection);
+                    }
+                    else
+                    {
+                         NS_FATAL_ERROR("Unknown txNodes string value: " << val);
+                    }
+                }
+                else
+                {
+                    NS_ASSERT_MSG(obj["txNodes"].IsArray(), "'txNodes' must be an array of objects or a string");
+                    for (auto& node : obj["txNodes"].GetArray())
+                    {
+                        if (node.IsString())
+                        {
+                            std::string val = node.GetString();
+                            RadioMapConfig::NodeSelection selection;
+                            if (val == "gNB") selection.key = "ALL_GNB";
+                            else if (val == "UE") selection.key = "ALL_UE";
+                            else if (val == "firstGNB") selection.key = "FIRST_GNB";
+                            else NS_FATAL_ERROR("Unknown txNodes string value: " << val);
+                            mapConfig.txNodes.push_back(selection);
+                        }
+                        else
+                        {
+                            NS_ASSERT_MSG(node.IsObject(), "'txNodes' elements must be objects or strings");
+                            NS_ASSERT_MSG(node.HasMember("key"), "'txNodes' element must have 'key'");
+                            NS_ASSERT_MSG(node["key"].IsString(), "'key' must be a string");
+
+                            RadioMapConfig::NodeSelection selection;
+                            selection.key = node["key"].GetString();
+
+
+                            if (node.HasMember("index"))
+                            {
+                                NS_ASSERT_MSG(node["index"].IsInt(), "'index' must be an integer");
+                                selection.index = node["index"].GetInt();
+                                NS_ASSERT_MSG(selection.index >= 0, "'index' must be non-negative");
+                            }
+
+                            if (node.HasMember("deviceIndex"))
+                            {
+                                NS_ASSERT_MSG(node["deviceIndex"].IsInt(), "'deviceIndex' must be an integer");
+                                selection.deviceIndex = node["deviceIndex"].GetInt();
+                            }
+
+                            mapConfig.txNodes.push_back(selection);
+                        }
+                    }
+                }
+            }
+
+            if (obj.HasMember("rxNode"))
+            {
+                if (obj["rxNode"].IsString())
+                {
+                    std::string val = obj["rxNode"].GetString();
+                    RadioMapConfig::NodeSelection selection;
+                    if (val == "firstGNB")
+                    {
+                        selection.key = "FIRST_GNB";
+                        mapConfig.rxNode = selection;
+                    }
+                    else if (val == "firstUE")
+                    {
+                        selection.key = "FIRST_UE";
+                        mapConfig.rxNode = selection;
+                    }
+                    else
+                    {
+                        NS_FATAL_ERROR("Unknown rxNode string value: " << val);
+                    }
+                }
+                else
+                {
+                    auto& node = obj["rxNode"];
+                    NS_ASSERT_MSG(node.IsObject(), "'rxNode' element must be an object or a string");
+                    NS_ASSERT_MSG(node.HasMember("key"), "'rxNode' element must have 'key'");
+                    NS_ASSERT_MSG(node["key"].IsString(), "'key' must be a string");
+
+                    RadioMapConfig::NodeSelection selection;
+                    selection.key = node["key"].GetString();
+
+                    if (node.HasMember("index"))
+                    {
+                        NS_ASSERT_MSG(node["index"].IsInt(), "'index' must be an integer");
+                        selection.index = node["index"].GetInt();
+                        NS_ASSERT_MSG(selection.index >= 0, "'index' must be non-negative");
+                    }
+
+                    if (node.HasMember("deviceIndex"))
+                    {
+                        NS_ASSERT_MSG(node["deviceIndex"].IsInt(), "'deviceIndex' must be an integer");
+                        selection.deviceIndex = node["deviceIndex"].GetInt();
+                    }
+
+                    mapConfig.rxNode = selection;
+                }
+            }
             maps.push_back(mapConfig);
         }
     }

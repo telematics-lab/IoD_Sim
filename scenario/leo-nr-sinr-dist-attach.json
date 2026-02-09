@@ -2,7 +2,7 @@
   "name": "leo-nr-sinr-dist-attach",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 0.7,
+  "duration": 3,
   "appStatisticsReportInterval": 0.3,
   "staticNs3Config": [
     {
@@ -11,11 +11,11 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "300ms"
+      "value": "50ms"
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
-      "value": "300ms"
+      "value": "50ms"
     },
     {
       "name": "ns3::NrRlcUm::MaxTxBufferSize",
@@ -35,21 +35,32 @@
     "buildings": []
   },
   "radioMaps": [
+    // Second gNB after the handover
     {
       "phyLayerId": 0,
       "bwpId": 0,
       "coordinates": "geocentric",
       "logGeocentricREM": true,
+      "txNodes": [
+        {
+          "key": "leo-sats",
+          "index": 1
+        }
+      ],
+      "rxNode": {
+        "key": "vehicles",
+        "index": 0
+      },
       "parameters": {
-        "MinLon": "0.0",
-        "MaxLon": "360.0",
-        "MinLat": "-70.0",
-        "MaxLat": "70.0",
-        "Altitude": "2.0",
+        "MinLon": "-10.0",
+        "MaxLon": "19.0",
+        "MinLat": "9.0",
+        "MaxLat": "30.0",
+        "Altitude": "1.0",
         "XRes": "200",
         "YRes": "200",
-        "RemMode": "CoverageArea",
-        "InstallationDelay": "0.6s"
+        "RemMode": "BeamShape", // CoverageArea, BeamShape, UeCoverageArea
+        "InstallationDelay": "1.2s"
       }
     }
   ],
@@ -123,7 +134,12 @@
         "helper": "ns3::IdealBeamformingHelper",
         "method": "ns3::DirectPathBeamforming",
         "algorithmAttributes": [],
-        "attributes": []
+        "attributes": [
+          {
+            "name": "BeamformingPeriodicity",
+            "value": "100ms"
+          }
+        ]
       },
       "ueAntenna": {
         "arrayProperties": [
@@ -168,7 +184,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 10.0
+          "value": 60.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -289,192 +305,6 @@
           ]
         }
       ]
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "UE",
-          "bearers": [
-            {
-              "type": "NGBR_LOW_LAT_EMBB"
-            }
-          ],
-          "directivity": {
-            "mode": "serving-gnb"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoConstantVelocityMobility",
-        "attributes": [
-          {
-            "name": "InitialLatitude",
-            "value": 45.5
-          },
-          {
-            "name": "InitialLongitude",
-            "value": 9.2
-          },
-          {
-            "name": "Altitude",
-            "value": 0.0
-          },
-          {
-            "name": "Speed",
-            "value": 25.0
-          },
-          {
-            "name": "Azimuth",
-            "value": 90.0
-          }
-        ]
-      },
-      "applications": [
-        {
-          "name": "ns3::UdpServer",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.1
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Port",
-              "value": 1235
-            }
-          ]
-        },
-        {
-          "name": "ns3::UdpClient",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.5
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Remote",
-              "value": [
-                "1.0.0.2",
-                5000
-              ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 256
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "UE",
-          "bearers": [
-            {
-              "type": "NGBR_LOW_LAT_EMBB"
-            }
-          ],
-          "directivity": {
-            "mode": "serving-gnb"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoConstantVelocityMobility",
-        "attributes": [
-          {
-            "name": "InitialLatitude",
-            "value": -34.6
-          },
-          {
-            "name": "InitialLongitude",
-            "value": -58.4
-          },
-          {
-            "name": "Altitude",
-            "value": 0.0
-          },
-          {
-            "name": "Speed",
-            "value": 20.0
-          },
-          {
-            "name": "Azimuth",
-            "value": 180.0
-          }
-        ]
-      },
-      "applications": [
-        {
-          "name": "ns3::UdpServer",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.1
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Port",
-              "value": 1236
-            }
-          ]
-        },
-        {
-          "name": "ns3::UdpClient",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.5
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Remote",
-              "value": [
-                "1.0.0.2",
-                5000
-              ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 256
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
-            }
-          ]
-        }
-      ]
     }
   ],
   "leo-sats": [
@@ -507,196 +337,6 @@
           {
             "name": "Offset",
             "value": 0.0
-          },
-          {
-            "name": "RetrogradeOrbit",
-            "value": false
-          }
-        ]
-      },
-      "applications": []
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoLeoOrbitMobility",
-        "attributes": [
-          {
-            "name": "Altitude",
-            "value": 550.0
-          },
-          {
-            "name": "Inclination",
-            "value": 53.0
-          },
-          {
-            "name": "Longitude",
-            "value": 45.0
-          },
-          {
-            "name": "Offset",
-            "value": 30.0
-          },
-          {
-            "name": "RetrogradeOrbit",
-            "value": false
-          }
-        ]
-      },
-      "applications": []
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoLeoOrbitMobility",
-        "attributes": [
-          {
-            "name": "Altitude",
-            "value": 780.0
-          },
-          {
-            "name": "Inclination",
-            "value": 98.2
-          },
-          {
-            "name": "Longitude",
-            "value": 120.0
-          },
-          {
-            "name": "Offset",
-            "value": 60.0
-          },
-          {
-            "name": "RetrogradeOrbit",
-            "value": false
-          }
-        ]
-      },
-      "applications": []
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoLeoOrbitMobility",
-        "attributes": [
-          {
-            "name": "Altitude",
-            "value": 600.0
-          },
-          {
-            "name": "Inclination",
-            "value": 87.4
-          },
-          {
-            "name": "Longitude",
-            "value": 180.0
-          },
-          {
-            "name": "Offset",
-            "value": 90.0
-          },
-          {
-            "name": "RetrogradeOrbit",
-            "value": true
-          }
-        ]
-      },
-      "applications": []
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoLeoOrbitMobility",
-        "attributes": [
-          {
-            "name": "Altitude",
-            "value": 1200.0
-          },
-          {
-            "name": "Inclination",
-            "value": 70.0
-          },
-          {
-            "name": "Longitude",
-            "value": -90.0
-          },
-          {
-            "name": "Offset",
-            "value": 120.0
-          },
-          {
-            "name": "RetrogradeOrbit",
-            "value": false
-          }
-        ]
-      },
-      "applications": []
-    },
-    {
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "mobilityModel": {
-        "name": "ns3::GeoLeoOrbitMobility",
-        "attributes": [
-          {
-            "name": "Altitude",
-            "value": 350.0
-          },
-          {
-            "name": "Inclination",
-            "value": 30.0
-          },
-          {
-            "name": "Longitude",
-            "value": -45.0
-          },
-          {
-            "name": "Offset",
-            "value": 150.0
           },
           {
             "name": "RetrogradeOrbit",
@@ -765,70 +405,6 @@
               "value": [
                 "7.0.0.2",
                 1234
-              ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 512
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
-            }
-          ]
-        },
-        {
-          "name": "ns3::UdpClient",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.1
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Remote",
-              "value": [
-                "7.0.0.3",
-                1235
-              ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 512
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
-            }
-          ]
-        },
-        {
-          "name": "ns3::UdpClient",
-          "attributes": [
-            {
-              "name": "StartTime",
-              "value": 0.1
-            },
-            {
-              "name": "StopTime",
-              "value": 290.0
-            },
-            {
-              "name": "Remote",
-              "value": [
-                "7.0.0.4",
-                1236
               ]
             },
             {

@@ -289,6 +289,14 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
         uint32_t phyLayerIndex;
         uint32_t bwpId;
         std::vector<std::pair<std::string, std::string>> parameters;
+        struct NodeSelection
+        {
+            std::string key;
+            int index = 0;
+            int deviceIndex = -1;
+        };
+        std::vector<NodeSelection> txNodes;
+        NodeSelection rxNode;
     };
 
     /**

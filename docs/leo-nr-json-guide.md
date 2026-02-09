@@ -1290,7 +1290,31 @@ It is possible to generate Radio Environment Maps (REM) for the NR scenarios to 
 Each object in the list contains:
 - `phyLayerId` (integer): ID of the PHY layer (usually 0).
 - `bwpId` (integer): ID of the Bandwidth Part to analyze (only nr).
+- `txNodes` (array): List of nodes to be used as transmitters. Can contain strings ("gNB", "UE") or objects defining specific nodes.
+- `rxNode` (object/string): The node to be used as receiver. Can be a string ("firstUE", "firstGNB") or an object defining a specific node.
 - `parameters` (object): Key-value pairs matching the `NrRadioEnvironmentMapHelper` attributes.
+
+#### Node Selection (`txNodes` and `rxNode`)
+
+**`txNodes`**:
+Can be a list of strings or objects.
+- **Strings**:
+    - `"gNB"`: Selects all gNBs configured in the simulation (default if empty).
+    - `"UE"`: Selects all UEs.
+- **Objects**:
+    - `key` (string): The container key (e.g., "vehicles", "leo-sats", "gNBs").
+    - `index` (integer): The index of the node in the container.
+    - `deviceIndex` (integer, optional): The index of the specific NetDevice on the node (0, 1, ...). If not specified or -1, all compatible devices on the node are selected.
+
+**`rxNode`**:
+Can be a string or an object.
+- **Strings**:
+    - `"firstUE"`: Selects the first UE found (default).
+    - `"firstGNB"`: Selects the first gNB found.
+- **Objects**:
+    - `key` (string): The container key.
+    - `index` (integer): The index of the node.
+    - `deviceIndex` (integer, optional): The specific device index. If not specified, the first compatible device on the node is selected.
 
 **Common Parameters:**
 - `XMin`, `XMax`, `YMin`, `YMax`: Coordinates of the map boundaries (in meters).
@@ -1347,8 +1371,40 @@ For LEO satellite scenarios, it is often necessary to generate a global radio ma
       "XRes": "100",
       "YRes": "50",
       "RemMode": "CoverageArea",
-      "InstallationDelay": "0.1s"
     }
   }
 ]
+```
+
+#### Node Selection Examples
+
+**1. Default behavior (All gNBs transmit, First UE receives)**
+```json
+"txNodes": "gNB",
+"rxNode": "firstUE"
+```
+
+**2. Specific Nodes by Container Index**
+Selects the first satellite as transmitter and the first vehicle as receiver.
+```json
+"txNodes": [
+  {
+    "key": "leo-sats",
+    "index": 0
+  }
+],
+"rxNode": {
+  "key": "vehicles",
+  "index": 0
+}
+```
+
+**3. Specific Network Device by Index (`deviceIndex`)**
+Selects a specific NetDevice (e.g., index 1) on the node.
+```json
+"rxNode": {
+  "key": "vehicles",
+  "index": 0,
+  "deviceIndex": 1
+}
 ```

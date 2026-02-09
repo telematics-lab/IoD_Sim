@@ -25,6 +25,7 @@
 #include "ns3/nr-epc-ue-nas.h"
 #include "ns3/nr-gnb-net-device.h"
 #include "ns3/nr-gnb-rrc.h"
+#include "ns3/nr-net-device.h"
 #include "ns3/nr-spectrum-phy.h"
 #include "ns3/nr-ue-net-device.h"
 #include "ns3/nr-ue-rrc.h"
@@ -64,6 +65,8 @@
 #include <ns3/lte-ue-net-device.h>
 #include <ns3/mobility-factory-helper.h>
 #include <ns3/mobility-helper.h>
+#include <ns3/mobility-model-configuration.h>
+#include <ns3/names.h>
 #include <ns3/nat-application.h>
 #include <ns3/net-device-container.h>
 #include <ns3/node-list.h>
@@ -787,36 +790,195 @@ Scenario::operator()()
             if (config.type == "nr")
             {
                 NetDeviceContainer txDevs;
-                for (const auto& [netId, containers] : m_nrGnbDevices)
+                Ptr<NetDevice> rxDev;
+
+                // TX Nodes Selection
+                if (!config.txNodes.empty())
                 {
-                    if (netId != config.phyLayerIndex)
+                    for (const auto& selection : config.txNodes)
                     {
-                        continue;
+                        if (selection.key == "ALL_GNB")
+                        {
+                            for (const auto& [netId, containers] : m_nrGnbDevices)
+                            {
+                                if (netId != config.phyLayerIndex) continue;
+                                for (const auto& container : containers) txDevs.Add(container);
+                            }
+                        }
+                        else if (selection.key == "ALL_UE")
+                        {
+                            for (const auto& [netId, devices] : m_nrUeDevices)
+                            {
+                                if (netId != config.phyLayerIndex) continue;
+                                for (auto dev : devices)
+                                {
+                                    txDevs.Add(dev);
+                                }
+                            }
+                        }
+                        else if (selection.key == "FIRST_GNB")
+                        {
+                            bool found = false;
+                            for (const auto& [netId, containers] : m_nrGnbDevices)
+                            {
+                                if (netId != config.phyLayerIndex) continue;
+                                if (!containers.empty())
+                                {
+                                     txDevs.Add(containers[0].Get(0));
+                                     found = true;
+                                     break;
+                                }
+                            }
+                            if (!found) NS_LOG_WARN("FIRST_GNB selected but no gNBs found.");
+                        }
+                        else
+                        {
+                            if (selection.index < 0)
+                            {
+                                 NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " must be non-negative.");
+                            }
+                            Ptr<Node> node = GetNodeByKey(selection.key, selection.index);
+                            if (node)
+                            {
+                                if (selection.deviceIndex != -1)
+                                {
+                                    if ((uint32_t)selection.deviceIndex < node->GetNDevices())
+                                    {
+                                        auto dev = node->GetDevice(selection.deviceIndex);
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                        {
+                                            txDevs.Add(dev);
+                                        }
+                                        else
+                                        {
+                                            NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " is not an NR device.");
+                                        }
+                                    }
+                                    else
+                                    {
+                                         NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " out of range.");
+                                    }
+                                }
+                                else
+                                {
+                                    for (uint32_t i = 0; i < node->GetNDevices(); ++i)
+                                    {
+                                        auto dev = node->GetDevice(i);
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                        {
+                                            txDevs.Add(dev);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                NS_LOG_WARN("Tx Node " << selection.key << " index " << selection.index << " not found.");
+                            }
+                        }
                     }
-                    for (const auto& container : containers)
+                }
+                else
+                {
+                    // Default behavior: All gNBs
+                     for (const auto& [netId, containers] : m_nrGnbDevices)
                     {
-                        txDevs.Add(container);
+                        if (netId != config.phyLayerIndex) continue;
+                        for (const auto& container : containers) txDevs.Add(container);
                     }
                 }
 
-                Ptr<NetDevice> rxDev;
-                for (const auto& [netId, devices] : m_nrUeDevices)
+                // RX Node Selection
+                // Check if key is set (it's empty by default)
+                if (!config.rxNode.key.empty())
                 {
-                    if (netId != config.phyLayerIndex)
+                    const auto& selection = config.rxNode;
+
+                    if (selection.key == "FIRST_GNB")
                     {
-                        continue;
+                         for (const auto& [netId, containers] : m_nrGnbDevices)
+                        {
+                            if (netId != config.phyLayerIndex) continue;
+                            if (!containers.empty())
+                            {
+                                    rxDev = containers[0].Get(0);
+                                    break;
+
+                            }
+                        }
                     }
-                    if (!devices.empty())
+                    else if (selection.key == "FIRST_UE")
                     {
-                        rxDev = devices.front();
-                        break;
+                        for (const auto& [netId, devices] : m_nrUeDevices)
+                        {
+                            if (netId != config.phyLayerIndex) continue;
+                            if (!devices.empty()) {
+                                rxDev = devices.front();
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (selection.index < 0)
+                        {
+                            NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " must be non-negative.");
+                        }
+                        Ptr<Node> node = GetNodeByKey(selection.key, selection.index);
+
+                        if (node)
+                        {
+                            if (selection.deviceIndex != -1)
+                            {
+                                if ((uint32_t)selection.deviceIndex < node->GetNDevices())
+                                {
+                                    auto dev = node->GetDevice(selection.deviceIndex);
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                    {
+                                        rxDev = dev;
+                                    }
+                                     else
+                                    {
+                                         NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " is not an NR device.");
+                                    }
+                                }
+                                 else
+                                {
+                                     NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " out of range.");
+                                }
+                            }
+                            else
+                            {
+                                 for (uint32_t i = 0; i < node->GetNDevices(); ++i)
+                                {
+                                    auto dev = node->GetDevice(i);
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId())) { rxDev = dev; break; }
+                                }
+                            }
+                        }
+                        else
+                        {
+                             NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " not found.");
+                        }
+                    }
+                }
+                else
+                {
+                    // Default behavior: First UE -> DL
+                    for (const auto& [netId, devices] : m_nrUeDevices)
+                    {
+                        if (netId != config.phyLayerIndex) continue;
+                        if (!devices.empty()) { rxDev = devices.front(); break; }
                     }
                 }
 
                 if (!rxDev)
                 {
-                    NS_FATAL_ERROR(
-                        "Cannot generate REM: No UEs found to serve as reference receiver.");
+                    NS_FATAL_ERROR("Cannot generate REM: No Rx device found.");
+                }
+                if (txDevs.GetN() == 0)
+                {
+                    NS_FATAL_ERROR("Cannot generate REM: No Tx devices found.");
                 }
 
                 std::stringstream ss;
@@ -2735,7 +2897,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         // Find best gNB
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
         double bestSnr = -std::numeric_limits<double>::infinity();
-        //double bestDistance = std::numeric_limits<double>::infinity();
+
 
         // Check all gNBs
         for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
@@ -2789,7 +2951,6 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             {
                 if (estimatedSnr > bestSnr)
                 {
-                    //bestDistance = distance / 1e3;
                     bestSnr = estimatedSnr;
                     bestGnb = gnbDevice;
                 }
@@ -2819,10 +2980,10 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
         if (bestGnb)
         {
-            //std::cout << "UE " << ueDevice->GetImsi() << " CAN connect to gNB "
-                         //<< bestGnb->GetCellId() << " (SNR: " << bestSnr
-                      //<< " dB, distance: " << bestDistance << " km)" << " at "
-                      //<< Simulator::Now().GetSeconds() << std::endl;
+            std::cout << "UE " << ueDevice->GetNode()->GetId() << " CAN connect to gNB "
+                      << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr
+                      << " dB)" << " at "
+                      << Simulator::Now().GetSeconds() << std::endl;
 
             for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
             {
@@ -2839,7 +3000,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 if (currentGnb != bestGnb)
                 {
                     std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                              << currentGnb->GetCellId() << " to gNB " << bestGnb->GetCellId()
+                              << currentGnb->GetNode()->GetId() << " to gNB " << bestGnb->GetNode()->GetId()
                               << std::endl;
                     nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
                 }
