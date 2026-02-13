@@ -100,6 +100,52 @@ In the `phyLayer` settings, we can configure a physical layer of type `nr` which
 - `max-rsrp`: Attaches the UE to the gNB with the strongest signal (RSRP).
 - `none`: Does not perform attachment.
 
+**Note:** If `advancedOptions.sinr-distance-attach` is configured, it will override this setting and use the SINR-Distance based logic instead.
+
+### `advancedOptions`
+**Optional**
+**Type:** `object`
+**Description:** Advanced configuration options for the NR PHY layer.
+
+#### `advancedOptions.sinr-distance-attach`
+**Description:** Configuration for the SINR-Distance based attachment logic. This mechanism allows UEs to attach to gNBs based on a combination of distance and minimum SINR requirements, useful for satellite scenarios where traditional attachment methods might not be sufficient.
+
+**Parameters:**
+- `precision` (string): Time interval for evaluating the attachment logic (e.g., "100ms").
+- `threshold` (double): Hysteresis threshold in dB. A UE will only handover to a new gNB if the new gNB's SINR is better than the current gNB's SINR by at least this threshold. Default: `2.0`.
+- `table` (array): A list of distance-SINR pairs defining the minimum required SINR for a given distance.
+
+**Table Entry Parameters:**
+- `maxDistance` (double): The maximum distance (in meters) for which this rule applies.
+- `minSINR` (double): The minimum required SINR (in dB) for the corresponding distance.
+
+**Logic:**
+The simulation periodically evaluates the attachment for each UE. For each candidate gNB, it checks the distance. It finds the appropriate rule in the `table` (the entry with the smallest `maxDistance` that is greater than or equal to the actual distance). If the estimated SINR is above the `minSINR` for that rule, the gNB is considered a candidate. The UE attaches to the candidate with the best SINR. Hysteresis is applied using the `threshold` to prevent ping-pong effects during handovers.
+
+**Example:**
+```json
+"advancedOptions": {
+  "sinr-distance-attach": {
+    "precision": "100ms",
+    "threshold": 3.0,
+    "table": [
+      {
+        "maxDistance": 50000,
+        "minSINR": -30.0
+      },
+      {
+        "maxDistance": 100000,
+        "minSINR": -20.0
+      },
+      {
+        "maxDistance": 500000,
+        "minSINR": -10.0
+      }
+    ]
+  }
+}
+```
+
 ### `fullMeshX2Links`
 **Optional**
 **Type:** `boolean`

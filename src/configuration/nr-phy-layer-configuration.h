@@ -134,6 +134,7 @@ struct SinrDistanceAttachConfig
 {
     Time precision;
     std::vector<SinrDistanceTableEntry> table;
+    double threshold = 2.0;
 };
 
 /**

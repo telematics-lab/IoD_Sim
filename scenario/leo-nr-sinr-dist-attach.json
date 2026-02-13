@@ -2,7 +2,7 @@
   "name": "leo-nr-sinr-dist-attach",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 3,
+  "duration": 10,
   "appStatisticsReportInterval": 0.3,
   "staticNs3Config": [
     {
@@ -105,17 +105,10 @@
       "advancedOptions": {
         "sinr-distance-attach": {
           "precision": "100ms",
+          "threshold": 3.0,
           "table": [
             {
-              "maxDistance": 50e3,
-              "minSINR": -30.0
-            },
-            {
-              "maxDistance": 100e3,
-              "minSINR": -20.0
-            },
-            {
-              "maxDistance": 500e3,
+              "maxDistance": 430e3,
               "minSINR": -10.0
             }
           ]
@@ -336,7 +329,7 @@
           },
           {
             "name": "Offset",
-            "value": 0.0
+            "value": 0
           },
           {
             "name": "RetrogradeOrbit",
@@ -374,7 +367,7 @@
           },
           {
             "name": "Offset",
-            "value": 2.910989972200442 // At 0.3s this gNB will be not the best for the UE under this position
+            "value": 2
           },
           {
             "name": "RetrogradeOrbit",

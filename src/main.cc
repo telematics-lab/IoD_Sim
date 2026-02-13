@@ -119,6 +119,8 @@
 #include <sys/resource.h>
 #include <vector>
 
+#define SINR_DISTANCE_PRINT_DEBUG
+
 namespace ns3
 {
 
@@ -338,7 +340,6 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
            if (Ptr<NrUeNetDevice> ueDevice = DynamicCast<NrUeNetDevice>(dev))
            {
                auto rrcState = ueDevice->GetRrc()->GetState();
-               //std::cout << "UE " << ueDevice->GetImsi() << " RRC State: " << rrcState << " CellID: " << ueDevice->GetRrc()->GetCellId() << std::endl;
 
                if (rrcState == NrUeRrc::CONNECTED_NORMALLY ||
                    rrcState == NrUeRrc::CONNECTED_HANDOVER)
@@ -368,7 +369,6 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                                 {
                                                     targetPos = gnbMob->GetPosition();
                                                     targetFound = true;
-                                                    //std::cout << "UE " << ueDevice->GetImsi() << " Steering to Serving gNB " << cellId << std::endl;
                                                 }
                                             }
                                         }
@@ -382,7 +382,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
 
            if (!targetFound)
            {
-               //std::cout << "UE Falling back to nearest-gnb" << std::endl;
+            #ifdef SINR_DISTANCE_PRINT_DEBUG
+               std::cout << "UE Falling back to nearest-gnb" << std::endl;
+            #endif
                // Fallback to nearest-gnb if not connected or gNB not found
                useNearestGnb = true;
            }
@@ -2894,6 +2896,27 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         if (!ueMobility)
             continue;
 
+        // Find current gNB
+        uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
+        Ptr<NrGnbNetDevice> currentGnb = nullptr;
+
+        if (ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_NORMALLY ||
+            ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_HANDOVER)
+        {
+             for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
+             {
+                 auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
+                 if (gnb && gnb->GetCellId() == currentCellId)
+                 {
+                     currentGnb = gnb;
+                     break;
+                 }
+             }
+        }
+
+        double currentSnr = -std::numeric_limits<double>::infinity();
+        bool currentGnbValid = false;
+
         // Find best gNB
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
         double bestSnr = -std::numeric_limits<double>::infinity();
@@ -2916,6 +2939,10 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 continue;
 
             double distance = ueMobility->GetDistanceFrom(gnbMobility);
+
+            #ifdef SINR_DISTANCE_PRINT_DEBUG
+            //std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB " << gnbNode->GetId() << ": " << distance/1000 << " km" << std::endl;
+            #endif
 
             // Find required min SINR for this distance
             double minSinrRequired = std::numeric_limits<double>::max();
@@ -2949,6 +2976,12 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             // Checking if SNR is above the required threshold
             if (estimatedSnr >= minSinrRequired)
             {
+                if (currentGnb && gnbDevice == currentGnb)
+                {
+                    currentSnr = estimatedSnr;
+                    currentGnbValid = true;
+                }
+
                 if (estimatedSnr > bestSnr)
                 {
                     bestSnr = estimatedSnr;
@@ -2957,56 +2990,67 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             }
         }
 
-        // Check if already attached
-        // We use the RRC to get the current CellID because GetTargetGnb() in NetDevice
-        // might not be updated after a handover.
-        uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
-        Ptr<NrGnbNetDevice> currentGnb = nullptr;
-
-        // Find the gNB object corresponding to the current Cell ID
-        if (ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_NORMALLY ||
-            ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_HANDOVER)
-        {
-             for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
-             {
-                 auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
-                 if (gnb && gnb->GetCellId() == currentCellId)
-                 {
-                     currentGnb = gnb;
-                     break;
-                 }
-             }
-        }
-
         if (bestGnb)
         {
-            std::cout << "UE " << ueDevice->GetNode()->GetId() << " CAN connect to gNB "
-                      << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr
-                      << " dB)" << " at "
-                      << Simulator::Now().GetSeconds() << std::endl;
-
-            for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
-            {
-               auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
-               if (uePhy && !uePhy->IsPhyEnabled())
-               {
-                   uePhy->SetPhyEnabled(true);
-               }
-            }
-
             // Check if we need to handover (if configured gNB is different)
             if (currentGnb != nullptr)
             {
                 if (currentGnb != bestGnb)
                 {
-                    std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                              << currentGnb->GetNode()->GetId() << " to gNB " << bestGnb->GetNode()->GetId()
-                              << std::endl;
-                    nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
+                    // Hysteresis check
+                    // Only switch if the new gNB is better by at least 'threshold' dB
+                    // AND the current gNB is still valid.
+                    // If current gNB is NOT valid (didn't meet min requirements), we MUST switch.
+
+                    bool shouldHandover = true;
+
+                    if (currentGnbValid)
+                    {
+                        if (bestSnr < currentSnr + sdaConfig.threshold)
+                        {
+                            shouldHandover = false;
+                            #ifdef SINR_DISTANCE_PRINT_DEBUG
+                            if (bestSnr > currentSnr)
+                            {
+                                std::cout << "UE " << ueDevice->GetImsi()
+                                          << " HANDOVER PREVENTED by threshold (" << sdaConfig.threshold << " dB)"
+                                          << " from gNB " << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr << " dB)"
+                                          << " to gNB " << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)"
+                                          << " Delta: " << bestSnr - currentSnr << " dB"
+                                          << std::endl;
+                            }
+                            #endif
+                        }
+                    }
+
+                    if (shouldHandover)
+                    {
+                        #ifdef SINR_DISTANCE_PRINT_DEBUG
+                        std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
+                                  << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr << " dB)"
+                                  << " to gNB " << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)"
+                                  << " Threshold: " << sdaConfig.threshold << " dB"
+                                  << std::endl;
+                        #endif
+                        nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
+                    }
                 }
             }
             else
             {
+                std::cout << "UE " << ueDevice->GetNode()->GetId() << " CAN connect to gNB "
+                          << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr
+                          << " dB)" << " at "
+                          << Simulator::Now().GetSeconds() << std::endl;
+
+                for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
+                {
+                   auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
+                   if (uePhy && !uePhy->IsPhyEnabled())
+                   {
+                       uePhy->SetPhyEnabled(true);
+                   }
+                }
                 nrHelper->AttachToGnb(ueDevice, bestGnb);
             }
         }
@@ -3015,9 +3059,11 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
              // No suitable gNB found. If currently connected, disconnect.
              if (currentGnb != nullptr)
              {
+                #ifdef SINR_DISTANCE_PRINT_DEBUG
                  std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
                            << currentGnb->GetCellId() << " (No suitable gNB found)"
                            << " at " << Simulator::Now().GetSeconds() << std::endl;
+                #endif
 
                  for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
                  {

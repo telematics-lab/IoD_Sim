@@ -728,6 +728,12 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                 sdaConfig.table.push_back(SinrDistanceTableEntry{entry["maxDistance"].GetDouble(),
                                                                  entry["minSINR"].GetDouble()});
             }
+
+            if (sda.HasMember("threshold") && sda["threshold"].IsNumber())
+            {
+                sdaConfig.threshold = sda["threshold"].GetDouble();
+            }
+
             nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
         }
     }
