@@ -21,8 +21,9 @@
 #include "drone.h"
 
 #include <ns3/device-energy-model.h>
-#include <ns3/li-ion-energy-source.h>
+#include <ns3/energy-source.h>
 #include <ns3/simulator.h>
+#include <ns3/traced-value.h>
 
 namespace ns3
 {

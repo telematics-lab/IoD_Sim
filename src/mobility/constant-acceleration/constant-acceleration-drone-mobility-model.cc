@@ -85,6 +85,12 @@ ConstantAccelerationDroneMobilityModel::ConstantAccelerationDroneMobilityModel()
 {
 }
 
+Ptr<MobilityModel>
+ConstantAccelerationDroneMobilityModel::Copy() const
+{
+    return CreateObject<ConstantAccelerationDroneMobilityModel>(*this);
+}
+
 FlightPlan
 ConstantAccelerationDroneMobilityModel::ProjectedToGeographicCoordinates(
     const FlightPlan& flightPlan,

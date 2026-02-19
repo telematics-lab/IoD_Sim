@@ -65,14 +65,39 @@ GeoSGP4Mobility::GetTypeId()
                       MakeStringChecker());
 }
 
+
 GeoSGP4Mobility::GeoSGP4Mobility()
     : GeocentricMobilityModel()
 {
     NS_LOG_FUNCTION_NOARGS();
 }
 
+GeoSGP4Mobility::GeoSGP4Mobility(const GeoSGP4Mobility& other)
+    : GeocentricMobilityModel(other),
+      m_position(other.m_position),
+      m_precision(other.m_precision),
+      m_tleLine1(other.m_tleLine1),
+      m_tleLine2(other.m_tleLine2),
+      m_sgp4StartTime(other.m_sgp4StartTime),
+      m_sgp4StartTimeString(other.m_sgp4StartTimeString),
+      m_sgp4InitAttempted(false) // Reset checking
+{
+    NS_LOG_FUNCTION(this << &other);
+    // If SGP4 was initialized in the other object, we should try to initialize it here too
+    if (other.m_sgp4)
+    {
+        Update();
+    }
+}
+
 GeoSGP4Mobility::~GeoSGP4Mobility()
 {
+}
+
+Ptr<MobilityModel>
+GeoSGP4Mobility::Copy() const
+{
+    return CreateObject<GeoSGP4Mobility>(*this);
 }
 
 void

@@ -55,6 +55,17 @@ class NrPhySimulationHelperPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(NrPhySimulationHelper);
+
+TypeId
+NrPhySimulationHelper::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NrPhySimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 NrPhySimulationHelper::NrPhySimulationHelper(const size_t stackId)
     : m_nr{CreateObject<NrHelper>()}
 {

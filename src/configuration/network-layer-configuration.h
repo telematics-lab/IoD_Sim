@@ -39,6 +39,13 @@ class NetworkLayerConfiguration : public Object
      * \param type The type of the Network Layer to be configured.
      */
     NetworkLayerConfiguration(std::string type);
+
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     /**
      * \return The type of the decoded Network Layer
      */

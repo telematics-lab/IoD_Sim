@@ -48,6 +48,13 @@ class NrPhySimulationHelper : public Object
   public:
     /** Default constructor */
     NrPhySimulationHelper(const size_t stackId);
+
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     /** Default destructor */
     ~NrPhySimulationHelper();
 

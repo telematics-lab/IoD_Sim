@@ -60,6 +60,12 @@ class GeoConstantVelocityMobility : public GeocentricMobilityModel
     virtual ~GeoConstantVelocityMobility() = default;
 
     /**
+     * \brief Copy the mobility model
+     * \return a copy of the mobility model
+     */
+    virtual Ptr<MobilityModel> Copy() const override;
+
+    /**
      * \brief Get velocity
      * \return the current velocity
      */

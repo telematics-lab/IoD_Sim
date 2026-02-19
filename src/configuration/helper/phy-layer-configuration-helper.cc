@@ -83,7 +83,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         const auto propagationLossModel =
             ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["propagationLossModel"]);
 
-        return Create<WifiPhyLayerConfiguration>(phyType,
+        return CreateObject<WifiPhyLayerConfiguration>(phyType,
                                                  jsonPhyLayer["standard"].GetString(),
                                                  phyAttributes,
                                                  propagationDelayModel,
@@ -91,7 +91,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
     }
     if (phyType == "none")
     {
-        return Create<NonePhyLayerConfiguration>(phyType,
+        return CreateObject<NonePhyLayerConfiguration>(phyType,
                                                  std::vector<ModelConfiguration::Attribute>());
     }
     else if (phyType == "lte")
@@ -118,7 +118,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             ModelConfigurationHelper::GetOptional(jsonPhyLayer["channel"].GetObject(),
                                                   "propagationLossModel");
 
-        phyConfig = Create<LtePhyLayerConfiguration>(phyType,
+        phyConfig = CreateObject<LtePhyLayerConfiguration>(phyType,
                                                      phyAttributes,
                                                      propagationLossModel,
                                                      spectrumModel);
@@ -154,7 +154,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["conditionModel"]);
         const auto environment = jsonPhyLayer["environment"].GetString();
 
-        phyConfig = Create<ThreeGppPhyLayerConfiguration>(phyType,
+        phyConfig = CreateObject<ThreeGppPhyLayerConfiguration>(phyType,
                                                           phyAttributes,
                                                           propagationLossModel,
                                                           conditionModel,
@@ -167,7 +167,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         if (!jsonPhyLayer.HasMember("attributes"))
         {
             nrConfig =
-                Create<NrPhyLayerConfiguration>(phyType, ModelConfiguration::AttributeVector());
+                CreateObject<NrPhyLayerConfiguration>(phyType, ModelConfiguration::AttributeVector());
         }
         else
         {
@@ -176,7 +176,7 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             const auto phyAttributes =
                 ModelConfigurationHelper::GetAttributes(TypeId::LookupByName("ns3::NrHelper"),
                                                         jsonPhyLayer["attributes"].GetArray());
-            nrConfig = Create<NrPhyLayerConfiguration>(phyType, phyAttributes);
+            nrConfig = CreateObject<NrPhyLayerConfiguration>(phyType, phyAttributes);
         }
 
         if (jsonPhyLayer.HasMember("attachMethod"))

@@ -102,14 +102,42 @@ GeoLeoOrbitMobility::GetTypeId()
                       MakeStringChecker());
 }
 
+
 GeoLeoOrbitMobility::GeoLeoOrbitMobility()
     : GeocentricMobilityModel()
 {
     NS_LOG_FUNCTION_NOARGS();
 }
 
+GeoLeoOrbitMobility::GeoLeoOrbitMobility(const GeoLeoOrbitMobility& other)
+    : GeocentricMobilityModel(other),
+      m_orbitHeight(other.m_orbitHeight),
+      m_inclination(other.m_inclination),
+      m_longitude(other.m_longitude),
+      m_offset(other.m_offset),
+      m_retrogradeOrbit(other.m_retrogradeOrbit),
+      m_position(other.m_position),
+      m_precision(other.m_precision),
+      m_tleLine1(other.m_tleLine1),
+      m_tleLine2(other.m_tleLine2),
+      m_tleStartTime(other.m_tleStartTime),
+      m_tleStartTimeString(other.m_tleStartTimeString)
+{
+    NS_LOG_FUNCTION(this << &other);
+    if (!m_tleLine1.empty() && !m_tleLine2.empty())
+    {
+        InitializeFromTLE();
+    }
+}
+
 GeoLeoOrbitMobility::~GeoLeoOrbitMobility()
 {
+}
+
+Ptr<MobilityModel>
+GeoLeoOrbitMobility::Copy() const
+{
+    return CreateObject<GeoLeoOrbitMobility>(*this);
 }
 
 void

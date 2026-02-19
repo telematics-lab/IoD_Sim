@@ -32,6 +32,12 @@ class RemoteConfiguration : public Object
   public:
     RemoteConfiguration(uint32_t networkLayerId, std::vector<ModelConfiguration> m_applications);
 
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     const uint32_t GetNetworkLayerId() const;
     const std::vector<ModelConfiguration>& GetApplications() const;
 

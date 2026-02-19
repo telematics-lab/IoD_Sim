@@ -20,6 +20,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(NetworkLayerConfiguration);
+
+TypeId
+NetworkLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NetworkLayerConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 NetworkLayerConfiguration::NetworkLayerConfiguration(std::string type)
     : m_type{type}
 {

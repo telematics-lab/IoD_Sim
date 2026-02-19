@@ -20,6 +20,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(ModelNetdeviceConfiguration);
+
+TypeId
+ModelNetdeviceConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::ModelNetdeviceConfiguration")
+                            .SetParent<NetdeviceConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 ModelNetdeviceConfiguration::ModelNetdeviceConfiguration(const std::string type,
                                                          const ModelConfiguration macLayer)
     : NetdeviceConfiguration{type},

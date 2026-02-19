@@ -76,6 +76,12 @@ GeoConstantVelocityMobility::GeoConstantVelocityMobility() : GeocentricMobilityM
   NS_LOG_FUNCTION_NOARGS ();
 }
 
+Ptr<MobilityModel>
+GeoConstantVelocityMobility::Copy() const
+{
+  return CreateObject<GeoConstantVelocityMobility>(*this);
+}
+
 double
 GeoConstantVelocityMobility::GetSpeed () const
 {

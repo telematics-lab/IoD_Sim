@@ -1,64 +1,62 @@
-From 597996114033f0677d58fe343b1175189bd4a5c8 Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni.grieco@poliba.it>
-Date: Wed, 5 Jul 2023 09:37:01 +0000
+From 34eabc844035fc27924bdaba2c536d4259900f92 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 16 Feb 2026 13:48:57 +0100
 Subject: [PATCH] Add ns3 quirks for IoD Sim compatibility
 
 ---
  src/mobility/helper/mobility-helper.h | 1 +
  src/mobility/model/mobility-model.h   | 1 +
- src/wifi/helper/wifi-helper.h         | 2 ++
+ src/wifi/helper/wifi-helper.h         | 1 +
  src/wifi/helper/yans-wifi-helper.h    | 1 +
- 4 files changed, 5 insertions(+)
+ 4 files changed, 4 insertions(+)
 
 diff --git a/src/mobility/helper/mobility-helper.h b/src/mobility/helper/mobility-helper.h
-index 60d94a907..ebb926827 100644
+index 60d94a907..a5d05e716 100644
 --- a/src/mobility/helper/mobility-helper.h
 +++ b/src/mobility/helper/mobility-helper.h
-@@ -32,6 +32,7 @@ class MobilityModel;
+@@ -31,6 +31,7 @@ class MobilityModel;
+  */
  class MobilityHelper
  {
++  friend class MobilityFactoryHelper;
    public:
-+    friend class MobilityFactoryHelper;
      /**
       * Construct a Mobility Helper which is used to make life easier when working
-      * with mobility models.
 diff --git a/src/mobility/model/mobility-model.h b/src/mobility/model/mobility-model.h
-index 53e41d1c5..c7a1fffb1 100644
+index ff7b029b1..6622d0356 100644
 --- a/src/mobility/model/mobility-model.h
 +++ b/src/mobility/model/mobility-model.h
 @@ -28,6 +28,7 @@ namespace ns3
- class MobilityModel : public Object
+  */
+ class MOBILITY_EXPORT MobilityModel : public Object
  {
++  friend class MobilityFactoryHelper;
    public:
-+    friend class MobilityFactoryHelper;
      /**
       * Register this type with the TypeId system.
-      * @return the object TypeId
 diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
-index d8397ad3e..f407b0d46 100644
+index 945a8a8c9..adb42da8a 100644
 --- a/src/wifi/helper/wifi-helper.h
 +++ b/src/wifi/helper/wifi-helper.h
-@@ -395,6 +395,8 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
+@@ -376,6 +376,7 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
+  */
  class WifiHelper
  {
-   public:
 +    friend class WifiMacFactoryHelper;
-+
+   public:
      virtual ~WifiHelper();
- 
-     /**
+
 diff --git a/src/wifi/helper/yans-wifi-helper.h b/src/wifi/helper/yans-wifi-helper.h
-index b0fa76b40..f2b598a01 100644
+index b0fa76b40..513a4347f 100644
 --- a/src/wifi/helper/yans-wifi-helper.h
 +++ b/src/wifi/helper/yans-wifi-helper.h
-@@ -27,6 +27,7 @@ namespace ns3
+@@ -26,6 +26,7 @@ namespace ns3
+  */
  class YansWifiChannelHelper
  {
++  friend class WifiPhyFactoryHelper;
    public:
-+    friend class WifiPhyFactoryHelper;
      /**
       * Create a channel helper without any parameter set. The user must set
-      * them all to be able to call Create later.
--- 
-2.39.5 (Apple Git-154)
-
+--
+2.50.1 (Apple Git-155)

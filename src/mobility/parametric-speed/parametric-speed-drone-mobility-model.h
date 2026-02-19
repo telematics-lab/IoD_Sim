@@ -45,6 +45,13 @@ class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
     static TypeId GetTypeId();
 
     ParametricSpeedDroneMobilityModel();
+    virtual ~ParametricSpeedDroneMobilityModel() = default;
+
+    /**
+     * \brief Copy the mobility model
+     * \return a copy of the mobility model
+     */
+    virtual Ptr<MobilityModel> Copy() const override;
 
     static FlightPlan ProjectedToGeographicCoordinates(
         const FlightPlan& flightPlan,
@@ -55,13 +62,13 @@ class ParametricSpeedDroneMobilityModel : public GeocentricMobilityModel
 
   private:
     /// Initialize the object instance.
-    virtual void DoInitialize();
+    virtual void DoInitialize() override;
     /// Destroy the object instance.
-    virtual void DoDispose();
+    virtual void DoDispose() override;
 
-    virtual Vector DoGetPosition(PositionType type) const;
-    virtual void DoSetPosition(const Vector& position, PositionType type);
-    virtual Vector DoGetVelocity() const;
+    virtual Vector DoGetPosition(PositionType type) const override;
+    virtual void DoSetPosition(const Vector& position, PositionType type) override;
+    virtual Vector DoGetVelocity() const override;
 
     virtual void Update() const;
     FlightPlan GetFlightPlan() const;

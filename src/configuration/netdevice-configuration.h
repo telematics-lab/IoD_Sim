@@ -64,6 +64,11 @@ class NetdeviceConfiguration : public Object
         const std::optional<uint32_t> networkLayerId,
         const std::optional<ModelConfiguration> antennaModel,
         const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
     /** \return The type of the Network Device. */
     const std::string GetType() const;
     /** \return The reference network layer identifier. */

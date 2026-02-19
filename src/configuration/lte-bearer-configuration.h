@@ -50,6 +50,12 @@ class LteBearerConfiguration : public Object
     LteBearerConfiguration(const std::string type);
 
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * \return The type of the Network Device.
      */
     const EpsBearer::Qci GetType() const;

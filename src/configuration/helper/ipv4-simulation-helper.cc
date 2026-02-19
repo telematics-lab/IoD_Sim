@@ -26,6 +26,17 @@ Ipv4SimulationHelper::Ipv4SimulationHelper(const std::string mask, const std::st
 {
 }
 
+NS_OBJECT_ENSURE_REGISTERED(Ipv4SimulationHelper);
+
+TypeId
+Ipv4SimulationHelper::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::Ipv4SimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 Ipv4InterfaceContainer&
 Ipv4SimulationHelper::GetIpv4Interfaces()
 {

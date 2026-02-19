@@ -29,6 +29,17 @@ EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>
 {
 }
 
+NS_OBJECT_ENSURE_REGISTERED(EntityConfiguration);
+
+TypeId
+EntityConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::EntityConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 EntityConfiguration::EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> netDevices,
                                          MobilityModelConfiguration mobility,
                                          std::vector<ModelConfiguration> applications,

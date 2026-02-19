@@ -34,6 +34,17 @@ class LteNetdeviceConfigurationPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(LteNetdeviceConfiguration);
+
+TypeId
+LteNetdeviceConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::LteNetdeviceConfiguration")
+                            .SetParent<NetdeviceConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 LteNetdeviceConfiguration::LteNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,

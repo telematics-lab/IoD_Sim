@@ -20,6 +20,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(NullNtnDemoMacLayerConfiguration);
+
+TypeId
+NullNtnDemoMacLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NullNtnDemoMacLayerConfiguration")
+                            .SetParent<MacLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 NullNtnDemoMacLayerConfiguration::NullNtnDemoMacLayerConfiguration(std::string macType,
                                                                    double timeResolution,
                                                                    double bandwidth,

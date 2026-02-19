@@ -669,21 +669,29 @@ main(int argc, char* argv[])
 
     for (uint32_t i = 0; i < gnbNetDev.GetN(); ++i)
     {
-        // Set gNB transmission power based on enableGnb parameter
-        if (enableGnb)
+        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(gnbNetDev.Get(i));
+             ++bwpId)
         {
-            nrHelper->GetGnbPhy(gnbNetDev.Get(i), 0)->SetTxPower(satTxPower);
-        }
-        else
-        {
-            nrHelper->GetGnbPhy(gnbNetDev.Get(i), 0)
-                ->SetTxPower(-1000); // Effectively disable transmission
+            // Set gNB transmission power based on enableGnb parameter
+            if (enableGnb)
+            {
+                NrHelper::GetGnbPhy(gnbNetDev.Get(i), bwpId)->SetTxPower(satTxPower);
+            }
+            else
+            {
+                NrHelper::GetGnbPhy(gnbNetDev.Get(i), bwpId)
+                    ->SetTxPower(-1000); // Effectively disable transmission
+            }
         }
     }
 
     for (uint32_t i = 0; i < ueNetDev.GetN(); ++i)
     {
-        nrHelper->GetUePhy(ueNetDev.Get(i), 0)->SetTxPower(ueTxPower);
+        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(ueNetDev.Get(i));
+             ++bwpId)
+        {
+            NrHelper::GetUePhy(ueNetDev.Get(i), bwpId)->SetTxPower(ueTxPower);
+        }
     }
 
     InternetStackHelper internet;

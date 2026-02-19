@@ -48,6 +48,12 @@ class NrBearerConfiguration : public Object
     NrBearerConfiguration(const std::string type);
 
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * \return The type of the Network Device.
      */
     const NrEpsBearer::Qci GetType() const;

@@ -169,6 +169,17 @@ class NrBearerConfigurationPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(NrBearerConfiguration);
+
+TypeId
+NrBearerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NrBearerConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 NrBearerConfiguration::NrBearerConfiguration(const std::string type,
                                              const uint64_t gbrDl,
                                              const uint64_t gbrUl,

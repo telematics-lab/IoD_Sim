@@ -66,34 +66,37 @@ integrate_contrib_module() {
   fi
 }
 
-clone_checkout_ns3 ns-3.45
+skip_ssh_id_and_signature() {
+  # Deactivate signature of commit if any setted globally on current global git config
+  git config --local commit.gpgsign false
+
+  if [ -z "$(git config user.name)" ]; then
+    git config --local user.name "IoD Sim"
+  fi
+
+  if [ -z "$(git config user.email)" ]; then
+    git config --local user.email "iod_sim@no-reply.com"
+  fi
+
+}
+
+clone_checkout_ns3 ns-3.46
 ln -fs ../../leo ./ns3/contrib/leo
 
-integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.1.y"
+integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.1.1"
 
 pushd ns3 > /dev/null
-# Deactivate signature of commit if any setted globally on current global git config
-git config --local commit.gpgsign false
-
-if [ -z "$(git config user.name)" ]; then
-  git config --local user.name "IoD Sim"
-fi
-
-if [ -z "$(git config user.email)" ]; then
-  git config --local user.email "iod_sim@no-reply.com"
-fi
-
+skip_ssh_id_and_signature
 git am ../tools/*.patch
 
 # Apply patches to contrib/nr
 if ls ../tools/*.patch-nr 1> /dev/null 2>&1; then
     pushd contrib/nr > /dev/null
+    skip_ssh_id_and_signature
     git am ../../../tools/*.patch-nr
     popd > /dev/null
 fi
 
-# Retrieve the ns3 script from a future commit to avoid python3.14 crashes
-git checkout 30eb4168f63ee7263a046d5851ce99913e84d42a -- ns3
 chmod +x ns3
 
 popd > /dev/null

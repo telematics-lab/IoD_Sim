@@ -69,4 +69,4 @@ RUN ./ns3 build -j$(nproc) scenario
 
 WORKDIR /IoD_Sim/ns3/build
 
-CMD mv ns3.45-scenario-default /bin_result/ && exit 0
+CMD mv ns3.46-scenario-default /bin_result/ && exit 0

@@ -40,6 +40,17 @@ namespace ns3
 {
 NS_LOG_COMPONENT_DEFINE("NullNtnDemoMacLayerSimulationHelper");
 
+NS_OBJECT_ENSURE_REGISTERED(NullNtnDemoMacLayerSimulationHelper);
+
+TypeId
+NullNtnDemoMacLayerSimulationHelper::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::NullNtnDemoMacLayerSimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoDSim");
+    return tid;
+}
+
 NullNtnDemoMacLayerSimulationHelper::NullNtnDemoMacLayerSimulationHelper(
     Ptr<NullNtnDemoMacLayerConfiguration> config,
     Ptr<ThreeGppPhySimulationHelper> phyHelper)

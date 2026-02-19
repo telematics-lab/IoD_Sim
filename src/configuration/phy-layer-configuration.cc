@@ -20,6 +20,21 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(PhyLayerConfiguration);
+
+TypeId
+PhyLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::PhyLayerConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
+PhyLayerConfiguration::PhyLayerConfiguration()
+{
+}
+
 PhyLayerConfiguration::PhyLayerConfiguration(std::string type,
                                              std::vector<ModelConfiguration::Attribute> attributes)
     : m_type{type},

@@ -33,6 +33,12 @@ namespace ns3
 class LtePhySimulationHelper : public Object
 {
   public:
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
+
     LtePhySimulationHelper(const size_t stackId);
     /**
      * \return The LTE Helper used to configure this layer.

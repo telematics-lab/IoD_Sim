@@ -44,6 +44,13 @@ class Ipv4NetworkLayerConfiguration : public NetworkLayerConfiguration
                                   std::string address,
                                   std::string mask,
                                   std::string gatewayAddress);
+
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     /**
      * \return The configured network address.
      */

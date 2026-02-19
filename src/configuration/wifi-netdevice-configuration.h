@@ -46,6 +46,12 @@ class WifiNetdeviceConfiguration : public NetdeviceConfiguration
                                const std::optional<ModelConfiguration> antennaModel,
                                const std::optional<DirectivityConfiguration> directivity = std::nullopt);
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * \return The MAC Layer configuration.
      */
     const ModelConfiguration GetMacLayer() const;

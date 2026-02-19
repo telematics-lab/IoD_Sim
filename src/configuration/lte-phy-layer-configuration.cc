@@ -22,6 +22,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(LtePhyLayerConfiguration);
+
+TypeId
+LtePhyLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::LtePhyLayerConfiguration")
+                            .SetParent<PhyLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 LtePhyLayerConfiguration::LtePhyLayerConfiguration(
     std::string phyType,
     std::vector<ModelConfiguration::Attribute> attributes,

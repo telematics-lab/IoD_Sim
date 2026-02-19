@@ -22,6 +22,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(WifiPhyLayerConfiguration);
+
+TypeId
+WifiPhyLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::WifiPhyLayerConfiguration")
+                            .SetParent<PhyLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 WifiPhyLayerConfiguration::WifiPhyLayerConfiguration(
     std::string phyType,
     std::string standard,

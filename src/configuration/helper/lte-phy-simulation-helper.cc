@@ -45,6 +45,17 @@ class LtePhySimulationHelperPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(LtePhySimulationHelper);
+
+TypeId
+LtePhySimulationHelper::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::LtePhySimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoDSim");
+    return tid;
+}
+
 LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
     : m_lte{CreateObject<LteHelper>()},
       m_epc{CreateObjectWithAttributes<PointToPointEpcHelper>(

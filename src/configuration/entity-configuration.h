@@ -37,6 +37,12 @@ class EntityConfiguration : public Object
                         MobilityModelConfiguration m_mobility,
                         std::vector<ModelConfiguration> m_applications);
 
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     EntityConfiguration(std::vector<Ptr<NetdeviceConfiguration>> m_netDevices,
                         MobilityModelConfiguration m_mobility,
                         std::vector<ModelConfiguration> m_applications,

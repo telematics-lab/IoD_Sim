@@ -34,6 +34,12 @@ class MacLayerConfiguration : public Object
 {
   public:
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * Create a new object instance.
      *
      * \param type The type of the MAC Layer Configuration.

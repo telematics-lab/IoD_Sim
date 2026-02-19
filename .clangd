@@ -1,0 +1,4 @@
+CompileFlags:
+  # Tell clangd where to find compile_commands.json
+  # For newer ns-3 (CMake), this is usually 'cmake-cache' or 'build'
+  CompilationDatabase: ns3/cmake-cache

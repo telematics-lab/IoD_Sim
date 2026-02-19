@@ -59,8 +59,19 @@ class GeoSGP4Mobility : public GeocentricMobilityModel
 
     /// constructor
     GeoSGP4Mobility();
+    /**
+     * \brief Copy constructor
+     * \param other the object to copy
+     */
+    GeoSGP4Mobility(const GeoSGP4Mobility& other);
     /// destructor
     virtual ~GeoSGP4Mobility();
+
+    /**
+     * \brief Copy the mobility model
+     * \return a copy of the mobility model
+     */
+    virtual Ptr<MobilityModel> Copy() const override;
 
     /**
      * \brief Sets the TLE Line 1

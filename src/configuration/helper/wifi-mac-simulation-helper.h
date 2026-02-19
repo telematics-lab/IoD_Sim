@@ -31,6 +31,12 @@ class WifiMacSimulationHelper : public Object
 {
   public:
     /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
+
+    /**
      * \return The WiFi MAC Helper used to configure this layer.
      */
     WifiMacHelper& GetMacHelper();

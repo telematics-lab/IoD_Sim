@@ -20,6 +20,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppPhySimulationHelper);
+
+TypeId
+ThreeGppPhySimulationHelper::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::ThreeGppPhySimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoDSim");
+    return tid;
+}
+
 ThreeGppPhySimulationHelper::ThreeGppPhySimulationHelper(
     const std::size_t stackId,
     Ptr<ThreeGppChannelConditionModel> channelConditionModel,

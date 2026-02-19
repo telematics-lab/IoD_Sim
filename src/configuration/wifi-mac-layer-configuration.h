@@ -34,6 +34,12 @@ class WifiMacLayerConfiguration : public MacLayerConfiguration
 {
   public:
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * Create a new object instance.
      *
      * \param macType The type of the MAC Layer to be configured. It should be "wifi".

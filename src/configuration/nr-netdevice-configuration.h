@@ -77,6 +77,12 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     ~NrNetdeviceConfiguration();
 
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * \return The role of the Network Device in the NR network.
      */
     const NrRole GetRole() const;

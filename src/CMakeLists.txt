@@ -303,6 +303,7 @@ build_lib(
                     ${libmobility}
                     ${libnr}
                     ${libleo}
+                    ${libenergy}
                     ${LibArchive_LIBRARIES}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}

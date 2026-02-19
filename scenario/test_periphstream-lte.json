@@ -67,12 +67,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 20000000.0,
+                                    "uplink": 5000000.0
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 20000000.0,
+                                    "uplink": 5000000.0
                                 }
                             }
                         }
@@ -261,7 +261,7 @@
                 "attributes": [
                     {
                         "name": "Mass",
-                        "value": 0.750
+                        "value": 0.75
                     },
                     {
                         "name": "RotorDiskArea",
@@ -274,15 +274,19 @@
                 ]
             },
             "battery": {
-                "name": "ns3::energy::LiIonEnergySource",
+                "name": "ns3::energy::GenericBatteryModel",
                 "attributes": [
                     {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
+                        "name": "LowBatteryThreshold",
+                        "value": 0.2
                     },
                     {
-                        "name": "LiIonEnergyLowBatteryThreshold",
-                        "value": 0.2
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
+                    {
+                        "name": "MaxCapacity",
+                        "value": 0.33227006911217444
                     }
                 ]
             },
@@ -344,12 +348,12 @@
                             "type": "GBR_CONV_VIDEO",
                             "bitrate": {
                                 "guaranteed": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 20000000.0,
+                                    "uplink": 5000000.0
                                 },
                                 "maximum": {
-                                    "downlink": 20e6,
-                                    "uplink": 5e6
+                                    "downlink": 20000000.0,
+                                    "uplink": 5000000.0
                                 }
                             }
                         }

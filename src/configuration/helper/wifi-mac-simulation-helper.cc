@@ -20,6 +20,18 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(WifiMacSimulationHelper);
+
+TypeId
+WifiMacSimulationHelper::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::WifiMacSimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoDSim")
+                            .AddConstructor<WifiMacSimulationHelper>();
+    return tid;
+}
+
 WifiMacHelper&
 WifiMacSimulationHelper::GetMacHelper()
 {

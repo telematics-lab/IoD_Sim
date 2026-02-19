@@ -86,6 +86,17 @@ class LteBearerConfigurationPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(LteBearerConfiguration);
+
+TypeId
+LteBearerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::LteBearerConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 LteBearerConfiguration::LteBearerConfiguration(const std::string type,
                                                const uint64_t gbrDl,
                                                const uint64_t gbrUl,

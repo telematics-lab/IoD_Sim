@@ -77,6 +77,12 @@ ParametricSpeedDroneMobilityModel::ParametricSpeedDroneMobilityModel()
 {
 }
 
+Ptr<MobilityModel>
+ParametricSpeedDroneMobilityModel::Copy() const
+{
+    return CreateObject<ParametricSpeedDroneMobilityModel>(*this);
+}
+
 FlightPlan
 ParametricSpeedDroneMobilityModel::ProjectedToGeographicCoordinates(
     const FlightPlan& flightPlan,

@@ -32,3 +32,5 @@ nohup.out
 # Ignore documentation build artifacts
 docs/html
 docs/latex
+
+.cache

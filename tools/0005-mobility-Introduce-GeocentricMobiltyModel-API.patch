@@ -1,25 +1,25 @@
-From 93313c29c015ea477fee8971e46d123261bcc730 Mon Sep 17 00:00:00 2001
+From 35737f702ec437880bd1d3e84f74c5d5af56b355 Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni@grieco.dev>
 Date: Thu, 30 May 2024 12:22:02 +0200
 Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
 
 ---
  src/mobility/CMakeLists.txt                   |   2 +
- ...entric-constant-position-mobility-model.cc | 230 ++++--------------
- ...centric-constant-position-mobility-model.h | 103 +-------
- .../model/geocentric-mobility-model.cc        | 177 ++++++++++++++
+ ...entric-constant-position-mobility-model.cc | 234 ++++--------------
+ ...centric-constant-position-mobility-model.h | 108 +-------
+ .../model/geocentric-mobility-model.cc        | 177 +++++++++++++
  .../model/geocentric-mobility-model.h         | 153 ++++++++++++
  src/mobility/model/geographic-positions.h     |   7 +
  .../model/channel-condition-model.cc          |   8 +-
  .../model/three-gpp-propagation-loss-model.cc |  73 ++++--
  .../examples/three-gpp-ntn-channel-example.cc |   9 +-
  src/spectrum/model/three-gpp-channel-model.cc |  27 +-
- 10 files changed, 475 insertions(+), 314 deletions(-)
+ 10 files changed, 483 insertions(+), 315 deletions(-)
  create mode 100644 src/mobility/model/geocentric-mobility-model.cc
  create mode 100644 src/mobility/model/geocentric-mobility-model.h
 
 diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
-index 50f67040b..3e4d8cf07 100644
+index 3a5eb215d..5d99bfe5b 100644
 --- a/src/mobility/CMakeLists.txt
 +++ b/src/mobility/CMakeLists.txt
 @@ -11,6 +11,7 @@ build_lib(
@@ -39,7 +39,7 @@ index 50f67040b..3e4d8cf07 100644
      model/hierarchical-mobility-model.h
      model/mobility-model.h
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-index 282feeeda..ecc0da563 100644
+index 8caa63d3e..08af770e8 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
 @@ -4,9 +4,12 @@
@@ -54,7 +54,7 @@ index 282feeeda..ecc0da563 100644
 +
  #include "ns3/angles.h"
  
- #include <math.h>
+ #include <cmath>
 @@ -27,7 +30,7 @@ GeocentricConstantPositionMobilityModel::GetTypeId()
  {
      static TypeId tid =
@@ -64,7 +64,7 @@ index 282feeeda..ecc0da563 100644
              .SetGroupName("Mobility")
              .AddConstructor<GeocentricConstantPositionMobilityModel>()
              .AddAttribute(
-@@ -37,194 +40,57 @@ GeocentricConstantPositionMobilityModel::GetTypeId()
+@@ -37,200 +40,69 @@ GeocentricConstantPositionMobilityModel::GetTypeId()
                  "altitude",
                  Vector3DValue({0, 0, 0}),
                  MakeVector3DAccessor(&GeocentricConstantPositionMobilityModel::m_position),
@@ -151,28 +151,9 @@ index 282feeeda..ecc0da563 100644
 -                                                                m_geographicReferencePoint,
 -                                                                GeographicPositions::SPHERE);
 -    return topographicCoordinates;
-+GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
-+{
-+    switch (type)
-+    {
-+    case PositionType::TOPOCENTRIC:
-+        return GeographicPositions::GeographicToTopocentricCoordinates(
-+            m_position,
-+            GetGeographicReferencePoint(),
-+            GetEarthSpheroidType());
-+    case PositionType::GEOCENTRIC:
-+        return GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
-+                                                                     m_position.y,
-+                                                                     m_position.z,
-+                                                                     GetEarthSpheroidType());
-+    case PositionType::GEOGRAPHIC:
-+        return m_position;
-+    default:
-+        NS_ABORT_MSG("Unknown PositionType requested");
-+    }
- }
- 
- void
+-}
+-
+-void
 -GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position)
 -{
 -    Vector geographicCoordinates =
@@ -263,19 +244,32 @@ index 282feeeda..ecc0da563 100644
 -    double elevAngle = std::abs((180.0 * M_1_PI) * asin(x));
 -
 -    return elevAngle;
--}
--
--void
++GeocentricConstantPositionMobilityModel::DoGetPosition(PositionType type) const
++{
++    switch (type)
++    {
++    case PositionType::TOPOCENTRIC:
++        return GeographicPositions::GeographicToTopocentricCoordinates(
++            m_position,
++            GetGeographicReferencePoint(),
++            GetEarthSpheroidType());
++    case PositionType::GEOCENTRIC:
++        return GeographicPositions::GeographicToCartesianCoordinates(m_position.x,
++                                                                     m_position.y,
++                                                                     m_position.z,
++                                                                     GetEarthSpheroidType());
++    case PositionType::GEOGRAPHIC:
++        return m_position;
++    default:
++        NS_ABORT_MSG("Unknown PositionType requested");
++    }
+ }
+ 
+ void
 -GeocentricConstantPositionMobilityModel::DoSetCoordinateTranslationReferencePoint(
 -    const Vector& refPoint)
 -{
 -    m_geographicReferencePoint = refPoint;
--}
--
--Vector
--GeocentricConstantPositionMobilityModel::DoGetCoordinateTranslationReferencePoint() const
--{
--    return m_geographicReferencePoint;
 +GeocentricConstantPositionMobilityModel::DoSetPosition(const Vector& position, PositionType type)
 +{
 +    Vector geographicCoordinates;
@@ -303,8 +297,25 @@ index 282feeeda..ecc0da563 100644
  }
  
  Vector
+-GeocentricConstantPositionMobilityModel::DoGetCoordinateTranslationReferencePoint() const
++GeocentricConstantPositionMobilityModel::DoGetVelocity() const
+ {
+-    return m_geographicReferencePoint;
++    return Vector(0.0, 0.0, 0.0);
+ }
+ 
+-Vector
+-GeocentricConstantPositionMobilityModel::DoGetVelocity() const
++Ptr<MobilityModel>
++GeocentricConstantPositionMobilityModel::Copy() const
+ {
+-    return Vector(0.0, 0.0, 0.0);
++    return CreateObject<GeocentricConstantPositionMobilityModel>(*this);
+ }
+ 
+ } // namespace ns3
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.h b/src/mobility/model/geocentric-constant-position-mobility-model.h
-index b543c43ff..de9910763 100644
+index d100b803d..bfe830811 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.h
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.h
 @@ -4,11 +4,12 @@
@@ -330,10 +341,16 @@ index b543c43ff..de9910763 100644
  {
    public:
      /**
-@@ -37,113 +38,19 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
+@@ -37,119 +38,26 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      GeocentricConstantPositionMobilityModel() = default;
      ~GeocentricConstantPositionMobilityModel() override = default;
  
+-    // Inherited from MobilityModel
+-    Ptr<MobilityModel> Copy() const override
+-    {
+-        return CreateObject<GeocentricConstantPositionMobilityModel>(*this);
+-    }
+-
 -    /**
 -     * @brief Computes elevation angle between a ground terminal and a HAPS/Satellite.
 -     * After calculating the plane perpendicular to a cartesian position vector,
@@ -384,12 +401,15 @@ index b543c43ff..de9910763 100644
 -     */
 -    virtual void SetCoordinateTranslationReferencePoint(const Vector& refPoint);
 -
--    /**
+     /**
 -     * @brief Get the reference point for coordinate conversion
 -     * @return Vector containing geographic reference point (meter)
--     */
++     * @brief Copy the mobility model
++     * @return a copy of the mobility model
+      */
 -    virtual Vector GetCoordinateTranslationReferencePoint() const;
--
++    Ptr<MobilityModel> Copy() const override;
+ 
 -    /**
 -     * @return the current position
 -     */
@@ -405,7 +425,7 @@ index b543c43ff..de9910763 100644
 -     * @return the distance between the two objects. Unit is meters.
 -     */
 -    double GetDistanceFrom(Ptr<const GeocentricConstantPositionMobilityModel> other) const;
--
+ 
    private:
      /** @copydoc GetPosition() */
 -    Vector DoGetPosition() const override;
@@ -809,7 +829,7 @@ index 2d55581ab..94b56f8f3 100644
       * Converts earth geographic/geodetic coordinates (latitude and longitude in
       * degrees) with a given altitude above earth's surface (in meters) to Earth
 diff --git a/src/propagation/model/channel-condition-model.cc b/src/propagation/model/channel-condition-model.cc
-index 274e09d00..6d0afb476 100644
+index 1e3f1dd01..e6186bc3f 100644
 --- a/src/propagation/model/channel-condition-model.cc
 +++ b/src/propagation/model/channel-condition-model.cc
 @@ -9,7 +9,7 @@
@@ -835,7 +855,7 @@ index 274e09d00..6d0afb476 100644
                    "Mobility Models need to be of type Geocentric for NTN scenarios");
  
 diff --git a/src/propagation/model/three-gpp-propagation-loss-model.cc b/src/propagation/model/three-gpp-propagation-loss-model.cc
-index fc6243906..c37c71eb0 100644
+index 2ed836356..b60eeef69 100644
 --- a/src/propagation/model/three-gpp-propagation-loss-model.cc
 +++ b/src/propagation/model/three-gpp-propagation-loss-model.cc
 @@ -11,7 +11,8 @@
@@ -912,7 +932,7 @@ index fc6243906..c37c71eb0 100644
  } // namespace
  
  namespace ns3
-@@ -1600,6 +1621,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -1589,6 +1610,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -920,7 +940,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1608,7 +1630,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -1597,7 +1619,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -931,7 +951,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
-@@ -1625,6 +1649,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+@@ -1614,6 +1638,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -939,7 +959,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1636,7 +1661,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+@@ -1625,7 +1650,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -950,7 +970,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
-@@ -1747,6 +1774,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
+@@ -1736,6 +1763,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -958,7 +978,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1755,7 +1783,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
+@@ -1744,7 +1772,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -969,7 +989,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
-@@ -1771,6 +1801,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
+@@ -1760,6 +1790,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -977,7 +997,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1782,7 +1813,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
+@@ -1771,7 +1802,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -988,7 +1008,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
-@@ -1894,6 +1927,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -1883,6 +1916,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -996,7 +1016,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1902,7 +1936,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
+@@ -1891,7 +1925,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -1007,7 +1027,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
  
-@@ -1920,6 +1956,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
+@@ -1909,6 +1945,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -1015,26 +1035,7 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1931,7 +1968,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -2042,6 +2081,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2050,7 +2090,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
+@@ -1920,7 +1957,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -1045,7 +1046,7 @@ index fc6243906..c37c71eb0 100644
  
      NS_LOG_DEBUG("Loss " << loss);
      return loss;
-@@ -2066,6 +2108,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
+@@ -2031,6 +2070,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
      double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
      auto [elevAngle, elevAngleQuantized] =
          ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
@@ -1053,7 +1054,26 @@ index fc6243906..c37c71eb0 100644
  
      // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
      double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2077,7 +2120,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
+@@ -2039,7 +2079,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
+     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
+ 
+     // Apply Ionospheric plus Tropospheric Scintillation Loss
+-    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
++    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
++                                                                elevAngleQuantized,
++                                                                lowestMobAltitude);
+ 
+     NS_LOG_DEBUG("Loss " << loss);
+     return loss;
+@@ -2055,6 +2097,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
+     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
+     auto [elevAngle, elevAngleQuantized] =
+         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
++    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
+ 
+     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
+     double loss = ComputeNtnPathloss(m_frequency, distance3D);
+@@ -2066,7 +2109,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
      loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
  
      // Apply Ionospheric plus Tropospheric Scintillation Loss
@@ -1154,5 +1174,5 @@ index 9d372d5b1..f0f792097 100644
                      isSatellite = true;
                  }
 -- 
-2.39.5 (Apple Git-154)
+2.50.1 (Apple Git-155)
 

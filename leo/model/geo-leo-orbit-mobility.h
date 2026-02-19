@@ -67,8 +67,19 @@ class GeoLeoOrbitMobility : public GeocentricMobilityModel
     static TypeId GetTypeId(void);
     /// constructor
     GeoLeoOrbitMobility();
+    /**
+     * \brief Copy constructor
+     * \param other the object to copy
+     */
+    GeoLeoOrbitMobility(const GeoLeoOrbitMobility& other);
     /// destructor
     virtual ~GeoLeoOrbitMobility();
+
+    /**
+     * \brief Copy the mobility model
+     * \return a copy of the mobility model
+     */
+    virtual Ptr<MobilityModel> Copy() const override;
 
     /**
      * \brief Gets the speed of the node

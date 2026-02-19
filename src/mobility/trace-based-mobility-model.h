@@ -16,7 +16,14 @@ class TraceBasedMobilityModel : public GeocentricMobilityModel
     static TypeId GetTypeId();
 
     TraceBasedMobilityModel();
-    ~TraceBasedMobilityModel();
+    TraceBasedMobilityModel(const TraceBasedMobilityModel& other);
+    virtual ~TraceBasedMobilityModel();
+
+    /**
+     * \brief Copy the mobility model
+     * \return a copy of the mobility model
+     */
+    virtual Ptr<MobilityModel> Copy() const override;
 
     void SetTraceFile(std::string file);
     void SetDeviceId(std::string deviceId);

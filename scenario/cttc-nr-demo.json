@@ -76,26 +76,7 @@
                 "bandwidth": 50e6,
                 "numComponentCarriers": 1
               }
-            }
-          ]
-        },
-        {
-          "scenario": "UMi",
-          "conditionModel": "Default",
-          "propagationModel": "ThreeGpp",
-          "pathlossAttributes": [
-            {
-              "name": "ShadowingEnabled",
-              "value": false
-            }
-          ],
-          "channelConditionAttributes": [
-            {
-              "name": "UpdatePeriod",
-              "value": "0ms"
-            }
-          ],
-          "bands": [
+            },
             {
               "type": "contiguous",
               "carrier": {

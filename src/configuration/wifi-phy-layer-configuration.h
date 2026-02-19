@@ -35,6 +35,12 @@ class WifiPhyLayerConfiguration : public PhyLayerConfiguration
 {
   public:
     /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
+    /**
      * Create a new object instance.
      *
      * \param phyType The type of the PHY Layer to be configured. It should be "wifi".

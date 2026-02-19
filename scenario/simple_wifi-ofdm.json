@@ -32,7 +32,7 @@
                     "attributes": [
                         {
                             "name": "Frequency",
-                            "value": 2.4e9
+                            "value": 2400000000.0
                         }
                     ]
                 }
@@ -145,7 +145,7 @@
                 "attributes": [
                     {
                         "name": "Mass",
-                        "value": 0.750
+                        "value": 0.75
                     },
                     {
                         "name": "RotorDiskArea",
@@ -158,19 +158,23 @@
                 ]
             },
             "battery": {
-                "name": "ns3::energy::LiIonEnergySource",
+                "name": "ns3::energy::GenericBatteryModel",
                 "attributes": [
                     {
-                        "name": "LiIonEnergySourceInitialEnergyJ",
-                        "value": 5000.0
-                    },
-                    {
-                        "name": "LiIonEnergyLowBatteryThreshold",
+                        "name": "LowBatteryThreshold",
                         "value": 0.2
                     },
                     {
                         "name": "PeriodicEnergyUpdateInterval",
                         "value": "100ms"
+                    },
+                    {
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
+                    {
+                        "name": "MaxCapacity",
+                        "value": 0.33227006911217444
                     }
                 ]
             },

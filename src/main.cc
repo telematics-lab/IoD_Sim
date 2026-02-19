@@ -110,7 +110,6 @@
 #include <ns3/wifi-phy-simulation-helper.h>
 #include <ns3/zsp-list.h>
 
-#include <algorithm>
 #include <filesystem>
 #include <list>
 #include <map>
@@ -119,7 +118,7 @@
 #include <sys/resource.h>
 #include <vector>
 
-#define SINR_DISTANCE_PRINT_DEBUG
+// #define SINR_DISTANCE_PRINT_DEBUG
 
 namespace ns3
 {
@@ -330,25 +329,26 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
 
     if (config.mode == "serving-gnb" || config.mode == "nearest-gnb")
     {
-        NS_ASSERT_MSG(deviceType == "nr", "Only NR devices can use serving-gnb/nearest-gnb directivity mode");
+        NS_ASSERT_MSG(deviceType == "nr",
+                      "Only NR devices can use serving-gnb/nearest-gnb directivity mode");
 
         bool useNearestGnb = (config.mode == "nearest-gnb");
 
         // Try serving-gnb logic first if requested
         if (config.mode == "serving-gnb")
         {
-           if (Ptr<NrUeNetDevice> ueDevice = DynamicCast<NrUeNetDevice>(dev))
-           {
-               auto rrcState = ueDevice->GetRrc()->GetState();
+            if (Ptr<NrUeNetDevice> ueDevice = DynamicCast<NrUeNetDevice>(dev))
+            {
+                auto rrcState = ueDevice->GetRrc()->GetState();
 
-               if (rrcState == NrUeRrc::CONNECTED_NORMALLY ||
-                   rrcState == NrUeRrc::CONNECTED_HANDOVER)
-               {
-                   uint16_t cellId = ueDevice->GetRrc()->GetCellId();
+                if (rrcState == NrUeRrc::CONNECTED_NORMALLY ||
+                    rrcState == NrUeRrc::CONNECTED_HANDOVER)
+                {
+                    uint16_t cellId = ueDevice->GetRrc()->GetCellId();
 
-                   // Find the gNB with this CellID
-                   if (netId.has_value())
-                   {
+                    // Find the gNB with this CellID
+                    if (netId.has_value())
+                    {
                         auto it = m_nrGnbDevices.find(*netId);
                         if (it != m_nrGnbDevices.end())
                         {
@@ -364,7 +364,8 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                             Ptr<Node> gnbNode = gnbDev->GetNode();
                                             if (gnbNode)
                                             {
-                                                Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
+                                                Ptr<MobilityModel> gnbMob =
+                                                    gnbNode->GetObject<MobilityModel>();
                                                 if (gnbMob)
                                                 {
                                                     targetPos = gnbMob->GetPosition();
@@ -376,57 +377,60 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                 }
                             }
                         }
-                   }
-               }
-           }
+                    }
+                }
+            }
 
-           if (!targetFound)
-           {
-            #ifdef SINR_DISTANCE_PRINT_DEBUG
-               std::cout << "UE Falling back to nearest-gnb" << std::endl;
-            #endif
-               // Fallback to nearest-gnb if not connected or gNB not found
-               useNearestGnb = true;
-           }
+            if (!targetFound)
+            {
+#ifdef SINR_DISTANCE_PRINT_DEBUG
+                std::cout << "UE Falling back to nearest-gnb" << std::endl;
+#endif
+                // Fallback to nearest-gnb if not connected or gNB not found
+                useNearestGnb = true;
+            }
         }
 
         if (useNearestGnb)
         {
             double minDist = std::numeric_limits<double>::max();
 
-
-        if (netId.has_value())
-        {
-            auto it = m_nrGnbDevices.find(*netId);
-            if (it != m_nrGnbDevices.end())
+            if (netId.has_value())
             {
-                // Iterate only over gNBs for this netId
-                for (const auto& devContainer : it->second)
+                auto it = m_nrGnbDevices.find(*netId);
+                if (it != m_nrGnbDevices.end())
                 {
-                    for (uint32_t i = 0; i < devContainer.GetN(); ++i)
+                    // Iterate only over gNBs for this netId
+                    for (const auto& devContainer : it->second)
                     {
-                        Ptr<NetDevice> gnbDev = devContainer.Get(i);
-                        if (!gnbDev)
-                            continue;
-                        Ptr<Node> gnbNode = gnbDev->GetNode();
-                        if (!gnbNode || gnbNode->GetId() == nodeId)
-                            continue;
-
-                        Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
-                        if (gnbMob)
+                        for (uint32_t i = 0; i < devContainer.GetN(); ++i)
                         {
-                            double dist = gnbMob->GetDistanceFrom(model);
-                            if (dist < minDist)
+                            Ptr<NetDevice> gnbDev = devContainer.Get(i);
+                            if (!gnbDev)
                             {
-                                minDist = dist;
-                                targetPos = gnbMob->GetPosition();
-                                targetFound = true;
+                                continue;
+                            }
+                            Ptr<Node> gnbNode = gnbDev->GetNode();
+                            if (!gnbNode || gnbNode->GetId() == nodeId)
+                            {
+                                continue;
+                            }
+
+                            Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
+                            if (gnbMob)
+                            {
+                                double dist = gnbMob->GetDistanceFrom(model);
+                                if (dist < minDist)
+                                {
+                                    minDist = dist;
+                                    targetPos = gnbMob->GetPosition();
+                                    targetFound = true;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         }
     }
     else if (config.mode == "nearest-ue")
@@ -445,10 +449,14 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                 for (const auto& ueDev : it->second)
                 {
                     if (!ueDev)
+                    {
                         continue;
+                    }
                     Ptr<Node> ueNode = ueDev->GetNode();
                     if (!ueNode || ueNode->GetId() == nodeId)
+                    {
                         continue;
+                    }
 
                     Ptr<MobilityModel> ueMob = ueNode->GetObject<MobilityModel>();
                     if (ueMob)
@@ -509,7 +517,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
     }
 
     if (!targetFound)
+    {
         return;
+    }
 
     Vector dir = targetPos - currentPos;
     // Calculate angles in radians
@@ -566,7 +576,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     // LteEnbPhy has GetDlSpectrumPhy
                     auto specPhy = phy->GetDlSpectrumPhy();
                     if (specPhy)
+                    {
                         antennaObj = specPhy->GetAntenna();
+                    }
                 }
             }
             else if (Ptr<LteUeNetDevice> lteUe = DynamicCast<LteUeNetDevice>(dev))
@@ -577,7 +589,9 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     // LteUePhy has GetDlSpectrumPhy
                     auto specPhy = phy->GetDlSpectrumPhy();
                     if (specPhy)
+                    {
                         antennaObj = specPhy->GetAntenna();
+                    }
                 }
             }
         }
@@ -623,7 +637,9 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
                                             bool steerArrays)
 {
     if (!antennaObj)
+    {
         return;
+    }
 
     // Try Parabolic
     if (Ptr<ParabolicAntennaModel> parabolic = DynamicCast<ParabolicAntennaModel>(antennaObj))
@@ -724,7 +740,6 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureFullMeshX2Links();
     AttachAllNrUesToGnbs();
 
-
     EnablePhyLteTraces();
     EnablePhyNrTraces();
 
@@ -803,16 +818,25 @@ Scenario::operator()()
                         {
                             for (const auto& [netId, containers] : m_nrGnbDevices)
                             {
-                                if (netId != config.phyLayerIndex) continue;
-                                for (const auto& container : containers) txDevs.Add(container);
+                                if (netId != config.phyLayerIndex)
+                                {
+                                    continue;
+                                }
+                                for (const auto& container : containers)
+                                {
+                                    txDevs.Add(container);
+                                }
                             }
                         }
                         else if (selection.key == "ALL_UE")
                         {
                             for (const auto& [netId, devices] : m_nrUeDevices)
                             {
-                                if (netId != config.phyLayerIndex) continue;
-                                for (auto dev : devices)
+                                if (netId != config.phyLayerIndex)
+                                {
+                                    continue;
+                                }
+                                for (const auto& dev : devices)
                                 {
                                     txDevs.Add(dev);
                                 }
@@ -823,21 +847,27 @@ Scenario::operator()()
                             bool found = false;
                             for (const auto& [netId, containers] : m_nrGnbDevices)
                             {
-                                if (netId != config.phyLayerIndex) continue;
+                                if (netId != config.phyLayerIndex)
+                                {
+                                    continue;
+                                }
                                 if (!containers.empty())
                                 {
-                                     txDevs.Add(containers[0].Get(0));
-                                     found = true;
-                                     break;
+                                    txDevs.Add(containers[0].Get(0));
+                                    found = true;
+                                    break;
                                 }
                             }
-                            if (!found) NS_LOG_WARN("FIRST_GNB selected but no gNBs found.");
+                            if (!found)
+                                NS_LOG_WARN("FIRST_GNB selected but no gNBs found.");
                         }
                         else
                         {
                             if (selection.index < 0)
                             {
-                                 NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " must be non-negative.");
+                                NS_FATAL_ERROR("Tx Node " << selection.key << " index "
+                                                          << selection.index
+                                                          << " must be non-negative.");
                             }
                             Ptr<Node> node = GetNodeByKey(selection.key, selection.index);
                             if (node)
@@ -847,18 +877,27 @@ Scenario::operator()()
                                     if ((uint32_t)selection.deviceIndex < node->GetNDevices())
                                     {
                                         auto dev = node->GetDevice(selection.deviceIndex);
-                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                       NrNetDevice::GetTypeId()))
                                         {
                                             txDevs.Add(dev);
                                         }
                                         else
                                         {
-                                            NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " is not an NR device.");
+                                            NS_FATAL_ERROR("Tx Node " << selection.key << " index "
+                                                                      << selection.index
+                                                                      << " deviceIndex "
+                                                                      << selection.deviceIndex
+                                                                      << " is not an NR device.");
                                         }
                                     }
                                     else
                                     {
-                                         NS_FATAL_ERROR("Tx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " out of range.");
+                                        NS_FATAL_ERROR("Tx Node " << selection.key << " index "
+                                                                  << selection.index
+                                                                  << " deviceIndex "
+                                                                  << selection.deviceIndex
+                                                                  << " out of range.");
                                     }
                                 }
                                 else
@@ -866,7 +905,8 @@ Scenario::operator()()
                                     for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                     {
                                         auto dev = node->GetDevice(i);
-                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                       NrNetDevice::GetTypeId()))
                                         {
                                             txDevs.Add(dev);
                                         }
@@ -875,7 +915,8 @@ Scenario::operator()()
                             }
                             else
                             {
-                                NS_LOG_WARN("Tx Node " << selection.key << " index " << selection.index << " not found.");
+                                NS_LOG_WARN("Tx Node " << selection.key << " index "
+                                                       << selection.index << " not found.");
                             }
                         }
                     }
@@ -883,10 +924,16 @@ Scenario::operator()()
                 else
                 {
                     // Default behavior: All gNBs
-                     for (const auto& [netId, containers] : m_nrGnbDevices)
+                    for (const auto& [netId, containers] : m_nrGnbDevices)
                     {
-                        if (netId != config.phyLayerIndex) continue;
-                        for (const auto& container : containers) txDevs.Add(container);
+                        if (netId != config.phyLayerIndex)
+                        {
+                            continue;
+                        }
+                        for (const auto& container : containers)
+                        {
+                            txDevs.Add(container);
+                        }
                     }
                 }
 
@@ -898,14 +945,16 @@ Scenario::operator()()
 
                     if (selection.key == "FIRST_GNB")
                     {
-                         for (const auto& [netId, containers] : m_nrGnbDevices)
+                        for (const auto& [netId, containers] : m_nrGnbDevices)
                         {
-                            if (netId != config.phyLayerIndex) continue;
+                            if (netId != config.phyLayerIndex)
+                            {
+                                continue;
+                            }
                             if (!containers.empty())
                             {
-                                    rxDev = containers[0].Get(0);
-                                    break;
-
+                                rxDev = containers[0].Get(0);
+                                break;
                             }
                         }
                     }
@@ -913,8 +962,12 @@ Scenario::operator()()
                     {
                         for (const auto& [netId, devices] : m_nrUeDevices)
                         {
-                            if (netId != config.phyLayerIndex) continue;
-                            if (!devices.empty()) {
+                            if (netId != config.phyLayerIndex)
+                            {
+                                continue;
+                            }
+                            if (!devices.empty())
+                            {
                                 rxDev = devices.front();
                                 break;
                             }
@@ -924,7 +977,9 @@ Scenario::operator()()
                     {
                         if (selection.index < 0)
                         {
-                            NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " must be non-negative.");
+                            NS_FATAL_ERROR("Rx Node " << selection.key << " index "
+                                                      << selection.index
+                                                      << " must be non-negative.");
                         }
                         Ptr<Node> node = GetNodeByKey(selection.key, selection.index);
 
@@ -935,32 +990,46 @@ Scenario::operator()()
                                 if ((uint32_t)selection.deviceIndex < node->GetNDevices())
                                 {
                                     auto dev = node->GetDevice(selection.deviceIndex);
-                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                   NrNetDevice::GetTypeId()))
                                     {
                                         rxDev = dev;
                                     }
-                                     else
+                                    else
                                     {
-                                         NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " is not an NR device.");
+                                        NS_FATAL_ERROR("Rx Node " << selection.key << " index "
+                                                                  << selection.index
+                                                                  << " deviceIndex "
+                                                                  << selection.deviceIndex
+                                                                  << " is not an NR device.");
                                     }
                                 }
-                                 else
+                                else
                                 {
-                                     NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " deviceIndex " << selection.deviceIndex << " out of range.");
+                                    NS_FATAL_ERROR("Rx Node " << selection.key << " index "
+                                                              << selection.index << " deviceIndex "
+                                                              << selection.deviceIndex
+                                                              << " out of range.");
                                 }
                             }
                             else
                             {
-                                 for (uint32_t i = 0; i < node->GetNDevices(); ++i)
+                                for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                 {
                                     auto dev = node->GetDevice(i);
-                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId())) { rxDev = dev; break; }
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                   NrNetDevice::GetTypeId()))
+                                    {
+                                        rxDev = dev;
+                                        break;
+                                    }
                                 }
                             }
                         }
                         else
                         {
-                             NS_FATAL_ERROR("Rx Node " << selection.key << " index " << selection.index << " not found.");
+                            NS_FATAL_ERROR("Rx Node " << selection.key << " index "
+                                                      << selection.index << " not found.");
                         }
                     }
                 }
@@ -969,8 +1038,15 @@ Scenario::operator()()
                     // Default behavior: First UE -> DL
                     for (const auto& [netId, devices] : m_nrUeDevices)
                     {
-                        if (netId != config.phyLayerIndex) continue;
-                        if (!devices.empty()) { rxDev = devices.front(); break; }
+                        if (netId != config.phyLayerIndex)
+                        {
+                            continue;
+                        }
+                        if (!devices.empty())
+                        {
+                            rxDev = devices.front();
+                            break;
+                        }
                     }
                 }
 
@@ -994,7 +1070,7 @@ Scenario::operator()()
                     remHelper->SetSimTag(ss.str());
                     remHelper->SetLogGeocentricRem(config.logGeocentricRem);
 
-                    for (auto par : config.parameters)
+                    for (const auto& par : config.parameters)
                     {
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
@@ -1008,7 +1084,7 @@ Scenario::operator()()
                     nrRemHelpers.push_back(remHelper); // Keep alive
                     remHelper->SetSimTag(ss.str());
 
-                    for (auto par : config.parameters)
+                    for (const auto& par : config.parameters)
                     {
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
@@ -1031,7 +1107,7 @@ Scenario::operator()()
                         CreateObject<ThreeDimensionalRemHelper>();
                     lte3dRemHelpers.push_back(remHelper); // Keep alive
 
-                    for (auto par : config.parameters)
+                    for (const auto& par : config.parameters)
                     {
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
@@ -1050,7 +1126,7 @@ Scenario::operator()()
                         CreateObject<RadioEnvironmentMapHelper>();
                     lteRemHelpers.push_back(remHelper); // Keep alive
 
-                    for (auto par : config.parameters)
+                    for (const auto& par : config.parameters)
                     {
                         remHelper->SetAttribute(par.first, StringValue(par.second));
                     }
@@ -1356,7 +1432,7 @@ Scenario::ConfigurePhy()
                 }
             }
 
-            for (auto bandConf : nrConf->GetBandsConfiguration())
+            for (const auto& bandConf : nrConf->GetBandsConfiguration())
             {
                 std::vector<NrPhySimulationHelper::ChannelOperationBandConf> channelOpBands;
 
@@ -1961,20 +2037,23 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     auto dev = StaticCast<NrGnbNetDevice, NetDevice>(
         nrPhy->InstallGnbDevices(entityNodeContainer, bwps).Get(0));
 
-
-
     for (const auto& attr : phyConf)
     {
+        auto bwpLen = NrHelper::GetNumberBwp(dev);
         if (attr.bwpId.has_value())
         {
-            nrHelper->GetGnbPhy(dev, attr.bwpId.value())
+            if (attr.bwpId.value() >= bwpLen)
+            {
+                NS_FATAL_ERROR("BWP ID " << attr.bwpId.value() << " is out of range");
+            }
+            NrHelper::GetGnbPhy(dev, attr.bwpId.value())
                 ->SetAttribute(attr.attribute.name, *attr.attribute.value);
         }
         else
         {
-            for (size_t i = 0; i < bwps.size(); i++)
+            for (size_t i = 0; i < bwpLen; i++)
             {
-                nrHelper->GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
+                NrHelper::GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
                                                           *attr.attribute.value);
             }
         }
@@ -2080,16 +2159,21 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
 
     for (const auto& attr : phyConf)
     {
+        auto bwpLen = NrHelper::GetNumberBwp(dev);
         if (attr.bwpId.has_value())
         {
-            nrHelper->GetUePhy(dev, attr.bwpId.value())
+            if (attr.bwpId.value() >= bwpLen)
+            {
+                NS_FATAL_ERROR("BWP ID " << attr.bwpId.value() << " is out of range");
+            }
+            NrHelper::GetUePhy(dev, attr.bwpId.value())
                 ->SetAttribute(attr.attribute.name, *attr.attribute.value);
         }
         else
         {
-            for (size_t i = 0; i < bwps.size(); i++)
+            for (size_t i = 0; i < bwpLen; i++)
             {
-                nrHelper->GetUePhy(dev, i)->SetAttribute(attr.attribute.name,
+                NrHelper::GetUePhy(dev, i)->SetAttribute(attr.attribute.name,
                                                          *attr.attribute.value);
             }
         }
@@ -2107,7 +2191,6 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
         NrHelper::GetBwpManagerUe(dev)->SetOutputLink(link.sourceBwp, link.targetBwp);
     }
 
-
     // create a static route for each UE to the SGW/PGW in order to communicate
     // with the internet
     auto nodeIpv4 = entityNode->GetObject<Ipv4>();
@@ -2116,7 +2199,7 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                                    nodeIpv4->GetInterfaceForDevice(dev));
 
     // Store UE device for later attachment operations
-    m_nrUeDevices[netId].push_back(dev);
+    m_nrUeDevices[netId].emplace_back(dev);
 
     // init bearers on UE
     for (auto& bearerConf : bearers)
@@ -2191,7 +2274,7 @@ Scenario::ConfigureEntityApplications(const std::string& entityKey,
 {
     NS_LOG_FUNCTION(entityKey << conf << entityId);
 
-    for (auto appConf : conf->GetApplications())
+    for (const auto& appConf : conf->GetApplications())
     {
         ObjectFactory f{appConf.GetName()};
 
@@ -2278,7 +2361,7 @@ Scenario::ConfigureEntityPeripherals(const std::string& entityKey,
 
     ObjectFactory factory;
 
-    for (auto perConf : conf->GetPeripherals())
+    for (const auto& perConf : conf->GetPeripherals())
     {
         NS_LOG_INFO("Configuring peripheral " << perConf.GetName());
         dronePeripheralsContainer->Add(perConf.GetName());
@@ -2538,7 +2621,7 @@ Scenario::ConfigureRegionsOfInterest()
 {
     const auto regions = CONFIGURATOR->GetRegionsOfInterest();
     Ptr<InterestRegion> reg;
-    for (auto region : regions)
+    for (const auto& region : regions)
     {
         reg = irc->Create(region);
     }
@@ -2709,7 +2792,7 @@ Scenario::AttachAllNrUesToGnbs()
 
         // Attach all UEs to closest gNB
         NetDeviceContainer ueDevices;
-        for (auto ueDevice : ueIt->second)
+        for (const auto& ueDevice : ueIt->second)
         {
             ueDevices.Add(ueDevice);
         }
@@ -2717,8 +2800,10 @@ Scenario::AttachAllNrUesToGnbs()
         // Retrieve the configuration for this PHY layer to check the attachment method
         auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
         // Assuming netId maps directly to the index in the PHY layer configuration vector
-        // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in ConfigurePhy
-        auto nrConf = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+        // This assumption holds based on how m_protocolStacks[PHY_LAYER] is populated in
+        // ConfigurePhy
+        auto nrConf =
+            StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
 
         // Check if SINR-Distance Attachment is configured
         if (nrConf->GetSinrDistanceAttachConfig())
@@ -2727,7 +2812,10 @@ Scenario::AttachAllNrUesToGnbs()
             {
                 NS_LOG_INFO(
                     "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
-                Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+                Simulator::Schedule(Seconds(0),
+                                    &Scenario::EvaluateSinrDistanceAttachment,
+                                    this,
+                                    netId);
                 m_sinrAttachmentRunning.insert(netId);
             }
             continue;
@@ -2745,8 +2833,9 @@ Scenario::AttachAllNrUesToGnbs()
         else if (attachMethod == "max-rsrp")
         {
             // Workaround for segfault in NrHelper::AttachToMaxRsrpGnb(container)
-            // The helper captures an iterator to the container, which becomes invalid if the container
-            // is destroyed. We create a persistent container for each UE to ensure validity.
+            // The helper captures an iterator to the container, which becomes invalid if the
+            // container is destroyed. We create a persistent container for each UE to ensure
+            // validity.
             for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
             {
                 Ptr<NetDevice> ueDevice = *i;
@@ -2795,13 +2884,13 @@ Scenario::ConfigureFullMeshX2Links()
         auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
         if (!nrConf || !nrConf->GetFullMeshX2Links())
         {
-             continue;
+            continue;
         }
 
         auto nrPhySim = DynamicCast<NrPhySimulationHelper>(m_protocolStacks[PHY_LAYER][netId]);
         if (!nrPhySim)
         {
-             continue;
+            continue;
         }
 
         NS_LOG_INFO("Configuring full mesh X2 links for netId " << netId);
@@ -2810,17 +2899,17 @@ Scenario::ConfigureFullMeshX2Links()
         auto it = m_nrGnbDevices.find(netId);
         if (it != m_nrGnbDevices.end())
         {
-             for (const auto& devContainer : it->second)
-             {
-                 for (uint32_t i = 0; i < devContainer.GetN(); ++i)
-                 {
-                     Ptr<NetDevice> dev = devContainer.Get(i);
-                     if (dev)
-                     {
-                         gnbNodes.Add(dev->GetNode());
-                     }
-                 }
-             }
+            for (const auto& devContainer : it->second)
+            {
+                for (uint32_t i = 0; i < devContainer.GetN(); ++i)
+                {
+                    Ptr<NetDevice> dev = devContainer.Get(i);
+                    if (dev)
+                    {
+                        gnbNodes.Add(dev->GetNode());
+                    }
+                }
+            }
         }
 
         // AddX2Interface creates links between all pairs in the container
@@ -2837,11 +2926,15 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     // Retrieve configuration
     auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
     if (netId >= phyLayerConfs.size())
+    {
         return;
+    }
 
     auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
     if (!nrConf)
+    {
         return;
+    }
 
     auto sdaConfigOpt = nrConf->GetSinrDistanceAttachConfig();
 
@@ -2882,19 +2975,25 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
     remHelper->SetInterferers(allGnbDevices, 0); // Configure interferers (all gNBs)
 
     // Iterate over all UEs
-    for (auto ueDevicePtr : ueIt->second)
+    for (const auto& ueDevicePtr : ueIt->second)
     {
         auto ueDevice = DynamicCast<NrUeNetDevice>(ueDevicePtr);
         if (!ueDevice)
+        {
             continue;
+        }
 
         Ptr<Node> ueNode = ueDevice->GetNode();
         if (!ueNode)
+        {
             continue;
+        }
 
         Ptr<MobilityModel> ueMobility = ueNode->GetObject<MobilityModel>();
         if (!ueMobility)
+        {
             continue;
+        }
 
         // Find current gNB
         uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
@@ -2903,15 +3002,15 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         if (ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_NORMALLY ||
             ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_HANDOVER)
         {
-             for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
-             {
-                 auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
-                 if (gnb && gnb->GetCellId() == currentCellId)
-                 {
-                     currentGnb = gnb;
-                     break;
-                 }
-             }
+            for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
+            {
+                auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
+                if (gnb && gnb->GetCellId() == currentCellId)
+                {
+                    currentGnb = gnb;
+                    break;
+                }
+            }
         }
 
         double currentSnr = -std::numeric_limits<double>::infinity();
@@ -2921,28 +3020,34 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
         double bestSnr = -std::numeric_limits<double>::infinity();
 
-
         // Check all gNBs
         for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
              ++gnbDeviceIt)
         {
             Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
             if (!gnbDevice)
+            {
                 continue;
+            }
 
             Ptr<Node> gnbNode = gnbDevice->GetNode();
             if (!gnbNode)
+            {
                 continue;
+            }
 
             Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
             if (!gnbMobility)
+            {
                 continue;
+            }
 
             double distance = ueMobility->GetDistanceFrom(gnbMobility);
 
-            #ifdef SINR_DISTANCE_PRINT_DEBUG
-            //std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB " << gnbNode->GetId() << ": " << distance/1000 << " km" << std::endl;
-            #endif
+#ifdef SINR_DISTANCE_PRINT_DEBUG
+// std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB " << gnbNode->GetId() <<
+// ": " << distance/1000 << " km" << std::endl;
+#endif
 
             // Find required min SINR for this distance
             double minSinrRequired = std::numeric_limits<double>::max();
@@ -3009,76 +3114,84 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                         if (bestSnr < currentSnr + sdaConfig.threshold)
                         {
                             shouldHandover = false;
-                            #ifdef SINR_DISTANCE_PRINT_DEBUG
+#ifdef SINR_DISTANCE_PRINT_DEBUG
                             if (bestSnr > currentSnr)
                             {
                                 std::cout << "UE " << ueDevice->GetImsi()
-                                          << " HANDOVER PREVENTED by threshold (" << sdaConfig.threshold << " dB)"
-                                          << " from gNB " << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr << " dB)"
-                                          << " to gNB " << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)"
+                                          << " HANDOVER PREVENTED by threshold ("
+                                          << sdaConfig.threshold << " dB)"
+                                          << " from gNB " << currentGnb->GetNode()->GetId()
+                                          << " (SNR: " << currentSnr << " dB)"
+                                          << " to gNB " << bestGnb->GetNode()->GetId()
+                                          << " (SNR: " << bestSnr << " dB)"
                                           << " Delta: " << bestSnr - currentSnr << " dB"
                                           << std::endl;
                             }
-                            #endif
+#endif
                         }
                     }
 
                     if (shouldHandover)
                     {
-                        #ifdef SINR_DISTANCE_PRINT_DEBUG
+#ifdef SINR_DISTANCE_PRINT_DEBUG
                         std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                                  << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr << " dB)"
-                                  << " to gNB " << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)"
-                                  << " Threshold: " << sdaConfig.threshold << " dB"
-                                  << std::endl;
-                        #endif
+                                  << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr
+                                  << " dB)"
+                                  << " to gNB " << bestGnb->GetNode()->GetId()
+                                  << " (SNR: " << bestSnr << " dB)"
+                                  << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
+#endif
                         nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
                     }
                 }
             }
             else
             {
+#ifdef SINR_DISTANCE_PRINT_DEBUG
                 std::cout << "UE " << ueDevice->GetNode()->GetId() << " CAN connect to gNB "
-                          << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr
-                          << " dB)" << " at "
+                          << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)" << " at "
                           << Simulator::Now().GetSeconds() << std::endl;
+#endif
 
                 for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
                 {
-                   auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
-                   if (uePhy && !uePhy->IsPhyEnabled())
-                   {
-                       uePhy->SetPhyEnabled(true);
-                   }
+                    auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
+                    if (uePhy && !uePhy->IsPhyEnabled())
+                    {
+                        uePhy->SetPhyEnabled(true);
+                    }
                 }
                 nrHelper->AttachToGnb(ueDevice, bestGnb);
             }
         }
         else
         {
-             // No suitable gNB found. If currently connected, disconnect.
-             if (currentGnb != nullptr)
-             {
-                #ifdef SINR_DISTANCE_PRINT_DEBUG
-                 std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
-                           << currentGnb->GetCellId() << " (No suitable gNB found)"
-                           << " at " << Simulator::Now().GetSeconds() << std::endl;
-                #endif
+            // No suitable gNB found. If currently connected, disconnect.
+            if (currentGnb != nullptr)
+            {
+#ifdef SINR_DISTANCE_PRINT_DEBUG
+                std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
+                          << currentGnb->GetCellId() << " (No suitable gNB found)"
+                          << " at " << Simulator::Now().GetSeconds() << std::endl;
+#endif
 
-                 for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
-                 {
+                for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
+                {
                     auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
                     if (uePhy)
                     {
                         uePhy->SetPhyEnabled(false);
                     }
-                 }
-             }
+                }
+            }
         }
     }
 
     // Reschedule
-    Simulator::Schedule(sdaConfig.precision, &Scenario::EvaluateSinrDistanceAttachment, this, netId);
+    Simulator::Schedule(sdaConfig.precision,
+                        &Scenario::EvaluateSinrDistanceAttachment,
+                        this,
+                        netId);
 }
 
 } // namespace ns3

@@ -37,6 +37,12 @@ class NullNtnDemoMacLayerSimulationHelper : public Object
 {
   public:
     /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
+
+    /**
      * \brief A structure that holds the parameters for the
      * ComputeSnr function. In this way the problem with the limited
      * number of parameters of method Schedule is avoided.

@@ -20,8 +20,20 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(WifiPhySimulationHelper);
+
+TypeId
+WifiPhySimulationHelper::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::WifiPhySimulationHelper")
+                            .SetParent<Object>()
+                            .SetGroupName("IoDSim")
+                            .AddConstructor<WifiPhySimulationHelper>();
+    return tid;
+}
+
 WifiHelper*
-WifiPhySimulationHelper::GetWifiHelper()
+ WifiPhySimulationHelper::GetWifiHelper()
 {
     return &m_wifi;
 }

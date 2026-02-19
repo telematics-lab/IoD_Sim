@@ -64,6 +64,13 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
                               const std::optional<ModelConfiguration> antennaModel,
                               const std::optional<ModelConfiguration> phyModel,
                               const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     /**
      * \return The role of the Network Device in the LTE network.
      */

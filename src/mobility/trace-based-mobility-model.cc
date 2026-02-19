@@ -48,6 +48,25 @@ TraceBasedMobilityModel::TraceBasedMobilityModel()
 {
 }
 
+TraceBasedMobilityModel::TraceBasedMobilityModel(const TraceBasedMobilityModel& other)
+    : GeocentricMobilityModel(other),
+      m_traceFile(other.m_traceFile),
+      m_deviceId(other.m_deviceId),
+      m_precision(other.m_precision),
+      m_updateEvent(), // Don't copy the event
+      m_position(other.m_position),
+      m_velocity(other.m_velocity),
+      m_lastTime(other.m_lastTime),
+      m_firstUpdate(other.m_firstUpdate)
+{
+}
+
+Ptr<MobilityModel>
+TraceBasedMobilityModel::Copy() const
+{
+    return CreateObject<TraceBasedMobilityModel>(*this);
+}
+
 TraceBasedMobilityModel::~TraceBasedMobilityModel()
 {
 }

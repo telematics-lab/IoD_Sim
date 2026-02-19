@@ -53,6 +53,9 @@ set(Tests
   test_periphstream-lte.json
   test_periphstream-wifi.json
   cttc-nr-demo.json
+  cttc-3gpp-channel-nums-fdm.json
+  leo-nr-sinr-dist-attach-disconnect.json
+  leo-nr-sinr-dist-attach.json
   leo-car-move-tracing.json
   leo-constellation-uniform-orbits.json
   leo-constellation-file.json
@@ -60,7 +63,7 @@ set(Tests
   taxi-all-example-trace.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.45-scenario-debug)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.46-scenario-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)

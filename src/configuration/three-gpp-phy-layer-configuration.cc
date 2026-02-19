@@ -22,6 +22,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(ThreeGppPhyLayerConfiguration);
+
+TypeId
+ThreeGppPhyLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::ThreeGppPhyLayerConfiguration")
+                            .SetParent<PhyLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 ThreeGppPhyLayerConfiguration::ThreeGppPhyLayerConfiguration(
     std::string phyType,
     std::vector<ModelConfiguration::Attribute> attributes,

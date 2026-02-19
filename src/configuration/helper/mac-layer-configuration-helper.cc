@@ -54,17 +54,17 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonMacL
         const auto remoteStationManagerConfiguration =
             ModelConfigurationHelper::Get(jsonMacLayer["remoteStationManager"]);
 
-        macConfig = Create<WifiMacLayerConfiguration>(macType,
+        macConfig = CreateObject<WifiMacLayerConfiguration>(macType,
                                                       jsonMacLayer["ssid"].GetString(),
                                                       remoteStationManagerConfiguration);
     }
     else if (macType == "lte")
     {
-        macConfig = Create<MacLayerConfiguration>(macType);
+        macConfig = CreateObject<MacLayerConfiguration>(macType);
     }
     else if (macType == "nr")
     {
-        macConfig = Create<MacLayerConfiguration>(macType);
+        macConfig = CreateObject<MacLayerConfiguration>(macType);
     }
     else if (macType == "NullNtnDemo")
     {
@@ -89,7 +89,7 @@ MacLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonMacL
         NS_ASSERT_MSG(jsonMacLayer["ueAntennaNoiseFigure"].IsNumber(),
                       "MAC Layer 'ueAntennaNoiseFigure' property must be a number.");
 
-        macConfig = Create<NullNtnDemoMacLayerConfiguration>(
+        macConfig = CreateObject<NullNtnDemoMacLayerConfiguration>(
             macType,
             jsonMacLayer["timeResolution"].GetDouble(),
             jsonMacLayer["bandwidth"].GetDouble(),

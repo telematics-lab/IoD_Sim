@@ -32,6 +32,12 @@ class WifiPhySimulationHelper : public Object
 {
   public:
     /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
+
+    /**
      * \return The WiFi Helper used to configure this layer.
      */
     WifiHelper* GetWifiHelper();

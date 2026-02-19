@@ -31,17 +31,17 @@ namespace ns3
 {
 
 /**
-<<<<<<< HEAD
- * \ingroup lte
- *
- * \brief Data class to store information about the WiFi PHY Layer of a Scenario.
-=======
  * Data class to store information about the LTE PHY Layer of a Scenario.
->>>>>>> b4aa70b (Merge branch 'nr' into nr-merge)
  */
 class LtePhyLayerConfiguration : public PhyLayerConfiguration
 {
   public:
+    /**
+     * Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId();
+
     /**
      * Create a new object instance.
      *

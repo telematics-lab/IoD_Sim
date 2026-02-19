@@ -50,7 +50,7 @@ NetworkLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& json
         NS_ASSERT_MSG(json["gateway"].IsString(),
                       "Network Layer 'gateway' property must be a string.");
 
-        netConfig = Create<Ipv4NetworkLayerConfiguration>(json["type"].GetString(),
+        netConfig = CreateObject<Ipv4NetworkLayerConfiguration>(json["type"].GetString(),
                                                           json["address"].GetString(),
                                                           json["mask"].GetString(),
                                                           json["gateway"].GetString());

@@ -20,6 +20,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(RemoteConfiguration);
+
+TypeId
+RemoteConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::RemoteConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 RemoteConfiguration::RemoteConfiguration(uint32_t netId,
                                          std::vector<ModelConfiguration> applications)
     : m_networkLayerId{netId},

@@ -22,6 +22,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(WifiMacLayerConfiguration);
+
+TypeId
+WifiMacLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::WifiMacLayerConfiguration")
+                            .SetParent<MacLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 WifiMacLayerConfiguration::WifiMacLayerConfiguration(
     std::string macType,
     std::string ssid,

@@ -22,6 +22,17 @@
 namespace ns3
 {
 
+NS_OBJECT_ENSURE_REGISTERED(Ipv4NetworkLayerConfiguration);
+
+TypeId
+Ipv4NetworkLayerConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::Ipv4NetworkLayerConfiguration")
+                            .SetParent<NetworkLayerConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 Ipv4NetworkLayerConfiguration::Ipv4NetworkLayerConfiguration(std::string type,
                                                              std::string address,
                                                              std::string mask,

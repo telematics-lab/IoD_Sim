@@ -1,0 +1,56 @@
+From 0d1db2391818d98a6482abb1f3423b243413f61e Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 17 Feb 2026 15:07:09 +0100
+Subject: [PATCH] Temp Fix to allow Handover behaviour
+
+---
+ model/nr-rrc-protocol-ideal.cc | 6 +++++-
+ model/nr-ue-rrc.cc             | 9 +++------
+ 2 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/model/nr-rrc-protocol-ideal.cc b/model/nr-rrc-protocol-ideal.cc
+index d7089793..764444d0 100644
+--- a/model/nr-rrc-protocol-ideal.cc
++++ b/model/nr-rrc-protocol-ideal.cc
+@@ -154,7 +154,11 @@ NrUeRrcProtocolIdeal::DoSendMeasurementReport(NrRrcSap::MeasurementReport msg)
+ void
+ NrUeRrcProtocolIdeal::DoSendIdealUeContextRemoveRequest(uint16_t rnti)
+ {
+-    NS_FATAL_ERROR("NrUeRrcProtocolIdeal does not have RLF functionality yet");
++    NS_LOG_FUNCTION(this << rnti);
++    Simulator::Schedule(RRC_IDEAL_MSG_DELAY,
++                        &NrGnbRrcSapProvider::RecvIdealUeContextRemoveRequest,
++                        m_gnbRrcSapProvider,
++                        rnti);
+ }
+ 
+ void
+diff --git a/model/nr-ue-rrc.cc b/model/nr-ue-rrc.cc
+index 6453f43e..ead16cf0 100644
+--- a/model/nr-ue-rrc.cc
++++ b/model/nr-ue-rrc.cc
+@@ -783,18 +783,15 @@ NrUeRrc::DoForceCampedOnGnb(uint16_t cellId, uint32_t dlEarfcn)
+     switch (m_state)
+     {
+     case IDLE_START:
++    case IDLE_CELL_SEARCH:
++    case IDLE_WAIT_MIB_SIB1:
++    case IDLE_WAIT_SIB1:
+         m_cellId = cellId;
+         m_dlEarfcn = dlEarfcn;
+         m_cphySapProvider.at(GetPrimaryDlIndex())->SynchronizeWithGnb(m_cellId, m_dlEarfcn);
+         SwitchToState(IDLE_WAIT_MIB);
+         break;
+ 
+-    case IDLE_CELL_SEARCH:
+-    case IDLE_WAIT_MIB_SIB1:
+-    case IDLE_WAIT_SIB1:
+-        NS_FATAL_ERROR("cannot abort cell selection " << ToString(m_state));
+-        break;
+-
+     case IDLE_WAIT_MIB:
+         NS_LOG_INFO("already forced to camp to cell " << m_cellId);
+         break;
+-- 
+2.50.1 (Apple Git-155)
+

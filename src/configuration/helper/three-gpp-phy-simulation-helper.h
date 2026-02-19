@@ -31,6 +31,12 @@ namespace ns3
 class ThreeGppPhySimulationHelper : public Object
 {
   public:
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */
+    static TypeId GetTypeId(void);
+
     ThreeGppPhySimulationHelper(
         const std::size_t stackId,
         Ptr<ThreeGppChannelConditionModel> channelConditionModel,

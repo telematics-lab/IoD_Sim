@@ -34,6 +34,17 @@ class NrNetdeviceConfigurationPriv
     }
 };
 
+NS_OBJECT_ENSURE_REGISTERED(NrNetdeviceConfiguration);
+
+TypeId
+NrNetdeviceConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NrNetdeviceConfiguration")
+                            .SetParent<NetdeviceConfiguration>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
 NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,

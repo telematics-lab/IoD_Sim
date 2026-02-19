@@ -2125,14 +2125,18 @@
         ]
       },
       "battery": {
-        "name": "ns3::energy::LiIonEnergySource",
+        "name": "ns3::energy::GenericBatteryModel",
         "attributes": [
           {
-            "name": "LiIonEnergySourceInitialEnergyJ",
-            "value": 200.0
-          },
+                        "name": "MaxCapacity",
+                        "value": 0.013290802764486976
+                    },
+                    {
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
           {
-            "name": "LiIonEnergyLowBatteryThreshold",
+            "name": "LowBatteryThreshold",
             "value": 0.2
           }
         ]
@@ -2293,14 +2297,18 @@
         ]
       },
       "battery": {
-        "name": "ns3::energy::LiIonEnergySource",
+        "name": "ns3::energy::GenericBatteryModel",
         "attributes": [
           {
-            "name": "LiIonEnergySourceInitialEnergyJ",
-            "value": 200.0
-          },
+                        "name": "MaxCapacity",
+                        "value": 0.013290802764486976
+                    },
+                    {
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
           {
-            "name": "LiIonEnergyLowBatteryThreshold",
+            "name": "LowBatteryThreshold",
             "value": 0.2
           }
         ]
@@ -2461,14 +2469,18 @@
         ]
       },
       "battery": {
-        "name": "ns3::energy::LiIonEnergySource",
+        "name": "ns3::energy::GenericBatteryModel",
         "attributes": [
           {
-            "name": "LiIonEnergySourceInitialEnergyJ",
-            "value": 200.0
-          },
+                        "name": "MaxCapacity",
+                        "value": 0.013290802764486976
+                    },
+                    {
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
           {
-            "name": "LiIonEnergyLowBatteryThreshold",
+            "name": "LowBatteryThreshold",
             "value": 0.2
           }
         ]
@@ -2629,14 +2641,18 @@
         ]
       },
       "battery": {
-        "name": "ns3::energy::LiIonEnergySource",
+        "name": "ns3::energy::GenericBatteryModel",
         "attributes": [
           {
-            "name": "LiIonEnergySourceInitialEnergyJ",
-            "value": 200.0
-          },
+                        "name": "MaxCapacity",
+                        "value": 0.013290802764486976
+                    },
+                    {
+                        "name": "BatteryType",
+                        "value": "LION_LIPO"
+                    },
           {
-            "name": "LiIonEnergyLowBatteryThreshold",
+            "name": "LowBatteryThreshold",
             "value": 0.2
           }
         ]

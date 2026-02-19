@@ -20,10 +20,22 @@
 namespace ns3
 {
 
-NetdeviceConfiguration::NetdeviceConfiguration(const std::string type,
-                                               const std::optional<uint32_t> networkLayerId,
-                                               const std::optional<ModelConfiguration> antennaModel,
-                                               const std::optional<DirectivityConfiguration> directivity)
+NS_OBJECT_ENSURE_REGISTERED(NetdeviceConfiguration);
+
+TypeId
+NetdeviceConfiguration::GetTypeId()
+{
+    static TypeId tid = TypeId("ns3::NetdeviceConfiguration")
+                            .SetParent<Object>()
+                            .SetGroupName("IoD_Sim");
+    return tid;
+}
+
+NetdeviceConfiguration::NetdeviceConfiguration(
+    const std::string type,
+    const std::optional<uint32_t> networkLayerId,
+    const std::optional<ModelConfiguration> antennaModel,
+    const std::optional<DirectivityConfiguration> directivity)
     : m_type{type},
       m_networkLayerId{networkLayerId},
       m_antennaModel{antennaModel},
