@@ -63,7 +63,7 @@ set(Tests
   taxi-all-example-trace.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.46-scenario-debug)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.47-scenario-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)
