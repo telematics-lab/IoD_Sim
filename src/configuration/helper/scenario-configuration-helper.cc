@@ -1520,33 +1520,39 @@ ScenarioConfigurationHelper::GetRadioMaps() const
                     }
                     else
                     {
-                         NS_FATAL_ERROR("Unknown txNodes string value: " << val);
+                        NS_FATAL_ERROR("Unknown txNodes string value: " << val);
                     }
                 }
                 else
                 {
-                    NS_ASSERT_MSG(obj["txNodes"].IsArray(), "'txNodes' must be an array of objects or a string");
+                    NS_ASSERT_MSG(obj["txNodes"].IsArray(),
+                                  "'txNodes' must be an array of objects or a string");
                     for (auto& node : obj["txNodes"].GetArray())
                     {
                         if (node.IsString())
                         {
                             std::string val = node.GetString();
                             RadioMapConfig::NodeSelection selection;
-                            if (val == "gNB") selection.key = "ALL_GNB";
-                            else if (val == "UE") selection.key = "ALL_UE";
-                            else if (val == "firstGNB") selection.key = "FIRST_GNB";
-                            else NS_FATAL_ERROR("Unknown txNodes string value: " << val);
+                            if (val == "gNB")
+                                selection.key = "ALL_GNB";
+                            else if (val == "UE")
+                                selection.key = "ALL_UE";
+                            else if (val == "firstGNB")
+                                selection.key = "FIRST_GNB";
+                            else
+                                NS_FATAL_ERROR("Unknown txNodes string value: " << val);
                             mapConfig.txNodes.push_back(selection);
                         }
                         else
                         {
-                            NS_ASSERT_MSG(node.IsObject(), "'txNodes' elements must be objects or strings");
-                            NS_ASSERT_MSG(node.HasMember("key"), "'txNodes' element must have 'key'");
+                            NS_ASSERT_MSG(node.IsObject(),
+                                          "'txNodes' elements must be objects or strings");
+                            NS_ASSERT_MSG(node.HasMember("key"),
+                                          "'txNodes' element must have 'key'");
                             NS_ASSERT_MSG(node["key"].IsString(), "'key' must be a string");
 
                             RadioMapConfig::NodeSelection selection;
                             selection.key = node["key"].GetString();
-
 
                             if (node.HasMember("index"))
                             {
@@ -1557,7 +1563,8 @@ ScenarioConfigurationHelper::GetRadioMaps() const
 
                             if (node.HasMember("deviceIndex"))
                             {
-                                NS_ASSERT_MSG(node["deviceIndex"].IsInt(), "'deviceIndex' must be an integer");
+                                NS_ASSERT_MSG(node["deviceIndex"].IsInt(),
+                                              "'deviceIndex' must be an integer");
                                 selection.deviceIndex = node["deviceIndex"].GetInt();
                             }
 
@@ -1591,7 +1598,8 @@ ScenarioConfigurationHelper::GetRadioMaps() const
                 else
                 {
                     auto& node = obj["rxNode"];
-                    NS_ASSERT_MSG(node.IsObject(), "'rxNode' element must be an object or a string");
+                    NS_ASSERT_MSG(node.IsObject(),
+                                  "'rxNode' element must be an object or a string");
                     NS_ASSERT_MSG(node.HasMember("key"), "'rxNode' element must have 'key'");
                     NS_ASSERT_MSG(node["key"].IsString(), "'key' must be a string");
 
@@ -1607,7 +1615,8 @@ ScenarioConfigurationHelper::GetRadioMaps() const
 
                     if (node.HasMember("deviceIndex"))
                     {
-                        NS_ASSERT_MSG(node["deviceIndex"].IsInt(), "'deviceIndex' must be an integer");
+                        NS_ASSERT_MSG(node["deviceIndex"].IsInt(),
+                                      "'deviceIndex' must be an integer");
                         selection.deviceIndex = node["deviceIndex"].GetInt();
                     }
 
@@ -1619,6 +1628,70 @@ ScenarioConfigurationHelper::GetRadioMaps() const
     }
 
     return maps;
+}
+
+const std::vector<ScenarioConfigurationHelper::SchedulingEventConfig>
+ScenarioConfigurationHelper::GetSchedulingEvents() const
+{
+    std::vector<SchedulingEventConfig> events;
+
+    if (m_config.HasMember("scheduling"))
+    {
+        NS_ASSERT_MSG(m_config["scheduling"].IsArray(),
+                      "Check 'scheduling': should be an array of objects.");
+
+        for (auto& obj : m_config["scheduling"].GetArray())
+        {
+            SchedulingEventConfig eventConfig;
+
+            NS_ASSERT_MSG(obj.HasMember("time"), "Scheduling event must have 'time'");
+            eventConfig.time = obj["time"].GetDouble();
+
+            eventConfig.type = "event"; // default
+            if (obj.HasMember("type"))
+            {
+                eventConfig.type = obj["type"].GetString();
+            }
+
+            NS_ASSERT_MSG(obj.HasMember("action"), "Scheduling event must have 'action'");
+            eventConfig.action = obj["action"].GetString();
+
+            if (obj.HasMember("params"))
+            {
+                auto& params = obj["params"];
+                if (params.HasMember("ue"))
+                {
+                    auto& ue = params["ue"];
+                    eventConfig.params.ue.key = ue["key"].GetString();
+                    eventConfig.params.ue.index = ue["index"].GetUint();
+                }
+                if (params.HasMember("cellId"))
+                {
+                    auto& cellIdObj = params["cellId"];
+                    if (cellIdObj.IsUint() || cellIdObj.IsInt())
+                    {
+                        eventConfig.params.cellId.isDirectId = true;
+                        eventConfig.params.cellId.cellId = cellIdObj.GetUint();
+                    }
+                    else if (cellIdObj.IsObject())
+                    {
+                        eventConfig.params.cellId.isDirectId = false;
+                        eventConfig.params.cellId.key = cellIdObj["key"].GetString();
+                        eventConfig.params.cellId.index = cellIdObj["index"].GetUint();
+                        if (cellIdObj.HasMember("deviceIndex"))
+                        {
+                            eventConfig.params.cellId.hasDeviceIndex = true;
+                            eventConfig.params.cellId.deviceIndex =
+                                cellIdObj["deviceIndex"].GetUint();
+                        }
+                    }
+                }
+            }
+            events.push_back(eventConfig);
+        }
+    }
+
+    return events;
 }
 
 const std::string

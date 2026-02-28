@@ -115,6 +115,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
 #include <sys/resource.h>
 #include <vector>
 
@@ -215,8 +216,13 @@ class Scenario
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs();
+    void ConfigureScheduling();
     void ConfigureFullMeshX2Links();
     void EvaluateSinrDistanceAttachment(const uint32_t netId);
+    void ExecuteHandoverRequest(Ptr<NrUeNetDevice> ueDevice,
+                                Ptr<NrGnbNetDevice> targetGnb,
+                                uint16_t targetCellId,
+                                uint32_t ueNetId);
     void UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                                   DirectivityConfiguration config,
                                   std::string deviceType,
@@ -257,6 +263,9 @@ class Scenario
 Ptr<Node>
 Scenario::GetNodeByKey(std::string key, uint32_t index)
 {
+    std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
     Ptr<Node> targetNode = nullptr;
     if (key == "leo-sats")
     {
@@ -309,7 +318,7 @@ Scenario::GetNodeByKey(std::string key, uint32_t index)
     }
     else
     {
-        NS_FATAL_ERROR("Unknown node key for directivity: " << key);
+        NS_FATAL_ERROR("Unknown node key: " << key);
     }
     return targetNode;
 }
@@ -739,6 +748,7 @@ Scenario::Scenario(int argc, char** argv)
 
     ConfigureFullMeshX2Links();
     AttachAllNrUesToGnbs();
+    ConfigureScheduling();
 
     EnablePhyLteTraces();
     EnablePhyNrTraces();
@@ -859,7 +869,9 @@ Scenario::operator()()
                                 }
                             }
                             if (!found)
+                            {
                                 NS_LOG_WARN("FIRST_GNB selected but no gNBs found.");
+                            }
                         }
                         else
                         {
@@ -1164,8 +1176,8 @@ Scenario::operator()()
             int plyRet = system(cmd.c_str());
             if (plyRet != 0)
             {
-                NS_LOG_ERROR("Something went wrong while generating the ply file for "
-                             << plotConf.file);
+                NS_FATAL_ERROR("Something went wrong while generating the ply file for "
+                               << plotConf.file);
             }
 
             std::string plotCmd = plotConf.is3D
@@ -1180,8 +1192,8 @@ Scenario::operator()()
             int plotRet = system(plotCmd.c_str());
             if (plotRet != 0)
             {
-                NS_LOG_ERROR("Something went wrong while generating the plot for "
-                             << plotConf.file);
+                NS_FATAL_ERROR("Something went wrong while generating the plot for "
+                               << plotConf.file);
             }
         }
     }
@@ -1786,6 +1798,7 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     if (entityKey == "drones")
     {
         mobility.Install(m_drones.Get(entityId));
+        MobilityFactoryHelper::ApplyExtraAttributes(m_drones.Get(entityId), mobilityConf);
         std::ostringstream oss;
         oss << "/DroneList/" << entityId << "/$ns3::MobilityModel/CourseChange";
         auto mob = m_drones.Get(entityId)->GetObject<MobilityModel>();
@@ -1796,15 +1809,18 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     else if (entityKey == "ZSPs")
     {
         mobility.Install(m_zsps.Get(entityId));
+        MobilityFactoryHelper::ApplyExtraAttributes(m_zsps.Get(entityId), mobilityConf);
     }
     else if (entityKey == "nodes")
     {
         mobility.Install(m_plainNodes.Get(entityId));
+        MobilityFactoryHelper::ApplyExtraAttributes(m_plainNodes.Get(entityId), mobilityConf);
     }
     else if (entityKey == "leo-sats")
     {
         auto node = m_leoSats.Get(entityId);
         mobility.Install(node);
+        MobilityFactoryHelper::ApplyExtraAttributes(node, mobilityConf);
         std::ostringstream oss;
         oss << "/LeoSatList/" << entityId << "/$ns3::MobilityModel/CourseChange";
 
@@ -1817,6 +1833,7 @@ Scenario::ConfigureEntityMobility(const std::string& entityKey,
     {
         auto vehicle = m_vehicles.Get(entityId);
         mobility.Install(vehicle);
+        MobilityFactoryHelper::ApplyExtraAttributes(vehicle, mobilityConf);
         std::ostringstream oss;
         oss << "/VehicleList/" << entityId << "/$ns3::MobilityModel/CourseChange";
         auto mob = vehicle->GetObject<MobilityModel>();
@@ -3045,8 +3062,8 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             double distance = ueMobility->GetDistanceFrom(gnbMobility);
 
 #ifdef SINR_DISTANCE_PRINT_DEBUG
-// std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB " << gnbNode->GetId() <<
-// ": " << distance/1000 << " km" << std::endl;
+            std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB "
+                      << gnbNode->GetId() << ": " << distance / 1000 << " km" << std::endl;
 #endif
 
             // Find required min SINR for this distance
@@ -3077,6 +3094,12 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
             minSinrRequired = bestEntry->minSinr;
             double estimatedSnr = remHelper->GetSinr(ueDevice, gnbDevice, 0, true);
+
+#ifdef SINR_DISTANCE_PRINT_DEBUG
+            std::cout << "UE " << ueDevice->GetNode()->GetId() << " evaluated SNR for gNB "
+                      << gnbNode->GetId() << ": " << estimatedSnr
+                      << " dB (Required: " << minSinrRequired << " dB)" << std::endl;
+#endif
 
             // Checking if SNR is above the required threshold
             if (estimatedSnr >= minSinrRequired)
@@ -3192,6 +3215,191 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                         &Scenario::EvaluateSinrDistanceAttachment,
                         this,
                         netId);
+}
+
+void
+Scenario::ConfigureScheduling()
+{
+    NS_LOG_FUNCTION_NOARGS();
+    auto schedulingEvents = CONFIGURATOR->GetSchedulingEvents();
+    if (schedulingEvents.empty())
+    {
+        return;
+    }
+
+    for (const auto& event : schedulingEvents)
+    {
+        if (event.action == "handover")
+        {
+            Ptr<Node> ueNode = GetNodeByKey(event.params.ue.key, event.params.ue.index);
+            if (!ueNode)
+            {
+                NS_FATAL_ERROR("Could not find UE node for handover scheduling.");
+                continue;
+            }
+
+            Ptr<NrUeNetDevice> ueDevice = nullptr;
+            uint32_t ueNetId = 0;
+            for (const auto& [netId, devices] : m_nrUeDevices)
+            {
+                for (const auto& dev : devices)
+                {
+                    if (dev->GetNode() == ueNode)
+                    {
+                        ueDevice = DynamicCast<NrUeNetDevice>(dev);
+                        ueNetId = netId;
+                        break;
+                    }
+                }
+                if (ueDevice)
+                {
+                    break;
+                }
+            }
+
+            if (!ueDevice)
+            {
+                NS_FATAL_ERROR("Could not find NR UE net device for handover scheduling.");
+                continue;
+            }
+
+            uint16_t targetCellId = 0;
+            Ptr<NrGnbNetDevice> targetGnb = nullptr;
+            if (event.params.cellId.isDirectId)
+            {
+                auto it = m_nrGnbDevices.find(ueNetId);
+                if (it != m_nrGnbDevices.end())
+                {
+                    for (const auto& containers : it->second)
+                    {
+                        for (uint32_t i = 0; i < containers.GetN(); ++i)
+                        {
+                            auto gnb = DynamicCast<NrGnbNetDevice>(containers.Get(i));
+                            if (gnb)
+                            {
+                                if (gnb->GetCellId() == event.params.cellId.cellId ||
+                                    gnb->GetRrc()->HasCellId(event.params.cellId.cellId))
+                                {
+                                    targetGnb = gnb;
+                                    break;
+                                }
+                            }
+                        }
+                        if (targetGnb)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (targetGnb)
+                {
+                    targetCellId = event.params.cellId.cellId;
+                }
+            }
+            else
+            {
+                Ptr<Node> gnbNode =
+                    GetNodeByKey(event.params.cellId.key, event.params.cellId.index);
+                if (gnbNode)
+                {
+                    if (event.params.cellId.hasDeviceIndex)
+                    {
+                        targetGnb = DynamicCast<NrGnbNetDevice>(
+                            gnbNode->GetDevice(event.params.cellId.deviceIndex));
+                    }
+                    else
+                    {
+                        auto it = m_nrGnbDevices.find(ueNetId);
+                        if (it != m_nrGnbDevices.end())
+                        {
+                            for (const auto& containers : it->second)
+                            {
+                                for (uint32_t i = 0; i < containers.GetN(); ++i)
+                                {
+                                    auto gnb = DynamicCast<NrGnbNetDevice>(containers.Get(i));
+                                    if (gnb && gnb->GetNode() == gnbNode)
+                                    {
+                                        targetGnb = gnb;
+                                        break;
+                                    }
+                                }
+                                if (targetGnb)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (targetGnb)
+                {
+                    targetCellId = targetGnb->GetCellId();
+                }
+            }
+
+            if (!targetGnb)
+            {
+                NS_FATAL_ERROR("Could not find Target gNB net device for handover scheduling.");
+                continue;
+            }
+
+            NS_LOG_INFO("Scheduling Handover for UE "
+                        << ueNode->GetId() << " to gNB " << targetGnb->GetNode()->GetId()
+                        << " cellId " << targetCellId << " at time " << event.time << "s");
+            Simulator::Schedule(Seconds(event.time),
+                                &Scenario::ExecuteHandoverRequest,
+                                this,
+                                ueDevice,
+                                targetGnb,
+                                targetCellId,
+                                ueNetId);
+        }
+    }
+}
+
+void
+Scenario::ExecuteHandoverRequest(Ptr<NrUeNetDevice> ueDevice,
+                                 Ptr<NrGnbNetDevice> targetGnb,
+                                 uint16_t targetCellId,
+                                 uint32_t ueNetId)
+{
+    Ptr<NrGnbNetDevice> sourceGnb = nullptr;
+    uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
+    auto it = m_nrGnbDevices.find(ueNetId);
+    if (it != m_nrGnbDevices.end())
+    {
+        for (const auto& containers : it->second)
+        {
+            for (uint32_t i = 0; i < containers.GetN(); ++i)
+            {
+                auto gnb = DynamicCast<NrGnbNetDevice>(containers.Get(i));
+                if (gnb && gnb->GetCellId() == currentCellId)
+                {
+                    sourceGnb = gnb;
+                    break;
+                }
+            }
+            if (sourceGnb)
+            {
+                break;
+            }
+        }
+    }
+
+    if (!sourceGnb)
+    {
+        NS_LOG_WARN("ExecuteHandoverRequest: Could not find Source gNB net device.");
+        return;
+    }
+
+    auto nrPhySim = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][ueNetId]);
+    auto nrHelper = nrPhySim->GetNrHelper();
+
+    NS_LOG_INFO("Executing Handover for UE "
+                << ueDevice->GetNode()->GetId() << " from gNB " << sourceGnb->GetNode()->GetId()
+                << " to gNB " << targetGnb->GetNode()->GetId() << " cellId " << targetCellId);
+
+    nrHelper->HandoverRequest(Seconds(0), ueDevice, sourceGnb, targetCellId);
 }
 
 } // namespace ns3

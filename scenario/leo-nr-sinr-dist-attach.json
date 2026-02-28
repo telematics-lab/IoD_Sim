@@ -76,6 +76,10 @@
             {
               "name": "ShadowingEnabled",
               "value": false
+            },
+            {
+              "name": "MeanVehicularLoss",
+              "value": 0.0
             }
           ],
           "channelConditionAttributes": [
@@ -174,10 +178,23 @@
           }
         ]
       },
+      "scheduler": {
+        "type": "ns3::NrMacSchedulerOfdmaPF",
+        "attributes": [
+          {
+            "name": "FixedMcsDl",
+            "value": true
+          },
+          {
+            "name": "StartingMcsDl",
+            "value": 2
+          }
+        ]
+      },
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 60.0
+          "value": 75.0
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -187,7 +204,7 @@
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 60.0
+          "value": 75.0
         }
       ]
     }
@@ -239,7 +256,7 @@
           },
           {
             "name": "Speed",
-            "value": 30.0
+            "value": 8.0
           },
           {
             "name": "Azimuth",

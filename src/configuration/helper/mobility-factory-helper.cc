@@ -18,53 +18,102 @@
 #include "mobility-factory-helper.h"
 
 #include <ns3/building-position-allocator.h>
+#include <ns3/constant-acceleration-mobility-model.h>
+#include <ns3/constant-velocity-mobility-model.h>
+#include <ns3/node.h>
 
 namespace ns3
 {
 
 void
-MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper, const ModelConfiguration& modelConf)
+MobilityFactoryHelper::SetMobilityModel(MobilityHelper& helper,
+                                        const MobilityModelConfiguration& modelConf)
 {
     helper.m_mobility.SetTypeId(modelConf.GetName());
 
-    if (modelConf.GetName().find("ConstantPositionMobilityModel") != std::string::npos)
-    {
-        if (modelConf.GetAttributes().size() == 0)
-            return;
-
-        for (auto& attr : modelConf.GetAttributes())
-        {
-            if (attr.name == "Position")
-            {
-                auto positionAllocator = CreateObject<ListPositionAllocator>();
-                Vector3D initialPosition =
-                    StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
-                positionAllocator->Add(initialPosition);
-                helper.SetPositionAllocator(positionAllocator);
-            }
-            else
-            {
-                helper.m_mobility.Set(attr.name, *attr.value);
-            }
-        }
-    }
-    else if (modelConf.GetName() == "ns3::GeoConstantVelocityMobility")
+    if (modelConf.GetName() == "ns3::GeoConstantVelocityMobility")
     {
         helper.SetPositionAllocator(nullptr);
-        for (auto& attr : modelConf.GetAttributes())
-        {
-            helper.m_mobility.Set(attr.name, *attr.value);
-        }
     }
     else if (modelConf.GetName() == "ns3::RandomWalk2dOutdoorMobilityModel")
     {
         static auto positionAllocator = CreateObject<OutdoorPositionAllocator>();
         helper.SetPositionAllocator(positionAllocator);
     }
-    else
+
+    if (modelConf.GetAttributes().size() == 0 && !modelConf.GetInitialPosition())
     {
-        for (auto& attr : modelConf.GetAttributes())
+        return;
+    }
+
+    auto positionAllocator = CreateObject<ListPositionAllocator>();
+    bool hasPosition = false;
+
+    if (modelConf.GetInitialPosition())
+    {
+        positionAllocator->Add(modelConf.GetInitialPosition().value());
+        hasPosition = true;
+    }
+
+    for (auto& attr : modelConf.GetAttributes())
+    {
+        if (attr.name == "Position")
+        {
+            Vector3D initialPosition = StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
+            if (!hasPosition)
+            {
+                positionAllocator->Add(initialPosition);
+                hasPosition = true;
+            }
+        }
+        else if (attr.name == "Velocity" || attr.name == "Acceleration")
+        {
+            // Handled post-installation by ApplyExtraAttributes
+        }
+        else
+        {
             helper.m_mobility.Set(attr.name, *attr.value);
+        }
+    }
+
+    if (hasPosition)
+    {
+        helper.SetPositionAllocator(positionAllocator);
+    }
+}
+
+void
+MobilityFactoryHelper::ApplyExtraAttributes(Ptr<Node> node,
+                                            const MobilityModelConfiguration& modelConf)
+{
+    auto mob = node->GetObject<MobilityModel>();
+    if (!mob)
+    {
+        return;
+    }
+
+    for (auto& attr : modelConf.GetAttributes())
+    {
+        if (attr.name == "Velocity")
+        {
+            Vector3D velocity = StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
+            if (auto cv = DynamicCast<ConstantVelocityMobilityModel>(mob))
+            {
+                cv->SetVelocity(velocity);
+            }
+            else if (auto ca = DynamicCast<ConstantAccelerationMobilityModel>(mob))
+            {
+                ca->SetVelocityAndAcceleration(velocity, Vector3D(0.0, 0.0, 0.0));
+            }
+        }
+        else if (attr.name == "Acceleration")
+        {
+            Vector3D acceleration = StaticCast<Vector3DValue, AttributeValue>(attr.value)->Get();
+            if (auto ca = DynamicCast<ConstantAccelerationMobilityModel>(mob))
+            {
+                ca->SetVelocityAndAcceleration(ca->GetVelocity(), acceleration);
+            }
+        }
     }
 }
 

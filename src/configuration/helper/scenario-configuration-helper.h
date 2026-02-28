@@ -280,6 +280,37 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
      */
     const std::vector<DoubleVector> GetRegionsOfInterest() const;
 
+    struct SchedulingEventConfig
+    {
+        double time;
+        std::string type;
+        std::string action;
+
+        struct Params
+        {
+            struct Ue
+            {
+                std::string key;
+                uint32_t index;
+            } ue;
+
+            struct CellId
+            {
+                bool isDirectId;
+                uint32_t cellId;
+                std::string key;
+                uint32_t index;
+                bool hasDeviceIndex = false;
+                uint32_t deviceIndex = 0;
+            } cellId;
+        } params;
+    };
+
+    /**
+     * \return a list of scheduling events
+     */
+    const std::vector<SchedulingEventConfig> GetSchedulingEvents() const;
+
     struct RadioMapConfig
     {
         std::string type;
@@ -289,12 +320,14 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
         uint32_t phyLayerIndex;
         uint32_t bwpId;
         std::vector<std::pair<std::string, std::string>> parameters;
+
         struct NodeSelection
         {
             std::string key;
             int index = 0;
             int deviceIndex = -1;
         };
+
         std::vector<NodeSelection> txNodes;
         NodeSelection rxNode;
     };

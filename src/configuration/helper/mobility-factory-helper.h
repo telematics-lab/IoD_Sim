@@ -19,7 +19,7 @@
 #define MOBILITY_FACTORY_HELPER_H
 
 #include <ns3/mobility-helper.h>
-#include <ns3/model-configuration.h>
+#include <ns3/mobility-model-configuration.h>
 
 namespace ns3
 {
@@ -42,7 +42,17 @@ class MobilityFactoryHelper
      * \param modelConf The configuration data class that defines the mobility model to be used and
      * its configuration.
      */
-    static void SetMobilityModel(MobilityHelper& helper, const ModelConfiguration& modelConf);
+    static void SetMobilityModel(MobilityHelper& helper,
+                                 const MobilityModelConfiguration& modelConf);
+
+    /**
+     * Apply extra attributes that shouldn't or couldn't be set directly via ObjectFactory,
+     * such as non-constructible attributes or specific model properties like Velocity.
+     *
+     * \param node The node to which the mobility model has been installed.
+     * \param modelConf The configuration data class containing the attributes.
+     */
+    static void ApplyExtraAttributes(Ptr<Node> node, const MobilityModelConfiguration& modelConf);
 };
 
 } // namespace ns3

@@ -1,0 +1,312 @@
+{
+  "name": "terrestrial_inter_gnb_handover",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 5.0,
+  "staticNs3Config": [
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 999999999
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "600",
+      "Y": "100",
+      "Z": "100"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "nr",
+      "handover": {
+        "algorithm": "ns3::NrA3RsrpHandoverAlgorithm",
+        "attributes": []
+      },
+      "channelAccessManager": {
+        "ue": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        },
+        "gnb": {
+          "type": "ns3::NrAlwaysOnAccessManager",
+          "attributes": []
+        }
+      },
+      "attachMethod": "closest",
+      "channels": [
+        {
+          "scenario": "RMa",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "100ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 1.8e9,
+                "bandwidth": 100e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 1
+              }
+            }
+          ]
+        }
+      ],
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 2
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 8
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 40.0
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 35.0
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  "ZSPs": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [],
+        "initialPosition": [
+          250.0,
+          50.0,
+          30.0
+        ]
+      },
+      "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "role": "gNB",
+          "networkLayer": 0
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantPositionMobilityModel",
+        "attributes": [],
+        "initialPosition": [
+          350.0,
+          50.0,
+          30.0
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "vehicles": [
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::ConstantVelocityMobilityModel",
+        "attributes": [
+          {
+            "name": "Velocity",
+            "value": [
+              25.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "initialPosition": [
+          0.0,
+          50.0,
+          1.5
+        ]
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 25.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.2
+            },
+            {
+              "name": "StopTime",
+              "value": 24.5
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 1024
+            },
+            {
+              "name": "Interval",
+              "value": 0.01
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scheduling": [
+    {
+      "time": 1.0,
+      "type": "event",
+      "action": "handover",
+      "params": {
+        "ue": {
+          "key": "vehicles",
+          "index": 0
+        },
+        "cellId": {
+          "key": "ZSPs",
+          "index": 1
+        }
+      }
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "NrA3RsrpHandoverAlgorithm",
+    "NrGnbRrc",
+    "NrUeRrc",
+    "NrHelper"
+  ]
+}

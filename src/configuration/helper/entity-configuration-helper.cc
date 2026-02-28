@@ -207,7 +207,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 auto arr = dirJson["position"].GetArray();
                 NS_ASSERT_MSG(arr.Size() == 3,
                               "Directivity 'position' array must have 3 elements.");
-                dirConfig.position = Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
+                dirConfig.position =
+                    Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
             }
 
             if (dirJson.HasMember("precision"))
@@ -357,8 +358,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                               "Entity NR Network Device 'outputLinks' must be an array.");
                 for (auto& link : netdev["outputLinks"].GetArray())
                 {
-                    NS_ASSERT_MSG(link.IsObject(),
-                                  "Entity NR Network Device 'outputLinks' elements must be objects.");
+                    NS_ASSERT_MSG(
+                        link.IsObject(),
+                        "Entity NR Network Device 'outputLinks' elements must be objects.");
                     NS_ASSERT_MSG(link.HasMember("sourceBwp") && link.HasMember("targetBwp"),
                                   "OutputLink must have 'sourceBwp' and 'targetBwp'.");
                     OutputLinkConfiguration config;
@@ -371,7 +373,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             uint32_t channelId = 0;
             if (netdev.HasMember("channelId"))
             {
-                NS_ASSERT_MSG(netdev["channelId"].IsUint(), "channelId must be an unsigned integer");
+                NS_ASSERT_MSG(netdev["channelId"].IsUint(),
+                              "channelId must be an unsigned integer");
                 channelId = netdev["channelId"].GetUint();
             }
 
@@ -451,8 +454,10 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
         }
         else if (type == "simple")
         {
-            confs.push_back(
-                CreateObject<NetdeviceConfiguration>(type, networkLayerId, antennaModel, directivity));
+            confs.push_back(CreateObject<NetdeviceConfiguration>(type,
+                                                                 networkLayerId,
+                                                                 antennaModel,
+                                                                 directivity));
         }
         else
         {
@@ -658,7 +663,7 @@ EntityConfigurationHelper::DecodeInitialPosition(const rapidyyjson::Value& jsonM
                   "Mobility Model initialPosition must be an array of 3 coordinates.");
 
     auto arr = jsonModel["initialPosition"].GetArray();
-    NS_ASSERT_MSG(arr.Size() != 3 || !arr[0].IsDouble() || !arr[1].IsDouble() || !arr[2].IsDouble(),
+    NS_ASSERT_MSG(arr.Size() == 3 && arr[0].IsDouble() && arr[1].IsDouble() && arr[2].IsDouble(),
                   "Mobility Model initialPosition must be an array of 3 coordinates.");
 
     return Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
