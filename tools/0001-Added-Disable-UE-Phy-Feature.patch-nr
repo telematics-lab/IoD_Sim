@@ -23,7 +23,7 @@ index 7909f594..f0ec7406 100644
 @@ -289,6 +290,23 @@ NrUePhy::GetTxPower() const
      return m_txPower;
  }
- 
+
 +void
 +NrUePhy::SetPhyEnabled(bool enable)
 +{
@@ -53,7 +53,7 @@ index 7909f594..f0ec7406 100644
 +        NS_LOG_DEBUG("PHY disabled, ignoring received control message");
 +        return;
 +    }
- 
+
      if (msg->GetMessageType() == NrControlMessage::DL_DCI)
      {
 @@ -1216,6 +1239,11 @@ NrUePhy::EndVarTti(const std::shared_ptr<DciInfoElementTdma>& dci)
@@ -104,7 +104,7 @@ index 4bb67dfa..1bcf9ba4 100644
 @@ -254,6 +254,20 @@ class NrUePhy : public NrPhy
       */
      void GenerateDlCqiReport(const SpectrumValue& sinr);
- 
+
 +    /**
 +     * @brief Set the PHY enabled or disabled.
 +     * @param enable true if the PHY should be enabled, false otherwise.
@@ -125,12 +125,11 @@ index 4bb67dfa..1bcf9ba4 100644
 @@ -607,6 +621,8 @@ class NrUePhy : public NrPhy
       */
      void ReportUeMeasurements();
- 
+
 +    bool m_phyEnabled; //!< True if the PHY is enabled (default)
 +
      /**
       * @brief A function called by NrHelper to configure in NrUePhy what is the CSI feedback type.
       * @param csiFeedbackType CSI feedback type that is configured by NrHelper
--- 
+--
 2.50.1 (Apple Git-155)
-

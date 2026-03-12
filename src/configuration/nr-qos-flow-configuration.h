@@ -15,11 +15,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef NR_BEARER_CONFIGURATION_H
-#define NR_BEARER_CONFIGURATION_H
+#ifndef NR_QOS_FLOW_CONFIGURATION_H
+#define NR_QOS_FLOW_CONFIGURATION_H
 
 #include <ns3/epc-tft.h>
-#include <ns3/nr-eps-bearer.h>
+#include <ns3/nr-qos-flow.h>
 #include <ns3/object.h>
 
 namespace ns3
@@ -28,7 +28,7 @@ namespace ns3
 /**
  * Data class to store parameters useful at NR Bearer configuration.
  */
-class NrBearerConfiguration : public Object
+class NrQosFlowConfiguration : public Object
 {
   public:
     /**
@@ -39,13 +39,13 @@ class NrBearerConfiguration : public Object
      * device. \param networkLayerId The identifier for the Network Layer that has been defined for
      * this simulation. It must be compatible with the given type and macLayer.
      */
-    NrBearerConfiguration(const std::string type,
+    NrQosFlowConfiguration(const std::string type,
                           const uint64_t gbrDl,
                           const uint64_t gbrUl,
                           const uint64_t mbrDl,
                           const uint64_t mbrUl);
 
-    NrBearerConfiguration(const std::string type);
+    NrQosFlowConfiguration(const std::string type);
 
     /**
      * Get the type ID.
@@ -56,17 +56,17 @@ class NrBearerConfiguration : public Object
     /**
      * \return The type of the Network Device.
      */
-    const NrEpsBearer::Qci GetType() const;
+    const NrQosFlow::FiveQi GetType() const;
     /**
      * \return The reference network layer identifier.
      */
     const NrGbrQosInformation GetQos() const;
 
   private:
-    const NrEpsBearer::Qci m_type;
+    const NrQosFlow::FiveQi m_type;
     const NrGbrQosInformation m_qos;
 };
 
 } // namespace ns3
 
-#endif /* NR_BEARER_CONFIGURATION_H */
+#endif /* NR_QOS_FLOW_CONFIGURATION_H */

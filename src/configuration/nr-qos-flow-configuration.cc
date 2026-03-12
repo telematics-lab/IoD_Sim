@@ -15,138 +15,138 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "nr-bearer-configuration.h"
+#include "nr-qos-flow-configuration.h"
 
 namespace ns3
 {
-class NrBearerConfigurationPriv
+class NrQosFlowConfigurationPriv
 {
   public:
-    static const NrEpsBearer::Qci ParseBearerType(const std::string t)
+    static const NrQosFlow::FiveQi ParseBearerType(const std::string t)
     {
         if (t == "GBR_CONV_VOICE")
         {
-            return NrEpsBearer::Qci::GBR_CONV_VOICE;
+            return NrQosFlow::FiveQi::GBR_CONV_VOICE;
         }
         else if (t == "GBR_CONV_VIDEO")
         {
-            return NrEpsBearer::Qci::GBR_CONV_VIDEO;
+            return NrQosFlow::FiveQi::GBR_CONV_VIDEO;
         }
         else if (t == "GBR_GAMING")
         {
-            return NrEpsBearer::Qci::GBR_GAMING;
+            return NrQosFlow::FiveQi::GBR_GAMING;
         }
         else if (t == "GBR_NON_CONV_VIDEO")
         {
-            return NrEpsBearer::Qci::GBR_NON_CONV_VIDEO;
+            return NrQosFlow::FiveQi::GBR_NON_CONV_VIDEO;
         }
         else if (t == "GBR_MC_PUSH_TO_TALK")
         {
-            return NrEpsBearer::Qci::GBR_MC_PUSH_TO_TALK;
+            return NrQosFlow::FiveQi::GBR_MC_PUSH_TO_TALK;
         }
         else if (t == "GBR_NMC_PUSH_TO_TALK")
         {
-            return NrEpsBearer::Qci::GBR_NMC_PUSH_TO_TALK;
+            return NrQosFlow::FiveQi::GBR_NMC_PUSH_TO_TALK;
         }
         else if (t == "GBR_MC_VIDEO")
         {
-            return NrEpsBearer::Qci::GBR_MC_VIDEO;
+            return NrQosFlow::FiveQi::GBR_MC_VIDEO;
         }
         else if (t == "GBR_V2X")
         {
-            return NrEpsBearer::Qci::GBR_V2X;
+            return NrQosFlow::FiveQi::GBR_V2X;
         }
         else if (t == "GBR_LIVE_UL_71")
         {
-            return NrEpsBearer::Qci::GBR_LIVE_UL_71;
+            return NrQosFlow::FiveQi::GBR_LIVE_UL_71;
         }
         else if (t == "GBR_LIVE_UL_72")
         {
-            return NrEpsBearer::Qci::GBR_LIVE_UL_72;
+            return NrQosFlow::FiveQi::GBR_LIVE_UL_72;
         }
         else if (t == "GBR_LIVE_UL_73")
         {
-            return NrEpsBearer::Qci::GBR_LIVE_UL_73;
+            return NrQosFlow::FiveQi::GBR_LIVE_UL_73;
         }
         else if (t == "GBR_LIVE_UL_74")
         {
-            return NrEpsBearer::Qci::GBR_LIVE_UL_74;
+            return NrQosFlow::FiveQi::GBR_LIVE_UL_74;
         }
         else if (t == "GBR_LIVE_UL_76")
         {
-            return NrEpsBearer::Qci::GBR_LIVE_UL_76;
+            return NrQosFlow::FiveQi::GBR_LIVE_UL_76;
         }
         else if (t == "NGBR_IMS")
         {
-            return NrEpsBearer::Qci::NGBR_IMS;
+            return NrQosFlow::FiveQi::NGBR_IMS;
         }
         else if (t == "NGBR_VIDEO_TCP_OPERATOR")
         {
-            return NrEpsBearer::Qci::NGBR_VIDEO_TCP_OPERATOR;
+            return NrQosFlow::FiveQi::NGBR_VIDEO_TCP_OPERATOR;
         }
         else if (t == "NGBR_VOICE_VIDEO_GAMING")
         {
-            return NrEpsBearer::Qci::NGBR_VOICE_VIDEO_GAMING;
+            return NrQosFlow::FiveQi::NGBR_VOICE_VIDEO_GAMING;
         }
         else if (t == "NGBR_VIDEO_TCP_PREMIUM")
         {
-            return NrEpsBearer::Qci::NGBR_VIDEO_TCP_PREMIUM;
+            return NrQosFlow::FiveQi::NGBR_VIDEO_TCP_PREMIUM;
         }
         else if (t == "NGBR_VIDEO_TCP_DEFAULT")
         {
-            return NrEpsBearer::Qci::NGBR_VIDEO_TCP_DEFAULT;
+            return NrQosFlow::FiveQi::NGBR_VIDEO_TCP_DEFAULT;
         }
         else if (t == "NGBR_MC_DELAY_SIGNAL")
         {
-            return NrEpsBearer::Qci::NGBR_MC_DELAY_SIGNAL;
+            return NrQosFlow::FiveQi::NGBR_MC_DELAY_SIGNAL;
         }
         else if (t == "NGBR_MC_DATA")
         {
-            return NrEpsBearer::Qci::NGBR_MC_DATA;
+            return NrQosFlow::FiveQi::NGBR_MC_DATA;
         }
         else if (t == "NGBR_V2X")
         {
-            return NrEpsBearer::Qci::NGBR_V2X;
+            return NrQosFlow::FiveQi::NGBR_V2X;
         }
         else if (t == "NGBR_LOW_LAT_EMBB")
         {
-            return NrEpsBearer::Qci::NGBR_LOW_LAT_EMBB;
+            return NrQosFlow::FiveQi::NGBR_LOW_LAT_EMBB;
         }
         else if (t == "DGBR_DISCRETE_AUT_SMALL")
         {
-            return NrEpsBearer::Qci::DGBR_DISCRETE_AUT_SMALL;
+            return NrQosFlow::FiveQi::DGBR_DISCRETE_AUT_SMALL;
         }
         else if (t == "DGBR_DISCRETE_AUT_LARGE")
         {
-            return NrEpsBearer::Qci::DGBR_DISCRETE_AUT_LARGE;
+            return NrQosFlow::FiveQi::DGBR_DISCRETE_AUT_LARGE;
         }
         else if (t == "DGBR_ITS")
         {
-            return NrEpsBearer::Qci::DGBR_ITS;
+            return NrQosFlow::FiveQi::DGBR_ITS;
         }
         else if (t == "DGBR_ELECTRICITY")
         {
-            return NrEpsBearer::Qci::DGBR_ELECTRICITY;
+            return NrQosFlow::FiveQi::DGBR_ELECTRICITY;
         }
         else if (t == "DGBR_V2X")
         {
-            return NrEpsBearer::Qci::DGBR_V2X;
+            return NrQosFlow::FiveQi::DGBR_V2X;
         }
         else if (t == "DGBR_INTER_SERV_87")
         {
-            return NrEpsBearer::Qci::DGBR_INTER_SERV_87;
+            return NrQosFlow::FiveQi::DGBR_INTER_SERV_87;
         }
         else if (t == "DGBR_INTER_SERV_88")
         {
-            return NrEpsBearer::Qci::DGBR_INTER_SERV_88;
+            return NrQosFlow::FiveQi::DGBR_INTER_SERV_88;
         }
         else if (t == "DGBR_VISUAL_CONTENT_89")
         {
-            return NrEpsBearer::Qci::DGBR_VISUAL_CONTENT_89;
+            return NrQosFlow::FiveQi::DGBR_VISUAL_CONTENT_89;
         }
         else if (t == "DGBR_VISUAL_CONTENT_90")
         {
-            return NrEpsBearer::Qci::DGBR_VISUAL_CONTENT_90;
+            return NrQosFlow::FiveQi::DGBR_VISUAL_CONTENT_90;
         }
         else
         {
@@ -169,40 +169,40 @@ class NrBearerConfigurationPriv
     }
 };
 
-NS_OBJECT_ENSURE_REGISTERED(NrBearerConfiguration);
+NS_OBJECT_ENSURE_REGISTERED(NrQosFlowConfiguration);
 
 TypeId
-NrBearerConfiguration::GetTypeId()
+NrQosFlowConfiguration::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrBearerConfiguration")
+    static TypeId tid = TypeId("ns3::NrQosFlowConfiguration")
                             .SetParent<Object>()
                             .SetGroupName("IoD_Sim");
     return tid;
 }
 
-NrBearerConfiguration::NrBearerConfiguration(const std::string type,
+NrQosFlowConfiguration::NrQosFlowConfiguration(const std::string type,
                                              const uint64_t gbrDl,
                                              const uint64_t gbrUl,
                                              const uint64_t mbrDl,
                                              const uint64_t mbrUl)
-    : m_type{NrBearerConfigurationPriv::ParseBearerType(type)},
-      m_qos{NrBearerConfigurationPriv::BuildQosInformation(gbrDl, gbrUl, mbrDl, mbrUl)}
+    : m_type{NrQosFlowConfigurationPriv::ParseBearerType(type)},
+      m_qos{NrQosFlowConfigurationPriv::BuildQosInformation(gbrDl, gbrUl, mbrDl, mbrUl)}
 {
 }
 
-NrBearerConfiguration::NrBearerConfiguration(const std::string type)
-    : m_type{NrBearerConfigurationPriv::ParseBearerType(type)}
+NrQosFlowConfiguration::NrQosFlowConfiguration(const std::string type)
+    : m_type{NrQosFlowConfigurationPriv::ParseBearerType(type)}
 {
 }
 
-const NrEpsBearer::Qci
-NrBearerConfiguration::GetType() const
+const NrQosFlow::FiveQi
+NrQosFlowConfiguration::GetType() const
 {
     return m_type;
 }
 
 const NrGbrQosInformation
-NrBearerConfiguration::GetQos() const
+NrQosFlowConfiguration::GetQos() const
 {
     return m_qos;
 }

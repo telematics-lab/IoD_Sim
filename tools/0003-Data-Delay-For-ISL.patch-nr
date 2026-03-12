@@ -1,0 +1,137 @@
+From e5371da3dbcae8249b11954495366137261c54a4 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 9 Mar 2026 01:15:42 +0100
+Subject: [PATCH] Updates in Mac layer on Gnb To support DataDelay for ISL
+ communications
+
+---
+ model/nr-gnb-mac.cc | 56 +++++++++++++++++++++++++++++++++++++++++++--
+ model/nr-gnb-mac.h  |  5 ++++
+ model/nr-ue-rrc.cc  |  7 +++++-
+ 3 files changed, 65 insertions(+), 3 deletions(-)
+
+diff --git a/model/nr-gnb-mac.cc b/model/nr-gnb-mac.cc
+index 83572464..bdf7bcb2 100644
+--- a/model/nr-gnb-mac.cc
++++ b/model/nr-gnb-mac.cc
+@@ -442,6 +442,11 @@ NrGnbMac::GetTypeId()
+                             "Harq feedback.",
+                             MakeTraceSourceAccessor(&NrGnbMac::m_dlHarqFeedback),
+                             "ns3::NrGnbMac::DlHarqFeedbackTracedCallback")
++            .AddAttribute("DataDelay",
++                          "Additional generic data delay",
++                          TimeValue(Seconds(0)),
++                          MakeTimeAccessor(&NrGnbMac::m_dataDelay),
++                          MakeTimeChecker())
+             .AddAttribute("NumberOfRaPreambles",
+                           "How many random access preambles are available for the contention based "
+                           "RACH process",
+@@ -952,7 +957,47 @@ NrGnbMac::DoReceivePhyPdu(Ptr<Packet> p)
+ 
+     if (rxParams.p->GetSize())
+     {
+-        (*lcidIt).second->ReceivePdu(rxParams);
++        if (m_dataDelay.GetTimeStep() > 0)
++        {
++            Simulator::Schedule(m_dataDelay,
++                                &NrGnbMac::ForwardUpToRlc,
++                                this,
++                                (*lcidIt).second,
++                                rxParams);
++        }
++        else
++        {
++            (*lcidIt).second->ReceivePdu(rxParams);
++        }
++    }
++}
++
++void
++NrGnbMac::ForwardUpToRlc(NrMacSapUser* msu, NrMacSapUser::ReceivePduParameters params)
++{
++    // Need to verify if the UE / LC is still attached
++    auto rntiIt = m_rlcAttached.find(params.rnti);
++    if (rntiIt != m_rlcAttached.end())
++    {
++        auto lcidIt = rntiIt->second.find(params.lcid);
++        if (lcidIt != rntiIt->second.end())
++        {
++            if (lcidIt->second == msu) // pointer match
++            {
++                msu->ReceivePdu(params);
++            }
++        }
++    }
++}
++
++void
++NrGnbMac::DelayedDlRlcBufferReq(NrMacSchedSapProvider::SchedDlRlcBufferReqParameters params)
++{
++    // Need to verify if the UE is still attached before reporting to scheduler
++    auto rntiIt = m_rlcAttached.find(params.m_rnti);
++    if (rntiIt != m_rlcAttached.end())
++    {
++        m_macSchedSapProvider->SchedDlRlcBufferReq(params);
+     }
+ }
+ 
+@@ -1100,7 +1145,14 @@ NrGnbMac::DoTransmitBufferStatusReport(NrMacSapProvider::BufferStatusReportParam
+                 << ", Retransmission Queue HOL delay=" << params.retxQueueHolDelay
+                 << ", PDU Size=" << params.statusPduSize);
+ 
+-    m_macSchedSapProvider->SchedDlRlcBufferReq(schedParams);
++    if (m_dataDelay.GetTimeStep() > 0)
++    {
++        Simulator::Schedule(m_dataDelay, &NrGnbMac::DelayedDlRlcBufferReq, this, schedParams);
++    }
++    else
++    {
++        m_macSchedSapProvider->SchedDlRlcBufferReq(schedParams);
++    }
+ }
+ 
+ // forwarded from NrMacSapProvider
+diff --git a/model/nr-gnb-mac.h b/model/nr-gnb-mac.h
+index 86a6baf9..88afb200 100644
+--- a/model/nr-gnb-mac.h
++++ b/model/nr-gnb-mac.h
+@@ -283,6 +283,8 @@ class NrGnbMac : public Object
+      */
+     void DoReportSrToScheduler(uint16_t rnti);
+     void DoReceivePhyPdu(Ptr<Packet> p);
++    void ForwardUpToRlc(NrMacSapUser* msu, NrMacSapUser::ReceivePduParameters params);
++    void DelayedDlRlcBufferReq(NrMacSchedSapProvider::SchedDlRlcBufferReqParameters params);
+     void DoReceiveControlMessage(Ptr<NrControlMessage> msg);
+     virtual void DoSchedConfigIndication(NrMacSchedSapUser::SchedConfigIndParameters ind);
+     // forwarded from NrMacSapProvider
+@@ -370,6 +372,9 @@ class NrGnbMac : public Object
+     std::vector<NrMacSchedSapProvider::SchedUlCqiInfoReqParameters> m_ulCqiReceived;
+     std::vector<MacCeElement> m_ulCeReceived; // CE received (BSR up to now)
+ 
++    Time m_dataDelay{Seconds(0)}; // ISL data delay
++
++
+     // start of RACH related member variables
+     uint8_t m_numberOfRaPreambles;  ///< number of RA preambles
+     uint8_t m_preambleTransMax;     ///< preamble transmit maximum
+diff --git a/model/nr-ue-rrc.cc b/model/nr-ue-rrc.cc
+index 4bd6e5bb..1d80bc2d 100644
+--- a/model/nr-ue-rrc.cc
++++ b/model/nr-ue-rrc.cc
+@@ -815,7 +815,12 @@ NrUeRrc::DoForceCampedOnGnb(uint16_t cellId, uint32_t arfcn)
+ 
+     case IDLE_WAIT_MIB_SIB1:
+     case IDLE_WAIT_SIB1:
+-        NS_FATAL_ERROR("cannot abort cell selection " << ToString(m_state));
++        NS_LOG_WARN("aborting cell selection in state "
++                    << ToString(m_state) << " to force camping on cell " << m_cellId);
++        m_cellId = cellId;
++        m_initDlArfcn = arfcn;
++        m_cphySapProvider.at(GetPrimaryDlIndex())->SynchronizeWithGnb(m_cellId, m_initDlArfcn);
++        SwitchToState(IDLE_WAIT_MIB);
+         break;
+ 
+     case IDLE_WAIT_MIB:
+-- 
+2.50.1 (Apple Git-155)
+

@@ -1,0 +1,27 @@
+From fbee504424b42c7993992f9b1474315ee14e36c2 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 9 Mar 2026 02:46:11 +0100
+Subject: [PATCH] Fix for handover
+
+---
+ helper/nr-no-backhaul-epc-helper.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/helper/nr-no-backhaul-epc-helper.cc b/helper/nr-no-backhaul-epc-helper.cc
+index 9e91f241..485ee789 100644
+--- a/helper/nr-no-backhaul-epc-helper.cc
++++ b/helper/nr-no-backhaul-epc-helper.cc
+@@ -427,8 +427,8 @@ NrNoBackhaulEpcHelper::DoAddX2Interface(const Ptr<NrEpcX2>& gnb1X2,
+     NS_LOG_LOGIC("NrGnbNetDevice #1 = " << gnb1NrDev << " - CellId = " << gnb1CellId);
+     NS_LOG_LOGIC("NrGnbNetDevice #2 = " << gnb2NrDev << " - CellId = " << gnb2CellId);
+ 
+-    gnb1X2->AddX2Interface(gnb1CellId, gnb1X2Address, gnb2NrDevice->GetBwpIds(), gnb2X2Address);
+-    gnb2X2->AddX2Interface(gnb2CellId, gnb2X2Address, gnb1NrDevice->GetBwpIds(), gnb1X2Address);
++    gnb1X2->AddX2Interface(gnb1CellId, gnb1X2Address, std::vector<uint16_t>{gnb2CellId}, gnb2X2Address);
++    gnb2X2->AddX2Interface(gnb2CellId, gnb2X2Address, std::vector<uint16_t>{gnb1CellId}, gnb1X2Address);
+ 
+     gnb1NrDevice->GetRrc()->AddX2Neighbour(gnb2CellId);
+     gnb2NrDevice->GetRrc()->AddX2Neighbour(gnb1CellId);
+-- 
+2.50.1 (Apple Git-155)
+

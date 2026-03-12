@@ -74,14 +74,15 @@ NrPhySimulationHelper::NrPhySimulationHelper(const size_t stackId)
 
 void
 NrPhySimulationHelper::SetEpcHelper(TypeId epc,
-                                    std::vector<ModelConfiguration::Attribute> attributes)
+                                    std::vector<ModelConfiguration::Attribute> attributes,
+                                    bool enablePcap)
 {
     ObjectFactory factory;
     factory.SetTypeId(epc);
-    factory.Set("S1uLinkEnablePcap", BooleanValue(CONFIGURATOR->GetLogOnFile()));
+    factory.Set("S1uLinkEnablePcap", BooleanValue(enablePcap));
     factory.Set("S1uLinkPcapPrefix",
                 StringValue(NrPhySimulationHelperPriv::GetS1uLinkPcapPrefix(m_stackId)));
-    factory.Set("X2LinkEnablePcap", BooleanValue(CONFIGURATOR->GetLogOnFile()));
+    factory.Set("X2LinkEnablePcap", BooleanValue(enablePcap));
     factory.Set("X2LinkPcapPrefix",
                 StringValue(NrPhySimulationHelperPriv::GetX2LinkPcapPrefix(m_stackId)));
     m_nr_epc = factory.Create<NrEpcHelper>();

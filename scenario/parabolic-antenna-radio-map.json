@@ -122,7 +122,7 @@
           "type": "nr",
           "role": "UE",
           "networkLayer": 0,
-          "bearers": [
+          "qosFlows": [
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }

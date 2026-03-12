@@ -200,7 +200,7 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
-          "bearers": [
+          "qosFlows": [
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }

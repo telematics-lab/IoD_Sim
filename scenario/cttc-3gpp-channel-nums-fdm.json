@@ -497,7 +497,7 @@
               "targetBwp": 2
             }
           ],
-          "bearers": [
+          "qosFlows": [
             {
               "type": "GBR_CONV_VIDEO"
             },
@@ -604,7 +604,7 @@
               "targetBwp": 2
             }
           ],
-          "bearers": [
+          "qosFlows": [
             {
               "type": "GBR_CONV_VIDEO"
             },
@@ -711,7 +711,7 @@
               "targetBwp": 2
             }
           ],
-          "bearers": [
+          "qosFlows": [
             {
               "type": "GBR_CONV_VIDEO"
             },
@@ -818,7 +818,7 @@
               "targetBwp": 2
             }
           ],
-          "bearers": [
+          "qosFlows": [
             {
               "type": "GBR_CONV_VIDEO"
             },

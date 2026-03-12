@@ -84,15 +84,16 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             ModelConfigurationHelper::Get(jsonPhyLayer["channel"]["propagationLossModel"]);
 
         return CreateObject<WifiPhyLayerConfiguration>(phyType,
-                                                 jsonPhyLayer["standard"].GetString(),
-                                                 phyAttributes,
-                                                 propagationDelayModel,
-                                                 propagationLossModel);
+                                                       jsonPhyLayer["standard"].GetString(),
+                                                       phyAttributes,
+                                                       propagationDelayModel,
+                                                       propagationLossModel);
     }
     if (phyType == "none")
     {
-        return CreateObject<NonePhyLayerConfiguration>(phyType,
-                                                 std::vector<ModelConfiguration::Attribute>());
+        return CreateObject<NonePhyLayerConfiguration>(
+            phyType,
+            std::vector<ModelConfiguration::Attribute>());
     }
     else if (phyType == "lte")
     {
@@ -119,9 +120,9 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                                                   "propagationLossModel");
 
         phyConfig = CreateObject<LtePhyLayerConfiguration>(phyType,
-                                                     phyAttributes,
-                                                     propagationLossModel,
-                                                     spectrumModel);
+                                                           phyAttributes,
+                                                           propagationLossModel,
+                                                           spectrumModel);
     }
     else if (phyType == "3GPP")
     {
@@ -155,10 +156,10 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         const auto environment = jsonPhyLayer["environment"].GetString();
 
         phyConfig = CreateObject<ThreeGppPhyLayerConfiguration>(phyType,
-                                                          phyAttributes,
-                                                          propagationLossModel,
-                                                          conditionModel,
-                                                          environment);
+                                                                phyAttributes,
+                                                                propagationLossModel,
+                                                                conditionModel,
+                                                                environment);
     }
     else if (phyType == "nr")
     {
@@ -166,8 +167,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
 
         if (!jsonPhyLayer.HasMember("attributes"))
         {
-            nrConfig =
-                CreateObject<NrPhyLayerConfiguration>(phyType, ModelConfiguration::AttributeVector());
+            nrConfig = CreateObject<NrPhyLayerConfiguration>(phyType,
+                                                             ModelConfiguration::AttributeVector());
         }
         else
         {
@@ -197,6 +198,13 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             NS_ASSERT_MSG(jsonPhyLayer["fullMeshX2Links"].IsBool(),
                           "NR PHY Layer 'fullMeshX2Links' must be a boolean.");
             nrConfig->SetFullMeshX2Links(jsonPhyLayer["fullMeshX2Links"].GetBool());
+        }
+
+        if (jsonPhyLayer.HasMember("enablePcap"))
+        {
+            NS_ASSERT_MSG(jsonPhyLayer["enablePcap"].IsBool(),
+                          "NR PHY Layer 'enablePcap' must be a boolean.");
+            nrConfig->SetEnablePcap(jsonPhyLayer["enablePcap"].GetBool());
         }
 
         // Parse beamforming configuration
@@ -607,7 +615,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                     bandConfig.channelConditionAttributes = channelConditionAttributes;
                 }
 
-                if (channel.HasMember("pathlossAttributes") && channel["pathlossAttributes"].IsArray())
+                if (channel.HasMember("pathlossAttributes") &&
+                    channel["pathlossAttributes"].IsArray())
                 {
                     const auto pathlossAttributes = ModelConfigurationHelper::GetAttributes(
                         propagationLossTypeId,
@@ -735,6 +744,64 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             }
 
             nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
+        }
+
+        if (advancedOptions.HasMember("islDelayMode") && advancedOptions["islDelayMode"].IsObject())
+        {
+            const auto& idm = advancedOptions["islDelayMode"];
+
+            IslDelayModeConfig idmConfig;
+
+            if (idm.HasMember("precision") && idm["precision"].IsString())
+            {
+                idmConfig.precision = TimeValue(Time(idm["precision"].GetString())).Get();
+            }
+            else
+            {
+                idmConfig.precision = MilliSeconds(100);
+            }
+
+            if (idm.HasMember("additionalDelay") && idm["additionalDelay"].IsString())
+            {
+                idmConfig.additionalDelay =
+                    TimeValue(Time(idm["additionalDelay"].GetString())).Get();
+            }
+            else
+            {
+                idmConfig.additionalDelay = MilliSeconds(0);
+            }
+
+            if (idm.HasMember("maxISLSatDistance") && idm["maxISLSatDistance"].IsNumber())
+            {
+                idmConfig.maxISLSatDistance = idm["maxISLSatDistance"].GetDouble();
+            }
+
+            if (idm.HasMember("maxGroundStationDistance") && idm["maxGroundStationDistance"].IsNumber())
+            {
+                idmConfig.maxGroundStationDistance = idm["maxGroundStationDistance"].GetDouble();
+            }
+
+            NS_ASSERT_MSG(idm.HasMember("groundStations") && idm["groundStations"].IsArray(),
+                          "islDelayMode must have 'groundStations' array");
+
+            const auto& gsArray = idm["groundStations"].GetArray();
+            for (rapidyyjson::SizeType i = 0; i < gsArray.Size(); ++i)
+            {
+                const auto& gs = gsArray[i];
+                NS_ASSERT_MSG(gs.IsArray() && gs.Size() == 2,
+                              "groundStations entry must be an array of [lat, lon]");
+                NS_ASSERT_MSG(gs[0].IsNumber() && gs[1].IsNumber(),
+                              "groundStations entry coordinates must be numbers");
+
+                idmConfig.groundStations.emplace_back(gs[0].GetDouble(), gs[1].GetDouble());
+            }
+
+            if (idm.HasMember("updateLog") && idm["updateLog"].IsBool())
+            {
+                idmConfig.updateLog = idm["updateLog"].GetBool();
+            }
+
+            nrConfigPtr->SetIslDelayModeConfig(idmConfig);
         }
     }
 

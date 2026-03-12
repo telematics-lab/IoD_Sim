@@ -83,7 +83,7 @@ skip_ssh_id_and_signature() {
 clone_checkout_ns3 ns-3.47
 ln -fs ../../leo ./ns3/contrib/leo
 
-integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.1.1"
+integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.2.y"
 
 pushd ns3 > /dev/null
 skip_ssh_id_and_signature

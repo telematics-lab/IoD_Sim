@@ -288,6 +288,19 @@ class NrRadioGeoEnvironmentMapHelper : public Object
                    bool isDl = true);
 
     /**
+     * @brief Calculate the SNR for a specific UE and gNB at the current time without interference.
+     * @param ueDevice The UE device
+     * @param gnbDevice The gNB device
+     * @param bwpId The Bandwidth Part ID
+     * @param isDl True for Downlink (gNB->UE), False for Uplink (UE->gNB)
+     * @return The SNR in dB
+     */
+    double GetSnr(Ptr<NetDevice> ueDevice,
+                  Ptr<NetDevice> gnbDevice,
+                  uint8_t bwpId = 0,
+                  bool isDl = true);
+
+    /**
      * @brief Configure the list of interfering devices for GetSinr.
      * @param interferers The container of interfering devices
      * @param bwpId The Bandwidth Part ID
@@ -317,7 +330,7 @@ class NrRadioGeoEnvironmentMapHelper : public Object
         Ptr<Node> node;
         Ptr<SimpleNetDevice> dev;
         Ptr<GeocentricMobilityModel> mob;
-        Ptr<UniformPlanarArray> antenna;
+        Ptr<PhasedArrayModel> antenna;
         double txPower{0};
         double bandwidth{0};
         double frequency{0};
@@ -564,7 +577,7 @@ class NrRadioGeoEnvironmentMapHelper : public Object
      */
     void ConfigureDirectPathBfv(RemDevice& device,
                                 const RemDevice& otherDevice,
-                                const Ptr<const UniformPlanarArray>& antenna);
+                                const Ptr<const PhasedArrayModel>& antenna);
 
     std::list<RemDevice> m_remDev; ///< List of REM Transmitting Devices (RTDs).
     std::list<RemPoint> m_rem;     ///< List of REM points.
@@ -609,7 +622,7 @@ private:
     Ptr<NrPhy> m_rrdPhy; ///< Pointer to the phy of the RRD
     std::map<const Ptr<NetDevice>, Ptr<NrPhy>>
         m_rtdDeviceToPhy; ///< Map for storing the phy of each RTD device
-    std::map<const Ptr<NetDevice>, Ptr<UniformPlanarArray>> m_deviceToAntenna;
+    std::map<const Ptr<NetDevice>, Ptr<PhasedArrayModel>> m_deviceToAntenna;
 
     Ptr<PropagationLossModel> m_propagationLossModel;
     Ptr<PhasedArraySpectrumPropagationLossModel> m_phasedArraySpectrumLossModel;

@@ -69,7 +69,7 @@ GeoLeoOrbitMobility::GetTypeId()
                       DoubleValue(0.0),
                       MakeDoubleAccessor(&GeoLeoOrbitMobility::SetLongitudeOffset,
                                          &GeoLeoOrbitMobility::GetLongitudeOffset),
-                      MakeDoubleChecker<double>(-180.0, 180.0))
+                      MakeDoubleChecker<double>())
         .AddAttribute(
             "RetrogradeOrbit",
             "If true, the satellite moves in the opposite direction of the Earth's rotation",
@@ -81,7 +81,7 @@ GeoLeoOrbitMobility::GetTypeId()
             "The initial offset of the satellite in degrees",
             DoubleValue(0.0),
             MakeDoubleAccessor(&GeoLeoOrbitMobility::SetOffset, &GeoLeoOrbitMobility::GetOffset),
-            MakeDoubleChecker<double>(0, 360.0))
+            MakeDoubleChecker<double>())
         .AddAttribute("TleLine1",
                       "TLE Line 1",
                       StringValue(""),
@@ -144,6 +144,15 @@ void
 GeoLeoOrbitMobility::SetLongitudeOffset(double longitude)
 {
     NS_LOG_FUNCTION(this << longitude);
+    longitude = std::fmod(longitude, 360.0);
+    if (longitude > 180.0)
+    {
+        longitude -= 360.0;
+    }
+    else if (longitude < -180.0)
+    {
+        longitude += 360.0;
+    }
     m_longitude = DegreesToRadians(longitude);
     Update();
 }
@@ -159,6 +168,11 @@ void
 GeoLeoOrbitMobility::SetOffset(double offset)
 {
     NS_LOG_FUNCTION(this << offset);
+    offset = std::fmod(offset, 360.0);
+    if (offset < 0)
+    {
+        offset += 360.0;
+    }
     m_offset = DegreesToRadians(offset);
     Update();
 }

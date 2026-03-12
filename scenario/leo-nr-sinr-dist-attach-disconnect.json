@@ -74,6 +74,10 @@
             {
               "name": "ShadowingEnabled",
               "value": false
+            },
+            {
+              "name": "MeanVehicularLoss",
+              "value": 0.0
             }
           ],
           "channelConditionAttributes": [
@@ -87,7 +91,7 @@
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28e9,
-                "bandwidth": 400e6,
+                "bandwidth": 10e6,
                 "numComponentCarriers": 1,
                 "numBandwidthParts": 1
               }
@@ -106,7 +110,7 @@
           "table": [
             {
               "maxDistance": 500e3,
-              "minSINR": -10.0
+              "minSINR": -20.0
             }
           ]
         }
@@ -130,7 +134,7 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 2
+            "value": 4
           },
           {
             "name": "NumColumns",
@@ -139,14 +143,29 @@
         ]
       },
       "gnbAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 28e9
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 60.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 0.01
+          }
+        ],
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 8
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 8
+            "value": 1
           }
         ]
       },
@@ -169,7 +188,11 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 10.0
+          "value": 23.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
         },
         {
           "name": "EnableUplinkPowerControl",
@@ -179,7 +202,11 @@
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 60.0
+          "value": 40.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
         }
       ]
     }

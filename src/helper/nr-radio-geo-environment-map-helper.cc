@@ -4,6 +4,8 @@
 
 #include "nr-radio-geo-environment-map-helper.h"
 
+// #define SINR_RADIO_MAP_PRINT_DEBUG
+
 #include "ns3/abort.h"
 #include "ns3/beamforming-vector.h"
 #include "ns3/boolean.h"
@@ -736,22 +738,41 @@ void
 NrRadioGeoEnvironmentMapHelper::ConfigureQuasiOmniBfv(RemDevice& device)
 {
     NS_LOG_FUNCTION(this);
+    Ptr<UniformPlanarArray> upa = DynamicCast<UniformPlanarArray>(device.antenna);
+    if (!upa)
+    {
+        return;
+    }
     // configure beam on rrd antenna to be quasi-omni
     UintegerValue numRows;
     UintegerValue numColumns;
-    device.antenna->GetAttribute("NumRows", numRows);
-    device.antenna->GetAttribute("NumColumns", numColumns);
+    upa->GetAttribute("NumRows", numRows);
+    upa->GetAttribute("NumColumns", numColumns);
     // configure RRD antenna to have quasi omni beamforming vector
-    device.antenna->SetBeamformingVector(CreateQuasiOmniBfv(device.antenna));
+    device.antenna->SetBeamformingVector(CreateQuasiOmniBfv(upa));
 }
 
 void
 NrRadioGeoEnvironmentMapHelper::ConfigureDirectPathBfv(RemDevice& device,
                                                        const RemDevice& otherDevice,
-                                                       const Ptr<const UniformPlanarArray>& antenna)
+                                                       const Ptr<const PhasedArrayModel>& antenna)
 {
     NS_LOG_FUNCTION(this);
-    device.antenna->SetBeamformingVector(CreateDirectPathBfv(device.mob, otherDevice.mob, antenna));
+    Ptr<const UniformPlanarArray> upa = DynamicCast<const UniformPlanarArray>(antenna);
+    if (upa)
+    {
+        device.antenna->SetBeamformingVector(CreateDirectPathBfv(device.mob, otherDevice.mob, upa));
+    }
+    else
+    {
+        uint16_t size = antenna->GetNumElems();
+        PhasedArrayModel::ComplexVector vec(size);
+        for (uint16_t i = 0; i < size; ++i)
+        {
+            vec[i] = 1.0;
+        }
+        device.antenna->SetBeamformingVector(vec);
+    }
 }
 
 Ptr<SpectrumValue>
@@ -797,13 +818,15 @@ NrRadioGeoEnvironmentMapHelper::CalcRxPsdValue(RemDevice& device, RemDevice& oth
         tempPropModels.remPropagationLossModelCopy->CalcRxPower(0, device.mob, otherDevice.mob);
     double pathGainLinear = DbToRatio(pathLossDb);
 
-    NS_LOG_DEBUG("Tx power in dBm:" << WToDbm(Integral(*convertedTxPsd)));
+    double txDbm = WToDbm(Integral(*convertedTxPsd));
+    NS_LOG_DEBUG("Tx power in dBm:" << txDbm);
     NS_LOG_DEBUG("PathlosDb:" << pathLossDb);
 
     // Apply now calculated pathloss to rxPsd, now rxPsd < txPsd because we had some losses
     *(rxParams->psd) *= pathGainLinear;
 
-    NS_LOG_DEBUG("RX power in dBm after pathloss:" << WToDbm(Integral(*(rxParams->psd))));
+    double rxDbmAfterPathloss = WToDbm(Integral(*(rxParams->psd)));
+    NS_LOG_DEBUG("RX power in dBm after pathloss:" << rxDbmAfterPathloss);
 
     // Now we call spectrum model, which in this keys add a beamforming gain
     rxParams =
@@ -813,7 +836,37 @@ NrRadioGeoEnvironmentMapHelper::CalcRxPsdValue(RemDevice& device, RemDevice& oth
                                                                               device.antenna,
                                                                               otherDevice.antenna);
 
-    NS_LOG_DEBUG("RX power in dBm after fading: " << WToDbm(Integral(*(rxParams->psd))));
+    double rxDbmAfterFading = WToDbm(Integral(*(rxParams->psd)));
+    NS_LOG_DEBUG("RX power in dBm after fading: " << rxDbmAfterFading);
+
+#ifdef SINR_RADIO_MAP_PRINT_DEBUG
+    if (device.node && otherDevice.node)
+    {
+        std::cout << "Link Budget [Tx " << device.node->GetId() << " -> Rx "
+                  << otherDevice.node->GetId() << "]:\n"
+                  << "  Raw Configured TxPower=" << device.txPower << "dBm\n"
+                  << "  Effective TxPower (after spectrum conversion to Rx bandwidth)=" << txDbm
+                  << "dBm\n"
+                  << "  Tx Bandwidth="
+                  << (device.spectrumModel->GetNumBands() > 0
+                          ? device.spectrumModel->GetNumBands() *
+                                (device.spectrumModel->Begin()->fh -
+                                 device.spectrumModel->Begin()->fl)
+                          : 0)
+                  << " Hz\n"
+                  << "  Rx Bandwidth="
+                  << (otherDevice.spectrumModel->GetNumBands() > 0
+                          ? otherDevice.spectrumModel->GetNumBands() *
+                                (otherDevice.spectrumModel->Begin()->fh -
+                                 otherDevice.spectrumModel->Begin()->fl)
+                          : 0)
+                  << " Hz\n"
+                  << "  PathGain=" << pathLossDb << "dB\n"
+                  << "  Antenna/FadingGain=" << (rxDbmAfterFading - rxDbmAfterPathloss) << "dB\n"
+                  << "  RxPower(Final)=" << rxDbmAfterFading << "dBm\n"
+                  << std::endl;
+    }
+#endif
 
     return rxParams->psd;
 }
@@ -896,8 +949,7 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
         {
             // COPY the antenna so we can modify beamforming without affecting the live device
             remDev.antenna =
-                ConfigureObjectFactory(spectrumPhy->GetAntenna()->GetObject<UniformPlanarArray>())
-                    .Create<UniformPlanarArray>();
+                ConfigureObjectFactory(spectrumPhy->GetAntenna()).Create<PhasedArrayModel>();
         }
 
         if (remDev.mob)
@@ -945,19 +997,15 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = ueDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = uePhy->GetSpectrumModel();
-        rxDevice.antenna =
-            ConfigureObjectFactory(
-                uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
-                .Create<UniformPlanarArray>();
+        rxDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
 
         // Transmitter (gNB)
         txDevice.node = gnbDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        txDevice.antenna =
-            ConfigureObjectFactory(
-                gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
-                .Create<UniformPlanarArray>();
+        txDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
         txDevice.txPower = gnbPhy->GetTxPower();
 
         // Prepare Noise (at Rx: UE)
@@ -975,19 +1023,15 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
         rxDevice.node = gnbDevice->GetNode();
         rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
         rxDevice.spectrumModel = gnbPhy->GetSpectrumModel();
-        rxDevice.antenna =
-            ConfigureObjectFactory(
-                gnbPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
-                .Create<UniformPlanarArray>();
+        rxDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
 
         // Transmitter (UE)
         txDevice.node = ueDevice->GetNode();
         txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
         txDevice.spectrumModel = uePhy->GetSpectrumModel();
-        txDevice.antenna =
-            ConfigureObjectFactory(
-                uePhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())
-                .Create<UniformPlanarArray>();
+        txDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
         txDevice.txPower = uePhy->GetTxPower();
 
         // Prepare Noise (at Rx: gNB)
@@ -1023,6 +1067,98 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
     }
 
     return CalculateSinr(usefulSignal, interferenceSignals);
+}
+
+double
+NrRadioGeoEnvironmentMapHelper::GetSnr(Ptr<NetDevice> ueDevice,
+                                       Ptr<NetDevice> gnbDevice,
+                                       uint8_t bwpId,
+                                       bool isDl)
+{
+    NS_LOG_FUNCTION(this);
+
+    Ptr<NrUeNetDevice> ueNrDevice = DynamicCast<NrUeNetDevice>(ueDevice);
+    Ptr<NrGnbNetDevice> gnbNrDevice = DynamicCast<NrGnbNetDevice>(gnbDevice);
+
+    if (!ueNrDevice || !gnbNrDevice)
+    {
+        NS_FATAL_ERROR("GetSnr expects an NrUeNetDevice and an NrGnbNetDevice.");
+    }
+
+    Ptr<NrPhy> uePhy = ueNrDevice->GetPhy(bwpId);
+    Ptr<NrPhy> gnbPhy = gnbNrDevice->GetPhy(bwpId);
+
+    // Ensure Propagation Models are configured (using gNB PHY mostly for factory config)
+    if (!m_propagationLossModel)
+    {
+        ConfigurePropagationModelsFactories(gnbPhy);
+    }
+
+    // Configure Devices based on Direction
+    RemDevice rxDevice;
+    RemDevice txDevice;
+
+    if (isDl)
+    {
+        // DL: Rx = UE, Tx = gNB
+        // Receiver (UE)
+        rxDevice.node = ueDevice->GetNode();
+        rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
+        rxDevice.spectrumModel = uePhy->GetSpectrumModel();
+        rxDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
+
+        // Transmitter (gNB)
+        txDevice.node = gnbDevice->GetNode();
+        txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
+        txDevice.spectrumModel = gnbPhy->GetSpectrumModel();
+        txDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
+        txDevice.txPower = gnbPhy->GetTxPower();
+
+        // Prepare Noise (at Rx: UE)
+        if (!m_noisePsd)
+        {
+            m_noisePsd =
+                NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(uePhy->GetNoiseFigure(),
+                                                                       rxDevice.spectrumModel);
+        }
+    }
+    else
+    {
+        // UL: Rx = gNB, Tx = UE
+        // Receiver (gNB)
+        rxDevice.node = gnbDevice->GetNode();
+        rxDevice.mob = rxDevice.node->GetObject<GeocentricMobilityModel>();
+        rxDevice.spectrumModel = gnbPhy->GetSpectrumModel();
+        rxDevice.antenna = ConfigureObjectFactory(gnbPhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
+
+        // Transmitter (UE)
+        txDevice.node = ueDevice->GetNode();
+        txDevice.mob = txDevice.node->GetObject<GeocentricMobilityModel>();
+        txDevice.spectrumModel = uePhy->GetSpectrumModel();
+        txDevice.antenna = ConfigureObjectFactory(uePhy->GetSpectrumPhy()->GetAntenna())
+                               .Create<PhasedArrayModel>();
+        txDevice.txPower = uePhy->GetTxPower();
+
+        // Prepare Noise (at Rx: gNB)
+        if (!m_noisePsd)
+        {
+            m_noisePsd =
+                NrSpectrumValueHelper::CreateNoisePowerSpectralDensity(gnbPhy->GetNoiseFigure(),
+                                                                       rxDevice.spectrumModel);
+        }
+    }
+
+    // Configure Ideal Beamforming (Direct Path) for the active link
+    ConfigureDirectPathBfv(txDevice, rxDevice, txDevice.antenna);
+    ConfigureDirectPathBfv(rxDevice, txDevice, rxDevice.antenna);
+
+    // Calculate Signal
+    Ptr<SpectrumValue> usefulSignal = CalcRxPsdValue(txDevice, rxDevice);
+
+    return CalculateSnr(usefulSignal);
 }
 
 double

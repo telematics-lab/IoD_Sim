@@ -290,19 +290,20 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
 
             const std::string role = netdev["role"].GetString();
 
-            std::vector<ns3::NrBearerConfiguration> bearers;
-            if (netdev.HasMember("bearers"))
+            std::vector<ns3::NrQosFlowConfiguration> qosFlows;
+            if (netdev.HasMember("qosFlows"))
             {
-                if (netdev["bearers"].IsArray())
+                if (netdev["qosFlows"].IsArray())
                 {
-                    for (auto& ele : DecodeNrBearerConfigurations(netdev["bearers"].GetArray()))
+                    for (auto& ele : DecodeNrQosFlowConfigurations(netdev["qosFlows"].GetArray()))
                     {
-                        bearers.push_back(std::move(ele));
+                        qosFlows.push_back(std::move(ele));
                     }
                 }
                 else
                 {
-                    NS_FATAL_ERROR("Entity NR Network Device 'bearers' property must be an array.");
+                    NS_FATAL_ERROR(
+                        "Entity NR Network Device 'qosFlows' property must be an array.");
                 }
             }
 
@@ -441,7 +442,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
 
             confs.push_back(CreateObject<NrNetdeviceConfiguration>(type,
                                                                    role,
-                                                                   bearers,
+                                                                   qosFlows,
                                                                    phyProperties,
                                                                    networkLayerId,
                                                                    antennaModel,
@@ -539,56 +540,56 @@ EntityConfigurationHelper::DecodeLteBearerConfigurations(const JsonArray& jsonAr
     return bearers;
 }
 
-const std::vector<NrBearerConfiguration>
-EntityConfigurationHelper::DecodeNrBearerConfigurations(const JsonArray& jsonArray)
+const std::vector<NrQosFlowConfiguration>
+EntityConfigurationHelper::DecodeNrQosFlowConfigurations(const JsonArray& jsonArray)
 {
-    auto bearers = std::vector<NrBearerConfiguration>();
+    auto qosFlows = std::vector<NrQosFlowConfiguration>();
 
-    for (auto& bearerConf : jsonArray)
+    for (auto& qosFlowConf : jsonArray)
     {
-        NS_ASSERT_MSG(bearerConf.HasMember("type"),
-                      "Entity NR Bearer configuration must have 'type' property defined.");
-        NS_ASSERT_MSG(bearerConf["type"].IsString(),
-                      "Entity NR Bearer configuration 'type' must be an array.");
-        if (bearerConf.HasMember("bitrate") && bearerConf["bitrate"].IsObject() &&
-            bearerConf["bitrate"].HasMember("guaranteed") &&
-            bearerConf["bitrate"]["guaranteed"].IsObject() &&
-            bearerConf["bitrate"]["guaranteed"].HasMember("downlink") &&
-            bearerConf["bitrate"]["guaranteed"]["downlink"].IsDouble() &&
-            bearerConf["bitrate"]["guaranteed"].HasMember("uplink") &&
-            bearerConf["bitrate"]["guaranteed"]["uplink"].IsDouble() &&
-            bearerConf["bitrate"].HasMember("maximum") &&
-            bearerConf["bitrate"]["maximum"].IsObject() &&
-            bearerConf["bitrate"]["maximum"].HasMember("downlink") &&
-            bearerConf["bitrate"]["maximum"]["downlink"].IsDouble() &&
-            bearerConf["bitrate"]["maximum"].HasMember("uplink") &&
-            bearerConf["bitrate"]["maximum"]["uplink"].IsDouble())
+        NS_ASSERT_MSG(qosFlowConf.HasMember("type"),
+                      "Entity NR QoSFlow configuration must have 'type' property defined.");
+        NS_ASSERT_MSG(qosFlowConf["type"].IsString(),
+                      "Entity NR QoSFlow configuration 'type' must be a string.");
+        if (qosFlowConf.HasMember("bitrate") && qosFlowConf["bitrate"].IsObject() &&
+            qosFlowConf["bitrate"].HasMember("guaranteed") &&
+            qosFlowConf["bitrate"]["guaranteed"].IsObject() &&
+            qosFlowConf["bitrate"]["guaranteed"].HasMember("downlink") &&
+            qosFlowConf["bitrate"]["guaranteed"]["downlink"].IsDouble() &&
+            qosFlowConf["bitrate"]["guaranteed"].HasMember("uplink") &&
+            qosFlowConf["bitrate"]["guaranteed"]["uplink"].IsDouble() &&
+            qosFlowConf["bitrate"].HasMember("maximum") &&
+            qosFlowConf["bitrate"]["maximum"].IsObject() &&
+            qosFlowConf["bitrate"]["maximum"].HasMember("downlink") &&
+            qosFlowConf["bitrate"]["maximum"]["downlink"].IsDouble() &&
+            qosFlowConf["bitrate"]["maximum"].HasMember("uplink") &&
+            qosFlowConf["bitrate"]["maximum"]["uplink"].IsDouble())
         {
-            const std::string type = bearerConf["type"].GetString();
-            const double gbrDl = bearerConf["bitrate"]["guaranteed"]["downlink"].GetDouble();
-            const double gbrUl = bearerConf["bitrate"]["guaranteed"]["uplink"].GetDouble();
-            const double mbrDl = bearerConf["bitrate"]["maximum"]["downlink"].GetDouble();
-            const double mbrUl = bearerConf["bitrate"]["maximum"]["uplink"].GetDouble();
+            const std::string type = qosFlowConf["type"].GetString();
+            const double gbrDl = qosFlowConf["bitrate"]["guaranteed"]["downlink"].GetDouble();
+            const double gbrUl = qosFlowConf["bitrate"]["guaranteed"]["uplink"].GetDouble();
+            const double mbrDl = qosFlowConf["bitrate"]["maximum"]["downlink"].GetDouble();
+            const double mbrUl = qosFlowConf["bitrate"]["maximum"]["uplink"].GetDouble();
 
             NS_ASSERT_MSG(gbrDl >= 0.0 && gbrUl >= 0.0 && mbrDl >= 0.0 && mbrUl >= 0.0 &&
                               floor(gbrDl) == gbrDl && floor(gbrUl) == gbrUl &&
                               floor(mbrDl) == mbrDl && floor(mbrUl) == mbrUl,
                           "Bitrate must be a positive integral number.");
-            bearers.push_back(NrBearerConfiguration(type,
-                                                    (uint64_t)gbrDl,
-                                                    (uint64_t)gbrUl,
-                                                    (uint64_t)mbrDl,
-                                                    (uint64_t)mbrUl));
+            qosFlows.emplace_back(type,
+                                  (uint64_t)gbrDl,
+                                  (uint64_t)gbrUl,
+                                  (uint64_t)mbrDl,
+                                  (uint64_t)mbrUl);
         }
         else
         {
-            // In Nr simulation bearers can also be specified without QoS params
-            const std::string type = bearerConf["type"].GetString();
-            bearers.push_back(NrBearerConfiguration(type));
+            // In Nr simulation qosFlows can also be specified without QoS params
+            const std::string type = qosFlowConf["type"].GetString();
+            qosFlows.emplace_back(type);
         }
     }
 
-    return bearers;
+    return qosFlows;
 }
 
 const MobilityModelConfiguration

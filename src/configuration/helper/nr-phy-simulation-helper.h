@@ -124,16 +124,15 @@ class NrPhySimulationHelper : public Object
         std::vector<CcBwpCreator::SimpleOperationBandConf> carrierConfs;
     };
 
-    void CreateChannel(
-        const std::vector<ChannelOperationBandConf>& freqBands,
-        const std::string& bandScenario,
-        const std::string& bandCondition,
-        const std::string& bandModel,
-        std::vector<ModelConfiguration::Attribute> channelAttributes,
-        std::vector<ModelConfiguration::Attribute> pathlossAttributes,
-        std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
-        uint8_t channelConfigFlags = NrChannelHelper::INIT_PROPAGATION |
-                                     NrChannelHelper::INIT_FADING);
+    void CreateChannel(const std::vector<ChannelOperationBandConf>& freqBands,
+                       const std::string& bandScenario,
+                       const std::string& bandCondition,
+                       const std::string& bandModel,
+                       std::vector<ModelConfiguration::Attribute> channelAttributes,
+                       std::vector<ModelConfiguration::Attribute> pathlossAttributes,
+                       std::vector<ModelConfiguration::Attribute> phasedSpectrumAttributes,
+                       uint8_t channelConfigFlags = NrChannelHelper::INIT_PROPAGATION |
+                                                    NrChannelHelper::INIT_FADING);
 
     void SetGnbAntenna(const std::string& antennaType,
                        const std::vector<ModelConfiguration::Attribute>& antennaProps = {},
@@ -149,7 +148,8 @@ class NrPhySimulationHelper : public Object
     void SetUePhyAttributes(const std::vector<ModelConfiguration::Attribute>& uePhyAttributes);
     void SetGnbPhyAttributes(const std::vector<ModelConfiguration::Attribute>& gnbPhyAttributes);
 
-    BandwidthPartInfoPtrVector GetBwps(uint32_t channelId, const std::vector<uint32_t>& bandIndices) const;
+    BandwidthPartInfoPtrVector GetBwps(uint32_t channelId,
+                                       const std::vector<uint32_t>& bandIndices) const;
 
     NetDeviceContainer InstallGnbDevices(NodeContainer& gnbNode,
                                          BandwidthPartInfoPtrVector allBwps);
@@ -160,7 +160,9 @@ class NrPhySimulationHelper : public Object
         NodeContainer& ueNodes,
         BandwidthPartInfoPtrVector allBwps);
 
-    void SetEpcHelper(TypeId epc, std::vector<ModelConfiguration::Attribute> attributes);
+    void SetEpcHelper(TypeId epc,
+                      std::vector<ModelConfiguration::Attribute> attributes,
+                      bool enablePcap = false);
     void SetBeamformingHelper(TypeId beam, std::vector<ModelConfiguration::Attribute> attributes);
 
   private:

@@ -21,7 +21,7 @@
 #include <ns3/entity-configuration.h>
 #include <ns3/lte-bearer-configuration.h>
 #include <ns3/netdevice-configuration.h>
-#include <ns3/nr-bearer-configuration.h>
+#include <ns3/nr-qos-flow-configuration.h>
 
 #include <rapidyyjson/document.h>
 
@@ -57,7 +57,7 @@ class EntityConfigurationHelper
         const rapidyyjson::Value& json);
     static const std::vector<LteBearerConfiguration> DecodeLteBearerConfigurations(
         const JsonArray& json);
-    static const std::vector<NrBearerConfiguration> DecodeNrBearerConfigurations(
+    static const std::vector<NrQosFlowConfiguration> DecodeNrQosFlowConfigurations(
         const JsonArray& jsonArray);
     static const MobilityModelConfiguration DecodeMobilityConfiguration(
         const rapidyyjson::Value& json);

@@ -80,6 +80,10 @@
             {
               "name": "MeanVehicularLoss",
               "value": 0.0
+            },
+            {
+              "name": "BuildingPenetrationLossesEnabled",
+              "value": false
             }
           ],
           "channelConditionAttributes": [
@@ -93,7 +97,7 @@
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28e9,
-                "bandwidth": 400e6,
+                "bandwidth": 100e6,
                 "numComponentCarriers": 1,
                 "numBandwidthParts": 1
               }
@@ -113,9 +117,26 @@
           "table": [
             {
               "maxDistance": 430e3,
-              "minSINR": -10.0
+              "minSINR": -20.0
             }
           ]
+        },
+        "islDelayMode": {
+          "precision": "100ms",
+          "additionalDelay": "5ms",
+          "maxISLSatDistance": 4000e3,
+          "maxGroundStationDistance": 600e3, //if set, the simulation fails due to unreachable satellites
+          "groundStations": [
+            [
+              30.0,
+              108.0
+            ],
+            [
+              59.0,
+              -70.0
+            ]
+          ],
+          "updateLog": true
         }
       },
       "epc": {
@@ -142,7 +163,7 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 2
+            "value": 4
           },
           {
             "name": "NumColumns",
@@ -151,14 +172,29 @@
         ]
       },
       "gnbAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 28e9
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 50.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 0.01
+          }
+        ],
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 8
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 8
+            "value": 1
           }
         ]
       },
@@ -194,17 +230,33 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 75.0
+          "value": 50.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
         },
         {
           "name": "EnableUplinkPowerControl",
           "value": false
+        },
+        {
+          "name": "NoiseFigure",
+          "value": 0.0
         }
       ],
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 75.0
+          "value": 50.0
+        },
+        {
+          "name": "NoiseFigure",
+          "value": 0.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
         }
       ]
     }
@@ -318,6 +370,42 @@
     }
   ],
   "leo-sats": [
+    {
+      "!constellation": {
+        "distribution": "uniform-orbits",
+        "orbits": [
+          {
+            "height": 400.0,
+            "inclination": 30.0,
+            "orbits-per-longitude": 10,
+            "sats-per-orbit": 1
+          },
+          {
+            "height": 400.0,
+            "inclination": 60.0,
+            "orbits-per-longitude": 10,
+            "sats-per-orbit": 1
+          },
+          {
+            "height": 400.0,
+            "inclination": 45.0,
+            "orbits-per-longitude": 10,
+            "sats-per-orbit": 1
+          }
+        ]
+      },
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "applications": []
+    },
     {
       "netDevices": [
         {

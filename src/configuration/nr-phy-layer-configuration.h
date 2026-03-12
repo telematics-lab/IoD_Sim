@@ -28,6 +28,7 @@
 #include <ns3/wifi-phy.h>
 
 #include <functional>
+#include <limits>
 #include <optional>
 #include <string>
 #include <utility>
@@ -94,6 +95,7 @@ struct NrOperationBand
         CONTIGUOUS,
         NON_CONTIGUOUS
     };
+
     Type type = CONTIGUOUS;
     std::vector<NrFrequencyBand> carriers;
 };
@@ -135,6 +137,20 @@ struct SinrDistanceAttachConfig
     Time precision;
     std::vector<SinrDistanceTableEntry> table;
     double threshold = 2.0;
+};
+
+/**
+ * Data structure for ISL Delay Mode configuration
+ */
+struct IslDelayModeConfig
+{
+    Time precision;
+    Time additionalDelay;
+    double maxISLSatDistance = std::numeric_limits<double>::infinity(); // no limit
+    double maxGroundStationDistance =
+        std::numeric_limits<double>::infinity();           // default infinity/large number
+    std::vector<std::pair<double, double>> groundStations; // <latitude, longitude>
+    bool updateLog = false;
 };
 
 /**
@@ -455,6 +471,18 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::optional<SinrDistanceAttachConfig> GetSinrDistanceAttachConfig() const;
 
     /**
+     * Set the ISL delay mode configuration
+     * \param config The configuration
+     */
+    void SetIslDelayModeConfig(const IslDelayModeConfig& config);
+
+    /**
+     * Get the ISL delay mode configuration
+     * \return The configuration
+     */
+    std::optional<IslDelayModeConfig> GetIslDelayModeConfig() const;
+
+    /**
      * Set if full mesh X2 links should be created among gNBs
      * \param enable True if full mesh X2 links should be enabled
      */
@@ -465,6 +493,16 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      * \return True if full mesh X2 links are enabled
      */
     bool GetFullMeshX2Links() const;
+
+    /**
+     * Set Enable Pcap
+     */
+    void SetEnablePcap(bool enablePcap);
+
+    /**
+     * Get Enable Pcap
+     */
+    bool GetEnablePcap() const;
 
   private:
     std::string m_attachMethod = "closest";
@@ -496,6 +534,8 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     TypeId m_gnbChannelAccessManagerType;
     std::vector<ModelConfiguration::Attribute> m_gnbChannelAccessManagerAttributes;
     std::optional<SinrDistanceAttachConfig> m_sinrDistanceAttachConfig;
+    std::optional<IslDelayModeConfig> m_islDelayModeConfig;
+    bool m_enablePcap = false;
     bool m_fullMeshX2Links = true;
 };
 

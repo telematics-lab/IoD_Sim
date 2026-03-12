@@ -48,7 +48,7 @@ NrNetdeviceConfiguration::GetTypeId()
 NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::string type,
     const std::string rawRole,
-    const std::vector<NrBearerConfiguration> bearers,
+    const std::vector<NrQosFlowConfiguration> qosFlows,
     const std::vector<NrPhyProperty> phyProperties,
     const std::optional<uint32_t> networkLayerId,
     const std::optional<ModelConfiguration> antennaModel,
@@ -60,7 +60,7 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<X2NeighborConfiguration> x2Neighbors)
     : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
-      m_bearers{bearers},
+      m_qosFlows{qosFlows},
       m_phyProperties{phyProperties},
       m_rrcProperties{rrcProperties},
       m_outputLinks{outputLinks},
@@ -80,10 +80,10 @@ NrNetdeviceConfiguration::GetRole() const
     return m_role;
 }
 
-const std::vector<NrBearerConfiguration>
-NrNetdeviceConfiguration::GetBearers() const
+const std::vector<NrQosFlowConfiguration>
+NrNetdeviceConfiguration::GetQosFlows() const
 {
-    return m_bearers;
+    return m_qosFlows;
 }
 
 const std::vector<NrPhyProperty>

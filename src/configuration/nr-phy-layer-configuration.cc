@@ -433,6 +433,18 @@ NrPhyLayerConfiguration::GetSinrDistanceAttachConfig() const
 }
 
 void
+NrPhyLayerConfiguration::SetIslDelayModeConfig(const IslDelayModeConfig& config)
+{
+    m_islDelayModeConfig = config;
+}
+
+std::optional<IslDelayModeConfig>
+NrPhyLayerConfiguration::GetIslDelayModeConfig() const
+{
+    return m_islDelayModeConfig;
+}
+
+void
 NrPhyLayerConfiguration::SetFullMeshX2Links(bool enable)
 {
     m_fullMeshX2Links = enable;
@@ -442,6 +454,18 @@ bool
 NrPhyLayerConfiguration::GetFullMeshX2Links() const
 {
     return m_fullMeshX2Links;
+}
+
+void
+NrPhyLayerConfiguration::SetEnablePcap(bool enablePcap)
+{
+    m_enablePcap = enablePcap;
+}
+
+bool
+NrPhyLayerConfiguration::GetEnablePcap() const
+{
+    return m_enablePcap;
 }
 
 } // namespace ns3

@@ -146,6 +146,35 @@ The simulation periodically evaluates the attachment for each UE. For each candi
 }
 ```
 
+#### `advancedOptions.islDelayMode`
+**Description:** Configuration for the Inter-Satellite Link (ISL) routing delay module. This mode dynamcally adjusts the latency of the `PointToPoint` S1-U link between LEO-sat gNBs and the core network by modeling minimum-delay ISL hop topology. Satellites route backwards through an ISL mesh to reach the nearest connected ground station.
+
+**Parameters:**
+- `precision` (string): Time interval for recalculating distances, graph topology, and updating delays (e.g., "100ms"). Default: `100ms`.
+- `additionalDelay` (string): A fixed additional delay added to the shortest path calculated propagation delay (e.g., "10ms"). Default: `0ms`.
+- `maxISLSatDistance` (double): The maximum 3D distance in meters allowed between two satellites to form an ISL edge. Default: `3000000.0` (3000km).
+- `maxGroundStationDistance` (double): The maximum 3D distance in meters allowed between a satellite and a ground station to form a direct downlink edge. Default: infinity.
+- `groundStations` (array of arrays): A list of coordinate pairs `[latitude, longitude]` defining the locations of available ground stations.
+
+**Logic:**
+The simulation periodically (every `precision` interval) builds an undirected graph of all satellite gNBs. An ISL edge is populated between satellites if their distance is `<= maxISLSatDistance`. Satellites are additionally tethered to a Virtual Earth node if they lie within `maxGroundStationDistance` of any predefined ground station. The delay weight of the ISL/downlink edges is the propagation delay (distance over speed of light). Dijkstra's shortest-path algorithm is executed starting at the Virtual Earth node to find the lowest possible cumulative delay towards the core network for each satellite. The final shortest delay + `additionalDelay` is dynamically applied to the `PointToPointChannel` attributes. Unreachable satellites receive an effectively infinite delay of 1 hour to drop packets.
+
+**Example:**
+```json
+"advancedOptions": {
+  "islDelayMode": {
+    "precision": "100ms",
+    "additionalDelay": "5ms",
+    "maxISLSatDistance": 3000000.0,
+    "maxGroundStationDistance": 2000000.0,
+    "groundStations": [
+      [45.0, 9.0],
+      [40.7128, -74.0060]
+    ]
+  }
+}
+```
+
 ### `fullMeshX2Links`
 **Optional**
 **Type:** `boolean`
@@ -378,7 +407,7 @@ In this parameter, we set how to define the scheduler to use for radio resource 
 | ns3::NrMacSchedulerOfdmaRR     | OFDMA    | Round Robin (RR)         | Assigns resources to UEs in turn, cyclically. Guarantees maximum fairness but does not optimize total throughput or channel quality.               |
 | ns3::NrMacSchedulerOfdmaPF     | OFDMA    | Proportional Fair (PF)   | Seeks a compromise between fairness and throughput. Assigns resources based on the ratio between instantaneous channel quality and the user's historical average throughput. |
 | ns3::NrMacSchedulerOfdmaMR     | OFDMA    | Max Rate (MR)            | Assigns resources to the UE with the absolute best channel. Maximizes cell throughput but starves edge users (minimum fairness).                     |
-| ns3::NrMacSchedulerOfdmaQos    | OFDMA    | Quality of Service (QoS) | Prioritizes users based on QoS requirements (e.g., bearer/flow priority). Ideal for mixed scenarios with voice, video, and data traffic.                       |
+| ns3::NrMacSchedulerOfdmaQos    | OFDMA    | Quality of Service (QoS) | Prioritizes users based on QoS requirements (e.g., QoS Flow priority). Ideal for mixed scenarios with voice, video, and data traffic.                       |
 | ns3::NrMacSchedulerOfdmaRandom | OFDMA    | Random                   | Assigns resources purely randomly. Mainly used for debug or baseline purposes.                                                                    |
 | ns3::NrMacSchedulerOfdmaAi     | OFDMA    | AI / External            | Interface to connect external learning agents (e.g., via ns3-ai) to make scheduling decisions based on Machine Learning.                      |
 | ns3::NrMacSchedulerTdmaRR      | TDMA     | Round Robin (RR)         | TDMA version of Round Robin. Assigns the entire slot to users in turn.                                                                                            |
@@ -1019,7 +1048,7 @@ When we go to configure the various network devices, it is possible to configure
     "role": "UE", // Role: UE or gNB
     "channelId": 0, // Optional: Channel ID to use (default: 0)
     "channelBands": [0, 1], // Optional: List of band indices to use (default: all)
-    "bearers": [
+    "qosFlows": [
       {
         "type": "NGBR_LOW_LAT_EMBB"
       }
@@ -1057,7 +1086,7 @@ When we go to configure the various network devices, it is possible to configure
 ]
 ```
 
-As you can see, it is possible to specify the type of bearer (flow) you want to use among those supported by 5g-lena.
+As you can see, it is possible to specify the QoS Flow you want to use among those supported by 5g-lena.
 
 It is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device. The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
 

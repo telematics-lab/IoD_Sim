@@ -19,7 +19,7 @@
 #define NR_NETDEVICE_CONFIGURATION_H
 
 #include "netdevice-configuration.h"
-#include "nr-bearer-configuration.h"
+#include "nr-qos-flow-configuration.h"
 
 #include <ns3/model-configuration.h>
 
@@ -63,7 +63,7 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
      */
     NrNetdeviceConfiguration(const std::string type,
                              const std::string rawRole,
-                             const std::vector<NrBearerConfiguration> bearers,
+                             const std::vector<NrQosFlowConfiguration> qosFlows,
                              const std::vector<NrPhyProperty> phyProperties,
                              const std::optional<uint32_t> networkLayerId,
                              const std::optional<ModelConfiguration> antennaModel,
@@ -89,7 +89,7 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     /**
      * \return The bearers configuration for the Network Device.
      */
-    const std::vector<NrBearerConfiguration> GetBearers() const;
+    const std::vector<NrQosFlowConfiguration> GetQosFlows() const;
     /** \return The phy properties configuration for the Network Device. */
     const std::vector<NrPhyProperty> GetPhyProperties() const;
     /** \return The rrc properties configuration for the Network Device. */
@@ -106,7 +106,7 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
 
   private:
     const NrRole m_role;
-    const std::vector<NrBearerConfiguration> m_bearers;
+    const std::vector<NrQosFlowConfiguration> m_qosFlows;
     const std::vector<NrPhyProperty> m_phyProperties;
     const std::vector<NrPhyProperty> m_rrcProperties;
     const std::vector<OutputLinkConfiguration> m_outputLinks;
