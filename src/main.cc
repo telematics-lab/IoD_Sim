@@ -2998,8 +2998,8 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
         }
         else
         {
-            // Unreachable satellite: close the link by setting a massive delay (1 hour)
-            totalDelay = Years(100.0);
+            // Unreachable satellite: close the link by dropping data entirely with a negative delay
+            totalDelay = Seconds(-1.0);
         }
 
         Ptr<Node> gnbNode = sats[i].node;

@@ -1,17 +1,17 @@
-From e5371da3dbcae8249b11954495366137261c54a4 Mon Sep 17 00:00:00 2001
+From 23d8bb31f8d711ddb7014856115a9ec7421c1380 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 9 Mar 2026 01:15:42 +0100
 Subject: [PATCH] Updates in Mac layer on Gnb To support DataDelay for ISL
  communications
 
 ---
- model/nr-gnb-mac.cc | 56 +++++++++++++++++++++++++++++++++++++++++++--
+ model/nr-gnb-mac.cc | 58 +++++++++++++++++++++++++++++++++++++++++++--
  model/nr-gnb-mac.h  |  5 ++++
  model/nr-ue-rrc.cc  |  7 +++++-
- 3 files changed, 65 insertions(+), 3 deletions(-)
+ 3 files changed, 67 insertions(+), 3 deletions(-)
 
 diff --git a/model/nr-gnb-mac.cc b/model/nr-gnb-mac.cc
-index 83572464..bdf7bcb2 100644
+index 83572464..1214ff13 100644
 --- a/model/nr-gnb-mac.cc
 +++ b/model/nr-gnb-mac.cc
 @@ -442,6 +442,11 @@ NrGnbMac::GetTypeId()
@@ -26,7 +26,7 @@ index 83572464..bdf7bcb2 100644
              .AddAttribute("NumberOfRaPreambles",
                            "How many random access preambles are available for the contention based "
                            "RACH process",
-@@ -952,7 +957,47 @@ NrGnbMac::DoReceivePhyPdu(Ptr<Packet> p)
+@@ -952,7 +957,48 @@ NrGnbMac::DoReceivePhyPdu(Ptr<Packet> p)
  
      if (rxParams.p->GetSize())
      {
@@ -39,10 +39,11 @@ index 83572464..bdf7bcb2 100644
 +                                (*lcidIt).second,
 +                                rxParams);
 +        }
-+        else
++        else if (m_dataDelay.GetTimeStep() == 0)
 +        {
 +            (*lcidIt).second->ReceivePdu(rxParams);
 +        }
++        // If m_dataDelay < 0, naturally do nothing (drop the PDU)
 +    }
 +}
 +
@@ -75,7 +76,7 @@ index 83572464..bdf7bcb2 100644
      }
  }
  
-@@ -1100,7 +1145,14 @@ NrGnbMac::DoTransmitBufferStatusReport(NrMacSapProvider::BufferStatusReportParam
+@@ -1100,7 +1146,15 @@ NrGnbMac::DoTransmitBufferStatusReport(NrMacSapProvider::BufferStatusReportParam
                  << ", Retransmission Queue HOL delay=" << params.retxQueueHolDelay
                  << ", PDU Size=" << params.statusPduSize);
  
@@ -84,10 +85,11 @@ index 83572464..bdf7bcb2 100644
 +    {
 +        Simulator::Schedule(m_dataDelay, &NrGnbMac::DelayedDlRlcBufferReq, this, schedParams);
 +    }
-+    else
++    else if (m_dataDelay.GetTimeStep() == 0)
 +    {
 +        m_macSchedSapProvider->SchedDlRlcBufferReq(schedParams);
 +    }
++    // If m_dataDelay < 0, drop the BSR reporting to scheduler
  }
  
  // forwarded from NrMacSapProvider
