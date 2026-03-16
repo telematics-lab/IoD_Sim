@@ -1,9 +1,18 @@
 {
-  "name": "leo-nr-sinr-dist-attach",
+  /*
+    In this example:
+    - There is a satellite that covers our UE, after 1/2 seconds the satellite moves away from the UE, and the UE is disconnected.
+    - The UE is reconnected after some seconds to the next satellite
+    - The UE is disconnected after around 70 seconds
+
+    The scenario is useful to test the attach/disconnect process of the UE with sinr-distance-attach option.
+
+  */
+  "name": "leo-nr-sinr-dist-attach-disconnect",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 10,
-  "appStatisticsReportInterval": 0.3,
+  "duration": 80.0,
+  "appStatisticsReportInterval": 1.0,
   "staticNs3Config": [
     {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
@@ -11,11 +20,11 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "50ms"
+      "value": "100ms"
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
-      "value": "50ms"
+      "value": "100ms"
     },
     {
       "name": "ns3::NrRlcUm::MaxTxBufferSize",
@@ -23,7 +32,7 @@
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-      "value": false // Deactivated HARQ for satellite communication
+      "value": false
     }
   ],
   "world": {
@@ -35,32 +44,21 @@
     "buildings": []
   },
   "radioMaps": [
-    // Second gNB after the handover
     {
       "phyLayerId": 0,
       "bwpId": 0,
       "coordinates": "geocentric",
       "logGeocentricREM": true,
-      "txNodes": [
-        {
-          "key": "leo-sats",
-          "index": 1
-        }
-      ],
-      "rxNode": {
-        "key": "vehicles",
-        "index": 0
-      },
       "parameters": {
-        "MinLon": "-10.0",
-        "MaxLon": "19.0",
-        "MinLat": "9.0",
-        "MaxLat": "30.0",
-        "Altitude": "1.0",
-        "XRes": "200",
-        "YRes": "200",
-        "RemMode": "BeamShape", // CoverageArea, BeamShape, UeCoverageArea
-        "InstallationDelay": "1.2s"
+        "MinLon": "-5.0",
+        "MaxLon": "5.0",
+        "MinLat": "-5.0",
+        "MaxLat": "5.0",
+        "Altitude": "2.0",
+        "XRes": "100",
+        "YRes": "100",
+        "RemMode": "CoverageArea",
+        "InstallationDelay": "0.6s"
       }
     }
   ],
@@ -80,10 +78,6 @@
             {
               "name": "MeanVehicularLoss",
               "value": 0.0
-            },
-            {
-              "name": "BuildingPenetrationLossesEnabled",
-              "value": false
             }
           ],
           "channelConditionAttributes": [
@@ -97,7 +91,7 @@
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28e9,
-                "bandwidth": 100e6,
+                "bandwidth": 10e6,
                 "numComponentCarriers": 1,
                 "numBandwidthParts": 1
               }
@@ -113,30 +107,12 @@
       "advancedOptions": {
         "sinr-distance-attach": {
           "precision": "100ms",
-          "threshold": 3.0,
           "table": [
             {
-              "maxDistance": 430e3,
+              "maxDistance": 500e3,
               "minSINR": -20.0
             }
           ]
-        },
-        "islDelayMode": {
-          "precision": "100ms",
-          "additionalDelay": "5ms",
-          "maxISLSatDistance": 4000e3,
-          "maxGroundStationDistance": 600e3, //if set, the simulation fails due to unreachable satellites
-          "groundStations": [
-            [
-              30.0,
-              108.0
-            ],
-            [
-              59.0,
-              -70.0
-            ]
-          ],
-          "updateLog": true
         }
       },
       "epc": {
@@ -152,12 +128,7 @@
         "helper": "ns3::IdealBeamformingHelper",
         "method": "ns3::DirectPathBeamforming",
         "algorithmAttributes": [],
-        "attributes": [
-          {
-            "name": "BeamformingPeriodicity",
-            "value": "100ms"
-          }
-        ]
+        "attributes": []
       },
       "ueAntenna": {
         "arrayProperties": [
@@ -180,7 +151,7 @@
           },
           {
             "name": "AntennaMaxGainDb",
-            "value": 50.0
+            "value": 60.0
           },
           {
             "name": "AntennaCircularApertureRadius",
@@ -214,23 +185,10 @@
           }
         ]
       },
-      "scheduler": {
-        "type": "ns3::NrMacSchedulerOfdmaPF",
-        "attributes": [
-          {
-            "name": "FixedMcsDl",
-            "value": true
-          },
-          {
-            "name": "StartingMcsDl",
-            "value": 2
-          }
-        ]
-      },
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 50.0
+          "value": 23.0
         },
         {
           "name": "PowerAllocationType",
@@ -239,20 +197,12 @@
         {
           "name": "EnableUplinkPowerControl",
           "value": false
-        },
-        {
-          "name": "NoiseFigure",
-          "value": 0.0
         }
       ],
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
-          "value": 50.0
-        },
-        {
-          "name": "NoiseFigure",
-          "value": 0.0
+          "value": 40.0
         },
         {
           "name": "PowerAllocationType",
@@ -296,11 +246,11 @@
         "attributes": [
           {
             "name": "InitialLatitude",
-            "value": 19.5
+            "value": 0.0
           },
           {
             "name": "InitialLongitude",
-            "value": 1.5
+            "value": 0.0
           },
           {
             "name": "Altitude",
@@ -308,11 +258,11 @@
           },
           {
             "name": "Speed",
-            "value": 8.0
+            "value": 0.0
           },
           {
             "name": "Azimuth",
-            "value": 45.0
+            "value": 0.0
           }
         ]
       },
@@ -322,11 +272,11 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.1
+              "value": 0.5
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 299.0
             },
             {
               "name": "Port",
@@ -343,7 +293,7 @@
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 299.0
             },
             {
               "name": "Remote",
@@ -371,42 +321,6 @@
   ],
   "leo-sats": [
     {
-      "!constellation": {
-        "distribution": "uniform-orbits",
-        "orbits": [
-          {
-            "height": 400.0,
-            "inclination": 30.0,
-            "orbits-per-longitude": 10,
-            "sats-per-orbit": 1
-          },
-          {
-            "height": 400.0,
-            "inclination": 60.0,
-            "orbits-per-longitude": 10,
-            "sats-per-orbit": 1
-          },
-          {
-            "height": 400.0,
-            "inclination": 45.0,
-            "orbits-per-longitude": 10,
-            "sats-per-orbit": 1
-          }
-        ]
-      },
-      "netDevices": [
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "directivity": {
-            "mode": "earth-centered"
-          }
-        }
-      ],
-      "applications": []
-    },
-    {
       "netDevices": [
         {
           "type": "nr",
@@ -426,7 +340,7 @@
           },
           {
             "name": "Inclination",
-            "value": 20.0
+            "value": 0.0
           },
           {
             "name": "Longitude",
@@ -434,7 +348,7 @@
           },
           {
             "name": "Offset",
-            "value": 0
+            "value": 2.52
           },
           {
             "name": "RetrogradeOrbit",
@@ -464,15 +378,15 @@
           },
           {
             "name": "Inclination",
-            "value": 20.0
-          },
-          {
-            "name": "Longitude",
             "value": 0.0
           },
           {
+            "name": "Longitude",
+            "value": -20.0
+          },
+          {
             "name": "Offset",
-            "value": 2
+            "value": 17
           },
           {
             "name": "RetrogradeOrbit",
@@ -492,11 +406,11 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.1
+              "value": 0.5
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 299.0
             },
             {
               "name": "Remote",
@@ -524,11 +438,11 @@
           "attributes": [
             {
               "name": "StartTime",
-              "value": 0.1
+              "value": 0.5
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 299.0
             },
             {
               "name": "Port",
@@ -543,13 +457,6 @@
     "UdpClient",
     "UdpServer",
     "NrPdcp",
-    "Scenario",
-    "UdpEchoClientApplication",
-    "UdpEchoServerApplication",
-    "PacketSink",
-    "UdpL4Protocol",
-    "NrSpectrumPhy",
-    "NrEesmErrorModel",
-    "ThreeGppSpectrumPropagationLossModel"
+    "Scenario"
   ]
 }

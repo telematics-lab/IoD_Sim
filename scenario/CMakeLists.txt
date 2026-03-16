@@ -54,7 +54,7 @@ set(Tests
   test_periphstream-wifi.json
   cttc-nr-demo.json
   cttc-3gpp-channel-nums-fdm.json
-  leo-nr-sinr-dist-attach-disconnect.json
+  leo-nr-isl-link.json
   leo-nr-sinr-dist-attach.json
   leo-car-move-tracing.json
   leo-constellation-uniform-orbits.json
