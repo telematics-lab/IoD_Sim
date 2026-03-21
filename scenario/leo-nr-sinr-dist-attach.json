@@ -8,7 +8,7 @@
     The scenario is useful to test the attach/disconnect process of the UE with sinr-distance-attach option.
 
   */
-  "name": "leo-nr-sinr-dist-attach-disconnect",
+  "name": "leo-nr-sinr-dist-attach",
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 80.0,

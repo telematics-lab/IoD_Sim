@@ -268,6 +268,8 @@ set(header_files
 )
 
 
+set(STATIC_DEPS "")
+
 if(NS3_STATIC)
     set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
@@ -315,7 +317,14 @@ build_lib(
 
 build_exec(
   EXECNAME scenario
-  SOURCE_FILES main.cc
+  SOURCE_FILES main.cc 
+               scenario-core.cc 
+               scenario-phy.cc 
+               scenario-mac.cc 
+               scenario-network.cc 
+               scenario-entities.cc 
+               scenario-mobility.cc 
+               scenario-link.cc
   LIBRARIES_TO_LINK ${libiodsim}
                     ${libcore}
                     ${libapplications}
