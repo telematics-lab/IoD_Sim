@@ -1,4 +1,5 @@
 #include "scenario.h"
+#include <filesystem>
 
 namespace ns3
 {

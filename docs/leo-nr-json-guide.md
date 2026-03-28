@@ -1255,6 +1255,54 @@ In particular, however, we focus the detail on the constant velocity geocentric 
 | `Speed` | number | Speed in m/s |
 | `Azimuth` | number | Direction of movement in degrees (0-360) |
 
+### `vehicles[n].mobilityModel` (TraceBased)
+**Description:** Mobility model based on real or pre-recorded geographical traces.
+
+```json
+"mobilityModel": {
+  "name": "ns3::TraceBasedMobilityModel",
+  "attributes": [
+    {"name": "TraceFile", "value": "scenarios/traces/milan-traffic.trace"},
+    {"name": "DeviceId", "value": "vehicle-42"},
+    {"name": "Precision", "value": "1s"}
+  ]
+}
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `TraceFile` | string | `""` | Path to the trace file (`.trace`, which is internally a `.tar.gz` architecture containing compressed CSVs). |
+| `DeviceId` | string | `""` | The unique Device ID contained within the trace file to track for this specific node. |
+| `Precision` | string | `"1s"` | The time precision with which to compute position updates. `0` means arbitrary precision. |
+
+This model requires external setup through a `.trace` (that is a `.gz.tar` non-standard format) trace file. It is generally not configured manually per generic vehicle object but instead generated automatically using the `!traceMobility` helper generative command which automatically injects all the properties (`DeviceId`, `TraceFile`) autonomously.
+
+### Generative Command: `!traceMobility`
+**Description:** Automates the creation of vehicles and their mobility models by reading a `.trace` trace file (containing compressed `nodes.csv.gz` and `traces.csv.gz`), effectively iterating and duplicating the JSON block for each traced node avoiding manual setup.
+
+**Parameters:**
+- `file` (string): The path to the `.trace` trace file.
+- `blacklist` (array of strings, optional): Nodes by ID to exclude from creation.
+- `whitelist` (array of strings, optional): Nodes by ID to explicitly include (excluding all others).
+
+**Example:**
+```json
+"vehicles": [
+  {
+    "!traceMobility": {
+      "file": "scenarios/traces/milan-traffic.tar.gz",
+      "blacklist": ["bus-10", "tram-2"]
+    },
+    // The following properties will be cloned for each tracked vehicle
+    "phyLayer": [
+      {
+        "type": "nr"
+      }
+    ]
+  }
+]
+```
+
 ---
 
 ## LEO Satellites
@@ -1297,6 +1345,86 @@ Furthermore, also in this case we see specifically the geocentric mobility model
 | `Longitude` | number | Longitude of the ascending node in degrees |
 | `Offset` | number | Orbital offset (phase offset) in degrees |
 | `RetrogradeOrbit` | boolean | If `true`, retrograde orbit |
+
+### `leo-sats[n].mobilityModel` (SGP4)
+**Description:** LEO orbital mobility model utilizing Simplified General Perturbations-4 (SGP4) and Two-Line Elements (TLE) data for precise dynamic positioning.
+
+```json
+"mobilityModel": {
+  "name": "ns3::GeoSgp4MobilityModel",
+  "attributes": [
+    {"name": "TleElement1", "value": "1 44235U 19029A   26078.00000000  .00000000  00000-0  00000-0 0  9990"},
+    {"name": "TleElement2", "value": "2 44235  53.0000   0.0000 0001000   0.0000   0.0000 15.00000000    01"},
+    {"name": "Sgp4TimeReference", "value": "now"}
+  ]
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `TleElement1` | string | The first row of the TLE data |
+| `TleElement2` | string | The second row of the TLE data |
+| `Sgp4TimeReference` | string | Temporal alignment reference (e.g., "now", "2026-03-28T12:00:00Z") |
+
+### Generative Command: `!constellation`
+**Description:** Automates the creation of complex satellite constellations. Instead of specifying hundreds of singular `leo-sats` blocks manually, this generative macro parses multiple nodes structurally.
+
+It supports two main generation modes: `file` (working with TLE datasets) and `uniform-orbits`.
+
+#### Distribution: `file`
+Downloads OR reads a TLE payload file, assigning the SGP4 mobility model automatically to each satellite entry found within.
+
+**Parameters:**
+- `distribution` (string): Must be `"file"`.
+- `file` (string): The local file path or the HTTPS URL to a `.txt` format TLE dataset (e.g., Celestrak).
+- `tleTimeReference` (string): Time alignment reference (e.g., `"now"`).
+- `model` (string): Underlying mobility model to configure (usually `"sgp4"`).
+
+**Example (Starlink Live Fetching):**
+```json
+"leo-sats": [
+  {
+    "!constellation": {
+      "distribution": "file",
+      "file": "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=starlink&FORMAT=tle",
+      "tleTimeReference": "now",
+      "model": "sgp4"
+    },
+    // The following properties will be cloned for each satellite
+    "phyLayer": [
+      {
+        "type": "nr"
+      }
+    ]
+  }
+]
+```
+
+#### Distribution: `uniform-orbits`
+Generates satellites distributed uniformly across a given number of orbital planes using the mathematical `GeoLeoOrbitMobility` model.
+
+**Parameters:**
+- `distribution` (string): Must be `"uniform-orbits"`.
+- `orbits` (array): Array defining specific uniform orbit blocks. Each block specifies: `height`, `inclination`, `orbits-per-longitude`, `sats-per-orbit`.
+
+**Example:**
+```json
+"leo-sats": [
+  {
+    "!constellation": {
+      "distribution": "uniform-orbits",
+      "orbits": [
+        {
+          "height": 550.0,
+          "inclination": 53.0,
+          "orbits-per-longitude": 24,
+          "sats-per-orbit": 66
+        }
+      ]
+    }
+  }
+]
+```
 
 ---
 
