@@ -32,7 +32,7 @@
     {
       "!constellation": {
         "distribution": "file",
-        "file": "tle-sats-sample-data.tle",
+        "file": "../scenario/assets/leo-sats-sample-data.tle",
         "tleTimeReference": "tleEpoch",
         "model": "sgp4"
       }

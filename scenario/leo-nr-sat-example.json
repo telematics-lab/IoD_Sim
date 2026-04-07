@@ -1,0 +1,663 @@
+{
+  "name": "leo-nr-sat-example",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 5,
+  "appStatisticsReportInterval": 0.3,
+  // 1. STATIC NS3 CONFIGURATION
+  // Questa sezione sovrascrive i parametri globali di default di ns-3.
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE" // Modello della terra semplificato a sfera, consigliato per LEO
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "500ms" // Precisione del tracciamento delle orbite (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "500ms" // Precisione del tracciamento dei veicoli a velocità costante (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::TraceBasedMobilityModel::Precision",
+      "value": "500ms" // Precisione del tracciamento dei veicoli basato su trace (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 999999999 // Buffer infinito all'RLC come indicato negli esempi di lena
+    },
+    {
+      "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
+      "value": false // Disabilitazione standard per comunicazioni satellitari dove il delay e' troppo elevato per l'HARQ
+    }
+  ],
+  // 2. DIMENSIONI DEL MONDO
+  // Definisce uno spazio sufficientemente grande per simulare la superficie terrestre e l'orbita dei satelliti
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  // 3. LIVELLO FISICO (PHY LAYER) E CONFIGURAZIONE FDM/ISL
+  "phyLayer": [
+    {
+      "type": "nr",
+      // CONFIGURAZIONE CANALI E FDM: Definiamo i Bandwidth Parts (BWP) su più bande
+      "channels": [
+        {
+          "scenario": "NTN-Rural",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "100ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28e9, // Banda 1
+                "bandwidth": 100e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 1 // BWP 0: Management/Primary
+              }
+            },
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28.2e9, // Banda 2 per FDM
+                "bandwidth": 100e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 2 // BWP 1 (DL) e BWP 2 (UL)
+              }
+            }
+          ]
+        }
+      ],
+      "handover": {
+        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
+        "attributes": []
+      },
+      "attachMethod": "none",
+      // IMPOSTAZIONI AVANZATE: attach SINR-Based & Inter-Satellite Links (ISL) Delay
+      "advancedOptions": {
+        // Questa direttiva usa il modello di attachment in base al range SINR/Distanza
+        "sinr-distance-attach": {
+          "precision": "100ms", // Intervallo dell'aggiornamento della valutazione
+          "threshold": 3.0, // Isteresi
+          "table": [
+            {
+              "maxDistance": 430e3,
+              "minSINR": -20.0
+            }
+          ]
+        },
+        // Configurazione del ritardo per l'ISL simulando le distanze fisiche tra gli apparati inter-satellitari o ai gateway
+        "islDelayMode": {
+          "precision": "100ms",
+          "additionalDelay": "5ms",
+          "maxISLSatDistance": 4000e3,
+          "maxGroundStationDistance": 600e3,
+          "groundStations": [
+            [
+              30.0,
+              108.0
+            ],
+            [
+              59.0,
+              -70.0
+            ]
+          ],
+          "updateLog": true
+        }
+      },
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": [
+          {
+            "name": "BeamformingPeriodicity",
+            "value": "100ms"
+          }
+        ]
+      },
+      "ueAntenna": {
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 4
+          },
+          {
+            "name": "NumColumns",
+            "value": 4
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 28e9
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 50.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 0.01
+          }
+        ],
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 1
+          },
+          {
+            "name": "NumColumns",
+            "value": 1
+          }
+        ]
+      },
+      "gnbBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "ueBwpManager": {
+        "attributes": [
+          {
+            "name": "NGBR_LOW_LAT_EMBB",
+            "value": 0
+          }
+        ]
+      },
+      "scheduler": {
+        "type": "ns3::NrMacSchedulerOfdmaPF",
+        "attributes": [
+          {
+            "name": "FixedMcsDl",
+            "value": true
+          },
+          {
+            "name": "StartingMcsDl",
+            "value": 2
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 50.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
+        },
+        {
+          "name": "EnableUplinkPowerControl",
+          "value": false
+        },
+        {
+          "name": "NoiseFigure",
+          "value": 0.0
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 50.0
+        },
+        {
+          "name": "NoiseFigure",
+          "value": 0.0
+        },
+        {
+          "name": "PowerAllocationType",
+          "value": "UniformPowerAllocUsed"
+        }
+      ]
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.0.0.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  // 4. VEICOLI A TERRA (UEs) - MODELLI DI MOBILITÀ MISTI
+  "vehicles": [
+    // 4.1 Veicolo con movimento esplicito a velocita' costante (Costant Velocity Engine)
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          // Specifica del setup del FDM che incrocia i BWP
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ],
+          "directivity": {
+            "mode": "serving-gnb"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 45.0
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 9.0
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 30.0 // Metri al secondo
+          },
+          {
+            "name": "Azimuth", // Angolo di spostamento
+            "value": 90.0
+          }
+        ]
+      }
+    },
+    // 4.2 Veicolo che definisce in modo manuale e diretto le tracce tramite MobilityModel
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ],
+          "directivity": {
+            "mode": "serving-gnb"
+          }
+        }
+      ],
+      "mobilityModel": {
+        // Questo carica una singola traccia definita per un "DeviceId" all'interno della traccia (.trace)
+        "name": "ns3::TraceBasedMobilityModel",
+        "attributes": [
+          {
+            "name": "TraceFile",
+            "value": "../scenario/assets/taxi_example.trace"
+          },
+          {
+            "name": "DeviceId", // Identificativo interno del veicolo trovato nel file node.csv o races.csv
+            "value": "2"
+          },
+          {
+            "name": "Precision",
+            "value": "1s"
+          }
+        ]
+      }
+    },
+    // 4.3 Generazione automatica di MOLTI veicoli (replicazione) mediante la macro !traceMobility
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "outputLinks": [
+            {
+              "sourceBwp": 1,
+              "targetBwp": 2
+            }
+          ],
+          "bearers": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ],
+          "directivity": {
+            "mode": "serving-gnb"
+          }
+        }
+      ],
+      // La macro replica dinamicamente per ogni DeviceId esistente nel .trace,
+      // un nuovo veicolo copio-incollando i networkDevices o networkLayer in essi inclusi.
+      "!traceMobility": {
+        "file": "../scenario/assets/taxi_example.trace",
+        "blacklist": [
+          "2" // we have included this in the privious example manually
+        ]
+        // blacklist/whitelist e' possibile se serve solo per alcuni DeviceId !
+      }
+    }
+  ],
+  // 5. SATELLITI (Loro simulano le Base Station GNB)
+  "leo-sats": [
+    // 5.1 Definizione di una intera costellazione di satelliti in LEO autogenerati (!constellation)
+    {
+      // Questo comando instanzia automaticamente `orbits-per-longitude` * `sats-per-orbit` entita'
+      "!constellation": {
+        "distribution": "uniform-orbits",
+        "orbits": [
+          {
+            "height": 400.0,
+            "inclination": 30.0,
+            "orbits-per-longitude": 10,
+            "sats-per-orbit": 1
+          }
+        ]
+      },
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          // Configurazione del setup FDM (Numerology e Pattens)
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1, // Downlink
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2, // Uplink
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "applications": []
+    },
+    // 5.2 Uso diretto e customizzato di un singolo satellite con GeoLeoOrbitMobility invece della macro
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      // Creazione esplicita manuale dell'orbita
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination", // Angolo di inclinazione
+            "value": 45.0
+          },
+          {
+            "name": "Longitude",
+            "value": 90.0
+          },
+          {
+            "name": "Offset",
+            "value": 0
+          },
+          {
+            "name": "RetrogradeOrbit", // False -> L'orbita va nel verso della rotazione terrestre (Est)
+            "value": false
+          }
+        ]
+      },
+      "applications": []
+    },
+    // 5.3 Importazione di satelliti tramite TLE file con modello di mobilità manuale (circolare)
+    {
+      "!constellation": {
+        "distribution": "file",
+        "file": "../scenario/assets/tle-sats-sample-data.tle",
+        "tleTimeReference": "tleEpoch",
+        "model": "circular"
+      },
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "applications": []
+    },
+    // 5.4 Satellite manuale con dati TLE placeholder
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "TleLine1",
+            "value": "1 59409U 24064M   26092.20595232  .00002026  00000+0  83126-4 0  9993"
+          },
+          {
+            "name": "TleLine2",
+            "value": "2 59409  43.0029 272.8555 0001336 278.0470  82.0230 15.27585291112882"
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "logComponents": [
+    "Scenario",
+    "TraceBasedMobilityModel",
+    "TraceReader"
+  ]
+}
