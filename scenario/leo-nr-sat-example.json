@@ -49,28 +49,38 @@
       // CONFIGURAZIONE CANALI E FDM: Definiamo i Bandwidth Parts (BWP) su più bande
       "channels": [
         {
+          // Scenario usato nel modello di propagazione
+          // NOTA: Solo il 3GPP propagation model supporta gli scenari NTN
           "scenario": "NTN-Rural",
+          // Il condition model è consigliato di default, rispetterà le condizioni probabili dello scenario scelto
           "conditionModel": "Default",
           "propagationModel": "ThreeGpp",
+          // Attributi del pathloss
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
               "value": false
             }
           ],
+          // Attributi del channel condition
           "channelConditionAttributes": [
             {
+              // Aggiorna le condizioni del canale ogni 100ms
               "name": "UpdatePeriod",
               "value": "100ms"
             }
           ],
+          // Configurazione delle bande mediante i modelli descritti
           "bands": [
             {
+              // Banda 1: Contigua, se non contigua, specificheremo una lista di carriers
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28e9, // Banda 1
                 "bandwidth": 100e6,
+                // 1 CC per questa banda
                 "numComponentCarriers": 1,
+                // 1 BWP per questa banda
                 "numBandwidthParts": 1 // BWP 0: Management/Primary
               }
             },
@@ -80,16 +90,21 @@
                 "centralFrequency": 28.2e9, // Banda 2 per FDM
                 "bandwidth": 100e6,
                 "numComponentCarriers": 1,
+                // La banda verrà divisa in 2 BWP, uno per il DL e uno per l'UL in questo caso
                 "numBandwidthParts": 2 // BWP 1 (DL) e BWP 2 (UL)
               }
             }
           ]
         }
       ],
+      // Handover (qui potranno essere inseriti nuovi algoritmi di handover)
+      // Al momento in lena questa funzionalità è esposta tramite API, ma di fatto non è implementata
+      // In future versioni questo campo avrà un ruolo fondamentale per la simulazione di handover
       "handover": {
         "algorithm": "ns3::NrNoOpHandoverAlgorithm",
         "attributes": []
       },
+      // Metodo di attach ad inizio simulazione
       "attachMethod": "none",
       // IMPOSTAZIONI AVANZATE: attach SINR-Based & Inter-Satellite Links (ISL) Delay
       "advancedOptions": {
@@ -108,8 +123,11 @@
         "islDelayMode": {
           "precision": "100ms",
           "additionalDelay": "5ms",
+          // Distanza massima tra satelliti per l'ISL (entro questa distanza il link è assunto come possibile)
           "maxISLSatDistance": 4000e3,
+          // Distanza massima tra satelliti e ground stations per l'ISL (entro questa distanza il link è assunto come possibile)
           "maxGroundStationDistance": 600e3,
+          // Lista di ground stations (coordinate geografiche)
           "groundStations": [
             [
               30.0,
@@ -120,9 +138,11 @@
               -70.0
             ]
           ],
+          // Abilita il log delle path ISL
           "updateLog": true
         }
       },
+      // Configurazione dell'EPC (Evolved Packet Core)
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [
@@ -132,6 +152,7 @@
           }
         ]
       },
+      // Configurazione del beamforming
       "beamforming": {
         "helper": "ns3::IdealBeamformingHelper",
         "method": "ns3::DirectPathBeamforming",
@@ -143,6 +164,7 @@
           }
         ]
       },
+      // Configurazione dell'antenna del UE
       "ueAntenna": {
         "arrayProperties": [
           {
@@ -155,6 +177,7 @@
           }
         ]
       },
+      // Configurazione dell'antenna del gNB
       "gnbAntenna": {
         "type": "ns3::CircularApertureAntennaModel",
         "properties": [
@@ -171,6 +194,7 @@
             "value": 0.01
           }
         ],
+        // Proprietà dell'array di antenne (1x1 poichè non vogliamo un array in questo caso)
         "arrayProperties": [
           {
             "name": "NumRows",
@@ -182,6 +206,7 @@
           }
         ]
       },
+      // Configurazione del BWP manager del gNB
       "gnbBwpManager": {
         "attributes": [
           {
@@ -190,6 +215,7 @@
           }
         ]
       },
+      // Configurazione del BWP manager del UE
       "ueBwpManager": {
         "attributes": [
           {
@@ -198,6 +224,7 @@
           }
         ]
       },
+      // Configurazione dello scheduler
       "scheduler": {
         "type": "ns3::NrMacSchedulerOfdmaPF",
         "attributes": [
@@ -211,6 +238,7 @@
           }
         ]
       },
+      // Attributi del PHY del UE
       "uePhyAttributes": [
         {
           "name": "TxPower",
@@ -229,6 +257,7 @@
           "value": 0.0
         }
       ],
+      // Attributi del PHY del gNB
       "gnbPhyAttributes": [
         {
           "name": "TxPower",
