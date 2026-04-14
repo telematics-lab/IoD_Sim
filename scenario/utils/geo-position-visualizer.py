@@ -350,92 +350,92 @@ if isl_data is not None:
 
 
 
-# Process ISL and Ground Station links
-for row in attached_isl.itertuples():
-    # Source position
-    sx, sy, sz = None, None, None
-    if 'SatX' in attached_isl.columns:
-        sx, sy, sz = row.SatX, row.SatY, row.SatZ
-    else:
-        gnb_id = str(row.GNbNodeId)
-        gnb_pos = df[(df['DataType'] == 'leo-sat') & (df['Node'] == gnb_id)]
-        if not gnb_pos.empty:
-            idx = (gnb_pos['Time'] - max_time).abs().idxmin()
-            sx, sy, sz = gnb_pos.loc[idx, ['X', 'Y', 'Z']]
-    if sx is None or pd.isna(sx):
-        continue
-    path_str = row.NextHopPath
-    if isinstance(path_str, str) and path_str != "N/A":
-        parts = path_str.split(" -> ")
-        if parts:
-            first_hop = parts[0].strip("[]")
-            elements = first_hop.split(";")
-            if len(elements) == 3:
-                target_node = elements[0]
-                tx, ty, tz = None, None, None
-                if target_node == "Ground":
-                    tx, ty, tz = get_gs_xyz(row.GsCoords)
-                else:
-                    try:
-                        t_id = target_node.split('_')[1]
-                        if t_id in node_positions:
-                            tx, ty, tz = node_positions[t_id]
-                        else:
-                            t_pos = df[(df['DataType'] == 'leo-sat') & (df['Node'] == t_id)]
-                            if not t_pos.empty:
-                                idx = (t_pos['Time'] - max_time).abs().idxmin()
-                                tx, ty, tz = t_pos.loc[idx, ['X', 'Y', 'Z']]
-                    except Exception:
-                        pass
-                if tx is not None and not pd.isna(tx):
-                    # Compute Euclidean distance between source and target
-                    dist = ((sx - tx) ** 2 + (sy - ty) ** 2 + (sz - tz) ** 2) ** 0.5
-                    # Append coordinates for Plotly line (None creates break between segments)
-                    isl_x.extend([sx, tx, None])
-                    isl_y.extend([sy, ty, None])
-                    isl_z.extend([sz, tz, None])
-                    # Prepare hover text with latency and distance
-                    hover_msg = f"Latency: {row.TotalDelay:.3f}s<br>Distance: {dist/1000:.2f} km"
-                    isl_hover.extend([hover_msg, hover_msg, ""])
+    # Process ISL and Ground Station links
+    for row in attached_isl.itertuples():
+        # Source position
+        sx, sy, sz = None, None, None
+        if 'SatX' in attached_isl.columns:
+            sx, sy, sz = row.SatX, row.SatY, row.SatZ
+        else:
+            gnb_id = str(row.GNbNodeId)
+            gnb_pos = df[(df['DataType'] == 'leo-sat') & (df['Node'] == gnb_id)]
+            if not gnb_pos.empty:
+                idx = (gnb_pos['Time'] - max_time).abs().idxmin()
+                sx, sy, sz = gnb_pos.loc[idx, ['X', 'Y', 'Z']]
+        if sx is None or pd.isna(sx):
+            continue
+        path_str = row.NextHopPath
+        if isinstance(path_str, str) and path_str != "N/A":
+            parts = path_str.split(" -> ")
+            if parts:
+                first_hop = parts[0].strip("[]")
+                elements = first_hop.split(";")
+                if len(elements) == 3:
+                    target_node = elements[0]
+                    tx, ty, tz = None, None, None
+                    if target_node == "Ground":
+                        tx, ty, tz = get_gs_xyz(row.GsCoords)
+                    else:
+                        try:
+                            t_id = target_node.split('_')[1]
+                            if t_id in node_positions:
+                                tx, ty, tz = node_positions[t_id]
+                            else:
+                                t_pos = df[(df['DataType'] == 'leo-sat') & (df['Node'] == t_id)]
+                                if not t_pos.empty:
+                                    idx = (t_pos['Time'] - max_time).abs().idxmin()
+                                    tx, ty, tz = t_pos.loc[idx, ['X', 'Y', 'Z']]
+                        except Exception:
+                            pass
+                    if tx is not None and not pd.isna(tx):
+                        # Compute Euclidean distance between source and target
+                        dist = ((sx - tx) ** 2 + (sy - ty) ** 2 + (sz - tz) ** 2) ** 0.5
+                        # Append coordinates for Plotly line (None creates break between segments)
+                        isl_x.extend([sx, tx, None])
+                        isl_y.extend([sy, ty, None])
+                        isl_z.extend([sz, tz, None])
+                        # Prepare hover text with latency and distance
+                        hover_msg = f"Latency: {row.TotalDelay:.3f}s<br>Distance: {dist/1000:.2f} km"
+                        isl_hover.extend([hover_msg, hover_msg, ""])
 
-# Add ISL link trace
-if isl_x:
-    fig.add_trace(
-        go.Scatter3d(
-            x=isl_x,
-            y=isl_y,
-            z=isl_z,
-            mode='lines',
-            line=dict(color='yellow', width=3),
-            hoverinfo='text',
-            hovertext=isl_hover,
-            name=f"ISL Links (t={max_time}s)",
-            legendgroup="isl",
-            legendgrouptitle_text="ISL Links"
+    # Add ISL link trace
+    if isl_x:
+        fig.add_trace(
+            go.Scatter3d(
+                x=isl_x,
+                y=isl_y,
+                z=isl_z,
+                mode='lines',
+                line=dict(color='yellow', width=3),
+                hoverinfo='text',
+                hovertext=isl_hover,
+                name=f"ISL Links (t={max_time}s)",
+                legendgroup="isl",
+                legendgrouptitle_text="ISL Links"
+            )
         )
-    )
 
-# Add Ground Station markers
-gs_coords_set = set()
-for row in attached_isl.itertuples():
-    if isinstance(row.NextHopPath, str) and "Ground" in row.NextHopPath:
-        gs_coords_set.add(row.GsCoords)
-if gs_coords_set:
-    gs_x, gs_y, gs_z = [], [], []
-    for gs in gs_coords_set:
-        x, y, z = get_gs_xyz(gs)
-        if x is not None:
-            gs_x.append(x); gs_y.append(y); gs_z.append(z)
-    fig.add_trace(
-        go.Scatter3d(
-            x=gs_x, y=gs_y, z=gs_z,
-            mode='markers',
-            marker=dict(size=5, color='cyan', symbol='diamond'),
-            name='Ground Stations',
-            legendgroup='ground',
-            legendgrouptitle_text='Ground Stations'
+    # Add Ground Station markers
+    gs_coords_set = set()
+    for row in attached_isl.itertuples():
+        if isinstance(row.NextHopPath, str) and "Ground" in row.NextHopPath:
+            gs_coords_set.add(row.GsCoords)
+    if gs_coords_set:
+        gs_x, gs_y, gs_z = [], [], []
+        for gs in gs_coords_set:
+            x, y, z = get_gs_xyz(gs)
+            if x is not None:
+                gs_x.append(x); gs_y.append(y); gs_z.append(z)
+        fig.add_trace(
+            go.Scatter3d(
+                x=gs_x, y=gs_y, z=gs_z,
+                mode='markers',
+                marker=dict(size=5, color='cyan', symbol='diamond'),
+                name='Ground Stations',
+                legendgroup='ground',
+                legendgrouptitle_text='Ground Stations'
+            )
         )
-    )
 
 # Add Earth sphere with WebGL surface rendering
 radius_earth = 6.371e6 - 100
