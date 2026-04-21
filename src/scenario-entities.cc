@@ -107,19 +107,19 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 const auto entityLteDevConf =
                     StaticCast<LteNetdeviceConfiguration, NetdeviceConfiguration>(entityNetDev);
                 const auto role = entityLteDevConf->GetRole();
-                const auto antennaModel = entityLteDevConf->GetAntennaModel();
+                const auto antennaModels = entityLteDevConf->GetAntennaModels();
                 const auto phyConf = entityLteDevConf->GetPhyModel();
 
                 switch (role)
                 {
                 case eNB:
-                    ConfigureLteEnb(entityNode, *netId, antennaModel, phyConf);
+                    ConfigureLteEnb(entityNode, *netId, antennaModels, phyConf);
                     break;
                 case UE:
                     ConfigureLteUe(entityNode,
                                    entityLteDevConf->GetBearers(),
                                    *netId,
-                                   antennaModel,
+                                   antennaModels,
                                    phyConf);
                     break;
                 default:
@@ -133,7 +133,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 const auto entityNrDevConf =
                     StaticCast<NrNetdeviceConfiguration, NetdeviceConfiguration>(entityNetDev);
                 const auto role = entityNrDevConf->GetRole();
-                const auto antennaModel = entityNrDevConf->GetAntennaModel();
+                const auto antennaModels = entityNrDevConf->GetAntennaModels();
                 const auto phyConf = entityNrDevConf->GetPhyProperties();
                 const auto rrcConf = entityNrDevConf->GetRrcProperties();
                 const auto outputLinks = entityNrDevConf->GetOutputLinks();
@@ -144,7 +144,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 case NrRole::gNB:
                     ConfigureNrGnb(entityNode,
                                    *netId,
-                                   antennaModel,
+                                   antennaModels,
                                    phyConf,
                                    rrcConf,
                                    outputLinks,
@@ -156,7 +156,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     ConfigureNrUe(entityNode,
                                   entityNrDevConf->GetQosFlows(),
                                   *netId,
-                                  antennaModel,
+                                  antennaModels,
                                   phyConf,
                                   rrcConf,
                                   outputLinks,
@@ -170,13 +170,14 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
             else if (entityNetDev->GetType() == "simple")
             {
                 auto netDevice = CreateObject<SimpleNetDevice>();
-                const auto antennaConf = entityNetDev->GetAntennaModel();
+                const auto antennaModels = entityNetDev->GetAntennaModels();
 
-                if (antennaConf)
+                if (!antennaModels.empty())
                 {
+                    const auto antennaConf = antennaModels.front().model;
                     ObjectFactory factory;
-                    factory.SetTypeId(antennaConf->GetName());
-                    for (auto& attr : antennaConf->GetAttributes())
+                    factory.SetTypeId(antennaConf.GetName());
+                    for (auto& attr : antennaConf.GetAttributes())
                     {
                         factory.Set(attr.name, *attr.value);
                     }
@@ -194,7 +195,8 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     "Unsupported Drone Network Device Type: " << entityNetDev->GetType());
             }
 
-            if (const auto& dirConfig = entityNetDev->GetDirectivity())
+            auto dirConfigs = entityNetDev->GetDirectivity();
+            for (const auto& dirConfig : dirConfigs)
             {
                 NS_LOG_INFO("Configuring Directivity for Entity " << entityId << " Device "
                                                                   << deviceId);
@@ -203,7 +205,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 if (mob)
                 {
                     Scenario::UpdateAntennaDirectivity(entityNode->GetDevice(deviceId),
-                                                       *dirConfig,
+                                                       dirConfig,
                                                        entityNetDev->GetType(),
                                                        entityNetDev->GetNetworkLayerId(),
                                                        mob);

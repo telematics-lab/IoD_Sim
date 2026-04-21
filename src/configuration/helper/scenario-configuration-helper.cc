@@ -537,7 +537,7 @@ ScenarioConfigurationHelper::GetDroneWaypoints(uint32_t i) const
                                   (*point)["position"][1].GetDouble(),
                                   (*point)["position"][2].GetDouble()});
 
-        waypoints.emplace_back(Waypoint(time, position));
+        waypoints.emplace_back(time, position);
 
         prevTime = time;
     }
@@ -1472,14 +1472,21 @@ ScenarioConfigurationHelper::GetRadioMaps() const
                 mapConfig.is3d = obj["is3d"].GetBool();
             }
 
-            // bwpId is optional for some types but let's keep it usually required or 0 default
             if (obj.HasMember("bwpId"))
             {
-                mapConfig.bwpId = obj["bwpId"].GetUint();
+                if (obj["bwpId"].IsString() && std::string(obj["bwpId"].GetString()) == "all")
+                {
+                    mapConfig.aggregateBwps = true;
+                    mapConfig.bwpId = std::nullopt;
+                }
+                else
+                {
+                    mapConfig.bwpId = obj["bwpId"].GetUint();
+                }
             }
             else
             {
-                mapConfig.bwpId = 0;
+                mapConfig.bwpId = std::nullopt;
             }
 
             if (obj.HasMember("coordinates"))
@@ -1497,8 +1504,8 @@ ScenarioConfigurationHelper::GetRadioMaps() const
                 NS_ASSERT_MSG(obj["parameters"].IsObject(), "'parameters' must be an object");
                 for (auto& member : obj["parameters"].GetObject())
                 {
-                    mapConfig.parameters.push_back(
-                        {member.name.GetString(), member.value.GetString()});
+                    mapConfig.parameters.emplace_back(member.name.GetString(),
+                                                      member.value.GetString());
                 }
             }
 

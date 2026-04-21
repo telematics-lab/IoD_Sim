@@ -1,0 +1,85 @@
+From c4d04a4ec6fc28dcef81333bb66f886ec60a8e0b Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 21 Apr 2026 11:48:13 +0200
+Subject: [PATCH] ADD: allow to not stop scenario at the end of a RadioMap
+ generation, allow circular antenna get attributes
+
+---
+ src/antenna/model/circular-aperture-antenna-model.cc | 12 ++++++++----
+ src/antenna/model/phased-array-model.cc              |  7 +++++++
+ src/antenna/model/phased-array-model.h               |  6 ++++++
+ 3 files changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/src/antenna/model/circular-aperture-antenna-model.cc b/src/antenna/model/circular-aperture-antenna-model.cc
+index 8eae7bb87..fe3f4df6e 100644
+--- a/src/antenna/model/circular-aperture-antenna-model.cc
++++ b/src/antenna/model/circular-aperture-antenna-model.cc
+@@ -60,22 +60,26 @@ CircularApertureAntennaModel::GetTypeId()
+             .AddAttribute("AntennaCircularApertureRadius",
+                           "The radius of the aperture of the antenna, in meters",
+                           DoubleValue(0.5),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetApertureRadius),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetApertureRadius,
++                                             &CircularApertureAntennaModel::SetApertureRadius),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("OperatingFrequency",
+                           "The operating frequency in Hz of the antenna",
+                           DoubleValue(2e9),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetOperatingFrequency),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetOperatingFrequency,
++                                             &CircularApertureAntennaModel::SetOperatingFrequency),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("AntennaMinGainDb",
+                           "The minimum gain value in dB of the antenna",
+                           DoubleValue(-100.0),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetMinGain),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetMinGain,
++                                             &CircularApertureAntennaModel::SetMinGain),
+                           MakeDoubleChecker<double>())
+             .AddAttribute("AntennaMaxGainDb",
+                           "The maximum gain value in dB of the antenna",
+                           DoubleValue(1),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetMaxGain),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetMaxGain,
++                                             &CircularApertureAntennaModel::SetMaxGain),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("ForceGainBounds",
+                           "Force GetGainDb to [AntennaMinGainDb, AntennaMaxGainDb] range",
+diff --git a/src/antenna/model/phased-array-model.cc b/src/antenna/model/phased-array-model.cc
+index 912a969a5..2540640c0 100644
+--- a/src/antenna/model/phased-array-model.cc
++++ b/src/antenna/model/phased-array-model.cc
+@@ -81,6 +81,13 @@ PhasedArrayModel::GetBeamformingVectorRef() const
+     return m_beamformingVector;
+ }
+ 
++bool
++PhasedArrayModel::IsBfVectorValid() const
++{
++    NS_LOG_FUNCTION(this);
++    return m_isBfVectorValid;
++}
++
+ PhasedArrayModel::ComplexVector
+ PhasedArrayModel::GetBeamformingVector(Angles a) const
+ {
+diff --git a/src/antenna/model/phased-array-model.h b/src/antenna/model/phased-array-model.h
+index 98cc928c6..a58f37f94 100644
+--- a/src/antenna/model/phased-array-model.h
++++ b/src/antenna/model/phased-array-model.h
+@@ -212,6 +212,12 @@ class PhasedArrayModel : public Object
+      */
+     const PhasedArrayModel::ComplexVector& GetBeamformingVectorRef() const;
+ 
++    /**
++     * Returns true if the current beamforming vector is natively valid
++     * @return true if valid
++     */
++    bool IsBfVectorValid() const;
++
+     /**
+      * Returns the beamforming vector that points towards the specified position
+      * @param a the beamforming angle
+-- 
+2.50.1 (Apple Git-155)
+

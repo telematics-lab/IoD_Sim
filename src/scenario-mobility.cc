@@ -1,5 +1,7 @@
 #include "scenario.h"
 
+#include <ns3/nr-helper.h>
+
 namespace ns3
 {
 
@@ -220,36 +222,59 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
     double dist2d = std::hypot(dir.x, dir.y);
     double elevation = std::atan2(dir.z, dist2d);
 
+    if (config.bearingOffset.has_value())
+    {
+        azimuth += config.bearingOffset.value() * M_PI / 180.0;
+    }
+    if (config.downtiltOffset.has_value())
+    {
+        elevation -= config.downtiltOffset.value() * M_PI / 180.0;
+    }
+
     // Update Antenna based on Device Type
-    Ptr<Object> antennaObj = nullptr;
+    std::vector<Ptr<Object>> upaAntennas;
 
     if (deviceType == "nr")
     {
-        if (Ptr<NrUeNetDevice> nrUe = DynamicCast<NrUeNetDevice>(dev))
+        uint32_t startBwp = 0;
+        uint32_t endBwp = 1;
+        uint32_t numBwp = ns3::NrHelper::GetNumberBwp(dev);
+        if (config.bwpId.has_value())
         {
-            // The AntennaElement should be the same in every bwp
-            // So we need to change it one time only
-            auto phy = nrUe->GetPhy(0);
-            if (phy)
+            if (config.bwpId.value() < numBwp)
             {
-                auto spectrumPhy = phy->GetSpectrumPhy();
-                if (spectrumPhy)
-                {
-                    antennaObj = spectrumPhy->GetAntenna();
-                }
+                startBwp = config.bwpId.value();
+                endBwp = startBwp + 1;
+            }
+            else
+            {
+                startBwp = numBwp; // no-op if out of bounds
+                endBwp = numBwp;
             }
         }
-        else if (Ptr<NrGnbNetDevice> nrGnb = DynamicCast<NrGnbNetDevice>(dev))
+        else
         {
-            // The AntennaElement should be the same in every bwp
-            // So we need to change it one time only
-            auto phy = nrGnb->GetPhy(0);
+            endBwp = numBwp;
+        }
+
+        for (uint32_t i = startBwp; i < endBwp; ++i)
+        {
+            Ptr<NrPhy> phy = nullptr;
+            if (Ptr<NrUeNetDevice> nrUe = DynamicCast<NrUeNetDevice>(dev))
+            {
+                phy = nrUe->GetPhy(i);
+            }
+            else if (Ptr<NrGnbNetDevice> nrGnb = DynamicCast<NrGnbNetDevice>(dev))
+            {
+                phy = nrGnb->GetPhy(i);
+            }
+
             if (phy)
             {
                 auto spectrumPhy = phy->GetSpectrumPhy();
                 if (spectrumPhy)
                 {
-                    antennaObj = spectrumPhy->GetAntenna();
+                    upaAntennas.emplace_back(spectrumPhy->GetAntenna());
                 }
             }
         }
@@ -268,7 +293,7 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     auto specPhy = phy->GetDlSpectrumPhy();
                     if (specPhy)
                     {
-                        antennaObj = specPhy->GetAntenna();
+                        upaAntennas.emplace_back(specPhy->GetAntenna());
                     }
                 }
             }
@@ -281,7 +306,7 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                     auto specPhy = phy->GetDlSpectrumPhy();
                     if (specPhy)
                     {
-                        antennaObj = specPhy->GetAntenna();
+                        upaAntennas.emplace_back(specPhy->GetAntenna());
                     }
                 }
             }
@@ -298,16 +323,19 @@ Scenario::UpdateAntennaDirectivity(Ptr<NetDevice> dev,
                 Ptr<SpectrumWifiPhy> specPhy = DynamicCast<SpectrumWifiPhy>(phy);
                 if (specPhy)
                 {
-                    antennaObj = specPhy->GetAntenna();
+                    upaAntennas.emplace_back(specPhy->GetAntenna());
                 }
             }
         }
     }
 
-    if (antennaObj)
+    for (const auto& antennaObj : upaAntennas)
     {
-        bool steerArrays = deviceType != "nr";
-        RecursiveUpdateAntennaDirectivity(antennaObj, azimuth, elevation, steerArrays);
+        if (antennaObj)
+        {
+            bool steerArrays = deviceType != "nr";
+            RecursiveUpdateAntennaDirectivity(antennaObj, azimuth, elevation, steerArrays);
+        }
     }
 
     // Schedule next update
@@ -357,9 +385,12 @@ Scenario::RecursiveUpdateAntennaDirectivity(Ptr<Object> antennaObj,
         Ptr<const AntennaModel> elem = upa->GetAntennaElement();
         if (elem)
         {
+            auto elemFactory = NrRadioGeoEnvironmentMapHelper::ConfigureObjectFactory(
+                ns3::ConstCast<ns3::AntennaModel>(elem));
             // ConstCast is needed because GetAntennaElement returns const pointer
-            Ptr<AntennaModel> mutableElem = ConstCast<AntennaModel>(elem);
+            Ptr<AntennaModel> mutableElem = DynamicCast<AntennaModel>(elemFactory.Create());
             RecursiveUpdateAntennaDirectivity(mutableElem, azimuth, elevation, steerArrays);
+            upa->SetAntennaElement(mutableElem);
         }
     }
     else if (Ptr<IsotropicAntennaModel> array = DynamicCast<IsotropicAntennaModel>(antennaObj))

@@ -674,7 +674,7 @@ Example of beamforming configuration:
 ```
 
 ### `phyLayer[0].ueAntenna` and `gnbAntenna`
-**Description:** Antenna configuration for UE and gNB.
+**Description:** Antenna(s) configuration for UE and gNB.
 
 Example of UE antenna configuration:
 
@@ -687,6 +687,31 @@ Example of UE antenna configuration:
     {"name": "NumColumns", "value": 4}
   ]
 }
+```
+
+The property could be also a list of objects, in case we want to specify specific antennas for each BWP like in the example below:
+
+```json
+"ueAntenna": [
+  {
+    "bwpId": 0,
+    "type": "ns3::IsotropicAntennaModel",
+    "properties": [],
+    "arrayProperties": [
+      {"name": "NumRows", "value": 2},
+      {"name": "NumColumns", "value": 4}
+    ]
+  },
+  {
+    "bwpId": 1,
+    "type": "ns3::IsotropicAntennaModel",
+    "properties": [],
+    "arrayProperties": [
+      {"name": "NumRows", "value": 2},
+      {"name": "NumColumns", "value": 4}
+    ]
+  }
+]
 ```
 
 In Type, we can insert any antenna present on ns-3, which will be inserted into an antenna array (as defined by 5g-lena), whose configuration parameters can be specified in arrayProperties.
@@ -1090,7 +1115,7 @@ As you can see, it is possible to specify the QoS Flow you want to use among tho
 
 It is possible to specify attributes in the physical layer specific to that NR netdevice: the attribute is applied to a particular BWP if specified, otherwise to all BWPs of the device. The supported attributes are the same as those listed in the previous section for `uePhyAttributes` and `gnbPhyAttributes`.
 
-Furthermore, using the `antennaModel` parameter, it is possible to specify the antenna model of the device with the same kind of attributes as the `ueAntenna` and `gnbAntenna` parameters.
+Furthermore, using the `antennaModel` parameter, it is possible to specify the antenna model of the device with the same kind of attributes as the `ueAntenna` and `gnbAntenna` parameters. This parameter can be either a single object or an array of objects to set custom antenna properties for specific Bandwidth Parts using the `bwpId` property.
 
 ### `netDevices[i].channelId`
 **Type:** `uint32_t`
@@ -1103,7 +1128,7 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 **Description:** A list of indices of the bands within the selected channel that the device should use. If empty or not specified, the device will be configured to use all available bands in the channel.
 
 ### `netDevices[i].directivity`
-**Description:** Configuration of the initial antenna pointing direction.
+**Description:** Configuration of the initial antenna pointing direction. This can be configured as a single object (applied to all bandwidth parts) or as an array of objects to specify tilted directivity for each BWP independently using the `bwpId` property.
 - `mode`: Directivity mode string. Options:
   - `nearest-gnb`: Points towards the nearest gNB (only for UE).
   - `serving-gnb`: Points towards the currently connected gNB (only for UE).
@@ -1131,9 +1156,12 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 
 | Name | Type | Options | Description |
 |------|------|---------|-------------|
+| `bwpId` | uint32_t | - | The ID of the bandwidth part this directivity applies to (when used in an array). |
 | `mode` | string | `nearest-gnb`, `serving-gnb`, `nearest-ue`, `earth-centered`, `point` | The directivity mode. |
 | `coordinates` | string | `geocentric`, `geographic` | Coordinate system for `point` mode (optional). |
 | `position` | array | `[x, y, z]` | Target position for `point` mode (optional). |
+| `downtiltOffset` | double | - | Static elevation offset in degrees (optional). |
+| `bearingOffset` | double | - | Static azimuth offset in degrees (optional). |
 | `precision` | string | - | The update interval (e.g., "100ms", "1s"). Default: "100ms". |
 
 **Modes:**
@@ -1492,7 +1520,7 @@ It is possible to generate Radio Environment Maps (REM) for the NR scenarios to 
 
 Each object in the list contains:
 - `phyLayerId` (integer): ID of the PHY layer (usually 0).
-- `bwpId` (integer): ID of the Bandwidth Part to analyze (only nr).
+- `bwpId` (integer or string): ID of the Bandwidth Part to analyze (only nr). You can also specify the string `"all"` to sequentially compute and aggregate a maximum-value radio map across all configured Bandwidth Parts.
 - `txNodes` (array): List of nodes to be used as transmitters. Can contain strings ("gNB", "UE") or objects defining specific nodes.
 - `rxNode` (object/string): The node to be used as receiver. Can be a string ("firstUE", "firstGNB") or an object defining a specific node.
 - `parameters` (object): Key-value pairs matching the `NrRadioEnvironmentMapHelper` attributes.

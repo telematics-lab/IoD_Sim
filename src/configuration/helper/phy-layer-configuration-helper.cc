@@ -461,38 +461,51 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             }
         }
 
-        // Parse UE antenna configuration
-        if (jsonPhyLayer.HasMember("ueAntenna") && jsonPhyLayer["ueAntenna"].IsObject())
-        {
-            const auto& ueAntenna = jsonPhyLayer["ueAntenna"];
-            std::string antennaType = "ns3::IsotropicAntennaModel";
-            if (ueAntenna.HasMember("type") && ueAntenna["type"].IsString())
+        auto parseAntennaConfig = [](const rapidyyjson::Value& antennaJson) -> NrAntennaConfiguration {
+            NrAntennaConfiguration conf;
+            if (antennaJson.HasMember("bwpId") && antennaJson["bwpId"].IsUint())
             {
-                antennaType = ueAntenna["type"].GetString();
+                conf.bwpId = antennaJson["bwpId"].GetUint();
             }
 
-            std::vector<ModelConfiguration::Attribute> antennaProps;
-            std::vector<ModelConfiguration::Attribute> arrayProps;
-
-            if (ueAntenna.HasMember("properties") && ueAntenna["properties"].IsArray())
+            if (antennaJson.HasMember("type") && antennaJson["type"].IsString())
             {
-                antennaProps =
-                    ModelConfigurationHelper::GetAttributes(TypeId::LookupByName(antennaType),
-                                                            ueAntenna["properties"].GetArray());
+                conf.type = antennaJson["type"].GetString();
             }
 
-            if (ueAntenna.HasMember("arrayProperties") && ueAntenna["arrayProperties"].IsArray())
+            if (antennaJson.HasMember("properties") && antennaJson["properties"].IsArray())
             {
-                arrayProps = ModelConfigurationHelper::GetAttributes(
+                conf.properties =
+                    ModelConfigurationHelper::GetAttributes(TypeId::LookupByName(conf.type),
+                                                            antennaJson["properties"].GetArray());
+            }
+
+            if (antennaJson.HasMember("arrayProperties") && antennaJson["arrayProperties"].IsArray())
+            {
+                conf.arrayProperties = ModelConfigurationHelper::GetAttributes(
                     TypeId::LookupByName("ns3::UniformPlanarArray"),
-                    ueAntenna["arrayProperties"].GetArray());
+                    antennaJson["arrayProperties"].GetArray());
             }
 
-            nrConfig->SetUeAntenna(NrAntennaConfiguration{
-                .type = antennaType,
-                .properties = antennaProps,
-                .arrayProperties = arrayProps,
-            });
+            return conf;
+        };
+
+        // Parse UE antenna configuration
+        if (jsonPhyLayer.HasMember("ueAntenna"))
+        {
+            std::vector<NrAntennaConfiguration> ueAntennas;
+            if (jsonPhyLayer["ueAntenna"].IsArray())
+            {
+                for (auto& antJson : jsonPhyLayer["ueAntenna"].GetArray())
+                {
+                    ueAntennas.push_back(parseAntennaConfig(antJson));
+                }
+            }
+            else if (jsonPhyLayer["ueAntenna"].IsObject())
+            {
+                ueAntennas.push_back(parseAntennaConfig(jsonPhyLayer["ueAntenna"]));
+            }
+            nrConfig->SetUeAntenna(ueAntennas);
         }
 
         if (jsonPhyLayer.HasMember("uePhyAttributes") && jsonPhyLayer["uePhyAttributes"].IsArray())
@@ -504,37 +517,21 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
         }
 
         // Parse gNB antenna configuration
-        if (jsonPhyLayer.HasMember("gnbAntenna") && jsonPhyLayer["gnbAntenna"].IsObject())
+        if (jsonPhyLayer.HasMember("gnbAntenna"))
         {
-            const auto& gnbAntenna = jsonPhyLayer["gnbAntenna"];
-            std::string antennaType = "ns3::IsotropicAntennaModel";
-            if (gnbAntenna.HasMember("type") && gnbAntenna["type"].IsString())
+            std::vector<NrAntennaConfiguration> gnbAntennas;
+            if (jsonPhyLayer["gnbAntenna"].IsArray())
             {
-                antennaType = gnbAntenna["type"].GetString();
+                for (auto& antJson : jsonPhyLayer["gnbAntenna"].GetArray())
+                {
+                    gnbAntennas.push_back(parseAntennaConfig(antJson));
+                }
             }
-
-            std::vector<ModelConfiguration::Attribute> antennaProps;
-            std::vector<ModelConfiguration::Attribute> arrayProps;
-
-            if (gnbAntenna.HasMember("properties") && gnbAntenna["properties"].IsArray())
+            else if (jsonPhyLayer["gnbAntenna"].IsObject())
             {
-                antennaProps =
-                    ModelConfigurationHelper::GetAttributes(TypeId::LookupByName(antennaType),
-                                                            gnbAntenna["properties"].GetArray());
+                gnbAntennas.push_back(parseAntennaConfig(jsonPhyLayer["gnbAntenna"]));
             }
-
-            if (gnbAntenna.HasMember("arrayProperties") && gnbAntenna["arrayProperties"].IsArray())
-            {
-                arrayProps = ModelConfigurationHelper::GetAttributes(
-                    TypeId::LookupByName("ns3::UniformPlanarArray"),
-                    gnbAntenna["arrayProperties"].GetArray());
-            }
-
-            nrConfig->SetGnbAntenna(NrAntennaConfiguration{
-                .type = antennaType,
-                .properties = antennaProps,
-                .arrayProperties = arrayProps,
-            });
+            nrConfig->SetGnbAntenna(gnbAntennas);
         }
 
         if (jsonPhyLayer.HasMember("gnbPhyAttributes") &&

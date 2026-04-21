@@ -37,12 +37,21 @@ struct DirectivityConfiguration
     Time precision = MilliSeconds(100);
     std::string key = "";
     uint32_t index = 0;
+    std::optional<uint32_t> bwpId = std::nullopt;
+    std::optional<double> downtiltOffset = std::nullopt;
+    std::optional<double> bearingOffset = std::nullopt;
 };
 
 struct OutputLinkConfiguration
 {
     uint32_t sourceBwp;
     uint32_t targetBwp;
+};
+
+struct AntennaModelConfiguration
+{
+    std::optional<uint32_t> bwpId = std::nullopt;
+    ModelConfiguration model;
 };
 
 /**
@@ -59,11 +68,11 @@ class NetdeviceConfiguration : public Object
      * device. \param networkLayerId The identifier for the Network Layer that has been defined for
      * this simulation. It must be compatible with the given type and macLayer.
      */
-    NetdeviceConfiguration(
-        const std::string type,
-        const std::optional<uint32_t> networkLayerId,
-        const std::optional<ModelConfiguration> antennaModel,
-        const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+    NetdeviceConfiguration(const std::string type,
+                           const std::optional<uint32_t> networkLayerId,
+                           const std::vector<AntennaModelConfiguration>& antennaModels,
+                           const std::vector<DirectivityConfiguration>& directivity =
+                               std::vector<DirectivityConfiguration>());
     /**
      * Get the type ID.
      * \return the object TypeId
@@ -74,15 +83,15 @@ class NetdeviceConfiguration : public Object
     /** \return The reference network layer identifier. */
     virtual const std::optional<uint32_t> GetNetworkLayerId() const;
     /** \return The antenna model configuration for the Network Device. */
-    std::optional<ModelConfiguration> GetAntennaModel() const;
+    std::vector<AntennaModelConfiguration> GetAntennaModels() const;
     /** \return The directivity configuration for the Network Device. */
-    std::optional<DirectivityConfiguration> GetDirectivity() const;
+    std::vector<DirectivityConfiguration> GetDirectivity() const;
 
   private:
     const std::string m_type;
     const std::optional<uint32_t> m_networkLayerId;
-    const std::optional<ModelConfiguration> m_antennaModel;
-    const std::optional<DirectivityConfiguration> m_directivity;
+    const std::vector<AntennaModelConfiguration> m_antennaModels;
+    const std::vector<DirectivityConfiguration> m_directivity;
 };
 
 } // namespace ns3

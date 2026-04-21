@@ -124,10 +124,19 @@ Scenario::operator()()
             bool is3D;
         };
 
+        struct AggregationTask
+        {
+            std::vector<std::string> inputFiles;
+            std::string outputFile;
+            std::string type;
+            bool is3D;
+        };
+
         NS_LOG_INFO("Generating Radio Maps...");
 
         std::vector<std::string> generatedFiles;
         std::vector<RadioMapGenConfig> plotFiles;
+        std::vector<AggregationTask> aggregationTasks;
 
         size_t mapIdx = 0;
         for (const auto& config : radioMaps)
@@ -389,44 +398,108 @@ Scenario::operator()()
                     NS_FATAL_ERROR("Cannot generate REM: No Tx devices found.");
                 }
 
-                std::stringstream ss;
-                ss << "Phy" << config.phyLayerIndex << "-Bwp" << config.bwpId << "-" << mapIdx + 1;
+                uint32_t startBwp = 0;
+                uint32_t endBwp = 1;
 
-                if (config.coordinatesType == "geocentric")
+                if (config.bwpId.has_value())
                 {
-                    Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
-                        CreateObject<NrRadioGeoEnvironmentMapHelper>();
-                    nrGeoRemHelpers.push_back(remHelper); // Keep alive
-                    remHelper->SetSimTag(ss.str());
-                    remHelper->SetLogGeocentricRem(config.logGeocentricRem);
-
-                    for (const auto& par : config.parameters)
-                    {
-                        remHelper->SetAttribute(par.first, StringValue(par.second));
-                    }
-
-                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+                    startBwp = config.bwpId.value();
+                    endBwp = startBwp + 1;
                 }
                 else
                 {
-                    Ptr<NrRadioEnvironmentMapHelper> remHelper =
-                        CreateObject<NrRadioEnvironmentMapHelper>();
-                    nrRemHelpers.push_back(remHelper); // Keep alive
-                    remHelper->SetSimTag(ss.str());
-
-                    for (const auto& par : config.parameters)
+                    // get highest bwpLen from txDevs
+                    uint32_t maxBwp = 0;
+                    for (uint32_t i = 0; i < txDevs.GetN(); ++i)
                     {
-                        remHelper->SetAttribute(par.first, StringValue(par.second));
+                        auto dev = txDevs.Get(i);
+                        if (dev->GetInstanceTypeId() == NrGnbNetDevice::GetTypeId() ||
+                            dev->GetInstanceTypeId() == NrUeNetDevice::GetTypeId())
+                        {
+                            uint32_t len = NrHelper::GetNumberBwp(dev);
+                            if (len > maxBwp)
+                            {
+                                maxBwp = len;
+                            }
+                        }
                     }
-
-                    remHelper->CreateRem(txDevs, rxDev, config.bwpId);
+                    if (maxBwp == 0)
+                    {
+                        maxBwp = 1; // Fallback
+                    }
+                    endBwp = maxBwp;
                 }
 
-                // New helper outputs: nr-rem- + simTag + ".out"
-                std::string filename =
-                    CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str() + ".out";
-                generatedFiles.push_back(filename);
-                plotFiles.push_back({.file = filename, .type = "nr", .is3D = false});
+                for (uint32_t bwpId = startBwp; bwpId < endBwp; bwpId++)
+                {
+                    std::stringstream ss;
+                    ss << "Phy" << config.phyLayerIndex << "-Bwp" << bwpId << "-" << mapIdx + 1;
+
+                    if (config.coordinatesType == "geocentric")
+                    {
+                        Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
+                            CreateObject<NrRadioGeoEnvironmentMapHelper>();
+                        nrGeoRemHelpers.push_back(remHelper); // Keep alive
+                        remHelper->SetSimTag(ss.str());
+                        remHelper->SetLogGeocentricRem(config.logGeocentricRem);
+                        remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+
+                        for (const auto& par : config.parameters)
+                        {
+                            remHelper->SetAttribute(par.first, StringValue(par.second));
+                        }
+
+                        remHelper->CreateRem(txDevs, rxDev, bwpId);
+                    }
+                    else
+                    {
+                        Ptr<NrRadioEnvironmentMapHelper> remHelper =
+                            CreateObject<NrRadioEnvironmentMapHelper>();
+                        nrRemHelpers.push_back(remHelper); // Keep alive
+                        remHelper->SetSimTag(ss.str());
+                        remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+
+                        for (const auto& par : config.parameters)
+                        {
+                            remHelper->SetAttribute(par.first, StringValue(par.second));
+                        }
+
+                        remHelper->CreateRem(txDevs, rxDev, bwpId);
+                    }
+
+                    // New helper outputs: nr-rem- + simTag + ".out"
+                    std::string filename =
+                        CONFIGURATOR->GetResultsPath() + "nr-rem-" + ss.str() + ".out";
+                    generatedFiles.push_back(filename);
+
+                    if (!config.aggregateBwps)
+                    {
+                        plotFiles.push_back({.file = filename, .type = "nr", .is3D = false});
+                    }
+                } // end loop bwps
+
+                if (config.aggregateBwps)
+                {
+                    std::stringstream ssAgg;
+                    ssAgg << "Phy" << config.phyLayerIndex << "-BwpALL-" << mapIdx + 1;
+                    std::string aggFilename =
+                        CONFIGURATOR->GetResultsPath() + "nr-rem-" + ssAgg.str() + ".out";
+
+                    AggregationTask task;
+                    task.outputFile = aggFilename;
+                    task.type = "nr";
+                    task.is3D = false;
+                    for (uint32_t bwpId = startBwp; bwpId < endBwp; bwpId++)
+                    {
+                        std::stringstream ssBwp;
+                        ssBwp << "Phy" << config.phyLayerIndex << "-Bwp" << bwpId << "-"
+                              << mapIdx + 1;
+                        task.inputFiles.push_back(CONFIGURATOR->GetResultsPath() + "nr-rem-" +
+                                                  ssBwp.str() + ".out");
+                    }
+                    aggregationTasks.push_back(task);
+                    plotFiles.push_back({.file = aggFilename, .type = "nr", .is3D = false});
+                }
             }
             else if (config.type == "lte")
             {
@@ -479,6 +552,87 @@ Scenario::operator()()
 
         Simulator::Run();
         Simulator::Destroy();
+
+        // Perform aggregation logic right after Simulator ends
+        for (const auto& task : aggregationTasks)
+        {
+            if (task.inputFiles.empty())
+            {
+                continue;
+            }
+
+            NS_LOG_INFO("Aggregating BWP REM maps to " << task.outputFile);
+
+            std::map<std::tuple<double, double, double>, std::vector<double>> aggregatedData;
+
+            for (const auto& inFileName : task.inputFiles)
+            {
+                std::ifstream inFile(inFileName);
+                if (!inFile.is_open())
+                {
+                    NS_LOG_WARN("Could not open input file for aggregation: " << inFileName);
+                    continue;
+                }
+
+                std::string line;
+                while (std::getline(inFile, line))
+                {
+                    if (line.empty())
+                        continue;
+                    std::stringstream ss(line);
+                    double x, y, z;
+                    if (!(ss >> x >> y >> z))
+                        continue;
+
+                    std::vector<double> vals;
+                    std::string strVal;
+                    while (ss >> strVal)
+                    {
+                        try
+                        {
+                            vals.push_back(std::stod(strVal));
+                        }
+                        catch (...)
+                        {
+                            vals.push_back(-1e9); // fallback for unparseable floats
+                        }
+                    }
+
+                    auto key = std::make_tuple(x, y, z);
+                    auto it = aggregatedData.find(key);
+                    if (it == aggregatedData.end())
+                    {
+                        aggregatedData[key] = vals;
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < vals.size() && i < it->second.size(); ++i)
+                        {
+                            it->second[i] = std::max(it->second[i], vals[i]);
+                        }
+                    }
+                }
+            }
+
+            std::ofstream outFile(task.outputFile);
+            if (!outFile.is_open())
+            {
+                NS_LOG_WARN("Could not open output file for aggregation: " << task.outputFile);
+                continue;
+            }
+
+            for (const auto& kv : aggregatedData)
+            {
+                outFile << std::get<0>(kv.first) << "\t" << std::get<1>(kv.first) << "\t"
+                        << std::get<2>(kv.first);
+                for (double val : kv.second)
+                {
+                    outFile << "\t" << val;
+                }
+                outFile << "\n";
+            }
+            outFile.close();
+        }
 
         for (const auto& plotConf : plotFiles)
         {

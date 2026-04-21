@@ -127,115 +127,156 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             return std::nullopt;
         }();
 
-        std::optional<ModelConfiguration> antennaModel;
+        std::vector<AntennaModelConfiguration> antennaModels;
+
+        auto parseAntennaModel = [](const rapidyyjson::Value& antennaModelJson) -> AntennaModelConfiguration {
+            AntennaModelConfiguration conf;
+
+            if (antennaModelJson.HasMember("bwpId") && antennaModelJson["bwpId"].IsUint()) {
+                conf.bwpId = antennaModelJson["bwpId"].GetUint();
+            }
+
+            ObjectFactory antennaElementFactory;
+            antennaElementFactory.SetTypeId("ns3::IsotropicAntennaModel");
+            if (antennaModelJson.HasMember("type") && antennaModelJson["type"].IsString())
+            {
+                antennaElementFactory.SetTypeId(antennaModelJson["type"].GetString());
+            }
+
+            std::vector<ModelConfiguration::Attribute> arrayProps;
+
+            if (antennaModelJson.HasMember("properties") &&
+                antennaModelJson["properties"].IsArray())
+            {
+                for (auto& prop : antennaModelJson["properties"].GetArray())
+                {
+                    NS_ASSERT_MSG(
+                        prop.IsObject(),
+                        "Entity Network Device 'antennaModel' 'properties' must be an array "
+                        "of objects.");
+                    const auto attr = ModelConfigurationHelper::DecodeModelAttribute(
+                        antennaElementFactory.GetTypeId(),
+                        prop);
+                    antennaElementFactory.Set(attr.name, *attr.value);
+                }
+            }
+
+            if (antennaModelJson.HasMember("arrayProperties") &&
+                antennaModelJson["arrayProperties"].IsArray())
+            {
+                arrayProps = ModelConfigurationHelper::GetAttributes(
+                    TypeId::LookupByName("ns3::UniformPlanarArray"),
+                    antennaModelJson["arrayProperties"].GetArray());
+            }
+            arrayProps.push_back(ModelConfiguration::Attribute(
+                "AntennaElement",
+                Create<PointerValue>(antennaElementFactory.Create())));
+            
+            conf.model = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
+            return conf;
+        };
 
         if (type == "nr")
         {
-            if (netdev.HasMember("antennaModel") && netdev["antennaModel"].IsObject())
+            if (netdev.HasMember("antennaModel"))
             {
-                const auto& antennaModelJson = netdev["antennaModel"];
-                ObjectFactory antennaElementFactory;
-                antennaElementFactory.SetTypeId("ns3::IsotropicAntennaModel");
-                if (antennaModelJson.HasMember("type") && antennaModelJson["type"].IsString())
-                {
-                    antennaElementFactory.SetTypeId(antennaModelJson["type"].GetString());
-                }
-
-                std::vector<ModelConfiguration::Attribute> arrayProps;
-
-                if (antennaModelJson.HasMember("properties") &&
-                    antennaModelJson["properties"].IsArray())
-                {
-                    for (auto& prop : antennaModelJson["properties"].GetArray())
-                    {
-                        NS_ASSERT_MSG(
-                            prop.IsObject(),
-                            "Entity NR Network Device 'antennaModel' 'properties' must be an array "
-                            "of objects.");
-                        const auto attr = ModelConfigurationHelper::DecodeModelAttribute(
-                            antennaElementFactory.GetTypeId(),
-                            prop);
-                        antennaElementFactory.Set(attr.name, *attr.value);
+                if (netdev["antennaModel"].IsArray()) {
+                    for (auto& antJson : netdev["antennaModel"].GetArray()) {
+                        antennaModels.push_back(parseAntennaModel(antJson));
                     }
+                } else if (netdev["antennaModel"].IsObject()) {
+                    antennaModels.push_back(parseAntennaModel(netdev["antennaModel"]));
                 }
-
-                if (antennaModelJson.HasMember("arrayProperties") &&
-                    antennaModelJson["arrayProperties"].IsArray())
-                {
-                    arrayProps = ModelConfigurationHelper::GetAttributes(
-                        TypeId::LookupByName("ns3::UniformPlanarArray"),
-                        antennaModelJson["arrayProperties"].GetArray());
-                }
-                arrayProps.push_back(ModelConfiguration::Attribute(
-                    "AntennaElement",
-                    Create<PointerValue>(antennaElementFactory.Create())));
-                antennaModel = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
             }
         }
         else
         {
-            antennaModel =
-                ModelConfigurationHelper::GetOptional(netdev.GetObject(), "antennaModel");
+            if (netdev.HasMember("antennaModel") && netdev["antennaModel"].IsObject())
+            {
+                AntennaModelConfiguration conf;
+                conf.model = ModelConfigurationHelper::Get(netdev["antennaModel"].GetObject());
+                antennaModels.push_back(conf);
+            }
         }
 
-        std::optional<DirectivityConfiguration> directivity;
+        std::vector<DirectivityConfiguration> directivities;
         if (netdev.HasMember("directivity"))
         {
-            NS_ASSERT_MSG(netdev["directivity"].IsObject(),
-                          "Entity Network Device 'directivity' property must be an object.");
+            auto parseDirectivity = [](const rapidyyjson::Value& dirJson) -> DirectivityConfiguration {
+                NS_ASSERT_MSG(dirJson.IsObject(),
+                              "Entity Network Device 'directivity' property must be an object.");
+                NS_ASSERT_MSG(dirJson.HasMember("mode"),
+                              "Directivity configuration must have 'mode' property.");
+                NS_ASSERT_MSG(dirJson["mode"].IsString(),
+                              "Directivity 'mode' property must be a string.");
 
-            const auto& dirJson = netdev["directivity"];
-            NS_ASSERT_MSG(dirJson.HasMember("mode"),
-                          "Directivity configuration must have 'mode' property.");
-            NS_ASSERT_MSG(dirJson["mode"].IsString(),
-                          "Directivity 'mode' property must be a string.");
+                DirectivityConfiguration dirConfig;
+                dirConfig.mode = dirJson["mode"].GetString();
 
-            DirectivityConfiguration dirConfig;
-            dirConfig.mode = dirJson["mode"].GetString();
+                if (dirJson.HasMember("coordinates"))
+                {
+                    NS_ASSERT_MSG(dirJson["coordinates"].IsString(),
+                                  "Directivity 'coordinates' property must be a string.");
+                    dirConfig.coordinates = dirJson["coordinates"].GetString();
+                }
 
-            if (dirJson.HasMember("coordinates"))
-            {
-                NS_ASSERT_MSG(dirJson["coordinates"].IsString(),
-                              "Directivity 'coordinates' property must be a string.");
-                dirConfig.coordinates = dirJson["coordinates"].GetString();
+                if (dirJson.HasMember("position"))
+                {
+                    NS_ASSERT_MSG(dirJson["position"].IsArray(),
+                                  "Directivity 'position' property must be an array.");
+                    auto arr = dirJson["position"].GetArray();
+                    NS_ASSERT_MSG(arr.Size() == 3,
+                                  "Directivity 'position' array must have 3 elements.");
+                    dirConfig.position =
+                        Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
+                }
+
+                if (dirJson.HasMember("precision"))
+                {
+                    NS_ASSERT_MSG(dirJson["precision"].IsString(),
+                                  "Directivity 'precision' property must be a string (e.g., '100ms').");
+                    dirConfig.precision = Time(dirJson["precision"].GetString());
+                }
+
+                if (dirConfig.mode == "node")
+                {
+                    NS_ASSERT_MSG(
+                        dirJson.HasMember("key"),
+                        "Directivity configuration must have 'key' property when mode is 'node'.");
+                    NS_ASSERT_MSG(dirJson["key"].IsString(),
+                                  "Directivity 'key' property must be a string.");
+                    dirConfig.key = dirJson["key"].GetString();
+
+                    NS_ASSERT_MSG(
+                        dirJson.HasMember("index"),
+                        "Directivity configuration must have 'index' property when mode is 'node'.");
+                    NS_ASSERT_MSG(dirJson["index"].IsUint(),
+                                  "Directivity 'index' property must be an unsigned integer.");
+                    dirConfig.index = dirJson["index"].GetUint();
+                }
+
+                if (dirJson.HasMember("bwpId") && dirJson["bwpId"].IsUint()) {
+                    dirConfig.bwpId = dirJson["bwpId"].GetUint();
+                }
+                if (dirJson.HasMember("downtiltOffset") && dirJson["downtiltOffset"].IsNumber()) {
+                    dirConfig.downtiltOffset = dirJson["downtiltOffset"].GetDouble();
+                }
+                if (dirJson.HasMember("bearingOffset") && dirJson["bearingOffset"].IsNumber()) {
+                    dirConfig.bearingOffset = dirJson["bearingOffset"].GetDouble();
+                }
+
+                return dirConfig;
+            };
+
+            if (netdev["directivity"].IsArray()) {
+                for (auto& dirJson : netdev["directivity"].GetArray()) {
+                    directivities.push_back(parseDirectivity(dirJson));
+                }
+            } else if (netdev["directivity"].IsObject()) {
+                directivities.push_back(parseDirectivity(netdev["directivity"]));
+            } else {
+                NS_FATAL_ERROR("Entity Network Device 'directivity' must be an object or array of objects.");
             }
-
-            if (dirJson.HasMember("position"))
-            {
-                NS_ASSERT_MSG(dirJson["position"].IsArray(),
-                              "Directivity 'position' property must be an array.");
-                auto arr = dirJson["position"].GetArray();
-                NS_ASSERT_MSG(arr.Size() == 3,
-                              "Directivity 'position' array must have 3 elements.");
-                dirConfig.position =
-                    Vector(arr[0].GetDouble(), arr[1].GetDouble(), arr[2].GetDouble());
-            }
-
-            if (dirJson.HasMember("precision"))
-            {
-                NS_ASSERT_MSG(dirJson["precision"].IsString(),
-                              "Directivity 'precision' property must be a string (e.g., '100ms').");
-                dirConfig.precision = Time(dirJson["precision"].GetString());
-            }
-
-            if (dirConfig.mode == "node")
-            {
-                NS_ASSERT_MSG(
-                    dirJson.HasMember("key"),
-                    "Directivity configuration must have 'key' property when mode is 'node'.");
-                NS_ASSERT_MSG(dirJson["key"].IsString(),
-                              "Directivity 'key' property must be a string.");
-                dirConfig.key = dirJson["key"].GetString();
-
-                NS_ASSERT_MSG(
-                    dirJson.HasMember("index"),
-                    "Directivity configuration must have 'index' property when mode is 'node'.");
-                NS_ASSERT_MSG(dirJson["index"].IsUint(),
-                              "Directivity 'index' property must be an unsigned integer.");
-                dirConfig.index = dirJson["index"].GetUint();
-            }
-
-            directivity = dirConfig;
         }
 
         if (type == "wifi")
@@ -250,8 +291,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             confs.push_back(CreateObject<WifiNetdeviceConfiguration>(type,
                                                                      macLayer,
                                                                      networkLayerId,
-                                                                     antennaModel,
-                                                                     directivity));
+                                                                     antennaModels,
+                                                                     directivities));
         }
         else if (type == "lte")
         {
@@ -277,9 +318,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                                                     role,
                                                                     bearers,
                                                                     networkLayerId,
-                                                                    antennaModel,
+                                                                    antennaModels,
                                                                     phyModel,
-                                                                    directivity));
+                                                                    directivities));
         }
         else if (type == "nr")
         {
@@ -445,9 +486,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                                                    qosFlows,
                                                                    phyProperties,
                                                                    networkLayerId,
-                                                                   antennaModel,
+                                                                   antennaModels,
                                                                    outputLinks,
-                                                                   directivity,
+                                                                   directivities,
                                                                    channelId,
                                                                    channelBands,
                                                                    rrcProperties,
@@ -457,8 +498,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
         {
             confs.push_back(CreateObject<NetdeviceConfiguration>(type,
                                                                  networkLayerId,
-                                                                 antennaModel,
-                                                                 directivity));
+                                                                 antennaModels,
+                                                                 directivities));
         }
         else
         {

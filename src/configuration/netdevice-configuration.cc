@@ -21,26 +21,24 @@ namespace ns3
 {
 
 NS_OBJECT_ENSURE_REGISTERED(NetdeviceConfiguration);
+NetdeviceConfiguration::NetdeviceConfiguration(
+    const std::string type,
+    const std::optional<uint32_t> networkLayerId,
+    const std::vector<AntennaModelConfiguration>& antennaModels,
+    const std::vector<DirectivityConfiguration>& directivity)
+    : m_type(type),
+      m_networkLayerId(networkLayerId),
+      m_antennaModels(antennaModels),
+      m_directivity(directivity)
+{
+}
 
 TypeId
 NetdeviceConfiguration::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NetdeviceConfiguration")
-                            .SetParent<Object>()
-                            .SetGroupName("IoD_Sim");
+    static TypeId tid =
+        TypeId("ns3::NetdeviceConfiguration").SetParent<Object>().SetGroupName("Scenario");
     return tid;
-}
-
-NetdeviceConfiguration::NetdeviceConfiguration(
-    const std::string type,
-    const std::optional<uint32_t> networkLayerId,
-    const std::optional<ModelConfiguration> antennaModel,
-    const std::optional<DirectivityConfiguration> directivity)
-    : m_type{type},
-      m_networkLayerId{networkLayerId},
-      m_antennaModel{antennaModel},
-      m_directivity{directivity}
-{
 }
 
 const std::string
@@ -55,13 +53,13 @@ NetdeviceConfiguration::GetNetworkLayerId() const
     return m_networkLayerId;
 }
 
-std::optional<ModelConfiguration>
-NetdeviceConfiguration::GetAntennaModel() const
+std::vector<AntennaModelConfiguration>
+NetdeviceConfiguration::GetAntennaModels() const
 {
-    return m_antennaModel;
+    return m_antennaModels;
 }
 
-std::optional<DirectivityConfiguration>
+std::vector<DirectivityConfiguration>
 NetdeviceConfiguration::GetDirectivity() const
 {
     return m_directivity;

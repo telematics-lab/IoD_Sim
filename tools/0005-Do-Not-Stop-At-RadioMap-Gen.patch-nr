@@ -1,0 +1,154 @@
+From cef01223d0532cc0c6e4a09cf6a0f7b201f6bb12 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 21 Apr 2026 11:46:54 +0200
+Subject: [PATCH] ADD: allow to not stop scenario at the end of a RadioMap
+ generation
+
+---
+ helper/nr-radio-environment-map-helper.cc | 36 +++++++++++++++++++----
+ helper/nr-radio-environment-map-helper.h  | 18 ++++++++++--
+ 2 files changed, 47 insertions(+), 7 deletions(-)
+
+diff --git a/helper/nr-radio-environment-map-helper.cc b/helper/nr-radio-environment-map-helper.cc
+index bf75ec96..9599f299 100644
+--- a/helper/nr-radio-environment-map-helper.cc
++++ b/helper/nr-radio-environment-map-helper.cc
+@@ -8,6 +8,7 @@
+ 
+ #include "ns3/abort.h"
+ #include "ns3/beamforming-vector.h"
++#include "ns3/boolean.h"
+ #include "ns3/buildings-module.h"
+ #include "ns3/config.h"
+ #include "ns3/double.h"
+@@ -151,7 +152,14 @@ NrRadioEnvironmentMapHelper::GetTypeId()
+                 "depends on RRC message timing.",
+                 TimeValue(MilliSeconds(100)),
+                 MakeTimeAccessor(&NrRadioEnvironmentMapHelper::SetInstallationDelay),
+-                MakeTimeChecker());
++                MakeTimeChecker())
++            .AddAttribute("StopWhenDone",
++                          "If true, Simulator::Stop () will be called as soon as the REM has been "
++                          "generated",
++                          BooleanValue(true),
++                          MakeBooleanAccessor(&NrRadioEnvironmentMapHelper::SetStopWhenDone,
++                                              &NrRadioEnvironmentMapHelper::GetStopWhenDone),
++                          MakeBooleanChecker());
+     return tid;
+ }
+ 
+@@ -269,6 +277,18 @@ NrRadioEnvironmentMapHelper::GetZ() const
+     return m_z;
+ }
+ 
++void
++NrRadioEnvironmentMapHelper::SetStopWhenDone(bool stop)
++{
++    m_stopWhenDone = stop;
++}
++
++bool
++NrRadioEnvironmentMapHelper::GetStopWhenDone() const
++{
++    return m_stopWhenDone;
++}
++
+ double
+ NrRadioEnvironmentMapHelper::DbmToW(double dBm) const
+ {
+@@ -336,7 +356,10 @@ NrRadioEnvironmentMapHelper::CopyAntenna(Ptr<UniformPlanarArray> antenna) const
+         ok = copy->SetAttributeFailSafe(attrName, *attrValue);
+         NS_ASSERT_MSG(ok, "Failed to copy an attribute " << attrName);
+     }
+-    copy->SetBeamformingVector(antenna->GetBeamformingVector());
++    if (antenna->IsBfVectorValid())
++    {
++        copy->SetBeamformingVector(antenna->GetBeamformingVector());
++    }
+     return copy;
+ }
+ 
+@@ -592,13 +615,13 @@ NrRadioEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(const NetDeviceCon
+ {
+     m_deviceToAntenna.insert(std::make_pair(
+         rrdDevice,
+-        Copy(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
++        CopyAntenna(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+     for (auto rtdNetDevIt = rtdNetDev.Begin(); rtdNetDevIt != rtdNetDev.End(); ++rtdNetDevIt)
+     {
+         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*rtdNetDevIt)->second;
+         m_deviceToAntenna.insert(std::make_pair(
+             *rtdNetDevIt,
+-            Copy(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
++            CopyAntenna(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+     }
+ }
+ 
+@@ -1515,13 +1538,16 @@ void
+ NrRadioEnvironmentMapHelper::Finalize()
+ {
+     NS_LOG_FUNCTION(this);
++    if (m_stopWhenDone)
++    {
++        Simulator::Stop();
++    }
+     // TODO test if we can call this
+     // std::ostringstream oss;
+     // oss <<"gnuplot -p nr-"<<m_simTag.c_str()<<"-ues.txt nr-"<<m_simTag.c_str()<<"-gnbs.txt
+     // nr-rem-"<<m_simTag.c_str()<<"-buildings.txt nr-rem-"<<m_simTag.c_str()<<"-plot-rem.gnuplot";
+     // system(oss.str().c_str());
+     // TODO if yes, then we can add also convert command
+-    Simulator::Stop();
+ }
+ 
+ } // namespace ns3
+diff --git a/helper/nr-radio-environment-map-helper.h b/helper/nr-radio-environment-map-helper.h
+index 0d45b755..65e12966 100644
+--- a/helper/nr-radio-environment-map-helper.h
++++ b/helper/nr-radio-environment-map-helper.h
+@@ -15,7 +15,6 @@
+ #include "ns3/three-gpp-spectrum-propagation-loss-model.h"
+ 
+ #include <chrono>
+-#include <fstream>
+ 
+ namespace ns3
+ {
+@@ -222,10 +221,23 @@ class NrRadioEnvironmentMapHelper : public Object
+     uint16_t GetResY() const;
+ 
+     /**
+-     * @return Gets the value of the z coordinate of the map
++     * @brief Gets the attribute Z
++     * @return double value
+      */
+     double GetZ() const;
+ 
++    /**
++     * @brief Sets the attribute StopWhenDone
++     * @param stop boolean value
++     */
++    void SetStopWhenDone(bool stop);
++
++    /**
++     * @brief Gets the attribute StopWhenDone
++     * @return boolean value
++     */
++    bool GetStopWhenDone() const;
++
+     /**
+      * @brief Convert from Watts to dBm.
+      * @param w the power in Watts
+@@ -563,7 +575,9 @@ class NrRadioEnvironmentMapHelper : public Object
+ 
+     uint16_t m_numOfIterationsToAverage{1};
+     Time m_installationDelay{Seconds(0)};
++    bool m_stopWhenDone{true};
+ 
++  public:
+     RemDevice m_rrd;
+ 
+     Ptr<NrPhy> m_rrdPhy; ///< Pointer to the phy of the RRD
+-- 
+2.50.1 (Apple Git-155)
+

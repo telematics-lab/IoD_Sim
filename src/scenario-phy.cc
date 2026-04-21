@@ -1,4 +1,5 @@
 #include "scenario.h"
+
 #include <filesystem>
 
 namespace ns3
@@ -271,7 +272,7 @@ Scenario::ConfigurePhy()
 void
 Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
                           const uint32_t netId,
-                          const std::optional<ModelConfiguration> antennaModel,
+                          const std::vector<AntennaModelConfiguration> antennaModels,
                           const std::optional<ModelConfiguration> phyConf)
 {
     // !NOTICE: no checks are made for backbone/netid combination that do not represent an LTE
@@ -280,12 +281,12 @@ Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
     auto ltePhy = StaticCast<LtePhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
     auto lteHelper = ltePhy->GetLteHelper();
 
-    if (antennaModel)
+    if (!antennaModels.empty())
     {
-        lteHelper->SetEnbAntennaModelType(antennaModel->GetName());
-        for (auto& attr : antennaModel->GetAttributes())
+        ltePhy->GetLteHelper()->SetEnbAntennaModelType(antennaModels.front().model.GetName());
+        for (auto& attr : antennaModels.front().model.GetAttributes())
         {
-            lteHelper->SetEnbAntennaModelAttribute(attr.name, *attr.value);
+            ltePhy->GetLteHelper()->SetEnbAntennaModelAttribute(attr.name, *attr.value);
         }
     }
 
@@ -313,7 +314,7 @@ void
 Scenario::ConfigureLteUe(Ptr<Node> entityNode,
                          const std::vector<LteBearerConfiguration> bearers,
                          const uint32_t netId,
-                         const std::optional<ModelConfiguration> antennaModel,
+                         const std::vector<AntennaModelConfiguration> antennaModels,
                          const std::optional<ModelConfiguration> phyConf)
 {
     // NOTICE: no checks are made for ue/netid combination that do not represent an LTE backbone!
@@ -322,12 +323,12 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
     auto lteHelper = ltePhy->GetLteHelper();
     Ipv4StaticRoutingHelper routingHelper;
 
-    if (antennaModel)
+    if (!antennaModels.empty())
     {
-        lteHelper->SetUeAntennaModelType(antennaModel->GetName());
-        for (auto& attr : antennaModel->GetAttributes())
+        ltePhy->GetLteHelper()->SetUeAntennaModelType(antennaModels.front().model.GetName());
+        for (auto& attr : antennaModels.front().model.GetAttributes())
         {
-            lteHelper->SetUeAntennaModelAttribute(attr.name, *attr.value);
+            ltePhy->GetLteHelper()->SetUeAntennaModelAttribute(attr.name, *attr.value);
         }
     }
 
@@ -379,7 +380,7 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
 void
 Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const uint32_t netId,
-                         const std::optional<ModelConfiguration> antennaModel,
+                         const std::vector<AntennaModelConfiguration> antennaModels,
                          const std::vector<ns3::NrPhyProperty> phyConf,
                          const std::vector<ns3::NrPhyProperty> rrcConf,
                          const std::vector<OutputLinkConfiguration> outputLinks,
@@ -394,25 +395,44 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     auto nrHelper = nrPhy->GetNrHelper();
 
     nrPhy->ResetGnbAntenna();
-    if (antennaModel)
+    std::vector<AntennaModelConfiguration> effectiveAntennas = antennaModels;
+    if (effectiveAntennas.empty())
     {
-        // The Antenna Model is built with a UniformPlanarArray and will have an antenna element
-        // built according to the specified model. The syntax will be the same of the ue and gnb on
-        // phy layer antenna configuration
-        nrHelper->SetGnbAntennaTypeId(antennaModel->GetName());
-        for (auto& attr : antennaModel->GetAttributes())
+        for (const auto& antConf : nrPhyConf->GetGnbAntenna())
         {
-            nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+            AntennaModelConfiguration parsedConf;
+            parsedConf.bwpId = antConf.bwpId;
+
+            ObjectFactory antennaElementFactory;
+            antennaElementFactory.SetTypeId(TypeId::LookupByName(antConf.type));
+            for (const auto& prop : antConf.properties)
+            {
+                antennaElementFactory.Set(prop.name, *prop.value);
+            }
+
+            auto arrayProps = antConf.arrayProperties;
+            arrayProps.emplace_back("AntennaElement",
+                                    Create<PointerValue>(antennaElementFactory.Create()));
+
+            parsedConf.model = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
+            effectiveAntennas.push_back(parsedConf);
         }
     }
-    else
+
+    if (!effectiveAntennas.empty())
     {
-        // Rebuild the antenna every time such that any antenna has a AntennaElement indipendent
-        // from the other nr node antennas
-        auto gnbAntennaConf = nrPhyConf->GetGnbAntenna();
-        nrPhy->SetGnbAntenna(gnbAntennaConf.type,
-                             gnbAntennaConf.properties,
-                             gnbAntennaConf.arrayProperties);
+        // Setup factory with the first one to ensure the correct class is instantiated
+        auto firstModel = effectiveAntennas.front().model;
+        nrHelper->SetGnbAntennaTypeId(firstModel.GetName());
+        // For backwards compatibility or default behavior, configure it entirely on the factory if
+        // only 1 model
+        if (effectiveAntennas.size() == 1 && !effectiveAntennas.front().bwpId.has_value())
+        {
+            for (auto& attr : firstModel.GetAttributes())
+            {
+                nrHelper->SetGnbAntennaAttribute(attr.name, *attr.value);
+            }
+        }
     }
     auto entityNodeContainer = NodeContainer(entityNode);
     auto bwps = nrPhy->GetBwps(channelId, channelBands);
@@ -437,6 +457,51 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
             {
                 NrHelper::GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
                                                           *attr.attribute.value);
+            }
+        }
+    }
+
+    if (effectiveAntennas.size() > 1 ||
+        (!effectiveAntennas.empty() && effectiveAntennas.front().bwpId.has_value()))
+    {
+        auto bwpLen = NrHelper::GetNumberBwp(dev);
+        for (const auto& antConf : effectiveAntennas)
+        {
+            uint32_t startBwp = 0;
+            uint32_t endBwp = bwpLen;
+            if (antConf.bwpId.has_value())
+            {
+                if (antConf.bwpId.value() < bwpLen)
+                {
+                    startBwp = antConf.bwpId.value();
+                    endBwp = startBwp + 1;
+                }
+                else
+                {
+                    NS_LOG_WARN("Skipping out-of-bounds bwpId " << antConf.bwpId.value()
+                                                                << " for antenna component");
+                    continue;
+                }
+            }
+
+            for (uint32_t i = startBwp; i < endBwp; ++i)
+            {
+                auto phy = dev->GetPhy(i);
+                if (phy)
+                {
+                    auto specPhy = phy->GetSpectrumPhy();
+                    if (specPhy)
+                    {
+                        auto antenna = specPhy->GetAntenna();
+                        if (antenna)
+                        {
+                            for (auto& attr : antConf.model.GetAttributes())
+                            {
+                                antenna->SetAttribute(attr.name, *attr.value);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -479,7 +544,7 @@ void
 Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::vector<NrQosFlowConfiguration> qosFlows,
                         const uint32_t netId,
-                        const std::optional<ModelConfiguration> antennaModel,
+                        const std::vector<AntennaModelConfiguration> antennaModels,
                         const std::vector<ns3::NrPhyProperty> phyConf,
                         const std::vector<ns3::NrPhyProperty> rrcConf,
                         const std::vector<OutputLinkConfiguration> outputLinks,
@@ -493,25 +558,41 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
     auto nrHelper = nrPhy->GetNrHelper();
 
     nrPhy->ResetUeAntenna();
-    if (antennaModel)
+    std::vector<AntennaModelConfiguration> effectiveAntennas = antennaModels;
+    if (effectiveAntennas.empty())
     {
-        // The Antenna Model is built with a UniformPlanarArray and will have an antenna element
-        // built according to the specified model. The syntax will be the same of the ue and gnb on
-        // phy layer antenna configuration
-        nrHelper->SetUeAntennaTypeId(antennaModel->GetName());
-        for (auto& attr : antennaModel->GetAttributes())
+        for (const auto& antConf : nrPhyConf->GetUeAntenna())
         {
-            nrHelper->SetUeAntennaAttribute(attr.name, *attr.value);
+            AntennaModelConfiguration parsedConf;
+            parsedConf.bwpId = antConf.bwpId;
+
+            ObjectFactory antennaElementFactory;
+            antennaElementFactory.SetTypeId(TypeId::LookupByName(antConf.type));
+            for (const auto& prop : antConf.properties)
+            {
+                antennaElementFactory.Set(prop.name, *prop.value);
+            }
+
+            auto arrayProps = antConf.arrayProperties;
+            arrayProps.emplace_back("AntennaElement",
+                                    Create<PointerValue>(antennaElementFactory.Create()));
+
+            parsedConf.model = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
+            effectiveAntennas.push_back(parsedConf);
         }
     }
-    else
+
+    if (!effectiveAntennas.empty())
     {
-        // Rebuild the antenna every time such that any antenna has a AntennaElement indipendent
-        // from the other nr node antennas
-        auto ueAntennaConf = nrPhyConf->GetUeAntenna();
-        nrPhy->SetUeAntenna(ueAntennaConf.type,
-                            ueAntennaConf.properties,
-                            ueAntennaConf.arrayProperties);
+        auto firstModel = effectiveAntennas.front().model;
+        nrHelper->SetUeAntennaTypeId(firstModel.GetName());
+        if (effectiveAntennas.size() == 1 && !effectiveAntennas.front().bwpId.has_value())
+        {
+            for (auto& attr : firstModel.GetAttributes())
+            {
+                nrHelper->SetUeAntennaAttribute(attr.name, *attr.value);
+            }
+        }
     }
 
     Ipv4StaticRoutingHelper routingHelper;
@@ -557,6 +638,47 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
             {
                 NrHelper::GetUePhy(dev, i)->SetAttribute(attr.attribute.name,
                                                          *attr.attribute.value);
+            }
+        }
+    }
+
+    auto bwpLen = NrHelper::GetNumberBwp(dev);
+    for (const auto& antConf : effectiveAntennas)
+    {
+        uint32_t startBwp = 0;
+        uint32_t endBwp = bwpLen;
+        if (antConf.bwpId.has_value())
+        {
+            if (antConf.bwpId.value() < bwpLen)
+            {
+                startBwp = antConf.bwpId.value();
+                endBwp = startBwp + 1;
+            }
+            else
+            {
+                NS_LOG_WARN("Skipping out-of-bounds bwpId " << antConf.bwpId.value()
+                                                            << " for UE antenna component");
+                continue;
+            }
+        }
+
+        for (uint32_t i = startBwp; i < endBwp; ++i)
+        {
+            auto phy = dev->GetPhy(i);
+            if (phy)
+            {
+                auto specPhy = phy->GetSpectrumPhy();
+                if (specPhy)
+                {
+                    auto antenna = specPhy->GetAntenna();
+                    if (antenna)
+                    {
+                        for (auto& attr : antConf.model.GetAttributes())
+                        {
+                            antenna->SetAttribute(attr.name, *attr.value);
+                        }
+                    }
+                }
             }
         }
     }

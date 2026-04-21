@@ -43,8 +43,8 @@ class WifiNetdeviceConfiguration : public NetdeviceConfiguration
     WifiNetdeviceConfiguration(const std::string type,
                                const ModelConfiguration macLayer,
                                const std::optional<uint32_t> networkLayerId,
-                               const std::optional<ModelConfiguration> antennaModel,
-                               const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+                               const std::vector<AntennaModelConfiguration>& antennaModels,
+                               const std::vector<DirectivityConfiguration> directivity = std::vector<DirectivityConfiguration>());
     /**
      * Get the type ID.
      * \return the object TypeId

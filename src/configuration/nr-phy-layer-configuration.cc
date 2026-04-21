@@ -20,8 +20,6 @@
 #include <ns3/abort.h>
 #include <ns3/cc-bwp-helper.h>
 
-#include <functional>
-
 namespace ns3
 {
 
@@ -130,13 +128,13 @@ NrPhyLayerConfiguration::AddBandConfiguration(const NrBandConfiguration& bandCon
 }
 
 void
-NrPhyLayerConfiguration::SetGnbAntenna(const NrAntennaConfiguration& antennaConfig)
+NrPhyLayerConfiguration::SetGnbAntenna(const std::vector<NrAntennaConfiguration>& antennaConfig)
 {
     m_gnbAntenna = antennaConfig;
 }
 
 void
-NrPhyLayerConfiguration::SetUeAntenna(const NrAntennaConfiguration& antennaConfig)
+NrPhyLayerConfiguration::SetUeAntenna(const std::vector<NrAntennaConfiguration>& antennaConfig)
 {
     m_ueAntenna = antennaConfig;
 }
@@ -162,7 +160,7 @@ NrPhyLayerConfiguration::GetSchedulerType() const
 /**
  * Get gNB antenna configuration
  */
-const NrAntennaConfiguration&
+const std::vector<NrAntennaConfiguration>&
 NrPhyLayerConfiguration::GetGnbAntenna() const
 {
     return m_gnbAntenna;
@@ -171,7 +169,7 @@ NrPhyLayerConfiguration::GetGnbAntenna() const
 /**
  * Get UE antenna configuration
  */
-const NrAntennaConfiguration&
+const std::vector<NrAntennaConfiguration>&
 NrPhyLayerConfiguration::GetUeAntenna() const
 {
     return m_ueAntenna;

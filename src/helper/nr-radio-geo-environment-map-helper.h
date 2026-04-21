@@ -307,6 +307,13 @@ class NrRadioGeoEnvironmentMapHelper : public Object
      */
     void SetInterferers(const NetDeviceContainer& interferers, uint8_t bwpId = 0);
 
+    /**
+     * @brief Configures the object factories with the parameters set in the
+     * user scenario script.
+     * @return Configured ObjectFactory instance
+     */
+    static ObjectFactory ConfigureObjectFactory(const Ptr<Object>& object);
+
   private:
     /**
      * @brief This struct includes the coordinates of each Rem Point
@@ -513,13 +520,6 @@ class NrRadioGeoEnvironmentMapHelper : public Object
     void ConfigurePropagationModelsFactories(const Ptr<const NrPhy>& rtdPhy);
 
     /**
-     * @brief Configures the object factories with the parameters set in the
-     * user scenario script.
-     * @return Configured ObjectFactory instance
-     */
-    ObjectFactory ConfigureObjectFactory(const Ptr<Object>& object) const;
-
-    /**
      * @brief This method creates the temporal Propagation Models
      * @return The struct with the temporal propagation models (created for each
      * rem point)
@@ -601,8 +601,9 @@ class NrRadioGeoEnvironmentMapHelper : public Object
     uint16_t m_numOfIterationsToAverage{1};
     Time m_installationDelay{Seconds(0)};
     bool m_logGeocentricRem{false};
+    bool m_stopWhenDone{true};
 
-public:
+  public:
     /**
      * @brief Sets the attribute LogGeocentricRem
      * @param logGeocentricRem boolean value
@@ -615,8 +616,19 @@ public:
      */
     bool GetLogGeocentricRem() const;
 
-private:
+    /**
+     * @brief Sets the attribute StopWhenDone
+     * @param stop boolean value
+     */
+    void SetStopWhenDone(bool stop);
 
+    /**
+     * @brief Gets the attribute StopWhenDone
+     * @return boolean value
+     */
+    bool GetStopWhenDone() const;
+
+  private:
     RemDevice m_rrd;
 
     Ptr<NrPhy> m_rrdPhy; ///< Pointer to the phy of the RRD

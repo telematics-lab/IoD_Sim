@@ -118,6 +118,7 @@ struct NrBandConfiguration
  */
 struct NrAntennaConfiguration
 {
+    std::optional<uint32_t> bwpId = std::nullopt;
     std::string type = "ns3::IsotropicAntennaModel";
     std::vector<ModelConfiguration::Attribute> properties;
     std::vector<ModelConfiguration::Attribute> arrayProperties;
@@ -247,12 +248,12 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     /**
      * Set gNB antenna configuration
      */
-    void SetGnbAntenna(const NrAntennaConfiguration& antennaConfig);
+    void SetGnbAntenna(const std::vector<NrAntennaConfiguration>& antennaConfig);
 
     /**
      * Set UE antenna configuration
      */
-    void SetUeAntenna(const NrAntennaConfiguration& antennaConfig);
+    void SetUeAntenna(const std::vector<NrAntennaConfiguration>& antennaConfig);
 
     /**
      * Get beamforming method
@@ -267,11 +268,11 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     /**
      * Get gNB antenna configuration
      */
-    const NrAntennaConfiguration& GetGnbAntenna() const;
+    const std::vector<NrAntennaConfiguration>& GetGnbAntenna() const;
     /**
      * Get UE antenna configuration
      */
-    const NrAntennaConfiguration& GetUeAntenna() const;
+    const std::vector<NrAntennaConfiguration>& GetUeAntenna() const;
 
     /**
      * Get UE PHY attributes
@@ -516,8 +517,8 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     TypeId m_ulErrorModelType;
     std::vector<ModelConfiguration::Attribute> m_ulErrorModelAttributes;
     std::vector<NrBandConfiguration> m_bandsConfig;
-    NrAntennaConfiguration m_ueAntenna;
-    NrAntennaConfiguration m_gnbAntenna;
+    std::vector<NrAntennaConfiguration> m_ueAntenna;
+    std::vector<NrAntennaConfiguration> m_gnbAntenna;
     std::vector<ModelConfiguration::Attribute> m_uePhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_gnbPhyAttributes;
     std::vector<ModelConfiguration::Attribute> m_beamformingAttributes;

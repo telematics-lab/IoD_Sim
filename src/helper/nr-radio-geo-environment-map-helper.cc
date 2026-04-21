@@ -163,6 +163,13 @@ NrRadioGeoEnvironmentMapHelper::GetTypeId()
                           BooleanValue(false),
                           MakeBooleanAccessor(&NrRadioGeoEnvironmentMapHelper::SetLogGeocentricRem,
                                               &NrRadioGeoEnvironmentMapHelper::GetLogGeocentricRem),
+                          MakeBooleanChecker())
+            .AddAttribute("StopWhenDone",
+                          "If true, Simulator::Stop () will be called as soon as the REM has been "
+                          "generated",
+                          BooleanValue(true),
+                          MakeBooleanAccessor(&NrRadioGeoEnvironmentMapHelper::SetStopWhenDone,
+                                              &NrRadioGeoEnvironmentMapHelper::GetStopWhenDone),
                           MakeBooleanChecker());
     return tid;
 }
@@ -243,6 +250,18 @@ bool
 NrRadioGeoEnvironmentMapHelper::GetLogGeocentricRem() const
 {
     return m_logGeocentricRem;
+}
+
+void
+NrRadioGeoEnvironmentMapHelper::SetStopWhenDone(bool stop)
+{
+    m_stopWhenDone = stop;
+}
+
+bool
+NrRadioGeoEnvironmentMapHelper::GetStopWhenDone() const
+{
+    return m_stopWhenDone;
 }
 
 NrRadioGeoEnvironmentMapHelper::RemMode
@@ -487,9 +506,8 @@ NrRadioGeoEnvironmentMapHelper::ConfigurePropagationModelsFactories(const Ptr<co
 }
 
 ObjectFactory
-NrRadioGeoEnvironmentMapHelper::ConfigureObjectFactory(const Ptr<Object>& object) const
+NrRadioGeoEnvironmentMapHelper::ConfigureObjectFactory(const Ptr<Object>& object)
 {
-    NS_LOG_FUNCTION(this);
     ObjectFactory objectFactory;
     TypeId tid = object->GetInstanceTypeId();
     objectFactory.SetTypeId(object->GetInstanceTypeId());
@@ -563,8 +581,7 @@ NrRadioGeoEnvironmentMapHelper::CreateRem(const NetDeviceContainer& rtdNetDev,
 {
     NS_LOG_FUNCTION(this);
 
-    for (NetDeviceContainer::Iterator netDevIt = rtdNetDev.Begin(); netDevIt != rtdNetDev.End();
-         ++netDevIt)
+    for (auto netDevIt = rtdNetDev.Begin(); netDevIt != rtdNetDev.End(); ++netDevIt)
     {
         Ptr<NrGnbNetDevice> gnbRtdNetDevice = DynamicCast<NrGnbNetDevice>(*netDevIt);
         Ptr<NrUeNetDevice> ueRtdNetDevice = DynamicCast<NrUeNetDevice>(*netDevIt);
@@ -632,20 +649,24 @@ NrRadioGeoEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(
     auto rrdAntennaCopy = ConfigureObjectFactory(originalRrdAntenna).Create<UniformPlanarArray>();
 
     // Copy BF vector if valid (snapshot)
-    rrdAntennaCopy->SetBeamformingVector(originalRrdAntenna->GetBeamformingVector());
+    if (originalRrdAntenna->IsBfVectorValid())
+    {
+        rrdAntennaCopy->SetBeamformingVector(originalRrdAntenna->GetBeamformingVector());
+    }
     m_deviceToAntenna.insert(std::make_pair(rrdDevice, rrdAntennaCopy));
 
     // RTDs
-    for (NetDeviceContainer::Iterator rtdNetDevIt = rtdNetDev.Begin();
-         rtdNetDevIt != rtdNetDev.End();
-         ++rtdNetDevIt)
+    for (auto rtdNetDevIt = rtdNetDev.Begin(); rtdNetDevIt != rtdNetDev.End(); ++rtdNetDevIt)
     {
         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*rtdNetDevIt)->second;
         auto originalRtdAntenna =
             rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>();
         auto rtdAntennaCopy =
             ConfigureObjectFactory(originalRtdAntenna).Create<UniformPlanarArray>();
-        rtdAntennaCopy->SetBeamformingVector(originalRtdAntenna->GetBeamformingVector());
+        if (originalRtdAntenna->IsBfVectorValid())
+        {
+            rtdAntennaCopy->SetBeamformingVector(originalRtdAntenna->GetBeamformingVector());
+        }
 
         m_deviceToAntenna.insert(std::make_pair(*rtdNetDevIt, rtdAntennaCopy));
     }
@@ -917,7 +938,9 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
     {
         Ptr<NetDevice> dev = *it;
         if (!dev)
+        {
             continue;
+        }
 
         Ptr<NrPhy> phy = nullptr;
 
@@ -936,7 +959,9 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
         }
 
         if (!phy)
+        {
             continue;
+        }
 
         RemDevice remDev;
         remDev.node = dev->GetNode();
@@ -1762,7 +1787,10 @@ void
 NrRadioGeoEnvironmentMapHelper::Finalize()
 {
     NS_LOG_FUNCTION(this);
-    Simulator::Stop();
+    if (m_stopWhenDone)
+    {
+        Simulator::Stop();
+    }
 }
 
 void

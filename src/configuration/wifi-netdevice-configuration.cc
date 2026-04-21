@@ -35,9 +35,9 @@ WifiNetdeviceConfiguration::WifiNetdeviceConfiguration(
     const std::string type,
     const ModelConfiguration macLayer,
     const std::optional<uint32_t> networkLayerId,
-    const std::optional<ModelConfiguration> antennaModel,
-    const std::optional<DirectivityConfiguration> directivity)
-    : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
+    const std::vector<AntennaModelConfiguration>& antennaModels,
+    const std::vector<DirectivityConfiguration> directivity)
+    : NetdeviceConfiguration{type, networkLayerId, antennaModels, directivity},
       m_macLayer{macLayer}
 {
 }

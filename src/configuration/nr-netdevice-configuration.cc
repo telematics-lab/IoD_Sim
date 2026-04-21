@@ -26,11 +26,17 @@ class NrNetdeviceConfigurationPriv
     static const NrRole ParseRole(const std::string rawRole)
     {
         if (rawRole == "UE")
+        {
             return NrRole::nrUE;
+        }
         else if (rawRole == "gNB")
+        {
             return NrRole::gNB;
+        }
         else
+        {
             NS_FATAL_ERROR("Unsupported NR Role: " << rawRole);
+        }
     }
 };
 
@@ -51,14 +57,14 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<NrQosFlowConfiguration> qosFlows,
     const std::vector<NrPhyProperty> phyProperties,
     const std::optional<uint32_t> networkLayerId,
-    const std::optional<ModelConfiguration> antennaModel,
-    const std::vector<OutputLinkConfiguration> outputLinks,
-    const std::optional<DirectivityConfiguration> directivity,
+    const std::vector<AntennaModelConfiguration>& antennaModels,
+    const std::vector<OutputLinkConfiguration>& outputLinks,
+    const std::vector<DirectivityConfiguration>& directivity,
     const uint32_t channelId,
     const std::vector<uint32_t> channelBands,
     const std::vector<NrPhyProperty> rrcProperties,
     const std::vector<X2NeighborConfiguration> x2Neighbors)
-    : NetdeviceConfiguration{type, networkLayerId, antennaModel, directivity},
+    : NetdeviceConfiguration{type, networkLayerId, antennaModels, directivity},
       m_role{NrNetdeviceConfigurationPriv::ParseRole(rawRole)},
       m_qosFlows{qosFlows},
       m_phyProperties{phyProperties},

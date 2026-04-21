@@ -61,9 +61,10 @@ class LteNetdeviceConfiguration : public NetdeviceConfiguration
                               const std::string rawRole,
                               const std::vector<LteBearerConfiguration> bearers,
                               const std::optional<uint32_t> networkLayerId,
-                              const std::optional<ModelConfiguration> antennaModel,
-                              const std::optional<ModelConfiguration> phyModel,
-                              const std::optional<DirectivityConfiguration> directivity = std::nullopt);
+                              const std::vector<AntennaModelConfiguration>& antennaModels,
+                              const std::optional<ModelConfiguration> phyLayer,
+                              const std::vector<DirectivityConfiguration> directivity =
+                                  std::vector<DirectivityConfiguration>());
 
     /**
      * Get the type ID.

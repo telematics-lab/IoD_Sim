@@ -317,8 +317,9 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
         std::string coordinatesType = "cartesian";
         bool is3d = false;
         bool logGeocentricRem = false;
+        bool aggregateBwps = false;
         uint32_t phyLayerIndex;
-        uint32_t bwpId;
+        std::optional<uint32_t> bwpId;
         std::vector<std::pair<std::string, std::string>> parameters;
 
         struct NodeSelection
