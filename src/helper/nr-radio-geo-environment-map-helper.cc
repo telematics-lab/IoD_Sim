@@ -828,8 +828,19 @@ NrRadioGeoEnvironmentMapHelper::CalcRxPsdValue(RemDevice& device, RemDevice& oth
         NS_LOG_LOGIC("Converting TXPSD of RTD device " << device.spectrumModel->GetUid() << " --> "
                                                        << otherDevice.spectrumModel->GetUid());
 
-        SpectrumConverter converter(device.spectrumModel, otherDevice.spectrumModel);
-        convertedTxPsd = converter.Convert(txPsd);
+        std::pair<uint32_t, uint32_t> pairKey = std::make_pair(device.spectrumModel->GetUid(), otherDevice.spectrumModel->GetUid());
+        Ptr<SpectrumConverter> converter;
+        auto it = m_spectrumConverterCache.find(pairKey);
+        if (it != m_spectrumConverterCache.end())
+        {
+            converter = it->second;
+        }
+        else
+        {
+            converter = Create<SpectrumConverter>(device.spectrumModel, otherDevice.spectrumModel);
+            m_spectrumConverterCache[pairKey] = converter;
+        }
+        convertedTxPsd = converter->Convert(txPsd);
     }
 
     // Copy TX PSD to RX PSD, they are now equal rxPsd == txPsd

@@ -481,6 +481,7 @@ Scenario::ConfigureFullMeshX2Links()
         NS_LOG_INFO("Configuring full mesh X2 links for netId " << netId);
 
         NodeContainer gnbNodes;
+        std::set<Ptr<Node>> uniqueNodes;
         auto it = m_nrGnbDevices.find(netId);
         if (it != m_nrGnbDevices.end())
         {
@@ -491,7 +492,12 @@ Scenario::ConfigureFullMeshX2Links()
                     Ptr<NetDevice> dev = devContainer.Get(i);
                     if (dev)
                     {
-                        gnbNodes.Add(dev->GetNode());
+                        Ptr<Node> node = dev->GetNode();
+                        if (uniqueNodes.find(node) == uniqueNodes.end())
+                        {
+                            uniqueNodes.insert(node);
+                            gnbNodes.Add(node);
+                        }
                     }
                 }
             }

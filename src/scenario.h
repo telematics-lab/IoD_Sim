@@ -163,17 +163,17 @@ class Scenario
                                                 const uint32_t entityId,
                                                 const uint32_t deviceId,
                                                 const uint32_t netId);
-    void ConfigureLteEnb(Ptr<Node> entityNode,
+    Ptr<NetDevice> ConfigureLteEnb(Ptr<Node> entityNode,
                          const uint32_t netId,
                          const std::vector<AntennaModelConfiguration> antennaModels,
                          const std::optional<ModelConfiguration> phyConf);
-    void ConfigureLteUe(Ptr<Node> entityNode,
+    Ptr<NetDevice> ConfigureLteUe(Ptr<Node> entityNode,
                         const std::vector<LteBearerConfiguration> bearers,
                         const uint32_t netId,
                         const std::vector<AntennaModelConfiguration> antennaModels,
                         const std::optional<ModelConfiguration> phyConf);
 
-    void ConfigureNrGnb(Ptr<Node> entityNode,
+    Ptr<NetDevice> ConfigureNrGnb(Ptr<Node> entityNode,
                         const uint32_t netId,
                         const std::vector<AntennaModelConfiguration> antennaModels,
                         const std::vector<ns3::NrPhyProperty> phyConf,
@@ -183,7 +183,7 @@ class Scenario
                         const uint32_t channelId,
                         const std::vector<uint32_t> channelBands);
 
-    void ConfigureNrUe(Ptr<Node> entityNode,
+    Ptr<NetDevice> ConfigureNrUe(Ptr<Node> entityNode,
                        const std::vector<NrQosFlowConfiguration> qosFlows,
                        const uint32_t netId,
                        const std::vector<AntennaModelConfiguration> antennaModels,

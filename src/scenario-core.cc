@@ -213,30 +213,29 @@ Scenario::operator()()
                             {
                                 if (selection.deviceIndex != -1)
                                 {
-                                    if ((uint32_t)selection.deviceIndex < node->GetNDevices())
+                                    uint32_t nrDeviceCount = 0;
+                                    bool foundDevice = false;
+                                    for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                     {
-                                        auto dev = node->GetDevice(selection.deviceIndex);
-                                        if (dev && dev->GetInstanceTypeId().IsChildOf(
-                                                       NrNetDevice::GetTypeId()))
+                                        auto dev = node->GetDevice(i);
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
                                         {
-                                            txDevs.Add(dev);
-                                        }
-                                        else
-                                        {
-                                            NS_FATAL_ERROR("Tx Node " << selection.key << " index "
-                                                                      << selection.index
-                                                                      << " deviceIndex "
-                                                                      << selection.deviceIndex
-                                                                      << " is not an NR device.");
+                                            if (nrDeviceCount == (uint32_t)selection.deviceIndex)
+                                            {
+                                                txDevs.Add(dev);
+                                                foundDevice = true;
+                                                break;
+                                            }
+                                            nrDeviceCount++;
                                         }
                                     }
-                                    else
+                                    if (!foundDevice)
                                     {
                                         NS_FATAL_ERROR("Tx Node " << selection.key << " index "
                                                                   << selection.index
                                                                   << " deviceIndex "
                                                                   << selection.deviceIndex
-                                                                  << " out of range.");
+                                                                  << " is out of range. Found only " << nrDeviceCount << " NR devices.");
                                     }
                                 }
                                 else
@@ -326,29 +325,28 @@ Scenario::operator()()
                         {
                             if (selection.deviceIndex != -1)
                             {
-                                if ((uint32_t)selection.deviceIndex < node->GetNDevices())
+                                uint32_t nrDeviceCount = 0;
+                                bool foundDevice = false;
+                                for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                 {
-                                    auto dev = node->GetDevice(selection.deviceIndex);
-                                    if (dev && dev->GetInstanceTypeId().IsChildOf(
-                                                   NrNetDevice::GetTypeId()))
+                                    auto dev = node->GetDevice(i);
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
                                     {
-                                        rxDev = dev;
-                                    }
-                                    else
-                                    {
-                                        NS_FATAL_ERROR("Rx Node " << selection.key << " index "
-                                                                  << selection.index
-                                                                  << " deviceIndex "
-                                                                  << selection.deviceIndex
-                                                                  << " is not an NR device.");
+                                        if (nrDeviceCount == (uint32_t)selection.deviceIndex)
+                                        {
+                                            rxDev = dev;
+                                            foundDevice = true;
+                                            break;
+                                        }
+                                        nrDeviceCount++;
                                     }
                                 }
-                                else
+                                if (!foundDevice)
                                 {
                                     NS_FATAL_ERROR("Rx Node " << selection.key << " index "
                                                               << selection.index << " deviceIndex "
                                                               << selection.deviceIndex
-                                                              << " out of range.");
+                                                              << " is out of range. Found only " << nrDeviceCount << " NR devices.");
                                 }
                             }
                             else

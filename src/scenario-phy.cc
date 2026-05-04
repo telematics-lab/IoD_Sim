@@ -269,7 +269,7 @@ Scenario::ConfigurePhy()
     }
 }
 
-void
+Ptr<NetDevice>
 Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
                           const uint32_t netId,
                           const std::vector<AntennaModelConfiguration> antennaModels,
@@ -308,9 +308,10 @@ Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
         ltePhy->GetLteHelper()->AddX2Interface(entityNode, *eNB);
     }
     backbonePerStack[netId].Add(entityNode);
+    return dev;
 }
 
-void
+Ptr<NetDevice>
 Scenario::ConfigureLteUe(Ptr<Node> entityNode,
                          const std::vector<LteBearerConfiguration> bearers,
                          const uint32_t netId,
@@ -375,9 +376,10 @@ Scenario::ConfigureLteUe(Ptr<Node> entityNode,
         EpsBearer bearer(bearerConf.GetType(), bearerConf.GetQos());
         ltePhy->GetLteHelper()->ActivateDedicatedEpsBearer(dev, bearer, EpcTft::Default());
     }
+    return dev;
 }
 
-void
+Ptr<NetDevice>
 Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const uint32_t netId,
                          const std::vector<AntennaModelConfiguration> antennaModels,
@@ -538,9 +540,11 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
     // Store gNB device for later attachment operations
     NetDeviceContainer gnbDevContainer(dev);
     m_nrGnbDevices[netId].push_back(gnbDevContainer);
+
+    return dev;
 }
 
-void
+Ptr<NetDevice>
 Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::vector<NrQosFlowConfiguration> qosFlows,
                         const uint32_t netId,
@@ -705,12 +709,13 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
     // Store UE device for later attachment operations
     m_nrUeDevices[netId].emplace_back(dev);
 
-    // init QoS flows on UE
     for (auto& qosFlowConf : qosFlows)
     {
         NrQosFlow flow(qosFlowConf.GetType(), qosFlowConf.GetQos());
         nrPhy->GetNrHelper()->ActivateDedicatedQosFlow(dev, flow, NrQosRule::Default());
     }
+
+    return dev;
 }
 
 void

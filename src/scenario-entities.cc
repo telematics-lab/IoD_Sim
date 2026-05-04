@@ -86,6 +86,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
         for (auto& entityNetDev : entityConf->GetNetDevices())
         {
             const auto netId = entityNetDev->GetNetworkLayerId();
+            Ptr<NetDevice> installedDev = nullptr;
 
             if (entityNetDev->GetType() == "wifi")
             {
@@ -97,6 +98,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                                                              entityId,
                                                              deviceId,
                                                              *netId);
+                installedDev = devContainer.Get(0);
                 InstallEntityIpv4(entityNode, devContainer, *netId);
                 ConfigureEntityIpv4(entityNode, devContainer, deviceId, *netId);
             }
@@ -113,10 +115,10 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 switch (role)
                 {
                 case eNB:
-                    ConfigureLteEnb(entityNode, *netId, antennaModels, phyConf);
+                    installedDev = ConfigureLteEnb(entityNode, *netId, antennaModels, phyConf);
                     break;
                 case UE:
-                    ConfigureLteUe(entityNode,
+                    installedDev = ConfigureLteUe(entityNode,
                                    entityLteDevConf->GetBearers(),
                                    *netId,
                                    antennaModels,
@@ -142,7 +144,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 switch (role)
                 {
                 case NrRole::gNB:
-                    ConfigureNrGnb(entityNode,
+                    installedDev = ConfigureNrGnb(entityNode,
                                    *netId,
                                    antennaModels,
                                    phyConf,
@@ -153,7 +155,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                                    entityNrDevConf->GetChannelBands());
                     break;
                 case NrRole::nrUE:
-                    ConfigureNrUe(entityNode,
+                    installedDev = ConfigureNrUe(entityNode,
                                   entityNrDevConf->GetQosFlows(),
                                   *netId,
                                   antennaModels,
@@ -188,6 +190,7 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
 
                 entityNode->AddDevice(netDevice);
                 netDevice->SetNode(entityNode);
+                installedDev = netDevice;
             }
             else
             {
@@ -202,9 +205,9 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                                                                   << deviceId);
                 // Schedule initial directivity update
                 auto mob = entityNode->GetObject<MobilityModel>();
-                if (mob)
+                if (mob && installedDev)
                 {
-                    Scenario::UpdateAntennaDirectivity(entityNode->GetDevice(deviceId),
+                    Scenario::UpdateAntennaDirectivity(installedDev,
                                                        dirConfig,
                                                        entityNetDev->GetType(),
                                                        entityNetDev->GetNetworkLayerId(),

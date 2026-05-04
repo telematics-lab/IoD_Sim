@@ -129,10 +129,12 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
 
         std::vector<AntennaModelConfiguration> antennaModels;
 
-        auto parseAntennaModel = [](const rapidyyjson::Value& antennaModelJson) -> AntennaModelConfiguration {
+        auto parseAntennaModel =
+            [](const rapidyyjson::Value& antennaModelJson) -> AntennaModelConfiguration {
             AntennaModelConfiguration conf;
 
-            if (antennaModelJson.HasMember("bwpId") && antennaModelJson["bwpId"].IsUint()) {
+            if (antennaModelJson.HasMember("bwpId") && antennaModelJson["bwpId"].IsUint())
+            {
                 conf.bwpId = antennaModelJson["bwpId"].GetUint();
             }
 
@@ -171,7 +173,7 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
             arrayProps.push_back(ModelConfiguration::Attribute(
                 "AntennaElement",
                 Create<PointerValue>(antennaElementFactory.Create())));
-            
+
             conf.model = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
             return conf;
         };
@@ -180,11 +182,15 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
         {
             if (netdev.HasMember("antennaModel"))
             {
-                if (netdev["antennaModel"].IsArray()) {
-                    for (auto& antJson : netdev["antennaModel"].GetArray()) {
+                if (netdev["antennaModel"].IsArray())
+                {
+                    for (auto& antJson : netdev["antennaModel"].GetArray())
+                    {
                         antennaModels.push_back(parseAntennaModel(antJson));
                     }
-                } else if (netdev["antennaModel"].IsObject()) {
+                }
+                else if (netdev["antennaModel"].IsObject())
+                {
                     antennaModels.push_back(parseAntennaModel(netdev["antennaModel"]));
                 }
             }
@@ -202,7 +208,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
         std::vector<DirectivityConfiguration> directivities;
         if (netdev.HasMember("directivity"))
         {
-            auto parseDirectivity = [](const rapidyyjson::Value& dirJson) -> DirectivityConfiguration {
+            auto parseDirectivity =
+                [](const rapidyyjson::Value& dirJson) -> DirectivityConfiguration {
                 NS_ASSERT_MSG(dirJson.IsObject(),
                               "Entity Network Device 'directivity' property must be an object.");
                 NS_ASSERT_MSG(dirJson.HasMember("mode"),
@@ -233,8 +240,9 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
 
                 if (dirJson.HasMember("precision"))
                 {
-                    NS_ASSERT_MSG(dirJson["precision"].IsString(),
-                                  "Directivity 'precision' property must be a string (e.g., '100ms').");
+                    NS_ASSERT_MSG(
+                        dirJson["precision"].IsString(),
+                        "Directivity 'precision' property must be a string (e.g., '100ms').");
                     dirConfig.precision = Time(dirJson["precision"].GetString());
                 }
 
@@ -247,35 +255,45 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                                   "Directivity 'key' property must be a string.");
                     dirConfig.key = dirJson["key"].GetString();
 
-                    NS_ASSERT_MSG(
-                        dirJson.HasMember("index"),
-                        "Directivity configuration must have 'index' property when mode is 'node'.");
+                    NS_ASSERT_MSG(dirJson.HasMember("index"),
+                                  "Directivity configuration must have 'index' property when mode "
+                                  "is 'node'.");
                     NS_ASSERT_MSG(dirJson["index"].IsUint(),
                                   "Directivity 'index' property must be an unsigned integer.");
                     dirConfig.index = dirJson["index"].GetUint();
                 }
 
-                if (dirJson.HasMember("bwpId") && dirJson["bwpId"].IsUint()) {
+                if (dirJson.HasMember("bwpId") && dirJson["bwpId"].IsUint())
+                {
                     dirConfig.bwpId = dirJson["bwpId"].GetUint();
                 }
-                if (dirJson.HasMember("downtiltOffset") && dirJson["downtiltOffset"].IsNumber()) {
+                if (dirJson.HasMember("downtiltOffset") && dirJson["downtiltOffset"].IsNumber())
+                {
                     dirConfig.downtiltOffset = dirJson["downtiltOffset"].GetDouble();
                 }
-                if (dirJson.HasMember("bearingOffset") && dirJson["bearingOffset"].IsNumber()) {
+                if (dirJson.HasMember("bearingOffset") && dirJson["bearingOffset"].IsNumber())
+                {
                     dirConfig.bearingOffset = dirJson["bearingOffset"].GetDouble();
                 }
 
                 return dirConfig;
             };
 
-            if (netdev["directivity"].IsArray()) {
-                for (auto& dirJson : netdev["directivity"].GetArray()) {
+            if (netdev["directivity"].IsArray())
+            {
+                for (auto& dirJson : netdev["directivity"].GetArray())
+                {
                     directivities.push_back(parseDirectivity(dirJson));
                 }
-            } else if (netdev["directivity"].IsObject()) {
+            }
+            else if (netdev["directivity"].IsObject())
+            {
                 directivities.push_back(parseDirectivity(netdev["directivity"]));
-            } else {
-                NS_FATAL_ERROR("Entity Network Device 'directivity' must be an object or array of objects.");
+            }
+            else
+            {
+                NS_FATAL_ERROR(
+                    "Entity Network Device 'directivity' must be an object or array of objects.");
             }
         }
 
@@ -288,11 +306,11 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
 
             const auto macLayer = ModelConfigurationHelper::Get(netdev["macLayer"]);
 
-            confs.push_back(CreateObject<WifiNetdeviceConfiguration>(type,
-                                                                     macLayer,
-                                                                     networkLayerId,
-                                                                     antennaModels,
-                                                                     directivities));
+            confs.emplace_back(CreateObject<WifiNetdeviceConfiguration>(type,
+                                                                        macLayer,
+                                                                        networkLayerId,
+                                                                        antennaModels,
+                                                                        directivities));
         }
         else if (type == "lte")
         {

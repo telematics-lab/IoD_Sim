@@ -1,5 +1,5 @@
 {
-  "name": "leo-nr-multibeam",
+  "name": "leo-nr-multibeam-2",
   "resultsPath": "../results/",
   "logOnFile": true,
   "duration": 1,
@@ -7,7 +7,7 @@
   "radioMaps": [
     {
       "phyLayerId": 0,
-      "bwpId": "all",
+      "bwpId": 0,
       "coordinates": "geocentric",
       "logGeocentricREM": true,
       "parameters": {
@@ -50,7 +50,7 @@
     "buildings": []
   },
   "phyLayer": [
-    {
+    { // Beam 1
       "type": "nr",
       "attachMethod": "max-rsrp",
       "channels": [
@@ -75,9 +75,59 @@
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28e9,
-                "bandwidth": 600e6,
-                "numComponentCarriers": 1,
-                "numBandwidthParts": 2
+                "bandwidth": 300e6
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "NTN-Rural",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 28.15e9,
+                "bandwidth": 300e6
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "NTN-Rural",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "0ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 27.85e9,
+                "bandwidth": 300e6
               }
             }
           ]
@@ -110,80 +160,6 @@
           }
         ]
       },
-      "gnbAntenna": [
-        {
-          "bwpId": 0,
-          "type": "ns3::CircularApertureAntennaModel",
-          "properties": [
-            {
-              "name": "OperatingFrequency",
-              "value": 27.85e9
-            },
-            {
-              "name": "AntennaMaxGainDb",
-              "value": 50.0
-            },
-            {
-              "name": "AntennaCircularApertureRadius",
-              "value": 0.01
-            }
-          ],
-          "arrayProperties": [
-            {
-              "name": "NumRows",
-              "value": 1
-            },
-            {
-              "name": "NumColumns",
-              "value": 1
-            }
-          ]
-        },
-        {
-          "bwpId": 1,
-          "type": "ns3::CircularApertureAntennaModel",
-          "properties": [
-            {
-              "name": "OperatingFrequency",
-              "value": 28.15e9
-            },
-            {
-              "name": "AntennaMaxGainDb",
-              "value": 50.0
-            },
-            {
-              "name": "AntennaCircularApertureRadius",
-              "value": 0.01
-            }
-          ],
-          "arrayProperties": [
-            {
-              "name": "NumRows",
-              "value": 1
-            },
-            {
-              "name": "NumColumns",
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "gnbBwpManager": {
-        "attributes": [
-          {
-            "name": "NGBR_LOW_LAT_EMBB",
-            "value": 0
-          }
-        ]
-      },
-      "ueBwpManager": {
-        "attributes": [
-          {
-            "name": "NGBR_LOW_LAT_EMBB",
-            "value": 0
-          }
-        ]
-      },
       "uePhyAttributes": [
         {
           "name": "TxPower",
@@ -207,7 +183,7 @@
     {
       "type": "ipv4",
       "address": "7.0.0.0",
-      "mask": "255.0.0.0",
+      "mask": "255.255.255.0",
       "gateway": "7.0.0.1"
     }
   ],
@@ -218,11 +194,6 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
-          "bearers": [
-            {
-              "type": "NGBR_LOW_LAT_EMBB"
-            }
-          ],
           "directivity": {
             "mode": "nearest-gnb"
           }
@@ -258,17 +229,118 @@
         {
           "type": "nr",
           "networkLayer": 0,
+          "channelId": 0,
           "role": "gNB",
+          "antennaModel": {
+            "type": "ns3::CircularApertureAntennaModel",
+            "properties": [
+              {
+                "name": "OperatingFrequency",
+                "value": 28e9
+              },
+              {
+                "name": "AntennaMaxGainDb",
+                "value": 50.0
+              },
+              {
+                "name": "AntennaCircularApertureRadius",
+                "value": 0.01
+              }
+            ],
+            "arrayProperties": [
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "NumColumns",
+                "value": 1
+              }
+            ]
+          },
           "directivity": [
             {
+              "mode": "earth-centered"
+            }
+          ]
+        },
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "channelId": 1,
+          "role": "gNB",
+          "antennaModel": {
+            "type": "ns3::CircularApertureAntennaModel",
+            "properties": [
+              {
+                "name": "OperatingFrequency",
+                "value": 28.15e9
+              },
+              {
+                "name": "AntennaMaxGainDb",
+                "value": 50.0
+              },
+              {
+                "name": "AntennaCircularApertureRadius",
+                "value": 0.01
+              }
+            ],
+            "arrayProperties": [
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "NumColumns",
+                "value": 1
+              }
+            ]
+          },
+          "directivity": [
+            { // 40° downtilt => 40° under the zenith-oriented beam
               "mode": "earth-centered",
-              "bwpId": 0
-            },
-            {
+              "downtiltOffset": 40,
+              "bearingOffset": 0
+            }
+          ]
+        },
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "channelId": 2,
+          "role": "gNB",
+          "antennaModel": {
+            "type": "ns3::CircularApertureAntennaModel",
+            "properties": [
+              {
+                "name": "OperatingFrequency",
+                "value": 27.85e9
+              },
+              {
+                "name": "AntennaMaxGainDb",
+                "value": 50.0
+              },
+              {
+                "name": "AntennaCircularApertureRadius",
+                "value": 0.01
+              }
+            ],
+            "arrayProperties": [
+              {
+                "name": "NumRows",
+                "value": 1
+              },
+              {
+                "name": "NumColumns",
+                "value": 1
+              }
+            ]
+          },
+          "directivity": [
+            { // 40° bearing offset => 40° to the left of the zenith-oriented beam
               "mode": "earth-centered",
-              "bwpId": 1,
-              "downtiltOffset": 30,
-              "bearingOffset": 30
+              "downtiltOffset": 0,
+              "bearingOffset": 40
             }
           ]
         }

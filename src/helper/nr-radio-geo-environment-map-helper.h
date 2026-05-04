@@ -26,6 +26,7 @@ namespace ns3
 class Node;
 class NetDevice;
 class SpectrumChannel;
+class SpectrumConverter;
 class MobilityModel;
 class MobilityHelper;
 class ChannelConditionModel;
@@ -642,6 +643,8 @@ class NrRadioGeoEnvironmentMapHelper : public Object
     ObjectFactory m_matrixBasedChannelModelFactory;
 
     Ptr<SpectrumValue> m_noisePsd; // noise figure PSD that will be used for calculations
+
+    mutable std::map<std::pair<uint32_t, uint32_t>, Ptr<SpectrumConverter>> m_spectrumConverterCache;
 
     std::string m_simTag; ///< The `SimTag` attribute.
 
