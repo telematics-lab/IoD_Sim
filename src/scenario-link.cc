@@ -1,4 +1,10 @@
 #include "scenario.h"
+
+#include "ns3/nr-epc-x2.h"
+#include "ns3/nr-gnb-net-device.h"
+#include "ns3/nr-no-backhaul-epc-helper.h"
+#include "ns3/point-to-point-helper.h"
+
 #include <filesystem>
 
 namespace ns3
@@ -480,33 +486,22 @@ Scenario::ConfigureFullMeshX2Links()
 
         NS_LOG_INFO("Configuring full mesh X2 links for netId " << netId);
 
-        NodeContainer gnbNodes;
-        std::set<Ptr<Node>> uniqueNodes;
+        // Collect all NrGnbNetDevice pointers (one per channelId/device, not per node)
+        NetDeviceContainer allGnbDevs;
+
         auto it = m_nrGnbDevices.find(netId);
         if (it != m_nrGnbDevices.end())
         {
             for (const auto& devContainer : it->second)
             {
-                for (uint32_t i = 0; i < devContainer.GetN(); ++i)
-                {
-                    Ptr<NetDevice> dev = devContainer.Get(i);
-                    if (dev)
-                    {
-                        Ptr<Node> node = dev->GetNode();
-                        if (uniqueNodes.find(node) == uniqueNodes.end())
-                        {
-                            uniqueNodes.insert(node);
-                            gnbNodes.Add(node);
-                        }
-                    }
-                }
+                allGnbDevs.Add(devContainer);
             }
         }
 
-        // AddX2Interface creates links between all pairs in the container
-        if (gnbNodes.GetN() > 1)
+        // Full mesh X2 links (standard path via NrHelper, now supports intra-node)
+        if (allGnbDevs.GetN() > 1)
         {
-            nrPhySim->GetNrHelper()->AddX2Interface(gnbNodes);
+            nrPhySim->GetNrHelper()->AddX2Interface(allGnbDevs);
         }
     }
 }
@@ -590,8 +585,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
         Ptr<NrGnbNetDevice> currentGnb = nullptr;
 
-        if (ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_NORMALLY ||
-            ueDevice->GetRrc()->GetState() == NrUeRrc::CONNECTED_HANDOVER)
+        if (ueDevice->GetRrc()->GetState() != NrUeRrc::IDLE_START)
         {
             for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
             {
@@ -637,7 +631,8 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
 #ifdef SINR_DISTANCE_PRINT_DEBUG
             std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB "
-                      << gnbNode->GetId() << ": " << distance / 1000 << " km" << std::endl;
+                      << gnbDevice->GetCellId() << " (node " << gnbNode->GetId()
+                      << "): " << distance / 1000 << " km" << std::endl;
 #endif
 
             // Find required min SINR for this distance
@@ -671,8 +666,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
 #ifdef SINR_DISTANCE_PRINT_DEBUG
             std::cout << "UE " << ueDevice->GetNode()->GetId() << " evaluated SNR for gNB "
-                      << gnbNode->GetId() << ": " << estimatedSnr
-                      << " dB (Required: " << minSinrRequired << " dB)" << std::endl;
+                      << gnbDevice->GetCellId() << " (node " << gnbNode->GetId()
+                      << "): " << estimatedSnr << " dB (Required: " << minSinrRequired << " dB)"
+                      << std::endl;
 #endif
 
             // Checking if SNR is above the required threshold
@@ -714,15 +710,16 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 #ifdef SINR_DISTANCE_PRINT_DEBUG
                             if (bestSnr > currentSnr)
                             {
-                                std::cout << "UE " << ueDevice->GetImsi()
-                                          << " HANDOVER PREVENTED by threshold ("
-                                          << sdaConfig.threshold << " dB)"
-                                          << " from gNB " << currentGnb->GetNode()->GetId()
-                                          << " (SNR: " << currentSnr << " dB)"
-                                          << " to gNB " << bestGnb->GetNode()->GetId()
-                                          << " (SNR: " << bestSnr << " dB)"
-                                          << " Delta: " << bestSnr - currentSnr << " dB"
-                                          << std::endl;
+                                std::cout
+                                    << "UE " << ueDevice->GetImsi()
+                                    << " HANDOVER PREVENTED by threshold (" << sdaConfig.threshold
+                                    << " dB)"
+                                    << " from gNB " << currentGnb->GetCellId() << " (node "
+                                    << currentGnb->GetNode()->GetId() << ", SNR: " << currentSnr
+                                    << " dB)"
+                                    << " to gNB " << bestGnb->GetCellId() << " (node "
+                                    << bestGnb->GetNode()->GetId() << ", SNR: " << bestSnr << " dB)"
+                                    << " Delta: " << bestSnr - currentSnr << " dB" << std::endl;
                             }
 #endif
                         }
@@ -732,10 +729,10 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                     {
 #ifdef SINR_DISTANCE_PRINT_DEBUG
                         std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                                  << currentGnb->GetNode()->GetId() << " (SNR: " << currentSnr
-                                  << " dB)"
-                                  << " to gNB " << bestGnb->GetNode()->GetId()
-                                  << " (SNR: " << bestSnr << " dB)"
+                                  << currentGnb->GetCellId() << " (node "
+                                  << currentGnb->GetNode()->GetId() << ", SNR: " << currentSnr
+                                  << " dB) to gNB " << bestGnb->GetCellId() << " (node "
+                                  << bestGnb->GetNode()->GetId() << ", SNR: " << bestSnr << " dB)"
                                   << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
 #endif
                         nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
@@ -746,8 +743,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             {
 #ifdef SINR_DISTANCE_PRINT_DEBUG
                 std::cout << "UE " << ueDevice->GetNode()->GetId() << " CAN connect to gNB "
-                          << bestGnb->GetNode()->GetId() << " (SNR: " << bestSnr << " dB)" << " at "
-                          << Simulator::Now().GetSeconds() << std::endl;
+                          << bestGnb->GetCellId() << " (node " << bestGnb->GetNode()->GetId()
+                          << ", SNR: " << bestSnr << " dB) at " << Simulator::Now().GetSeconds()
+                          << std::endl;
 #endif
 
                 for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)

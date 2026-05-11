@@ -164,34 +164,34 @@ class Scenario
                                                 const uint32_t deviceId,
                                                 const uint32_t netId);
     Ptr<NetDevice> ConfigureLteEnb(Ptr<Node> entityNode,
-                         const uint32_t netId,
-                         const std::vector<AntennaModelConfiguration> antennaModels,
-                         const std::optional<ModelConfiguration> phyConf);
+                                   const uint32_t netId,
+                                   const std::vector<AntennaModelConfiguration> antennaModels,
+                                   const std::optional<ModelConfiguration> phyConf);
     Ptr<NetDevice> ConfigureLteUe(Ptr<Node> entityNode,
-                        const std::vector<LteBearerConfiguration> bearers,
-                        const uint32_t netId,
-                        const std::vector<AntennaModelConfiguration> antennaModels,
-                        const std::optional<ModelConfiguration> phyConf);
+                                  const std::vector<LteBearerConfiguration> bearers,
+                                  const uint32_t netId,
+                                  const std::vector<AntennaModelConfiguration> antennaModels,
+                                  const std::optional<ModelConfiguration> phyConf);
 
     Ptr<NetDevice> ConfigureNrGnb(Ptr<Node> entityNode,
-                        const uint32_t netId,
-                        const std::vector<AntennaModelConfiguration> antennaModels,
-                        const std::vector<ns3::NrPhyProperty> phyConf,
-                        const std::vector<ns3::NrPhyProperty> rrcConf,
-                        const std::vector<OutputLinkConfiguration> outputLinks,
-                        const std::vector<X2NeighborConfiguration> x2Neighbors,
-                        const uint32_t channelId,
-                        const std::vector<uint32_t> channelBands);
+                                  const uint32_t netId,
+                                  const std::vector<AntennaModelConfiguration> antennaModels,
+                                  const std::vector<ns3::NrPhyProperty> phyConf,
+                                  const std::vector<ns3::NrPhyProperty> rrcConf,
+                                  const std::vector<OutputLinkConfiguration> outputLinks,
+                                  const std::vector<X2NeighborConfiguration> x2Neighbors,
+                                  const uint32_t channelId,
+                                  const std::vector<uint32_t> channelBands);
 
     Ptr<NetDevice> ConfigureNrUe(Ptr<Node> entityNode,
-                       const std::vector<NrQosFlowConfiguration> qosFlows,
-                       const uint32_t netId,
-                       const std::vector<AntennaModelConfiguration> antennaModels,
-                       const std::vector<ns3::NrPhyProperty> phyConf,
-                       const std::vector<ns3::NrPhyProperty> rrcConf,
-                       const std::vector<OutputLinkConfiguration> outputLinks,
-                       const uint32_t channelId,
-                       const std::vector<uint32_t> channelBands);
+                                 const std::vector<NrQosFlowConfiguration> qosFlows,
+                                 const uint32_t netId,
+                                 const std::vector<AntennaModelConfiguration> antennaModels,
+                                 const std::vector<ns3::NrPhyProperty> phyConf,
+                                 const std::vector<ns3::NrPhyProperty> rrcConf,
+                                 const std::vector<OutputLinkConfiguration> outputLinks,
+                                 const uint32_t channelId,
+                                 const std::vector<uint32_t> channelBands);
 
     void InstallEntityIpv4(Ptr<Node> entityNode,
                            NetDeviceContainer netDevices,
