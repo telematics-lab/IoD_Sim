@@ -116,10 +116,16 @@ TraceBasedMobilityModel::SetDeviceId(std::string deviceId)
 }
 
 void
+TraceBasedMobilityModel::DoInitialize()
+{
+    GeocentricMobilityModel::DoInitialize();
+    Update();
+}
+
+void
 TraceBasedMobilityModel::SetPrecision(Time precision)
 {
     m_precision = precision;
-    Update();
 }
 
 Time

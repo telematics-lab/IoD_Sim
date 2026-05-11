@@ -1,0 +1,56 @@
+{
+  "name": "tcl-example",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 1000,
+  "appStatisticsReportInterval": 0.3,
+  // 1. STATIC NS3 CONFIGURATION
+  // Questa sezione sovrascrive i parametri globali di default di ns-3.
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE" // Modello della terra semplificato a sfera, consigliato per LEO
+    },
+    // I valori di precision fanno riferimento a quanto spesso effettivamente nel simulatore avverrà lo spostamento del nodo
+    // di conseguenza può essere adattato in base al tipo di scenario per avere simulazioni più o meno pesanti
+    // In più ogni spostamento verrà tracciato nei relativi file csv per i nodi veichles e leo-sats
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "1s" // Precisione del tracciamento delle orbite (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "1s" // Precisione del tracciamento dei veicoli a velocità costante (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::TraceBasedMobilityModel::Precision",
+      "value": "1s" // Precisione del tracciamento dei veicoli basato su trace (aggiornate ogni 500ms)
+    }
+  ],
+  // 2. DIMENSIONI DEL MONDO
+  // Definisce uno spazio sufficientemente grande per simulare la superficie terrestre e l'orbita dei satelliti
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  // Ignoriamo la parte di rete/radio
+  "phyLayer": [],
+  "macLayer": [],
+  "networkLayer": [],
+  // 4. VEICOLI A TERRA (UEs) - MODELLI DI MOBILITÀ MISTI
+  "vehicles": [
+    {
+      "netDevices": [],
+      // La macro replica dinamicamente per ogni DeviceId esistente nel .trace,
+      // un nuovo veicolo copio-incollando i networkDevices o networkLayer in essi inclusi.
+      "!traceMobility": {
+        "file": "../scenario/assets/tcl.trace"
+      }
+    }
+  ],
+  "logComponents": []
+}

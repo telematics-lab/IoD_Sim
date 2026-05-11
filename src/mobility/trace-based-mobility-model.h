@@ -32,6 +32,7 @@ class TraceBasedMobilityModel : public GeocentricMobilityModel
     Time GetPrecision() const;
 
   private:
+    void DoInitialize() override;
     Vector DoGetPosition(PositionType type) const override;
     void DoSetPosition(const Vector& position, PositionType type) override;
     Vector DoGetVelocity() const override;
