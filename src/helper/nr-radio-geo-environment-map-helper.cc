@@ -19,6 +19,7 @@
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
 #include "ns3/nr-gnb-net-device.h"
+#include "ns3/nr-helper.h"
 #include "ns3/nr-spectrum-phy.h"
 #include "ns3/nr-spectrum-value-helper.h"
 #include "ns3/nr-ue-net-device.h"
@@ -379,10 +380,10 @@ NrRadioGeoEnvironmentMapHelper::ConfigureRtdList(const NetDeviceContainer& rtdDe
 {
     NS_LOG_FUNCTION(this);
 
-    for (NetDeviceContainer::Iterator netDevIt = rtdDevs.Begin(); netDevIt != rtdDevs.End();
-         ++netDevIt)
+    for (auto netDevIt = rtdDevs.Begin(); netDevIt != rtdDevs.End(); ++netDevIt)
     {
         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*netDevIt)->second;
+
         if (rtdPhy->GetSpectrumModel() != m_rrd.spectrumModel)
         {
             if (rtdPhy->GetSpectrumModel()->IsOrthogonal(*m_rrd.spectrumModel))
@@ -828,7 +829,8 @@ NrRadioGeoEnvironmentMapHelper::CalcRxPsdValue(RemDevice& device, RemDevice& oth
         NS_LOG_LOGIC("Converting TXPSD of RTD device " << device.spectrumModel->GetUid() << " --> "
                                                        << otherDevice.spectrumModel->GetUid());
 
-        std::pair<uint32_t, uint32_t> pairKey = std::make_pair(device.spectrumModel->GetUid(), otherDevice.spectrumModel->GetUid());
+        std::pair<uint32_t, uint32_t> pairKey =
+            std::make_pair(device.spectrumModel->GetUid(), otherDevice.spectrumModel->GetUid());
         Ptr<SpectrumConverter> converter;
         auto it = m_spectrumConverterCache.find(pairKey);
         if (it != m_spectrumConverterCache.end())
@@ -963,7 +965,7 @@ NrRadioGeoEnvironmentMapHelper::SetInterferers(const NetDeviceContainer& interfe
         else
         {
             Ptr<NrUeNetDevice> ue = DynamicCast<NrUeNetDevice>(dev);
-            if (ue)
+            if (!ue)
             {
                 phy = ue->GetPhy(bwpId);
             }
@@ -1015,6 +1017,11 @@ NrRadioGeoEnvironmentMapHelper::GetSinr(Ptr<NetDevice> ueDevice,
 
     Ptr<NrPhy> uePhy = ueNrDevice->GetPhy(bwpId);
     Ptr<NrPhy> gnbPhy = gnbNrDevice->GetPhy(bwpId);
+
+    if (!uePhy || !gnbPhy)
+    {
+        return -std::numeric_limits<double>::infinity();
+    }
 
     // Ensure Propagation Models are configured (using gNB PHY mostly for factory config)
     if (!m_propagationLossModel)
@@ -1123,6 +1130,11 @@ NrRadioGeoEnvironmentMapHelper::GetSnr(Ptr<NetDevice> ueDevice,
 
     Ptr<NrPhy> uePhy = ueNrDevice->GetPhy(bwpId);
     Ptr<NrPhy> gnbPhy = gnbNrDevice->GetPhy(bwpId);
+
+    if (!uePhy || !gnbPhy)
+    {
+        return -std::numeric_limits<double>::infinity();
+    }
 
     // Ensure Propagation Models are configured (using gNB PHY mostly for factory config)
     if (!m_propagationLossModel)

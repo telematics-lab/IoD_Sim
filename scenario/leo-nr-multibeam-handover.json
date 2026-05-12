@@ -109,6 +109,35 @@
           }
         ]
       },
+      "gnbAntenna": [
+        {
+          "type": "ns3::CircularApertureAntennaModel",
+          "properties": [
+            {
+              "name": "OperatingFrequency",
+              "value": 28.00e9
+            },
+            {
+              "name": "AntennaMaxGainDb",
+              "value": 50.0
+            },
+            {
+              "name": "AntennaCircularApertureRadius",
+              "value": 0.01
+            }
+          ],
+          "arrayProperties": [
+            {
+              "name": "NumRows",
+              "value": 1
+            },
+            {
+              "name": "NumColumns",
+              "value": 1
+            }
+          ]
+        }
+      ],
       "uePhyAttributes": [
         {
           "name": "TxPower",
@@ -158,7 +187,8 @@
           "role": "UE",
           "directivity": {
             "mode": "nearest-gnb"
-          }
+          },
+          "channelId": 1
         }
       ],
       "mobilityModel": {
@@ -192,33 +222,11 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
-          "antennaModel": {
-            "type": "ns3::CircularApertureAntennaModel",
-            "properties": [
-              {
-                "name": "OperatingFrequency",
-                "value": 28e9
-              },
-              {
-                "name": "AntennaMaxGainDb",
-                "value": 50.0
-              },
-              {
-                "name": "AntennaCircularApertureRadius",
-                "value": 0.01
-              }
-            ],
-            "arrayProperties": [
-              {
-                "name": "NumRows",
-                "value": 1
-              },
-              {
-                "name": "NumColumns",
-                "value": 1
-              }
-            ]
-          },
+          "channelBands": [
+            {
+              "ccId": 0
+            }
+          ],
           "directivity": [
             {
               "mode": "earth-centered"
@@ -229,33 +237,11 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
-          "antennaModel": {
-            "type": "ns3::CircularApertureAntennaModel",
-            "properties": [
-              {
-                "name": "OperatingFrequency",
-                "value": 27.85e9
-              },
-              {
-                "name": "AntennaMaxGainDb",
-                "value": 50.0
-              },
-              {
-                "name": "AntennaCircularApertureRadius",
-                "value": 0.01
-              }
-            ],
-            "arrayProperties": [
-              {
-                "name": "NumRows",
-                "value": 1
-              },
-              {
-                "name": "NumColumns",
-                "value": 1
-              }
-            ]
-          },
+          "channelBands": [
+            {
+              "ccId": 1
+            }
+          ],
           "directivity": [
             { // 40° bearing offset => 40° to the left of the zenith-oriented beam
               "mode": "earth-centered",

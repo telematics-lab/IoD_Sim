@@ -334,7 +334,7 @@ ThreeDimensionalRemHelper::RunOneIteration(double xMin,
 {
     NS_LOG_FUNCTION(this << xMin << xMax << yMin << yMax << z);
     std::cout << "Computing SINR for z = " << (z) << std::endl;
-    std::list<RemPoint>::iterator remIt = m_rem.begin();
+    auto remIt = m_rem.begin();
     double x = 0.0;
     double y = 0.0;
     for (x = xMin; x < xMax + 0.5 * m_xStep; x += m_xStep)

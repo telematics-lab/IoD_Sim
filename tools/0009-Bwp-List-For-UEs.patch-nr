@@ -1,0 +1,36 @@
+From d43c25a718f622c803883427db125fb8da9611e9 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 12 May 2026 11:43:55 +0200
+Subject: [PATCH] Get number of bwp of an UE device
+
+---
+ helper/nr-helper.cc | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/helper/nr-helper.cc b/helper/nr-helper.cc
+index 1f710be7..1be89b58 100644
+--- a/helper/nr-helper.cc
++++ b/helper/nr-helper.cc
+@@ -177,12 +177,15 @@ uint32_t
+ NrHelper::GetNumberBwp(const Ptr<const NetDevice>& gnbDevice)
+ {
+     NS_LOG_FUNCTION(gnbDevice);
+-    Ptr<const NrGnbNetDevice> netDevice = DynamicCast<const NrGnbNetDevice>(gnbDevice);
+-    if (netDevice == nullptr)
++    if (Ptr<const NrGnbNetDevice> netDevice = DynamicCast<const NrGnbNetDevice>(gnbDevice))
++    {
++        return netDevice->GetCcMapSize();
++    }
++    if (Ptr<const NrUeNetDevice> netDevice = DynamicCast<const NrUeNetDevice>(gnbDevice))
+     {
+-        return 0;
++        return netDevice->GetCcMapSize();
+     }
+-    return netDevice->GetCcMapSize();
++    return 0;
+ }
+ 
+ Ptr<NrGnbPhy>
+-- 
+2.50.1 (Apple Git-155)
+

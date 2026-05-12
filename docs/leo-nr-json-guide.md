@@ -1072,7 +1072,18 @@ When we go to configure the various network devices, it is possible to configure
     "networkLayer": 0, // ID of the nr layer
     "role": "UE", // Role: UE or gNB
     "channelId": 0, // Optional: Channel ID to use (default: 0)
-    "channelBands": [0, 1], // Optional: List of band indices to use (default: all)
+    "channelBands": [
+      {
+        "bwpId": 0
+      },
+      {
+        "ccId": 0,
+        "bwpId": 1
+      },
+      {
+        "ccId": 1,
+      }
+    ], // Optional: List of ids of part of rge band to use (default: all)
     "qosFlows": [
       {
         "type": "NGBR_LOW_LAT_EMBB"
@@ -1125,7 +1136,8 @@ Furthermore, using the `antennaModel` parameter, it is possible to specify the a
 ### `netDevices[i].channelBands`
 **Type:** `array[uint32_t]`
 **Default:** `[]` (all bands)
-**Description:** A list of indices of the bands within the selected channel that the device should use. If empty or not specified, the device will be configured to use all available bands in the channel.
+**Description:** A list of filters of the bands within the selected channel that the device should use. If empty or not specified, the device will be configured to use all available bands in the channel.
+Each filter is composed of a `ccId` and `bwpId`. The `ccId` is the ID of the component carrier and the `bwpId` is the ID of the bandwidth part. The `ccId` is optional and if not specified, any CC is accepted. The `bwpId` is optional and if not specified, any BWP is accepted.
 
 ### `netDevices[i].directivity`
 **Description:** Configuration of the initial antenna pointing direction. This can be configured as a single object (applied to all bandwidth parts) or as an array of objects to specify tilted directivity for each BWP independently using the `bwpId` property.

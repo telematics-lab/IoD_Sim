@@ -60,9 +60,8 @@ NS_OBJECT_ENSURE_REGISTERED(NrPhySimulationHelper);
 TypeId
 NrPhySimulationHelper::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrPhySimulationHelper")
-                            .SetParent<Object>()
-                            .SetGroupName("IoD_Sim");
+    static TypeId tid =
+        TypeId("ns3::NrPhySimulationHelper").SetParent<Object>().SetGroupName("IoD_Sim");
     return tid;
 }
 
@@ -249,31 +248,50 @@ NrPhySimulationHelper::CreateChannel(
 }
 
 BandwidthPartInfoPtrVector
-NrPhySimulationHelper::GetBwps(uint32_t channelId, const std::vector<uint32_t>& bandIndices) const
+NrPhySimulationHelper::GetBwps(uint32_t channelId,
+                               const std::vector<ChannelBandFilter>& bandFilters) const
 {
     NS_ASSERT_MSG(channelId < m_channelsBands.size(), "Channel ID out of range");
 
-    std::vector<std::reference_wrapper<OperationBandInfo>> refs;
+    BandwidthPartInfoPtrVector result;
     const auto& channel = m_channelsBands[channelId];
 
-    if (bandIndices.empty())
+    for (const auto& band : channel)
     {
-        // If no specific bands are requested, return all bands in the channel
-        for (const auto& band : channel)
+        for (const auto& cc : band.m_cc)
         {
-            refs.push_back(std::ref(const_cast<OperationBandInfo&>(band)));
-        }
-    }
-    else
-    {
-        for (const auto& index : bandIndices)
-        {
-            NS_ASSERT_MSG(index < channel.size(), "Band index out of range");
-            refs.push_back(std::ref(const_cast<OperationBandInfo&>(channel[index])));
+            for (const auto& bwp : cc->m_bwp)
+            {
+                bool match = false;
+                if (bandFilters.empty())
+                {
+                    match = true;
+                }
+                else
+                {
+                    for (const auto& filter : bandFilters)
+                    {
+                        bool ccMatch =
+                            !filter.ccId.has_value() || filter.ccId.value() == cc->m_ccId;
+                        bool bwpMatch =
+                            !filter.bwpId.has_value() || filter.bwpId.value() == bwp->m_bwpId;
+                        if (ccMatch && bwpMatch)
+                        {
+                            match = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (match)
+                {
+                    result.push_back(std::ref(const_cast<BandwidthPartInfoPtr&>(bwp)));
+                }
+            }
         }
     }
 
-    return CcBwpCreator::GetAllBwps(refs);
+    return result;
 }
 
 void

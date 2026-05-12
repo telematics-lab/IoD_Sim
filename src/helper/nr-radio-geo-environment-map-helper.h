@@ -644,7 +644,8 @@ class NrRadioGeoEnvironmentMapHelper : public Object
 
     Ptr<SpectrumValue> m_noisePsd; // noise figure PSD that will be used for calculations
 
-    mutable std::map<std::pair<uint32_t, uint32_t>, Ptr<SpectrumConverter>> m_spectrumConverterCache;
+    mutable std::map<std::pair<uint32_t, uint32_t>, Ptr<SpectrumConverter>>
+        m_spectrumConverterCache;
 
     std::string m_simTag; ///< The `SimTag` attribute.
 

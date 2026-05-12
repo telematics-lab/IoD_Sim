@@ -661,6 +661,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 continue;
             }
 
+            Ptr<NrGnbNetDevice> gnbNrDev = DynamicCast<NrGnbNetDevice>(gnbDevice);
+            Ptr<NrUeNetDevice> ueNrDev = DynamicCast<NrUeNetDevice>(ueDevice);
+
             minSinrRequired = bestEntry->minSinr;
             double estimatedSnr = remHelper->GetSnr(ueDevice, gnbDevice, 0, true);
 

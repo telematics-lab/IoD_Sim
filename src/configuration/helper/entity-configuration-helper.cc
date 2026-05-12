@@ -170,9 +170,8 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                     TypeId::LookupByName("ns3::UniformPlanarArray"),
                     antennaModelJson["arrayProperties"].GetArray());
             }
-            arrayProps.push_back(ModelConfiguration::Attribute(
-                "AntennaElement",
-                Create<PointerValue>(antennaElementFactory.Create())));
+            arrayProps.emplace_back("AntennaElement",
+                                    Create<PointerValue>(antennaElementFactory.Create()));
 
             conf.model = ModelConfiguration("ns3::UniformPlanarArray", arrayProps);
             return conf;
@@ -438,14 +437,25 @@ EntityConfigurationHelper::DecodeNetdeviceConfigurations(const rapidyyjson::Valu
                 channelId = netdev["channelId"].GetUint();
             }
 
-            std::vector<uint32_t> channelBands;
+            std::vector<ChannelBandFilter> channelBands;
             if (netdev.HasMember("channelBands"))
             {
                 NS_ASSERT_MSG(netdev["channelBands"].IsArray(), "channelBands must be an array");
                 for (auto& band : netdev["channelBands"].GetArray())
                 {
-                    NS_ASSERT_MSG(band.IsUint(), "channelBands elements must be unsigned integers");
-                    channelBands.push_back(band.GetUint());
+                    NS_ASSERT_MSG(band.IsObject(), "channelBands elements must be objects");
+                    ChannelBandFilter filter;
+                    if (band.HasMember("ccId"))
+                    {
+                        NS_ASSERT_MSG(band["ccId"].IsUint(), "ccId must be an unsigned integer");
+                        filter.ccId = band["ccId"].GetUint();
+                    }
+                    if (band.HasMember("bwpId"))
+                    {
+                        NS_ASSERT_MSG(band["bwpId"].IsUint(), "bwpId must be an unsigned integer");
+                        filter.bwpId = band["bwpId"].GetUint();
+                    }
+                    channelBands.push_back(filter);
                 }
             }
 

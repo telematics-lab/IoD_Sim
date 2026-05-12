@@ -218,7 +218,8 @@ Scenario::operator()()
                                     for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                     {
                                         auto dev = node->GetDevice(i);
-                                        if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                        if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                       NrNetDevice::GetTypeId()))
                                         {
                                             if (nrDeviceCount == (uint32_t)selection.deviceIndex)
                                             {
@@ -231,11 +232,12 @@ Scenario::operator()()
                                     }
                                     if (!foundDevice)
                                     {
-                                        NS_FATAL_ERROR("Tx Node " << selection.key << " index "
-                                                                  << selection.index
-                                                                  << " deviceIndex "
-                                                                  << selection.deviceIndex
-                                                                  << " is out of range. Found only " << nrDeviceCount << " NR devices.");
+                                        NS_FATAL_ERROR("Tx Node "
+                                                       << selection.key << " index "
+                                                       << selection.index << " deviceIndex "
+                                                       << selection.deviceIndex
+                                                       << " is out of range. Found only "
+                                                       << nrDeviceCount << " NR devices.");
                                     }
                                 }
                                 else
@@ -330,7 +332,8 @@ Scenario::operator()()
                                 for (uint32_t i = 0; i < node->GetNDevices(); ++i)
                                 {
                                     auto dev = node->GetDevice(i);
-                                    if (dev && dev->GetInstanceTypeId().IsChildOf(NrNetDevice::GetTypeId()))
+                                    if (dev && dev->GetInstanceTypeId().IsChildOf(
+                                                   NrNetDevice::GetTypeId()))
                                     {
                                         if (nrDeviceCount == (uint32_t)selection.deviceIndex)
                                         {
@@ -346,7 +349,8 @@ Scenario::operator()()
                                     NS_FATAL_ERROR("Rx Node " << selection.key << " index "
                                                               << selection.index << " deviceIndex "
                                                               << selection.deviceIndex
-                                                              << " is out of range. Found only " << nrDeviceCount << " NR devices.");
+                                                              << " is out of range. Found only "
+                                                              << nrDeviceCount << " NR devices.");
                                 }
                             }
                             else
@@ -433,6 +437,52 @@ Scenario::operator()()
                     std::stringstream ss;
                     ss << "Phy" << config.phyLayerIndex << "-Bwp" << bwpId << "-" << mapIdx + 1;
 
+                    // Check if rx and tx can communicate with each other on this bwpId
+                    uint32_t maxRxBwp = 0;
+
+                    if (auto ueDev = DynamicCast<NrUeNetDevice>(rxDev))
+                    {
+                        maxRxBwp = NrHelper::GetNumberBwp(ueDev);
+                    }
+                    else if (auto gnbDev = DynamicCast<NrGnbNetDevice>(rxDev))
+                    {
+                        maxRxBwp = NrHelper::GetNumberBwp(gnbDev);
+                    }
+
+                    if (bwpId >= maxRxBwp)
+                    {
+                        std::cout << "[RadioMap Setup] Rx device does not have BWP " << bwpId
+                                  << std::endl;
+                        continue;
+                    }
+
+                    NetDeviceContainer currentTxDevices;
+                    for (uint32_t i = 0; i < txDevs.GetN(); ++i)
+                    {
+                        auto dev = txDevs.Get(i);
+
+                        uint32_t maxTxBwp = 0;
+                        if (auto ueDev = DynamicCast<NrUeNetDevice>(dev))
+                        {
+                            maxTxBwp = ueDev->GetCcMapSize();
+                        }
+                        else if (auto gnbDev = DynamicCast<NrGnbNetDevice>(dev))
+                        {
+                            maxTxBwp = gnbDev->GetCcMapSize();
+                        }
+                        if (bwpId < maxTxBwp)
+                        {
+                            currentTxDevices.Add(dev);
+                        }
+                    }
+
+                    if (currentTxDevices.GetN() == 0)
+                    {
+                        std::cout << "[RadioMap Setup] No Tx devices found with BWP " << bwpId
+                                  << std::endl;
+                        continue;
+                    }
+
                     if (config.coordinatesType == "geocentric")
                     {
                         Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
@@ -447,7 +497,7 @@ Scenario::operator()()
                             remHelper->SetAttribute(par.first, StringValue(par.second));
                         }
 
-                        remHelper->CreateRem(txDevs, rxDev, bwpId);
+                        remHelper->CreateRem(currentTxDevices, rxDev, bwpId);
                     }
                     else
                     {
@@ -462,7 +512,7 @@ Scenario::operator()()
                             remHelper->SetAttribute(par.first, StringValue(par.second));
                         }
 
-                        remHelper->CreateRem(txDevs, rxDev, bwpId);
+                        remHelper->CreateRem(currentTxDevices, rxDev, bwpId);
                     }
 
                     // New helper outputs: nr-rem- + simTag + ".out"
@@ -667,6 +717,7 @@ Scenario::operator()()
             }
         }
     }
+
     else
     {
         if (CONFIGURATOR->IsDryRun())

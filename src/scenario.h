@@ -122,7 +122,7 @@
 #include <sys/resource.h>
 #include <vector>
 
-// #define SINR_DISTANCE_PRINT_DEBUG
+#define SINR_DISTANCE_PRINT_DEBUG
 
 // Set to 1 to apply ISL delay only on data (DataDelay of NrGnbMac)
 // Set to 0 to apply ISL delay to the Point-To-Point backhaul link
@@ -181,7 +181,7 @@ class Scenario
                                   const std::vector<OutputLinkConfiguration> outputLinks,
                                   const std::vector<X2NeighborConfiguration> x2Neighbors,
                                   const uint32_t channelId,
-                                  const std::vector<uint32_t> channelBands);
+                                  const std::vector<ChannelBandFilter> channelBands);
 
     Ptr<NetDevice> ConfigureNrUe(Ptr<Node> entityNode,
                                  const std::vector<NrQosFlowConfiguration> qosFlows,
@@ -191,7 +191,7 @@ class Scenario
                                  const std::vector<ns3::NrPhyProperty> rrcConf,
                                  const std::vector<OutputLinkConfiguration> outputLinks,
                                  const uint32_t channelId,
-                                 const std::vector<uint32_t> channelBands);
+                                 const std::vector<ChannelBandFilter> channelBands);
 
     void InstallEntityIpv4(Ptr<Node> entityNode,
                            NetDeviceContainer netDevices,

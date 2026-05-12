@@ -46,6 +46,12 @@ struct X2NeighborConfiguration
     uint32_t index;
 };
 
+struct ChannelBandFilter
+{
+    std::optional<uint32_t> ccId;
+    std::optional<uint32_t> bwpId;
+};
+
 /**
  * Data class to recnognize and configure an NR Network Device for an entity to be simulated.
  */
@@ -68,9 +74,10 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
                              const std::optional<uint32_t> networkLayerId,
                              const std::vector<AntennaModelConfiguration>& antennaModels,
                              const std::vector<OutputLinkConfiguration>& outputLinks = {},
-                             const std::vector<DirectivityConfiguration>& directivity = std::vector<DirectivityConfiguration>(),
+                             const std::vector<DirectivityConfiguration>& directivity =
+                                 std::vector<DirectivityConfiguration>(),
                              const uint32_t channelId = 0,
-                             const std::vector<uint32_t> channelBands = {},
+                             const std::vector<ChannelBandFilter> channelBands = {},
                              const std::vector<NrPhyProperty> rrcProperties = {},
                              const std::vector<X2NeighborConfiguration> x2Neighbors = {});
     /** Default destructor */
@@ -101,8 +108,8 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
 
     /** \return The channel ID for the Network Device. */
     const uint32_t GetChannelId() const;
-    /** \return The channel bands indices for the Network Device. */
-    const std::vector<uint32_t> GetChannelBands() const;
+    /** \return The channel bands filters for the Network Device. */
+    const std::vector<ChannelBandFilter> GetChannelBands() const;
 
   private:
     const NrRole m_role;
@@ -112,7 +119,7 @@ class NrNetdeviceConfiguration : public NetdeviceConfiguration
     const std::vector<OutputLinkConfiguration> m_outputLinks;
     const std::vector<X2NeighborConfiguration> m_x2Neighbors;
     const uint32_t m_channelId;
-    const std::vector<uint32_t> m_channelBands;
+    const std::vector<ChannelBandFilter> m_channelBands;
 };
 
 } // namespace ns3

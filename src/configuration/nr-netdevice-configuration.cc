@@ -61,7 +61,7 @@ NrNetdeviceConfiguration::NrNetdeviceConfiguration(
     const std::vector<OutputLinkConfiguration>& outputLinks,
     const std::vector<DirectivityConfiguration>& directivity,
     const uint32_t channelId,
-    const std::vector<uint32_t> channelBands,
+    const std::vector<ChannelBandFilter> channelBands,
     const std::vector<NrPhyProperty> rrcProperties,
     const std::vector<X2NeighborConfiguration> x2Neighbors)
     : NetdeviceConfiguration{type, networkLayerId, antennaModels, directivity},
@@ -122,7 +122,7 @@ NrNetdeviceConfiguration::GetChannelId() const
     return m_channelId;
 }
 
-const std::vector<uint32_t>
+const std::vector<ChannelBandFilter>
 NrNetdeviceConfiguration::GetChannelBands() const
 {
     return m_channelBands;

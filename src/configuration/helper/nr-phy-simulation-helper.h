@@ -18,16 +18,16 @@
 #ifndef NR_PHY_SIMULATION_HELPER_H
 #define NR_PHY_SIMULATION_HELPER_H
 
+#include "ns3/nr-channel-helper.h"
+#include "ns3/nr-epc-helper.h"
+#include "ns3/nr-helper.h"
+#include "ns3/nr-netdevice-configuration.h"
+#include "ns3/object.h"
+#include "ns3/type-id.h"
 #include <ns3/beamforming-helper-base.h>
 #include <ns3/cc-bwp-helper.h>
 #include <ns3/model-configuration.h>
-#include <ns3/nr-channel-helper.h>
-#include <ns3/nr-epc-helper.h>
-#include <ns3/nr-helper.h>
-#include <ns3/object.h>
-#include <ns3/type-id.h>
 
-#include <tuple>
 #include <vector>
 
 namespace ns3
@@ -149,7 +149,7 @@ class NrPhySimulationHelper : public Object
     void SetGnbPhyAttributes(const std::vector<ModelConfiguration::Attribute>& gnbPhyAttributes);
 
     BandwidthPartInfoPtrVector GetBwps(uint32_t channelId,
-                                       const std::vector<uint32_t>& bandIndices) const;
+                                       const std::vector<ChannelBandFilter>& bandFilters) const;
 
     NetDeviceContainer InstallGnbDevices(NodeContainer& gnbNode,
                                          BandwidthPartInfoPtrVector allBwps);

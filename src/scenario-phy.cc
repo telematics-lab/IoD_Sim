@@ -301,9 +301,7 @@ Scenario::ConfigureLteEnb(Ptr<Node> entityNode,
         }
     }
 
-    for (NodeContainer::Iterator eNB = backbonePerStack[netId].Begin();
-         eNB != backbonePerStack[netId].End();
-         eNB++)
+    for (auto eNB = backbonePerStack[netId].Begin(); eNB != backbonePerStack[netId].End(); eNB++)
     {
         ltePhy->GetLteHelper()->AddX2Interface(entityNode, *eNB);
     }
@@ -388,7 +386,7 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                          const std::vector<OutputLinkConfiguration> outputLinks,
                          const std::vector<X2NeighborConfiguration> x2Neighbors,
                          const uint32_t channelId,
-                         const std::vector<uint32_t> channelBands)
+                         const std::vector<ChannelBandFilter> channelBands)
 {
     static std::vector<NodeContainer> backbonePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
@@ -553,7 +551,7 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         const std::vector<ns3::NrPhyProperty> rrcConf,
                         const std::vector<OutputLinkConfiguration> outputLinks,
                         const uint32_t channelId,
-                        const std::vector<uint32_t> channelBands)
+                        const std::vector<ChannelBandFilter> channelBands)
 {
     static std::vector<NodeContainer> uePerStack(m_protocolStacks[PHY_LAYER].size());
     auto nrPhy = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
