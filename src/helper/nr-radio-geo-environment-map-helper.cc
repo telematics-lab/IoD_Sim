@@ -18,6 +18,7 @@
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
+#include "ns3/nr-epc-helper.h"
 #include "ns3/nr-gnb-net-device.h"
 #include "ns3/nr-helper.h"
 #include "ns3/nr-spectrum-phy.h"
