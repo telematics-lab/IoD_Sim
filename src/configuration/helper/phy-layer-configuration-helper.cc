@@ -740,6 +740,20 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                 sdaConfig.threshold = sda["threshold"].GetDouble();
             }
 
+            if (sda.HasMember("bwps") && sda["bwps"].IsArray())
+            {
+                sdaConfig.bwps.clear();
+                const auto& bwpsArr = sda["bwps"].GetArray();
+                for (rapidyyjson::SizeType bi = 0; bi < bwpsArr.Size(); ++bi)
+                {
+                    NS_ASSERT_MSG(bwpsArr[bi].IsUint(),
+                                  "sinr-distance-attach 'bwps' entries must be unsigned integers");
+                    sdaConfig.bwps.push_back(static_cast<uint8_t>(bwpsArr[bi].GetUint()));
+                }
+                NS_ASSERT_MSG(!sdaConfig.bwps.empty(),
+                              "sinr-distance-attach 'bwps' must have at least one entry");
+            }
+
             nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
         }
 

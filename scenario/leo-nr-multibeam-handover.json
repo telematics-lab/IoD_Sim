@@ -2,7 +2,7 @@
   "name": "leo-nr-multibeam-handover",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 10,
+  "duration": 120,
   "appStatisticsReportInterval": 0.3,
   "radioMaps": [
     {
@@ -111,11 +111,40 @@
       },
       "gnbAntenna": [
         {
+          "bwpId": 0,
           "type": "ns3::CircularApertureAntennaModel",
           "properties": [
             {
               "name": "OperatingFrequency",
-              "value": 28.00e9
+              "value": 27.85e9
+            },
+            {
+              "name": "AntennaMaxGainDb",
+              "value": 50.0
+            },
+            {
+              "name": "AntennaCircularApertureRadius",
+              "value": 0.01
+            }
+          ],
+          "arrayProperties": [
+            {
+              "name": "NumRows",
+              "value": 1
+            },
+            {
+              "name": "NumColumns",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "bwpId": 1,
+          "type": "ns3::CircularApertureAntennaModel",
+          "properties": [
+            {
+              "name": "OperatingFrequency",
+              "value": 28.15e9
             },
             {
               "name": "AntennaMaxGainDb",
@@ -153,7 +182,11 @@
       "advancedOptions": {
         "sinr-distance-attach": {
           "precision": "100ms",
-          "threshold": 3.0, // Isteresi
+          "threshold": 3.0, // Hysteresis
+          "bwps": [
+            0,
+            1
+          ],
           "table": [
             {
               "maxDistance": 1000e3,
@@ -187,8 +220,7 @@
           "role": "UE",
           "directivity": {
             "mode": "nearest-gnb"
-          },
-          "channelId": 1
+          }
         }
       ],
       "mobilityModel": {
@@ -212,7 +244,25 @@
           }
         ]
       },
-      "applications": []
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        }
+      ]
     }
   ],
   "leo-sats": [
@@ -222,28 +272,13 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
-          "channelBands": [
-            {
-              "ccId": 0
-            }
-          ],
           "directivity": [
             {
+              "bwpId": 0,
               "mode": "earth-centered"
-            }
-          ]
-        },
-        {
-          "type": "nr",
-          "networkLayer": 0,
-          "role": "gNB",
-          "channelBands": [
-            {
-              "ccId": 1
-            }
-          ],
-          "directivity": [
+            },
             { // 40° bearing offset => 40° to the left of the zenith-oriented beam
+              "bwpId": 1,
               "mode": "earth-centered",
               "downtiltOffset": 0,
               "bearingOffset": 40
@@ -275,6 +310,44 @@
       "applications": []
     }
   ],
-  "remotes": [],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.5
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                "7.0.0.2",
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 512
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "logComponents": []
 }

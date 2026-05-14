@@ -122,7 +122,7 @@
 #include <sys/resource.h>
 #include <vector>
 
-#define SINR_DISTANCE_PRINT_DEBUG
+// #define SINR_DISTANCE_PRINT_DEBUG
 
 // Set to 1 to apply ISL delay only on data (DataDelay of NrGnbMac)
 // Set to 0 to apply ISL delay to the Point-To-Point backhaul link
@@ -267,6 +267,10 @@ class Scenario
 
     // Track active SINR attachment loops to avoid duplicates
     std::set<uint32_t> m_sinrAttachmentRunning;
+
+    // Persistent per-UE active BWP tracking (key = UE node ID)
+    // Used for hysteresis in same-gNB BWP switches
+    std::map<uint32_t, uint8_t> m_ueActiveBwp;
 };
 
 } // namespace ns3

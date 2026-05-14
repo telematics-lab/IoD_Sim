@@ -138,6 +138,8 @@ struct SinrDistanceAttachConfig
     Time precision;
     std::vector<SinrDistanceTableEntry> table;
     double threshold = 2.0;
+    /// List of BWP IDs to evaluate per gNB (default: {0})
+    std::vector<uint8_t> bwps = {0};
 };
 
 /**
