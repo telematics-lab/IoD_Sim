@@ -448,15 +448,29 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
             {
                 NS_FATAL_ERROR("BWP ID " << attr.bwpId.value() << " is out of range");
             }
-            NrHelper::GetGnbPhy(dev, attr.bwpId.value())
-                ->SetAttribute(attr.attribute.name, *attr.attribute.value);
+            Ptr<NrPhy> phy = NrHelper::GetGnbPhy(dev, attr.bwpId.value());
+            if (attr.attribute.name == "SameNodeInterference")
+            {
+                phy->GetSpectrumPhy()->SetAttribute(attr.attribute.name, *attr.attribute.value);
+            }
+            else
+            {
+                phy->SetAttribute(attr.attribute.name, *attr.attribute.value);
+            }
         }
         else
         {
             for (size_t i = 0; i < bwpLen; i++)
             {
-                NrHelper::GetGnbPhy(dev, i)->SetAttribute(attr.attribute.name,
-                                                          *attr.attribute.value);
+                Ptr<NrPhy> phy = NrHelper::GetGnbPhy(dev, i);
+                if (attr.attribute.name == "SameNodeInterference")
+                {
+                    phy->GetSpectrumPhy()->SetAttribute(attr.attribute.name, *attr.attribute.value);
+                }
+                else
+                {
+                    phy->SetAttribute(attr.attribute.name, *attr.attribute.value);
+                }
             }
         }
     }

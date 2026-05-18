@@ -915,6 +915,7 @@ Attributes available for `gnbPhyAttributes`:
 | `Pattern` | string | - | F\|F\|F\|F\|F\|F\|F\|F\|F\|F\| | Slot pattern |
 | `CsiRsModel` | enum | CsiRsPerUe\|CsiRsPerBeam | CsiRsPerUe | Type of CSI-RS model: per UE or per beam |
 | `CsiRsPeriodicity` | uint16_t | 0:65535 | 10 | Default CSI periodicity in number of slots |
+| `SameNodeInterference` | boolean | - | true | If false, transmissions from devices on the same node do not create interference |
 
 **Note:** From the `Pattern` attribute we can define the slot pattern in terms of Downlink (D), Uplink (U), and Flexible (F). For example, a pattern of "DDFU" indicates that the first two slots are Downlink, the third is Flexible, and the fourth is Uplink.
 

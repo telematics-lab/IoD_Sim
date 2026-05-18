@@ -584,9 +584,6 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
         // BWP)
         uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
         Ptr<NrGnbNetDevice> currentGnb = nullptr;
-        uint32_t ueNodeId = ueNode->GetId();
-        uint8_t currentBwpId =
-            m_ueActiveBwp.count(ueNodeId) ? m_ueActiveBwp[ueNodeId] : bwpsToEvaluate.front();
 
         if (ueDevice->GetRrc()->GetState() != NrUeRrc::IDLE_START)
         {
@@ -606,7 +603,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
         // Best (gNB, bwpId) pair found so far
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
-        uint8_t bestBwpId = bwpsToEvaluate.front();
+        [[maybe_unused]] uint8_t bestBwpId = bwpsToEvaluate.front();
         double bestSnr = -std::numeric_limits<double>::infinity();
 
         // Check all gNBs
@@ -686,7 +683,7 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                 if (estimatedSnr >= minSinrRequired)
                 {
                     // Track SNR of current (gNB, bwpId) for hysteresis
-                    if (currentGnb && gnbDevice == currentGnb && bwpId == currentBwpId)
+                    if (currentGnb && gnbDevice == currentGnb)
                     {
                         currentSnr = estimatedSnr;
                         currentGnbValid = true;
@@ -707,9 +704,8 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
             if (currentGnb != nullptr)
             {
                 bool gnbChanged = (currentGnb != bestGnb);
-                bool bwpChanged = (currentBwpId != bestBwpId);
 
-                if (gnbChanged || bwpChanged)
+                if (gnbChanged)
                 {
                     // Hysteresis: only switch if improvement exceeds threshold,
                     // unless the current (gNB, bwpId) is no longer valid
@@ -726,12 +722,9 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                                 std::cout << "UE " << ueDevice->GetImsi()
                                           << " SWITCH PREVENTED by threshold ("
                                           << sdaConfig.threshold << " dB)"
-                                          << " from gNB " << currentGnb->GetCellId() << " BWP "
-                                          << static_cast<uint32_t>(currentBwpId)
-                                          << " (SNR: " << currentSnr << " dB)"
-                                          << " to gNB " << bestGnb->GetCellId() << " BWP "
-                                          << static_cast<uint32_t>(bestBwpId)
-                                          << " (SNR: " << bestSnr << " dB)"
+                                          << " from gNB " << currentGnb->GetCellId()
+                                          << " (SNR: " << currentSnr << " dB)" << " to gNB "
+                                          << bestGnb->GetCellId() << " (SNR: " << bestSnr << " dB)"
                                           << " Delta: " << bestSnr - currentSnr << " dB"
                                           << std::endl;
                             }
@@ -741,38 +734,16 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
 
                     if (shouldSwitch)
                     {
-                        if (gnbChanged)
-                        {
-                            // Cross-gNB handover (includes beam switch between gNB devices)
+                        // Cross-gNB handover (includes beam switch between gNB devices)
 #ifdef SINR_DISTANCE_PRINT_DEBUG
-                            std::cout
-                                << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                                << currentGnb->GetCellId() << " BWP "
-                                << static_cast<uint32_t>(currentBwpId) << " (SNR: " << currentSnr
-                                << " dB) to gNB " << bestGnb->GetCellId() << " BWP "
-                                << static_cast<uint32_t>(bestBwpId) << " (SNR: " << bestSnr
-                                << " dB)"
-                                << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
+                        std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
+                                  << currentGnb->GetCellId() << " (SNR: " << currentSnr
+                                  << " dB) to gNB " << bestGnb->GetCellId() << " BWP "
+                                  << static_cast<uint32_t>(bestBwpId) << " (SNR: " << bestSnr
+                                  << " dB)"
+                                  << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
 #endif
-                            nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
-                        }
-                        else
-                        {
-                            // Same gNB, different BWP.
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                            std::cout << "UE " << ueDevice->GetImsi() << " BWP SWITCH on gNB "
-                                      << currentGnb->GetCellId() << " from BWP "
-                                      << static_cast<uint32_t>(currentBwpId)
-                                      << " (SNR: " << currentSnr << " dB)"
-                                      << " to BWP " << static_cast<uint32_t>(bestBwpId)
-                                      << " (SNR: " << bestSnr << " dB)"
-                                      << " Threshold: " << sdaConfig.threshold << " dB"
-                                      << std::endl;
-#endif
-
-                            // TODO don't know how to do
-                            m_ueActiveBwp[ueNodeId] = bestBwpId;
-                        }
+                        nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
                     }
                 }
             }
@@ -794,8 +765,6 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                     }
                 }
                 nrHelper->AttachToGnb(ueDevice, bestGnb);
-                // Record the initially attached BWP
-                m_ueActiveBwp[ueNodeId] = bestBwpId;
             }
         }
         else

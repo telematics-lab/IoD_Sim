@@ -461,7 +461,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             }
         }
 
-        auto parseAntennaConfig = [](const rapidyyjson::Value& antennaJson) -> NrAntennaConfiguration {
+        auto parseAntennaConfig =
+            [](const rapidyyjson::Value& antennaJson) -> NrAntennaConfiguration {
             NrAntennaConfiguration conf;
             if (antennaJson.HasMember("bwpId") && antennaJson["bwpId"].IsUint())
             {
@@ -480,7 +481,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                                                             antennaJson["properties"].GetArray());
             }
 
-            if (antennaJson.HasMember("arrayProperties") && antennaJson["arrayProperties"].IsArray())
+            if (antennaJson.HasMember("arrayProperties") &&
+                antennaJson["arrayProperties"].IsArray())
             {
                 conf.arrayProperties = ModelConfigurationHelper::GetAttributes(
                     TypeId::LookupByName("ns3::UniformPlanarArray"),
@@ -787,7 +789,8 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
                 idmConfig.maxISLSatDistance = idm["maxISLSatDistance"].GetDouble();
             }
 
-            if (idm.HasMember("maxGroundStationDistance") && idm["maxGroundStationDistance"].IsNumber())
+            if (idm.HasMember("maxGroundStationDistance") &&
+                idm["maxGroundStationDistance"].IsNumber())
             {
                 idmConfig.maxGroundStationDistance = idm["maxGroundStationDistance"].GetDouble();
             }

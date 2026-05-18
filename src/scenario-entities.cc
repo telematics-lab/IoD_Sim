@@ -119,10 +119,10 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                     break;
                 case UE:
                     installedDev = ConfigureLteUe(entityNode,
-                                   entityLteDevConf->GetBearers(),
-                                   *netId,
-                                   antennaModels,
-                                   phyConf);
+                                                  entityLteDevConf->GetBearers(),
+                                                  *netId,
+                                                  antennaModels,
+                                                  phyConf);
                     break;
                 default:
                     NS_FATAL_ERROR("Unrecognized LTE role for entity ID " << entityId);
@@ -145,25 +145,25 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
                 {
                 case NrRole::gNB:
                     installedDev = ConfigureNrGnb(entityNode,
-                                   *netId,
-                                   antennaModels,
-                                   phyConf,
-                                   rrcConf,
-                                   outputLinks,
-                                   x2Neighbors,
-                                   entityNrDevConf->GetChannelId(),
-                                   entityNrDevConf->GetChannelBands());
+                                                  *netId,
+                                                  antennaModels,
+                                                  phyConf,
+                                                  rrcConf,
+                                                  outputLinks,
+                                                  x2Neighbors,
+                                                  entityNrDevConf->GetChannelId(),
+                                                  entityNrDevConf->GetChannelBands());
                     break;
                 case NrRole::nrUE:
                     installedDev = ConfigureNrUe(entityNode,
-                                  entityNrDevConf->GetQosFlows(),
-                                  *netId,
-                                  antennaModels,
-                                  phyConf,
-                                  rrcConf,
-                                  outputLinks,
-                                  entityNrDevConf->GetChannelId(),
-                                  entityNrDevConf->GetChannelBands());
+                                                 entityNrDevConf->GetQosFlows(),
+                                                 *netId,
+                                                 antennaModels,
+                                                 phyConf,
+                                                 rrcConf,
+                                                 outputLinks,
+                                                 entityNrDevConf->GetChannelId(),
+                                                 entityNrDevConf->GetChannelBands());
                     break;
                 default:
                     NS_FATAL_ERROR("Unrecognized NR role for entity ID " << entityId);
