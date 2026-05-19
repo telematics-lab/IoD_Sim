@@ -4,14 +4,22 @@
 cd $(dirname "$0")/..
 
 MODE="debug"
+ENABLE_CLI=true
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --mode) MODE="$2"; shift ;;
+        --no-cli) ENABLE_CLI=false ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
+
+if [ "$ENABLE_CLI" = true ]; then
+    ENABLE_CLI="-DENABLE_CLI_COMMANDS"
+else
+    ENABLE_CLI=""
+fi
 
 mkdir -p build
 cmake -B build .
@@ -25,5 +33,5 @@ pushd ns3
 ./ns3 configure --build-profile="$MODE" \
                 --enable-examples --enable-tests --disable-mpi \
                 --disable-python --enable-modules=iodsim,nr,leo,point-to-point-layout \
-                -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $ENABLE_CLI
 popd

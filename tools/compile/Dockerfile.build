@@ -64,8 +64,12 @@ WORKDIR /IoD_Sim
 RUN ./tools/prepare-ns3.sh
 WORKDIR /IoD_Sim/ns3
 
-RUN ./ns3 configure --build-profile=default --enable-static --enable-examples --enable-tests --disable-mpi --disable-python --enable-modules=iodsim,nr,leo,point-to-point-layout
+RUN ./ns3 configure --build-profile=default --enable-static \
+                    --enable-examples --enable-tests --disable-mpi --disable-python \
+                    --enable-modules=iodsim,nr,leo,point-to-point-layout
+
 RUN ./ns3 build -j$(nproc) scenario
+RUN find build/ -type f -executable -exec strip --strip-unneeded {} +
 
 WORKDIR /IoD_Sim/ns3/build
 

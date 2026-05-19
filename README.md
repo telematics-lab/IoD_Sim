@@ -102,6 +102,8 @@ In particular, to run a JSON scenarios the `ns3/build/ns3.47-scenario-debug` (`n
 The results output directory can be defined in the JSON scenario with the "resultsPath" key.
 In the examples, you will usually find the path to "../results/". In this folder there will be a folder for every execution with this name format: "<scenario_name>-<date>.<time>" (e.g. test-trace-2025-11-27.20-34-52).
 
+> **Note**: IoD_Sim includes some features that execute CLI commands during the simulation (e.g., downloading files via curl or generating GUI previews). This behavior is controlled by the `ENABLE_CLI_COMMANDS` macro in `src/scenario.h`, which is enabled by default. To compile without these features, you can pass `--no-cli` to `configure-iodsim.sh`.
+
 If you want a statically compiled binary usable on any system, you can use the docker builder as:
 ```bash
 cd tools/compile && docker compose up --build && docker compose rm -f -s -v

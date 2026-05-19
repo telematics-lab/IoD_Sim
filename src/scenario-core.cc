@@ -682,6 +682,7 @@ Scenario::operator()()
             outFile.close();
         }
 
+#ifdef ENABLE_CLI_COMMANDS
         for (const auto& plotConf : plotFiles)
         {
             std::string cmd = "python " + CONFIGURATOR->GetResultsPath() +
@@ -716,6 +717,12 @@ Scenario::operator()()
                                << plotConf.file);
             }
         }
+#else
+        if (!plotFiles.empty())
+        {
+            NS_LOG_INFO("Skipping GUI preview terminal script execution because ENABLE_CLI_COMMANDS is not defined.");
+        }
+#endif
     }
 
     else

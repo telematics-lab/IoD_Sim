@@ -17,6 +17,8 @@
  */
 #include "constellation-expander.h"
 
+#include "../scenario.h"
+
 #include <ns3/assert.h>
 #include <ns3/fatal-error.h>
 #include <ns3/log.h>
@@ -47,6 +49,11 @@ static std::time_t g_nowTimestamp = 0;
 static std::string
 GetUrlContent(const std::string& url)
 {
+#ifndef ENABLE_CLI_COMMANDS
+    NS_FATAL_ERROR(
+        "Downloading files via curl is not available without CLI command enabled at compile time.");
+    return "";
+#else
     // Check if curl is available
     if (std::system("which curl > /dev/null 2>&1") != 0)
     {
@@ -81,6 +88,7 @@ GetUrlContent(const std::string& url)
     }
 
     return result;
+#endif
 }
 
 std::time_t

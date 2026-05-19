@@ -13,6 +13,12 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/json-interface)
 include_directories(${LibArchive_INCLUDE_DIRS})
 
+option(ENABLE_CLI_COMMANDS "Enable execution of CLI commands from the simulation code" ON)
+
+if(ENABLE_CLI_COMMANDS)
+    add_compile_definitions(ENABLE_CLI_COMMANDS)
+endif()
+
 set(source_files
   application/drone-client-application.cc
   application/drone-communications.cc

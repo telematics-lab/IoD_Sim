@@ -124,9 +124,12 @@
 
 // #define SINR_DISTANCE_PRINT_DEBUG
 
-// Set to 1 to apply ISL delay only on data (DataDelay of NrGnbMac)
-// Set to 0 to apply ISL delay to the Point-To-Point backhaul link
+// Set to apply ISL delay only on data (DataDelay of NrGnbMac)
+// unset to apply ISL delay to the Point-To-Point backhaul link
 // #define APPLY_ISL_DELAY_ONLY_ON_DATA
+
+// #define ENABLE_CLI_COMMANDS
+// Set to enable extra feature that requires CLI commands enabled at compile time
 
 namespace ns3
 {

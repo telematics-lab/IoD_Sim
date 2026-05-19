@@ -1,0 +1,210 @@
+{
+  "name": "gui_preview_example",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 360,
+  "appStatisticsReportInterval": 0.3,
+  // 1. STATIC NS3 CONFIGURATION
+  // Questa sezione sovrascrive i parametri globali di default di ns-3.
+  "staticNs3Config": [
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE" // Modello della terra semplificato a sfera, consigliato per LEO
+    },
+    // I valori di precision fanno riferimento a quanto spesso effettivamente nel simulatore avverrà lo spostamento del nodo
+    // di conseguenza può essere adattato in base al tipo di scenario per avere simulazioni più o meno pesanti
+    // In più ogni spostamento verrà tracciato nei relativi file csv per i nodi veichles e leo-sats
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "1s" // Precisione del tracciamento delle orbite (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "1s" // Precisione del tracciamento dei veicoli a velocità costante (aggiornate ogni 500ms)
+    },
+    {
+      "name": "ns3::TraceBasedMobilityModel::Precision",
+      "value": "1s" // Precisione del tracciamento dei veicoli basato su trace (aggiornate ogni 500ms)
+    }
+  ],
+  // 2. DIMENSIONI DEL MONDO
+  // Definisce uno spazio cartesiano sufficientemente grande per simulare la superficie terrestre e l'orbita dei satelliti
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  // Ignoriamo la parte di rete/radio
+  "phyLayer": [],
+  "macLayer": [],
+  "networkLayer": [],
+  // 4. VEICOLI A TERRA (UEs) - MODELLI DI MOBILITÀ MISTI
+  "vehicles": [
+    // 4.1 Singolo veicolo con mobilità a velocità costante (GeoConstantVelocityMobility)
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 45.0
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 9.0
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 30.0 // Metri al secondo
+          },
+          {
+            "name": "Azimuth", // Angolo di spostamento
+            "value": 90.0
+          }
+        ]
+      }
+    },
+    // 4.2 Singolo veicolo con mobilità basata su dataset di tracce (TraceBasedMobilityModel), specificando l'ID del singolo veicolo da tracciare (DeviceId)
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        // Questo carica una singola traccia definita per un "DeviceId" all'interno della traccia (.trace)
+        "name": "ns3::TraceBasedMobilityModel",
+        "attributes": [
+          {
+            "name": "TraceFile",
+            "value": "../scenario/assets/taxi_example.trace"
+          },
+          {
+            "name": "DeviceId", // Identificativo interno del veicolo trovato nel file node.csv
+            "value": "2"
+          }
+        ]
+      }
+    },
+    // 4.3 Generazione automatica di MOLTI veicoli (replicazione) mediante la macro !traceMobility da dataset
+    {
+      "netDevices": [],
+      // La macro replica dinamicamente per ogni DeviceId esistente nel .trace,
+      // un nuovo veicolo copio-incollando i networkDevices o networkLayer in essi inclusi.
+      "!traceMobility": {
+        "file": "../scenario/assets/taxi_example.trace",
+        "blacklist": [
+          "2" // abbiamo incluso questo taxi manualmente prima, quindi evitiamo venga replicato
+        ]
+        // blacklist/whitelist serve a specificare solo alcuni DeviceId
+      }
+    },
+    // 4.4 Generazione automatica di MOLTI veicoli (replicazione) mediante la macro !traceMobility da file TCL
+    {
+      "netDevices": [],
+      // La macro replica dinamicamente per ogni DeviceId esistente nel .trace,
+      // un nuovo veicolo copio-incollando i networkDevices o networkLayer in essi inclusi.
+      "!traceMobility": {
+        "file": "../scenario/assets/tcl.trace"
+      }
+    }
+  ],
+  // NOTA: sia il mobilityModel ns3::TraceBasedMobilityModel che la macro !traceMobility sono stati implementati per i veicoli a terra, ma possono essere usati senza problemi nei nodi satellitari,
+  // Con delle tracce di satelliti apposite, dato che i file .trace hanno anche i dati sull'altitudine.
+  // 5. SATELLITI (Loro simulano le Base Station GNB)
+  "leo-sats": [
+    // 5.1 Definizione di una intera costellazione di satelliti in LEO autogenerati (!constellation)
+    {
+      // Questo comando instanzia automaticamente `orbits-per-longitude` * `sats-per-orbit` entita'
+      "!constellation": {
+        "distribution": "uniform-orbits",
+        "orbits": [
+          {
+            "height": 400.0,
+            "inclination": 30.0,
+            "orbits-per-longitude": 10,
+            "sats-per-orbit": 1
+          }
+        ]
+      },
+      "netDevices": [],
+      "applications": []
+    },
+    // 5.2 Uso diretto e customizzato di un singolo satellite con GeoLeoOrbitMobility invece della macro/command !constellation
+    {
+      "netDevices": [],
+      // Creazione esplicita manuale dell'orbita
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination", // Angolo di inclinazione
+            "value": 45.0
+          },
+          {
+            "name": "Longitude",
+            "value": 90.0
+          },
+          {
+            "name": "Offset",
+            "value": 0
+          },
+          {
+            "name": "RetrogradeOrbit", // False -> L'orbita va nel verso della rotazione terrestre (Est)
+            "value": false
+          }
+        ]
+      },
+      "applications": []
+    },
+    // 5.3 Importazione di satelliti tramite TLE file con modello sgp4 usando !constellation
+    {
+      "!constellation": {
+        "distribution": "file",
+        "file": "../scenario/assets/tle-sats-sample-data.tle",
+        "tleTimeReference": "tleEpoch", // Impostazione dell'epoch da cui partire, in questo caso usa quello presente sui dati TLE che potrebbe essere non coerente sulla reale posizione
+        // inserendo "now" verrà calcolata la possizione all'istante corrente della simulazione, oppure è possibile inserire un ISO timestamp
+        "model": "sgp4"
+      },
+      "netDevices": [],
+      "applications": []
+    },
+    // 5.4 Satellite manuale con dati TLE placeholder
+    {
+      "netDevices": [],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "TleLine1",
+            "value": "1 59409U 24064M   26092.20595232  .00002026  00000+0  83126-4 0  9993"
+          },
+          {
+            "name": "TleLine2",
+            "value": "2 59409  43.0029 272.8555 0001336 278.0470  82.0230 15.27585291112882"
+          }
+        ]
+      },
+      "applications": []
+    }
+    ,
+    // 5.5 Importazione di satelliti tramite TLE file con modello sgp4 usando !constellation da URL remoto
+    {
+      "!constellation": {
+        "distribution": "file",
+        "file": "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=starlink&FORMAT=tle",
+        "model": "sgp4",
+        "tleTimeReference": "now"
+      }
+    }
+  ],
+  "logComponents": []
+}
