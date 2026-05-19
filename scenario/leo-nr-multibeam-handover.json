@@ -40,7 +40,9 @@
       "name": "ns3::GeoConstantVelocityMobility::Precision",
       "value": "50ms"
     },
-    {
+    { // This option removes interference caused by devices on the same node.
+      // This is usefull in multibeam context if we want to simulate results of beams with
+      // different frequency range usage
       "name": "ns3::NrSpectrumPhy::SameNodeInterference",
       "value": false
     }
