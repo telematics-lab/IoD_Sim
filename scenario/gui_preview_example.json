@@ -194,8 +194,7 @@
         ]
       },
       "applications": []
-    }
-    ,
+    },
     // 5.5 Importazione di satelliti tramite TLE file con modello sgp4 usando !constellation da URL remoto
     {
       "!constellation": {

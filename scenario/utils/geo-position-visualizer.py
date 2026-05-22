@@ -321,7 +321,7 @@ if isl_data is not None:
     latest_isl = isl_data[isl_data['Time'] == max_time]
 
     # We only care about Attached satellites
-    attached_isl = latest_isl[latest_isl['Attached'] == 'Yes']
+    attached_isl = latest_isl[latest_isl['Attached'].astype(str).str.lower().isin(['yes', 'true'])]
 
     isl_x = []
     isl_y = []

@@ -18,6 +18,19 @@ This document describes all configurable options in simulations using the leo an
 
 ## Global Configuration
 
+### `resultsPath` or `resultPath`
+**Type:** `string`
+**Description:** Path where simulation results and logs will be saved. You must specify exactly one of these two options:
+- `resultsPath`: Saves results in a dynamically generated subfolder inside the specified path, formatted as `<scenario_name>-<date>-<time>`.
+- `resultPath`: Saves results *exactly* in the specified directory, without generating a subfolder.
+
+**Example:**
+```json
+{
+  "resultsPath": "../results/"
+}
+```
+
 ### `staticNs3Config`
 **Type:** `array[object]`
 **Description:** Array of static ns-3 configurations to apply before the simulation. Each object has `name` (attribute name) and `value`.

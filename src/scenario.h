@@ -228,6 +228,11 @@ class Scenario
     void AttachAllNrUesToGnbs();
     void InitializeIslDelayMode();
     void UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config);
+    double GetISLMinimumDistance(Ptr<Node> n1, Ptr<Node> n2, uint32_t netId);
+    double GetISLMinimumDistance(Ptr<Node> n, uint32_t gsIndex, uint32_t netId);
+    // Returns {minDist, gsIndex}. If no ground station is reachable, returns
+    // {std::numeric_limits<double>::infinity(), 0}
+    std::pair<double, uint32_t> GetISLMinimumDistance(Ptr<Node> n, uint32_t netId);
     void ConfigureScheduling();
     void ConfigureFullMeshX2Links();
     void EvaluateSinrDistanceAttachment(const uint32_t netId);
@@ -246,6 +251,38 @@ class Scenario
                                            bool isNr);
     Ptr<Node> GetNodeByKey(std::string key, uint32_t index);
 
+    struct IslGraphCache
+    {
+        Time lastUpdate = Time::Min();
+        std::map<Ptr<Node>, size_t> nodeToIndex;
+        std::vector<Ptr<Node>> indexToNode;
+        std::vector<std::vector<double>> adjMatrix;
+        std::vector<std::vector<double>> shortestPaths; // APSP matrix
+        std::vector<std::vector<size_t>> parents;       // APSP parents
+        std::vector<std::vector<double>> nodeToGsDirectDist; // [satIndex][gsIndex]
+        std::vector<double> minEarthDist; // from virtual earth node to each sat
+        std::vector<size_t> earthParent;  // parent pointer to virtual earth node (numSats)
+        std::vector<uint32_t> closestGsIdx; // closest GS index for each sat
+        bool valid = false;
+
+        void Clear()
+        {
+            nodeToIndex.clear();
+            indexToNode.clear();
+            adjMatrix.clear();
+            shortestPaths.clear();
+            parents.clear();
+            nodeToGsDirectDist.clear();
+            minEarthDist.clear();
+            earthParent.clear();
+            closestGsIdx.clear();
+            valid = false;
+        }
+    };
+
+    void BuildIslGraph(uint32_t netId);
+
+    std::map<uint32_t, IslGraphCache> m_islCaches;
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
     NodeContainer m_zsps;

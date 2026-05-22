@@ -6,6 +6,8 @@
 #include "ns3/point-to-point-helper.h"
 
 #include <filesystem>
+#include <queue>
+#include <utility>
 
 namespace ns3
 {
@@ -41,195 +43,19 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
         return;
     }
 
-    // Phase 1: Precompute ground station coordinates
-    std::vector<std::pair<Vector, std::pair<double, double>>> gsData;
-    for (auto& gs : idmConfig->groundStations)
-    {
-        Vector pos =
-            GeographicPositions::GeographicToCartesianCoordinates(gs.first,
-                                                                  gs.second,
-                                                                  0,
-                                                                  GeographicPositions::SPHERE);
-        gsData.emplace_back(pos, gs);
-    }
+    BuildIslGraph(netId);
+    auto& cache = m_islCaches[netId];
 
-    struct SatInfo
-    {
-        Ptr<Node> node;
-        Vector pos;
-        double minEarthDist = std::numeric_limits<double>::max();
-        Time earthDelay = Time::Max();
-        std::pair<double, double> closestGsLatLon;
-    };
-
-    std::vector<SatInfo> sats;
-
-    auto gnbIt = m_nrGnbDevices.find(netId);
-    if (gnbIt != m_nrGnbDevices.end())
-    {
-        for (const auto& gnbContainer : gnbIt->second)
-        {
-            for (uint32_t i = 0; i < gnbContainer.GetN(); ++i)
-            {
-                Ptr<NetDevice> gnbDev = gnbContainer.Get(i);
-                Ptr<Node> gnbNode = gnbDev->GetNode();
-
-                // Only consider LEO satellites
-                bool isLeo = false;
-                for (uint32_t j = 0; j < m_leoSats.GetN(); ++j)
-                {
-                    if (m_leoSats.Get(j) == gnbNode)
-                    {
-                        isLeo = true;
-                        break;
-                    }
-                }
-
-                if (!isLeo)
-                {
-                    continue;
-                }
-
-                Ptr<MobilityModel> gnbMob = gnbNode->GetObject<MobilityModel>();
-                if (!gnbMob)
-                {
-                    continue;
-                }
-
-                SatInfo info;
-                info.node = gnbNode;
-                info.pos = gnbMob->GetPosition();
-                sats.push_back(info);
-            }
-        }
-    }
-
-    if (sats.empty())
+    if (!cache.valid || cache.indexToNode.empty())
     {
         Simulator::Schedule(idmConfig->precision, &Scenario::UpdateIslDelay, this, netId, config);
         return;
     }
 
-    // Phase 2: Ground Station Links
     const double SPEED_OF_LIGHT = 2.99792458e8;
-    for (auto& sat : sats)
-    {
-        double minDistSq = std::numeric_limits<double>::max();
-        std::pair<double, double> bestGsLatLon;
-        for (auto& gs : gsData)
-        {
-            Vector gsPos = gs.first;
-            double dx = sat.pos.x - gsPos.x;
-            double dy = sat.pos.y - gsPos.y;
-            double dz = sat.pos.z - gsPos.z;
-            double distSq = dx * dx + dy * dy + dz * dz;
-            if (distSq < minDistSq)
-            {
-                minDistSq = distSq;
-                bestGsLatLon = gs.second;
-            }
-        }
-
-        if (minDistSq != std::numeric_limits<double>::max() && !gsData.empty())
-        {
-            double minDist = std::sqrt(minDistSq);
-            sat.minEarthDist = minDist;
-            if (minDist <= idmConfig->maxGroundStationDistance)
-            {
-                sat.earthDelay = Seconds(minDist / SPEED_OF_LIGHT);
-                sat.closestGsLatLon = bestGsLatLon;
-            }
-        }
-    }
-
-    // Phase 3: Dijkstra's Algorithm
-    size_t numSats = sats.size();
+    size_t numSats = cache.indexToNode.size();
     size_t virtualEarthNode = numSats;
-    size_t numNodes = numSats + 1;
 
-    std::vector<Time> minDelay(numNodes, Time::Max());
-    std::vector<bool> visited(numNodes, false);
-    std::vector<size_t> parent(numNodes, numNodes);
-
-    // Initialize Virtual Earth Node
-    minDelay[virtualEarthNode] = Seconds(0);
-
-    // Find shortest paths
-    for (size_t count = 0; count < numNodes - 1; ++count)
-    {
-        // Pick minimum delay node
-        Time uDelay = Time::Max();
-        size_t uOffset = numNodes;
-
-        for (size_t v = 0; v < numNodes; ++v)
-        {
-            if (!visited[v] && minDelay[v] <= uDelay)
-            {
-                uDelay = minDelay[v];
-                uOffset = v;
-            }
-        }
-
-        if (uOffset == numNodes || uDelay == Time::Max())
-        {
-            break; // Unreachable nodes remain
-        }
-
-        visited[uOffset] = true;
-
-        // Update adjacent vertices
-        for (size_t v = 0; v < numNodes; ++v)
-        {
-            if (visited[v])
-            {
-                continue;
-            }
-
-            Time edgeDelay = Time::Max();
-
-            if (uOffset == virtualEarthNode)
-            {
-                // Edge from Virtual Earth to Satellite
-                if (v < numSats)
-                {
-                    edgeDelay = sats[v].earthDelay;
-                }
-            }
-            else if (v == virtualEarthNode)
-            {
-                // Edge from Satellite to Virtual Earth
-                if (uOffset < numSats)
-                {
-                    edgeDelay = sats[uOffset].earthDelay;
-                }
-            }
-            else
-            {
-                // ISL Edge between Satellites
-                double dx = sats[uOffset].pos.x - sats[v].pos.x;
-                double dy = sats[uOffset].pos.y - sats[v].pos.y;
-                double dz = sats[uOffset].pos.z - sats[v].pos.z;
-                double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-
-                if (dist <= idmConfig->maxISLSatDistance)
-                {
-                    edgeDelay = Seconds(dist / SPEED_OF_LIGHT);
-                }
-            }
-
-            if (edgeDelay != Time::Max())
-            {
-                Time altDelay = uDelay + edgeDelay;
-                if (altDelay < minDelay[v])
-                {
-                    minDelay[v] = altDelay;
-                    parent[v] = uOffset;
-                }
-            }
-        }
-    }
-
-    // Phase 5: Apply Delays
     std::ofstream traceFile;
     if (idmConfig->updateLog)
     {
@@ -242,105 +68,435 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
         }
     }
 
-    for (size_t i = 0; i < numSats; ++i)
+    auto gnbIt = m_nrGnbDevices.find(netId);
+    if (gnbIt == m_nrGnbDevices.end())
     {
-        Time totalDelay = Time::Max();
-        bool isAttached = false;
-        if (minDelay[i] != Time::Max())
-        {
-            totalDelay = minDelay[i] + idmConfig->additionalDelay;
-            isAttached = true;
-        }
-        else
-        {
-            // Unreachable satellite: close the link by dropping data entirely with a negative delay
-            totalDelay = Seconds(-1.0);
-        }
+        Simulator::Schedule(idmConfig->precision, &Scenario::UpdateIslDelay, this, netId, config);
+        return;
+    }
 
-        Ptr<Node> gnbNode = sats[i].node;
-
-        if (idmConfig->updateLog && traceFile.is_open())
+    for (const auto& gnbContainer : gnbIt->second)
+    {
+        for (uint32_t i = 0; i < gnbContainer.GetN(); ++i)
         {
-            std::ostringstream pathStream;
-            std::string gsCoordsStr = "N/A";
+            Ptr<Node> gnbNode = gnbContainer.Get(i)->GetNode();
 
-            if (isAttached)
+            auto it = cache.nodeToIndex.find(gnbNode);
+            if (it == cache.nodeToIndex.end())
             {
-                size_t curr = i;
-                bool firstHop = true;
-                while (curr != virtualEarthNode)
-                {
-                    size_t p = parent[curr];
-                    if (p == virtualEarthNode)
-                    {
-                        if (!firstHop)
-                        {
-                            pathStream << " -> ";
-                        }
-                        pathStream << "[Ground;" << sats[curr].minEarthDist << "m;"
-                                   << sats[curr].earthDelay.GetSeconds() << "s]";
-                        gsCoordsStr = std::to_string(sats[curr].closestGsLatLon.first) + "," +
-                                      std::to_string(sats[curr].closestGsLatLon.second);
-                        break;
-                    }
-                    else
-                    {
-                        double dx = sats[curr].pos.x - sats[p].pos.x;
-                        double dy = sats[curr].pos.y - sats[p].pos.y;
-                        double dz = sats[curr].pos.z - sats[p].pos.z;
-                        double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-                        Time delay = Seconds(dist / SPEED_OF_LIGHT);
-
-                        if (!firstHop)
-                        {
-                            pathStream << " -> ";
-                        }
-                        pathStream << "[Node_" << sats[p].node->GetId() << ";" << dist << "m;"
-                                   << delay.GetSeconds() << "s]";
-                    }
-                    curr = p;
-                    firstHop = false;
-                }
+                continue;
             }
 
-            traceFile << Simulator::Now().GetSeconds() << "," << gnbNode->GetId() << ","
-                      << (isAttached ? "Yes" : "No") << ",\"" << pathStream.str() << "\","
-                      << (isAttached ? totalDelay.GetSeconds() : 3600.0) << ",\"" << gsCoordsStr
-                      << "\"," << sats[i].pos.x << "," << sats[i].pos.y << "," << sats[i].pos.z
-                      << "\n";
-        }
-        for (uint32_t d = 0; d < gnbNode->GetNDevices(); ++d)
-        {
-            Ptr<NetDevice> nodeDev = gnbNode->GetDevice(d);
+            size_t satIdx = it->second;
+
+            Time totalDelay = Time::Max();
+            bool isAttached = false;
+            double minEarthDist = cache.minEarthDist[satIdx];
+
+            if (minEarthDist != std::numeric_limits<double>::infinity())
+            {
+                totalDelay = Seconds(minEarthDist / SPEED_OF_LIGHT) + idmConfig->additionalDelay;
+                isAttached = true;
+            }
+            else
+            {
+                totalDelay = Seconds(-1.0);
+            }
+
+            if (idmConfig->updateLog && traceFile.is_open())
+            {
+                Vector pos = cache.indexToNode[satIdx]->GetObject<MobilityModel>()->GetPosition();
+                std::ostringstream pathStream;
+                std::string gsCoordsStr = "N/A";
+
+                if (isAttached)
+                {
+                    size_t curr = satIdx;
+                    bool firstHop = true;
+                    while (curr != virtualEarthNode)
+                    {
+                        size_t p = cache.earthParent[curr];
+                        if (p == virtualEarthNode)
+                        {
+                            if (!firstHop)
+                            {
+                                pathStream << " -> ";
+                            }
+
+                            double directDist =
+                                cache.nodeToGsDirectDist[curr][cache.closestGsIdx[curr]];
+                            pathStream << "[Ground;" << directDist << "m;"
+                                       << (directDist / SPEED_OF_LIGHT) << "s]";
+                            auto gs = idmConfig->groundStations[cache.closestGsIdx[curr]];
+                            gsCoordsStr =
+                                std::to_string(gs.first) + "," + std::to_string(gs.second);
+                            break;
+                        }
+                        else
+                        {
+                            double dist = cache.adjMatrix[curr][p];
+                            if (!firstHop)
+                            {
+                                pathStream << " -> ";
+                            }
+                            pathStream << "[Node_" << cache.indexToNode[p]->GetId() << ";" << dist
+                                       << "m;" << (dist / SPEED_OF_LIGHT) << "s]";
+                        }
+                        curr = p;
+                        firstHop = false;
+                    }
+                }
+
+                traceFile << Simulator::Now().GetSeconds() << "," << gnbNode->GetId() << ","
+                          << (isAttached ? "true" : "false") << ",\"" << pathStream.str() << "\","
+                          << (isAttached ? totalDelay.GetSeconds() : 3600.0) << ",\"" << gsCoordsStr
+                          << "\"," << pos.x << "," << pos.y << "," << pos.z << "\n";
+            }
+
+            for (uint32_t d = 0; d < gnbNode->GetNDevices(); ++d)
+            {
+                Ptr<NetDevice> nodeDev = gnbNode->GetDevice(d);
 #if APPLY_ISL_DELAY_ONLY_ON_DATA
-            if (Ptr<NrGnbNetDevice> gnbDev = DynamicCast<NrGnbNetDevice>(nodeDev))
-            {
-                uint32_t numBwps = gnbDev->GetCcMapSize();
-                for (uint32_t bwpIndex = 0; bwpIndex < numBwps; ++bwpIndex)
+                if (Ptr<NrGnbNetDevice> gnbDev = DynamicCast<NrGnbNetDevice>(nodeDev))
                 {
-                    Ptr<NrGnbMac> mac = gnbDev->GetMac(bwpIndex);
-                    if (mac)
+                    uint32_t numBwps = gnbDev->GetCcMapSize();
+                    for (uint32_t bwpIndex = 0; bwpIndex < numBwps; ++bwpIndex)
                     {
-                        mac->SetAttribute("DataDelay", TimeValue(totalDelay));
+                        Ptr<NrGnbMac> mac = gnbDev->GetMac(bwpIndex);
+                        if (mac)
+                        {
+                            mac->SetAttribute("DataDelay", TimeValue(totalDelay));
+                        }
                     }
                 }
-            }
 #else
-            if (Ptr<PointToPointNetDevice> ptpDev = DynamicCast<PointToPointNetDevice>(nodeDev))
-            {
-                Ptr<PointToPointChannel> channel =
-                    DynamicCast<PointToPointChannel>(ptpDev->GetChannel());
-                if (channel)
+                if (Ptr<PointToPointNetDevice> ptpDev = DynamicCast<PointToPointNetDevice>(nodeDev))
                 {
-                    channel->SetAttribute("Delay", TimeValue(totalDelay));
+                    Ptr<PointToPointChannel> channel =
+                        DynamicCast<PointToPointChannel>(ptpDev->GetChannel());
+                    if (channel)
+                    {
+                        channel->SetAttribute("Delay", TimeValue(totalDelay));
+                    }
                 }
-            }
 #endif
+            }
         }
     }
 
-    // Schedule next update
     Simulator::Schedule(idmConfig->precision, &Scenario::UpdateIslDelay, this, netId, config);
+}
+
+void
+Scenario::BuildIslGraph(uint32_t netId)
+{
+    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
+    if (netId >= phyLayerConfs.size())
+    {
+        return;
+    }
+    auto config = StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
+    if (!config)
+    {
+        return;
+    }
+
+    auto idmConfig = config->GetIslDelayModeConfig();
+    if (!idmConfig)
+    {
+        return;
+    }
+
+    auto& cache = m_islCaches[netId];
+    if (cache.valid && (Simulator::Now() - cache.lastUpdate) < idmConfig->precision)
+    {
+        return;
+    }
+
+    cache.Clear();
+    cache.lastUpdate = Simulator::Now();
+    cache.valid = true;
+
+    auto gnbIt = m_nrGnbDevices.find(netId);
+    if (gnbIt == m_nrGnbDevices.end())
+    {
+        return;
+    }
+
+    std::vector<Ptr<Node>> configLeoNodes;
+    for (const auto& gnbContainer : gnbIt->second)
+    {
+        for (uint32_t i = 0; i < gnbContainer.GetN(); ++i)
+        {
+            Ptr<Node> gnbNode = gnbContainer.Get(i)->GetNode();
+
+            // Check if it's a LEO satellite
+            bool isLeo = false;
+            for (uint32_t j = 0; j < m_leoSats.GetN(); ++j)
+            {
+                if (m_leoSats.Get(j) == gnbNode)
+                {
+                    isLeo = true;
+                    break;
+                }
+            }
+
+            if (isLeo)
+            {
+                configLeoNodes.push_back(gnbNode);
+            }
+        }
+    }
+
+    // create a numeric association between satellite nodes and their indices in the matrixes
+    for (uint32_t i = 0; i < configLeoNodes.size(); ++i)
+    {
+        Ptr<Node> node = configLeoNodes[i];
+        cache.nodeToIndex[node] = i;
+        cache.indexToNode.push_back(node);
+    }
+
+    size_t numSats = cache.indexToNode.size();
+    if (numSats == 0)
+    {
+        return;
+    }
+
+    // Inizializing the matrixes with infinity distances (no connection)
+    cache.adjMatrix.assign(numSats,
+                           std::vector<double>(numSats, std::numeric_limits<double>::infinity()));
+    cache.shortestPaths.assign(
+        numSats,
+        std::vector<double>(numSats, std::numeric_limits<double>::infinity()));
+    cache.parents.assign(numSats, std::vector<size_t>(numSats, numSats));
+    cache.nodeToGsDirectDist.assign(numSats,
+                                    std::vector<double>(idmConfig->groundStations.size(),
+                                                        std::numeric_limits<double>::infinity()));
+
+    // Virtual Earth Node structures
+    cache.minEarthDist.assign(numSats, std::numeric_limits<double>::infinity());
+    cache.earthParent.assign(numSats, numSats);
+    cache.closestGsIdx.assign(numSats, 0);
+
+    // Computing the shortest path distances between satellites
+    for (size_t i = 0; i < numSats; ++i)
+    {
+        Ptr<Node> n1 = cache.indexToNode[i];
+        Vector p1 = n1->GetObject<MobilityModel>()->GetPosition();
+
+        // distance from a node to itself is 0
+        cache.adjMatrix[i][i] = 0;
+        cache.shortestPaths[i][i] = 0;
+
+        // Compute distances between satellites
+        for (size_t j = i + 1; j < numSats; ++j)
+        {
+            Ptr<Node> n2 = cache.indexToNode[j];
+            Vector p2 = n2->GetObject<MobilityModel>()->GetPosition();
+
+            double dx = p1.x - p2.x;
+            double dy = p1.y - p2.y;
+            double dz = p1.z - p2.z;
+            double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (dist <= idmConfig->maxISLSatDistance)
+            {
+                cache.adjMatrix[i][j] = dist;
+                cache.adjMatrix[j][i] = dist;
+                cache.shortestPaths[i][j] = dist;
+                cache.shortestPaths[j][i] = dist;
+                cache.parents[i][j] = i;
+                cache.parents[j][i] = j;
+            }
+        }
+
+        // Compute distances between satellites and ground stations
+        for (uint32_t gsIdx = 0; gsIdx < idmConfig->groundStations.size(); ++gsIdx)
+        {
+            auto gs = idmConfig->groundStations[gsIdx];
+            Vector gsPos =
+                GeographicPositions::GeographicToCartesianCoordinates(gs.first,
+                                                                      gs.second,
+                                                                      0,
+                                                                      GeographicPositions::SPHERE);
+
+            double dx = p1.x - gsPos.x;
+            double dy = p1.y - gsPos.y;
+            double dz = p1.z - gsPos.z;
+            double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (dist <= idmConfig->maxGroundStationDistance)
+            {
+                cache.nodeToGsDirectDist[i][gsIdx] = dist;
+            }
+        }
+    }
+
+    // Dijkstra's Algorithm for All-Pairs Shortest Path
+    using NodeDist = std::pair<double, size_t>;
+    for (size_t s = 0; s < numSats; ++s)
+    {
+        std::vector<double>& dist = cache.shortestPaths[s];
+        std::vector<size_t>& p = cache.parents[s];
+        std::fill(dist.begin(), dist.end(), std::numeric_limits<double>::infinity());
+        std::fill(p.begin(), p.end(), numSats);
+        dist[s] = 0;
+
+        std::priority_queue<NodeDist, std::vector<NodeDist>, std::greater<>> pq;
+        pq.emplace(0.0, s);
+
+        while (!pq.empty())
+        {
+            auto [d, u] = pq.top();
+            pq.pop();
+
+            if (d > dist[u])
+            {
+                continue;
+            }
+
+            for (size_t v = 0; v < numSats; ++v)
+            {
+                if (cache.adjMatrix[u][v] != std::numeric_limits<double>::infinity())
+                {
+                    double newDist = d + cache.adjMatrix[u][v];
+                    if (newDist < dist[v])
+                    {
+                        dist[v] = newDist;
+                        p[v] = u;
+                        pq.emplace(newDist, v);
+                    }
+                }
+            }
+        }
+    }
+
+    // Dijkstra's Algorithm for Virtual Earth Node
+    std::priority_queue<NodeDist, std::vector<NodeDist>, std::greater<>> earthPq;
+
+    for (size_t i = 0; i < numSats; ++i)
+    {
+        double minDist = std::numeric_limits<double>::infinity();
+        uint32_t bestGsIdx = 0;
+        for (uint32_t gsIdx = 0; gsIdx < idmConfig->groundStations.size(); ++gsIdx)
+        {
+            if (cache.nodeToGsDirectDist[i][gsIdx] < minDist)
+            {
+                minDist = cache.nodeToGsDirectDist[i][gsIdx];
+                bestGsIdx = gsIdx;
+            }
+        }
+
+        if (minDist != std::numeric_limits<double>::infinity())
+        {
+            cache.minEarthDist[i] = minDist;
+            cache.earthParent[i] = numSats; // Directly connected to earth
+            cache.closestGsIdx[i] = bestGsIdx;
+            earthPq.emplace(minDist, i);
+        }
+    }
+
+    while (!earthPq.empty())
+    {
+        auto [d, u] = earthPq.top();
+        earthPq.pop();
+
+        if (d > cache.minEarthDist[u])
+        {
+            continue;
+        }
+
+        for (size_t v = 0; v < numSats; ++v)
+        {
+            if (cache.adjMatrix[u][v] != std::numeric_limits<double>::infinity())
+            {
+                double newDist = d + cache.adjMatrix[u][v];
+                if (newDist < cache.minEarthDist[v])
+                {
+                    cache.minEarthDist[v] = newDist;
+                    cache.earthParent[v] = u;
+                    cache.closestGsIdx[v] = cache.closestGsIdx[u];
+                    earthPq.emplace(newDist, v);
+                }
+            }
+        }
+    }
+}
+
+double
+Scenario::GetISLMinimumDistance(Ptr<Node> n1, Ptr<Node> n2, uint32_t netId)
+{
+    BuildIslGraph(netId);
+    auto& cache = m_islCaches[netId];
+    if (!cache.valid)
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    auto it1 = cache.nodeToIndex.find(n1);
+    auto it2 = cache.nodeToIndex.find(n2);
+
+    if (it1 == cache.nodeToIndex.end() || it2 == cache.nodeToIndex.end())
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    return cache.shortestPaths[it1->second][it2->second];
+}
+
+double
+Scenario::GetISLMinimumDistance(Ptr<Node> n, uint32_t gsIndex, uint32_t netId)
+{
+    BuildIslGraph(netId);
+    auto& cache = m_islCaches[netId];
+    if (!cache.valid)
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    auto it = cache.nodeToIndex.find(n);
+    if (it == cache.nodeToIndex.end())
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    size_t u = it->second;
+    double minDist = std::numeric_limits<double>::infinity();
+
+    for (size_t v = 0; v < cache.indexToNode.size(); ++v)
+    {
+        if (cache.shortestPaths[u][v] != std::numeric_limits<double>::infinity() &&
+            cache.nodeToGsDirectDist[v][gsIndex] != std::numeric_limits<double>::infinity())
+        {
+            double dist = cache.shortestPaths[u][v] + cache.nodeToGsDirectDist[v][gsIndex];
+            if (dist < minDist)
+            {
+                minDist = dist;
+            }
+        }
+    }
+
+    return minDist;
+}
+
+std::pair<double, uint32_t>
+Scenario::GetISLMinimumDistance(Ptr<Node> n, uint32_t netId)
+{
+    BuildIslGraph(netId);
+    auto& cache = m_islCaches[netId];
+    if (!cache.valid)
+    {
+        return {std::numeric_limits<double>::infinity(), 0};
+    }
+
+    auto it = cache.nodeToIndex.find(n);
+    if (it == cache.nodeToIndex.end())
+    {
+        return {std::numeric_limits<double>::infinity(), 0};
+    }
+
+    size_t u = it->second;
+    return {cache.minEarthDist[u], cache.closestGsIdx[u]};
 }
 
 void
@@ -743,7 +899,24 @@ Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
                                   << " dB)"
                                   << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
 #endif
-                        nrHelper->HandoverRequest(Seconds(0), ueDevice, currentGnb, bestGnb);
+                        /* Example of ISL delay calculation for Handover:
+                         *  Calculated signaling between currentGnb -> CN -> bestGnb -> CN ->
+                         * currentGnb The example as only to consider a dimostrative example
+                         */
+                        /*
+                        double handoverTotDistance =
+                            GetISLMinimumDistance(currentGnb->GetNode(), netId).first * 2 +
+                            GetISLMinimumDistance(bestGnb->GetNode(), netId).first;
+                        // Summing for instance the delay for the direct link between gNBs
+                        handoverTotDistance += GetISLMinimumDistance(currentGnb->GetNode(),
+                        bestGnb->GetNode(), netId); double handoverDelay = 2.99792458e8 /
+                        handoverTotDistance;
+                        */
+                        double handoverDelay = 0;
+                        nrHelper->HandoverRequest(Seconds(handoverDelay),
+                                                  ueDevice,
+                                                  currentGnb,
+                                                  bestGnb);
                     }
                 }
             }

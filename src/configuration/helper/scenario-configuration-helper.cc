@@ -113,25 +113,48 @@ ScenarioConfigurationHelper::GetCurrentDateTime() const
 const std::string
 ScenarioConfigurationHelper::GetResultsPath()
 {
-    NS_ASSERT_MSG(m_config.HasMember("resultsPath"),
-                  "Please define 'resultsPath' in configuration file.");
-    NS_ASSERT_MSG(m_config["resultsPath"].IsString(), "'resultsPath' must be a string.");
+    bool hasResultsPath = m_config.HasMember("resultsPath");
+    bool hasResultPath = m_config.HasMember("resultPath");
+
+    NS_ASSERT_MSG(hasResultsPath || hasResultPath,
+                  "Please define 'resultsPath' or 'resultPath' in configuration file.");
+    NS_ASSERT_MSG(
+        !(hasResultsPath && hasResultPath),
+        "Please define only one of 'resultsPath' or 'resultPath' in configuration file, not both.");
 
     std::stringstream path;
-    auto resPath = m_config["resultsPath"].GetString();
-    auto resPathLen = strlen(resPath);
-    if (resPathLen > 0 && resPath[0] == '/')
+    if (hasResultsPath)
     {
-        path << resPath;
+        NS_ASSERT_MSG(m_config["resultsPath"].IsString(), "'resultsPath' must be a string.");
+        auto resPath = m_config["resultsPath"].GetString();
+        auto resPathLen = strlen(resPath);
+        if (resPathLen > 0 && resPath[0] == '/')
+        {
+            path << resPath;
+        }
+        else
+        {
+            std::string resPathStr = std::string(resPath);
+            if (resPathLen > 1 && resPath[resPathLen - 1] == '/')
+            {
+                resPathStr.pop_back();
+            }
+            path << m_currentPath << "/" << resPathStr << "/" << GetName() << "-" << m_dateTime;
+        }
     }
     else
     {
-        std::string resPathStr = std::string(resPath);
-        if (resPathLen > 1 && resPath[resPathLen - 1] == '/')
+        NS_ASSERT_MSG(m_config["resultPath"].IsString(), "'resultPath' must be a string.");
+        auto resPath = m_config["resultPath"].GetString();
+        auto resPathLen = strlen(resPath);
+        if (resPathLen > 0 && resPath[0] == '/')
         {
-            resPathStr.pop_back();
+            path << resPath;
         }
-        path << m_currentPath << "/" << resPathStr << "/" << GetName() << "-" << m_dateTime;
+        else
+        {
+            path << m_currentPath << "/" << std::string(resPath);
+        }
     }
 
     SystemPath::MakeDirectories(path.str());
