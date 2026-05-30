@@ -1,0 +1,32 @@
+From 84b148e083041be209482c8de195563e7c9ad8e9 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Sat, 30 May 2026 10:19:10 +0200
+Subject: [PATCH] PATCH: skip already created X2 links
+
+---
+ model/nr-epc-x2.cc | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/model/nr-epc-x2.cc b/model/nr-epc-x2.cc
+index 70ae0c0d..061830b9 100644
+--- a/model/nr-epc-x2.cc
++++ b/model/nr-epc-x2.cc
+@@ -171,10 +171,13 @@ NrEpcX2::AddX2Interface(uint16_t localCellId,
+     std::vector<uint16_t> localCellIds;
+     localCellIds.push_back(localCellId);
+ 
+-    NS_ASSERT_MSG(m_x2InterfaceSockets.find(remoteCellId) == m_x2InterfaceSockets.end(),
+-                  "Mapping for remoteCellId = " << remoteCellId << " is already known");
+     for (uint16_t remoteCellId : remoteCellIds)
+     {
++        if (m_x2InterfaceSockets.find(remoteCellId) != m_x2InterfaceSockets.end())
++        {
++            NS_LOG_WARN("Mapping for remoteCellId = " << remoteCellId << " is already known. Skipping redundant socket mapping.");
++            continue;
++        }
+         m_x2InterfaceSockets[remoteCellId] =
+             Create<NrX2IfaceInfo>(remoteX2Address, localX2cSocket, localX2uSocket);
+     }
+-- 
+2.50.1 (Apple Git-155)
+

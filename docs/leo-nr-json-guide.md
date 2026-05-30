@@ -68,6 +68,15 @@ Furthermore, we can specify the precision of the mobility models, setting the po
 
 In this example, we set the frequency to 1 second in the LEO orbital mobility models and in the constant velocity mobility models used by ground vehicles.
 
+For Multibeam Scenarios created by adding more gNB devices on the same node, for simulating different frequencies between beams on the same satellite, same-node interference can be disabled by setting the following parameter:
+
+```json
+{
+  "name": "ns3::NrSpectrumPhy::SameNodeInterference",
+  "value": false
+}
+```
+
 ## World Configuration
 
 ### `world.size`

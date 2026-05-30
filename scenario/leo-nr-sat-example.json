@@ -1,8 +1,21 @@
 {
+  // Nome dello scenario, verrà contenuto nel nome della cartella dei risultati (in caso si usi "resultsPath")
   "name": "leo-nr-sat-example",
+  // resultsPath è la cartella in cui verranno create diverse cartelle, una per esecuzione della simulazione con all'interno i file con i risultati della simulazione
   "resultsPath": "../results/",
+  // *
+  // "resultPath" è un parametro simile al precedente, è mutuamente esclusivo col precedente parametro, e specifica la cartella
+  // dove verrà memorizzato il risultato della simulazione, senza creare sotto cartelle, questo può risultare utile per sistemi in cui
+  // questo json di scenario è generato mediante script/interfaccia, e che quindi in modo automatico poi si vogliano leggere i risultati
+  // dell'esecuzione, associando a questo parametro una cartella temporanea ad esempio.
+  // *
+  // Se impostato a true logOnFile attiverà nelle varie parti della simulazione tutte le funzionalità utili a salvare i risultati su file
   "logOnFile": true,
+  // Durata totale della simulazione (tempo all'interno della simulazione)
   "duration": 5,
+  // Parametro utile a selezionare un intervallo di tempo per il quale periodicamente
+  // Si andranno a estrarre e salvare su app-statistics-periodic.txt le statistiche su tutti i flussi
+  // Aperti nella simulazione
   "appStatisticsReportInterval": 0.3,
   // 1. STATIC NS3 CONFIGURATION
   // Questa sezione sovrascrive i parametri globali di default di ns-3.
@@ -30,6 +43,12 @@
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
       "value": false // Disabilitazione standard per comunicazioni satellitari dove il delay e' troppo elevato per l'HARQ
+    },
+    {
+      // Parametro essenziale in scenari multibeam al fine di evitare interferenza tra le varie
+      // gNB presenti sullo stesso nodo che ricreano l'ambiente multibeam
+      "name": "ns3::NrSpectrumPhy::SameNodeInterference",
+      "value": false
     }
   ],
   // 2. DIMENSIONI DEL MONDO
@@ -48,21 +67,24 @@
       "type": "nr",
       // CONFIGURAZIONE CANALI E FDM: Definiamo i Bandwidth Parts (BWP) su più bande
       "channels": [
+        // Il canale è un astrazione di una combinazione tra il propagation model, il condition model (canale in LOS o NLOS)
+        // E bande organizzate con aggregation (contigui e non) e bandwidth parts (bwps)
+        // Nei dispositivi che implementeranno NR ci sarà un netdevice interno per ogni bwp
         {
           // Scenario usato nel modello di propagazione
           // NOTA: Solo il 3GPP propagation model supporta gli scenari NTN
           "scenario": "NTN-Rural",
           // Il condition model è consigliato di default, rispetterà le condizioni probabili dello scenario scelto
           "conditionModel": "Default",
-          "propagationModel": "ThreeGpp",
-          // Attributi del pathloss
+          "propagationModel": "ThreeGpp", // Scelta forzata per scenari NTN
+          // Attributi del pathloss (vedere documentazione lena/ns3)
           "pathlossAttributes": [
             {
               "name": "ShadowingEnabled",
               "value": false
             }
           ],
-          // Attributi del channel condition
+          // Attributi del channel condition (vedere documentazione lena/ns3)
           "channelConditionAttributes": [
             {
               // Aggiorna le condizioni del canale ogni 100ms
@@ -104,7 +126,7 @@
         "algorithm": "ns3::NrNoOpHandoverAlgorithm",
         "attributes": []
       },
-      // Metodo di attach ad inizio simulazione
+      // Metodo di attach ad inizio simulazione (vedi documentazione del json per altre opzioni)
       "attachMethod": "none",
       // IMPOSTAZIONI AVANZATE: attach SINR-Based & Inter-Satellite Links (ISL) Delay
       "advancedOptions": {
@@ -142,7 +164,7 @@
           "updateLog": true
         }
       },
-      // Configurazione dell'EPC (Evolved Packet Core)
+      // Configurazione dell'EPC (Evolved Packet Core) -> 5G NSA
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [
@@ -152,7 +174,7 @@
           }
         ]
       },
-      // Configurazione del beamforming
+      // Configurazione dell'algoritmo di beamforming
       "beamforming": {
         "helper": "ns3::IdealBeamformingHelper",
         "method": "ns3::DirectPathBeamforming",
@@ -164,7 +186,7 @@
           }
         ]
       },
-      // Configurazione dell'antenna del UE
+      // Configurazione dell'antenna del UE (di default)
       "ueAntenna": {
         "arrayProperties": [
           {
@@ -177,7 +199,7 @@
           }
         ]
       },
-      // Configurazione dell'antenna del gNB
+      // Configurazione dell'antenna del gNB (di default)
       "gnbAntenna": {
         "type": "ns3::CircularApertureAntennaModel",
         "properties": [
@@ -227,6 +249,7 @@
       // Configurazione dello scheduler
       "scheduler": {
         "type": "ns3::NrMacSchedulerOfdmaPF",
+        // In questo esempio fissiamo l' MCS ad esempio
         "attributes": [
           {
             "name": "FixedMcsDl",
@@ -274,11 +297,14 @@
       ]
     }
   ],
+  // Sul mac layer va specificato un layer vuoto con solo type nr, non ci sono parametri specificabili poichè tutto è definito in phyLayer
   "macLayer": [
     {
       "type": "nr"
     }
   ],
+  // Il network layer non è realmente utilizzato poichè gli IP sono fissati da 5g lena, gli indirizzi sotto sono quelli usati da lena
+  // Anche cambiandoli da qui, l'effetto finale sarà nullo
   "networkLayer": [
     {
       "type": "ipv4",
@@ -493,13 +519,7 @@
           "directivity": {
             "mode": "earth-centered"
           }
-        }
-      ],
-      "applications": []
-    },
-    // 5.2 Uso diretto e customizzato di un singolo satellite con GeoLeoOrbitMobility invece della macro
-    {
-      "netDevices": [
+        },
         {
           "type": "nr",
           "networkLayer": 0,
@@ -510,6 +530,7 @@
               "targetBwp": 1
             }
           ],
+          // Configurazione del setup FDM (Numerology e Pattens)
           "phy": [
             {
               "bwpId": 0,
@@ -517,6 +538,80 @@
               "value": 0
             },
             {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1, // Downlink
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2, // Uplink
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered",
+            "downtiltOffset": 0,
+            "bearingOffset": 40
+          }
+        }
+      ],
+      "applications": []
+    },
+    // 5.2 Uso diretto e customizzato di un singolo satellite con GeoLeoOrbitMobility invece della macro
+    {
+      "netDevices": [
+        // 1° Netdevice per il beam centrale, vedi in "directivity"
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          // Colleghiamo 2 bwp per uplink e downlink
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          // Impostazioni custom per il phy layer
+          "phy": [
+            {
+              // Numerology bwp = 0
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              // Pattern del frame in bwp = 0
               "bwpId": 0,
               "name": "Pattern",
               "value": "F|F|F|F|F|F|F|F|F|F|"
@@ -557,8 +652,76 @@
               "value": 0.0
             }
           ],
+          // Direttività verso il centro terrestre (beam centrato)
           "directivity": {
             "mode": "earth-centered"
+          }
+        },
+        // 2° Net Device per un secondo beam, vedi in "directivity"
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              // Numerology bwp = 0
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              // Pattern del frame in bwp = 0
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 1,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "TxPower",
+              "value": 4.0
+            },
+            {
+              "bwpId": 2,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 2,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            },
+            {
+              "bwpId": 2,
+              "name": "TxPower",
+              "value": 0.0
+            }
+          ],
+          // Puntiamo sempre al centro della terra, ma rispetto a quella posizione "tiltiamo" la direzione di un certo numero di gradi in elevazione e azimut
+          "directivity": {
+            "mode": "earth-centered",
+            "downtiltOffset": 0,
+            "bearingOffset": 40
           }
         }
       ],
@@ -629,6 +792,39 @@
           "directivity": {
             "mode": "earth-centered"
           }
+        },
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered",
+            "downtiltOffset": 0,
+            "bearingOffset": 40
+          }
         }
       ],
       "applications": []
@@ -665,6 +861,39 @@
           ],
           "directivity": {
             "mode": "earth-centered"
+          }
+        },
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "outputLinks": [
+            {
+              "sourceBwp": 2,
+              "targetBwp": 1
+            }
+          ],
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Numerology",
+              "value": 0
+            },
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "F|F|F|F|F|F|F|F|F|F|"
+            },
+            {
+              "bwpId": 0,
+              "name": "TxPower",
+              "value": 4.0
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered",
+            "downtiltOffset": 0,
+            "bearingOffset": 40
           }
         }
       ],
