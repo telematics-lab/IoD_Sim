@@ -249,7 +249,7 @@
       // Configurazione dello scheduler
       "scheduler": {
         "type": "ns3::NrMacSchedulerOfdmaPF",
-        // In questo esempio fissiamo l' MCS ad esempio
+        // In questo esempio fissiamo l'MCS ad un valore fisso ad esempio
         "attributes": [
           {
             "name": "FixedMcsDl",

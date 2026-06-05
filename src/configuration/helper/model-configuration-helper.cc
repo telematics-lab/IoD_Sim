@@ -287,6 +287,14 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             defIp.key = ipObj["key"].GetString();
             defIp.index = ipObj.HasMember("index") ? ipObj["index"].GetUint() : 0;
             defIp.device = ipObj.HasMember("device") ? ipObj["device"].GetUint() : 0;
+            if (ipObj.HasMember("v6") && ipObj["v6"].IsBool())
+            {
+                defIp.isIpv6 = ipObj["v6"].GetBool();
+            }
+            if (ipObj.HasMember("addressIndex"))
+            {
+                defIp.addressIndex = ipObj["addressIndex"].GetUint();
+            }
             if (ipObj.HasMember("port"))
             {
                 defIp.port = ipObj["port"].GetUint();
@@ -298,8 +306,16 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
             }
             
             // Create a dummy IP address for validation purposes.
-            attrValue = attrInfo.checker->CreateValidValue(
-                AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), defIp.port.value_or(0))));
+            if (defIp.isIpv6)
+            {
+                attrValue = attrInfo.checker->CreateValidValue(
+                    AddressValue(addressUtils::ConvertToSocketAddress(Ipv6Address("::"), defIp.port.value_or(0))));
+            }
+            else
+            {
+                attrValue = attrInfo.checker->CreateValidValue(
+                    AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), defIp.port.value_or(0))));
+            }
         }
         else if (attrInfo.checker->GetValueTypeName() == "ns3::PointerValue")
         {
@@ -349,6 +365,14 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 defIp.key = ipObj["key"].GetString();
                 defIp.index = ipObj.HasMember("index") ? ipObj["index"].GetUint() : 0;
                 defIp.device = ipObj.HasMember("device") ? ipObj["device"].GetUint() : 0;
+                if (ipObj.HasMember("v6") && ipObj["v6"].IsBool())
+                {
+                    defIp.isIpv6 = ipObj["v6"].GetBool();
+                }
+                if (ipObj.HasMember("addressIndex"))
+                {
+                    defIp.addressIndex = ipObj["addressIndex"].GetUint();
+                }
                 defIp.port = port;
 
                 if (deferredIps)
@@ -357,8 +381,16 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                 }
                 
                 // Create a dummy IP address for validation purposes.
-                attrValue = attrInfo.checker->CreateValidValue(
-                    AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), port)));
+                if (defIp.isIpv6)
+                {
+                    attrValue = attrInfo.checker->CreateValidValue(
+                        AddressValue(addressUtils::ConvertToSocketAddress(Ipv6Address("::"), port)));
+                }
+                else
+                {
+                    attrValue = attrInfo.checker->CreateValidValue(
+                        AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), port)));
+                }
             }
             else
             {

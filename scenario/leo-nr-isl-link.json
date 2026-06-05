@@ -215,17 +215,7 @@
         ]
       },
       "scheduler": {
-        "type": "ns3::NrMacSchedulerOfdmaPF",
-        "attributes": [
-          {
-            "name": "FixedMcsDl",
-            "value": true
-          },
-          {
-            "name": "StartingMcsDl",
-            "value": 2
-          }
-        ]
+        "type": "ns3::NrMacSchedulerOfdmaPF"
       },
       "uePhyAttributes": [
         {

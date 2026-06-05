@@ -39,6 +39,8 @@ class ModelConfiguration
         uint32_t index;
         uint32_t device;
         std::optional<uint16_t> port;
+        bool isIpv6 = false;
+        std::optional<uint32_t> addressIndex;
     };
 
     class Attribute

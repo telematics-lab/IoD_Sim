@@ -1498,14 +1498,15 @@ When configuring applications (like `ns3::UdpClient` or `ns3::OnOffApplication`)
 To solve this, IoD-Sim introduces the `@ip` dynamic resolution. Instead of hardcoding an IP string (e.g., `"10.0.0.1"`), you can pass an `@ip` object. The simulation engine will automatically resolve the IP address of the target device when initializing the configuration.
 
 ### Structure of an `@ip` object
-An `@ip` block must contain a `key` representing the target group, and optionally an `index` and `device`.
+An `@ip` block must contain a `key` representing the target group, and optionally an `index`, `device`, `v6`, and `addressIndex`.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `key`     | string | - | The target group container (e.g., `"vehicles"`, `"leo-sats"`, `"nodes"`). |
 | `index`   | uint32_t | `0` | The index of the node within the specified container group. |
 | `device`  | uint32_t | `0` | The index of the specific network device (NetDevice) on the node to query the IP address from. |
-| `port`    | uint32_t | - | Optional port number to combine with the IP address for `AddressValue` attributes. |
+| `v6`      | boolean | `false` | If true, resolves the IPv6 address of the device instead of the IPv4 address. |
+| `addressIndex` | uint32_t | *auto* | The index of the IP address on the interface to select. If omitted, it automatically selects index 0 for IPv4 and index 1 for IPv6 (first likely is link local) (if available, otherwise 0). |
 
 ### Usage Example inside an Array (e.g. `AddressValue` for `Remote`)
 For attributes like `Remote` that require an array combining the IP address and a Port (e.g. `["10.0.0.1", 1234]`), you can replace the string element with the `@ip` object:

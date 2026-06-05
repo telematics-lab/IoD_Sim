@@ -2,6 +2,7 @@
 #include "ns3/nstime.h"
 #include "ns3/pointer.h"
 #include <ns3/address-utils.h>
+#include <ns3/ipv6.h>
 
 namespace ns3
 {
@@ -462,31 +463,85 @@ Scenario::InstallApplications(const std::vector<ModelConfiguration>& apps, const
             auto targetNetworkNode = GetNodeByKey(defIp.key, defIp.index);
             NS_ABORT_MSG_IF(!targetNetworkNode, "Target node not found for key: " << defIp.key << " index: " << defIp.index);
 
-            auto targetIpv4 = targetNetworkNode->GetObject<Ipv4>();
-            NS_ABORT_MSG_IF(!targetIpv4, "Target node for IP resolution does not have an Ipv4 object.");
-
             uint32_t targetInterfaceIndex = 0;
             uint32_t deviceCount = 0;
+            Address targetAddress;
 
-            for (uint32_t i = 0; i < targetIpv4->GetNInterfaces(); ++i)
+            if (defIp.isIpv6)
             {
-                if (targetIpv4->GetNetDevice(i)->GetInstanceTypeId().GetName() == "ns3::LoopbackNetDevice")
+                auto targetIpv6 = targetNetworkNode->GetObject<Ipv6>();
+                NS_ABORT_MSG_IF(!targetIpv6, "Target node for IPv6 resolution does not have an Ipv6 object.");
+
+                for (uint32_t i = 0; i < targetIpv6->GetNInterfaces(); ++i)
                 {
-                    continue;
+                    if (targetIpv6->GetNetDevice(i)->GetInstanceTypeId().GetName() == "ns3::LoopbackNetDevice")
+                    {
+                        continue;
+                    }
+
+                    if (deviceCount == defIp.device)
+                    {
+                        targetInterfaceIndex = i;
+                        break;
+                    }
+                    deviceCount++;
                 }
 
-                if (deviceCount == defIp.device)
+                NS_ABORT_MSG_IF(targetInterfaceIndex == 0 && defIp.device > 0,
+                                "Target device index " << defIp.device << " out of bounds for IPv6.");
+                
+                // Usually address 0 is loopback, address 1 is link-local, address 2 is global for IPv6. We use the global or link-local address.
+                // We'll get address 1 if it exists as it is typically the valid one for the interface.
+                uint32_t addressIndex;
+                if (defIp.addressIndex.has_value())
                 {
-                    targetInterfaceIndex = i;
-                    break;
+                    addressIndex = defIp.addressIndex.value();
+                    NS_ABORT_MSG_IF(addressIndex >= targetIpv6->GetNAddresses(targetInterfaceIndex),
+                                    "IPv6 addressIndex " << addressIndex << " out of bounds.");
                 }
-                deviceCount++;
+                else
+                {
+                    addressIndex = targetIpv6->GetNAddresses(targetInterfaceIndex) > 1 ? 1 : 0;
+                }
+                targetAddress = targetIpv6->GetAddress(targetInterfaceIndex, addressIndex).GetAddress();
+            }
+            else
+            {
+                auto targetIpv4 = targetNetworkNode->GetObject<Ipv4>();
+                NS_ABORT_MSG_IF(!targetIpv4, "Target node for IPv4 resolution does not have an Ipv4 object.");
+
+                for (uint32_t i = 0; i < targetIpv4->GetNInterfaces(); ++i)
+                {
+                    if (targetIpv4->GetNetDevice(i)->GetInstanceTypeId().GetName() == "ns3::LoopbackNetDevice")
+                    {
+                        continue;
+                    }
+
+                    if (deviceCount == defIp.device)
+                    {
+                        targetInterfaceIndex = i;
+                        break;
+                    }
+                    deviceCount++;
+                }
+
+                NS_ABORT_MSG_IF(targetInterfaceIndex == 0 && defIp.device > 0,
+                                "Target device index " << defIp.device << " out of bounds for IPv4.");
+
+                uint32_t addressIndex;
+                if (defIp.addressIndex.has_value())
+                {
+                    addressIndex = defIp.addressIndex.value();
+                    NS_ABORT_MSG_IF(addressIndex >= targetIpv4->GetNAddresses(targetInterfaceIndex),
+                                    "IPv4 addressIndex " << addressIndex << " out of bounds.");
+                }
+                else
+                {
+                    addressIndex = 0;
+                }
+                targetAddress = targetIpv4->GetAddress(targetInterfaceIndex, addressIndex).GetLocal();
             }
 
-            NS_ABORT_MSG_IF(targetInterfaceIndex == 0 && defIp.device > 0,
-                            "Target device index " << defIp.device << " out of bounds.");
-
-            auto targetAddress = targetIpv4->GetAddress(targetInterfaceIndex, 0).GetLocal();
             auto targetPort = defIp.port.value_or(0);
 
             AddressValue resolvedAddressValue(
