@@ -63,15 +63,22 @@ class ModelConfigurationHelper
         const std::string& key,
         const ns3::TypeId& tid);
 
-    static const std::vector<ModelConfiguration::Attribute> GetAttributes(const TypeId& model,
-                                                                          const JsonArray& jAttrs);
+    static const std::vector<ModelConfiguration::Attribute> GetAttributes(
+        const TypeId& model,
+        const JsonArray& jAttrs,
+        std::vector<ModelConfiguration::DeferredIp>* deferredIps = nullptr);
+
     static const Ptr<AttributeValue> DecodeAttributeValue(
         const std::string& modelName,
         const JsonValue& jAttr,
-        const TypeId::AttributeInformation& checker);
+        const TypeId::AttributeInformation& checker,
+        std::vector<ModelConfiguration::DeferredIp>* deferredIps = nullptr,
+        const std::string& attrName = "");
 
-    static const ModelConfiguration::Attribute DecodeModelAttribute(const TypeId& model,
-                                                                    const JsonValue& jAttr);
+    static const ModelConfiguration::Attribute DecodeModelAttribute(
+        const TypeId& model,
+        const JsonValue& jAttr,
+        std::vector<ModelConfiguration::DeferredIp>* deferredIps = nullptr);
 
   private:
     static const std::vector<ModelConfiguration> DecodeModelAggregates(const JsonArray& jAggs);

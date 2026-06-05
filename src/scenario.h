@@ -204,6 +204,10 @@ class Scenario
                              NetDeviceContainer devContainer,
                              const uint32_t deviceId,
                              const uint32_t netId);
+    void InstallApplications(const std::vector<ModelConfiguration>& apps, const Ptr<Node>& targetNode);
+
+    void ConfigureAllApplications();
+    
     void ConfigureEntityApplications(const std::string& entityKey,
                                      const Ptr<EntityConfiguration>& conf,
                                      const uint32_t& entityId);

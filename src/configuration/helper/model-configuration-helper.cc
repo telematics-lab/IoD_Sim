@@ -58,8 +58,10 @@ ModelConfigurationHelper::Get(const JsonValue& jModel)
 
     const std::string modelName = jModel["name"].GetString();
     const TypeId modelTid = TypeId::LookupByName(modelName);
-    const auto jsonAttributes = jModel["attributes"].GetArray();
-    const auto attributes = GetAttributes(modelTid, jsonAttributes);
+    std::vector<ModelConfiguration::Attribute> attributes;
+    std::vector<ModelConfiguration::DeferredIp> deferredIps;
+    
+    attributes = GetAttributes(modelTid, jModel["attributes"].GetArray(), &deferredIps);
 
     std::vector<ModelConfiguration> aggregates;
     if (jModel.HasMember("aggregates"))
@@ -69,7 +71,9 @@ ModelConfigurationHelper::Get(const JsonValue& jModel)
         aggregates = DecodeModelAggregates(jModel["aggregates"].GetArray());
     }
 
-    return ModelConfiguration(modelName, attributes, aggregates);
+    ModelConfiguration config(modelName, attributes, aggregates);
+    config.SetDeferredIps(deferredIps);
+    return config;
 }
 
 const std::optional<ModelConfiguration>
@@ -104,13 +108,14 @@ ModelConfigurationHelper::GetOptionalCoaleshed(const JsonObject& jObj,
 
 const std::vector<ModelConfiguration::Attribute>
 ModelConfigurationHelper::GetAttributes(const TypeId& model,
-                                        const rapidyyjson::Value::ConstArray& jAttrs)
+                                        const JsonArray& jAttrs,
+                                        std::vector<ModelConfiguration::DeferredIp>* deferredIps)
 {
     std::vector<ModelConfiguration::Attribute> attributes;
     attributes.reserve(jAttrs.Size());
-    for (auto& el : jAttrs)
+    for (const auto& jAttr : jAttrs)
     {
-        attributes.push_back(DecodeModelAttribute(model, el));
+        attributes.push_back(DecodeModelAttribute(model, jAttr, deferredIps));
     }
 
     return attributes;
@@ -122,6 +127,7 @@ ModelConfigurationHelper::DecodeCoaleshedModel(const TypeId& model, const JsonOb
     // TODO: decode additional phy attribute that cannot be directly mapped
     std::vector<ModelConfiguration::Attribute> attributes;
     std::vector<ModelConfiguration> aggregates;
+    std::vector<ModelConfiguration::DeferredIp> deferredIps;
     TypeId::AttributeInformation attrInfo;
 
     attributes.reserve(jModel.MemberCount());
@@ -132,7 +138,7 @@ ModelConfigurationHelper::DecodeCoaleshedModel(const TypeId& model, const JsonOb
 
         if (model.LookupAttributeByName(attrName, &attrInfo))
         {
-            const auto& value = DecodeAttributeValue(model.GetName(), it->value, attrInfo);
+            const auto& value = DecodeAttributeValue(model.GetName(), it->value, attrInfo, &deferredIps, attrName);
             const auto attr = ModelConfiguration::Attribute(attrName, value);
             attributes.push_back(attr);
         }
@@ -148,13 +154,17 @@ ModelConfigurationHelper::DecodeCoaleshedModel(const TypeId& model, const JsonOb
         }
     }
 
-    return ModelConfiguration(model.GetName(), attributes, aggregates);
+    auto config = ModelConfiguration(model.GetName(), attributes, aggregates);
+    config.SetDeferredIps(deferredIps);
+    return config;
 }
 
 const Ptr<AttributeValue>
 ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
                                                const JsonValue& jAttr,
-                                               const TypeId::AttributeInformation& attrInfo)
+                                               const TypeId::AttributeInformation& attrInfo,
+                                               std::vector<ModelConfiguration::DeferredIp>* deferredIps,
+                                               const std::string& attrName)
 {
     const auto attrValueType = jAttr.GetType();
     Ptr<AttributeValue> attrValue;
@@ -265,44 +275,117 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         }
     }
     break;
+    case rapidyyjson::Type::kObjectType: {
+        if (jAttr.HasMember("@ip"))
+        {
+            const auto& ipObj = jAttr["@ip"];
+            NS_ASSERT_MSG(ipObj.IsObject(), "'@ip' must be an object");
+            NS_ASSERT_MSG(ipObj.HasMember("key") && ipObj["key"].IsString(), "'@ip' must have a string 'key'");
+            
+            ModelConfiguration::DeferredIp defIp;
+            defIp.attrName = attrName;
+            defIp.key = ipObj["key"].GetString();
+            defIp.index = ipObj.HasMember("index") ? ipObj["index"].GetUint() : 0;
+            defIp.device = ipObj.HasMember("device") ? ipObj["device"].GetUint() : 0;
+            if (ipObj.HasMember("port"))
+            {
+                defIp.port = ipObj["port"].GetUint();
+            }
+
+            if (deferredIps)
+            {
+                deferredIps->push_back(defIp);
+            }
+            
+            // Create a dummy IP address for validation purposes.
+            attrValue = attrInfo.checker->CreateValidValue(
+                AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), defIp.port.value_or(0))));
+        }
+        else if (attrInfo.checker->GetValueTypeName() == "ns3::PointerValue")
+        {
+            ObjectFactory factory;
+            const auto objConf = Get(jAttr);
+
+            factory.SetTypeId(objConf.GetName());
+            for (auto& attr : objConf.GetAttributes())
+            {
+                factory.Set(attr.name, *attr.value);
+            }
+
+            auto obj = factory.Create<Object>();
+            attrValue = attrInfo.checker->CreateValidValue(PointerValue(obj));
+        }
+        else
+        {
+            NS_FATAL_ERROR("Cannot parse attribute " << attrInfo.name << " for model " << modelName
+                                                     << ": unhandled object type");
+        }
+    }
+    break;
     case rapidyyjson::Type::kArrayType: {
         const auto arr = jAttr.GetArray();
         const auto acceptedType = attrInfo.checker->GetValueTypeName();
 
         if (acceptedType == "ns3::AddressValue")
         {
-            if (arr.Size() != 2 || !arr[0].IsString() || !arr[1].IsInt())
+            if (arr.Size() != 2 || !arr[1].IsInt() || (!arr[0].IsString() && !(arr[0].IsObject() && arr[0].HasMember("@ip"))))
             {
                 NS_FATAL_ERROR(
                     "Attribute "
                     << attrInfo.name << " for model " << modelName
-                    << " must be an array with a string and an integer. eg. [\"10.1.1.1\", 1234]");
+                    << " must be an array with a string or @ip object, and an integer. eg. [\"10.1.1.1\", 1234]");
             }
-            const auto addr = arr[0].GetString();
+            
             const auto port = arr[1].GetInt();
-            // Checking if address is v6 or v4
-            Address parsedAddr;
-            uint8_t byteAddr[16];
-            if (inet_pton(AF_INET, addr, &byteAddr) <= 0)
+
+            if (arr[0].IsObject() && arr[0].HasMember("@ip"))
             {
-                if (inet_pton(AF_INET6, addr, &byteAddr) <= 0)
+                const auto& ipObj = arr[0]["@ip"];
+                NS_ASSERT_MSG(ipObj.IsObject(), "'@ip' must be an object");
+                NS_ASSERT_MSG(ipObj.HasMember("key") && ipObj["key"].IsString(), "'@ip' must have a string 'key'");
+                
+                ModelConfiguration::DeferredIp defIp;
+                defIp.attrName = attrName;
+                defIp.key = ipObj["key"].GetString();
+                defIp.index = ipObj.HasMember("index") ? ipObj["index"].GetUint() : 0;
+                defIp.device = ipObj.HasMember("device") ? ipObj["device"].GetUint() : 0;
+                defIp.port = port;
+
+                if (deferredIps)
                 {
-                    NS_FATAL_ERROR("Attribute "
-                                   << attrInfo.name << " for model " << modelName
-                                   << " must has as first paramether a valid IPv4 or v6 address");
+                    deferredIps->push_back(defIp);
                 }
-                else
-                {
-                    parsedAddr = Ipv6Address(addr);
-                }
+                
+                // Create a dummy IP address for validation purposes.
+                attrValue = attrInfo.checker->CreateValidValue(
+                    AddressValue(addressUtils::ConvertToSocketAddress(Ipv4Address("0.0.0.0"), port)));
             }
             else
             {
-                parsedAddr = Ipv4Address(addr);
+                const auto addr = arr[0].GetString();
+                // Checking if address is v6 or v4
+                Address parsedAddr;
+                uint8_t byteAddr[16];
+                if (inet_pton(AF_INET, addr, &byteAddr) <= 0)
+                {
+                    if (inet_pton(AF_INET6, addr, &byteAddr) <= 0)
+                    {
+                        NS_FATAL_ERROR("Attribute "
+                                       << attrInfo.name << " for model " << modelName
+                                       << " must has as first paramether a valid IPv4 or v6 address");
+                    }
+                    else
+                    {
+                        parsedAddr = Ipv6Address(addr);
+                    }
+                }
+                else
+                {
+                    parsedAddr = Ipv4Address(addr);
+                }
+                attrValue = attrInfo.checker->CreateValidValue(
+                    AddressValue(addressUtils::ConvertToSocketAddress(parsedAddr, port)));
             }
-            attrValue = attrInfo.checker->CreateValidValue(
-                AddressValue(addressUtils::ConvertToSocketAddress(parsedAddr, port)));
-            const auto acceptedType = attrInfo.checker->GetValueTypeName();
         }
         else if (arr[0].IsString()) // StrVecValue
         {
@@ -469,27 +552,6 @@ ModelConfigurationHelper::DecodeAttributeValue(const std::string& modelName,
         attrValue = attrInfo.checker->CreateValidValue(BooleanValue(attrValueBool));
     }
     break;
-    case rapidyyjson::Type::kObjectType:
-        if (attrInfo.checker->GetValueTypeName() == "ns3::PointerValue")
-        {
-            ObjectFactory factory;
-            const auto objConf = Get(jAttr);
-
-            factory.SetTypeId(objConf.GetName());
-            for (auto& attr : objConf.GetAttributes())
-            {
-                factory.Set(attr.name, *attr.value);
-            }
-
-            auto obj = factory.Create<Object>();
-            attrValue = attrInfo.checker->CreateValidValue(PointerValue(obj));
-        }
-        else
-        {
-            NS_FATAL_ERROR("Unsupported attribute value type of object "
-                           << attrInfo.name << ": " << attrInfo.checker->GetValueTypeName());
-        }
-        break;
     case rapidyyjson::Type::kNullType:
     default:
         NS_FATAL_ERROR("Cannot determine how to map JSON type "
@@ -523,7 +585,9 @@ ModelConfigurationHelper::DecodeModelAggregates(const JsonArray& jAggs)
 }
 
 const ModelConfiguration::Attribute
-ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidyyjson::Value& el)
+ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model,
+                                               const JsonValue& el,
+                                               std::vector<ModelConfiguration::DeferredIp>* deferredIps)
 {
     NS_ASSERT_MSG(el.IsObject(),
                   "Attribute model definition must be an object, got " << el.GetType());
@@ -531,15 +595,22 @@ ModelConfigurationHelper::DecodeModelAttribute(const TypeId& model, const rapidy
     NS_ASSERT_MSG(el["name"].IsString(), "Attribute model name must be a string.");
     NS_ASSERT_MSG(el.HasMember("value"), "Attribute model must have 'value' property.");
 
-    const std::string attrName = el["name"].GetString();
+    const std::string name = el["name"].GetString();
+    const auto& value = el["value"];
     TypeId::AttributeInformation attrInfo = {};
 
-    NS_ASSERT_MSG(model.LookupAttributeByName(attrName, &attrInfo),
-                  "Attribute '" << attrName << "' for model '" << model.GetName()
+    NS_ASSERT_MSG(model.LookupAttributeByName(name, &attrInfo),
+                  "Attribute '" << name << "' for model '" << model.GetName()
                                 << "' does not exist!");
 
-    auto attrValue = DecodeAttributeValue(model.GetName(), el["value"], attrInfo);
-    return ModelConfiguration::Attribute(attrName, attrValue);
+    if (attrInfo.flags & TypeId::ATTR_CONSTRUCT && !(attrInfo.flags & TypeId::ATTR_SET))
+    {
+        NS_FATAL_ERROR("Attribute " << name << " for model " << model.GetName()
+                                    << " is construct-only.");
+    }
+
+    auto attrValue = DecodeAttributeValue(model.GetName(), value, attrInfo, deferredIps, name);
+    return ModelConfiguration::Attribute(name, attrValue);
 }
 
 const std::string

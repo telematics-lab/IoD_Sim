@@ -63,6 +63,9 @@ Scenario::Scenario(int argc, char** argv)
     ConfigureInternetBackbone();
     ConfigureInternetRemotes();
 
+    // Configure all applications after IP addresses are resolved
+    ConfigureAllApplications();
+
     ConfigureFullMeshX2Links();
     AttachAllNrUesToGnbs();
     InitializeIslDelayMode();

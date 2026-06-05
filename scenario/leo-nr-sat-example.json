@@ -16,7 +16,7 @@
   // Parametro utile a selezionare un intervallo di tempo per il quale periodicamente
   // Si andranno a estrarre e salvare su app-statistics-periodic.txt le statistiche su tutti i flussi
   // Aperti nella simulazione
-  "appStatisticsReportInterval": 0.3,
+  "appStatisticsReportInterval": 0.1,
   // 1. STATIC NS3 CONFIGURATION
   // Questa sezione sovrascrive i parametri globali di default di ns-3.
   "staticNs3Config": [
@@ -363,7 +363,62 @@
             "value": 90.0
           }
         ]
-      }
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.2
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 1,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
+            }
+          ]
+        }
+      ]
     },
     // 4.2 Veicolo che definisce in modo manuale e diretto le tracce tramite MobilityModel
     {
@@ -405,7 +460,64 @@
             "value": "1s"
           }
         ]
-      }
+      },
+      "applications": [
+        {
+          "name": "ns3::UdpServer",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.1
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Port",
+              "value": 1234
+            }
+          ]
+        },
+        {
+          "name": "ns3::UdpClient",
+          "attributes": [
+            {
+              "name": "StartTime",
+              "value": 0.2
+            },
+            {
+              "name": "StopTime",
+              "value": 299.0
+            },
+            {
+              "name": "Remote",
+              "value": [
+                {
+                  "@ip": {
+                    "key": "vehicles",
+                    "index": 0,
+                    "device": 0
+                  }
+                },
+                1234
+              ]
+            },
+            {
+              "name": "MaxPackets",
+              "value": 4294967295
+            },
+            {
+              "name": "PacketSize",
+              "value": 256
+            },
+            {
+              "name": "Interval",
+              "value": 0.005
+            }
+          ]
+        }
+      ]
     },
     // 4.3 Generazione automatica di MOLTI veicoli (replicazione) mediante la macro !traceMobility
     {

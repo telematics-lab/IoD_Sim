@@ -848,6 +848,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
     cmd.AddValue("name", "Name of the scenario", m_name);
     cmd.AddValue("config", "Configuration file path", configFilePath);
     cmd.AddValue("radioMaps", "Enables the generation of the Radio Maps", m_generateRadioMaps);
+    cmd.AddValue("realTime", "Do not buffer output on files, flush immediately", m_realTime);
     cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
     cmd.AddValue("output",
                  "Output file path for expanded JSON (optional, default stdout)",
@@ -974,7 +975,11 @@ ScenarioConfigurationHelper::InitializeLogging(const bool& onFile)
 
     if (onFile)
     {
-        m_out = std::ofstream(GetLoggingFilePath());
+        if (m_realTime)
+        {
+            m_out.rdbuf()->pubsetbuf(nullptr, 0);
+        }
+        m_out.open(GetLoggingFilePath());
         std::clog.rdbuf(m_out.rdbuf());
     }
 

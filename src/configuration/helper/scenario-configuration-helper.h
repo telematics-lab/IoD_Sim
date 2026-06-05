@@ -541,6 +541,7 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
     std::vector<std::pair<std::string, Ptr<AttributeValue>>>
         m_staticConfig;               /// cache for ns-3 static config params
     bool m_generateRadioMaps = false; /// toggle for radio map generation
+    bool m_realTime = false;          /// toggle for unbuffered file output
     std::string m_currentPath;        /// cache for the current path at initialization
 };
 

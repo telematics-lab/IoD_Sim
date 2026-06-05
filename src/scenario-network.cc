@@ -123,32 +123,7 @@ Scenario::ConfigureInternetRemotes()
     NS_LOG_FUNCTION_NOARGS();
 
     const auto remoteConfs = CONFIGURATOR->GetRemotesConfiguration();
-    size_t remoteId = 0;
-
-    for (auto& conf : remoteConfs)
-    {
-        const auto appConfs = conf->GetApplications();
-
-        for (auto& appConf : appConfs)
-        {
-            TypeId appTid;
-            NS_ASSERT_MSG(TypeId::LookupByNameFailSafe(appConf.GetName(), &appTid),
-                          "Failed to initialize application " << appConf.GetName()
-                                                              << ". It does not exist!");
-
-            ObjectFactory factory(appTid.GetName());
-
-            for (auto& appAttr : appConf.GetAttributes())
-            {
-                factory.Set(appAttr.name, *appAttr.value);
-            }
-
-            auto app = StaticCast<Application, Object>(factory.Create());
-            m_remoteNodes.Get(remoteId)->AddApplication(app);
-        }
-
-        remoteId++;
-    }
+    // Applications are now installed in ConfigureAllApplications
 }
 
 void

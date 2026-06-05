@@ -32,6 +32,15 @@ namespace ns3
 class ModelConfiguration
 {
   public:
+    struct DeferredIp
+    {
+        std::string attrName;
+        std::string key;
+        uint32_t index;
+        uint32_t device;
+        std::optional<uint16_t> port;
+    };
+
     class Attribute
     {
       public:
@@ -111,10 +120,14 @@ class ModelConfiguration
      */
     void SetAttribute(const std::string name, Ptr<AttributeValue> value);
 
+    void SetDeferredIps(const std::vector<DeferredIp>& ips);
+    const std::vector<DeferredIp>& GetDeferredIps() const;
+
   private:
     std::string m_name;
     AttributeVector m_attributes;
     ModelConfigurationVector m_aggregates;
+    std::vector<DeferredIp> m_deferredIps;
 };
 
 std::ostream& operator<<(std::ostream& os, const ModelConfiguration& mc);

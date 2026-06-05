@@ -78,10 +78,22 @@ ModelConfiguration::GetAttributes() const
     return m_attributes;
 }
 
-std::vector<ModelConfiguration>
+ModelConfiguration::ModelConfigurationVector
 ModelConfiguration::GetAggregates() const
 {
     return m_aggregates;
+}
+
+void
+ModelConfiguration::SetDeferredIps(const std::vector<DeferredIp>& ips)
+{
+    m_deferredIps = ips;
+}
+
+const std::vector<ModelConfiguration::DeferredIp>&
+ModelConfiguration::GetDeferredIps() const
+{
+    return m_deferredIps;
 }
 
 void

@@ -1,4 +1,7 @@
 #include "scenario.h"
+#include "ns3/nstime.h"
+#include "ns3/pointer.h"
+#include <ns3/address-utils.h>
 
 namespace ns3
 {
@@ -73,7 +76,8 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
 {
     NS_LOG_FUNCTION(entityKey);
 
-    const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration(entityKey); // Modificare
+    const auto entityConfs = CONFIGURATOR->GetEntitiesConfiguration(entityKey);
+
     size_t entityId = 0;
 
     for (auto& entityConf : entityConfs)
@@ -218,8 +222,6 @@ Scenario::ConfigureEntities(const std::string& entityKey, NodeContainer& nodes)
             ++deviceId;
         }
 
-        ConfigureEntityApplications(entityKey, entityConf, entityId);
-
         if (entityKey == "drones")
         {
             DroneEnergyModelHelper energyModel;
@@ -294,50 +296,7 @@ Scenario::ConfigureEntityWifiStack(const std::string entityKey,
     return devContainer;
 }
 
-void
-Scenario::ConfigureEntityApplications(const std::string& entityKey,
-                                      const Ptr<EntityConfiguration>& conf,
-                                      const uint32_t& entityId)
-{
-    NS_LOG_FUNCTION(entityKey << conf << entityId);
 
-    for (const auto& appConf : conf->GetApplications())
-    {
-        ObjectFactory f{appConf.GetName()};
-
-        for (auto attr : appConf.GetAttributes())
-        {
-            f.Set(attr.name, *attr.value);
-        }
-
-        auto app = StaticCast<Application, Object>(f.Create());
-
-        if (entityKey == "drones")
-        {
-            m_drones.Get(entityId)->AddApplication(app);
-        }
-        else if (entityKey == "ZSPs")
-        {
-            m_zsps.Get(entityId)->AddApplication(app);
-        }
-        else if (entityKey == "nodes")
-        {
-            m_plainNodes.Get(entityId)->AddApplication(app);
-        }
-        else if (entityKey == "leo-sats")
-        {
-            m_leoSats.Get(entityId)->AddApplication(app);
-        }
-        else if (entityKey == "vehicles")
-        {
-            m_vehicles.Get(entityId)->AddApplication(app);
-        }
-        else
-        {
-            NS_FATAL_ERROR("Unsupported Entity Type " << entityKey);
-        }
-    }
-}
 
 void
 Scenario::ConfigureEntityMechanics(const std::string& entityKey,
@@ -437,6 +396,105 @@ Scenario::ConfigureRegionsOfInterest()
     for (const auto& region : regions)
     {
         reg = irc->Create(region);
+    }
+}
+
+void
+Scenario::ConfigureAllApplications()
+{
+    NS_LOG_FUNCTION(this);
+    
+    std::vector<std::string> keys = {"drones", "ZSPs", "vehicles", "nodes", "leo-sats"};
+    for (const auto& entityKey : keys)
+    {
+        uint32_t entityId = 0;
+        const auto entities = CONFIGURATOR->GetEntitiesConfiguration(entityKey);
+        
+        for (const auto& conf : entities)
+        {
+            Ptr<Node> targetNode;
+            if (entityKey == "drones") targetNode = m_drones.Get(entityId);
+            else if (entityKey == "ZSPs") targetNode = m_zsps.Get(entityId);
+            else if (entityKey == "remotes") targetNode = m_remoteNodes.Get(entityId);
+            else if (entityKey == "vehicles") targetNode = m_vehicles.Get(entityId);
+            else if (entityKey == "nodes") targetNode = m_plainNodes.Get(entityId);
+            else if (entityKey == "leo-sats") targetNode = m_leoSats.Get(entityId);
+
+            if (targetNode)
+            {
+                InstallApplications(conf->GetApplications(), targetNode);
+            }
+            entityId++;
+        }
+    }
+
+    uint32_t remoteId = 0;
+    const auto remotes = CONFIGURATOR->GetRemotesConfiguration();
+    for (const auto& conf : remotes)
+    {
+        Ptr<Node> targetNode = m_remoteNodes.Get(remoteId);
+        if (targetNode)
+        {
+            InstallApplications(conf->GetApplications(), targetNode);
+        }
+        remoteId++;
+    }
+}
+
+void
+Scenario::InstallApplications(const std::vector<ModelConfiguration>& apps, const Ptr<Node>& targetNode)
+{
+    for (const auto& appConf : apps)
+    {
+        ObjectFactory factory;
+        factory.SetTypeId(appConf.GetName());
+
+        for (const auto& attr : appConf.GetAttributes())
+        {
+            factory.Set(attr.name, *attr.value);
+        }
+
+        Ptr<Application> application = factory.Create<Application>();
+
+        for (const auto& defIp : appConf.GetDeferredIps())
+        {
+            // Resolve the actual IP address
+            auto targetNetworkNode = GetNodeByKey(defIp.key, defIp.index);
+            NS_ABORT_MSG_IF(!targetNetworkNode, "Target node not found for key: " << defIp.key << " index: " << defIp.index);
+
+            auto targetIpv4 = targetNetworkNode->GetObject<Ipv4>();
+            NS_ABORT_MSG_IF(!targetIpv4, "Target node for IP resolution does not have an Ipv4 object.");
+
+            uint32_t targetInterfaceIndex = 0;
+            uint32_t deviceCount = 0;
+
+            for (uint32_t i = 0; i < targetIpv4->GetNInterfaces(); ++i)
+            {
+                if (targetIpv4->GetNetDevice(i)->GetInstanceTypeId().GetName() == "ns3::LoopbackNetDevice")
+                {
+                    continue;
+                }
+
+                if (deviceCount == defIp.device)
+                {
+                    targetInterfaceIndex = i;
+                    break;
+                }
+                deviceCount++;
+            }
+
+            NS_ABORT_MSG_IF(targetInterfaceIndex == 0 && defIp.device > 0,
+                            "Target device index " << defIp.device << " out of bounds.");
+
+            auto targetAddress = targetIpv4->GetAddress(targetInterfaceIndex, 0).GetLocal();
+            auto targetPort = defIp.port.value_or(0);
+
+            AddressValue resolvedAddressValue(
+                addressUtils::ConvertToSocketAddress(targetAddress, targetPort));
+            application->SetAttribute(defIp.attrName, resolvedAddressValue);
+        }
+
+        targetNode->AddApplication(application);
     }
 }
 

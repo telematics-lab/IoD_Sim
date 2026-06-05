@@ -1491,6 +1491,73 @@ Generates satellites distributed uniformly across a given number of orbital plan
 
 ---
 
+## Dynamic IP Resolution (`@ip`)
+
+When configuring applications (like `ns3::UdpClient` or `ns3::OnOffApplication`), you often need to specify the destination IP address (e.g. for the `Remote` attribute). Since IP addresses in IoD-Sim are dynamically assigned to nodes during the setup phase, you may not know the exact IP address of a destination node beforehand.
+
+To solve this, IoD-Sim introduces the `@ip` dynamic resolution. Instead of hardcoding an IP string (e.g., `"10.0.0.1"`), you can pass an `@ip` object. The simulation engine will automatically resolve the IP address of the target device when initializing the configuration.
+
+### Structure of an `@ip` object
+An `@ip` block must contain a `key` representing the target group, and optionally an `index` and `device`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `key`     | string | - | The target group container (e.g., `"vehicles"`, `"leo-sats"`, `"nodes"`). |
+| `index`   | uint32_t | `0` | The index of the node within the specified container group. |
+| `device`  | uint32_t | `0` | The index of the specific network device (NetDevice) on the node to query the IP address from. |
+| `port`    | uint32_t | - | Optional port number to combine with the IP address for `AddressValue` attributes. |
+
+### Usage Example inside an Array (e.g. `AddressValue` for `Remote`)
+For attributes like `Remote` that require an array combining the IP address and a Port (e.g. `["10.0.0.1", 1234]`), you can replace the string element with the `@ip` object:
+
+```json
+"applications": [
+  {
+    "name": "ns3::UdpClient",
+    "attributes": [
+      {
+        "name": "Remote",
+        "value": [
+          {
+            "@ip": {
+              "key": "vehicles",
+              "index": 1,
+              "device": 0
+            }
+          },
+          1234
+        ]
+      }
+    ]
+  }
+]
+```
+
+or even simpler direcltly using the object without the array if the attribute accepts an `AddressValue` directly:
+
+```json
+"applications": [
+  {
+    "name": "ns3::UdpClient",
+    "attributes": [
+      {
+        "name": "Remote",
+        "value": {
+          "@ip": {
+            "key": "vehicles",
+            "index": 1,
+            "device": 0,
+            "port": 1234
+          }
+        }
+      }
+    ]
+  }
+]
+```
+
+---
+
 ## Configuration Examples
 
 ### Example 1: Short simulation with 2 satellites and 1 car
