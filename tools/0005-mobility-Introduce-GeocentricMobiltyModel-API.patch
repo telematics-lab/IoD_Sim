@@ -1,4 +1,4 @@
-From e9a3b77504093f08835ea0834268165b424f3f13 Mon Sep 17 00:00:00 2001
+From 0f8b352dd72c7f2172853c73ec3b875236c1cd4b Mon Sep 17 00:00:00 2001
 From: Giovanni Grieco <giovanni@grieco.dev>
 Date: Thu, 30 May 2024 12:22:02 +0200
 Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
@@ -19,25 +19,25 @@ Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
  create mode 100644 src/mobility/model/geocentric-mobility-model.h
 
 diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
-index 3a5eb215d..5d99bfe5b 100644
+index 35d1a7f8b..648d786b8 100644
 --- a/src/mobility/CMakeLists.txt
 +++ b/src/mobility/CMakeLists.txt
-@@ -11,6 +11,7 @@ build_lib(
-     model/constant-velocity-mobility-model.cc
+@@ -13,6 +13,7 @@ build_lib(
      model/gauss-markov-mobility-model.cc
      model/geocentric-constant-position-mobility-model.cc
+     model/geocentric-ecef-mobility-model.cc
 +    model/geocentric-mobility-model.cc
      model/geographic-positions.cc
      model/hierarchical-mobility-model.cc
-     model/mobility-model.cc
-@@ -33,6 +34,7 @@ build_lib(
-     model/constant-velocity-mobility-model.h
+     model/leo-circular-orbit-mobility-model.cc
+@@ -40,6 +41,7 @@ build_lib(
      model/gauss-markov-mobility-model.h
      model/geocentric-constant-position-mobility-model.h
+     model/geocentric-ecef-mobility-model.h
 +    model/geocentric-mobility-model.h
      model/geographic-positions.h
      model/hierarchical-mobility-model.h
-     model/mobility-model.h
+     model/leo-circular-orbit-mobility-model.h
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
 index 8caa63d3e..08af770e8 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
@@ -315,7 +315,7 @@ index 8caa63d3e..08af770e8 100644
  
  } // namespace ns3
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.h b/src/mobility/model/geocentric-constant-position-mobility-model.h
-index d100b803d..bfe830811 100644
+index bfcd3a247..828d4052e 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.h
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.h
 @@ -4,11 +4,12 @@
@@ -332,8 +332,8 @@ index d100b803d..bfe830811 100644
  #include "mobility-model.h"
  
  /**
-@@ -23,7 +24,7 @@ namespace ns3
- /**
+@@ -25,7 +26,7 @@ namespace ns3
+  * @ingroup leo
   * @brief Mobility model using geocentric euclidean coordinates, as defined in 38.811 chapter 6.3
   */
 -class GeocentricConstantPositionMobilityModel : public MobilityModel
@@ -341,7 +341,7 @@ index d100b803d..bfe830811 100644
  {
    public:
      /**
-@@ -37,119 +38,26 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
+@@ -39,119 +40,26 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      GeocentricConstantPositionMobilityModel() = default;
      ~GeocentricConstantPositionMobilityModel() override = default;
  
@@ -811,10 +811,10 @@ index 000000000..4e9bd7b64
 +#endif /* GEOCENTRIC_MOBILITY_MODEL_H */
 \ No newline at end of file
 diff --git a/src/mobility/model/geographic-positions.h b/src/mobility/model/geographic-positions.h
-index 2d55581ab..94b56f8f3 100644
+index a5c5aade5..7b0dc0f3a 100644
 --- a/src/mobility/model/geographic-positions.h
 +++ b/src/mobility/model/geographic-positions.h
-@@ -72,6 +72,13 @@ class GeographicPositions
+@@ -76,6 +76,13 @@ class GeographicPositions
          WGS84
      };
  
@@ -1116,7 +1116,7 @@ index eedc421d1..820a5b811 100644
      // End changes with respect to three-gpp-channel-example,
  
 diff --git a/src/spectrum/model/three-gpp-channel-model.cc b/src/spectrum/model/three-gpp-channel-model.cc
-index 83622cd70..9d58d24a2 100644
+index a265e049a..4306dec17 100644
 --- a/src/spectrum/model/three-gpp-channel-model.cc
 +++ b/src/spectrum/model/three-gpp-channel-model.cc
 @@ -12,7 +12,8 @@

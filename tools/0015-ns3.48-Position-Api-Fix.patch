@@ -1,0 +1,107 @@
+From c271fd96f1b3b5eb233dff3ee32c130b7976b1b8 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Sat, 13 Jun 2026 19:35:42 +0200
+Subject: [PATCH] FIX ns3.48, adaption to the IoD_Sim Position APIs
+
+---
+ src/mobility/examples/leo-satellite-example.cc              | 6 +++---
+ .../model/geocentric-constant-position-mobility-model.h     | 4 +++-
+ src/mobility/model/geocentric-ecef-mobility-model.cc        | 4 ++--
+ src/mobility/model/geocentric-ecef-mobility-model.h         | 2 ++
+ src/mobility/model/leo-circular-orbit-mobility-model.h      | 5 ++++-
+ 5 files changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/src/mobility/examples/leo-satellite-example.cc b/src/mobility/examples/leo-satellite-example.cc
+index 5f7d91681..5365772c0 100644
+--- a/src/mobility/examples/leo-satellite-example.cc
++++ b/src/mobility/examples/leo-satellite-example.cc
+@@ -470,10 +470,10 @@ main(int argc, char* argv[])
+     groundStation.node = CreateObject<Node>();
+     Ptr<GeocentricEcefMobilityModel> groundNodeMobility =
+         CreateObject<GeocentricEcefMobilityModel>();
+-    groundNodeMobility->SetGeographicPosition(gsPos);
++    groundNodeMobility->SetPosition(gsPos, PositionType::GEOGRAPHIC);
+ 
+-    groundStation.posGEO = groundNodeMobility->GetGeographicPosition();
+-    groundStation.posECEF = groundNodeMobility->GetGeocentricPosition();
++    groundStation.posGEO = groundNodeMobility->GetPosition(PositionType::GEOGRAPHIC);
++    groundStation.posECEF = groundNodeMobility->GetPosition(PositionType::GEOCENTRIC);
+     NS_LOG_DEBUG(
+         "Ground Node Geocentric Position (ECEF x[m]/y[m]/z[m]): " << groundStation.posECEF);
+     NS_LOG_DEBUG(
+diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.h b/src/mobility/model/geocentric-constant-position-mobility-model.h
+index 828d4052e..3ed2cdcca 100644
+--- a/src/mobility/model/geocentric-constant-position-mobility-model.h
++++ b/src/mobility/model/geocentric-constant-position-mobility-model.h
+@@ -47,7 +47,7 @@ class GeocentricConstantPositionMobilityModel : public GeocentricMobilityModel
+     Ptr<MobilityModel> Copy() const override;
+ 
+ 
+-  private:
++  protected:
+     /** @copydoc GetPosition() */
+     Vector DoGetPosition(PositionType type) const override;
+     /** @copydoc SetPosition() */
+@@ -55,6 +55,8 @@ class GeocentricConstantPositionMobilityModel : public GeocentricMobilityModel
+     /** @copydoc GetVelocity() */
+     Vector DoGetVelocity() const override;
+ 
++  private:
++
+     /**
+      * the constant Geographic position,, in order: latitude (degree), longitude (degree), altitude
+      * (meter).
+diff --git a/src/mobility/model/geocentric-ecef-mobility-model.cc b/src/mobility/model/geocentric-ecef-mobility-model.cc
+index aee8df32a..23d77d178 100644
+--- a/src/mobility/model/geocentric-ecef-mobility-model.cc
++++ b/src/mobility/model/geocentric-ecef-mobility-model.cc
+@@ -33,8 +33,8 @@ GeocentricEcefMobilityModel::DoGetPosition() const
+     NS_LOG_FUNCTION(this);
+ 
+     // Return ECEF coordinates instead of ENU
+-    // Use the public GetGeocentricPosition() method which returns ECEF
+-    return GetGeocentricPosition();
++    // Use the public GetPosition() method with GEOCENTRIC type which returns ECEF
++    return GetPosition(PositionType::GEOCENTRIC);
+ }
+ 
+ } // namespace ns3
+diff --git a/src/mobility/model/geocentric-ecef-mobility-model.h b/src/mobility/model/geocentric-ecef-mobility-model.h
+index 15024478c..0957ad006 100644
+--- a/src/mobility/model/geocentric-ecef-mobility-model.h
++++ b/src/mobility/model/geocentric-ecef-mobility-model.h
+@@ -60,6 +60,8 @@ class GeocentricEcefMobilityModel : public GeocentricConstantPositionMobilityMod
+     ~GeocentricEcefMobilityModel() override = default;
+ 
+   private:
++    using GeocentricConstantPositionMobilityModel::DoGetPosition;
++
+     /**
+      * @brief Override to return ECEF coordinates instead of ENU
+      * @return the position in ECEF (Earth-Centered Earth-Fixed) coordinates
+diff --git a/src/mobility/model/leo-circular-orbit-mobility-model.h b/src/mobility/model/leo-circular-orbit-mobility-model.h
+index 35f0e6b0e..0a84dbbe9 100644
+--- a/src/mobility/model/leo-circular-orbit-mobility-model.h
++++ b/src/mobility/model/leo-circular-orbit-mobility-model.h
+@@ -113,7 +113,7 @@ class LeoCircularOrbitMobilityModel : public GeocentricConstantPositionMobilityM
+      * @brief Returns the Geocentric Position of the Node in ECEF (cartesian)
+      * @return ECEF position in meters
+      */
+-    Vector DoGetGeocentricPosition() const override;
++    Vector DoGetGeocentricPosition() const;
+ 
+     // Inherited from MobilityModel
+     Ptr<MobilityModel> Copy() const override
+@@ -122,6 +122,9 @@ class LeoCircularOrbitMobilityModel : public GeocentricConstantPositionMobilityM
+     }
+ 
+   private:
++    using GeocentricConstantPositionMobilityModel::DoGetPosition;
++    using GeocentricConstantPositionMobilityModel::DoSetPosition;
++
+     void DoInitialize() override;
+     void DoDispose() override;
+ 
+-- 
+2.50.1 (Apple Git-155)
+

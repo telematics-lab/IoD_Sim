@@ -463,6 +463,13 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     }
                 }
 
+                RxInfo rxInfo;
+                rxInfo.txPsd = txParams->psd;
+                rxInfo.txAntennaGain = txAntennaGain;
+                rxInfo.params = rxParams;
+                rxInfo.receiver = *rxPhyIterator;
+                rxInfo.availableConvertedPsds = convertedPsds;
+
                 if (rxNetDevice)
                 {
                     // the receiver has a NetDevice, so we expect that it is attached to a Node
@@ -471,11 +478,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                                                    delay,
                                                    &IrsAssistedSpectrumChannel::StartRx,
                                                    this,
-                                                   txParams->psd,
-                                                   txAntennaGain,
-                                                   rxParams,
-                                                   *rxPhyIterator,
-                                                   convertedPsds);
+                                                   rxInfo);
                 }
                 else
                 {
@@ -484,11 +487,7 @@ IrsAssistedSpectrumChannel::StartTx(Ptr<SpectrumSignalParameters> txParams)
                     Simulator::Schedule(delay,
                                         &IrsAssistedSpectrumChannel::StartRx,
                                         this,
-                                        txParams->psd,
-                                        txAntennaGain,
-                                        rxParams,
-                                        *rxPhyIterator,
-                                        convertedPsds);
+                                        rxInfo);
                 }
             }
             ++u;

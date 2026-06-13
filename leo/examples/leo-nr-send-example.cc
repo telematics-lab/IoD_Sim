@@ -43,7 +43,7 @@ static std::map<uint32_t, uint32_t> gnbToSatelliteMap; // gNB net device index -
 
 // Map to track IP addresses to car node IDs
 static std::map<Ipv4Address, uint32_t> ipToCarNodeMap; // IP address (as uint32_t) -> car node ID
-static std::map<uint32_t, pair<uint32_t, bool>>
+static std::map<uint32_t, std::pair<uint32_t, bool>>
     packetIdCarNodeMap; // car packet ID -> car node ID, isUplink
 
 // Maps to track transfer times for datarate calculation
@@ -134,7 +134,7 @@ ConnectionLogAndTrace(std::string context, Ptr<const Packet> pkt, std::string pr
         return;
     }
 
-    packetIdCarNodeMap[packetId] = make_pair(carNodeId, isUplink);
+    packetIdCarNodeMap[packetId] = std::make_pair(carNodeId, isUplink);
     std::string transferId = (isUplink ? "ul_" : "dl_") + std::to_string(carNodeId);
 
     if (isRx)
@@ -379,7 +379,7 @@ main(int argc, char* argv[])
     Config::SetDefault("ns3::ThreeGppChannelConditionModel::UpdatePeriod",
                        TimeValue(MilliSeconds(0))); // do not update the channel condition
 
-    LeoOrbitNodeHelper orbit;
+    ContribLeoOrbitNodeHelper orbit;
 
     orbit.SetPrecision(mobilityPrecision); // Set precision for position updates
     // Create and configure satellites using LEO orbit helper
@@ -669,8 +669,7 @@ main(int argc, char* argv[])
 
     for (uint32_t i = 0; i < gnbNetDev.GetN(); ++i)
     {
-        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(gnbNetDev.Get(i));
-             ++bwpId)
+        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(gnbNetDev.Get(i)); ++bwpId)
         {
             // Set gNB transmission power based on enableGnb parameter
             if (enableGnb)
@@ -687,8 +686,7 @@ main(int argc, char* argv[])
 
     for (uint32_t i = 0; i < ueNetDev.GetN(); ++i)
     {
-        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(ueNetDev.Get(i));
-             ++bwpId)
+        for (uint32_t bwpId = 0; bwpId < NrHelper::GetNumberBwp(ueNetDev.Get(i)); ++bwpId)
         {
             NrHelper::GetUePhy(ueNetDev.Get(i), bwpId)->SetTxPower(ueTxPower);
         }

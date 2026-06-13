@@ -41,14 +41,14 @@ namespace ns3
  *
  * Adds orbits with from a file for each node.
  */
-class LeoOrbitNodeHelper
+class ContribLeoOrbitNodeHelper
 {
   public:
     /// constructor
-    LeoOrbitNodeHelper();
+    ContribLeoOrbitNodeHelper();
 
     /// destructor
-    virtual ~LeoOrbitNodeHelper();
+    virtual ~ContribLeoOrbitNodeHelper();
 
     /**
      *

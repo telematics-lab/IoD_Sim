@@ -49,7 +49,7 @@ main(int argc, char* argv[])
     cmd.AddValue("carAzimuth", "Initial azimuth of the car in degrees", carAzimuth);
     cmd.Parse(argc, argv);
 
-    LeoOrbitNodeHelper orbit;
+    ContribLeoOrbitNodeHelper orbit;
     NodeContainer satellites = orbit.Install(LeoOrbit(400, 20, 1, 10));
 
     // Create ground nodes (cars)

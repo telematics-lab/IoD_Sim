@@ -54,7 +54,7 @@ main(int argc, char* argv[])
     cmd.AddValue("duration", "Duration of the simulation in seconds", duration);
     cmd.Parse(argc, argv);
 
-    LeoOrbitNodeHelper orbit;
+    ContribLeoOrbitNodeHelper orbit;
     NodeContainer satellites;
     if (!orbitFile.empty())
     {

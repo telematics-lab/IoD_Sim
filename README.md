@@ -92,9 +92,9 @@ cd ns3 && ./ns3 build
 
 After the build, binaries can be found in the `ns3/build` folder.
 
-In particular, to run a JSON scenarios the `ns3/build/ns3.47-scenario-debug` (`ns3/build/ns3.47-scenario-debug`) executable can be used in this way:
+In particular, to run a JSON scenarios the `ns3/build/ns3.48-scenario-debug` (`ns3/build/ns3.48-scenario-debug`) executable can be used in this way:
 ```bash
-./ns3/build/ns3.47-scenario-default --config=/path/to/scenario.json
+./ns3/build/ns3.48-scenario-default --config=/path/to/scenario.json
 # You can also use ./ns3 script using:
 ./ns3 run "scenario --config=/path/to/scenario.json"
 ```
@@ -143,7 +143,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | 5G LENA version | Build system  | Release date       |
 | :------------: | :-----------:| :-------------: | :-----------: |--------------------|
-| v4.2.0         | ns-3.47      | 5g-lena-v4.2.y  | cmake         |        TBA         |
+| v4.2.0         | ns-3.48      | 5g-lena-v4.2.y  | cmake         |        TBA         |
 | v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | January 9, 2026    |
 | v4.0.2         | ns-3.42      |      N/A        | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      |      N/A        | cmake         | June 5, 2024       |

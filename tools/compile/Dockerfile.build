@@ -73,4 +73,4 @@ RUN find build/ -type f -executable -exec strip --strip-unneeded {} +
 
 WORKDIR /IoD_Sim/ns3/build
 
-CMD mv ns3.47-scenario-default /bin_result/ && exit 0
+CMD mv ns3.48-scenario-default /bin_result/ && exit 0

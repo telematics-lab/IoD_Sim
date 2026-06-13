@@ -16,7 +16,7 @@
  * Author: Tim Schubert <ns-3-leo@timschubert.net>
  */
 
-#include "leo-orbit-node-helper.h"
+#include "contrib-leo-orbit-node-helper.h"
 
 #include "ns3/boolean.h"
 #include "ns3/config.h"
@@ -34,25 +34,25 @@ using namespace std;
 
 namespace ns3
 {
-NS_LOG_COMPONENT_DEFINE("LeoOrbitNodeHelper");
+NS_LOG_COMPONENT_DEFINE("ContribLeoOrbitNodeHelper");
 
-LeoOrbitNodeHelper::LeoOrbitNodeHelper()
+ContribLeoOrbitNodeHelper::ContribLeoOrbitNodeHelper()
 {
     m_nodeFactory.SetTypeId("ns3::Node");
 }
 
-LeoOrbitNodeHelper::~LeoOrbitNodeHelper()
+ContribLeoOrbitNodeHelper::~ContribLeoOrbitNodeHelper()
 {
 }
 
 void
-LeoOrbitNodeHelper::SetAttribute(string name, const AttributeValue& value)
+ContribLeoOrbitNodeHelper::SetAttribute(string name, const AttributeValue& value)
 {
     m_nodeFactory.Set(name, value);
 }
 
 NodeContainer
-LeoOrbitNodeHelper::Install(const LeoOrbit& orbit)
+ContribLeoOrbitNodeHelper::Install(const LeoOrbit& orbit)
 {
     NS_LOG_FUNCTION(this << orbit);
 
@@ -111,11 +111,11 @@ LeoOrbitNodeHelper::Install(const LeoOrbit& orbit)
 }
 
 NodeContainer
-LeoOrbitNodeHelper::Install(const double& altitude,
-                            const double& inclination,
-                            const double& longitude,
-                            const double& offset,
-                            const bool& retrograde)
+ContribLeoOrbitNodeHelper::Install(const double& altitude,
+                                   const double& inclination,
+                                   const double& longitude,
+                                   const double& offset,
+                                   const bool& retrograde)
 {
     NS_LOG_FUNCTION(this << altitude << inclination << longitude << offset);
 
@@ -144,19 +144,19 @@ LeoOrbitNodeHelper::Install(const double& altitude,
 }
 
 Time
-LeoOrbitNodeHelper::GetPrecision() const
+ContribLeoOrbitNodeHelper::GetPrecision() const
 {
     return m_precision;
 }
 
 void
-LeoOrbitNodeHelper::SetPrecision(Time precision)
+ContribLeoOrbitNodeHelper::SetPrecision(Time precision)
 {
     m_precision = precision;
 }
 
 NodeContainer
-LeoOrbitNodeHelper::Install(const std::string& orbitFile)
+ContribLeoOrbitNodeHelper::Install(const std::string& orbitFile)
 {
     NS_LOG_FUNCTION(this << orbitFile);
 
@@ -177,7 +177,7 @@ LeoOrbitNodeHelper::Install(const std::string& orbitFile)
 }
 
 NodeContainer
-LeoOrbitNodeHelper::Install(const vector<LeoOrbit>& orbits)
+ContribLeoOrbitNodeHelper::Install(const vector<LeoOrbit>& orbits)
 {
     NS_LOG_FUNCTION(this << orbits);
 

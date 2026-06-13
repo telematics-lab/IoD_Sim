@@ -58,12 +58,11 @@ set(Tests
   leo-nr-sinr-dist-attach.json
   leo-car-move-tracing.json
   leo-constellation-uniform-orbits.json
-  leo-constellation-file.json
   leo-nr-udp.json
   taxi-all-example-trace.json
 )
 
-set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.47-scenario-debug)
+set(exec ${CMAKE_SOURCE_DIR}/ns3/build/ns3.48-scenario-debug)
 
 foreach(test ${Tests})
   get_filename_component (TName ${test} NAME_WE)

@@ -41,7 +41,7 @@ static std::map<uint32_t, uint32_t> gnbToSatelliteMap; // gNB net device index -
 
 // Map to track IP addresses to vehicle node IDs
 static std::map<Ipv4Address, uint32_t> ipToVehicleNodeMap; // IP address -> vehicle node ID
-static std::map<uint32_t, pair<uint32_t, bool>>
+static std::map<uint32_t, std::pair<uint32_t, bool>>
     packetIdVehicleNodeMap; // packet ID -> vehicle node ID, isUplink
 
 // Maps to track transfer times for datarate calculation
@@ -131,7 +131,7 @@ ConnectionLogAndTrace(std::string context, Ptr<const Packet> pkt, std::string pr
         return;
     }
 
-    packetIdVehicleNodeMap[packetId] = make_pair(vehicleNodeId, isUplink);
+    packetIdVehicleNodeMap[packetId] = std::make_pair(vehicleNodeId, isUplink);
     std::string transferId = (isUplink ? "ul_" : "dl_") + std::to_string(vehicleNodeId);
 
     if (isRx)
@@ -379,7 +379,7 @@ main(int argc, char* argv[])
     Config::SetDefault("ns3::ThreeGppChannelConditionModel::UpdatePeriod",
                        TimeValue(MilliSeconds(0))); // do not update the channel condition
 
-    LeoOrbitNodeHelper orbit;
+    ContribLeoOrbitNodeHelper orbit;
     orbit.SetPrecision(mobilityPrecision); // Set precision for position updates
 
     // Create and configure satellites using LEO orbit helper
