@@ -406,7 +406,7 @@ GeoLeoOrbitMobility::DoGetGeocentricVelocity() const
     Vector3D pos = DoGetPosition(PositionType::GEOCENTRIC);
     pos = Vector3D(pos.x / pos.GetLength(), pos.y / pos.GetLength(), pos.z / pos.GetLength());
     Vector3D heading = CrossProduct(PlaneNorm(), pos);
-    return Product(GetSpeed(), heading);
+    return GetSpeed() * heading;
 }
 
 Vector
@@ -463,8 +463,8 @@ GeoLeoOrbitMobility::RotatePlane(double a, const Vector3D& x) const
 {
     Vector3D n = PlaneNorm();
 
-    return Product(DotProduct(n, x), n) + Product(cos(a), CrossProduct(CrossProduct(n, x), n)) +
-           Product(sin(a), CrossProduct(n, x));
+    return (DotProduct(n, x) * n) + (cos(a) * CrossProduct(CrossProduct(n, x), n)) +
+           (sin(a) * CrossProduct(n, x));
 }
 
 double
@@ -478,9 +478,8 @@ GeoLeoOrbitMobility::CalcPosition(Time t) const
 {
     double lat = CalcLatitude();
     // account for orbit latitude and earth rotation offset
-    Vector3D x = Product(
-        m_orbitHeight * 1000,
-        Vector3D(cos(m_inclination) * cos(lat), cos(m_inclination) * sin(lat), sin(m_inclination)));
+    Vector3D x = (m_orbitHeight * 1000) *
+        Vector3D(cos(m_inclination) * cos(lat), cos(m_inclination) * sin(lat), sin(m_inclination));
 
     return RotatePlane(GetProgress(t), x);
 }

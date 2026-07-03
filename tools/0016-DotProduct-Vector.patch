@@ -1,0 +1,85 @@
+From 5ff37abb37415c37bb1b1f6a813d766261ebb859 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Thu, 2 Jul 2026 13:42:37 +0200
+Subject: [PATCH] DotProduct added in vector function
+
+---
+ src/core/model/vector.cc | 12 ++++++++++++
+ src/core/model/vector.h  | 20 ++++++++++++++++++++
+ 2 files changed, 32 insertions(+)
+
+diff --git a/src/core/model/vector.cc b/src/core/model/vector.cc
+index 46446ac0d..a75d03674 100644
+--- a/src/core/model/vector.cc
++++ b/src/core/model/vector.cc
+@@ -212,6 +212,12 @@ CrossProduct(const Vector3D& a, const Vector3D& b)
+     return Vector3D(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+ }
+ 
++double
++DotProduct(const Vector3D& a, const Vector3D& b)
++{
++    return a.x * b.x + a.y * b.y + a.z * b.z;
++}
++
+ std::ostream&
+ operator<<(std::ostream& os, const Vector2D& vector)
+ {
+@@ -303,4 +309,10 @@ CrossProduct(const Vector2D& a, const Vector2D& b)
+     return (a.x * b.y) - (a.y * b.x);
+ }
+ 
++double
++DotProduct(const Vector2D& a, const Vector2D& b)
++{
++    return a.x * b.x + a.y * b.y;
++}
++
+ } // namespace ns3
+diff --git a/src/core/model/vector.h b/src/core/model/vector.h
+index 576b2d10e..a53d047ae 100644
+--- a/src/core/model/vector.h
++++ b/src/core/model/vector.h
+@@ -193,6 +193,14 @@ class Vector3D
+      * @return The cross product of \pname{a} and \pname{b}
+      */
+     friend Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
++
++    /**
++     * Dot product
++     * @param [in] a lhs vector.
++     * @param [in] b rhs vector.
++     * @return The dot product of \pname{a} and \pname{b}
++     */
++    friend double DotProduct(const Vector3D& a, const Vector3D& b);
+ };
+ 
+ /**
+@@ -354,12 +362,24 @@ class Vector2D
+      * @return The cross product of \pname{a} and \pname{b} @$ a_x b_y - a_y b_x @$
+      */
+     friend double CrossProduct(const Vector2D& a, const Vector2D& b);
++
++    /**
++     * Dot product
++     * @param [in] a lhs vector.
++     * @param [in] b rhs vector.
++     * @return The dot product of \pname{a} and \pname{b}
++     */
++    friend double DotProduct(const Vector2D& a, const Vector2D& b);
+ };
+ 
+ double CalculateDistance(const Vector3D& a, const Vector3D& b);
+ double CalculateDistance(const Vector2D& a, const Vector2D& b);
+ double CalculateDistanceSquared(const Vector3D& a, const Vector3D& b);
+ double CalculateDistanceSquared(const Vector2D& a, const Vector2D& b);
++Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
++double CrossProduct(const Vector2D& a, const Vector2D& b);
++double DotProduct(const Vector3D& a, const Vector3D& b);
++double DotProduct(const Vector2D& a, const Vector2D& b);
+ std::ostream& operator<<(std::ostream& os, const Vector3D& vector);
+ std::ostream& operator<<(std::ostream& os, const Vector2D& vector);
+ std::istream& operator>>(std::istream& is, Vector3D& vector);
+-- 
+2.50.1 (Apple Git-155)
+

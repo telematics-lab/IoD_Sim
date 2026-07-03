@@ -80,27 +80,27 @@ class GeoConstantVelocityMobility : public GeocentricMobilityModel
     /**
      * Initial latitude in degrees
      */
-    double m_initialLatitude;
+    double m_initialLatitude = 0.0;
 
     /**
      * Initial longitude in degrees
      */
-    double m_initialLongitude;
+    double m_initialLongitude = 0.0;
 
     /**
      * The altitude of the node in meters above the Earth's surface.
      */
-    double m_altitude;
+    double m_altitude = 0.0;
 
     /**
      * The direction of the velocity vector
      */
-    double m_azimuth;
+    double m_azimuth = 0.0;
 
     /**
      * The velocity of the node in m/s
      */
-    double m_speed;
+    double m_speed = 0.0;
 
     /**
      * Current position

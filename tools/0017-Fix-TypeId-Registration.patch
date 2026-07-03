@@ -1,0 +1,25 @@
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Thu, 2 Jul 2026 00:00:00 +0000
+Subject: [PATCH] Fix TypeId registration for unreferenced classes
+
+Modern GCC drops static variables that are never referenced, which breaks
+NS_OBJECT_ENSURE_REGISTERED for classes that are never instantiated
+directly in the code. This adds __attribute__((used)) to force the
+compiler to keep the static registration variable.
+---
+ src/core/model/object-base.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/core/model/object-base.h b/src/core/model/object-base.h
+index abcdef..123456 100644
+--- a/src/core/model/object-base.h
++++ b/src/core/model/object-base.h
+@@ -93,7 +93,7 @@
+             tid.GetParent();                                                                       \
+             NS_WARNING_POP;                                                                        \
+         }                                                                                          \
+-    } Object##type##RegistrationVariable
++    } Object##type##RegistrationVariable __attribute__((used))
+
+ /**
+  * @ingroup object

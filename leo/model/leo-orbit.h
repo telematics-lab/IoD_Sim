@@ -34,29 +34,7 @@ namespace ns3
 // Type alias for 3D vectors
 typedef Vector Vector3D;
 
-/**
- * \brief Calculate cross product of two 3D vectors
- * \param l left vector
- * \param r right vector
- * \return cross product vector
- */
-Vector3D CrossProduct (const Vector3D &l, const Vector3D &r);
 
-/**
- * \brief Multiply a scalar with a 3D vector
- * \param l scalar value
- * \param r vector
- * \return scaled vector
- */
-Vector3D Product (const double &l, const Vector3D &r);
-
-/**
- * \brief Calculate dot product of two 3D vectors
- * \param l left vector
- * \param r right vector
- * \return dot product scalar value
- */
-double DotProduct (const Vector3D &l, const Vector3D &r);
 
 Vector CartesianToTopocentric (const Vector &v, const Vector &referencePoint, GeographicPositions::EarthSpheroidType sphereType = GeographicPositions::SPHERE);
 

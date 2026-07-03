@@ -1,0 +1,5 @@
+num_satellites: [0, 5, 10, 100]
+num_vehicles: [0, 5, 10, 100, 300]
+mobility_precisions: ["100ms", "50ms"]
+enable_nr: [true, false]
+durations: [0.3]

@@ -1,0 +1,75 @@
+From 47daa73b8d0d0972108b097dc9c578353cfb25c5 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Thu, 2 Jul 2026 21:23:45 +0200
+Subject: [PATCH] Fix TypeId LookupByName in tgax
+
+---
+ build-support/custom-modules/ns3-executables.cmake | 4 ++--
+ src/applications/model/tgax-virtual-desktop.cc     | 3 ++-
+ src/applications/model/tgax-voip-traffic.cc        | 3 ++-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/build-support/custom-modules/ns3-executables.cmake b/build-support/custom-modules/ns3-executables.cmake
+index 431069ea7..22be71658 100644
+--- a/build-support/custom-modules/ns3-executables.cmake
++++ b/build-support/custom-modules/ns3-executables.cmake
+@@ -123,12 +123,12 @@ function(build_exec)
+   if(${NS3_STATIC} AND (NOT BEXEC_STANDALONE))
+     target_link_libraries(
+       ${BEXEC_EXECNAME_PREFIX}${BEXEC_EXECNAME} ${libraries_to_always_link}
+-      ${LIB_AS_NEEDED_PRE_STATIC} ${lib-ns3-static}
++      $<LINK_LIBRARY:WHOLE_ARCHIVE,${lib-ns3-static}>
+     )
+   elseif(${NS3_MONOLIB} AND (NOT BEXEC_STANDALONE))
+     target_link_libraries(
+       ${BEXEC_EXECNAME_PREFIX}${BEXEC_EXECNAME} ${libraries_to_always_link}
+-      ${LIB_AS_NEEDED_PRE} ${lib-ns3-monolib} ${LIB_AS_NEEDED_POST}
++      $<LINK_LIBRARY:WHOLE_ARCHIVE,${lib-ns3-monolib}>
+     )
+   else()
+     target_link_libraries(
+diff --git a/src/applications/model/tgax-virtual-desktop.cc b/src/applications/model/tgax-virtual-desktop.cc
+index 1e79136b1..979e6a21a 100644
+--- a/src/applications/model/tgax-virtual-desktop.cc
++++ b/src/applications/model/tgax-virtual-desktop.cc
+@@ -25,6 +25,7 @@
+ #include "ns3/socket-factory.h"
+ #include "ns3/socket.h"
+ #include "ns3/string.h"
++#include "ns3/tcp-socket-factory.h"
+ 
+ #include <cmath>
+ 
+@@ -58,7 +59,7 @@ TgaxVirtualDesktop::GetTypeId()
+             .AddAttribute(
+                 "Protocol",
+                 "The type of protocol to use. This should be a subclass of ns3::SocketFactory",
+-                TypeIdValue(TypeId::LookupByName("ns3::TcpSocketFactory")),
++                TypeIdValue(TcpSocketFactory::GetTypeId()),
+                 MakeTypeIdAccessor(&TgaxVirtualDesktop::m_protocolTid),
+                 MakeTypeIdChecker())
+             .AddAttribute(
+diff --git a/src/applications/model/tgax-voip-traffic.cc b/src/applications/model/tgax-voip-traffic.cc
+index 90af41d36..4f2e64c89 100644
+--- a/src/applications/model/tgax-voip-traffic.cc
++++ b/src/applications/model/tgax-voip-traffic.cc
+@@ -15,6 +15,7 @@
+ #include "ns3/node.h"
+ #include "ns3/nstime.h"
+ #include "ns3/packet-socket-address.h"
++#include "ns3/packet-socket-factory.h"
+ #include "ns3/packet.h"
+ #include "ns3/random-variable-stream.h"
+ #include "ns3/simulator.h"
+@@ -41,7 +42,7 @@ TgaxVoipTraffic::GetTypeId()
+                 "Protocol",
+                 "The type of protocol to use. This should be a subclass of ns3::SocketFactory",
+                 TypeId::ATTR_GET | TypeId::ATTR_CONSTRUCT, // prevent setting after construction
+-                TypeIdValue(TypeId::LookupByName("ns3::PacketSocketFactory")),
++                TypeIdValue(PacketSocketFactory::GetTypeId()),
+                 MakeTypeIdAccessor(&TgaxVoipTraffic::m_protocolTid),
+                 MakeTypeIdChecker())
+             .AddAttribute(
+-- 
+2.50.1 (Apple Git-155)
+
