@@ -840,7 +840,7 @@ index 9eed6f22..1da5a0f5 100644
                                                   this->GetNumRows(),
                                                   this->GetNumCols());
 
-+#if EIGEN_WORLD_VERSION >= 3 && EIGEN_MAJOR_VERSION >= 4
++#if  EIGEN_MAJOR_VERSION >= 5
 +        auto svd = H.jacobiSvd<Eigen::ComputeFullV>();
 +#else
          auto svd = H.jacobiSvd(Eigen::ComputeFullV);

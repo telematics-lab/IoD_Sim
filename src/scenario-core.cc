@@ -118,28 +118,28 @@ Scenario::operator()()
     static std::vector<Ptr<NrRadioEnvironmentMapHelper>> nrRemHelpers;
     static std::vector<Ptr<NrRadioGeoEnvironmentMapHelper>> nrGeoRemHelpers;
     auto radioMaps = CONFIGURATOR->GetRadioMaps();
+    struct RadioMapGenConfig
+    {
+        std::string file;
+        std::string type;
+        bool is3D;
+    };
+
+    struct AggregationTask
+    {
+        std::vector<std::string> inputFiles;
+        std::string outputFile;
+        std::string type;
+        bool is3D;
+    };
+
+    std::vector<std::string> generatedFiles;
+    std::vector<RadioMapGenConfig> plotFiles;
+    std::vector<AggregationTask> aggregationTasks;
+
     if (CONFIGURATOR->GetGenerateRadioMaps() && !radioMaps.empty())
     {
-        struct RadioMapGenConfig
-        {
-            std::string file;
-            std::string type;
-            bool is3D;
-        };
-
-        struct AggregationTask
-        {
-            std::vector<std::string> inputFiles;
-            std::string outputFile;
-            std::string type;
-            bool is3D;
-        };
-
         NS_LOG_INFO("Generating Radio Maps...");
-
-        std::vector<std::string> generatedFiles;
-        std::vector<RadioMapGenConfig> plotFiles;
-        std::vector<AggregationTask> aggregationTasks;
 
         Ptr<Object> lastRemHelper = nullptr;
 
@@ -613,10 +613,37 @@ Scenario::operator()()
         {
             lastRemHelper->SetAttribute("StopWhenDone", BooleanValue(true));
         }
+    }
 
-        Simulator::Run();
-        Simulator::Destroy();
+    if (CONFIGURATOR->IsDryRun())
+    {
+        return;
+    }
 
+    std::stringstream progressLogFilePath;
+    progressLogFilePath << CONFIGURATOR->GetResultsPath() << "progress.log";
+    auto progressLogSink =
+        Create<OutputStreamWrapper>(progressLogFilePath.str(), std::ios::out);
+
+    ShowProgress progressLog{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS),
+                             (*progressLogSink->GetStream())};
+    ShowProgress progressStdout{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
+
+    Simulator::Run();
+
+    // Stop UDP statistics collection
+    m_appStatsHelper.Stop();
+
+    if (CONFIGURATOR->GetLogOnFile())
+    {
+        // Report Module needs the simulator context alive to introspect it
+        Report::Get()->Save();
+    }
+    
+    Simulator::Destroy();
+
+    if (CONFIGURATOR->GetGenerateRadioMaps() && !radioMaps.empty())
+    {
         // Perform aggregation logic right after Simulator ends
         for (const auto& task : aggregationTasks)
         {
@@ -739,35 +766,6 @@ Scenario::operator()()
             NS_LOG_INFO("Skipping GUI preview terminal script execution because ENABLE_CLI_COMMANDS is not defined.");
         }
 #endif
-    }
-
-    else
-    {
-        if (CONFIGURATOR->IsDryRun())
-        {
-            return;
-        }
-
-        std::stringstream progressLogFilePath;
-        progressLogFilePath << CONFIGURATOR->GetResultsPath() << "progress.log";
-        auto progressLogSink =
-            Create<OutputStreamWrapper>(progressLogFilePath.str(), std::ios::out);
-
-        ShowProgress progressLog{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS),
-                                 (*progressLogSink->GetStream())};
-        ShowProgress progressStdout{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
-
-        Simulator::Run();
-
-        // Stop UDP statistics collection
-        m_appStatsHelper.Stop();
-
-        if (CONFIGURATOR->GetLogOnFile())
-        {
-            // Report Module needs the simulator context alive to introspect it
-            Report::Get()->Save();
-        }
-        Simulator::Destroy();
     }
 }
 

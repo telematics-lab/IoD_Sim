@@ -1171,7 +1171,7 @@ Each filter is composed of a `ccId` and `bwpId`. The `ccId` is the ID of the com
   - `earth-centered`: Points towards the center of the Earth (0,0,0).
   - `point`: Points towards a specific fixed coordinate.
   - `node`: Points towards a specific node in the simulation at each instant.
-- `key`: (Only for `mode="node"`) The type of node target. Options: `leo-sats`, `nodes`, `vehicles`, `drones`, `zsps`, `remote-nodes`, `backbone`.
+- `key`: (Only for `mode="node"`) The type of node target. Options: `leo-sats`, `nodes`, `vehicles`, `drones`, `zsps`, `remotes`, `backbone`.
 - `index`: (Only for `mode="node"`) The index of the node in the container (0, 1, ...).
 - `coordinates`: Coordinate system for `point` mode (default: `geocentric`, optional `geographic`).
 - `position`: Coordinates [x, y, z] for `point` mode.

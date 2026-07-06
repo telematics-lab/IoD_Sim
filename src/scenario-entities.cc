@@ -51,7 +51,7 @@ Scenario::GetNodeByKey(std::string key, uint32_t index)
             targetNode = m_zsps.Get(index);
         }
     }
-    else if (key == "remote-nodes")
+    else if (key == "remotes")
     {
         if (index < m_remoteNodes.GetN())
         {
