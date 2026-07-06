@@ -1,6 +1,6 @@
-From d9462f93559627f690886b259ee7155f367aed9b Mon Sep 17 00:00:00 2001
+From a56ec81668dedf2cd75ff46d15612c31d7ca7c0f Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
-Date: Mon, 6 Jul 2026 15:57:23 +0200
+Date: Mon, 6 Jul 2026 17:10:45 +0200
 Subject: [PATCH 5/5] Misc fixes (IRS, TypeId, Assert skips)
 
 ---

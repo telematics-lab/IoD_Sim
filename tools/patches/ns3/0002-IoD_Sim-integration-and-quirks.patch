@@ -1,6 +1,6 @@
-From 0026e1db6a24f9e8045e4e4a9cc7178fb8abc076 Mon Sep 17 00:00:00 2001
+From 29431585c0e964e77370a7027f34bd59f0b84df3 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
-Date: Mon, 6 Jul 2026 15:57:23 +0200
+Date: Mon, 6 Jul 2026 17:10:45 +0200
 Subject: [PATCH 2/5] IoD_Sim integration and quirks
 
 ---

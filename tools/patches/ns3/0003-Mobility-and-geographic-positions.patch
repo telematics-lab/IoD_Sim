@@ -1,12 +1,12 @@
-From 8671f9a1fd81bbb911cf3e675c4459f084904571 Mon Sep 17 00:00:00 2001
+From 24d1d66b0939461471e24c28e003e624ba996fdc Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
-Date: Mon, 6 Jul 2026 15:57:23 +0200
+Date: Mon, 6 Jul 2026 17:10:45 +0200
 Subject: [PATCH 3/5] Mobility and geographic positions
 
 ---
  src/core/model/vector.cc                      |  12 +
  src/core/model/vector.h                       |  20 ++
- src/mobility/CMakeLists.txt                   |   2 +
+ src/mobility/CMakeLists.txt                   |   3 +
  .../examples/leo-satellite-example.cc         |   6 +-
  src/mobility/helper/mobility-helper.cc        |   7 +-
  src/mobility/helper/mobility-helper.h         |   1 +
@@ -14,15 +14,17 @@ Subject: [PATCH 3/5] Mobility and geographic positions
  ...centric-constant-position-mobility-model.h | 112 +-------
  .../model/geocentric-ecef-mobility-model.cc   |   4 +-
  .../model/geocentric-ecef-mobility-model.h    |   2 +
- .../model/geocentric-mobility-model.cc        | 192 ++++++++++++++
+ .../model/geocentric-mobility-model.cc        | 193 ++++++++++++++
  .../model/geocentric-mobility-model.h         | 154 +++++++++++
  src/mobility/model/geographic-positions.cc    |  44 ++++
  src/mobility/model/geographic-positions.h     |  32 +++
  .../model/leo-circular-orbit-mobility-model.h |   5 +-
  src/mobility/model/mobility-model.h           |   1 +
- 16 files changed, 545 insertions(+), 290 deletions(-)
+ .../test/geocentric-elevation-angle-test.cc   | 156 ++++++++++++
+ 17 files changed, 703 insertions(+), 290 deletions(-)
  create mode 100644 src/mobility/model/geocentric-mobility-model.cc
  create mode 100644 src/mobility/model/geocentric-mobility-model.h
+ create mode 100644 src/mobility/test/geocentric-elevation-angle-test.cc
 
 diff --git a/src/core/model/vector.cc b/src/core/model/vector.cc
 index 46446ac0d..a75d03674 100644
@@ -97,7 +99,7 @@ index 576b2d10e..a53d047ae 100644
  std::ostream& operator<<(std::ostream& os, const Vector2D& vector);
  std::istream& operator>>(std::istream& is, Vector3D& vector);
 diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
-index 35d1a7f8b..648d786b8 100644
+index 35d1a7f8b..e77fccd82 100644
 --- a/src/mobility/CMakeLists.txt
 +++ b/src/mobility/CMakeLists.txt
 @@ -13,6 +13,7 @@ build_lib(
@@ -116,6 +118,14 @@ index 35d1a7f8b..648d786b8 100644
      model/geographic-positions.h
      model/hierarchical-mobility-model.h
      model/leo-circular-orbit-mobility-model.h
+@@ -61,6 +63,7 @@ build_lib(
+     test/box-line-intersection-test.cc
+     test/geo-to-cartesian-test.cc
+     test/geocentric-topocentric-conversion-test.cc
++    test/geocentric-elevation-angle-test.cc
+     test/mobility-test-suite.cc
+     test/mobility-trace-test-suite.cc
+     test/ns2-mobility-helper-test-suite.cc
 diff --git a/src/mobility/examples/leo-satellite-example.cc b/src/mobility/examples/leo-satellite-example.cc
 index 5f7d91681..5365772c0 100644
 --- a/src/mobility/examples/leo-satellite-example.cc
@@ -632,10 +642,10 @@ index 15024478c..0957ad006 100644
       * @return the position in ECEF (Earth-Centered Earth-Fixed) coordinates
 diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
 new file mode 100644
-index 000000000..2cb31f86a
+index 000000000..afa4f25e9
 --- /dev/null
 +++ b/src/mobility/model/geocentric-mobility-model.cc
-@@ -0,0 +1,192 @@
+@@ -0,0 +1,193 @@
 +/*
 + * Copyright (C) 2023 University of Padua.
 + * Copyright (C) 2023 Polytechnic University of Bari.
@@ -794,23 +804,24 @@ index 000000000..2cb31f86a
 +    Vector me = this->DoGetPosition(PositionType::GEOCENTRIC);
 +    Vector them = other->DoGetPosition(PositionType::GEOCENTRIC);
 +
-+    // a is assumed to be the terminal with the lowest altitude
-+    Vector& a = (me.z < them.z ? me : them);
-+    Vector& b = (me.z < them.z ? them : me);
++    // a is assumed to be the terminal with the lowest altitude (distance from Earth center)
++    Vector& a = (me.GetLength() < them.GetLength() ? me : them);
++    Vector& b = (me.GetLength() < them.GetLength() ? them : me);
 +
 +    Vector bMinusA = b - a;
 +    double denominator = a.GetLength() * bMinusA.GetLength();
 +    if (denominator == 0) // /0 case: same position
 +        return 0.0;
-+    double numerator = std::abs(a * bMinusA);
++    double numerator = a * bMinusA;
 +    double x = numerator / denominator;
 +
 +    // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
 +    x = std::min(x, 1.0);
 +    x = std::max(x, -1.0);
 +
-+    // asin returns radians, we convert to degrees
-+    double elevAngle = abs((180.0 * M_1_PI) * asin(x));
++    // asin returns radians, we convert to degrees. A negative result means the
++    // other terminal is below the local horizon.
++    double elevAngle = (180.0 * M_1_PI) * asin(x);
 +
 +    return elevAngle;
 +}
@@ -1137,6 +1148,168 @@ index ff7b029b1..6622d0356 100644
    public:
      /**
       * Register this type with the TypeId system.
+diff --git a/src/mobility/test/geocentric-elevation-angle-test.cc b/src/mobility/test/geocentric-elevation-angle-test.cc
+new file mode 100644
+index 000000000..a640ba7bd
+--- /dev/null
++++ b/src/mobility/test/geocentric-elevation-angle-test.cc
+@@ -0,0 +1,156 @@
++/*
++ * Copyright (c) 2026 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
++ *
++ * SPDX-License-Identifier: GPL-2.0-only
++ *
++ * Author: Gabriel Ferreira <gabrielcarvfer@gmail.com>
++ */
++
++#include "ns3/geocentric-constant-position-mobility-model.h"
++#include "ns3/geographic-positions.h"
++#include "ns3/test.h"
++
++#include <cmath>
++
++using namespace ns3;
++
++/**
++ * @ingroup mobility-test
++ *
++ * @brief Tests GeocentricConstantPositionMobilityModel::GetElevationAngle (@issueid{1308}).
++ *
++ * The elevation angle is measured at the lower terminal, with the local
++ * vertical given by the geocentric radial direction (the model uses a perfect
++ * sphere). The angle must be signed (negative when the other terminal is
++ * below the local horizon), independent of the argument order, and identical
++ * for mirrored geometries in either hemisphere. This test pins that behavior.
++ */
++class GeocentricElevationAngleTestCase : public TestCase
++{
++  public:
++    GeocentricElevationAngleTestCase()
++        : TestCase("GeocentricConstantPositionMobilityModel elevation angle")
++    {
++    }
++
++  private:
++    void DoRun() override;
++
++    /// Build a model at the given geographic position.
++    /// @param lat latitude (deg)
++    /// @param lon longitude (deg)
++    /// @param alt altitude (m)
++    /// @return the configured mobility model
++    static Ptr<GeocentricConstantPositionMobilityModel> Make(double lat, double lon, double alt)
++    {
++        auto m = CreateObject<GeocentricConstantPositionMobilityModel>();
++        m->SetPosition(Vector(lat, lon, alt), PositionType::GEOGRAPHIC);
++        return m;
++    }
++};
++
++void
++GeocentricElevationAngleTestCase::DoRun()
++{
++    constexpr double TOL = 1e-2; // degrees
++    const double geoAlt = 35786e3;
++    const double leoAlt = 600e3;
++
++    // A satellite directly above the ground station is at zenith: 90 degrees.
++    auto gs = Make(45.0, 0.0, 0.0);
++    auto overhead = Make(45.0, 0.0, geoAlt);
++    NS_TEST_ASSERT_MSG_EQ_TOL(gs->GetElevationAngle(overhead),
++                              90.0,
++                              TOL,
++                              "Satellite at zenith should have 90 degrees elevation");
++
++    // GEO satellite over the equator seen from a ground station at 45 N.
++    auto geoSat = Make(0.0, 0.0, geoAlt);
++    double elevFromGs = gs->GetElevationAngle(geoSat);
++    NS_TEST_ASSERT_MSG_EQ_TOL(elevFromGs, 38.1771, TOL, "Wrong elevation for GEO over the equator");
++    // The result must be independent of the argument order.
++    NS_TEST_ASSERT_MSG_EQ_TOL(geoSat->GetElevationAngle(gs),
++                              elevFromGs,
++                              TOL,
++                              "Elevation angle must not depend on the argument order");
++
++    // A terminal below the local horizon must yield a negative elevation.
++    auto equatorGs = Make(0.0, 0.0, 0.0);
++    auto farSat = Make(0.0, 120.0, leoAlt);
++    NS_TEST_ASSERT_MSG_EQ_TOL(equatorGs->GetElevationAngle(farSat),
++                              -58.5127,
++                              TOL,
++                              "Below-horizon terminal should have a negative elevation");
++
++    // Southern-hemisphere mirror of the GEO case: the geometry is symmetric,
++    // so the elevation must match the northern result.
++    auto southGs = Make(-45.0, 0.0, 0.0);
++    NS_TEST_ASSERT_MSG_EQ_TOL(southGs->GetElevationAngle(geoSat),
++                              elevFromGs,
++                              TOL,
++                              "Southern-hemisphere GEO elevation must mirror the northern one");
++
++    // Oblique LEO geometry at high latitude and its southern mirror: the
++    // endpoints have genuinely different local verticals, so hemisphere
++    // symmetry is a strong discriminator for the vertex selection.
++    auto northHighGs = Make(60.0, 0.0, 0.0);
++    auto northLeo = Make(50.0, 0.0, leoAlt);
++    double northElev = northHighGs->GetElevationAngle(northLeo);
++    NS_TEST_ASSERT_MSG_EQ_TOL(northElev, 22.2040, TOL, "Wrong elevation for oblique LEO geometry");
++    auto southHighGs = Make(-60.0, 0.0, 0.0);
++    auto southLeo = Make(-50.0, 0.0, leoAlt);
++    NS_TEST_ASSERT_MSG_EQ_TOL(southHighGs->GetElevationAngle(southLeo),
++                              northElev,
++                              TOL,
++                              "North and south mirror geometries must have equal elevation");
++
++    // Longitude rotational invariance: shifting both terminals by the same
++    // longitude must not change the (purely relative) geometry.
++    auto rotatedGs = Make(60.0, 130.0, 0.0);
++    auto rotatedLeo = Make(50.0, 130.0, leoAlt);
++    NS_TEST_ASSERT_MSG_EQ_TOL(rotatedGs->GetElevationAngle(rotatedLeo),
++                              northElev,
++                              TOL,
++                              "Elevation must be invariant under a common longitude shift");
++
++    // Exact horizon: place the satellite so the line of sight grazes the
++    // sphere and the ground station sees it at exactly 0 degrees, pinning the
++    // sign boundary between visible and below-horizon terminals.
++    const double horizonLon = std::acos(GeographicPositions::EARTH_SPHERE_RADIUS /
++                                        (GeographicPositions::EARTH_SPHERE_RADIUS + leoAlt)) *
++                              180.0 / M_PI;
++    auto horizonSat = Make(0.0, horizonLon, leoAlt);
++    NS_TEST_ASSERT_MSG_EQ_TOL(equatorGs->GetElevationAngle(horizonSat),
++                              0.0,
++                              TOL,
++                              "Satellite at the geometric horizon should have 0 degrees elevation");
++
++    // Zenith sanity sweep across latitudes. Zenith is degenerate (both radial
++    // directions coincide), so this is an invariant check.
++    for (double lat : {-80.0, -30.0, 0.0, 30.0, 80.0})
++    {
++        NS_TEST_ASSERT_MSG_EQ_TOL(Make(lat, 0.0, 0.0)->GetElevationAngle(Make(lat, 0.0, leoAlt)),
++                                  90.0,
++                                  TOL,
++                                  "Zenith satellite should have 90 degrees elevation at latitude "
++                                      << lat);
++    }
++}
++
++/**
++ * @ingroup mobility-test
++ *
++ * @brief Geocentric elevation angle test suite.
++ */
++class GeocentricElevationAngleTestSuite : public TestSuite
++{
++  public:
++    GeocentricElevationAngleTestSuite()
++        : TestSuite("geocentric-elevation-angle", Type::UNIT)
++    {
++        AddTestCase(new GeocentricElevationAngleTestCase, TestCase::Duration::QUICK);
++    }
++};
++
++static GeocentricElevationAngleTestSuite
++    g_geocentricElevationAngleTestSuite; //!< Static variable for test initialization
 -- 
 2.50.1 (Apple Git-155)
 

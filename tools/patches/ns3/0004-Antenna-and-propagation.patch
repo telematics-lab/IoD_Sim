@@ -1,6 +1,6 @@
-From aa69d2184897393cb6ccacc278d5fd29a1271b94 Mon Sep 17 00:00:00 2001
+From 0105b536914b789376084ac860da7aa1ca0ef595 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
-Date: Mon, 6 Jul 2026 15:57:23 +0200
+Date: Mon, 6 Jul 2026 17:10:45 +0200
 Subject: [PATCH 4/5] Antenna and propagation
 
 ---

@@ -1,4 +1,4 @@
-From a71238a1288d429c9e90a6e37dabe4d518c89b36 Mon Sep 17 00:00:00 2001
+From 85a869362c63cad11ae0404f97d3943bc777c145 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 6 Jul 2026 15:56:33 +0200
 Subject: [PATCH 2/3] Support for multiple NR devices on the same node
