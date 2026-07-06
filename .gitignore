@@ -1,9 +1,9 @@
 # Ignore build artifacts
 build/
-ns3/
+/ns3/
 # Ignore upstream repository
-ns3/build
-ns3/src/iodsim
+/ns3/build
+/ns3/src/iodsim
 
 # Ignore user scenario results, but keep directory in place
 results/*

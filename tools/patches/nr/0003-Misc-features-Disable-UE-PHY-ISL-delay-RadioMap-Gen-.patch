@@ -1,0 +1,601 @@
+From d323d5e2285153a692d12ca6f19f0b393cc03120 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:56:33 +0200
+Subject: [PATCH 3/3] Misc features (Disable UE PHY, ISL delay, RadioMap Gen,
+ BWP list)
+
+---
+ helper/nr-epc-helper.h                    |  8 ++++
+ helper/nr-no-backhaul-epc-helper.h        |  4 ++
+ helper/nr-point-to-point-epc-helper.cc    |  7 ++-
+ helper/nr-radio-environment-map-helper.cc | 31 ++++++++++--
+ helper/nr-radio-environment-map-helper.h  | 18 ++++++-
+ model/nr-epc-gnb-application.cc           |  7 +++
+ model/nr-epc-gnb-application.h            |  6 +++
+ model/nr-epc-x2.h                         | 23 ++++++++-
+ model/nr-gnb-mac.cc                       | 58 ++++++++++++++++++++++-
+ model/nr-gnb-mac.h                        |  5 ++
+ model/nr-gnb-rrc.h                        | 13 ++---
+ model/nr-interference.cc                  | 34 ++++++++++---
+ model/nr-interference.h                   | 13 ++++-
+ model/nr-qos-rule-classifier.cc           |  3 ++
+ model/nr-qos-rule.h                       | 10 ++++
+ 15 files changed, 213 insertions(+), 27 deletions(-)
+
+diff --git a/helper/nr-epc-helper.h b/helper/nr-epc-helper.h
+index c8938183..b9c5e15a 100644
+--- a/helper/nr-epc-helper.h
++++ b/helper/nr-epc-helper.h
+@@ -85,6 +85,14 @@ class NR_EXPORT NrEpcHelper : public Object
+      */
+     virtual void AddX2Interface(Ptr<Node> gnbNode1, Ptr<Node> gnbNode2) = 0;
+ 
++    /**
++     * Add an X2 interface between two gNB devices
++     *
++     * @param gnbDev1 one gNB peer device of the X2 interface
++     * @param gnbDev2 the other gNB peer device of the X2 interface
++     */
++    virtual void AddX2Interface(Ptr<NetDevice> gnbDev1, Ptr<NetDevice> gnbDev2) = 0;
++
+     /**
+      * Add an S1 interface between an gNB and a SGW
+      *
+diff --git a/helper/nr-no-backhaul-epc-helper.h b/helper/nr-no-backhaul-epc-helper.h
+index 602afadb..7c64dafb 100644
+--- a/helper/nr-no-backhaul-epc-helper.h
++++ b/helper/nr-no-backhaul-epc-helper.h
+@@ -57,6 +57,7 @@ class NR_EXPORT NrNoBackhaulEpcHelper : public NrEpcHelper
+     void AddGnb(Ptr<Node> gnbNode, Ptr<NetDevice> nrGnbNetDevice, uint16_t cellId) override;
+     void AddUe(Ptr<NetDevice> ueNrDevice, uint64_t imsi) override;
+     void AddX2Interface(Ptr<Node> gnbNode1, Ptr<Node> gnbNode2) override;
++    void AddX2Interface(Ptr<NetDevice> gnbDev1, Ptr<NetDevice> gnbDev2) override;
+     void AddS1Interface(Ptr<Node> gnb,
+                         Ipv4Address gnbAddress,
+                         Ipv4Address sgwAddress,
+@@ -109,6 +110,9 @@ class NR_EXPORT NrNoBackhaulEpcHelper : public NrEpcHelper
+                                         const Ptr<NrQosRule>& rule,
+                                         const NrQosFlow& flow) const;
+ 
++  protected:
++    uint32_t m_epcIndex;
++
+   private:
+     /**
+      * helper to assign IPv4 addresses to UE devices as well as to the TUN device of the SGW/PGW
+diff --git a/helper/nr-point-to-point-epc-helper.cc b/helper/nr-point-to-point-epc-helper.cc
+index 9c77b14a..61ec44a8 100644
+--- a/helper/nr-point-to-point-epc-helper.cc
++++ b/helper/nr-point-to-point-epc-helper.cc
+@@ -38,8 +38,11 @@ NrPointToPointEpcHelper::NotifyConstructionCompleted()
+     // since we use point-to-point links for the backhaul links,
+     // we use a /30 subnet which can hold exactly two addresses
+     // (remember that net broadcast and null address are not valid)
+-    m_s1uIpv4AddressHelper.SetBase("10.0.0.0", "255.255.255.252");
+-    m_s1apIpv4AddressHelper.SetBase("11.0.0.0", "255.255.255.252");
++    std::stringstream s1u, s1ap;
++    s1u << "10." << m_epcIndex << ".0.0";
++    s1ap << "11." << m_epcIndex << ".0.0";
++    m_s1uIpv4AddressHelper.SetBase(s1u.str().c_str(), "255.255.255.252");
++    m_s1apIpv4AddressHelper.SetBase(s1ap.str().c_str(), "255.255.255.252");
+ }
+ 
+ NrPointToPointEpcHelper::~NrPointToPointEpcHelper()
+diff --git a/helper/nr-radio-environment-map-helper.cc b/helper/nr-radio-environment-map-helper.cc
+index 50b9441e..66336473 100644
+--- a/helper/nr-radio-environment-map-helper.cc
++++ b/helper/nr-radio-environment-map-helper.cc
+@@ -8,6 +8,7 @@
+ 
+ #include "ns3/abort.h"
+ #include "ns3/beamforming-vector.h"
++#include "ns3/boolean.h"
+ #include "ns3/buildings-module.h"
+ #include "ns3/config.h"
+ #include "ns3/double.h"
+@@ -151,7 +152,14 @@ NrRadioEnvironmentMapHelper::GetTypeId()
+                 "depends on RRC message timing.",
+                 TimeValue(MilliSeconds(100)),
+                 MakeTimeAccessor(&NrRadioEnvironmentMapHelper::SetInstallationDelay),
+-                MakeTimeChecker());
++                MakeTimeChecker())
++            .AddAttribute("StopWhenDone",
++                          "If true, Simulator::Stop () will be called as soon as the REM has been "
++                          "generated",
++                          BooleanValue(true),
++                          MakeBooleanAccessor(&NrRadioEnvironmentMapHelper::SetStopWhenDone,
++                                              &NrRadioEnvironmentMapHelper::GetStopWhenDone),
++                          MakeBooleanChecker());
+     return tid;
+ }
+ 
+@@ -269,6 +277,18 @@ NrRadioEnvironmentMapHelper::GetZ() const
+     return m_z;
+ }
+ 
++void
++NrRadioEnvironmentMapHelper::SetStopWhenDone(bool stop)
++{
++    m_stopWhenDone = stop;
++}
++
++bool
++NrRadioEnvironmentMapHelper::GetStopWhenDone() const
++{
++    return m_stopWhenDone;
++}
++
+ double
+ NrRadioEnvironmentMapHelper::DbmToW(double dBm) const
+ {
+@@ -594,13 +614,13 @@ NrRadioEnvironmentMapHelper::SaveAntennasWithUserDefinedBeams(const NetDeviceCon
+ {
+     m_deviceToAntenna.insert(std::make_pair(
+         rrdDevice,
+-        Copy(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
++        CopyAntenna(m_rrdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+     for (auto rtdNetDevIt = rtdNetDev.Begin(); rtdNetDevIt != rtdNetDev.End(); ++rtdNetDevIt)
+     {
+         Ptr<NrPhy> rtdPhy = m_rtdDeviceToPhy.find(*rtdNetDevIt)->second;
+         m_deviceToAntenna.insert(std::make_pair(
+             *rtdNetDevIt,
+-            Copy(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
++            CopyAntenna(rtdPhy->GetSpectrumPhy()->GetAntenna()->GetObject<UniformPlanarArray>())));
+     }
+ }
+ 
+@@ -1517,13 +1537,16 @@ void
+ NrRadioEnvironmentMapHelper::Finalize()
+ {
+     NS_LOG_FUNCTION(this);
++    if (m_stopWhenDone)
++    {
++        Simulator::Stop();
++    }
+     // TODO test if we can call this
+     // std::ostringstream oss;
+     // oss <<"gnuplot -p nr-"<<m_simTag.c_str()<<"-ues.txt nr-"<<m_simTag.c_str()<<"-gnbs.txt
+     // nr-rem-"<<m_simTag.c_str()<<"-buildings.txt nr-rem-"<<m_simTag.c_str()<<"-plot-rem.gnuplot";
+     // system(oss.str().c_str());
+     // TODO if yes, then we can add also convert command
+-    Simulator::Stop();
+ }
+ 
+ } // namespace ns3
+diff --git a/helper/nr-radio-environment-map-helper.h b/helper/nr-radio-environment-map-helper.h
+index 4e5512c5..962b30f8 100644
+--- a/helper/nr-radio-environment-map-helper.h
++++ b/helper/nr-radio-environment-map-helper.h
+@@ -16,7 +16,6 @@
+ #include "ns3/three-gpp-spectrum-propagation-loss-model.h"
+ 
+ #include <chrono>
+-#include <fstream>
+ 
+ namespace ns3
+ {
+@@ -223,10 +222,23 @@ class NR_EXPORT NrRadioEnvironmentMapHelper : public Object
+     uint16_t GetResY() const;
+ 
+     /**
+-     * @return Gets the value of the z coordinate of the map
++     * @brief Gets the attribute Z
++     * @return double value
+      */
+     double GetZ() const;
+ 
++    /**
++     * @brief Sets the attribute StopWhenDone
++     * @param stop boolean value
++     */
++    void SetStopWhenDone(bool stop);
++
++    /**
++     * @brief Gets the attribute StopWhenDone
++     * @return boolean value
++     */
++    bool GetStopWhenDone() const;
++
+     /**
+      * @brief Convert from Watts to dBm.
+      * @param w the power in Watts
+@@ -564,7 +576,9 @@ class NR_EXPORT NrRadioEnvironmentMapHelper : public Object
+ 
+     uint16_t m_numOfIterationsToAverage{1};
+     Time m_installationDelay{Seconds(0)};
++    bool m_stopWhenDone{true};
+ 
++  public:
+     RemDevice m_rrd;
+ 
+     Ptr<NrPhy> m_rrdPhy; ///< Pointer to the phy of the RRD
+diff --git a/model/nr-epc-gnb-application.cc b/model/nr-epc-gnb-application.cc
+index df4f7356..351deb85 100644
+--- a/model/nr-epc-gnb-application.cc
++++ b/model/nr-epc-gnb-application.cc
+@@ -132,6 +132,13 @@ NrEpcGnbApplication::GetS1apSapGnb()
+     return m_s1apSapGnb;
+ }
+ 
++uint16_t
++NrEpcGnbApplication::GetCellId() const
++{
++    return m_cellId;
++}
++
++
+ void
+ NrEpcGnbApplication::DoInitialUeMessage(uint64_t imsi, uint16_t rnti)
+ {
+diff --git a/model/nr-epc-gnb-application.h b/model/nr-epc-gnb-application.h
+index 0899de2a..3dcc71e1 100644
+--- a/model/nr-epc-gnb-application.h
++++ b/model/nr-epc-gnb-application.h
+@@ -109,6 +109,12 @@ class NR_EXPORT NrEpcGnbApplication : public Application
+      */
+     NrEpcS1apSapGnb* GetS1apSapGnb();
+ 
++    /**
++     * @return the cell ID
++     */
++    uint16_t GetCellId() const;
++
++
+     /**
+      * Method to be assigned to the recv callback of the NR socket. It is called when the gNB
+      * receives a data packet from the radio interface that is to be forwarded to the SGW.
+diff --git a/model/nr-epc-x2.h b/model/nr-epc-x2.h
+index 27a51f49..b17299bd 100644
+--- a/model/nr-epc-x2.h
++++ b/model/nr-epc-x2.h
+@@ -108,9 +108,19 @@ class NR_EXPORT NrEpcX2 : public Object
+ 
+     /**
+      * @param s the X2 SAP User to be used by this EPC X2 entity
++     * (legacy single-cell path; routes all incoming messages to s)
+      */
+     void SetEpcX2SapUser(NrEpcX2SapUser* s);
+ 
++    /**
++     * @brief Register the X2 SAP User for a specific local cell.
++     *        Call this instead of the single-arg overload when multiple gNBs
++     *        share one NrEpcX2 object (same node, different beams/cell IDs).
++     * @param cellId the local cell ID
++     * @param s the X2 SAP User (i.e., the gNB RRC) for that cell
++     */
++    void SetEpcX2SapUser(uint16_t cellId, NrEpcX2SapUser* s);
++
+     /**
+      * @return the X2 SAP Provider interface offered by this EPC X2 entity
+      */
+@@ -195,8 +205,8 @@ class NR_EXPORT NrEpcX2 : public Object
+      */
+     virtual void DoSendHandoverCancel(NrEpcX2SapProvider::HandoverCancelParams params);
+ 
+-    NrEpcX2SapUser* m_x2SapUser;         ///< X2 SAP user
+-    NrEpcX2SapProvider* m_x2SapProvider; ///< X2 SAP provider
++    std::map<uint16_t, NrEpcX2SapUser*> m_x2SapUsers; ///< X2 SAP users, keyed by local cell ID
++    NrEpcX2SapProvider* m_x2SapProvider;              ///< X2 SAP provider
+ 
+   private:
+     /**
+@@ -211,6 +221,15 @@ class NR_EXPORT NrEpcX2 : public Object
+      */
+     std::map<Ptr<Socket>, Ptr<NrX2CellInfo>> m_x2InterfaceCellIds;
+ 
++    /**
++     * @brief Look up the SAP user for the given local cell ID.
++     *        If a cell-specific entry exists it is returned; otherwise the
++     *        wildcard entry (key 0, set by the legacy single-arg overload) is used.
++     * @param localCellId the local cell ID of the receiving gNB
++     * @return the corresponding NrEpcX2SapUser*, or nullptr if not found
++     */
++    NrEpcX2SapUser* GetX2SapUser(uint16_t localCellId) const;
++
+     /**
+      * UDP ports to be used for the X2-C interface
+      */
+diff --git a/model/nr-gnb-mac.cc b/model/nr-gnb-mac.cc
+index 9fdf7d2e..26415ff3 100644
+--- a/model/nr-gnb-mac.cc
++++ b/model/nr-gnb-mac.cc
+@@ -436,6 +436,11 @@ NrGnbMac::GetTypeId()
+                             "Harq feedback.",
+                             MakeTraceSourceAccessor(&NrGnbMac::m_dlHarqFeedback),
+                             "ns3::NrGnbMac::DlHarqFeedbackTracedCallback")
++            .AddAttribute("DataDelay",
++                          "Additional generic data delay",
++                          TimeValue(Seconds(0)),
++                          MakeTimeAccessor(&NrGnbMac::m_dataDelay),
++                          MakeTimeChecker())
+             .AddAttribute("NumberOfRaPreambles",
+                           "How many random access preambles are available for the contention based "
+                           "RACH process",
+@@ -963,7 +968,48 @@ NrGnbMac::DoReceivePhyPdu(Ptr<Packet> p)
+ 
+     if (rxParams.p->GetSize())
+     {
+-        (*lcidIt).second->ReceivePdu(rxParams);
++        if (m_dataDelay.GetTimeStep() > 0)
++        {
++            Simulator::Schedule(m_dataDelay,
++                                &NrGnbMac::ForwardUpToRlc,
++                                this,
++                                (*lcidIt).second,
++                                rxParams);
++        }
++        else if (m_dataDelay.GetTimeStep() == 0)
++        {
++            (*lcidIt).second->ReceivePdu(rxParams);
++        }
++        // If m_dataDelay < 0, naturally do nothing (drop the PDU)
++    }
++}
++
++void
++NrGnbMac::ForwardUpToRlc(NrMacSapUser* msu, NrMacSapUser::ReceivePduParameters params)
++{
++    // Need to verify if the UE / LC is still attached
++    auto rntiIt = m_rlcAttached.find(params.rnti);
++    if (rntiIt != m_rlcAttached.end())
++    {
++        auto lcidIt = rntiIt->second.find(params.lcid);
++        if (lcidIt != rntiIt->second.end())
++        {
++            if (lcidIt->second == msu) // pointer match
++            {
++                msu->ReceivePdu(params);
++            }
++        }
++    }
++}
++
++void
++NrGnbMac::DelayedDlRlcBufferReq(NrMacSchedSapProvider::SchedDlRlcBufferReqParameters params)
++{
++    // Need to verify if the UE is still attached before reporting to scheduler
++    auto rntiIt = m_rlcAttached.find(params.m_rnti);
++    if (rntiIt != m_rlcAttached.end())
++    {
++        m_macSchedSapProvider->SchedDlRlcBufferReq(params);
+     }
+ }
+ 
+@@ -1111,7 +1157,15 @@ NrGnbMac::DoTransmitBufferStatusReport(NrMacSapProvider::BufferStatusReportParam
+                 << ", Retransmission Queue HOL delay=" << params.retxQueueHolDelay
+                 << ", PDU Size=" << params.statusPduSize);
+ 
+-    m_macSchedSapProvider->SchedDlRlcBufferReq(schedParams);
++    if (m_dataDelay.GetTimeStep() > 0)
++    {
++        Simulator::Schedule(m_dataDelay, &NrGnbMac::DelayedDlRlcBufferReq, this, schedParams);
++    }
++    else if (m_dataDelay.GetTimeStep() == 0)
++    {
++        m_macSchedSapProvider->SchedDlRlcBufferReq(schedParams);
++    }
++    // If m_dataDelay < 0, drop the BSR reporting to scheduler
+ }
+ 
+ // forwarded from NrMacSapProvider
+diff --git a/model/nr-gnb-mac.h b/model/nr-gnb-mac.h
+index 52778024..bb8809bc 100644
+--- a/model/nr-gnb-mac.h
++++ b/model/nr-gnb-mac.h
+@@ -288,6 +288,8 @@ class NR_EXPORT NrGnbMac : public Object
+      */
+     void DoReportSrToScheduler(uint16_t rnti);
+     void DoReceivePhyPdu(Ptr<Packet> p);
++    void ForwardUpToRlc(NrMacSapUser* msu, NrMacSapUser::ReceivePduParameters params);
++    void DelayedDlRlcBufferReq(NrMacSchedSapProvider::SchedDlRlcBufferReqParameters params);
+     void DoReceiveControlMessage(Ptr<NrControlMessage> msg);
+     virtual void DoSchedConfigIndication(NrMacSchedSapUser::SchedConfigIndParameters ind);
+     // forwarded from NrMacSapProvider
+@@ -375,6 +377,9 @@ class NR_EXPORT NrGnbMac : public Object
+     std::vector<NrMacSchedSapProvider::SchedUlCqiInfoReqParameters> m_ulCqiReceived;
+     std::vector<MacCeElement> m_ulCeReceived; // CE received (BSR up to now)
+ 
++    Time m_dataDelay{Seconds(0)}; // ISL data delay
++
++
+     // start of RACH related member variables
+     uint8_t m_numberOfRaPreambles;  ///< number of RA preambles
+     uint8_t m_preambleTransMax;     ///< preamble transmit maximum
+diff --git a/model/nr-gnb-rrc.h b/model/nr-gnb-rrc.h
+index c08e6633..4ab3a545 100644
+--- a/model/nr-gnb-rrc.h
++++ b/model/nr-gnb-rrc.h
+@@ -175,7 +175,8 @@ class NR_EXPORT NrUeManager : public Object
+     void SetupDataRadioBearer(NrQosFlow flow,
+                               uint8_t qfi,
+                               uint32_t gtpTeid,
+-                              Ipv4Address transportLayerAddress);
++                              Ipv4Address transportLayerAddress,
++                              uint8_t drbid = 0);
+ 
+     /**
+      * Start all configured data radio bearers. It is safe to call this
+@@ -483,13 +484,13 @@ class NR_EXPORT NrUeManager : public Object
+ 
+   private:
+     /**
+-     * Add a new NrDataRadioBearerInfo structure to the NrUeManager
++     * add the NrDataRadioBearerInfo to the NrUeManager map
+      *
+-     * @param radioBearerInfo
+-     *
+-     * @return the id of the newly added data radio bearer structure
++     * @param drbInfo the NrDataRadioBearerInfo to be added
++     * @param drbid the preferred DRBID to use (if 0, allocate a new one)
++     * @return the Data Radio Bearer id
+      */
+-    uint8_t AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> radioBearerInfo);
++    uint8_t AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> drbInfo, uint8_t drbid = 0);
+ 
+     /**
+      * @param drbid the Data Radio Bearer id
+diff --git a/model/nr-interference.cc b/model/nr-interference.cc
+index 109c42e6..0eedb049 100644
+--- a/model/nr-interference.cc
++++ b/model/nr-interference.cc
+@@ -8,7 +8,10 @@
+ #include "nr-spectrum-signal-parameters.h"
+ 
+ #include "ns3/log.h"
++#include "ns3/net-device.h"
++#include "ns3/node.h"
+ #include "ns3/simulator.h"
++#include "ns3/spectrum-phy.h"
+ 
+ #include <algorithm>
+ 
+@@ -153,12 +156,12 @@ NrInterference::ConditionallyEvaluateChunk()
+ 
+         for (auto& cp : m_mimoChunkProcessors)
+         {
+-            // Covariance matrix of noise plus out-of-cell interference
+-            auto outOfCellInterfCov = CalcOutOfCellInterfCov();
+-
+             // Compute the MIMO SINR separately for each received signal.
+             for (auto& rxSignal : m_rxSignalsMimo)
+             {
++                // Covariance matrix of noise plus out-of-cell interference
++                auto outOfCellInterfCov = CalcOutOfCellInterfCov(rxSignal);
++
+                 // Use the UE's RNTI to distinguish multiple received signals
+                 auto nrRxSignal = DynamicCast<const NrSpectrumSignalParametersDataFrame>(rxSignal);
+                 uint16_t rnti = nrRxSignal ? nrRxSignal->rnti : 0;
+@@ -411,8 +414,14 @@ NrInterference::IsChunkProcessorSet()
+     return (!m_mimoChunkProcessors.empty());
+ }
+ 
++void
++NrInterference::SetSameNodeInterference(bool sameNodeInterference)
++{
++    m_sameNodeInterference = sameNodeInterference;
++}
++
+ NrCovMat
+-NrInterference::CalcOutOfCellInterfCov() const
++NrInterference::CalcOutOfCellInterfCov(Ptr<const SpectrumSignalParameters> rxSignal) const
+ {
+     // Extract dimensions from first receive signal. Interference signals have equal dimensions
+     NS_ASSERT_MSG(!(m_rxSignalsMimo.empty()), "At least one receive signal is required");
+@@ -441,7 +450,7 @@ NrInterference::CalcOutOfCellInterfCov() const
+             continue;
+         }
+ 
+-        AddInterference(allSignalsNoiseCov, intfSignal);
++        AddInterference(allSignalsNoiseCov, intfSignal, rxSignal);
+     }
+     return allSignalsNoiseCov;
+ }
+@@ -463,14 +472,25 @@ NrInterference::CalcCurrInterfCov(Ptr<const SpectrumSignalParameters> rxSignal,
+                        m_allSignalsMimo.end()),
+                       "RX signal already deleted from m_allSignalsMimo");
+ 
+-        AddInterference(interfNoiseCov, otherSignal);
++        AddInterference(interfNoiseCov, otherSignal, rxSignal);
+     }
+     return interfNoiseCov;
+ }
+ 
+ void
+-NrInterference::AddInterference(NrCovMat& covMat, Ptr<const SpectrumSignalParameters> signal) const
++NrInterference::AddInterference(NrCovMat& covMat,
++                                Ptr<const SpectrumSignalParameters> signal,
++                                Ptr<const SpectrumSignalParameters> rxSignal) const
+ {
++    if (!m_sameNodeInterference && signal->txPhy && rxSignal->txPhy)
++    {
++        if (signal->txPhy->GetDevice()->GetNode() == rxSignal->txPhy->GetDevice()->GetNode())
++        {
++            NS_LOG_DEBUG("Ignoring interference between signals from the same node.");
++            return;
++        }
++    }
++
+     const auto& chanSpct = *(signal->spectrumChannelMatrix);
+     if (signal->precodingMatrix)
+     {
+diff --git a/model/nr-interference.h b/model/nr-interference.h
+index 363b9e88..0de373ba 100644
+--- a/model/nr-interference.h
++++ b/model/nr-interference.h
+@@ -127,12 +127,18 @@ class NR_EXPORT NrInterference : public NrInterferenceBase
+      */
+     bool IsChunkProcessorSet();
+ 
++    /**
++     * @brief Set same node interference flag
++     */
++    void SetSameNodeInterference(bool sameNodeInterference);
++
+   private:
+     /// @brief Calculate interference-plus-noise covariance matrix for signals not in m_rxSignals
+     /// This function computes the interference signals from all out-of-cell interferers. The
+     /// intra-cell interference signals that are part of m_rxSignals are skipped.
++    /// @param rxSignal the receive signal of interest
+     /// @return the interference+noise covariance matrix for out-of-cell interference
+-    NrCovMat CalcOutOfCellInterfCov() const;
++    NrCovMat CalcOutOfCellInterfCov(Ptr<const SpectrumSignalParameters> rxSignal) const;
+ 
+     /// @brief Add the remaining interference to the interference-and-noise covariance matrix
+     /// This function is required for MU-MIMO UL, where the signal from a different UE within the
+@@ -146,7 +152,8 @@ class NR_EXPORT NrInterference : public NrInterferenceBase
+     /// @brief Add the covariance of the signal to an existing covariance matrix
+     /// @param covMat the existing interference-and-noise covariance matrix
+     /// @param signal the signal to be added
+-    void AddInterference(NrCovMat& covMat, Ptr<const SpectrumSignalParameters> signal) const;
++    /// @param rxSignal the signal of interest
++    void AddInterference(NrCovMat& covMat, Ptr<const SpectrumSignalParameters> signal, Ptr<const SpectrumSignalParameters> rxSignal) const;
+ 
+     /// @brief Compute the SINR of the current receive signal
+     /// @param outOfCellInterfCov the covariance matrix of out-of-cell signals, plus noise
+@@ -164,6 +171,8 @@ class NR_EXPORT NrInterference : public NrInterferenceBase
+     /// The processor instances that are notified whenever a new interference chunk is calculated
+     std::list<Ptr<NrMimoChunkProcessor>> m_mimoChunkProcessors;
+ 
++    bool m_sameNodeInterference = false;
++
+     /**
+      * Noise and Interference (thus Ni) event.
+      */
+diff --git a/model/nr-qos-rule-classifier.cc b/model/nr-qos-rule-classifier.cc
+index ede209cb..b3b9e34c 100644
+--- a/model/nr-qos-rule-classifier.cc
++++ b/model/nr-qos-rule-classifier.cc
+@@ -44,6 +44,9 @@ NrQosRuleClassifier::Add(Ptr<NrQosRule> rule, uint8_t qfi)
+     // Set the QFI in the rule for later retrieval during classification
+     rule->SetQfi(qfi);
+ 
++    // If a rule with this QFI already exists, remove it first to avoid duplicates
++    Delete(qfi);
++
+     // Extract the rule precedence and insert into multimap
+     uint8_t precedence = rule->GetPrecedence();
+     m_qosRuleMap.insert({precedence, rule});
+diff --git a/model/nr-qos-rule.h b/model/nr-qos-rule.h
+index 2ac72da8..411ea5f4 100644
+--- a/model/nr-qos-rule.h
++++ b/model/nr-qos-rule.h
+@@ -223,6 +223,16 @@ class NR_EXPORT NrQosRule : public SimpleRefCount<NrQosRule>
+      */
+     uint8_t GetQfi() const;
+ 
++    /**
++     * @brief Equality operator.
++     * @param other the other rule to compare with
++     * @return true if equal
++     */
++    bool operator==(const NrQosRule& other) const
++    {
++        return (m_precedence == other.m_precedence && m_filters == other.m_filters);
++    }
++
+   private:
+     std::list<PacketFilter> m_filters; ///< packet filter list
+     uint8_t m_numFilters;              ///< number of packet filters applied to this QoS rule
+-- 
+2.50.1 (Apple Git-155)
+

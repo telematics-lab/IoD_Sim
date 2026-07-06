@@ -1,0 +1,850 @@
+From f54d81eeb696e6022810643c8aac7e30f60c509f Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:56:33 +0200
+Subject: [PATCH 1/3] Handover fixes and adaptations for IoD_Sim
+
+---
+ examples/gsoc-leo-demo-example.cc      |   8 +-
+ helper/beamforming-helper-base.h       |   8 ++
+ helper/ideal-beamforming-helper.cc     |  20 +++++
+ helper/ideal-beamforming-helper.h      |   3 +
+ helper/nr-bearer-stats-connector.cc    |  36 ++++-----
+ helper/nr-no-backhaul-epc-helper.cc    | 106 +++++++++++++++++--------
+ helper/realistic-beamforming-helper.cc |  47 +++++++++++
+ helper/realistic-beamforming-helper.h  |   3 +
+ model/nr-epc-ue-nas.cc                 |   7 +-
+ model/nr-epc-x2.cc                     |  87 +++++++++++++++++---
+ model/nr-gnb-rrc.cc                    |  86 +++++++++++++++-----
+ model/nr-mac-scheduler-ns3.cc          |  11 ++-
+ model/nr-mimo-matrices-eigen.cc        |   2 +-
+ 13 files changed, 327 insertions(+), 97 deletions(-)
+
+diff --git a/examples/gsoc-leo-demo-example.cc b/examples/gsoc-leo-demo-example.cc
+index 7e54a5c7..65d36d8d 100644
+--- a/examples/gsoc-leo-demo-example.cc
++++ b/examples/gsoc-leo-demo-example.cc
+@@ -335,12 +335,12 @@ main(int argc, char* argv[])
+     auto firstSatellitePositionGEO =
+         GeographicPositions::CartesianToGeographicCoordinates(firstSatelliteMobility->GetPosition(),
+                                                               GeographicPositions::SPHERE);
+-    groundNodeMobility->SetGeographicPosition(
+-        Vector(firstSatellitePositionGEO.x, firstSatellitePositionGEO.y, 0));
++    groundNodeMobility->SetPosition(
++        Vector(firstSatellitePositionGEO.x, firstSatellitePositionGEO.y, 0), PositionType::GEOGRAPHIC);
+ 
+     // set global vars with GEO and ECEF positions for the Ground Node
+-    groundNodePosGEO = groundNodeMobility->GetGeographicPosition();
+-    groundNodePosECEF = groundNodeMobility->GetGeocentricPosition();
++    groundNodePosGEO = groundNodeMobility->GetPosition(PositionType::GEOGRAPHIC);
++    groundNodePosECEF = groundNodeMobility->GetPosition(PositionType::GEOCENTRIC);
+ 
+     groundNode->AggregateObject(groundNodeMobility);
+ 
+diff --git a/helper/beamforming-helper-base.h b/helper/beamforming-helper-base.h
+index 7baf9c8d..b1987b95 100644
+--- a/helper/beamforming-helper-base.h
++++ b/helper/beamforming-helper-base.h
+@@ -54,6 +54,14 @@ class NR_EXPORT BeamformingHelperBase : public Object
+     virtual void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
+                                     const Ptr<NrUeNetDevice>& ueDev) = 0;
+ 
++    /**
++     * @brief Removes the beamforming task for a handoff
++     * @param gNbDev gNb device
++     * @param ueDev UE device
++     */
++    virtual void RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
++                                       const Ptr<NrUeNetDevice>& ueDev) = 0;
++
+     /**
+      * @brief Set the beamforming method that will be executed each
+      * time when is necessary to update the beamforming algorithms
+diff --git a/helper/ideal-beamforming-helper.cc b/helper/ideal-beamforming-helper.cc
+index 256a82ab..9594e46f 100644
+--- a/helper/ideal-beamforming-helper.cc
++++ b/helper/ideal-beamforming-helper.cc
+@@ -84,6 +84,26 @@ IdealBeamformingHelper::AddBeamformingTask(const Ptr<NrGnbNetDevice>& gnbDev,
+     }
+ }
+ 
++void
++IdealBeamformingHelper::RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
++                                              const Ptr<NrUeNetDevice>& ueDev)
++{
++    NS_LOG_FUNCTION(this);
++    for (std::size_t ccId = 0; ccId < gNbDev->GetCcMapSize(); ccId++)
++    {
++        Ptr<NrSpectrumPhy> gnbSpectrumPhy = gNbDev->GetPhy(ccId)->GetSpectrumPhy();
++        Ptr<NrSpectrumPhy> ueSpectrumPhy = ueDev->GetPhy(ccId)->GetSpectrumPhy();
++
++        auto it = std::find(m_spectrumPhyPair.begin(),
++                            m_spectrumPhyPair.end(),
++                            std::make_pair(gnbSpectrumPhy, ueSpectrumPhy));
++        if (it != m_spectrumPhyPair.end())
++        {
++            m_spectrumPhyPair.erase(it);
++        }
++    }
++}
++
+ void
+ IdealBeamformingHelper::Run() const
+ {
+diff --git a/helper/ideal-beamforming-helper.h b/helper/ideal-beamforming-helper.h
+index 57e82c13..a2d71f42 100644
+--- a/helper/ideal-beamforming-helper.h
++++ b/helper/ideal-beamforming-helper.h
+@@ -71,6 +71,9 @@ class NR_EXPORT IdealBeamformingHelper : public BeamformingHelperBase
+     void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
+                             const Ptr<NrUeNetDevice>& ueDev) override;
+ 
++    void RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
++                               const Ptr<NrUeNetDevice>& ueDev) override;
++
+   protected:
+     // inherited from Object
+     void DoInitialize() override;
+diff --git a/helper/nr-bearer-stats-connector.cc b/helper/nr-bearer-stats-connector.cc
+index eb492e03..2c895445 100644
+--- a/helper/nr-bearer-stats-connector.cc
++++ b/helper/nr-bearer-stats-connector.cc
+@@ -404,12 +404,12 @@ NrBearerStatsConnector::ConnectTracesUe(std::string context,
+         arg->imsi = imsi;
+         arg->cellId = cellId;
+         arg->stats = m_rlcStats;
+-        Config::Connect(basePath + "/DataRadioBearerMap/*/NrRlc/TxPDU",
++        Config::ConnectFailSafe(basePath + "/DataRadioBearerMap/*/NrRlc/TxPDU",
+                         MakeBoundCallback(&UlTxPduCallback, arg));
+-        Config::Connect(basePath + "/DataRadioBearerMap/*/NrRlc/RxPDU",
++        Config::ConnectFailSafe(basePath + "/DataRadioBearerMap/*/NrRlc/RxPDU",
+                         MakeBoundCallback(&DlRxPduCallback, arg));
+-        Config::Connect(basePath + "/Srb1/NrRlc/TxPDU", MakeBoundCallback(&UlTxPduCallback, arg));
+-        Config::Connect(basePath + "/Srb1/NrRlc/RxPDU", MakeBoundCallback(&DlRxPduCallback, arg));
++        Config::ConnectFailSafe(basePath + "/Srb1/NrRlc/TxPDU", MakeBoundCallback(&UlTxPduCallback, arg));
++        Config::ConnectFailSafe(basePath + "/Srb1/NrRlc/RxPDU", MakeBoundCallback(&DlRxPduCallback, arg));
+     }
+     if (m_pdcpStats)
+     {
+@@ -417,12 +417,12 @@ NrBearerStatsConnector::ConnectTracesUe(std::string context,
+         arg->imsi = imsi;
+         arg->cellId = cellId;
+         arg->stats = m_pdcpStats;
+-        Config::Connect(basePath + "/DataRadioBearerMap/*/NrPdcp/RxPDU",
++        Config::ConnectFailSafe(basePath + "/DataRadioBearerMap/*/NrPdcp/RxPDU",
+                         MakeBoundCallback(&DlRxPduCallback, arg));
+-        Config::Connect(basePath + "/DataRadioBearerMap/*/NrPdcp/TxPDU",
++        Config::ConnectFailSafe(basePath + "/DataRadioBearerMap/*/NrPdcp/TxPDU",
+                         MakeBoundCallback(&UlTxPduCallback, arg));
+-        Config::Connect(basePath + "/Srb1/NrPdcp/RxPDU", MakeBoundCallback(&DlRxPduCallback, arg));
+-        Config::Connect(basePath + "/Srb1/NrPdcp/TxPDU", MakeBoundCallback(&UlTxPduCallback, arg));
++        Config::ConnectFailSafe(basePath + "/Srb1/NrPdcp/RxPDU", MakeBoundCallback(&DlRxPduCallback, arg));
++        Config::ConnectFailSafe(basePath + "/Srb1/NrPdcp/TxPDU", MakeBoundCallback(&UlTxPduCallback, arg));
+     }
+ }
+ 
+@@ -442,17 +442,17 @@ NrBearerStatsConnector::ConnectTracesGnb(std::string context,
+         arg->imsi = imsi;
+         arg->cellId = cellId;
+         arg->stats = m_rlcStats;
+-        Config::Connect(basePath.str() + "/DataRadioBearerMap/*/NrRlc/RxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/DataRadioBearerMap/*/NrRlc/RxPDU",
+                         MakeBoundCallback(&UlRxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/DataRadioBearerMap/*/NrRlc/TxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/DataRadioBearerMap/*/NrRlc/TxPDU",
+                         MakeBoundCallback(&DlTxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb0/NrRlc/RxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb0/NrRlc/RxPDU",
+                         MakeBoundCallback(&UlRxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb0/NrRlc/TxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb0/NrRlc/TxPDU",
+                         MakeBoundCallback(&DlTxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb1/NrRlc/RxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb1/NrRlc/RxPDU",
+                         MakeBoundCallback(&UlRxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb1/NrRlc/TxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb1/NrRlc/TxPDU",
+                         MakeBoundCallback(&DlTxPduCallback, arg));
+     }
+     if (m_pdcpStats)
+@@ -461,13 +461,13 @@ NrBearerStatsConnector::ConnectTracesGnb(std::string context,
+         arg->imsi = imsi;
+         arg->cellId = cellId;
+         arg->stats = m_pdcpStats;
+-        Config::Connect(basePath.str() + "/DataRadioBearerMap/*/NrPdcp/TxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/DataRadioBearerMap/*/NrPdcp/TxPDU",
+                         MakeBoundCallback(&DlTxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/DataRadioBearerMap/*/NrPdcp/RxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/DataRadioBearerMap/*/NrPdcp/RxPDU",
+                         MakeBoundCallback(&UlRxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb1/NrPdcp/TxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb1/NrPdcp/TxPDU",
+                         MakeBoundCallback(&DlTxPduCallback, arg));
+-        Config::Connect(basePath.str() + "/Srb1/NrPdcp/RxPDU",
++        Config::ConnectFailSafe(basePath.str() + "/Srb1/NrPdcp/RxPDU",
+                         MakeBoundCallback(&UlRxPduCallback, arg));
+     }
+ }
+diff --git a/helper/nr-no-backhaul-epc-helper.cc b/helper/nr-no-backhaul-epc-helper.cc
+index 86739e99..bf412fed 100644
+--- a/helper/nr-no-backhaul-epc-helper.cc
++++ b/helper/nr-no-backhaul-epc-helper.cc
+@@ -42,6 +42,8 @@ NrNoBackhaulEpcHelper::NrNoBackhaulEpcHelper()
+       m_s5LinkDelay(Seconds(0)),
+       m_s5LinkMtu(3000)
+ {
++    static uint32_t epcIndex = 0;
++    m_epcIndex = epcIndex++;
+     NS_LOG_FUNCTION(this);
+ }
+ 
+@@ -55,15 +57,22 @@ NrNoBackhaulEpcHelper::NotifyConstructionCompleted()
+     // since we use point-to-point links for links between the core network nodes,
+     // we use a /30 subnet which can hold exactly two addresses
+     // (remember that net broadcast and null address are not valid)
+-    m_x2Ipv4AddressHelper.SetBase("12.0.0.0", "255.255.255.252");
+-    m_s11Ipv4AddressHelper.SetBase("13.0.0.0", "255.255.255.252");
+-    m_s5Ipv4AddressHelper.SetBase("14.0.0.0", "255.255.255.252");
++    std::stringstream x2, s11, s5, ue, ue6;
++    x2 << "12." << m_epcIndex << ".0.0";
++    s11 << "13." << m_epcIndex << ".0.0";
++    s5 << "14." << m_epcIndex << ".0.0";
++    ue << "7." << m_epcIndex << ".0.0";
++    ue6 << "7777:f00" << std::hex << m_epcIndex << "::";
+ 
+-    // we use a /8 net for all UEs
+-    m_uePgwAddressHelper.SetBase("7.0.0.0", "255.0.0.0");
++    m_x2Ipv4AddressHelper.SetBase(x2.str().c_str(), "255.255.255.252");
++    m_s11Ipv4AddressHelper.SetBase(s11.str().c_str(), "255.255.255.252");
++    m_s5Ipv4AddressHelper.SetBase(s5.str().c_str(), "255.255.255.252");
++
++    // we use a /16 net for all UEs
++    m_uePgwAddressHelper.SetBase(ue.str().c_str(), "255.255.0.0");
+ 
+     // we use a /64 IPv6 net all UEs
+-    m_uePgwAddressHelper6.SetBase("7777:f00d::", Ipv6Prefix(64));
++    m_uePgwAddressHelper6.SetBase(Ipv6Address(ue6.str().c_str()), Ipv6Prefix(64));
+ 
+     // Create PGW, SGW and MME nodes
+     m_pgw = CreateObject<Node>();
+@@ -81,7 +90,11 @@ NrNoBackhaulEpcHelper::NotifyConstructionCompleted()
+     Ipv6StaticRoutingHelper ipv6RoutingHelper;
+     Ptr<Ipv6StaticRouting> pgwStaticRouting =
+         ipv6RoutingHelper.GetStaticRouting(m_pgw->GetObject<Ipv6>());
+-    pgwStaticRouting->AddNetworkRouteTo("7777:f00d::", Ipv6Prefix(64), Ipv6Address("::"), 1, 0);
++    pgwStaticRouting->AddNetworkRouteTo(Ipv6Address(ue6.str().c_str()),
++                                        Ipv6Prefix(64),
++                                        Ipv6Address("::"),
++                                        1,
++                                        0);
+ 
+     // create TUN device implementing tunneling of user data over GTP-U/UDP/IP in the PGW
+     m_tunDevice = CreateObject<VirtualNetDevice>();
+@@ -353,20 +366,30 @@ NrNoBackhaulEpcHelper::AddGnb(Ptr<Node> gnb, Ptr<NetDevice> nrGnbNetDevice, uint
+     Ptr<NrEpcGnbApplication> gnbApp =
+         CreateObject<NrEpcGnbApplication>(nrGnbSocket, nrGnbSocket6, cellId);
+     gnb->AddApplication(gnbApp);
+-    NS_ASSERT(gnb->GetNApplications() == 1);
+-    NS_ASSERT_MSG(gnb->GetApplication(0)->GetObject<NrEpcGnbApplication>(),
+-                  "cannot retrieve NrEpcGnbApplication");
+-    NS_LOG_LOGIC("gnb: " << gnb << ", gnb->GetApplication (0): " << gnb->GetApplication(0));
+-
+-    NS_LOG_INFO("Create NrEpcX2 entity");
+-    Ptr<NrEpcX2> x2 = CreateObject<NrEpcX2>();
+-    gnb->AggregateObject(x2);
++    NS_LOG_LOGIC("gnb: " << gnb << ", added gnbApp for cellId " << cellId);
++
++    if (gnb->GetObject<NrEpcX2>() == nullptr)
++    {
++        NS_LOG_INFO("Create NrEpcX2 entity");
++        Ptr<NrEpcX2> x2 = CreateObject<NrEpcX2>();
++        gnb->AggregateObject(x2);
++    }
+ }
+ 
+ void
+ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
+ {
+     NS_LOG_FUNCTION(this << gnb1 << gnb2);
++    AddX2Interface(gnb1->GetDevice(0), gnb2->GetDevice(0));
++}
++
++void
++NrNoBackhaulEpcHelper::AddX2Interface(Ptr<NetDevice> gnbDev1, Ptr<NetDevice> gnbDev2)
++{
++    NS_LOG_FUNCTION(this << gnbDev1 << gnbDev2);
++
++    Ptr<Node> gnb1 = gnbDev1->GetNode();
++    Ptr<Node> gnb2 = gnbDev2->GetNode();
+ 
+     // Create a point to point link between the two eNBs with
+     // the corresponding new NetDevices on each side
+@@ -374,11 +397,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
+     p2ph.SetDeviceAttribute("DataRate", DataRateValue(m_x2LinkDataRate));
+     p2ph.SetDeviceAttribute("Mtu", UintegerValue(m_x2LinkMtu));
+     p2ph.SetChannelAttribute("Delay", TimeValue(m_x2LinkDelay));
+-    NetDeviceContainer gnbDevices = p2ph.Install(gnb1, gnb2);
+-    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #1 after installing p2p dev: "
+-                 << gnb1->GetObject<Ipv4>()->GetNInterfaces());
+-    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #2 after installing p2p dev: "
+-                 << gnb2->GetObject<Ipv4>()->GetNInterfaces());
++    NetDeviceContainer x2Devices = p2ph.Install(gnb1, gnb2);
+ 
+     if (m_x2LinkEnablePcap)
+     {
+@@ -386,11 +405,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
+     }
+ 
+     m_x2Ipv4AddressHelper.NewNetwork();
+-    Ipv4InterfaceContainer gnbIpIfaces = m_x2Ipv4AddressHelper.Assign(gnbDevices);
+-    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #1 after assigning Ipv4 addr to X2 dev: "
+-                 << gnb1->GetObject<Ipv4>()->GetNInterfaces());
+-    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #2 after assigning Ipv4 addr to X2 dev: "
+-                 << gnb2->GetObject<Ipv4>()->GetNInterfaces());
++    Ipv4InterfaceContainer gnbIpIfaces = m_x2Ipv4AddressHelper.Assign(x2Devices);
+ 
+     Ipv4Address gnb1X2Address = gnbIpIfaces.GetAddress(0);
+     Ipv4Address gnb2X2Address = gnbIpIfaces.GetAddress(1);
+@@ -399,10 +414,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
+     Ptr<NrEpcX2> gnb1X2 = gnb1->GetObject<NrEpcX2>();
+     Ptr<NrEpcX2> gnb2X2 = gnb2->GetObject<NrEpcX2>();
+ 
+-    Ptr<NetDevice> gnb1NrDev = gnb1->GetDevice(0);
+-    Ptr<NetDevice> gnb2NrDev = gnb2->GetDevice(0);
+-
+-    DoAddX2Interface(gnb1X2, gnb1NrDev, gnb1X2Address, gnb2X2, gnb2NrDev, gnb2X2Address);
++    DoAddX2Interface(gnb1X2, gnbDev1, gnb1X2Address, gnb2X2, gnbDev2, gnb2X2Address);
+ }
+ 
+ void
+@@ -427,8 +439,14 @@ NrNoBackhaulEpcHelper::DoAddX2Interface(const Ptr<NrEpcX2>& gnb1X2,
+     NS_LOG_LOGIC("NrGnbNetDevice #1 = " << gnb1NrDev << " - CellId = " << gnb1CellId);
+     NS_LOG_LOGIC("NrGnbNetDevice #2 = " << gnb2NrDev << " - CellId = " << gnb2CellId);
+ 
+-    gnb1X2->AddX2Interface(gnb1CellId, gnb1X2Address, gnb2CellId, gnb2X2Address);
+-    gnb2X2->AddX2Interface(gnb2CellId, gnb2X2Address, gnb1CellId, gnb1X2Address);
++    gnb1X2->AddX2Interface(gnb1CellId,
++                           gnb1X2Address,
++                           gnb2CellId,
++                           gnb2X2Address);
++    gnb2X2->AddX2Interface(gnb2CellId,
++                           gnb2X2Address,
++                           gnb1CellId,
++                           gnb1X2Address);
+ 
+     gnb1NrDevice->GetRrc()->AddX2Neighbour(gnb2CellId);
+     gnb2NrDevice->GetRrc()->AddX2Neighbour(gnb1CellId);
+@@ -595,7 +613,16 @@ NrNoBackhaulEpcHelper::AddS1Interface(Ptr<Node> gnb,
+     int retval = gnbS1uSocket->Bind(InetSocketAddress(gnbAddress, m_gtpuUdpPort));
+     NS_ASSERT(retval == 0);
+ 
+-    Ptr<NrEpcGnbApplication> gnbApp = gnb->GetApplication(0)->GetObject<NrEpcGnbApplication>();
++    Ptr<NrEpcGnbApplication> gnbApp = nullptr;
++    for (uint32_t i = 0; i < gnb->GetNApplications(); ++i)
++    {
++        Ptr<NrEpcGnbApplication> app = gnb->GetApplication(i)->GetObject<NrEpcGnbApplication>();
++        if (app && app->GetCellId() == cellId)
++        {
++            gnbApp = app;
++            break;
++        }
++    }
+     NS_ASSERT_MSG(gnbApp, "NrEpcGnbApplication not available");
+     gnbApp->AddS1Interface(gnbS1uSocket, gnbAddress, sgwAddress);
+ 
+@@ -657,7 +684,11 @@ NrNoBackhaulEpcHelper::SetupRemoteHost(std::optional<std::string> dataRate,
+     Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
+     Ptr<Ipv4StaticRouting> remoteHostStaticRouting4 =
+         ipv4RoutingHelper.GetStaticRouting(remoteHost->GetObject<Ipv4>());
+-    remoteHostStaticRouting4->AddNetworkRouteTo(Ipv4Address("7.0.0.0"), Ipv4Mask("255.0.0.0"), 1);
++    std::stringstream ue;
++    ue << "7." << m_epcIndex << ".0.0";
++    remoteHostStaticRouting4->AddNetworkRouteTo(Ipv4Address(ue.str().c_str()),
++                                                Ipv4Mask("255.255.0.0"),
++                                                1);
+     return std::make_pair(remoteHost, internetIpIfaces.GetAddress(1, 0));
+ }
+ 
+@@ -701,8 +732,13 @@ NrNoBackhaulEpcHelper::SetupRemoteHost6(std::optional<std::string> dataRate,
+     Ipv6StaticRoutingHelper ipv6RoutingHelper;
+     Ptr<Ipv6StaticRouting> remoteHostStaticRouting =
+         ipv6RoutingHelper.GetStaticRouting(remoteHost->GetObject<Ipv6>());
+-    remoteHostStaticRouting
+-        ->AddNetworkRouteTo("7777:f00d::", Ipv6Prefix(64), internetIpIfaces.GetAddress(0, 1), 1, 0);
++    std::stringstream ue6;
++    ue6 << "7777:f00" << std::hex << m_epcIndex << "::";
++    remoteHostStaticRouting->AddNetworkRouteTo(Ipv6Address(ue6.str().c_str()),
++                                               Ipv6Prefix(64),
++                                               internetIpIfaces.GetAddress(0, 1),
++                                               1,
++                                               0);
+     return std::make_pair(remoteHost, internetIpIfaces.GetAddress(1, 1));
+ }
+ 
+diff --git a/helper/realistic-beamforming-helper.cc b/helper/realistic-beamforming-helper.cc
+index 746208e3..be171e82 100644
+--- a/helper/realistic-beamforming-helper.cc
++++ b/helper/realistic-beamforming-helper.cc
+@@ -87,6 +87,53 @@ RealisticBeamformingHelper::AssignStreams(int64_t stream)
+     return currentStream - stream;
+ }
+ 
++void
++RealisticBeamformingHelper::RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
++                                                  const Ptr<NrUeNetDevice>& ueDev)
++{
++    NS_LOG_FUNCTION(this);
++
++    for (auto it = m_spectrumPhyPairToAlgorithm.begin(); it != m_spectrumPhyPairToAlgorithm.end();)
++    {
++        bool remove = false;
++        if (gNbDev)
++        {
++            for (std::size_t ccId = 0; ccId < gNbDev->GetCcMapSize(); ccId++)
++            {
++                Ptr<NrSpectrumPhy> gnbSpectrumPhy = gNbDev->GetPhy(ccId)->GetSpectrumPhy();
++                Ptr<NrSpectrumPhy> ueSpectrumPhy = ueDev->GetPhy(ccId)->GetSpectrumPhy();
++                if (it->first.first == gnbSpectrumPhy && it->first.second == ueSpectrumPhy)
++                {
++                    remove = true;
++                    break;
++                }
++            }
++        }
++        else
++        {
++            for (std::size_t ccId = 0; ccId < ueDev->GetCcMapSize(); ccId++)
++            {
++                Ptr<NrSpectrumPhy> ueSpectrumPhy = ueDev->GetPhy(ccId)->GetSpectrumPhy();
++                if (it->first.second == ueSpectrumPhy)
++                {
++                    remove = true;
++                    break;
++                }
++            }
++        }
++
++        if (remove)
++        {
++            it->second->Dispose();
++            it = m_spectrumPhyPairToAlgorithm.erase(it);
++        }
++        else
++        {
++            ++it;
++        }
++    }
++}
++
+ BeamformingVectorPair
+ RealisticBeamformingHelper::GetBeamformingVectors(const Ptr<NrSpectrumPhy>& gnbSpectrumPhy,
+                                                   const Ptr<NrSpectrumPhy>& ueSpectrumPhy) const
+diff --git a/helper/realistic-beamforming-helper.h b/helper/realistic-beamforming-helper.h
+index df100194..08765373 100644
+--- a/helper/realistic-beamforming-helper.h
++++ b/helper/realistic-beamforming-helper.h
+@@ -71,6 +71,9 @@ class NR_EXPORT RealisticBeamformingHelper : public BeamformingHelperBase
+     void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
+                             const Ptr<NrUeNetDevice>& ueDev) override;
+ 
++    void RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
++                               const Ptr<NrUeNetDevice>& ueDev) override;
++
+     /**
+      * @brief Function that forwards the SRS SINR to the correct RealisticBeamformingAlgorithm
+      * @param srsSinr
+diff --git a/model/nr-epc-ue-nas.cc b/model/nr-epc-ue-nas.cc
+index 3b754368..b6533e78 100644
+--- a/model/nr-epc-ue-nas.cc
++++ b/model/nr-epc-ue-nas.cc
+@@ -170,10 +170,9 @@ NrEpcUeNas::ActivateQosFlow(NrQosFlow flow, Ptr<NrQosRule> rule)
+     switch (m_state)
+     {
+     case ACTIVE:
+-        NS_FATAL_ERROR(
+-            "the necessary NAS signaling to activate a QoS flow after the initial context "
+-            "has already been setup is not implemented");
+-        break;
++        NS_LOG_WARN("the necessary NAS signaling to activate a QoS flow after the initial context "
++                    "has already been setup is not implemented");
++        // break; execute bearers activation
+ 
+     default:
+         QosFlowToBeActivated qftba;
+diff --git a/model/nr-epc-x2.cc b/model/nr-epc-x2.cc
+index e14201c7..58e4f101 100644
+--- a/model/nr-epc-x2.cc
++++ b/model/nr-epc-x2.cc
+@@ -104,7 +104,33 @@ void
+ NrEpcX2::SetEpcX2SapUser(NrEpcX2SapUser* s)
+ {
+     NS_LOG_FUNCTION(this << s);
+-    m_x2SapUser = s;
++    // Legacy path: store under cell ID 0 as a fallback wildcard.
++    // Any cell-specific entry (added via the cellId overload) takes priority.
++    m_x2SapUsers[0] = s;
++}
++
++void
++NrEpcX2::SetEpcX2SapUser(uint16_t cellId, NrEpcX2SapUser* s)
++{
++    NS_LOG_FUNCTION(this << cellId << s);
++    m_x2SapUsers[cellId] = s;
++}
++
++NrEpcX2SapUser*
++NrEpcX2::GetX2SapUser(uint16_t localCellId) const
++{
++    // Prefer exact cell ID match; fall back to wildcard entry (key 0)
++    auto it = m_x2SapUsers.find(localCellId);
++    if (it != m_x2SapUsers.end())
++    {
++        return it->second;
++    }
++    auto fb = m_x2SapUsers.find(0);
++    if (fb != m_x2SapUsers.end())
++    {
++        return fb->second;
++    }
++    return nullptr;
+ }
+ 
+ NrEpcX2SapProvider*
+@@ -122,6 +148,12 @@ NrEpcX2::AddX2Interface(uint16_t localCellId,
+ {
+     NS_LOG_FUNCTION(this << localCellId << localX2Address << remoteCellId << remoteX2Address);
+ 
++    if (m_x2InterfaceSockets.find(remoteCellId) != m_x2InterfaceSockets.end())
++    {
++        NS_LOG_INFO("Mapping for remoteCellId = " << remoteCellId << " is already known; skipping socket creation");
++        return;
++    }
++
+     int retval;
+ 
+     // Get local gNB where this X2 entity belongs to
+@@ -141,9 +173,6 @@ NrEpcX2::AddX2Interface(uint16_t localCellId,
+     NS_ASSERT(retval == 0);
+     localX2uSocket->SetRecvCallback(MakeCallback(&NrEpcX2::RecvFromX2uSocket, this));
+ 
+-    NS_ASSERT_MSG(m_x2InterfaceSockets.find(remoteCellId) == m_x2InterfaceSockets.end(),
+-                  "Mapping for remoteCellId = " << remoteCellId << " is already known");
+-
+     m_x2InterfaceSockets[remoteCellId] =
+         Create<NrX2IfaceInfo>(remoteX2Address, localX2cSocket, localX2uSocket);
+ 
+@@ -206,7 +235,15 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("mmeUeS1apId = " << params.mmeUeS1apId);
+             NS_LOG_LOGIC("cellsInfo->m_localCellId = " << cellsInfo->m_localCellId);
+ 
+-            m_x2SapUser->RecvHandoverRequest(params);
++            NrEpcX2SapUser* sapUser = GetX2SapUser(params.targetCellId);
++            if (sapUser)
++            {
++                sapUser->RecvHandoverRequest(params);
++            }
++            else
++            {
++                NS_LOG_WARN("Missing SAP user for targetCellId " << params.targetCellId);
++            }
+         }
+         else if (messageType == NrEpcX2Header::SuccessfulOutcome)
+         {
+@@ -231,7 +268,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("sourceCellId = " << params.sourceCellId);
+             NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
+ 
+-            m_x2SapUser->RecvHandoverRequestAck(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvHandoverRequestAck(params);
++            }
+         }
+         else // messageType == NrEpcX2Header::UnsuccessfulOutcome
+         {
+@@ -255,7 +295,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("cause = " << params.cause);
+             NS_LOG_LOGIC("criticalityDiagnostics = " << params.criticalityDiagnostics);
+ 
+-            m_x2SapUser->RecvHandoverPreparationFailure(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvHandoverPreparationFailure(params);
++            }
+         }
+     }
+     else if (procedureCode == NrEpcX2Header::LoadIndication)
+@@ -274,7 +317,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+ 
+             NS_LOG_LOGIC("cellInformationList size = " << params.cellInformationList.size());
+ 
+-            m_x2SapUser->RecvLoadInformation(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvLoadInformation(params);
++            }
+         }
+     }
+     else if (procedureCode == NrEpcX2Header::SnStatusTransfer)
+@@ -302,7 +348,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
+             NS_LOG_LOGIC("erabsList size = " << params.erabsSubjectToStatusTransferList.size());
+ 
+-            m_x2SapUser->RecvSnStatusTransfer(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvSnStatusTransfer(params);
++            }
+         }
+     }
+     else if (procedureCode == NrEpcX2Header::UeContextRelease)
+@@ -323,7 +372,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("oldGnbUeX2apId = " << params.oldGnbUeX2apId);
+             NS_LOG_LOGIC("newGnbUeX2apId = " << params.newGnbUeX2apId);
+ 
+-            m_x2SapUser->RecvUeContextRelease(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvUeContextRelease(params);
++            }
+         }
+     }
+     else if (procedureCode == NrEpcX2Header::ResourceStatusReporting)
+@@ -348,7 +400,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC(
+                 "cellMeasurementResultList size = " << params.cellMeasurementResultList.size());
+ 
+-            m_x2SapUser->RecvResourceStatusUpdate(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvResourceStatusUpdate(params);
++            }
+         }
+     }
+     else if (procedureCode == NrEpcX2Header::HandoverCancel)
+@@ -375,7 +430,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
+             NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
+             NS_LOG_LOGIC("cause = " << params.cause);
+ 
+-            m_x2SapUser->RecvHandoverCancel(params);
++            for (auto const& pair : m_x2SapUsers)
++            {
++                pair.second->RecvHandoverCancel(params);
++            }
+         }
+     }
+     else
+@@ -408,7 +466,10 @@ NrEpcX2::RecvFromX2uSocket(Ptr<Socket> socket)
+     params.gtpTeid = gtpu.GetTeid();
+     params.ueData = packet;
+ 
+-    m_x2SapUser->RecvUeData(params);
++    for (auto const& pair : m_x2SapUsers)
++    {
++        pair.second->RecvUeData(params);
++    }
+ }
+ 
+ //
+diff --git a/model/nr-gnb-rrc.cc b/model/nr-gnb-rrc.cc
+index 7fa9a312..54bba432 100644
+--- a/model/nr-gnb-rrc.cc
++++ b/model/nr-gnb-rrc.cc
+@@ -435,18 +435,31 @@ void
+ NrUeManager::SetupDataRadioBearer(NrQosFlow flow,
+                                   uint8_t qfi,
+                                   uint32_t gtpTeid,
+-                                  Ipv4Address transportLayerAddress)
++                                  Ipv4Address transportLayerAddress,
++                                  uint8_t drbid)
+ {
+     NS_LOG_FUNCTION(this << (uint32_t)m_rnti);
+ 
++    // Check if bearer with this QFI already exists
++    for (const auto& [id, info] : m_drbMap)
++    {
++        if (info->m_qosFlowIdentity == qfi && qfi != 0)
++        {
++            NS_LOG_WARN("Bearer for QFI " << (uint32_t)qfi
++                                          << " already exists, skipping SetupDataRadioBearer");
++            return;
++        }
++    }
++
+     Ptr<NrDataRadioBearerInfo> drbInfo = CreateObject<NrDataRadioBearerInfo>();
+-    uint8_t drbid = AddDataRadioBearerInfo(drbInfo);
++    drbid = AddDataRadioBearerInfo(drbInfo, drbid);
+     uint8_t lcid = nr::Drbid2Lcid(drbid);
+     uint8_t qosFlowId = nr::Drbid2Qfi(drbid);
+     NS_ASSERT_MSG(qfi == 0 || qosFlowId == qfi,
+                   "QFI mismatch (" << (uint32_t)qosFlowId << " != " << (uint32_t)qfi
+                                    << ", the assumption that ID are allocated in the same "
+-                                      "way by MME and RRC is not valid any more");
++                                      "way by MME and RRC is not valid any more. DRBID was "
++                                   << (uint32_t)drbid);
+     drbInfo->m_qosFlow = flow;
+     drbInfo->m_qosFlowIdentity = qfi;
+     drbInfo->m_drbIdentity = drbid;
+@@ -784,6 +797,7 @@ NrUeManager::PrepareHandover(uint16_t cellId)
+         m_pendingHandoverTargetCellId = cellId;
+         return; // do NOT fall through; no X2 message yet
+ 
++    case HANDOVER_PREPARATION: // already preparing a HO
+     case HANDOVER_PATH_SWITCH: // already handed-over UE
+     case HANDOVER_LEAVING:     // concurrent HO in progress
+     case HANDOVER_JOINING:
+@@ -1639,24 +1653,36 @@ NrUeManager::BuildHoCancelMsg()
+ }
+ 
+ uint8_t
+-NrUeManager::AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> drbInfo)
++NrUeManager::AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> drbInfo, uint8_t drbid)
+ {
+     NS_LOG_FUNCTION(this);
+     const uint8_t MAX_DRB_ID = 32;
+-    for (int drbid = (m_lastAllocatedDrbid + 1) % MAX_DRB_ID; drbid != m_lastAllocatedDrbid;
+-         drbid = (drbid + 1) % MAX_DRB_ID)
++
++    if (drbid != 0)
++    {
++        NS_ASSERT_MSG(m_drbMap.find(drbid) == m_drbMap.end(),
++                      "requested DRBID " << (uint32_t)drbid << " is already in use");
++        drbInfo->m_drbIdentity = drbid;
++        m_drbMap.insert(std::pair<uint8_t, Ptr<NrDataRadioBearerInfo>>(drbid, drbInfo));
++        return drbid;
++    }
++
++    for (int drbid_loop = (m_lastAllocatedDrbid + 1) % MAX_DRB_ID;
++         drbid_loop != m_lastAllocatedDrbid;
++         drbid_loop = (drbid_loop + 1) % MAX_DRB_ID)
+     {
+         // Skip DRBID 0 (not allowed), 1-2 (reserved), 4 (reserved for sidelink)
+-        if (drbid != 0 && drbid != 1 && drbid != 2 && drbid != 4)
++        if (drbid_loop != 0 && drbid_loop != 1 && drbid_loop != 2 && drbid_loop != 4)
+         {
+-            if (m_drbMap.find(drbid) == m_drbMap.end())
++            if (m_drbMap.find(drbid_loop) == m_drbMap.end())
+             {
+-                m_drbMap.insert(std::pair<uint8_t, Ptr<NrDataRadioBearerInfo>>(drbid, drbInfo));
+-                drbInfo->m_drbIdentity = drbid;
+-                m_lastAllocatedDrbid = drbid;
+-                NS_LOG_DEBUG("Allocated DRBID " << (uint32_t)drbid << " (LCID " << (uint32_t)drbid
+-                                                << ") for RNTI " << m_rnti);
+-                return drbid;
++                drbInfo->m_drbIdentity = drbid_loop;
++                m_drbMap.insert(
++                    std::pair<uint8_t, Ptr<NrDataRadioBearerInfo>>(drbid_loop, drbInfo));
++                m_lastAllocatedDrbid = drbid_loop;
++                NS_LOG_DEBUG("Allocated DRBID " << (uint32_t)drbid_loop << " (LCID "
++                                                << (uint32_t)drbid_loop << ") for RNTI " << m_rnti);
++                return drbid_loop;
+             }
+         }
+     }
+@@ -3124,10 +3150,12 @@ NrGnbRrc::DoRecvHandoverRequest(NrEpcX2SapUser::HandoverRequestParams req)
+ 
+     for (auto it = req.bearers.begin(); it != req.bearers.end(); ++it)
+     {
++        uint8_t drbid = nr::Qfi2Drbid(it->erabId);
+         ueManager->SetupDataRadioBearer(it->erabLevelQosParameters,
+                                         it->erabId,
+                                         it->gtpTeid,
+-                                        it->transportLayerAddress);
++                                        it->transportLayerAddress,
++                                        drbid);
+         NrEpcX2Sap::ErabAdmittedItem i;
+         i.erabId = it->erabId;
+         ackParams.admittedBearers.push_back(i);
+@@ -3182,8 +3210,14 @@ NrGnbRrc::DoRecvHandoverRequestAck(NrEpcX2SapUser::HandoverRequestAckParams para
+     NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
+ 
+     uint16_t rnti = params.oldGnbUeX2apId;
+-    Ptr<NrUeManager> ueManager = GetUeManager(rnti);
+-    ueManager->RecvHandoverRequestAck(params);
++    if (HasUeManager(rnti))
++    {
++        Ptr<NrUeManager> ueManager = GetUeManager(rnti);
++        if (ueManager->GetState() == NrUeManager::HANDOVER_PREPARATION)
++        {
++            ueManager->RecvHandoverRequestAck(params);
++        }
++    }
+ }
+ 
+ void
+@@ -3205,7 +3239,10 @@ NrGnbRrc::DoRecvHandoverPreparationFailure(NrEpcX2SapUser::HandoverPreparationFa
+     if (HasUeManager(rnti))
+     {
+         Ptr<NrUeManager> ueManager = GetUeManager(rnti);
+-        ueManager->RecvHandoverPreparationFailure(params.targetCellId);
++        if (ueManager->GetState() == NrUeManager::HANDOVER_PREPARATION)
++        {
++            ueManager->RecvHandoverPreparationFailure(params.targetCellId);
++        }
+     }
+ }
+ 
+@@ -3227,7 +3264,10 @@ NrGnbRrc::DoRecvSnStatusTransfer(NrEpcX2SapUser::SnStatusTransferParams params)
+     if (HasUeManager(rnti))
+     {
+         Ptr<NrUeManager> ueManager = GetUeManager(rnti);
+-        ueManager->RecvSnStatusTransfer(params);
++        if (ueManager->GetState() == NrUeManager::HANDOVER_JOINING)
++        {
++            ueManager->RecvSnStatusTransfer(params);
++        }
+     }
+ }
+ 
+@@ -3246,8 +3286,12 @@ NrGnbRrc::DoRecvUeContextRelease(NrEpcX2SapUser::UeContextReleaseParams params)
+     // check if the RNTI to be removed is not stale
+     if (HasUeManager(rnti))
+     {
+-        GetUeManager(rnti)->RecvUeContextRelease(params);
+-        RemoveUe(rnti);
++        Ptr<NrUeManager> ueManager = GetUeManager(rnti);
++        if (ueManager->GetState() == NrUeManager::HANDOVER_LEAVING)
++        {
++            ueManager->RecvUeContextRelease(params);
++            RemoveUe(rnti);
++        }
+     }
+ }
+ 
+diff --git a/model/nr-mac-scheduler-ns3.cc b/model/nr-mac-scheduler-ns3.cc
+index 66d16dcf..ff8d44a1 100644
+--- a/model/nr-mac-scheduler-ns3.cc
++++ b/model/nr-mac-scheduler-ns3.cc
+@@ -947,7 +947,16 @@ NrMacSchedulerNs3::DoSchedDlCqiInfoReq(
+ 
+     for (const auto& cqi : params.m_cqiList)
+     {
+-        NS_ASSERT(m_ueMap.find(cqi.m_rnti) != m_ueMap.end());
++        if (m_ueMap.find(cqi.m_rnti) == m_ueMap.end())
++        {
++            NS_LOG_WARN("Transfer in a forced way the context for RNTI " << cqi.m_rnti);
++            NrMacCschedSapProvider::CschedUeConfigReqParameters req;
++            req.m_rnti = cqi.m_rnti;
++            req.m_beamId = ns3::BeamId(0, 0);
++            req.m_transmissionMode = 0;
++            req.m_reconfigureFlag = false;
++            DoCschedUeConfigReq(req);
++        }
+         const std::shared_ptr<NrMacSchedulerUeInfo>& ue = m_ueMap.find(cqi.m_rnti)->second;
+         m_cqiManagement.DlCqiReported(cqi, ue, expirationTime, m_maxDlMcs, GetBandwidthInRbg());
+         m_csiFeedbackReceived(GetCellId(), GetBwpId(), ue);
+diff --git a/model/nr-mimo-matrices-eigen.cc b/model/nr-mimo-matrices-eigen.cc
+index 9eed6f22..8de39fbd 100644
+--- a/model/nr-mimo-matrices-eigen.cc
++++ b/model/nr-mimo-matrices-eigen.cc
+@@ -203,7 +203,7 @@ NrIntfNormChanMat::ExtractOptimalPrecodingMatrices(uint8_t rank) const
+                                                  this->GetNumRows(),
+                                                  this->GetNumCols());
+ 
+-        auto svd = H.jacobiSvd(Eigen::ComputeFullV);
++        auto svd = H.jacobiSvd<Eigen::ComputeFullV>();
+         auto V = svd.matrixV();
+         for (size_t i = 0; i < m_numRows; i++)
+         {
+-- 
+2.50.1 (Apple Git-155)
+

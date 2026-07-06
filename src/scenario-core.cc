@@ -141,6 +141,8 @@ Scenario::operator()()
         std::vector<RadioMapGenConfig> plotFiles;
         std::vector<AggregationTask> aggregationTasks;
 
+        Ptr<Object> lastRemHelper = nullptr;
+
         size_t mapIdx = 0;
         for (const auto& config : radioMaps)
         {
@@ -494,6 +496,7 @@ Scenario::operator()()
                         remHelper->SetSimTag(ss.str());
                         remHelper->SetLogGeocentricRem(config.logGeocentricRem);
                         remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+                        lastRemHelper = remHelper;
 
                         for (const auto& par : config.parameters)
                         {
@@ -509,6 +512,7 @@ Scenario::operator()()
                         nrRemHelpers.push_back(remHelper); // Keep alive
                         remHelper->SetSimTag(ss.str());
                         remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+                        lastRemHelper = remHelper;
 
                         for (const auto& par : config.parameters)
                         {
@@ -560,6 +564,8 @@ Scenario::operator()()
                     Ptr<ThreeDimensionalRemHelper> remHelper =
                         CreateObject<ThreeDimensionalRemHelper>();
                     lte3dRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+                    lastRemHelper = remHelper;
 
                     for (const auto& par : config.parameters)
                     {
@@ -579,6 +585,8 @@ Scenario::operator()()
                     Ptr<RadioEnvironmentMapHelper> remHelper =
                         CreateObject<RadioEnvironmentMapHelper>();
                     lteRemHelpers.push_back(remHelper); // Keep alive
+                    remHelper->SetAttribute("StopWhenDone", BooleanValue(false));
+                    lastRemHelper = remHelper;
 
                     for (const auto& par : config.parameters)
                     {
@@ -599,6 +607,11 @@ Scenario::operator()()
                 NS_LOG_WARN("Unknown radio map type: " << config.type);
             }
             mapIdx++;
+        }
+
+        if (CONFIGURATOR->GetCloseAfterRadioMaps() && lastRemHelper != nullptr)
+        {
+            lastRemHelper->SetAttribute("StopWhenDone", BooleanValue(true));
         }
 
         Simulator::Run();

@@ -11,12 +11,12 @@
       "coordinates": "geocentric",
       "logGeocentricREM": true,
       "parameters": {
-        "MinLon": "80.0",
+        "MinLon": "60.0",
         "MaxLon": "130.0",
         "MinLat": "0.0",
         "MaxLat": "60.0",
         "Altitude": "2.0",
-        "XRes": "100",
+        "XRes": "150",
         "YRes": "100",
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.5s"
@@ -340,6 +340,42 @@
         ]
       },
       "applications": []
+    },
+    {
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "directivity": [
+            {
+              "mode": "earth-centered"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 350.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": 102.0
+          },
+          {
+            "name": "Offset",
+            "value": 355.0
+          }
+        ]
+      },
+      "applications": []
     }
   ],
   "remotes": [
@@ -359,10 +395,14 @@
             },
             {
               "name": "Remote",
-              "value": [
-                "7.0.0.2",
-                1234
-              ]
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
             },
             {
               "name": "MaxPackets",
@@ -391,10 +431,14 @@
             },
             {
               "name": "Remote",
-              "value": [
-                "7.0.0.3",
-                1234
-              ]
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 1,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
             },
             {
               "name": "MaxPackets",

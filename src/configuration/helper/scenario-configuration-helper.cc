@@ -848,6 +848,7 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
     cmd.AddValue("name", "Name of the scenario", m_name);
     cmd.AddValue("config", "Configuration file path", configFilePath);
     cmd.AddValue("radioMaps", "Enables the generation of the Radio Maps", m_generateRadioMaps);
+    cmd.AddValue("closeAfterRadioMaps", "Closes the simulation after all radioMaps has been generated", m_closeAfterRadioMaps);
     cmd.AddValue("realTime", "Do not buffer output on files, flush immediately", m_realTime);
     cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
     cmd.AddValue("output",
@@ -1464,6 +1465,12 @@ bool
 ScenarioConfigurationHelper::GetGenerateRadioMaps() const
 {
     return m_generateRadioMaps;
+}
+
+bool
+ScenarioConfigurationHelper::GetCloseAfterRadioMaps() const
+{
+    return m_closeAfterRadioMaps;
 }
 
 const std::vector<ScenarioConfigurationHelper::RadioMapConfig>

@@ -1,0 +1,100 @@
+From d9462f93559627f690886b259ee7155f367aed9b Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:57:23 +0200
+Subject: [PATCH 5/5] Misc fixes (IRS, TypeId, Assert skips)
+
+---
+ src/applications/model/tgax-virtual-desktop.cc    |  3 ++-
+ src/applications/model/tgax-voip-traffic.cc       |  3 ++-
+ src/core/model/object-base.h                      |  2 +-
+ src/spectrum/model/multi-model-spectrum-channel.h | 12 +++++++++++-
+ 4 files changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/src/applications/model/tgax-virtual-desktop.cc b/src/applications/model/tgax-virtual-desktop.cc
+index 1e79136b1..979e6a21a 100644
+--- a/src/applications/model/tgax-virtual-desktop.cc
++++ b/src/applications/model/tgax-virtual-desktop.cc
+@@ -25,6 +25,7 @@
+ #include "ns3/socket-factory.h"
+ #include "ns3/socket.h"
+ #include "ns3/string.h"
++#include "ns3/tcp-socket-factory.h"
+ 
+ #include <cmath>
+ 
+@@ -58,7 +59,7 @@ TgaxVirtualDesktop::GetTypeId()
+             .AddAttribute(
+                 "Protocol",
+                 "The type of protocol to use. This should be a subclass of ns3::SocketFactory",
+-                TypeIdValue(TypeId::LookupByName("ns3::TcpSocketFactory")),
++                TypeIdValue(TcpSocketFactory::GetTypeId()),
+                 MakeTypeIdAccessor(&TgaxVirtualDesktop::m_protocolTid),
+                 MakeTypeIdChecker())
+             .AddAttribute(
+diff --git a/src/applications/model/tgax-voip-traffic.cc b/src/applications/model/tgax-voip-traffic.cc
+index 90af41d36..4f2e64c89 100644
+--- a/src/applications/model/tgax-voip-traffic.cc
++++ b/src/applications/model/tgax-voip-traffic.cc
+@@ -15,6 +15,7 @@
+ #include "ns3/node.h"
+ #include "ns3/nstime.h"
+ #include "ns3/packet-socket-address.h"
++#include "ns3/packet-socket-factory.h"
+ #include "ns3/packet.h"
+ #include "ns3/random-variable-stream.h"
+ #include "ns3/simulator.h"
+@@ -41,7 +42,7 @@ TgaxVoipTraffic::GetTypeId()
+                 "Protocol",
+                 "The type of protocol to use. This should be a subclass of ns3::SocketFactory",
+                 TypeId::ATTR_GET | TypeId::ATTR_CONSTRUCT, // prevent setting after construction
+-                TypeIdValue(TypeId::LookupByName("ns3::PacketSocketFactory")),
++                TypeIdValue(PacketSocketFactory::GetTypeId()),
+                 MakeTypeIdAccessor(&TgaxVoipTraffic::m_protocolTid),
+                 MakeTypeIdChecker())
+             .AddAttribute(
+diff --git a/src/core/model/object-base.h b/src/core/model/object-base.h
+index 7c637516e..eb0cff3a2 100644
+--- a/src/core/model/object-base.h
++++ b/src/core/model/object-base.h
+@@ -43,7 +43,7 @@
+             tid.GetParent();                                                                       \
+             NS_WARNING_POP;                                                                        \
+         }                                                                                          \
+-    } Object##type##RegistrationVariable
++    } Object##type##RegistrationVariable __attribute__((used))
+ 
+ /**
+  * @ingroup object
+diff --git a/src/spectrum/model/multi-model-spectrum-channel.h b/src/spectrum/model/multi-model-spectrum-channel.h
+index 0736f14ed..4218d06ad 100644
+--- a/src/spectrum/model/multi-model-spectrum-channel.h
++++ b/src/spectrum/model/multi-model-spectrum-channel.h
+@@ -112,7 +112,6 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+   protected:
+     void DoDispose() override;
+ 
+-  private:
+     /**
+      * This method checks if m_rxSpectrumModelInfoMap contains an entry
+      * for the given TX SpectrumModel. If such entry exists, it returns
+@@ -147,6 +146,17 @@ class MultiModelSpectrumChannel : public SpectrumChannel
+      */
+     virtual void StartRx(const RxInfo& rxInfo);
+ 
++    const TxSpectrumModelInfoMap_t& GetTxSpectrumModelInfoMap() const
++    {
++        return m_txSpectrumModelInfoMap;
++    }
++
++    const RxSpectrumModelInfoMap_t& GetRxSpectrumModelInfoMap() const
++    {
++        return m_rxSpectrumModelInfoMap;
++    }
++
++  private:
+     /**
+      * Data structure holding, for each TX SpectrumModel,  all the
+      * converters to any RX SpectrumModel, and all the corresponding
+-- 
+2.50.1 (Apple Git-155)
+

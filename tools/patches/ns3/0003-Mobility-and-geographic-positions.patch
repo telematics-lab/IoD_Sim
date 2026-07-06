@@ -1,23 +1,101 @@
-From 0f8b352dd72c7f2172853c73ec3b875236c1cd4b Mon Sep 17 00:00:00 2001
-From: Giovanni Grieco <giovanni@grieco.dev>
-Date: Thu, 30 May 2024 12:22:02 +0200
-Subject: [PATCH] mobility: Introduce GeocentricMobiltyModel API
+From 8671f9a1fd81bbb911cf3e675c4459f084904571 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:57:23 +0200
+Subject: [PATCH 3/5] Mobility and geographic positions
 
 ---
+ src/core/model/vector.cc                      |  12 +
+ src/core/model/vector.h                       |  20 ++
  src/mobility/CMakeLists.txt                   |   2 +
- ...entric-constant-position-mobility-model.cc | 234 ++++--------------
- ...centric-constant-position-mobility-model.h | 108 +-------
- .../model/geocentric-mobility-model.cc        | 177 +++++++++++++
- .../model/geocentric-mobility-model.h         | 153 ++++++++++++
- src/mobility/model/geographic-positions.h     |   7 +
- .../model/channel-condition-model.cc          |   8 +-
- .../model/three-gpp-propagation-loss-model.cc |  73 ++++--
- .../examples/three-gpp-ntn-channel-example.cc |   9 +-
- src/spectrum/model/three-gpp-channel-model.cc |  27 +-
- 10 files changed, 483 insertions(+), 315 deletions(-)
+ .../examples/leo-satellite-example.cc         |   6 +-
+ src/mobility/helper/mobility-helper.cc        |   7 +-
+ src/mobility/helper/mobility-helper.h         |   1 +
+ ...entric-constant-position-mobility-model.cc | 241 +++++-------------
+ ...centric-constant-position-mobility-model.h | 112 +-------
+ .../model/geocentric-ecef-mobility-model.cc   |   4 +-
+ .../model/geocentric-ecef-mobility-model.h    |   2 +
+ .../model/geocentric-mobility-model.cc        | 192 ++++++++++++++
+ .../model/geocentric-mobility-model.h         | 154 +++++++++++
+ src/mobility/model/geographic-positions.cc    |  44 ++++
+ src/mobility/model/geographic-positions.h     |  32 +++
+ .../model/leo-circular-orbit-mobility-model.h |   5 +-
+ src/mobility/model/mobility-model.h           |   1 +
+ 16 files changed, 545 insertions(+), 290 deletions(-)
  create mode 100644 src/mobility/model/geocentric-mobility-model.cc
  create mode 100644 src/mobility/model/geocentric-mobility-model.h
 
+diff --git a/src/core/model/vector.cc b/src/core/model/vector.cc
+index 46446ac0d..a75d03674 100644
+--- a/src/core/model/vector.cc
++++ b/src/core/model/vector.cc
+@@ -212,6 +212,12 @@ CrossProduct(const Vector3D& a, const Vector3D& b)
+     return Vector3D(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+ }
+ 
++double
++DotProduct(const Vector3D& a, const Vector3D& b)
++{
++    return a.x * b.x + a.y * b.y + a.z * b.z;
++}
++
+ std::ostream&
+ operator<<(std::ostream& os, const Vector2D& vector)
+ {
+@@ -303,4 +309,10 @@ CrossProduct(const Vector2D& a, const Vector2D& b)
+     return (a.x * b.y) - (a.y * b.x);
+ }
+ 
++double
++DotProduct(const Vector2D& a, const Vector2D& b)
++{
++    return a.x * b.x + a.y * b.y;
++}
++
+ } // namespace ns3
+diff --git a/src/core/model/vector.h b/src/core/model/vector.h
+index 576b2d10e..a53d047ae 100644
+--- a/src/core/model/vector.h
++++ b/src/core/model/vector.h
+@@ -193,6 +193,14 @@ class Vector3D
+      * @return The cross product of \pname{a} and \pname{b}
+      */
+     friend Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
++
++    /**
++     * Dot product
++     * @param [in] a lhs vector.
++     * @param [in] b rhs vector.
++     * @return The dot product of \pname{a} and \pname{b}
++     */
++    friend double DotProduct(const Vector3D& a, const Vector3D& b);
+ };
+ 
+ /**
+@@ -354,12 +362,24 @@ class Vector2D
+      * @return The cross product of \pname{a} and \pname{b} @$ a_x b_y - a_y b_x @$
+      */
+     friend double CrossProduct(const Vector2D& a, const Vector2D& b);
++
++    /**
++     * Dot product
++     * @param [in] a lhs vector.
++     * @param [in] b rhs vector.
++     * @return The dot product of \pname{a} and \pname{b}
++     */
++    friend double DotProduct(const Vector2D& a, const Vector2D& b);
+ };
+ 
+ double CalculateDistance(const Vector3D& a, const Vector3D& b);
+ double CalculateDistance(const Vector2D& a, const Vector2D& b);
+ double CalculateDistanceSquared(const Vector3D& a, const Vector3D& b);
+ double CalculateDistanceSquared(const Vector2D& a, const Vector2D& b);
++Vector3D CrossProduct(const Vector3D& a, const Vector3D& b);
++double CrossProduct(const Vector2D& a, const Vector2D& b);
++double DotProduct(const Vector3D& a, const Vector3D& b);
++double DotProduct(const Vector2D& a, const Vector2D& b);
+ std::ostream& operator<<(std::ostream& os, const Vector3D& vector);
+ std::ostream& operator<<(std::ostream& os, const Vector2D& vector);
+ std::istream& operator>>(std::istream& is, Vector3D& vector);
 diff --git a/src/mobility/CMakeLists.txt b/src/mobility/CMakeLists.txt
 index 35d1a7f8b..648d786b8 100644
 --- a/src/mobility/CMakeLists.txt
@@ -38,8 +116,56 @@ index 35d1a7f8b..648d786b8 100644
      model/geographic-positions.h
      model/hierarchical-mobility-model.h
      model/leo-circular-orbit-mobility-model.h
+diff --git a/src/mobility/examples/leo-satellite-example.cc b/src/mobility/examples/leo-satellite-example.cc
+index 5f7d91681..5365772c0 100644
+--- a/src/mobility/examples/leo-satellite-example.cc
++++ b/src/mobility/examples/leo-satellite-example.cc
+@@ -470,10 +470,10 @@ main(int argc, char* argv[])
+     groundStation.node = CreateObject<Node>();
+     Ptr<GeocentricEcefMobilityModel> groundNodeMobility =
+         CreateObject<GeocentricEcefMobilityModel>();
+-    groundNodeMobility->SetGeographicPosition(gsPos);
++    groundNodeMobility->SetPosition(gsPos, PositionType::GEOGRAPHIC);
+ 
+-    groundStation.posGEO = groundNodeMobility->GetGeographicPosition();
+-    groundStation.posECEF = groundNodeMobility->GetGeocentricPosition();
++    groundStation.posGEO = groundNodeMobility->GetPosition(PositionType::GEOGRAPHIC);
++    groundStation.posECEF = groundNodeMobility->GetPosition(PositionType::GEOCENTRIC);
+     NS_LOG_DEBUG(
+         "Ground Node Geocentric Position (ECEF x[m]/y[m]/z[m]): " << groundStation.posECEF);
+     NS_LOG_DEBUG(
+diff --git a/src/mobility/helper/mobility-helper.cc b/src/mobility/helper/mobility-helper.cc
+index f89e33cba..5961fe9b7 100644
+--- a/src/mobility/helper/mobility-helper.cc
++++ b/src/mobility/helper/mobility-helper.cc
+@@ -101,8 +101,11 @@ MobilityHelper::Install(Ptr<Node> node) const
+             NS_LOG_DEBUG("node=" << object << ", mob=" << hierarchical);
+         }
+     }
+-    Vector position = m_position->GetNext();
+-    model->SetPosition(position);
++    if (m_position)
++    {
++        Vector position = m_position->GetNext();
++        model->SetPosition(position);
++    }
+ }
+ 
+ void
+diff --git a/src/mobility/helper/mobility-helper.h b/src/mobility/helper/mobility-helper.h
+index 60d94a907..a5d05e716 100644
+--- a/src/mobility/helper/mobility-helper.h
++++ b/src/mobility/helper/mobility-helper.h
+@@ -31,6 +31,7 @@ class MobilityModel;
+  */
+ class MobilityHelper
+ {
++  friend class MobilityFactoryHelper;
+   public:
+     /**
+      * Construct a Mobility Helper which is used to make life easier when working
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.cc b/src/mobility/model/geocentric-constant-position-mobility-model.cc
-index 8caa63d3e..08af770e8 100644
+index 8caa63d3e..a74f8cdae 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.cc
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.cc
 @@ -4,9 +4,12 @@
@@ -64,7 +190,7 @@ index 8caa63d3e..08af770e8 100644
              .SetGroupName("Mobility")
              .AddConstructor<GeocentricConstantPositionMobilityModel>()
              .AddAttribute(
-@@ -37,200 +40,69 @@ GeocentricConstantPositionMobilityModel::GetTypeId()
+@@ -37,200 +40,76 @@ GeocentricConstantPositionMobilityModel::GetTypeId()
                  "altitude",
                  Vector3DValue({0, 0, 0}),
                  MakeVector3DAccessor(&GeocentricConstantPositionMobilityModel::m_position),
@@ -258,6 +384,9 @@ index 8caa63d3e..08af770e8 100644
 +                                                                     m_position.y,
 +                                                                     m_position.z,
 +                                                                     GetEarthSpheroidType());
++    case PositionType::PROJECTED:
++        return GeographicPositions::GeographicToProjectedCoordinates(m_position,
++                                                                     GetEarthSpheroidType());
 +    case PositionType::GEOGRAPHIC:
 +        return m_position;
 +    default:
@@ -290,6 +419,10 @@ index 8caa63d3e..08af770e8 100644
 +    case PositionType::GEOGRAPHIC:
 +        m_position = position;
 +        break;
++    case PositionType::PROJECTED:
++        m_position =
++            GeographicPositions::ProjectedToGeographicCoordinates(position, GetEarthSpheroidType());
++        break;
 +    default:
 +        NS_ABORT_MSG("Unknown PositionType requested");
 +        break;
@@ -315,7 +448,7 @@ index 8caa63d3e..08af770e8 100644
  
  } // namespace ns3
 diff --git a/src/mobility/model/geocentric-constant-position-mobility-model.h b/src/mobility/model/geocentric-constant-position-mobility-model.h
-index bfcd3a247..828d4052e 100644
+index bfcd3a247..3ed2cdcca 100644
 --- a/src/mobility/model/geocentric-constant-position-mobility-model.h
 +++ b/src/mobility/model/geocentric-constant-position-mobility-model.h
 @@ -4,11 +4,12 @@
@@ -341,7 +474,7 @@ index bfcd3a247..828d4052e 100644
  {
    public:
      /**
-@@ -39,119 +40,26 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
+@@ -39,119 +40,28 @@ class GeocentricConstantPositionMobilityModel : public MobilityModel
      GeocentricConstantPositionMobilityModel() = default;
      ~GeocentricConstantPositionMobilityModel() override = default;
  
@@ -351,7 +484,7 @@ index bfcd3a247..828d4052e 100644
 -        return CreateObject<GeocentricConstantPositionMobilityModel>(*this);
 -    }
 -
--    /**
+     /**
 -     * @brief Computes elevation angle between a ground terminal and a HAPS/Satellite.
 -     * After calculating the plane perpendicular to a cartesian position vector,
 -     * the elevation angle is calculated using
@@ -361,9 +494,12 @@ index bfcd3a247..828d4052e 100644
 -     * @param other pointer to the HAPS/satellite mobility model
 -     * @return the elevation angle
 -     * in degrees
--     */
++     * @brief Copy the mobility model
++     * @return a copy of the mobility model
+      */
 -    virtual double GetElevationAngle(Ptr<const GeocentricConstantPositionMobilityModel> other);
--
++    Ptr<MobilityModel> Copy() const override;
+ 
 -    /**
 -     * @brief Get the position using geographic (geodetic) coordinates
 -     * @return Vector containing (latitude (degree), longitude (degree), altitude (meter))
@@ -388,7 +524,7 @@ index bfcd3a247..828d4052e 100644
 -     * @return Vector containing (x, y, z) (meter) coordinates
 -     */
 -    virtual Vector GetGeocentricPosition() const;
--
+ 
 -    /**
 -     * @brief Set the position using Geocentric Cartesian coordinates
 -     * @param position pointer to a Vector containing (x, y, z) (meter) coordinates
@@ -401,15 +537,12 @@ index bfcd3a247..828d4052e 100644
 -     */
 -    virtual void SetCoordinateTranslationReferencePoint(const Vector& refPoint);
 -
-     /**
+-    /**
 -     * @brief Get the reference point for coordinate conversion
 -     * @return Vector containing geographic reference point (meter)
-+     * @brief Copy the mobility model
-+     * @return a copy of the mobility model
-      */
+-     */
 -    virtual Vector GetCoordinateTranslationReferencePoint() const;
-+    Ptr<MobilityModel> Copy() const override;
- 
+-
 -    /**
 -     * @return the current position
 -     */
@@ -425,8 +558,9 @@ index bfcd3a247..828d4052e 100644
 -     * @return the distance between the two objects. Unit is meters.
 -     */
 -    double GetDistanceFrom(Ptr<const GeocentricConstantPositionMobilityModel> other) const;
- 
-   private:
+-
+-  private:
++  protected:
      /** @copydoc GetPosition() */
 -    Vector DoGetPosition() const override;
 +    Vector DoGetPosition(PositionType type) const override;
@@ -451,6 +585,8 @@ index bfcd3a247..828d4052e 100644
 -    virtual void DoSetCoordinateTranslationReferencePoint(const Vector& refPoint);
 -    /** @copydoc GetCoordinateTranslationReferencePoint() */
 -    virtual Vector DoGetCoordinateTranslationReferencePoint() const;
++
++  private:
  
      /**
       * the constant Geographic position,, in order: latitude (degree), longitude (degree), altitude
@@ -466,12 +602,40 @@ index bfcd3a247..828d4052e 100644
  };
  
  } // namespace ns3
+diff --git a/src/mobility/model/geocentric-ecef-mobility-model.cc b/src/mobility/model/geocentric-ecef-mobility-model.cc
+index aee8df32a..23d77d178 100644
+--- a/src/mobility/model/geocentric-ecef-mobility-model.cc
++++ b/src/mobility/model/geocentric-ecef-mobility-model.cc
+@@ -33,8 +33,8 @@ GeocentricEcefMobilityModel::DoGetPosition() const
+     NS_LOG_FUNCTION(this);
+ 
+     // Return ECEF coordinates instead of ENU
+-    // Use the public GetGeocentricPosition() method which returns ECEF
+-    return GetGeocentricPosition();
++    // Use the public GetPosition() method with GEOCENTRIC type which returns ECEF
++    return GetPosition(PositionType::GEOCENTRIC);
+ }
+ 
+ } // namespace ns3
+diff --git a/src/mobility/model/geocentric-ecef-mobility-model.h b/src/mobility/model/geocentric-ecef-mobility-model.h
+index 15024478c..0957ad006 100644
+--- a/src/mobility/model/geocentric-ecef-mobility-model.h
++++ b/src/mobility/model/geocentric-ecef-mobility-model.h
+@@ -60,6 +60,8 @@ class GeocentricEcefMobilityModel : public GeocentricConstantPositionMobilityMod
+     ~GeocentricEcefMobilityModel() override = default;
+ 
+   private:
++    using GeocentricConstantPositionMobilityModel::DoGetPosition;
++
+     /**
+      * @brief Override to return ECEF coordinates instead of ENU
+      * @return the position in ECEF (Earth-Centered Earth-Fixed) coordinates
 diff --git a/src/mobility/model/geocentric-mobility-model.cc b/src/mobility/model/geocentric-mobility-model.cc
 new file mode 100644
-index 000000000..22b66525e
+index 000000000..2cb31f86a
 --- /dev/null
 +++ b/src/mobility/model/geocentric-mobility-model.cc
-@@ -0,0 +1,177 @@
+@@ -0,0 +1,192 @@
 +/*
 + * Copyright (C) 2023 University of Padua.
 + * Copyright (C) 2023 Polytechnic University of Bari.
@@ -515,6 +679,9 @@ index 000000000..22b66525e
 +        break;
 +    case PositionType::GEOGRAPHIC:
 +        os << "GEOGRAPHIC";
++        break;
++    case PositionType::PROJECTED:
++        os << "PROJECTED";
 +        break;
 +    default:
 +        os << "UNKNOWN";
@@ -591,7 +758,17 @@ index 000000000..22b66525e
 +Vector
 +GeocentricMobilityModel::DoGetPosition() const
 +{
-+    return DoGetPosition(PositionType::TOPOCENTRIC);
++    auto model = GetEarthSpheroidType();
++    if (model == GeographicPositions::EarthSpheroidType::SPHERE)
++    {
++        return DoGetPosition(PositionType::GEOCENTRIC);
++    }else if (model == GeographicPositions::EarthSpheroidType::WGS84)
++    {
++        return DoGetPosition(PositionType::PROJECTED);
++    }else
++    {
++        return DoGetPosition(PositionType::TOPOCENTRIC);
++    }
 +}
 +
 +void
@@ -622,8 +799,10 @@ index 000000000..22b66525e
 +    Vector& b = (me.z < them.z ? them : me);
 +
 +    Vector bMinusA = b - a;
-+    double numerator = std::abs(a * bMinusA);
 +    double denominator = a.GetLength() * bMinusA.GetLength();
++    if (denominator == 0) // /0 case: same position
++        return 0.0;
++    double numerator = std::abs(a * bMinusA);
 +    double x = numerator / denominator;
 +
 +    // Enforce the appropriate domain range ([-1, 1]) for the argument of std::asin.
@@ -652,10 +831,10 @@ index 000000000..22b66525e
 \ No newline at end of file
 diff --git a/src/mobility/model/geocentric-mobility-model.h b/src/mobility/model/geocentric-mobility-model.h
 new file mode 100644
-index 000000000..4e9bd7b64
+index 000000000..6aced4acb
 --- /dev/null
 +++ b/src/mobility/model/geocentric-mobility-model.h
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,154 @@
 +/*
 + * Copyright (C) 2023 University of Padua.
 + * Copyright (C) 2023 Polytechnic University of Bari.
@@ -693,7 +872,8 @@ index 000000000..4e9bd7b64
 +{
 +    TOPOCENTRIC,
 +    GEOCENTRIC,
-+    GEOGRAPHIC
++    GEOGRAPHIC,
++    PROJECTED
 +};
 +
 +std::ostream& operator<<(std::ostream& os, PositionType type);
@@ -810,8 +990,70 @@ index 000000000..4e9bd7b64
 +
 +#endif /* GEOCENTRIC_MOBILITY_MODEL_H */
 \ No newline at end of file
+diff --git a/src/mobility/model/geographic-positions.cc b/src/mobility/model/geographic-positions.cc
+index 61473566f..eff3de6ed 100644
+--- a/src/mobility/model/geographic-positions.cc
++++ b/src/mobility/model/geographic-positions.cc
+@@ -32,6 +32,16 @@ namespace
+  * @brief  Lambda function for computing the curvature
+  */
+ auto curvature = [](double e, double ph) { return sqrt(1 - e * e * sin(ph) * sin(ph)); };
++
++/**
++ * \brief Calibration of the Mercator projection's x-axis in order to have a unit equal to 1 meter.
++ */
++constexpr double projectionUnitX = 25.059;
++
++/**
++ * \brief Calibration of the Mercator projection's y-axis in order to have a unit equal to 1 meter.
++ */
++constexpr double projectionUnitY = 24.665;
+ } // namespace
+ 
+ namespace ns3
+@@ -193,6 +203,40 @@ GeographicPositions::TopocentricToGeographicCoordinates(Vector pos,
+     return geographicCoordinates;
+ }
+ 
++Vector
++GeographicPositions::GeographicToProjectedCoordinates(Vector pos, EarthSpheroidType sphType)
++{
++    NS_LOG_FUNCTION(pos << sphType);
++    NS_ASSERT_MSG(sphType == EarthSpheroidType::WGS84,
++                  "Only WGS84 is supported for now. Requested: " << sphType);
++
++    constexpr double PHI_MAX = 85.051129; // deg; 2 * atan(exp(M_PI)) - M_PI_2
++    NS_ASSERT_MSG(pos.x <= PHI_MAX && pos.x >= -PHI_MAX,
++                  "Latitude must be between -85.051129 and 85.051129 degrees to ensure proper "
++                  "conversion using Web Marcator projection.");
++
++    double phi = DegreesToRadians(pos.x);
++    double lambda = DegreesToRadians(pos.y);
++
++    double x = M_1_PI * pow(2, projectionUnitX - 1) * (lambda + M_PI);
++    double y = M_1_PI * pow(2, projectionUnitY - 1) * (M_PI - log(tan(M_PI_4 + phi * 0.5)));
++
++    NS_LOG_LOGIC("Translated to (" << x << ", " << y << ", " << pos.z << ")");
++    return Vector(x, y, pos.z);
++}
++
++Vector
++GeographicPositions::ProjectedToGeographicCoordinates(Vector pos, EarthSpheroidType sphType)
++{
++    NS_LOG_FUNCTION(pos << sphType);
++    NS_ASSERT_MSG(sphType == EarthSpheroidType::WGS84,
++                  "Only WGS84 is supported for now. Requested: " << sphType);
++
++    double lambda = M_PI * (pow(2, 1 - projectionUnitX) * pos.x - 1);
++    double phi = 2 * atan(exp(M_PI * (1 - pow(2, 1 - projectionUnitY) * pos.y))) - M_PI_2;
++    return Vector(RadiansToDegrees(phi), RadiansToDegrees(lambda), pos.z);
++}
++
+ std::list<Vector>
+ GeographicPositions::RandCartesianPointsAroundGeographicPoint(double originLatitude,
+                                                               double originLongitude,
 diff --git a/src/mobility/model/geographic-positions.h b/src/mobility/model/geographic-positions.h
-index a5c5aade5..7b0dc0f3a 100644
+index a5c5aade5..f08d82981 100644
 --- a/src/mobility/model/geographic-positions.h
 +++ b/src/mobility/model/geographic-positions.h
 @@ -76,6 +76,13 @@ class GeographicPositions
@@ -828,351 +1070,73 @@ index a5c5aade5..7b0dc0f3a 100644
      /**
       * Converts earth geographic/geodetic coordinates (latitude and longitude in
       * degrees) with a given altitude above earth's surface (in meters) to Earth
-diff --git a/src/propagation/model/channel-condition-model.cc b/src/propagation/model/channel-condition-model.cc
-index 1e3f1dd01..e6186bc3f 100644
---- a/src/propagation/model/channel-condition-model.cc
-+++ b/src/propagation/model/channel-condition-model.cc
-@@ -9,7 +9,7 @@
+@@ -159,6 +166,31 @@ class GeographicPositions
+                                                      Vector refPoint,
+                                                      EarthSpheroidType sphType);
  
- #include "ns3/boolean.h"
- #include "ns3/double.h"
--#include "ns3/geocentric-constant-position-mobility-model.h"
-+#include "ns3/geocentric-mobility-model.h"
- #include "ns3/log.h"
- #include "ns3/mobility-model.h"
- #include "ns3/node.h"
-@@ -579,9 +579,9 @@ ThreeGppChannelConditionModel::GetQuantizedElevationAngle(Ptr<const MobilityMode
-     Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
-     Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
- 
--    // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
--    auto aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
--    auto bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
-+    // check if aMob and bMob are of type GeocentricMobilityModel
-+    auto aNTNMob = DynamicCast<GeocentricMobilityModel>(aMobNonConst);
-+    auto bNTNMob = DynamicCast<GeocentricMobilityModel>(bMobNonConst);
-     NS_ASSERT_MSG(aNTNMob && bNTNMob,
-                   "Mobility Models need to be of type Geocentric for NTN scenarios");
- 
-diff --git a/src/propagation/model/three-gpp-propagation-loss-model.cc b/src/propagation/model/three-gpp-propagation-loss-model.cc
-index 78763290c..f1f0276ab 100644
---- a/src/propagation/model/three-gpp-propagation-loss-model.cc
-+++ b/src/propagation/model/three-gpp-propagation-loss-model.cc
-@@ -11,7 +11,8 @@
- 
- #include "ns3/boolean.h"
- #include "ns3/double.h"
--#include "ns3/geocentric-constant-position-mobility-model.h"
-+#include "ns3/geocentric-mobility-model.h"
-+#include "ns3/geographic-positions.h"
- #include "ns3/log.h"
- #include "ns3/mobility-model.h"
- #include "ns3/node.h"
-@@ -22,6 +23,9 @@
- 
- namespace
- {
++    /**
++     * Conversion from geographic to Web Mercator projection (EPSG:3857).
++     * NOTE: assuming WGS87 spheroid.
++     *
++     * @param pos a vector containing the Geographic coordinates (latitude [in degrees], longitude
++     *            [in degrees], altitude [in meters])
++     * @param sphType earth spheroid model to use for conversion
++     * @return Vector position using Web Mercator projection
++     * @see https://en.wikipedia.org/wiki/Web_Mercator_projection
++     * @see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
++     */
++    static Vector GeographicToProjectedCoordinates(Vector pos, EarthSpheroidType sphType);
 +
-+constexpr double M_C = 3.0e8; //!< propagation velocity in free space
++    /**
++     * Conversion from Web Mercator projection (EPSG:3857) to geographic.
++     * NOTE: assuming WGS87 spheroid.
++     *
++     * @param pos a vector containing the Web Mercator coordinates (x, y, z)
++     * @param sphType earth spheroid model to use for conversion
++     * @return Vector position using geographic coordinates
++     * @see https://en.wikipedia.org/wiki/Web_Mercator_projection
++     * @see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
++     */
++    static Vector ProjectedToGeographicCoordinates(Vector pos, EarthSpheroidType sphType);
 +
- /**
-  * The enumerator used for code clarity when performing parameter assignment in the GetLoss Methods
-  */
-@@ -158,6 +162,23 @@ GetBsUtHeightsUmiStreetCanyon(double heightA, double heightB)
-     return std::make_tuple(hBs, hUt);
- }
+     /**
+      * Generates uniformly distributed random points (in ECEF Cartesian
+      * coordinates) within a given altitude above earth's surface centered around
+diff --git a/src/mobility/model/leo-circular-orbit-mobility-model.h b/src/mobility/model/leo-circular-orbit-mobility-model.h
+index 35f0e6b0e..0a84dbbe9 100644
+--- a/src/mobility/model/leo-circular-orbit-mobility-model.h
++++ b/src/mobility/model/leo-circular-orbit-mobility-model.h
+@@ -113,7 +113,7 @@ class LeoCircularOrbitMobilityModel : public GeocentricConstantPositionMobilityM
+      * @brief Returns the Geocentric Position of the Node in ECEF (cartesian)
+      * @return ECEF position in meters
+      */
+-    Vector DoGetGeocentricPosition() const override;
++    Vector DoGetGeocentricPosition() const;
  
-+/**
-+ * @return The altitude of the lowest mobility model for NTN scenarios.
-+ */
-+double
-+GetLowestNTNMobAltitude(ns3::Ptr<ns3::MobilityModel> a, ns3::Ptr<ns3::MobilityModel> b)
-+{
-+    auto aNTNMob = ns3::DynamicCast<ns3::GeocentricMobilityModel>(a);
-+    auto bNTNMob = ns3::DynamicCast<ns3::GeocentricMobilityModel>(b);
-+    NS_ASSERT_MSG(aNTNMob && bNTNMob,
-+                  "Mobility Models need to be of type Geocentric for NTN scenarios");
-+
-+    auto posA = aNTNMob->GetPosition(ns3::PositionType::GEOGRAPHIC);
-+    auto posB = bNTNMob->GetPosition(ns3::PositionType::GEOGRAPHIC);
-+    auto lowestMobAltitude = (posA.z < posB.z) ? posA.z : posB.z;
-+    return lowestMobAltitude;
-+}
-+
- /**
-  * @brief Computes the free-space path loss using the formula described in 3GPP TR 38.811,
-  * Table 6.6.2
-@@ -205,15 +226,17 @@ ComputeAtmosphericAbsorptionLoss(double freq, double elevAngle)
-  * @return the ionospheric plus tropospheric scintillation loss for NTN scenarios
-  */
- double
--ComputeIonosphericPlusTroposphericScintillationLoss(double freq, double elevAngleQuantized)
-+ComputeIonosphericPlusTroposphericScintillationLoss(double freq,
-+                                                    double elevAngleQuantized,
-+                                                    double lowestMobAltitude)
- {
-     double loss = 0;
--    if (freq < 6e9)
-+    if (freq < 6e9 && lowestMobAltitude < ns3::GeographicPositions::IONOSPHERE_MAX_ALT)
-     {
-         // Ionospheric
-         loss = 6.22 / (pow(freq / 1e9, 1.5));
+     // Inherited from MobilityModel
+     Ptr<MobilityModel> Copy() const override
+@@ -122,6 +122,9 @@ class LeoCircularOrbitMobilityModel : public GeocentricConstantPositionMobilityM
      }
--    else
-+    if (freq >= 6e9 && lowestMobAltitude < ns3::GeographicPositions::TROPOSPHERE_MAX_ALT)
-     {
-         // Tropospheric
-         loss = troposphericScintillationLoss.at(elevAngleQuantized);
-@@ -252,8 +275,6 @@ ComputeClutterLoss(double freq,
-     return loss;
- }
  
--constexpr double M_C = 3.0e8; //!< propagation velocity in free space
--
- } // namespace
+   private:
++    using GeocentricConstantPositionMobilityModel::DoGetPosition;
++    using GeocentricConstantPositionMobilityModel::DoSetPosition;
++
+     void DoInitialize() override;
+     void DoDispose() override;
  
- namespace ns3
-@@ -1764,6 +1785,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1772,7 +1794,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -1789,6 +1813,7 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1800,7 +1825,9 @@ ThreeGppNTNDenseUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -1911,6 +1938,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1919,7 +1947,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -1935,6 +1965,7 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -1946,7 +1977,9 @@ ThreeGppNTNUrbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -2058,6 +2091,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2066,7 +2100,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossLos(Ptr<MobilityModel> a,
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
- 
-@@ -2084,6 +2120,7 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2095,7 +2132,9 @@ ThreeGppNTNSuburbanPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a,
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -2206,6 +2245,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2214,7 +2254,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossLos(Ptr<MobilityModel> a, Ptr<Mobil
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-@@ -2230,6 +2272,7 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
-     double distance3D = CalculateDistance(a->GetPosition(), b->GetPosition());
-     auto [elevAngle, elevAngleQuantized] =
-         ThreeGppChannelConditionModel::GetQuantizedElevationAngle(a, b);
-+    auto lowestMobAltitude = GetLowestNTNMobAltitude(a, b);
- 
-     // compute the pathloss (see 3GPP TR 38.811, Table 6.6.2)
-     double loss = ComputeNtnPathloss(m_frequency, distance3D);
-@@ -2241,7 +2284,9 @@ ThreeGppNTNRuralPropagationLossModel::GetLossNlos(Ptr<MobilityModel> a, Ptr<Mobi
-     loss += ComputeAtmosphericAbsorptionLoss(m_frequency, elevAngle);
- 
-     // Apply Ionospheric plus Tropospheric Scintillation Loss
--    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency, elevAngleQuantized);
-+    loss += ComputeIonosphericPlusTroposphericScintillationLoss(m_frequency,
-+                                                                elevAngleQuantized,
-+                                                                lowestMobAltitude);
- 
-     NS_LOG_DEBUG("Loss " << loss);
-     return loss;
-diff --git a/src/spectrum/examples/three-gpp-ntn-channel-example.cc b/src/spectrum/examples/three-gpp-ntn-channel-example.cc
-index eedc421d1..820a5b811 100644
---- a/src/spectrum/examples/three-gpp-ntn-channel-example.cc
-+++ b/src/spectrum/examples/three-gpp-ntn-channel-example.cc
-@@ -23,6 +23,7 @@
- #include "ns3/antenna-model.h"
- #include "ns3/core-module.h"
- #include "ns3/geocentric-constant-position-mobility-model.h"
-+#include "ns3/geocentric-mobility-model.h"
- #include "ns3/isotropic-antenna-model.h"
- #include "ns3/mobility-model.h"
- #include "ns3/node-container.h"
-@@ -402,14 +403,14 @@ main(int argc, char* argv[])
-     Ptr<GeocentricConstantPositionMobilityModel> rxMob =
-         CreateObject<GeocentricConstantPositionMobilityModel>();
- 
--    txMob->SetGeographicPosition(Vector(45.40869, 11.89448, 35786000)); // GEO over Padova
--    rxMob->SetGeographicPosition(Vector(45.40869, 11.89448, 14.0));     // Padova Coordinates
-+    txMob->SetPosition(Vector(45.40869, 11.89448, 35786000), PositionType::GEOGRAPHIC); // GEO over Padova
-+    rxMob->SetPosition(Vector(45.40869, 11.89448, 14.0), PositionType::GEOGRAPHIC);     // Padova Coordinates
- 
-     // This is not strictly necessary, but is useful to have "sensible" values when using
-     // GetPosition()
--    txMob->SetCoordinateTranslationReferencePoint(
-+    txMob->SetGeographicReferencePoint(
-         Vector(45.40869, 11.89448, 0.0)); // Padova Coordinates without altitude
--    rxMob->SetCoordinateTranslationReferencePoint(
-+    rxMob->SetGeographicReferencePoint(
-         Vector(45.40869, 11.89448, 0.0)); // Padova Coordinates without altitude
-     // End changes with respect to three-gpp-channel-example,
- 
-diff --git a/src/spectrum/model/three-gpp-channel-model.cc b/src/spectrum/model/three-gpp-channel-model.cc
-index a265e049a..4306dec17 100644
---- a/src/spectrum/model/three-gpp-channel-model.cc
-+++ b/src/spectrum/model/three-gpp-channel-model.cc
-@@ -12,7 +12,8 @@
- 
- #include "ns3/boolean.h"
- #include "ns3/double.h"
--#include "ns3/geocentric-constant-position-mobility-model.h"
-+#include "ns3/geocentric-mobility-model.h"
-+#include "ns3/geographic-positions.h"
- #include "ns3/integer.h"
- #include "ns3/log.h"
- #include "ns3/mobility-model.h"
-@@ -1961,22 +1962,23 @@ ThreeGppChannelModel::GetThreeGppTable(Ptr<const MobilityModel> aMob,
-         Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(aMob);
-         Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(bMob);
- 
--        if (DynamicCast<GeocentricConstantPositionMobilityModel>(
-+        if (DynamicCast<GeocentricMobilityModel>(
-                 ConstCast<MobilityModel>(aMob)) && // Transform to NS_ASSERT
--            DynamicCast<GeocentricConstantPositionMobilityModel>(
-+            DynamicCast<GeocentricMobilityModel>(
-                 ConstCast<MobilityModel>(bMob))) // check if aMob and bMob are of type
--        // GeocentricConstantPositionMobilityModel
-+                                                 // GeocentricMobilityModel
-         {
--            Ptr<GeocentricConstantPositionMobilityModel> aNTNMob =
--                DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
--            Ptr<GeocentricConstantPositionMobilityModel> bNTNMob =
--                DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
-+            Ptr<GeocentricMobilityModel> aNTNMob =
-+                DynamicCast<GeocentricMobilityModel>(aMobNonConst);
-+            Ptr<GeocentricMobilityModel> bNTNMob =
-+                DynamicCast<GeocentricMobilityModel>(bMobNonConst);
- 
--            if (aNTNMob->GetGeographicPosition().z <
--                bNTNMob->GetGeographicPosition().z) // b is the HAPS/Satellite
-+            if (aNTNMob->GetPosition(PositionType::GEOGRAPHIC).z <
-+                bNTNMob->GetPosition(PositionType::GEOGRAPHIC).z) // b is the HAPS/Satellite
-             {
-                 elevAngle = aNTNMob->GetElevationAngle(bNTNMob);
--                if (bNTNMob->GetGeographicPosition().z > 50000)
-+                if (bNTNMob->GetPosition(PositionType::GEOGRAPHIC).z >
-+                    GeographicPositions::STRATOSPHERE_MAX_ALT)
-                 {
-                     isSatellite = true;
-                 }
-@@ -1984,7 +1986,8 @@ ThreeGppChannelModel::GetThreeGppTable(Ptr<const MobilityModel> aMob,
-             else // a is the HAPS/Satellite
-             {
-                 elevAngle = bNTNMob->GetElevationAngle(aNTNMob);
--                if (aNTNMob->GetGeographicPosition().z > 50000)
-+                if (aNTNMob->GetPosition(PositionType::GEOGRAPHIC).z >
-+                    GeographicPositions::STRATOSPHERE_MAX_ALT)
-                 {
-                     isSatellite = true;
-                 }
+diff --git a/src/mobility/model/mobility-model.h b/src/mobility/model/mobility-model.h
+index ff7b029b1..6622d0356 100644
+--- a/src/mobility/model/mobility-model.h
++++ b/src/mobility/model/mobility-model.h
+@@ -28,6 +28,7 @@ namespace ns3
+  */
+ class MOBILITY_EXPORT MobilityModel : public Object
+ {
++  friend class MobilityFactoryHelper;
+   public:
+     /**
+      * Register this type with the TypeId system.
 -- 
 2.50.1 (Apple Git-155)
 

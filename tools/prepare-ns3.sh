@@ -83,17 +83,17 @@ skip_ssh_id_and_signature() {
 clone_checkout_ns3 ns-3.48
 ln -fs ../../leo ./ns3/contrib/leo
 
-integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v4.2.y"
+integrate_contrib_module "nr" "https://gitlab.com/cttc-lena/nr.git" "5g-lena-v5.0.y"
 
 pushd ns3 > /dev/null
 skip_ssh_id_and_signature
-git am ../tools/*.patch
+git am ../tools/patches/ns3/*.patch
 
-# Apply patches to contrib/nr
-if ls ../tools/*.patch-nr 1> /dev/null 2>&1; then
+#Apply patches to contrib/nr
+if ls ../tools/patches/nr/*.patch 1> /dev/null 2>&1; then
     pushd contrib/nr > /dev/null
     skip_ssh_id_and_signature
-    git am ../../../tools/*.patch-nr
+    git am ../../../tools/patches/nr/*.patch
     popd > /dev/null
 fi
 

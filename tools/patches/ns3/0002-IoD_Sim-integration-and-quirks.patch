@@ -1,0 +1,115 @@
+From 0026e1db6a24f9e8045e4e4a9cc7178fb8abc076 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:57:23 +0200
+Subject: [PATCH 2/5] IoD_Sim integration and quirks
+
+---
+ .../custom-modules/ns3-executables.cmake          |  4 ++--
+ src/iodsim                                        |  1 +
+ src/lte/helper/lte-helper.h                       |  2 ++
+ src/lte/helper/no-backhaul-epc-helper.cc          | 15 +++++++++------
+ src/wifi/helper/wifi-helper.h                     |  1 +
+ src/wifi/helper/yans-wifi-helper.h                |  1 +
+ 6 files changed, 16 insertions(+), 8 deletions(-)
+ create mode 120000 src/iodsim
+
+diff --git a/build-support/custom-modules/ns3-executables.cmake b/build-support/custom-modules/ns3-executables.cmake
+index 431069ea7..22be71658 100644
+--- a/build-support/custom-modules/ns3-executables.cmake
++++ b/build-support/custom-modules/ns3-executables.cmake
+@@ -123,12 +123,12 @@ function(build_exec)
+   if(${NS3_STATIC} AND (NOT BEXEC_STANDALONE))
+     target_link_libraries(
+       ${BEXEC_EXECNAME_PREFIX}${BEXEC_EXECNAME} ${libraries_to_always_link}
+-      ${LIB_AS_NEEDED_PRE_STATIC} ${lib-ns3-static}
++      $<LINK_LIBRARY:WHOLE_ARCHIVE,${lib-ns3-static}>
+     )
+   elseif(${NS3_MONOLIB} AND (NOT BEXEC_STANDALONE))
+     target_link_libraries(
+       ${BEXEC_EXECNAME_PREFIX}${BEXEC_EXECNAME} ${libraries_to_always_link}
+-      ${LIB_AS_NEEDED_PRE} ${lib-ns3-monolib} ${LIB_AS_NEEDED_POST}
++      $<LINK_LIBRARY:WHOLE_ARCHIVE,${lib-ns3-monolib}>
+     )
+   else()
+     target_link_libraries(
+diff --git a/src/iodsim b/src/iodsim
+new file mode 120000
+index 000000000..929cb3dc9
+--- /dev/null
++++ b/src/iodsim
+@@ -0,0 +1 @@
++../../src
+\ No newline at end of file
+diff --git a/src/lte/helper/lte-helper.h b/src/lte/helper/lte-helper.h
+index a6bd2ccb4..bd41f2e05 100644
+--- a/src/lte/helper/lte-helper.h
++++ b/src/lte/helper/lte-helper.h
+@@ -91,6 +91,8 @@ class SpectrumPropagationLossModel;
+ class LteHelper : public Object
+ {
+   public:
++    friend class LteSetupHelper;
++
+     LteHelper();
+     ~LteHelper() override;
+ 
+diff --git a/src/lte/helper/no-backhaul-epc-helper.cc b/src/lte/helper/no-backhaul-epc-helper.cc
+index 25e33b739..94f06c00e 100644
+--- a/src/lte/helper/no-backhaul-epc-helper.cc
++++ b/src/lte/helper/no-backhaul-epc-helper.cc
+@@ -318,8 +318,11 @@ NoBackhaulEpcHelper::AddEnb(Ptr<Node> enb,
+     int retval;
+ 
+     // add an IPv4 stack to the previously created eNB
+-    InternetStackHelper internet;
+-    internet.Install(enb);
++    if (enb->GetObject<Ipv4>() == nullptr)
++    {
++        InternetStackHelper internet;
++        internet.Install(enb);
++    }
+     NS_LOG_LOGIC("number of Ipv4 ifaces of the eNB after node creation: "
+                  << enb->GetObject<Ipv4>()->GetNInterfaces());
+ 
+@@ -357,10 +360,10 @@ NoBackhaulEpcHelper::AddEnb(Ptr<Node> enb,
+     Ptr<EpcEnbApplication> enbApp =
+         CreateObject<EpcEnbApplication>(enbLteSocket, enbLteSocket6, cellIds.at(0));
+     enb->AddApplication(enbApp);
+-    NS_ASSERT(enb->GetNApplications() == 1);
+-    NS_ASSERT_MSG(enb->GetApplication(0)->GetObject<EpcEnbApplication>(),
+-                  "cannot retrieve EpcEnbApplication");
+-    NS_LOG_LOGIC("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication(0));
++    // NS_ASSERT(enb->GetNApplications() == 1);
++    // NS_ASSERT_MSG(enb->GetApplication(0)->GetObject<EpcEnbApplication>(),
++    //               "cannot retrieve EpcEnbApplication");
++    // NS_LOG_LOGIC("enb: " << enb << ", enb->GetApplication (0): " << enb->GetApplication(0));
+ 
+     NS_LOG_INFO("Create EpcX2 entity");
+     Ptr<EpcX2> x2 = CreateObject<EpcX2>();
+diff --git a/src/wifi/helper/wifi-helper.h b/src/wifi/helper/wifi-helper.h
+index 945a8a8c9..adb42da8a 100644
+--- a/src/wifi/helper/wifi-helper.h
++++ b/src/wifi/helper/wifi-helper.h
+@@ -376,6 +376,7 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
+  */
+ class WifiHelper
+ {
++    friend class WifiMacFactoryHelper;
+   public:
+     virtual ~WifiHelper();
+ 
+diff --git a/src/wifi/helper/yans-wifi-helper.h b/src/wifi/helper/yans-wifi-helper.h
+index b0fa76b40..513a4347f 100644
+--- a/src/wifi/helper/yans-wifi-helper.h
++++ b/src/wifi/helper/yans-wifi-helper.h
+@@ -26,6 +26,7 @@ namespace ns3
+  */
+ class YansWifiChannelHelper
+ {
++  friend class WifiPhyFactoryHelper;
+   public:
+     /**
+      * Create a channel helper without any parameter set. The user must set
+-- 
+2.50.1 (Apple Git-155)
+

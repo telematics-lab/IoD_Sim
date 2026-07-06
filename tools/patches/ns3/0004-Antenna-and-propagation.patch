@@ -1,0 +1,313 @@
+From aa69d2184897393cb6ccacc278d5fd29a1271b94 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 6 Jul 2026 15:57:23 +0200
+Subject: [PATCH 4/5] Antenna and propagation
+
+---
+ .../model/circular-aperture-antenna-model.cc  | 89 +++++++++++++++----
+ .../model/circular-aperture-antenna-model.h   |  8 ++
+ src/antenna/model/parabolic-antenna-model.cc  | 47 ++++++++--
+ src/antenna/model/parabolic-antenna-model.h   | 11 +++
+ .../model/channel-condition-model.cc          |  8 +-
+ 5 files changed, 134 insertions(+), 29 deletions(-)
+
+diff --git a/src/antenna/model/circular-aperture-antenna-model.cc b/src/antenna/model/circular-aperture-antenna-model.cc
+index 5475afc0e..fe3f4df6e 100644
+--- a/src/antenna/model/circular-aperture-antenna-model.cc
++++ b/src/antenna/model/circular-aperture-antenna-model.cc
+@@ -47,25 +47,39 @@ CircularApertureAntennaModel::GetTypeId()
+             .SetParent<AntennaModel>()
+             .SetGroupName("Antenna")
+             .AddConstructor<CircularApertureAntennaModel>()
++            .AddAttribute("BoresightAzimuth",
++                          "The azimuth angle of the antenna boresight in radians",
++                          DoubleValue(0.0), // Default points to X-axis
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::m_boresightAzimuth),
++                          MakeDoubleChecker<double>())
++            .AddAttribute("BoresightInclination",
++                          "The inclination angle of the antenna boresight in radians",
++                          DoubleValue(M_PI_2), // Default points to Horizon (Equator)
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::m_boresightInclination),
++                          MakeDoubleChecker<double>())
+             .AddAttribute("AntennaCircularApertureRadius",
+                           "The radius of the aperture of the antenna, in meters",
+                           DoubleValue(0.5),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetApertureRadius),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetApertureRadius,
++                                             &CircularApertureAntennaModel::SetApertureRadius),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("OperatingFrequency",
+                           "The operating frequency in Hz of the antenna",
+                           DoubleValue(2e9),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetOperatingFrequency),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetOperatingFrequency,
++                                             &CircularApertureAntennaModel::SetOperatingFrequency),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("AntennaMinGainDb",
+                           "The minimum gain value in dB of the antenna",
+                           DoubleValue(-100.0),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetMinGain),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetMinGain,
++                                             &CircularApertureAntennaModel::SetMinGain),
+                           MakeDoubleChecker<double>())
+             .AddAttribute("AntennaMaxGainDb",
+                           "The maximum gain value in dB of the antenna",
+                           DoubleValue(1),
+-                          MakeDoubleAccessor(&CircularApertureAntennaModel::SetMaxGain),
++                          MakeDoubleAccessor(&CircularApertureAntennaModel::GetMaxGain,
++                                             &CircularApertureAntennaModel::SetMaxGain),
+                           MakeDoubleChecker<double>(0.0))
+             .AddAttribute("ForceGainBounds",
+                           "Force GetGainDb to [AntennaMinGainDb, AntennaMaxGainDb] range",
+@@ -129,6 +143,32 @@ CircularApertureAntennaModel::GetMinGain() const
+     return m_minGain;
+ }
+ 
++void
++CircularApertureAntennaModel::SetBoresightAzimuth(double azimuthRadians)
++{
++    NS_LOG_FUNCTION(this << azimuthRadians);
++    m_boresightAzimuth = azimuthRadians;
++}
++
++double
++CircularApertureAntennaModel::GetBoresightAzimuth() const
++{
++    return m_boresightAzimuth;
++}
++
++void
++CircularApertureAntennaModel::SetBoresightInclination(double inclinationRadians)
++{
++    NS_LOG_FUNCTION(this << inclinationRadians);
++    m_boresightInclination = inclinationRadians;
++}
++
++double
++CircularApertureAntennaModel::GetBoresightInclination() const
++{
++    return m_boresightInclination;
++}
++
+ double
+ CircularApertureAntennaModel::GetGainDb(Angles a)
+ {
+@@ -138,25 +178,41 @@ CircularApertureAntennaModel::GetGainDb(Angles a)
+     // We assume that this angle represents the angle between the vectors corresponding
+     // to the cartesian coordinates of the provided spherical coordinates, and the spherical
+     // coordinates (r = 1, azimuth = 0, elevation = PI/2)
+-    double theta1 = a.GetInclination();
+-    double theta2 = M_PI_2; // reference direction
++    double thetaTarget = a.GetInclination();
++    double phiTarget = a.GetAzimuth();
+ 
+-    // Convert to ISO range: the input azimuth angle phi is in [-pi,pi],
+-    // while the ISO convention for spherical to cartesian coordinates
+-    // assumes phi in [0,2*pi].
+-    double phi1 = M_PI + a.GetAzimuth();
+-    double phi2 = M_PI; // reference direction
++    // Define the antenna direction (Boresight) from our variables
++    double thetaBoresight = m_boresightInclination;
++    double phiBoresight = m_boresightAzimuth;
+ 
+     // Convert the spherical coordinates of the boresight and the incoming ray
+     // to Cartesian coordinates
+-    Vector p1(sin(theta1) * cos(phi1), sin(theta1) * sin(phi1), cos(theta1));
+-    Vector p2(sin(theta2) * cos(phi2), sin(theta2) * sin(phi2), cos(theta2));
++    Vector pTarget(sin(thetaTarget) * cos(phiTarget),
++                   sin(thetaTarget) * sin(phiTarget),
++                   cos(thetaTarget));
+ 
+-    // Calculate the angle between the antenna boresight and the incoming ray
+-    double theta = acos(p1 * p2);
++    Vector pBoresight(sin(thetaBoresight) * cos(phiBoresight),
++                      sin(thetaBoresight) * sin(phiBoresight),
++                      cos(thetaBoresight));
++
++    // Calculate the angle between the two vectors (Dot Product)
++    double dotProduct = pTarget * pBoresight;
++
++    // Clamp dot product to [-1, 1] to prevent NaN in acos due to floating point errors
++    if (dotProduct > 1.0)
++    {
++        dotProduct = 1.0;
++    }
++    if (dotProduct < -1.0)
++    {
++        dotProduct = -1.0;
++    }
++
++    double theta = acos(dotProduct);
+ 
+     double gain = 0;
+-    if (theta == 0)
++
++    if (std::abs(theta) < 1e-9)
+     {
+         gain = m_maxGain;
+     }
+@@ -180,6 +236,7 @@ CircularApertureAntennaModel::GetGainDb(Angles a)
+         gain = std::cyl_bessel_j(1, kasintheta) / kasintheta;
+ #endif
+         gain = 10 * log10(4 * gain * gain) + m_maxGain;
++
+         if (m_forceGainBounds)
+         {
+             gain = std::min(std::max(gain, m_minGain), m_maxGain);
+diff --git a/src/antenna/model/circular-aperture-antenna-model.h b/src/antenna/model/circular-aperture-antenna-model.h
+index bf9c01f29..a178b9496 100644
+--- a/src/antenna/model/circular-aperture-antenna-model.h
++++ b/src/antenna/model/circular-aperture-antenna-model.h
+@@ -107,6 +107,12 @@ class CircularApertureAntennaModel : public AntennaModel
+      */
+     double GetMinGain() const;
+ 
++    void SetBoresightAzimuth(double azimuthRadians);
++    double GetBoresightAzimuth() const;
++
++    void SetBoresightInclination(double inclinationRadians);
++    double GetBoresightInclination() const;
++
+     /**
+      * @brief Get the gain in dB, using Bessel equation of first kind and first order.
+      *
+@@ -123,6 +129,8 @@ class CircularApertureAntennaModel : public AntennaModel
+     double m_maxGain;              //!< antenna gain in dB towards the main orientation
+     double m_minGain;              //!< antenna min gain in dB
+     bool m_forceGainBounds;        //!< enforce maximum and minimum gains (disabled for testing)
++    double m_boresightAzimuth;     //!< azimuth angle of the antenna boresight in radians
++    double m_boresightInclination; //!< inclination angle of the antenna boresight in radians
+ };
+ 
+ } // namespace ns3
+diff --git a/src/antenna/model/parabolic-antenna-model.cc b/src/antenna/model/parabolic-antenna-model.cc
+index 5cbeabcb4..ea46c8491 100644
+--- a/src/antenna/model/parabolic-antenna-model.cc
++++ b/src/antenna/model/parabolic-antenna-model.cc
+@@ -43,6 +43,13 @@ ParabolicAntennaModel::GetTypeId()
+                           MakeDoubleAccessor(&ParabolicAntennaModel::SetOrientation,
+                                              &ParabolicAntennaModel::GetOrientation),
+                           MakeDoubleChecker<double>(-360, 360))
++            .AddAttribute("Elevation",
++                          "The angle (degrees) that expresses the elevation of the antenna "
++                          "relative to the x-y plane",
++                          DoubleValue(0.0),
++                          MakeDoubleAccessor(&ParabolicAntennaModel::SetElevation,
++                                             &ParabolicAntennaModel::GetElevation),
++                          MakeDoubleChecker<double>(-90, 90))
+             .AddAttribute("MaxAttenuation",
+                           "The maximum attenuation (dB) of the antenna radiation pattern.",
+                           DoubleValue(20.0),
+@@ -77,26 +84,48 @@ ParabolicAntennaModel::GetOrientation() const
+     return RadiansToDegrees(m_orientationRadians);
+ }
+ 
++void
++ParabolicAntennaModel::SetElevation(double elevationDegrees)
++{
++    NS_LOG_FUNCTION(this << elevationDegrees);
++    m_elevationRadians = DegreesToRadians(elevationDegrees);
++}
++
++double
++ParabolicAntennaModel::GetElevation() const
++{
++    return RadiansToDegrees(m_elevationRadians);
++}
++
+ double
+ ParabolicAntennaModel::GetGainDb(Angles a)
+ {
+     NS_LOG_FUNCTION(this << a);
+-    // azimuth angle w.r.t. the reference system of the antenna
+-    double phi = a.GetAzimuth() - m_orientationRadians;
+ 
+-    // make sure phi is in (-pi, pi]
+-    while (phi <= -M_PI)
++    double azimuthAngle = a.GetAzimuth();
++    double inclinationAngle = a.GetInclination();
++
++    double antennaAzimuth = m_orientationRadians;
++    double antennaInclination = M_PI_2 - m_elevationRadians;
++
++    double cosPsi = std::cos(inclinationAngle) * std::cos(antennaInclination) +
++                    std::sin(inclinationAngle) * std::sin(antennaInclination) * std::cos(azimuthAngle - antennaAzimuth);
++
++    // Clamp to avoid domain errors
++    if (cosPsi < -1.0)
+     {
+-        phi += M_PI + M_PI;
++        cosPsi = -1.0;
+     }
+-    while (phi > M_PI)
++    else if (cosPsi > 1.0)
+     {
+-        phi -= M_PI + M_PI;
++        cosPsi = 1.0;
+     }
+ 
+-    NS_LOG_LOGIC("phi = " << phi);
++    double psi = std::acos(cosPsi);
++
++    NS_LOG_LOGIC("psi = " << psi);
+ 
+-    double gainDb = -std::min(12 * pow(phi / m_beamwidthRadians, 2), m_maxAttenuation);
++    double gainDb = -std::min(12 * pow(psi / m_beamwidthRadians, 2), m_maxAttenuation);
+ 
+     NS_LOG_LOGIC("gain = " << gainDb);
+     return gainDb;
+diff --git a/src/antenna/model/parabolic-antenna-model.h b/src/antenna/model/parabolic-antenna-model.h
+index e54adacc8..0604511fd 100644
+--- a/src/antenna/model/parabolic-antenna-model.h
++++ b/src/antenna/model/parabolic-antenna-model.h
+@@ -65,10 +65,21 @@ class ParabolicAntennaModel : public AntennaModel
+      * @return antenna orientation in degrees
+      */
+     double GetOrientation() const;
++    /**
++     * Set the antenna elevation
++     * @param elevationDegrees antenna elevation in degrees
++     */
++    void SetElevation(double elevationDegrees);
++    /**
++     * Get the antenna elevation
++     * @return antenna elevation in degrees
++     */
++    double GetElevation() const;
+ 
+   private:
+     double m_beamwidthRadians;   //!< Beam width in radians
+     double m_orientationRadians; //!< Antenna orientation in radians
++    double m_elevationRadians;   //!< Antenna elevation in radians
+     double m_maxAttenuation;     //!< Max attenuation
+ };
+ 
+diff --git a/src/propagation/model/channel-condition-model.cc b/src/propagation/model/channel-condition-model.cc
+index 1e3f1dd01..e6186bc3f 100644
+--- a/src/propagation/model/channel-condition-model.cc
++++ b/src/propagation/model/channel-condition-model.cc
+@@ -9,7 +9,7 @@
+ 
+ #include "ns3/boolean.h"
+ #include "ns3/double.h"
+-#include "ns3/geocentric-constant-position-mobility-model.h"
++#include "ns3/geocentric-mobility-model.h"
+ #include "ns3/log.h"
+ #include "ns3/mobility-model.h"
+ #include "ns3/node.h"
+@@ -579,9 +579,9 @@ ThreeGppChannelConditionModel::GetQuantizedElevationAngle(Ptr<const MobilityMode
+     Ptr<MobilityModel> aMobNonConst = ConstCast<MobilityModel>(a);
+     Ptr<MobilityModel> bMobNonConst = ConstCast<MobilityModel>(b);
+ 
+-    // check if aMob and bMob are of type GeocentricConstantPositionMobilityModel
+-    auto aNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(aMobNonConst);
+-    auto bNTNMob = DynamicCast<GeocentricConstantPositionMobilityModel>(bMobNonConst);
++    // check if aMob and bMob are of type GeocentricMobilityModel
++    auto aNTNMob = DynamicCast<GeocentricMobilityModel>(aMobNonConst);
++    auto bNTNMob = DynamicCast<GeocentricMobilityModel>(bMobNonConst);
+     NS_ASSERT_MSG(aNTNMob && bNTNMob,
+                   "Mobility Models need to be of type Geocentric for NTN scenarios");
+ 
+-- 
+2.50.1 (Apple Git-155)
+
