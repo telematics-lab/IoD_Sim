@@ -144,7 +144,7 @@ AppStatisticsHelper::Start()
                    << "IntervalTxPkts\tIntervalRxPkts\tIntervalLostPkts\t"
                    << "TotalTxPkts\tTotalRxPkts\tTotalLostPkts\t"
                    << "IntervalTxBytes\tIntervalRxBytes\t"
-                   << "Throughput_Mbps\tDelay_ms\tJitter_ms\tPLR_%\n";
+                   << "TxThroughput_kbps\tRxThroughput_kbps\tDelay_ms\tJitter_ms\tPLR_%\n";
 
     // Schedule periodic reports
     m_lastReportTime = Simulator::Now();
@@ -260,14 +260,15 @@ AppStatisticsHelper::GeneratePeriodicReport()
         Time deltaJitterSum = currentStats.jitterSum - prevStats.jitterSum;
 
         // Calculate metrics for this interval
-        double throughput = 0.0;
+        double txThroughput = deltaTxBytes * 8.0 / intervalDuration / 1000.0;
+        double rxThroughput = 0.0;
         double delay = 0.0;
         double jitter = 0.0;
         double plr = 0.0;
 
         if (deltaRxPackets > 0)
         {
-            throughput = deltaRxBytes * 8.0 / intervalDuration / 1000.0 / 1000.0;
+            rxThroughput = deltaRxBytes * 8.0 / intervalDuration / 1000.0;
             delay = 1000.0 * deltaDelaySum.GetSeconds() / deltaRxPackets;
             jitter = 1000.0 * deltaJitterSum.GetSeconds() / deltaRxPackets;
         }
@@ -300,7 +301,8 @@ AppStatisticsHelper::GeneratePeriodicReport()
                        << "\t" << deltaRxPackets << "\t" << deltaLostPackets << "\t"
                        << currentStats.txPackets << "\t" << currentStats.rxPackets << "\t"
                        << totalLostPackets << "\t" << deltaTxBytes << "\t" << deltaRxBytes << "\t"
-                       << std::setprecision(3) << throughput << "\t" << std::setprecision(3)
+                       << std::setprecision(3) << txThroughput << "\t" << std::setprecision(3)
+                       << rxThroughput << "\t" << std::setprecision(3)
                        << delay << "\t" << std::setprecision(3) << jitter << "\t"
                        << std::setprecision(2) << plr << "\n";
 
@@ -385,8 +387,8 @@ AppStatisticsHelper::WriteFlowMonitorStats()
         double flowDuration = (Simulator::Now() - Seconds(0)).GetSeconds();
         if (flowDuration > 0)
         {
-            flowMonFile << "  TxOffered:  "
-                        << i->second.txBytes * 8.0 / flowDuration / 1000.0 / 1000.0 << " Mbps\n";
+            flowMonFile << "  Tx Throughput: "
+                        << i->second.txBytes * 8.0 / flowDuration / 1000.0 << " kbps\n";
         }
 
         flowMonFile << "  Rx Bytes:   " << i->second.rxBytes << "\n";
@@ -404,7 +406,7 @@ AppStatisticsHelper::WriteFlowMonitorStats()
 
         if (i->second.rxPackets > 0)
         {
-            double throughput = i->second.rxBytes * 8.0 / flowDuration / 1000.0 / 1000.0;
+            double throughput = i->second.rxBytes * 8.0 / flowDuration / 1000.0;
             double delay = 1000.0 * i->second.delaySum.GetSeconds() / i->second.rxPackets;
             double jitter = 1000.0 * i->second.jitterSum.GetSeconds() / i->second.rxPackets;
 
@@ -414,13 +416,13 @@ AppStatisticsHelper::WriteFlowMonitorStats()
             averagePacketLoss += packetLossRatio;
             flowCount++;
 
-            flowMonFile << "  Throughput: " << std::setprecision(3) << throughput << " Mbps\n";
+            flowMonFile << "  Rx Throughput: " << std::setprecision(3) << throughput << " kbps\n";
             flowMonFile << "  Mean delay:  " << std::setprecision(3) << delay << " ms\n";
             flowMonFile << "  Mean jitter:  " << std::setprecision(3) << jitter << " ms\n";
         }
         else
         {
-            flowMonFile << "  Throughput:  0 Mbps\n";
+            flowMonFile << "  Rx Throughput: 0 kbps\n";
             flowMonFile << "  Mean delay:  0 ms\n";
             flowMonFile << "  Mean jitter: 0 ms\n";
         }
@@ -429,7 +431,7 @@ AppStatisticsHelper::WriteFlowMonitorStats()
     if (flowCount > 0)
     {
         flowMonFile << "\n\n  Mean flow throughput: " << averageFlowThroughput / flowCount
-                    << " Mbps\n";
+                    << " kbps\n";
         flowMonFile << "  Mean flow delay: " << averageFlowDelay / flowCount << " ms\n";
         flowMonFile << "  Mean flow jitter: " << averageFlowJitter / flowCount << " ms\n";
         flowMonFile << "  Mean packet loss: " << std::setprecision(2)

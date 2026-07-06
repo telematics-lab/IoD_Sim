@@ -34,11 +34,11 @@
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
-      "value": "50ms"
+      "value": "100ms"
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
-      "value": "50ms"
+      "value": "100ms"
     },
     { // This option removes interference caused by devices on the same node.
       // This is usefull in multibeam context if we want to simulate results of beams with
@@ -119,14 +119,15 @@
         "attributes": []
       },
       "ueAntenna": {
+        "type": "ns3::IsotropicAntennaModel",
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 1
+            "value": 4
           },
           {
             "name": "NumColumns",
-            "value": 1
+            "value": 4
           }
         ]
       },
@@ -213,23 +214,7 @@
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
             }
-          ],
-          "antennaModel": {
-            "type": "ns3::IsotropicAntennaModel",
-            "arrayProperties": [
-              {
-                "name": "NumRows",
-                "value": 4
-              },
-              {
-                "name": "NumColumns",
-                "value": 4
-              }
-            ]
-          },
-          "directivity": {
-            "mode": "nearest-gnb"
-          }
+          ]
         }
       ],
       "mobilityModel": {
@@ -314,23 +299,7 @@
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
             }
-          ],
-          "antennaModel": {
-            "type": "ns3::IsotropicAntennaModel",
-            "arrayProperties": [
-              {
-                "name": "NumRows",
-                "value": 4
-              },
-              {
-                "name": "NumColumns",
-                "value": 4
-              }
-            ]
-          },
-          "directivity": {
-            "mode": "nearest-gnb"
-          }
+          ]
         }
       ],
       "mobilityModel": {
