@@ -100,21 +100,16 @@
         }
       ],
       "handover": {
-        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
-        "attributes": []
+        "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "DistanceSinrTable",
+            "value": "500000:-20.0"
+          }
+        ]
       },
-      "attachMethod": "none",
-      "advancedOptions": {
-        "sinr-distance-attach": {
-          "precision": "100ms",
-          "table": [
-            {
-              "maxDistance": 500e3,
-              "minSINR": -20.0
-            }
-          ]
-        }
-      },
+      "attachMethod": "max-rsrp",
+      "advancedOptions": {},
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [

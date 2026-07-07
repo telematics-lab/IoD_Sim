@@ -1,4 +1,4 @@
-From aa2b62b9d7d49812420cf64cd0a0c136f1da7b42 Mon Sep 17 00:00:00 2001
+From 38047204c8e9d186f01b0de8204300f9c8addfde Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 6 Jul 2026 15:56:33 +0200
 Subject: [PATCH 1/3] Handover fixes and adaptations for IoD_Sim
@@ -14,10 +14,10 @@ Subject: [PATCH 1/3] Handover fixes and adaptations for IoD_Sim
  helper/realistic-beamforming-helper.h  |   3 +
  model/nr-epc-ue-nas.cc                 |   7 +-
  model/nr-epc-x2.cc                     |  87 +++++++++++++++++---
- model/nr-gnb-rrc.cc                    |  86 +++++++++++++++-----
+ model/nr-gnb-rrc.cc                    | 106 ++++++++++++++++++-------
  model/nr-mac-scheduler-ns3.cc          |  11 ++-
  model/nr-mimo-matrices-eigen.cc        |   4 +
- 13 files changed, 330 insertions(+), 96 deletions(-)
+ 13 files changed, 344 insertions(+), 102 deletions(-)
 
 diff --git a/examples/gsoc-leo-demo-example.cc b/examples/gsoc-leo-demo-example.cc
 index 7e54a5c7..65d36d8d 100644
@@ -31,15 +31,15 @@ index 7e54a5c7..65d36d8d 100644
 -        Vector(firstSatellitePositionGEO.x, firstSatellitePositionGEO.y, 0));
 +    groundNodeMobility->SetPosition(
 +        Vector(firstSatellitePositionGEO.x, firstSatellitePositionGEO.y, 0), PositionType::GEOGRAPHIC);
-
+ 
      // set global vars with GEO and ECEF positions for the Ground Node
 -    groundNodePosGEO = groundNodeMobility->GetGeographicPosition();
 -    groundNodePosECEF = groundNodeMobility->GetGeocentricPosition();
 +    groundNodePosGEO = groundNodeMobility->GetPosition(PositionType::GEOGRAPHIC);
 +    groundNodePosECEF = groundNodeMobility->GetPosition(PositionType::GEOCENTRIC);
-
+ 
      groundNode->AggregateObject(groundNodeMobility);
-
+ 
 diff --git a/helper/beamforming-helper-base.h b/helper/beamforming-helper-base.h
 index 7baf9c8d..b1987b95 100644
 --- a/helper/beamforming-helper-base.h
@@ -47,7 +47,7 @@ index 7baf9c8d..b1987b95 100644
 @@ -54,6 +54,14 @@ class NR_EXPORT BeamformingHelperBase : public Object
      virtual void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
                                      const Ptr<NrUeNetDevice>& ueDev) = 0;
-
+ 
 +    /**
 +     * @brief Removes the beamforming task for a handoff
 +     * @param gNbDev gNb device
@@ -66,7 +66,7 @@ index 256a82ab..9594e46f 100644
 @@ -84,6 +84,26 @@ IdealBeamformingHelper::AddBeamformingTask(const Ptr<NrGnbNetDevice>& gnbDev,
      }
  }
-
+ 
 +void
 +IdealBeamformingHelper::RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
 +                                              const Ptr<NrUeNetDevice>& ueDev)
@@ -97,7 +97,7 @@ index 57e82c13..a2d71f42 100644
 @@ -71,6 +71,9 @@ class NR_EXPORT IdealBeamformingHelper : public BeamformingHelperBase
      void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
                              const Ptr<NrUeNetDevice>& ueDev) override;
-
+ 
 +    void RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
 +                               const Ptr<NrUeNetDevice>& ueDev) override;
 +
@@ -141,7 +141,7 @@ index eb492e03..2c895445 100644
 +        Config::ConnectFailSafe(basePath + "/Srb1/NrPdcp/TxPDU", MakeBoundCallback(&UlTxPduCallback, arg));
      }
  }
-
+ 
 @@ -442,17 +442,17 @@ NrBearerStatsConnector::ConnectTracesGnb(std::string context,
          arg->imsi = imsi;
          arg->cellId = cellId;
@@ -196,7 +196,7 @@ index 86739e99..bf412fed 100644
 +    m_epcIndex = epcIndex++;
      NS_LOG_FUNCTION(this);
  }
-
+ 
 @@ -55,15 +57,22 @@ NrNoBackhaulEpcHelper::NotifyConstructionCompleted()
      // since we use point-to-point links for links between the core network nodes,
      // we use a /30 subnet which can hold exactly two addresses
@@ -210,7 +210,7 @@ index 86739e99..bf412fed 100644
 +    s5 << "14." << m_epcIndex << ".0.0";
 +    ue << "7." << m_epcIndex << ".0.0";
 +    ue6 << "7777:f00" << std::hex << m_epcIndex << "::";
-
+ 
 -    // we use a /8 net for all UEs
 -    m_uePgwAddressHelper.SetBase("7.0.0.0", "255.0.0.0");
 +    m_x2Ipv4AddressHelper.SetBase(x2.str().c_str(), "255.255.255.252");
@@ -219,11 +219,11 @@ index 86739e99..bf412fed 100644
 +
 +    // we use a /16 net for all UEs
 +    m_uePgwAddressHelper.SetBase(ue.str().c_str(), "255.255.0.0");
-
+ 
      // we use a /64 IPv6 net all UEs
 -    m_uePgwAddressHelper6.SetBase("7777:f00d::", Ipv6Prefix(64));
 +    m_uePgwAddressHelper6.SetBase(Ipv6Address(ue6.str().c_str()), Ipv6Prefix(64));
-
+ 
      // Create PGW, SGW and MME nodes
      m_pgw = CreateObject<Node>();
 @@ -81,7 +90,11 @@ NrNoBackhaulEpcHelper::NotifyConstructionCompleted()
@@ -236,7 +236,7 @@ index 86739e99..bf412fed 100644
 +                                        Ipv6Address("::"),
 +                                        1,
 +                                        0);
-
+ 
      // create TUN device implementing tunneling of user data over GTP-U/UDP/IP in the PGW
      m_tunDevice = CreateObject<VirtualNetDevice>();
 @@ -353,20 +366,30 @@ NrNoBackhaulEpcHelper::AddGnb(Ptr<Node> gnb, Ptr<NetDevice> nrGnbNetDevice, uint
@@ -260,7 +260,7 @@ index 86739e99..bf412fed 100644
 +        gnb->AggregateObject(x2);
 +    }
  }
-
+ 
  void
  NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
  {
@@ -275,7 +275,7 @@ index 86739e99..bf412fed 100644
 +
 +    Ptr<Node> gnb1 = gnbDev1->GetNode();
 +    Ptr<Node> gnb2 = gnbDev2->GetNode();
-
+ 
      // Create a point to point link between the two eNBs with
      // the corresponding new NetDevices on each side
 @@ -374,11 +397,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
@@ -288,12 +288,12 @@ index 86739e99..bf412fed 100644
 -    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #2 after installing p2p dev: "
 -                 << gnb2->GetObject<Ipv4>()->GetNInterfaces());
 +    NetDeviceContainer x2Devices = p2ph.Install(gnb1, gnb2);
-
+ 
      if (m_x2LinkEnablePcap)
      {
 @@ -386,11 +405,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
      }
-
+ 
      m_x2Ipv4AddressHelper.NewNetwork();
 -    Ipv4InterfaceContainer gnbIpIfaces = m_x2Ipv4AddressHelper.Assign(gnbDevices);
 -    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #1 after assigning Ipv4 addr to X2 dev: "
@@ -301,25 +301,25 @@ index 86739e99..bf412fed 100644
 -    NS_LOG_LOGIC("number of Ipv4 ifaces of the gNB #2 after assigning Ipv4 addr to X2 dev: "
 -                 << gnb2->GetObject<Ipv4>()->GetNInterfaces());
 +    Ipv4InterfaceContainer gnbIpIfaces = m_x2Ipv4AddressHelper.Assign(x2Devices);
-
+ 
      Ipv4Address gnb1X2Address = gnbIpIfaces.GetAddress(0);
      Ipv4Address gnb2X2Address = gnbIpIfaces.GetAddress(1);
 @@ -399,10 +414,7 @@ NrNoBackhaulEpcHelper::AddX2Interface(Ptr<Node> gnb1, Ptr<Node> gnb2)
      Ptr<NrEpcX2> gnb1X2 = gnb1->GetObject<NrEpcX2>();
      Ptr<NrEpcX2> gnb2X2 = gnb2->GetObject<NrEpcX2>();
-
+ 
 -    Ptr<NetDevice> gnb1NrDev = gnb1->GetDevice(0);
 -    Ptr<NetDevice> gnb2NrDev = gnb2->GetDevice(0);
 -
 -    DoAddX2Interface(gnb1X2, gnb1NrDev, gnb1X2Address, gnb2X2, gnb2NrDev, gnb2X2Address);
 +    DoAddX2Interface(gnb1X2, gnbDev1, gnb1X2Address, gnb2X2, gnbDev2, gnb2X2Address);
  }
-
+ 
  void
 @@ -427,8 +439,14 @@ NrNoBackhaulEpcHelper::DoAddX2Interface(const Ptr<NrEpcX2>& gnb1X2,
      NS_LOG_LOGIC("NrGnbNetDevice #1 = " << gnb1NrDev << " - CellId = " << gnb1CellId);
      NS_LOG_LOGIC("NrGnbNetDevice #2 = " << gnb2NrDev << " - CellId = " << gnb2CellId);
-
+ 
 -    gnb1X2->AddX2Interface(gnb1CellId, gnb1X2Address, gnb2CellId, gnb2X2Address);
 -    gnb2X2->AddX2Interface(gnb2CellId, gnb2X2Address, gnb1CellId, gnb1X2Address);
 +    gnb1X2->AddX2Interface(gnb1CellId,
@@ -330,13 +330,13 @@ index 86739e99..bf412fed 100644
 +                           gnb2X2Address,
 +                           gnb1CellId,
 +                           gnb1X2Address);
-
+ 
      gnb1NrDevice->GetRrc()->AddX2Neighbour(gnb2CellId);
      gnb2NrDevice->GetRrc()->AddX2Neighbour(gnb1CellId);
 @@ -595,7 +613,16 @@ NrNoBackhaulEpcHelper::AddS1Interface(Ptr<Node> gnb,
      int retval = gnbS1uSocket->Bind(InetSocketAddress(gnbAddress, m_gtpuUdpPort));
      NS_ASSERT(retval == 0);
-
+ 
 -    Ptr<NrEpcGnbApplication> gnbApp = gnb->GetApplication(0)->GetObject<NrEpcGnbApplication>();
 +    Ptr<NrEpcGnbApplication> gnbApp = nullptr;
 +    for (uint32_t i = 0; i < gnb->GetNApplications(); ++i)
@@ -350,7 +350,7 @@ index 86739e99..bf412fed 100644
 +    }
      NS_ASSERT_MSG(gnbApp, "NrEpcGnbApplication not available");
      gnbApp->AddS1Interface(gnbS1uSocket, gnbAddress, sgwAddress);
-
+ 
 @@ -657,7 +684,11 @@ NrNoBackhaulEpcHelper::SetupRemoteHost(std::optional<std::string> dataRate,
      Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
      Ptr<Ipv4StaticRouting> remoteHostStaticRouting4 =
@@ -363,7 +363,7 @@ index 86739e99..bf412fed 100644
 +                                                1);
      return std::make_pair(remoteHost, internetIpIfaces.GetAddress(1, 0));
  }
-
+ 
 @@ -701,8 +732,13 @@ NrNoBackhaulEpcHelper::SetupRemoteHost6(std::optional<std::string> dataRate,
      Ipv6StaticRoutingHelper ipv6RoutingHelper;
      Ptr<Ipv6StaticRouting> remoteHostStaticRouting =
@@ -379,7 +379,7 @@ index 86739e99..bf412fed 100644
 +                                               0);
      return std::make_pair(remoteHost, internetIpIfaces.GetAddress(1, 1));
  }
-
+ 
 diff --git a/helper/realistic-beamforming-helper.cc b/helper/realistic-beamforming-helper.cc
 index 746208e3..be171e82 100644
 --- a/helper/realistic-beamforming-helper.cc
@@ -387,7 +387,7 @@ index 746208e3..be171e82 100644
 @@ -87,6 +87,53 @@ RealisticBeamformingHelper::AssignStreams(int64_t stream)
      return currentStream - stream;
  }
-
+ 
 +void
 +RealisticBeamformingHelper::RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
 +                                                  const Ptr<NrUeNetDevice>& ueDev)
@@ -445,7 +445,7 @@ index df100194..08765373 100644
 @@ -71,6 +71,9 @@ class NR_EXPORT RealisticBeamformingHelper : public BeamformingHelperBase
      void AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
                              const Ptr<NrUeNetDevice>& ueDev) override;
-
+ 
 +    void RemoveBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev,
 +                               const Ptr<NrUeNetDevice>& ueDev) override;
 +
@@ -467,7 +467,7 @@ index 3b754368..b6533e78 100644
 +        NS_LOG_WARN("the necessary NAS signaling to activate a QoS flow after the initial context "
 +                    "has already been setup is not implemented");
 +        // break; execute bearers activation
-
+ 
      default:
          QosFlowToBeActivated qftba;
 diff --git a/model/nr-epc-x2.cc b/model/nr-epc-x2.cc
@@ -507,12 +507,12 @@ index e14201c7..58e4f101 100644
 +    }
 +    return nullptr;
  }
-
+ 
  NrEpcX2SapProvider*
 @@ -122,6 +148,12 @@ NrEpcX2::AddX2Interface(uint16_t localCellId,
  {
      NS_LOG_FUNCTION(this << localCellId << localX2Address << remoteCellId << remoteX2Address);
-
+ 
 +    if (m_x2InterfaceSockets.find(remoteCellId) != m_x2InterfaceSockets.end())
 +    {
 +        NS_LOG_INFO("Mapping for remoteCellId = " << remoteCellId << " is already known; skipping socket creation");
@@ -520,22 +520,22 @@ index e14201c7..58e4f101 100644
 +    }
 +
      int retval;
-
+ 
      // Get local gNB where this X2 entity belongs to
 @@ -141,9 +173,6 @@ NrEpcX2::AddX2Interface(uint16_t localCellId,
      NS_ASSERT(retval == 0);
      localX2uSocket->SetRecvCallback(MakeCallback(&NrEpcX2::RecvFromX2uSocket, this));
-
+ 
 -    NS_ASSERT_MSG(m_x2InterfaceSockets.find(remoteCellId) == m_x2InterfaceSockets.end(),
 -                  "Mapping for remoteCellId = " << remoteCellId << " is already known");
 -
      m_x2InterfaceSockets[remoteCellId] =
          Create<NrX2IfaceInfo>(remoteX2Address, localX2cSocket, localX2uSocket);
-
+ 
 @@ -206,7 +235,15 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("mmeUeS1apId = " << params.mmeUeS1apId);
              NS_LOG_LOGIC("cellsInfo->m_localCellId = " << cellsInfo->m_localCellId);
-
+ 
 -            m_x2SapUser->RecvHandoverRequest(params);
 +            NrEpcX2SapUser* sapUser = GetX2SapUser(params.targetCellId);
 +            if (sapUser)
@@ -552,7 +552,7 @@ index e14201c7..58e4f101 100644
 @@ -231,7 +268,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("sourceCellId = " << params.sourceCellId);
              NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
-
+ 
 -            m_x2SapUser->RecvHandoverRequestAck(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -564,7 +564,7 @@ index e14201c7..58e4f101 100644
 @@ -255,7 +295,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("cause = " << params.cause);
              NS_LOG_LOGIC("criticalityDiagnostics = " << params.criticalityDiagnostics);
-
+ 
 -            m_x2SapUser->RecvHandoverPreparationFailure(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -574,9 +574,9 @@ index e14201c7..58e4f101 100644
      }
      else if (procedureCode == NrEpcX2Header::LoadIndication)
 @@ -274,7 +317,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
-
+ 
              NS_LOG_LOGIC("cellInformationList size = " << params.cellInformationList.size());
-
+ 
 -            m_x2SapUser->RecvLoadInformation(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -588,7 +588,7 @@ index e14201c7..58e4f101 100644
 @@ -302,7 +348,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
              NS_LOG_LOGIC("erabsList size = " << params.erabsSubjectToStatusTransferList.size());
-
+ 
 -            m_x2SapUser->RecvSnStatusTransfer(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -600,7 +600,7 @@ index e14201c7..58e4f101 100644
 @@ -323,7 +372,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("oldGnbUeX2apId = " << params.oldGnbUeX2apId);
              NS_LOG_LOGIC("newGnbUeX2apId = " << params.newGnbUeX2apId);
-
+ 
 -            m_x2SapUser->RecvUeContextRelease(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -612,7 +612,7 @@ index e14201c7..58e4f101 100644
 @@ -348,7 +400,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC(
                  "cellMeasurementResultList size = " << params.cellMeasurementResultList.size());
-
+ 
 -            m_x2SapUser->RecvResourceStatusUpdate(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -624,7 +624,7 @@ index e14201c7..58e4f101 100644
 @@ -375,7 +430,10 @@ NrEpcX2::RecvFromX2cSocket(Ptr<Socket> socket)
              NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
              NS_LOG_LOGIC("cause = " << params.cause);
-
+ 
 -            m_x2SapUser->RecvHandoverCancel(params);
 +            for (auto const& pair : m_x2SapUsers)
 +            {
@@ -636,17 +636,17 @@ index e14201c7..58e4f101 100644
 @@ -408,7 +466,10 @@ NrEpcX2::RecvFromX2uSocket(Ptr<Socket> socket)
      params.gtpTeid = gtpu.GetTeid();
      params.ueData = packet;
-
+ 
 -    m_x2SapUser->RecvUeData(params);
 +    for (auto const& pair : m_x2SapUsers)
 +    {
 +        pair.second->RecvUeData(params);
 +    }
  }
-
+ 
  //
 diff --git a/model/nr-gnb-rrc.cc b/model/nr-gnb-rrc.cc
-index 7fa9a312..54bba432 100644
+index 7fa9a312..41fca106 100644
 --- a/model/nr-gnb-rrc.cc
 +++ b/model/nr-gnb-rrc.cc
 @@ -435,18 +435,31 @@ void
@@ -658,7 +658,7 @@ index 7fa9a312..54bba432 100644
 +                                  uint8_t drbid)
  {
      NS_LOG_FUNCTION(this << (uint32_t)m_rnti);
-
+ 
 +    // Check if bearer with this QFI already exists
 +    for (const auto& [id, info] : m_drbMap)
 +    {
@@ -687,14 +687,41 @@ index 7fa9a312..54bba432 100644
 @@ -784,6 +797,7 @@ NrUeManager::PrepareHandover(uint16_t cellId)
          m_pendingHandoverTargetCellId = cellId;
          return; // do NOT fall through; no X2 message yet
-
+ 
 +    case HANDOVER_PREPARATION: // already preparing a HO
      case HANDOVER_PATH_SWITCH: // already handed-over UE
      case HANDOVER_LEAVING:     // concurrent HO in progress
      case HANDOVER_JOINING:
-@@ -1639,24 +1653,36 @@ NrUeManager::BuildHoCancelMsg()
+@@ -999,12 +1013,20 @@ NrUeManager::SendData(uint8_t qfi, Ptr<Packet> p)
+     case HANDOVER_LEAVING: {
+         NS_LOG_INFO("forwarding data to target gNB over X2-U");
+         uint8_t drbid = nr::Qfi2Drbid(qfi);
+-        NrEpcX2Sap::UeDataParams params;
+-        params.sourceCellId = m_rrc->ComponentCarrierToCellId(m_componentCarrierId);
+-        params.targetCellId = m_targetCellId;
+-        params.gtpTeid = GetDataRadioBearerInfo(drbid)->m_gtpTeid;
+-        params.ueData = p;
+-        m_rrc->m_x2SapProvider->SendUeData(params);
++        auto it = m_drbMap.find(drbid);
++        if (it != m_drbMap.end())
++        {
++            NrEpcX2Sap::UeDataParams params;
++            params.sourceCellId = m_rrc->ComponentCarrierToCellId(m_componentCarrierId);
++            params.targetCellId = m_targetCellId;
++            params.gtpTeid = it->second->m_gtpTeid;
++            params.ueData = p;
++            m_rrc->m_x2SapProvider->SendUeData(params);
++        }
++        else
++        {
++            NS_LOG_WARN("DRB not found for QFI " << +qfi << " while HANDOVER_LEAVING, dropping packet");
++        }
+     }
+     break;
+ 
+@@ -1639,24 +1661,36 @@ NrUeManager::BuildHoCancelMsg()
  }
-
+ 
  uint8_t
 -NrUeManager::AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> drbInfo)
 +NrUeManager::AddDataRadioBearerInfo(Ptr<NrDataRadioBearerInfo> drbInfo, uint8_t drbid)
@@ -740,8 +767,8 @@ index 7fa9a312..54bba432 100644
              }
          }
      }
-@@ -3124,10 +3150,12 @@ NrGnbRrc::DoRecvHandoverRequest(NrEpcX2SapUser::HandoverRequestParams req)
-
+@@ -3124,10 +3158,12 @@ NrGnbRrc::DoRecvHandoverRequest(NrEpcX2SapUser::HandoverRequestParams req)
+ 
      for (auto it = req.bearers.begin(); it != req.bearers.end(); ++it)
      {
 +        uint8_t drbid = nr::Qfi2Drbid(it->erabId);
@@ -754,9 +781,9 @@ index 7fa9a312..54bba432 100644
          NrEpcX2Sap::ErabAdmittedItem i;
          i.erabId = it->erabId;
          ackParams.admittedBearers.push_back(i);
-@@ -3182,8 +3210,14 @@ NrGnbRrc::DoRecvHandoverRequestAck(NrEpcX2SapUser::HandoverRequestAckParams para
+@@ -3182,8 +3218,14 @@ NrGnbRrc::DoRecvHandoverRequestAck(NrEpcX2SapUser::HandoverRequestAckParams para
      NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
-
+ 
      uint16_t rnti = params.oldGnbUeX2apId;
 -    Ptr<NrUeManager> ueManager = GetUeManager(rnti);
 -    ueManager->RecvHandoverRequestAck(params);
@@ -769,9 +796,9 @@ index 7fa9a312..54bba432 100644
 +        }
 +    }
  }
-
+ 
  void
-@@ -3205,7 +3239,10 @@ NrGnbRrc::DoRecvHandoverPreparationFailure(NrEpcX2SapUser::HandoverPreparationFa
+@@ -3205,7 +3247,10 @@ NrGnbRrc::DoRecvHandoverPreparationFailure(NrEpcX2SapUser::HandoverPreparationFa
      if (HasUeManager(rnti))
      {
          Ptr<NrUeManager> ueManager = GetUeManager(rnti);
@@ -782,8 +809,8 @@ index 7fa9a312..54bba432 100644
 +        }
      }
  }
-
-@@ -3227,7 +3264,10 @@ NrGnbRrc::DoRecvSnStatusTransfer(NrEpcX2SapUser::SnStatusTransferParams params)
+ 
+@@ -3227,7 +3272,10 @@ NrGnbRrc::DoRecvSnStatusTransfer(NrEpcX2SapUser::SnStatusTransferParams params)
      if (HasUeManager(rnti))
      {
          Ptr<NrUeManager> ueManager = GetUeManager(rnti);
@@ -794,8 +821,8 @@ index 7fa9a312..54bba432 100644
 +        }
      }
  }
-
-@@ -3246,8 +3286,12 @@ NrGnbRrc::DoRecvUeContextRelease(NrEpcX2SapUser::UeContextReleaseParams params)
+ 
+@@ -3246,8 +3294,12 @@ NrGnbRrc::DoRecvUeContextRelease(NrEpcX2SapUser::UeContextReleaseParams params)
      // check if the RNTI to be removed is not stale
      if (HasUeManager(rnti))
      {
@@ -809,13 +836,13 @@ index 7fa9a312..54bba432 100644
 +        }
      }
  }
-
+ 
 diff --git a/model/nr-mac-scheduler-ns3.cc b/model/nr-mac-scheduler-ns3.cc
 index 66d16dcf..ff8d44a1 100644
 --- a/model/nr-mac-scheduler-ns3.cc
 +++ b/model/nr-mac-scheduler-ns3.cc
 @@ -947,7 +947,16 @@ NrMacSchedulerNs3::DoSchedDlCqiInfoReq(
-
+ 
      for (const auto& cqi : params.m_cqiList)
      {
 -        NS_ASSERT(m_ueMap.find(cqi.m_rnti) != m_ueMap.end());
@@ -833,13 +860,13 @@ index 66d16dcf..ff8d44a1 100644
          m_cqiManagement.DlCqiReported(cqi, ue, expirationTime, m_maxDlMcs, GetBandwidthInRbg());
          m_csiFeedbackReceived(GetCellId(), GetBwpId(), ue);
 diff --git a/model/nr-mimo-matrices-eigen.cc b/model/nr-mimo-matrices-eigen.cc
-index 9eed6f22..1da5a0f5 100644
+index 9eed6f22..27d74410 100644
 --- a/model/nr-mimo-matrices-eigen.cc
 +++ b/model/nr-mimo-matrices-eigen.cc
 @@ -203,7 +203,11 @@ NrIntfNormChanMat::ExtractOptimalPrecodingMatrices(uint8_t rank) const
                                                   this->GetNumRows(),
                                                   this->GetNumCols());
-
+ 
 +#if  EIGEN_MAJOR_VERSION >= 5
 +        auto svd = H.jacobiSvd<Eigen::ComputeFullV>();
 +#else
@@ -848,5 +875,6 @@ index 9eed6f22..1da5a0f5 100644
          auto V = svd.matrixV();
          for (size_t i = 0; i < m_numRows; i++)
          {
---
+-- 
 2.50.1 (Apple Git-155)
+

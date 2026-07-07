@@ -1,0 +1,70 @@
+From e4157ca906197d31aaf74c4ba63c24e135c1f345 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 7 Jul 2026 19:26:10 +0200
+Subject: [PATCH] Fix phase conjugation and DRB safety
+
+---
+ model/beamforming-vector.cc | 8 ++++----
+ model/nr-gnb-rrc.cc         | 6 +++++-
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/model/beamforming-vector.cc b/model/beamforming-vector.cc
+index 5fc16f8e..e5198caa 100644
+--- a/model/beamforming-vector.cc
++++ b/model/beamforming-vector.cc
+@@ -78,7 +78,7 @@ CreateDirectionalBfv(const Ptr<const UniformPlanarArray>& antenna, double sector
+             -2 * M_PI *
+             (sin(vAngle_radian) * cos(hAngle_radian) * loc.x +
+              sin(vAngle_radian) * sin(hAngle_radian) * loc.y + cos(vAngle_radian) * loc.z);
+-        tempVector[ind] = (exp(std::complex<double>(0, phase)) * power);
++        tempVector[ind] = (exp(std::complex<double>(0, -phase)) * power);
+     }
+     return tempVector;
+ }
+@@ -107,7 +107,7 @@ CreateDirectionalBfvAz(const Ptr<const UniformPlanarArray>& antenna, double azim
+                 -2 * M_PI *
+                 (sin(vAngle_radian) * cos(hAngle_radian) * loc.x +
+                  sin(vAngle_radian) * sin(hAngle_radian) * loc.y + cos(vAngle_radian) * loc.z);
+-            tempVector[ind] = exp(std::complex<double>(0, phase)) * power;
++            tempVector[ind] = exp(std::complex<double>(0, -phase)) * power;
+         }
+     }
+     return tempVector;
+@@ -149,7 +149,7 @@ CreateDirectPathBfv(const Ptr<MobilityModel>& a,
+         double phase = -2 * M_PI *
+                        (sin(vAngleRadian) * cos(hAngleRadian) * loc.x +
+                         sin(vAngleRadian) * sin(hAngleRadian) * loc.y + cos(vAngleRadian) * loc.z);
+-        antennaWeights[ind] = exp(std::complex<double>(0, phase)) * power;
++        antennaWeights[ind] = exp(std::complex<double>(0, -phase)) * power;
+     }
+ 
+     return antennaWeights;
+@@ -183,7 +183,7 @@ CreateKroneckerBfvImpl(const Ptr<const UniformPlanarArray>& antenna,
+             continue;
+         }
+         auto combPhase = rowIdx * vPhasePerEl + colIdx * hPhasePerEl;
+-        bfVector[elIdx] = normalizer * std::complex<double>(cos(combPhase), sin(combPhase));
++        bfVector[elIdx] = normalizer * std::conj(std::complex<double>(cos(combPhase), sin(combPhase)));
+     }
+     return bfVector;
+ }
+diff --git a/model/nr-gnb-rrc.cc b/model/nr-gnb-rrc.cc
+index 41fca106..f4350d9e 100644
+--- a/model/nr-gnb-rrc.cc
++++ b/model/nr-gnb-rrc.cc
+@@ -1704,7 +1704,11 @@ NrUeManager::GetDataRadioBearerInfo(uint8_t drbid)
+     NS_LOG_FUNCTION(this << (uint32_t)drbid);
+     NS_ASSERT(0 != drbid);
+     auto it = m_drbMap.find(drbid);
+-    NS_ABORT_IF(it == m_drbMap.end());
++    if (it == m_drbMap.end())
++    {
++        NS_LOG_WARN("DRB ID " << (uint32_t)drbid << " not found. Returning nullptr.");
++        return nullptr;
++    }
+     return it->second;
+ }
+ 
+-- 
+2.50.1 (Apple Git-155)
+

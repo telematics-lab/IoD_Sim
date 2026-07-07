@@ -124,23 +124,7 @@ struct NrAntennaConfiguration
     std::vector<ModelConfiguration::Attribute> arrayProperties;
 };
 
-/**
- * Data structure for SINR-Distance Attachment configuration
- */
-struct SinrDistanceTableEntry
-{
-    double maxDistance;
-    double minSinr;
-};
 
-struct SinrDistanceAttachConfig
-{
-    Time precision;
-    std::vector<SinrDistanceTableEntry> table;
-    double threshold = 2.0;
-    /// List of BWP IDs to evaluate per gNB (default: {0})
-    std::vector<uint8_t> bwps = {0};
-};
 
 /**
  * Data structure for ISL Delay Mode configuration
@@ -461,17 +445,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
      */
     std::string GetAttachMethod() const;
 
-    /**
-     * Set the SINR-Distance attachment configuration
-     * \param config The configuration
-     */
-    void SetSinrDistanceAttachConfig(const SinrDistanceAttachConfig& config);
 
-    /**
-     * Get the SINR-Distance attachment configuration
-     * \return The configuration
-     */
-    std::optional<SinrDistanceAttachConfig> GetSinrDistanceAttachConfig() const;
 
     /**
      * Set the ISL delay mode configuration
@@ -536,7 +510,7 @@ class NrPhyLayerConfiguration : public PhyLayerConfiguration
     std::vector<ModelConfiguration::Attribute> m_ueChannelAccessManagerAttributes;
     TypeId m_gnbChannelAccessManagerType;
     std::vector<ModelConfiguration::Attribute> m_gnbChannelAccessManagerAttributes;
-    std::optional<SinrDistanceAttachConfig> m_sinrDistanceAttachConfig;
+
     std::optional<IslDelayModeConfig> m_islDelayModeConfig;
     bool m_enablePcap = false;
     bool m_fullMeshX2Links = true;

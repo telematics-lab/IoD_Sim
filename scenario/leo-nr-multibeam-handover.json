@@ -11,13 +11,13 @@
       "coordinates": "geocentric",
       "logGeocentricREM": true,
       "parameters": {
-        "MinLon": "60.0",
-        "MaxLon": "130.0",
-        "MinLat": "0.0",
-        "MaxLat": "60.0",
+        "MinLon": "80.0",
+        "MaxLon": "125.0",
+        "MinLat": "10.0",
+        "MaxLat": "50.0",
         "Altitude": "2.0",
-        "XRes": "150",
-        "YRes": "100",
+        "XRes": "80",
+        "YRes": "80",
         "RemMode": "CoverageArea",
         "InstallationDelay": "0.5s"
       }
@@ -38,6 +38,10 @@
     },
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "100ms"
+    },
+    {
+      "name": "ns3::ThreeGppChannelModel::UpdatePeriod",
       "value": "100ms"
     },
     { // This option removes interference caused by devices on the same node.
@@ -74,7 +78,7 @@
   "phyLayer": [
     {
       "type": "nr",
-      "attachMethod": "max-rsrp",
+      "attachMethod": "sinr-distance-dynamic",
       "channels": [
         {
           "scenario": "NTN-Rural",
@@ -89,7 +93,7 @@
           "channelConditionAttributes": [
             {
               "name": "UpdatePeriod",
-              "value": "0ms"
+              "value": "100ms"
             }
           ],
           "bands": [
@@ -103,6 +107,19 @@
           ]
         }
       ],
+      "handover": {
+        "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "DistanceSinrTable",
+            "value": "1000000:-20.0"
+          },
+          {
+            "name": "Threshold",
+            "value": 3.0
+          }
+        ]
+      },
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [
@@ -123,11 +140,11 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 4
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 4
+            "value": 1
           }
         ]
       },
@@ -163,7 +180,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 45.0
+          "value": 60.0
         }
       ],
       "gnbPhyAttributes": [
@@ -173,18 +190,18 @@
         }
       ],
       "advancedOptions": {
-        "sinr-distance-attach": {
+        "islDelayMode": {
           "precision": "100ms",
-          "threshold": 3.0, // Hysteresis
-          "bwps": [
-            0
+          "additionalDelay": "0ms",
+          "maxISLSatDistance": 4000e3,
+          "maxGroundStationDistance": 600e3,
+          "groundStations": [
+            [
+              30.0,
+              102.0
+            ]
           ],
-          "table": [
-            {
-              "maxDistance": 1000e3,
-              "minSINR": -20.0
-            }
-          ]
+          "updateLog": true
         }
       },
       "fullMeshX2Links": true
@@ -454,7 +471,7 @@
           },
           {
             "name": "Offset",
-            "value": 355.0
+            "value": 353.0
           }
         ]
       },

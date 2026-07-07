@@ -1,12 +1,17 @@
 #include "scenario.h"
+#include "ns3/command-line.h"
 
 namespace ns3
 {
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
 
+Scenario* Scenario::s_instance = nullptr;
+
 Scenario::Scenario(int argc, char** argv)
 {
+    s_instance = this;
+
     RngSeedManager::SetRun(1);
     RngSeedManager::SetSeed(33);
     Config::SetDefault("ns3::RandomVariableStream::Stream", IntegerValue(1));
@@ -103,6 +108,12 @@ Scenario::Scenario(int argc, char** argv)
 
     // DebugHelper::ProbeNodes();
     ConfigureSimulator();
+}
+
+Scenario*
+Scenario::GetInstance()
+{
+    return s_instance;
 }
 
 Scenario::~Scenario()
@@ -805,6 +816,49 @@ Scenario::ConfigureSimulator()
     m_appStatsHelper.Start();
 
     Simulator::Stop(Seconds(CONFIGURATOR->GetDuration()));
+}
+
+std::optional<uint32_t>
+Scenario::GetNetId(Ptr<NetDevice> dev) const
+{
+    if (!dev)
+    {
+        return std::nullopt;
+    }
+
+    if (auto it = m_netIdCache.find(dev); it != m_netIdCache.end())
+    {
+        return it->second;
+    }
+
+    for (const auto& [netId, containers] : m_nrGnbDevices)
+    {
+        for (const auto& container : containers)
+        {
+            for (uint32_t i = 0; i < container.GetN(); ++i)
+            {
+                if (container.Get(i) == dev)
+                {
+                    m_netIdCache[dev] = netId;
+                    return netId;
+                }
+            }
+        }
+    }
+    
+    for (const auto& [netId, devices] : m_nrUeDevices)
+    {
+        for (const auto& ueDev : devices)
+        {
+            if (ueDev == dev)
+            {
+                m_netIdCache[dev] = netId;
+                return netId;
+            }
+        }
+    }
+
+    return std::nullopt;
 }
 
 } // namespace ns3

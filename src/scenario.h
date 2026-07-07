@@ -147,6 +147,13 @@ class Scenario
     Scenario(int argc, char** argv);
     virtual ~Scenario();
 
+    static Scenario* GetInstance();
+
+    double GetISLMinimumDistance(Ptr<Node> n1, Ptr<Node> n2, uint32_t netId);
+    double GetISLMinimumDistance(Ptr<Node> n, uint32_t gsIndex, uint32_t netId);
+    std::pair<double, uint32_t> GetISLMinimumDistance(Ptr<Node> n, uint32_t netId);
+    std::optional<uint32_t> GetNetId(Ptr<NetDevice> dev) const;
+
     void operator()();
 
   private:
@@ -232,14 +239,12 @@ class Scenario
     void AttachAllNrUesToGnbs();
     void InitializeIslDelayMode();
     void UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config);
-    double GetISLMinimumDistance(Ptr<Node> n1, Ptr<Node> n2, uint32_t netId);
-    double GetISLMinimumDistance(Ptr<Node> n, uint32_t gsIndex, uint32_t netId);
-    // Returns {minDist, gsIndex}. If no ground station is reachable, returns
-    // {std::numeric_limits<double>::infinity(), 0}
-    std::pair<double, uint32_t> GetISLMinimumDistance(Ptr<Node> n, uint32_t netId);
     void ConfigureScheduling();
     void ConfigureFullMeshX2Links();
-    void EvaluateSinrDistanceAttachment(const uint32_t netId);
+    void PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper,
+                                             NetDeviceContainer ueDevices,
+                                             NetDeviceContainer allGnbDevices,
+                                             std::string tableStr);
     void ExecuteHandoverRequest(Ptr<NrUeNetDevice> ueDevice,
                                 Ptr<NrGnbNetDevice> targetGnb,
                                 uint16_t targetCellId,
@@ -287,6 +292,7 @@ class Scenario
     void BuildIslGraph(uint32_t netId);
 
     std::map<uint32_t, IslGraphCache> m_islCaches;
+    mutable std::map<Ptr<NetDevice>, uint32_t> m_netIdCache;
     NodeContainer m_plainNodes;
     DroneContainer m_drones;
     NodeContainer m_zsps;
@@ -300,6 +306,9 @@ class Scenario
     Ptr<OutputStreamWrapper> m_vehicleTraceStream;
 
     // NR gNB and UE tracking for proper attachment
+    void AttachUes(const std::map<uint32_t, std::vector<Ptr<NetDevice>>>& gnbByNetId,
+                   const std::map<uint32_t, std::vector<Ptr<NetDevice>>>& ueByNetId);
+
     std::map<uint32_t, std::vector<NetDeviceContainer>> m_nrGnbDevices;
     std::map<uint32_t, std::vector<Ptr<NetDevice>>> m_nrUeDevices;
 
@@ -308,6 +317,10 @@ class Scenario
 
     // Persistent containers for NR attachment workaround
     std::list<std::shared_ptr<NetDeviceContainer>> m_persistentContainers;
+    std::vector<ns3::Ptr<ns3::Ipv4StaticRouting>> m_staticRouting;
+    ns3::Ptr<ns3::MobilityModel> m_controllerMobility;
+
+    static Scenario* s_instance;
 
     // Track active SINR attachment loops to avoid duplicates
     std::set<uint32_t> m_sinrAttachmentRunning;

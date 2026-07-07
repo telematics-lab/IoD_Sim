@@ -1133,19 +1133,11 @@ inline Value::Value(const Value& rhs, Allocator& allocator)
         {
             m_detached = ObjectData{};
             auto& obj = std::get<ObjectData>(m_detached);
-            int count = 0;
             for (auto it = rhs.MemberBegin(); it != rhs.MemberEnd(); ++it)
             {
                 Value k(it->name, allocator);
                 Value v(it->value, allocator);
                 obj.emplace_back(std::make_pair(k.GetString(), std::move(v)));
-                count++;
-            }
-            if (count == 0)
-            {
-                std::cerr << "DEBUG: Copying Object, passed IsObject(), but Member loop found 0 "
-                             "items! rhs.m_val: "
-                          << (void*)rhs.m_val << std::endl;
             }
         }
     }

@@ -89,6 +89,7 @@ set(source_files
   helper/debug-helper.h
   helper/three-dimensional-rem-helper.cc
   helper/nr-radio-geo-environment-map-helper.cc
+  helper/nr-sinr-distance-handover-algorithm.cc
   irs/patch-configurator/defined-patch-configurator.cc
   irs/patch-configurator/patch-configurator.cc
   irs/serving-configurator/defined-serving-configurator.cc
@@ -142,6 +143,13 @@ set(source_files
   world/interest-region.cc
   mobility/trace-reader.cc
   mobility/trace-based-mobility-model.cc
+  scenario-core.cc 
+  scenario-phy.cc 
+  scenario-mac.cc 
+  scenario-network.cc 
+  scenario-entities.cc 
+  scenario-mobility.cc 
+  scenario-link.cc
 )
 
 set(header_files
@@ -322,13 +330,6 @@ build_lib(
 build_exec(
   EXECNAME scenario
   SOURCE_FILES main.cc 
-               scenario-core.cc 
-               scenario-phy.cc 
-               scenario-mac.cc 
-               scenario-network.cc 
-               scenario-entities.cc 
-               scenario-mobility.cc 
-               scenario-link.cc
   LIBRARIES_TO_LINK ${libiodsim}
                     ${libcore}
                     ${libapplications}

@@ -1,0 +1,138 @@
+From a68dd7e9d8ca8e4fe122f33c041b1db05d6324ec Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Tue, 7 Jul 2026 19:26:10 +0200
+Subject: [PATCH] Fix massive MIMO uint8 overflow in channel gain
+
+---
+ .../model/sionna-rt-spectrum-propagation-loss-model.cc | 10 +++++-----
+ .../model/sionna-rt-spectrum-propagation-loss-model.h  | 10 +++++-----
+ src/spectrum/model/three-gpp-channel-model.cc          |  3 ++-
+ .../model/three-gpp-spectrum-propagation-loss-model.cc |  8 ++++----
+ .../model/three-gpp-spectrum-propagation-loss-model.h  |  8 ++++----
+ 5 files changed, 20 insertions(+), 19 deletions(-)
+
+diff --git a/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.cc b/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.cc
+index 40f3faf50..aac1351bd 100644
+--- a/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.cc
++++ b/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.cc
+@@ -204,9 +204,9 @@ SionnaRtSpectrumPropagationLossModel::CalcBeamformingGain(
+     Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+     const Vector& sSpeed,
+     const Vector& uSpeed,
+-    const uint8_t numTxPorts,
+-    const uint8_t numRxPorts,
+-    const bool isReverse) const
++    uint16_t numTxPorts,
++    uint16_t numRxPorts,
++    bool isReverse) const
+ 
+ {
+     NS_LOG_FUNCTION(this);
+@@ -317,8 +317,8 @@ SionnaRtSpectrumPropagationLossModel::GenSpectrumChannelMatrix(
+     Ptr<const MatrixBasedChannelModel::ChannelMatrix> channelMatrix,
+     Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+     PhasedArrayModel::ComplexVector doppler,
+-    uint8_t numTxPorts,
+-    uint8_t numRxPorts,
++    const uint16_t numTxPorts,
++    const uint16_t numRxPorts,
+     const bool isReverse)
+ {
+     const size_t numCluster = channelMatrix->m_channel.GetNumPages();
+diff --git a/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.h b/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.h
+index bb581da8e..9703b54e1 100644
+--- a/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.h
++++ b/src/spectrum/model/sionna-rt-spectrum-propagation-loss-model.h
+@@ -159,8 +159,8 @@ class SionnaRtSpectrumPropagationLossModel : public PhasedArraySpectrumPropagati
+         Ptr<const MatrixBasedChannelModel::ChannelMatrix> channelMatrix,
+         Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+         PhasedArrayModel::ComplexVector doppler,
+-        const uint8_t numTxPorts,
+-        const uint8_t numRxPorts,
++        const uint16_t numTxPorts,
++        const uint16_t numRxPorts,
+         const bool isReverse);
+ 
+     /**
+@@ -233,9 +233,9 @@ class SionnaRtSpectrumPropagationLossModel : public PhasedArraySpectrumPropagati
+         Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+         const Vector& sSpeed,
+         const Vector& uSpeed,
+-        uint8_t numTxPorts,
+-        uint8_t numRxPorts,
+-        bool isReverse) const;
++        uint16_t numTxPorts,
++        uint16_t numRxPorts,
++        const bool isReverse) const;
+ 
+     int64_t DoAssignStreams(int64_t stream) override;
+ 
+diff --git a/src/spectrum/model/three-gpp-channel-model.cc b/src/spectrum/model/three-gpp-channel-model.cc
+index b661094dc..6aedeb7a2 100644
+--- a/src/spectrum/model/three-gpp-channel-model.cc
++++ b/src/spectrum/model/three-gpp-channel-model.cc
+@@ -2493,7 +2493,8 @@ ThreeGppChannelModel::AntennaSetupChanged(Ptr<const PhasedArrayModel> aAntenna,
+     const bool dimsMatchNormal = uAntNumElems == chanNumRows && sAntNumElems == chanNumCols;
+     const bool dimsMatchSwapped = uAntNumElems == chanNumCols && sAntNumElems == chanNumRows;
+     const bool dimsMismatch = !(dimsMatchNormal || dimsMatchSwapped);
+-    const bool channelOutOfDate = aAntenna->IsChannelOutOfDate(bAntenna);
++    const bool channelOutOfDate =
++        aAntenna->IsChannelOutOfDate(bAntenna) || bAntenna->IsChannelOutOfDate(aAntenna);
+     const bool changed = dimsMismatch || channelOutOfDate;
+ 
+     if (changed)
+diff --git a/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.cc b/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.cc
+index 74f75d456..b21b9b2e7 100644
+--- a/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.cc
++++ b/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.cc
+@@ -240,8 +240,8 @@ ThreeGppSpectrumPropagationLossModel::CalcBeamformingGain(
+     Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+     const Vector& sSpeed,
+     const Vector& uSpeed,
+-    const uint8_t numTxPorts,
+-    const uint8_t numRxPorts,
++    const uint16_t numTxPorts,
++    const uint16_t numRxPorts,
+     const bool isReverse) const
+ 
+ {
+@@ -398,8 +398,8 @@ ThreeGppSpectrumPropagationLossModel::GenSpectrumChannelMatrix(
+     Ptr<const MatrixBasedChannelModel::ChannelMatrix> channelMatrix,
+     Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+     const PhasedArrayModel::ComplexVector& doppler,
+-    uint8_t numTxPorts,
+-    uint8_t numRxPorts,
++    uint16_t numTxPorts,
++    uint16_t numRxPorts,
+     const bool isReverse)
+ {
+     const size_t numCluster = channelMatrix->m_channel.GetNumPages();
+diff --git a/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.h b/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.h
+index c83e29ebf..d093d5f5e 100644
+--- a/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.h
++++ b/src/spectrum/model/three-gpp-spectrum-propagation-loss-model.h
+@@ -154,8 +154,8 @@ class ThreeGppSpectrumPropagationLossModel : public PhasedArraySpectrumPropagati
+         Ptr<const MatrixBasedChannelModel::ChannelMatrix> channelMatrix,
+         Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+         const PhasedArrayModel::ComplexVector& doppler,
+-        const uint8_t numTxPorts,
+-        const uint8_t numRxPorts,
++        const uint16_t numTxPorts,
++        const uint16_t numRxPorts,
+         const bool isReverse);
+ 
+     /**
+@@ -209,8 +209,8 @@ class ThreeGppSpectrumPropagationLossModel : public PhasedArraySpectrumPropagati
+         Ptr<const MatrixBasedChannelModel::ChannelParams> channelParams,
+         const Vector& sSpeed,
+         const Vector& uSpeed,
+-        const uint8_t numTxPorts,
+-        const uint8_t numRxPorts,
++        const uint16_t numTxPorts,
++        const uint16_t numRxPorts,
+         const bool isReverse) const;
+ 
+     int64_t DoAssignStreams(int64_t stream) override;
+-- 
+2.50.1 (Apple Git-155)
+

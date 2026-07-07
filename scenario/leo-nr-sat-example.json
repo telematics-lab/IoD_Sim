@@ -120,27 +120,27 @@
         }
       ],
       // Handover (qui potranno essere inseriti nuovi algoritmi di handover)
-      // Al momento in lena questa funzionalità è esposta tramite API, ma di fatto non è implementata
-      // In future versioni questo campo avrà un ruolo fondamentale per la simulazione di handover
       "handover": {
-        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
-        "attributes": []
+        // Valutazione ideale mediante sinr e distanza per handover
+        // In questo algoritmo andiamo a estrarre il nodo UE e gNB coinvolti, e valutiamo in modo ideale la distanza tra i due, e il SINR del link, per decidere se fare handover o meno
+        // Usando la threshold di SINR per implementare un meccanismo di isteresi, ed una tabella in cui andiamo a selezionare
+        // Il valore minore di distanza tra i massimi di distanze disponibili in DistanceSinrTable, e permettendo il link solo se il SINR è maggiore della soglia (Sintassi: distanza_max1:sinr_min1|distanza_max2:sinr_min2|...)
+        "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "DistanceSinrTable",
+            "value": "430000:-20.0"
+          },
+          {
+            "name": "Threshold",
+            "value": 3.0
+          }
+        ]
       },
       // Metodo di attach ad inizio simulazione (vedi documentazione del json per altre opzioni)
-      "attachMethod": "none",
+      "attachMethod": "max-rsrp",
       // IMPOSTAZIONI AVANZATE: attach SINR-Based & Inter-Satellite Links (ISL) Delay
       "advancedOptions": {
-        // Questa direttiva usa il modello di attachment in base al range SINR/Distanza
-        "sinr-distance-attach": {
-          "precision": "100ms", // Intervallo dell'aggiornamento della valutazione
-          "threshold": 3.0, // Isteresi
-          "table": [
-            {
-              "maxDistance": 430e3,
-              "minSINR": -20.0
-            }
-          ]
-        },
         // Configurazione del ritardo per l'ISL simulando le distanze fisiche tra gli apparati inter-satellitari o ai gateway
         "islDelayMode": {
           "precision": "100ms",

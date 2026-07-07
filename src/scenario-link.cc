@@ -2,8 +2,11 @@
 
 #include "ns3/nr-epc-x2.h"
 #include "ns3/nr-gnb-net-device.h"
+#include "ns3/nr-ue-rrc.h"
 #include "ns3/nr-no-backhaul-epc-helper.h"
 #include "ns3/point-to-point-helper.h"
+#include "ns3/string.h"
+#include "helper/nr-radio-geo-environment-map-helper.h"
 
 #include <filesystem>
 #include <queue>
@@ -176,7 +179,16 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
                         DynamicCast<PointToPointChannel>(ptpDev->GetChannel());
                     if (channel)
                     {
-                        channel->SetAttribute("Delay", TimeValue(totalDelay));
+                        if (totalDelay < Seconds(0))
+                        {
+                            // A negative delay means the link is down. PointToPointChannel cannot handle negative delays.
+                            // We set an artificially huge delay to practically drop the packets in the simulation time.
+                            channel->SetAttribute("Delay", TimeValue(Seconds(3600.0)));
+                        }
+                        else
+                        {
+                            channel->SetAttribute("Delay", TimeValue(totalDelay));
+                        }
                     }
                 }
 #endif
@@ -552,21 +564,7 @@ Scenario::AttachAllNrUesToGnbs()
         auto nrConf =
             StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
 
-        // Check if SINR-Distance Attachment is configured
-        if (nrConf->GetSinrDistanceAttachConfig())
-        {
-            if (m_sinrAttachmentRunning.find(netId) == m_sinrAttachmentRunning.end())
-            {
-                NS_LOG_INFO(
-                    "Using SINR-Distance Attachment logic. Skipping 'attachMethod' configuration.");
-                Simulator::Schedule(Seconds(0),
-                                    &Scenario::EvaluateSinrDistanceAttachment,
-                                    this,
-                                    netId);
-                m_sinrAttachmentRunning.insert(netId);
-            }
-            continue;
-        }
+
 
         std::string attachMethod = nrConf->GetAttachMethod();
 
@@ -600,16 +598,50 @@ Scenario::AttachAllNrUesToGnbs()
         {
             NS_LOG_INFO("Skipping attachment as per configuration.");
         }
+        else if (attachMethod == "sinr-distance-dynamic")
+        {
+            std::string tableStr = "";
+            for (const auto& attr : nrConf->GetHandoverAlgorithmAttributes())
+            {
+                if (attr.name == "DistanceSinrTable")
+                {
+                    Ptr<StringValue> stringVal = DynamicCast<StringValue>(attr.value);
+                    if (stringVal)
+                    {
+                        tableStr = stringVal->Get();
+                    }
+                    break;
+                }
+            }
+            if (tableStr.empty())
+            {
+                NS_LOG_WARN("DistanceSinrTable attribute missing from Handover algorithm. AttachMethod sinr-distance-dynamic may fail.");
+            }
+
+            // Create persistent containers for the periodic attachment
+            for (auto i = ueDevices.Begin(); i != ueDevices.End(); ++i)
+            {
+                Ptr<NetDevice> ueDevice = *i;
+                auto persistentContainer = std::make_shared<NetDeviceContainer>(ueDevice);
+                m_persistentContainers.push_back(persistentContainer);
+            }
+            auto persistentGnbContainer = std::make_shared<NetDeviceContainer>(allGnbDevices);
+            m_persistentContainers.push_back(persistentGnbContainer);
+
+            // Start the periodic check
+            Simulator::ScheduleNow(MakeEvent(&Scenario::PeriodicSinrDistanceAttachmentCheck,
+                                             this,
+                                             nrHelper,
+                                             ueDevices,
+                                             allGnbDevices,
+                                             tableStr));
+        }
         else
         {
             NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
         }
 
-        // Check if SINR-Distance Attachment is configured and schedule it
-        if (nrConf->GetSinrDistanceAttachConfig())
-        {
-            Simulator::Schedule(Seconds(0), &Scenario::EvaluateSinrDistanceAttachment, this, netId);
-        }
+
     }
 }
 
@@ -662,311 +694,87 @@ Scenario::ConfigureFullMeshX2Links()
     }
 }
 
+
+
+struct TableEntry {
+    double maxDistance;
+    double minSinr;
+};
+
 void
-Scenario::EvaluateSinrDistanceAttachment(const uint32_t netId)
+Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper, NetDeviceContainer ueDevices, NetDeviceContainer allGnbDevices, std::string tableStr)
 {
-    // Retrieve configuration
-    auto phyLayerConfs = CONFIGURATOR->GetPhyLayers();
-    if (netId >= phyLayerConfs.size())
-    {
-        return;
+    // Parse the table
+    std::vector<TableEntry> table;
+    std::stringstream ss(tableStr);
+    std::string token;
+    while (std::getline(ss, token, '|')) {
+        auto colonPos = token.find(':');
+        if (colonPos != std::string::npos) {
+            double dist = std::stod(token.substr(0, colonPos));
+            double sinr = std::stod(token.substr(colonPos + 1));
+            table.push_back({dist, sinr});
+        }
     }
 
-    auto nrConf = DynamicCast<NrPhyLayerConfiguration>(phyLayerConfs[netId]);
-    if (!nrConf)
+    bool anyUnattached = false;
+
+    for (uint32_t i = 0; i < ueDevices.GetN(); ++i)
     {
-        return;
-    }
-
-    auto sdaConfigOpt = nrConf->GetSinrDistanceAttachConfig();
-
-    if (!sdaConfigOpt)
-    {
-        return;
-    }
-
-    const auto& sdaConfig = *sdaConfigOpt;
-
-    // The list of BWP IDs to evaluate per gNB (default: {0})
-    const auto& bwpsToEvaluate = sdaConfig.bwps;
-
-    // Retrieve Devices
-    auto gnbIt = m_nrGnbDevices.find(netId);
-    auto ueIt = m_nrUeDevices.find(netId);
-
-    if (gnbIt == m_nrGnbDevices.end() || ueIt == m_nrUeDevices.end() || gnbIt->second.empty() ||
-        ueIt->second.empty())
-    {
-        // Reschedule if devices are not yet ready or empty
-        Simulator::Schedule(sdaConfig.precision,
-                            &Scenario::EvaluateSinrDistanceAttachment,
-                            this,
-                            netId);
-        return;
-    }
-
-    // Flatten gNB list for easier access
-    NetDeviceContainer allGnbDevices;
-    for (const auto& gnbContainer : gnbIt->second)
-    {
-        allGnbDevices.Add(gnbContainer);
-    }
-
-    auto nrPhySim = StaticCast<NrPhySimulationHelper, Object>(m_protocolStacks[PHY_LAYER][netId]);
-    auto nrHelper = nrPhySim->GetNrHelper();
-
-    // Iterate over all UEs
-    for (const auto& ueDevicePtr : ueIt->second)
-    {
-        auto ueDevice = DynamicCast<NrUeNetDevice>(ueDevicePtr);
-        if (!ueDevice)
-        {
-            continue;
+        Ptr<NetDevice> ueDevice = ueDevices.Get(i);
+        Ptr<NrUeNetDevice> ueNetDev = ueDevice->GetObject<NrUeNetDevice>();
+        // Check if the UE is attached. Wait, the state enum is NrUeRrc::IDLE_START or IDLE_CAMPED_NORMALLY.
+        // Actually, if it has a CellId == 0, it means it's not attached.
+        if (!ueNetDev || !ueNetDev->GetRrc() || ueNetDev->GetRrc()->GetCellId() != 0) {
+            continue; // Already attached or attaching
         }
 
-        Ptr<Node> ueNode = ueDevice->GetNode();
-        if (!ueNode)
-        {
-            continue;
-        }
+        anyUnattached = true;
 
-        Ptr<MobilityModel> ueMobility = ueNode->GetObject<MobilityModel>();
-        if (!ueMobility)
-        {
-            continue;
-        }
-
-        // Find current gNB and active BWP (use persistent tracking, fallback to first configured
-        // BWP)
-        uint16_t currentCellId = ueDevice->GetRrc()->GetCellId();
-        Ptr<NrGnbNetDevice> currentGnb = nullptr;
-
-        if (ueDevice->GetRrc()->GetState() != NrUeRrc::IDLE_START)
-        {
-            for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
-            {
-                auto gnb = DynamicCast<NrGnbNetDevice>(allGnbDevices.Get(k));
-                if (gnb && gnb->GetCellId() == currentCellId)
-                {
-                    currentGnb = gnb;
-                    break;
-                }
-            }
-        }
-
-        double currentSnr = -std::numeric_limits<double>::infinity();
-        bool currentGnbValid = false;
-
-        // Best (gNB, bwpId) pair found so far
+        Ptr<MobilityModel> ueMobility = ueDevice->GetNode()->GetObject<MobilityModel>();
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
-        [[maybe_unused]] uint8_t bestBwpId = bwpsToEvaluate.front();
         double bestSnr = -std::numeric_limits<double>::infinity();
 
-        // Check all gNBs
-        for (auto gnbDeviceIt = allGnbDevices.Begin(); gnbDeviceIt != allGnbDevices.End();
-             ++gnbDeviceIt)
-        {
-            Ptr<NrGnbNetDevice> gnbDevice = DynamicCast<NrGnbNetDevice>(*gnbDeviceIt);
-            if (!gnbDevice)
-            {
-                continue;
-            }
-
-            Ptr<Node> gnbNode = gnbDevice->GetNode();
-            if (!gnbNode)
-            {
-                continue;
-            }
-
-            Ptr<MobilityModel> gnbMobility = gnbNode->GetObject<MobilityModel>();
-            if (!gnbMobility)
-            {
-                continue;
-            }
-
+        for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k) {
+            Ptr<NetDevice> gnbDev = allGnbDevices.Get(k);
+            Ptr<NrGnbNetDevice> gnbNetDev = gnbDev->GetObject<NrGnbNetDevice>();
+            Ptr<MobilityModel> gnbMobility = gnbDev->GetNode()->GetObject<MobilityModel>();
             double distance = ueMobility->GetDistanceFrom(gnbMobility);
 
-            // Find the distance/SINR table entry for this gNB
-            const SinrDistanceTableEntry* bestEntry = nullptr;
+            const TableEntry* bestEntry = nullptr;
             double rangeDiff = std::numeric_limits<double>::max();
-            for (const auto& entry : sdaConfig.table)
-            {
-                if (distance <= entry.maxDistance && entry.maxDistance < rangeDiff)
-                {
+            for (const auto& entry : table) {
+                if (distance <= entry.maxDistance && entry.maxDistance < rangeDiff) {
                     rangeDiff = entry.maxDistance;
                     bestEntry = &entry;
                 }
             }
 
-            // UE is too far from this gNB for any configured rule — skip
-            if (!bestEntry)
-            {
-                continue;
-            }
+            if (!bestEntry) continue;
 
             double minSinrRequired = bestEntry->minSinr;
-            uint32_t gnbBwpCount = NrHelper::GetNumberBwp(gnbDevice);
 
-            // Evaluate each configured BWP on this gNB
-            for (uint8_t bwpId : bwpsToEvaluate)
-            {
-                if (static_cast<uint32_t>(bwpId) >= gnbBwpCount)
-                {
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                    std::cout << "[SDA] Skipping BWP " << static_cast<uint32_t>(bwpId) << " on gNB "
-                              << gnbDevice->GetCellId() << " (only " << gnbBwpCount
-                              << " BWP(s) available)" << std::endl;
-#endif
-                    continue;
-                }
-
-                // Create a per-BWP REM helper so the correct spectrum PHY is used
-                Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
-                    CreateObject<NrRadioGeoEnvironmentMapHelper>();
+            // Compute SINR for all BWPs and take the max
+            for (uint32_t bwpId = 0; bwpId < gnbNetDev->GetCcMapSize(); ++bwpId) {
+                Ptr<NrRadioGeoEnvironmentMapHelper> remHelper = CreateObject<NrRadioGeoEnvironmentMapHelper>();
                 remHelper->SetInterferers(allGnbDevices, bwpId);
-
-                double estimatedSnr = remHelper->GetSnr(ueDevice, gnbDevice, bwpId, true);
-
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                std::cout << "UE " << ueDevice->GetNode()->GetId() << " distance to gNB "
-                          << gnbDevice->GetCellId() << " (node " << gnbNode->GetId()
-                          << "): " << distance / 1000 << " km | BWP "
-                          << static_cast<uint32_t>(bwpId) << " SNR: " << estimatedSnr
-                          << " dB (Required: " << minSinrRequired << " dB)" << std::endl;
-#endif
-
-                // Check if SNR is above the required threshold
-                if (estimatedSnr >= minSinrRequired)
-                {
-                    // Track SNR of current (gNB, bwpId) for hysteresis
-                    if (currentGnb && gnbDevice == currentGnb)
-                    {
-                        currentSnr = estimatedSnr;
-                        currentGnbValid = true;
-                    }
-
-                    if (estimatedSnr > bestSnr)
-                    {
-                        bestSnr = estimatedSnr;
-                        bestGnb = gnbDevice;
-                        bestBwpId = bwpId;
-                    }
+                double estimatedSnr = remHelper->GetSnr(ueDevice, gnbDev, bwpId, true);
+                if (estimatedSnr >= minSinrRequired && estimatedSnr > bestSnr) {
+                    bestSnr = estimatedSnr;
+                    bestGnb = gnbNetDev;
                 }
             }
         }
 
-        if (bestGnb)
-        {
-            if (currentGnb != nullptr)
-            {
-                bool gnbChanged = (currentGnb != bestGnb);
-
-                if (gnbChanged)
-                {
-                    // Hysteresis: only switch if improvement exceeds threshold,
-                    // unless the current (gNB, bwpId) is no longer valid
-                    bool shouldSwitch = true;
-
-                    if (currentGnbValid)
-                    {
-                        if (bestSnr < currentSnr + sdaConfig.threshold)
-                        {
-                            shouldSwitch = false;
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                            if (bestSnr > currentSnr)
-                            {
-                                std::cout << "UE " << ueDevice->GetImsi()
-                                          << " SWITCH PREVENTED by threshold ("
-                                          << sdaConfig.threshold << " dB)"
-                                          << " from gNB " << currentGnb->GetCellId()
-                                          << " (SNR: " << currentSnr << " dB)" << " to gNB "
-                                          << bestGnb->GetCellId() << " (SNR: " << bestSnr << " dB)"
-                                          << " Delta: " << bestSnr - currentSnr << " dB"
-                                          << std::endl;
-                            }
-#endif
-                        }
-                    }
-
-                    if (shouldSwitch)
-                    {
-                        // Cross-gNB handover (includes beam switch between gNB devices)
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                        std::cout << "UE " << ueDevice->GetImsi() << " HANDOVER from gNB "
-                                  << currentGnb->GetCellId() << " (SNR: " << currentSnr
-                                  << " dB) to gNB " << bestGnb->GetCellId() << " BWP "
-                                  << static_cast<uint32_t>(bestBwpId) << " (SNR: " << bestSnr
-                                  << " dB)"
-                                  << " Threshold: " << sdaConfig.threshold << " dB" << std::endl;
-#endif
-                        /* Example of ISL delay calculation for Handover:
-                         *  Calculated signaling between currentGnb -> CN -> bestGnb -> CN ->
-                         * currentGnb The example as only to consider a dimostrative example
-                         */
-                        /*
-                        double handoverTotDistance =
-                            GetISLMinimumDistance(currentGnb->GetNode(), netId).first * 2 +
-                            GetISLMinimumDistance(bestGnb->GetNode(), netId).first;
-                        // Summing for instance the delay for the direct link between gNBs
-                        handoverTotDistance += GetISLMinimumDistance(currentGnb->GetNode(),
-                        bestGnb->GetNode(), netId); double handoverDelay = 2.99792458e8 /
-                        handoverTotDistance;
-                        */
-                        double handoverDelay = 0;
-                        nrHelper->HandoverRequest(Seconds(handoverDelay),
-                                                  ueDevice,
-                                                  currentGnb,
-                                                  bestGnb);
-                    }
-                }
-            }
-            else
-            {
-                // UE not yet attached — initial attachment to best (gNB, bwpId)
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                std::cout << "UE " << ueDevice->GetNode()->GetId() << " ATTACHING to gNB "
-                          << bestGnb->GetCellId() << " (node " << bestGnb->GetNode()->GetId()
-                          << ") BWP " << static_cast<uint32_t>(bestBwpId) << " (SNR: " << bestSnr
-                          << " dB) at " << Simulator::Now().GetSeconds() << std::endl;
-#endif
-                for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
-                {
-                    auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
-                    if (uePhy && !uePhy->IsPhyEnabled())
-                    {
-                        uePhy->SetPhyEnabled(true);
-                    }
-                }
-                nrHelper->AttachToGnb(ueDevice, bestGnb);
-            }
-        }
-        else
-        {
-            // No suitable (gNB, bwpId) found. If currently connected, disable PHY.
-            if (currentGnb != nullptr)
-            {
-#ifdef SINR_DISTANCE_PRINT_DEBUG
-                std::cout << "UE " << ueDevice->GetImsi() << " DISCONNECTING from gNB "
-                          << currentGnb->GetCellId() << " (No suitable gNB/BWP found)"
-                          << " at " << Simulator::Now().GetSeconds() << std::endl;
-#endif
-                for (uint32_t i = 0; i < ueDevice->GetCcMapSize(); ++i)
-                {
-                    auto uePhy = DynamicCast<NrUePhy>(ueDevice->GetPhy(i));
-                    if (uePhy)
-                    {
-                        uePhy->SetPhyEnabled(false);
-                    }
-                }
-            }
+        if (bestGnb) {
+            NS_LOG_INFO("Dynamically attaching UE " << ueDevice->GetNode()->GetId() << " to gNB " << bestGnb->GetNode()->GetId() << " (SINR: " << bestSnr << ")");
+            nrHelper->AttachToGnb(ueDevice, bestGnb);
         }
     }
 
-    // Reschedule
-    Simulator::Schedule(sdaConfig.precision,
-                        &Scenario::EvaluateSinrDistanceAttachment,
-                        this,
-                        netId);
+    if (anyUnattached) {
+        Simulator::Schedule(Seconds(1.0), MakeEvent(&Scenario::PeriodicSinrDistanceAttachmentCheck, this, nrHelper, ueDevices, allGnbDevices, tableStr));
+    }
 }
 
 } // namespace ns3

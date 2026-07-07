@@ -115,14 +115,13 @@ In the `phyLayer` settings, we can configure a physical layer of type `nr` which
 
 ### `attachMethod`
 **Type:** `string`
-**Options:** `closest`, `max-rsrp`, `none`
+**Options:** `closest`, `max-rsrp`, `sinr-distance-dynamic`, `none`
 **Default:** `max-rsrp`
 **Description:** Method used to attach UEs to gNBs.
 - `closest`: Attaches the UE to the geographically closest gNB.
 - `max-rsrp`: Attaches the UE to the gNB with the strongest signal (RSRP).
+- `sinr-distance-dynamic`: Dynamically attaches the UE in the background to the first gNB that satisfies the minimum SINR requirements for the distance, checking every second. It relies on the `DistanceSinrTable` parameter defined in the handover configuration. `NrSinrDistanceHandoverAlgorithm` should be used.
 - `none`: Does not perform attachment.
-
-**Note:** If `advancedOptions.sinr-distance-attach` is configured, it will override this setting and use the SINR-Distance based logic instead.
 
 ### `advancedOptions`
 **Optional**
@@ -872,12 +871,33 @@ Example of BWP Manager configuration:
 **Description:** Handover algorithm configuration.
 
 It is possible to specify the handover algorithm type and its attributes.
+Common algorithms include `ns3::NrNoOpHandoverAlgorithm` (no handover) and `ns3::NrSinrDistanceHandoverAlgorithm`.
+
+#### `ns3::NrSinrDistanceHandoverAlgorithm`
+**Description:** Handover algorithm that triggers an intra-frequency handover by evaluating both the estimated SINR of the target gNB and its physical distance from the UE.
+
+It requires the following attributes:
+
+| Name | Type | Initial Value | Description |
+|------|------|----------------|-------------|
+| `Threshold` | double | 2.0 | Hysteresis threshold (in dB) for switching gNBs. The target gNB SINR must be greater than the serving gNB SINR by this threshold. |
+| `DistanceSinrTable` | string | "" | A formatted table mapping the maximum distance to the minimum SINR required. Format: `maxDist1:minSinr1|maxDist2:minSinr2`. |
+| `TimeToTrigger` | Time | 256ms | Time during which neighbour cell's SINR must be continuously higher than serving cell's to trigger a handover. |
 
 **Example:**
 ```json
 "handover": {
-  "algorithm": "ns3::NrNoOpHandoverAlgorithm",
-  "attributes": []
+  "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+  "attributes": [
+    {
+      "name": "DistanceSinrTable",
+      "value": "500000:-20.0|1000000:-10.0"
+    },
+    {
+      "name": "Threshold",
+      "value": 3.0
+    }
+  ]
 }
 ```
 
@@ -1616,6 +1636,7 @@ or even simpler direcltly using the object without the array if the attribute ac
 ## NR Radio Environment Map
 
 It is possible to generate Radio Environment Maps (REM) for the NR scenarios to visualize the SINR coverage. To enable the generation you need to specify the `--radioMaps` flag in the command line of the scenario executable.
+Additionally, you can specify the `--closeAfterRadioMaps` flag to automatically close the simulation right after all radio maps have been generated. This is useful when you only want to compute coverage without running the full simulation.
 
 ### `radioMaps`
 **Type**: `array[object]`

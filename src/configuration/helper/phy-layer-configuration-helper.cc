@@ -185,10 +185,10 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             NS_ASSERT_MSG(jsonPhyLayer["attachMethod"].IsString(),
                           "NR PHY Layer 'attachMethod' must be a string.");
             std::string attachMethod = jsonPhyLayer["attachMethod"].GetString();
-            if (attachMethod != "closest" && attachMethod != "max-rsrp" && attachMethod != "none")
+            if (attachMethod != "closest" && attachMethod != "max-rsrp" && attachMethod != "none" && attachMethod != "sinr-distance-dynamic")
             {
                 NS_FATAL_ERROR("Invalid attachMethod: "
-                               << attachMethod << ". Valid values are: closest, max-rsrp, none");
+                               << attachMethod << ". Valid values are: closest, max-rsrp, sinr-distance-dynamic, none");
             }
             nrConfig->SetAttachMethod(attachMethod);
         }
@@ -709,55 +709,6 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
     {
         const auto& advancedOptions = jsonPhyLayer["advancedOptions"];
         Ptr<NrPhyLayerConfiguration> nrConfigPtr = DynamicCast<NrPhyLayerConfiguration>(phyConfig);
-
-        if (advancedOptions.HasMember("sinr-distance-attach") &&
-            advancedOptions["sinr-distance-attach"].IsObject())
-        {
-            const auto& sda = advancedOptions["sinr-distance-attach"];
-
-            SinrDistanceAttachConfig sdaConfig;
-
-            NS_ASSERT_MSG(sda.HasMember("precision") && sda["precision"].IsString(),
-                          "sinr-distance-attach must have 'precision' (TimeValue string)");
-            sdaConfig.precision = TimeValue(Time(sda["precision"].GetString())).Get();
-
-            NS_ASSERT_MSG(sda.HasMember("table") && sda["table"].IsArray(),
-                          "sinr-distance-attach must have 'table' array");
-
-            const auto& table = sda["table"].GetArray();
-            for (rapidyyjson::SizeType i = 0; i < table.Size(); ++i)
-            {
-                const auto& entry = table[i];
-                NS_ASSERT_MSG(entry.HasMember("maxDistance") && entry["maxDistance"].IsNumber(),
-                              "Table entry must have maxDistance");
-                NS_ASSERT_MSG(entry.HasMember("minSINR") && entry["minSINR"].IsNumber(),
-                              "Table entry must have minSINR");
-
-                sdaConfig.table.push_back(SinrDistanceTableEntry{entry["maxDistance"].GetDouble(),
-                                                                 entry["minSINR"].GetDouble()});
-            }
-
-            if (sda.HasMember("threshold") && sda["threshold"].IsNumber())
-            {
-                sdaConfig.threshold = sda["threshold"].GetDouble();
-            }
-
-            if (sda.HasMember("bwps") && sda["bwps"].IsArray())
-            {
-                sdaConfig.bwps.clear();
-                const auto& bwpsArr = sda["bwps"].GetArray();
-                for (rapidyyjson::SizeType bi = 0; bi < bwpsArr.Size(); ++bi)
-                {
-                    NS_ASSERT_MSG(bwpsArr[bi].IsUint(),
-                                  "sinr-distance-attach 'bwps' entries must be unsigned integers");
-                    sdaConfig.bwps.push_back(static_cast<uint8_t>(bwpsArr[bi].GetUint()));
-                }
-                NS_ASSERT_MSG(!sdaConfig.bwps.empty(),
-                              "sinr-distance-attach 'bwps' must have at least one entry");
-            }
-
-            nrConfigPtr->SetSinrDistanceAttachConfig(sdaConfig);
-        }
 
         if (advancedOptions.HasMember("islDelayMode") && advancedOptions["islDelayMode"].IsObject())
         {

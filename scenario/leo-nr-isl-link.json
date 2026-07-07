@@ -106,21 +106,20 @@
         }
       ],
       "handover": {
-        "algorithm": "ns3::NrNoOpHandoverAlgorithm",
-        "attributes": []
+        "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "DistanceSinrTable",
+            "value": "430000:-20.0"
+          },
+          {
+            "name": "Threshold",
+            "value": 3.0
+          }
+        ]
       },
-      "attachMethod": "none",
+      "attachMethod": "max-rsrp",
       "advancedOptions": {
-        "sinr-distance-attach": {
-          "precision": "100ms",
-          "threshold": 3.0,
-          "table": [
-            {
-              "maxDistance": 430e3,
-              "minSINR": -20.0
-            }
-          ]
-        },
         "islDelayMode": {
           "precision": "100ms",
           "additionalDelay": "5ms",
