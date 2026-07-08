@@ -57,6 +57,7 @@ set(Tests
   leo-nr-isl-link.json
   leo-nr-sinr-dist-attach.json
   leo-car-move-tracing.json
+  leo-nr-multibeam-handover.json
   leo-constellation-uniform-orbits.json
   leo-nr-udp.json
   taxi-all-example-trace.json

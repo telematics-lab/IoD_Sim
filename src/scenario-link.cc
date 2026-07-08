@@ -1,12 +1,12 @@
+#include "helper/nr-radio-geo-environment-map-helper.h"
 #include "scenario.h"
 
 #include "ns3/nr-epc-x2.h"
 #include "ns3/nr-gnb-net-device.h"
-#include "ns3/nr-ue-rrc.h"
 #include "ns3/nr-no-backhaul-epc-helper.h"
+#include "ns3/nr-ue-rrc.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/string.h"
-#include "helper/nr-radio-geo-environment-map-helper.h"
 
 #include <filesystem>
 #include <queue>
@@ -179,16 +179,43 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
                         DynamicCast<PointToPointChannel>(ptpDev->GetChannel());
                     if (channel)
                     {
-                        if (totalDelay < Seconds(0))
+                        /* ISL delayes on X2 links
+                        Ptr<NetDevice> dev0 = channel->GetDevice(0);
+                        Ptr<NetDevice> dev1 = channel->GetDevice(1);
+                        Ptr<Node> remoteNode =
+                            (dev0->GetNode() == gnbNode) ? dev1->GetNode() : dev0->GetNode();
+
+                        auto remoteIt = cache.nodeToIndex.find(remoteNode);
+                        Time appliedDelay =
+                            totalDelay; // Default to minEarthDist delay for non-X2 links
+
+                        if (remoteIt != cache.nodeToIndex.end())
                         {
-                            // A negative delay means the link is down. PointToPointChannel cannot handle negative delays.
-                            // We set an artificially huge delay to practically drop the packets in the simulation time.
+                            // It's an X2 link (connecting to another LEO satellite)
+                            size_t remoteSatIdx = remoteIt->second;
+                            double x2Dist = cache.shortestPaths[satIdx][remoteSatIdx];
+                            if (x2Dist != std::numeric_limits<double>::infinity())
+                            {
+                                appliedDelay =
+                                    Seconds(x2Dist / SPEED_OF_LIGHT) + idmConfig->additionalDelay;
+                            }
+                            else
+                            {
+                                appliedDelay = Seconds(-1.0);
+                            }
+                        }
+
+                        if (appliedDelay < Seconds(0))
+                        {
+                            // A negative delay means the link is down. PointToPointChannel cannot
+                            // handle negative delays. We set an artificially huge delay to
+                            // practically drop the packets in the simulation time.
                             channel->SetAttribute("Delay", TimeValue(Seconds(3600.0)));
                         }
                         else
                         {
-                            channel->SetAttribute("Delay", TimeValue(totalDelay));
-                        }
+                            channel->SetAttribute("Delay", TimeValue(appliedDelay));
+                        }*/
                     }
                 }
 #endif
@@ -564,8 +591,6 @@ Scenario::AttachAllNrUesToGnbs()
         auto nrConf =
             StaticCast<NrPhyLayerConfiguration, PhyLayerConfiguration>(phyLayerConfs[netId]);
 
-
-
         std::string attachMethod = nrConf->GetAttachMethod();
 
         NS_LOG_INFO("Attaching " << ueDevices.GetN()
@@ -615,7 +640,8 @@ Scenario::AttachAllNrUesToGnbs()
             }
             if (tableStr.empty())
             {
-                NS_LOG_WARN("DistanceSinrTable attribute missing from Handover algorithm. AttachMethod sinr-distance-dynamic may fail.");
+                NS_LOG_WARN("DistanceSinrTable attribute missing from Handover algorithm. "
+                            "AttachMethod sinr-distance-dynamic may fail.");
             }
 
             // Create persistent containers for the periodic attachment
@@ -640,8 +666,6 @@ Scenario::AttachAllNrUesToGnbs()
         {
             NS_FATAL_ERROR("Unknown attachment method: " << attachMethod);
         }
-
-
     }
 }
 
@@ -694,23 +718,27 @@ Scenario::ConfigureFullMeshX2Links()
     }
 }
 
-
-
-struct TableEntry {
+struct TableEntry
+{
     double maxDistance;
     double minSinr;
 };
 
 void
-Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper, NetDeviceContainer ueDevices, NetDeviceContainer allGnbDevices, std::string tableStr)
+Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper,
+                                              NetDeviceContainer ueDevices,
+                                              NetDeviceContainer allGnbDevices,
+                                              std::string tableStr)
 {
     // Parse the table
     std::vector<TableEntry> table;
     std::stringstream ss(tableStr);
     std::string token;
-    while (std::getline(ss, token, '|')) {
+    while (std::getline(ss, token, '|'))
+    {
         auto colonPos = token.find(':');
-        if (colonPos != std::string::npos) {
+        if (colonPos != std::string::npos)
+        {
             double dist = std::stod(token.substr(0, colonPos));
             double sinr = std::stod(token.substr(colonPos + 1));
             table.push_back({dist, sinr});
@@ -723,9 +751,10 @@ Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper, NetDeviceC
     {
         Ptr<NetDevice> ueDevice = ueDevices.Get(i);
         Ptr<NrUeNetDevice> ueNetDev = ueDevice->GetObject<NrUeNetDevice>();
-        // Check if the UE is attached. Wait, the state enum is NrUeRrc::IDLE_START or IDLE_CAMPED_NORMALLY.
-        // Actually, if it has a CellId == 0, it means it's not attached.
-        if (!ueNetDev || !ueNetDev->GetRrc() || ueNetDev->GetRrc()->GetCellId() != 0) {
+        // Check if the UE is attached. Wait, the state enum is NrUeRrc::IDLE_START or
+        // IDLE_CAMPED_NORMALLY. Actually, if it has a CellId == 0, it means it's not attached.
+        if (!ueNetDev || !ueNetDev->GetRrc() || ueNetDev->GetRrc()->GetCellId() != 0)
+        {
             continue; // Already attached or attaching
         }
 
@@ -735,7 +764,8 @@ Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper, NetDeviceC
         Ptr<NrGnbNetDevice> bestGnb = nullptr;
         double bestSnr = -std::numeric_limits<double>::infinity();
 
-        for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k) {
+        for (uint32_t k = 0; k < allGnbDevices.GetN(); ++k)
+        {
             Ptr<NetDevice> gnbDev = allGnbDevices.Get(k);
             Ptr<NrGnbNetDevice> gnbNetDev = gnbDev->GetObject<NrGnbNetDevice>();
             Ptr<MobilityModel> gnbMobility = gnbDev->GetNode()->GetObject<MobilityModel>();
@@ -743,37 +773,53 @@ Scenario::PeriodicSinrDistanceAttachmentCheck(Ptr<NrHelper> nrHelper, NetDeviceC
 
             const TableEntry* bestEntry = nullptr;
             double rangeDiff = std::numeric_limits<double>::max();
-            for (const auto& entry : table) {
-                if (distance <= entry.maxDistance && entry.maxDistance < rangeDiff) {
+            for (const auto& entry : table)
+            {
+                if (distance <= entry.maxDistance && entry.maxDistance < rangeDiff)
+                {
                     rangeDiff = entry.maxDistance;
                     bestEntry = &entry;
                 }
             }
 
-            if (!bestEntry) continue;
+            if (!bestEntry)
+                continue;
 
             double minSinrRequired = bestEntry->minSinr;
 
             // Compute SINR for all BWPs and take the max
-            for (uint32_t bwpId = 0; bwpId < gnbNetDev->GetCcMapSize(); ++bwpId) {
-                Ptr<NrRadioGeoEnvironmentMapHelper> remHelper = CreateObject<NrRadioGeoEnvironmentMapHelper>();
+            for (uint32_t bwpId = 0; bwpId < gnbNetDev->GetCcMapSize(); ++bwpId)
+            {
+                Ptr<NrRadioGeoEnvironmentMapHelper> remHelper =
+                    CreateObject<NrRadioGeoEnvironmentMapHelper>();
                 remHelper->SetInterferers(allGnbDevices, bwpId);
                 double estimatedSnr = remHelper->GetSnr(ueDevice, gnbDev, bwpId, true);
-                if (estimatedSnr >= minSinrRequired && estimatedSnr > bestSnr) {
+                if (estimatedSnr >= minSinrRequired && estimatedSnr > bestSnr)
+                {
                     bestSnr = estimatedSnr;
                     bestGnb = gnbNetDev;
                 }
             }
         }
 
-        if (bestGnb) {
-            NS_LOG_INFO("Dynamically attaching UE " << ueDevice->GetNode()->GetId() << " to gNB " << bestGnb->GetNode()->GetId() << " (SINR: " << bestSnr << ")");
+        if (bestGnb)
+        {
+            NS_LOG_INFO("Dynamically attaching UE " << ueDevice->GetNode()->GetId() << " to gNB "
+                                                    << bestGnb->GetNode()->GetId()
+                                                    << " (SINR: " << bestSnr << ")");
             nrHelper->AttachToGnb(ueDevice, bestGnb);
         }
     }
 
-    if (anyUnattached) {
-        Simulator::Schedule(Seconds(1.0), MakeEvent(&Scenario::PeriodicSinrDistanceAttachmentCheck, this, nrHelper, ueDevices, allGnbDevices, tableStr));
+    if (anyUnattached)
+    {
+        Simulator::Schedule(Seconds(1.0),
+                            MakeEvent(&Scenario::PeriodicSinrDistanceAttachmentCheck,
+                                      this,
+                                      nrHelper,
+                                      ueDevices,
+                                      allGnbDevices,
+                                      tableStr));
     }
 }
 

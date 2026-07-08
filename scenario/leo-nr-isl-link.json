@@ -118,7 +118,7 @@
           }
         ]
       },
-      "attachMethod": "max-rsrp",
+      "attachMethod": "sinr-distance-dynamic",
       "advancedOptions": {
         "islDelayMode": {
           "precision": "100ms",

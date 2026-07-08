@@ -140,11 +140,11 @@
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 1
+            "value": 4
           },
           {
             "name": "NumColumns",
-            "value": 1
+            "value": 4
           }
         ]
       },
@@ -180,7 +180,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 60.0
+          "value": 40.0
         }
       ],
       "gnbPhyAttributes": [

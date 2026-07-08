@@ -143,7 +143,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | 5G LENA version | Build system  | Release date       |
 | :------------: | :-----------:| :-------------: | :-----------: |--------------------|
-| v4.2.0         | ns-3.48      | 5g-lena-v4.2.y  | cmake         |        TBA         |
+| v4.2.0         | ns-3.48      | 5g-lena-v5.0.y  | cmake         |        TBA         |
 | v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | January 9, 2026    |
 | v4.0.2         | ns-3.42      |      N/A        | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      |      N/A        | cmake         | June 5, 2024       |

@@ -108,7 +108,7 @@
           }
         ]
       },
-      "attachMethod": "max-rsrp",
+      "attachMethod": "sinr-distance-dynamic",
       "advancedOptions": {},
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
