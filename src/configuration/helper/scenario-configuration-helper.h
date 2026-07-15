@@ -151,6 +151,26 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
     const double GetAppStatisticsReportInterval() const;
 
     /**
+     * \return The data rate of the Internet backbone, default is "100Gbps".
+     */
+    const std::string GetInternetBackboneDataRate() const;
+
+    /**
+     * \return The delay of the Internet backbone, default is "6560ns".
+     */
+    const std::string GetInternetBackboneDelay() const;
+
+    /**
+     * \return The ipv4 base address of the Internet backbone, default is "200.0.0.0".
+     */
+    const std::string GetInternetBackboneIpv4Base() const;
+
+    /**
+     * \return The ipv4 network mask of the Internet backbone, default is "255.0.0.0".
+     */
+    const std::string GetInternetBackboneIpv4Mask() const;
+
+    /**
      * \return The number of entities in the given entityKey category.
      */
     std::size_t GetN(const char* entityKey) const;

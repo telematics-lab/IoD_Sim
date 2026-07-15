@@ -179,7 +179,7 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
                         DynamicCast<PointToPointChannel>(ptpDev->GetChannel());
                     if (channel)
                     {
-                        /* ISL delayes on X2 links
+                        // ISL delayes on X2 links
                         Ptr<NetDevice> dev0 = channel->GetDevice(0);
                         Ptr<NetDevice> dev1 = channel->GetDevice(1);
                         Ptr<Node> remoteNode =
@@ -215,7 +215,7 @@ Scenario::UpdateIslDelay(uint32_t netId, Ptr<NrPhyLayerConfiguration> config)
                         else
                         {
                             channel->SetAttribute("Delay", TimeValue(appliedDelay));
-                        }*/
+                        }
                     }
                 }
 #endif

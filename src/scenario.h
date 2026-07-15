@@ -235,6 +235,7 @@ class Scenario
     void DroneCourseChange(std::string context, Ptr<const MobilityModel> model);
     void LeoSatCourseChange(std::string context, Ptr<const MobilityModel> model);
     void VehicleCourseChange(std::string context, Ptr<const MobilityModel> model);
+    void DumpNodeInfo() const;
     void ConfigureSimulator();
     void AttachAllNrUesToGnbs();
     void InitializeIslDelayMode();

@@ -2,8 +2,8 @@
   "name": "leo-nr-isl-link",
   "resultsPath": "../results/",
   "logOnFile": true,
-  "duration": 10,
-  "appStatisticsReportInterval": 0.3,
+  "duration": 30,
+  "appStatisticsReportInterval": 0.05,
   "staticNs3Config": [
     {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
@@ -23,7 +23,11 @@
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-      "value": false // Deactivated HARQ for satellite communication
+      "value": true
+    },
+    { // This option removes interference caused by devices on the same node.
+      "name": "ns3::NrSpectrumPhy::SameNodeInterference",
+      "value": false
     }
   ],
   "world": {
@@ -110,7 +114,7 @@
         "attributes": [
           {
             "name": "DistanceSinrTable",
-            "value": "430000:-20.0"
+            "value": "400000:25.0|500000:15.0|600000:5.0|700000:-5.0|1000000:-15.0|2000000:-25.0|3000000:-35.0"
           },
           {
             "name": "Threshold",
@@ -123,8 +127,8 @@
         "islDelayMode": {
           "precision": "100ms",
           "additionalDelay": "5ms",
-          "maxISLSatDistance": 4000e3,
-          "maxGroundStationDistance": 600e3, //if set, the simulation fails due to unreachable satellites
+          "maxISLSatDistance": 4352350,
+          "maxGroundStationDistance": 2500e3,
           "groundStations": [
             [
               30.0,
@@ -138,6 +142,7 @@
           "updateLog": true
         }
       },
+      "fullMeshX2Links": true,
       "epc": {
         "helper": "ns3::NrPointToPointEpcHelper",
         "attributes": [
@@ -219,16 +224,12 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 50.0
+          "value": 23.0
         },
-        {
+        /*{
           "name": "PowerAllocationType",
           "value": "UniformPowerAllocUsed"
-        },
-        {
-          "name": "EnableUplinkPowerControl",
-          "value": false
-        },
+        },*/
         {
           "name": "NoiseFigure",
           "value": 0.0
@@ -270,7 +271,7 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
-          "bearers": [
+          "qosFlows": [
             {
               "type": "NGBR_LOW_LAT_EMBB"
             }
@@ -307,51 +308,70 @@
       },
       "applications": [
         {
-          "name": "ns3::UdpServer",
+          "name": "ns3::PacketSink",
           "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
             {
               "name": "StartTime",
               "value": 0.1
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 30.0
             },
             {
-              "name": "Port",
-              "value": 1234
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
             }
           ]
         },
         {
-          "name": "ns3::UdpClient",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
             {
               "name": "StartTime",
               "value": 0.5
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 30.0
             },
             {
               "name": "Remote",
-              "value": [
-                "1.0.0.2",
-                5000
-              ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 256
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 5000
+                }
+              }
             }
           ]
         }
@@ -365,20 +385,20 @@
         "orbits": [
           {
             "height": 400.0,
-            "inclination": 30.0,
-            "orbits-per-longitude": 10,
+            "inclination": 15.0,
+            "orbits-per-longitude": 6,
             "sats-per-orbit": 1
           },
           {
             "height": 400.0,
-            "inclination": 60.0,
-            "orbits-per-longitude": 10,
+            "inclination": 85.0,
+            "orbits-per-longitude": 6,
             "sats-per-orbit": 1
           },
           {
             "height": 400.0,
-            "inclination": 45.0,
-            "orbits-per-longitude": 10,
+            "inclination": 50.0,
+            "orbits-per-longitude": 6,
             "sats-per-orbit": 1
           }
         ]
@@ -477,15 +497,35 @@
       "networkLayer": 0,
       "applications": [
         {
-          "name": "ns3::UdpClient",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
             {
               "name": "StartTime",
               "value": 0.1
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 30.0
             },
             {
               "name": "Remote",
@@ -493,35 +533,30 @@
                 "7.0.0.2",
                 1234
               ]
-            },
-            {
-              "name": "MaxPackets",
-              "value": 4294967295
-            },
-            {
-              "name": "PacketSize",
-              "value": 512
-            },
-            {
-              "name": "Interval",
-              "value": 0.005
             }
           ]
         },
         {
-          "name": "ns3::UdpServer",
+          "name": "ns3::PacketSink",
           "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
             {
               "name": "StartTime",
               "value": 0.1
             },
             {
               "name": "StopTime",
-              "value": 290.0
+              "value": 30.0
             },
             {
-              "name": "Port",
-              "value": 5000
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                5000
+              ]
             }
           ]
         }

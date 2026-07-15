@@ -35,6 +35,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iomanip> /* put_time */
 #include <iostream>
 #include <rapidyyjson/error/en.h>
@@ -363,6 +364,49 @@ ScenarioConfigurationHelper::GetDuration() const
     }
 
     return duration;
+}
+
+const std::string
+ScenarioConfigurationHelper::GetInternetBackboneDataRate() const
+{
+    if (m_config.HasMember("internetBackbone") &&
+        m_config["internetBackbone"].HasMember("dataRate"))
+    {
+        return m_config["internetBackbone"]["dataRate"].GetString();
+    }
+    return "100Gbps";
+}
+
+const std::string
+ScenarioConfigurationHelper::GetInternetBackboneDelay() const
+{
+    if (m_config.HasMember("internetBackbone") && m_config["internetBackbone"].HasMember("delay"))
+    {
+        return m_config["internetBackbone"]["delay"].GetString();
+    }
+    return "0ms";
+}
+
+const std::string
+ScenarioConfigurationHelper::GetInternetBackboneIpv4Base() const
+{
+    if (m_config.HasMember("internetBackbone") &&
+        m_config["internetBackbone"].HasMember("ipv4Base"))
+    {
+        return m_config["internetBackbone"]["ipv4Base"].GetString();
+    }
+    return "200.0.0.0";
+}
+
+const std::string
+ScenarioConfigurationHelper::GetInternetBackboneIpv4Mask() const
+{
+    if (m_config.HasMember("internetBackbone") &&
+        m_config["internetBackbone"].HasMember("ipv4Mask"))
+    {
+        return m_config["internetBackbone"]["ipv4Mask"].GetString();
+    }
+    return "255.0.0.0";
 }
 
 const double
@@ -848,7 +892,9 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
     cmd.AddValue("name", "Name of the scenario", m_name);
     cmd.AddValue("config", "Configuration file path", configFilePath);
     cmd.AddValue("radioMaps", "Enables the generation of the Radio Maps", m_generateRadioMaps);
-    cmd.AddValue("closeAfterRadioMaps", "Closes the simulation after all radioMaps has been generated", m_closeAfterRadioMaps);
+    cmd.AddValue("closeAfterRadioMaps",
+                 "Closes the simulation after all radioMaps has been generated",
+                 m_closeAfterRadioMaps);
     cmd.AddValue("realTime", "Do not buffer output on files, flush immediately", m_realTime);
     cmd.AddValue("expand", "Expand JSON configuration and exit", doExpand);
     cmd.AddValue("output",
@@ -957,6 +1003,31 @@ ScenarioConfigurationHelper::InitializeConfiguration(int argc, char** argv)
             std::cout << buffer.GetString() << std::endl;
         }
         exit(0);
+    }
+
+    // Save the unresolved JSON to the results directory
+    std::string configOutPath = GetResultsPath() + "config.json";
+    std::ifstream src(configFilePath, std::ios::binary);
+    std::ofstream dst(configOutPath, std::ios::binary);
+    dst << src.rdbuf();
+    src.close();
+    dst.close();
+
+    // Extract and save custom-time-labels if present
+    if (m_config.HasMember("custom-time-labels") && m_config["custom-time-labels"].IsArray())
+    {
+        std::string labelsOutPath = GetResultsPath() + "custom-time-labels.csv";
+        std::ofstream labelsFS(labelsOutPath);
+        labelsFS << "Time,Label\n";
+        for (auto& labelObj : m_config["custom-time-labels"].GetArray())
+        {
+            if (labelObj.HasMember("time") && labelObj.HasMember("label"))
+            {
+                labelsFS << labelObj["time"].GetDouble() << "," << labelObj["label"].GetString()
+                         << "\n";
+            }
+        }
+        labelsFS.close();
     }
 }
 

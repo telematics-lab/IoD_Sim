@@ -1,0 +1,35 @@
+From 6b3678205f81fd812de94a8f6ccf14a338cc008d Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Wed, 15 Jul 2026 09:27:59 +0200
+Subject: [PATCH] Skip error on SRS duplicate signal
+
+---
+ model/nr-spectrum-phy.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/model/nr-spectrum-phy.cc b/model/nr-spectrum-phy.cc
+index 02aaf3b5..cdd30027 100644
+--- a/model/nr-spectrum-phy.cc
++++ b/model/nr-spectrum-phy.cc
+@@ -1461,7 +1461,7 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
+     // UL SRS signals 3) SRS should be received only one at a time, otherwise this function
+     // should assert 4) CTRL message list contains only one message and that one is SRS CTRL
+     // message
+-    NS_ASSERT(params->cellId == GetCellId() && m_isGnb && m_state != RX_UL_SRS &&
++    NS_ASSERT(params->cellId == GetCellId() && m_isGnb &&
+               params->ctrlMsgList.size() == 1 &&
+               (*params->ctrlMsgList.begin())->GetMessageType() == NrControlMessage::SRS);
+ 
+@@ -1480,6 +1480,9 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
+         NS_FATAL_ERROR(
+             "gNB should not receive simultaneously non SRS and SRS uplink control signals");
+         break;
++    case RX_UL_SRS:
++        NS_LOG_WARN("Cannot receive SRS while already receiving SRS. Ignoring overlap.");
++        return;
+     case CCA_BUSY:
+         NS_LOG_INFO("Start receiving UL SRS while channel in CCA_BUSY state.");
+         /* no break */
+-- 
+2.50.1 (Apple Git-155)
+

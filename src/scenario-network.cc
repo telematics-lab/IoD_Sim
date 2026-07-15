@@ -138,11 +138,14 @@ Scenario::ConfigureInternetBackbone()
 
     // setup a CSMA LAN between all the remotes and network gateways in the backbone
     CsmaHelper csma;
+    csma.SetChannelAttribute("DataRate", StringValue(CONFIGURATOR->GetInternetBackboneDataRate()));
+    csma.SetChannelAttribute("Delay", StringValue(CONFIGURATOR->GetInternetBackboneDelay()));
     NetDeviceContainer backboneDevs = csma.Install(m_backbone);
 
     // set a new address base for the backbone
     Ipv4AddressHelper ipv4H;
-    ipv4H.SetBase(Ipv4Address("200.0.0.0"), Ipv4Mask("255.0.0.0"));
+    ipv4H.SetBase(Ipv4Address(CONFIGURATOR->GetInternetBackboneIpv4Base().c_str()), 
+                  Ipv4Mask(CONFIGURATOR->GetInternetBackboneIpv4Mask().c_str()));
     ipv4H.Assign(backboneDevs);
 
     // Ipv4GlobalRoutingHelper::PopulateRoutingTables ();

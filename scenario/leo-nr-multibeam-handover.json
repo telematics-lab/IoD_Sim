@@ -53,18 +53,6 @@
     {
       "name": "ns3::TcpSocket::SegmentSize",
       "value": "1380"
-    },
-    {
-      "name": "ns3::TcpSocket::RcvBufSize",
-      "value": "10000000"
-    },
-    {
-      "name": "ns3::TcpSocket::SndBufSize",
-      "value": "10000000"
-    },
-    {
-      "name": "ns3::TcpSocket::InitialCwnd",
-      "value": "20"
     }
   ],
   "world": {
@@ -261,7 +249,7 @@
           "attributes": [
             {
               "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
+              "value": "ns3::UdpSocketFactory"
             },
             {
               "name": "StartTime",
@@ -281,8 +269,20 @@
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "DataRate",
+              "value": "10Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
             {
               "name": "StartTime",
               "value": 2.0
@@ -346,7 +346,7 @@
           "attributes": [
             {
               "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
+              "value": "ns3::UdpSocketFactory"
             },
             {
               "name": "StartTime",
@@ -366,8 +366,20 @@
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "DataRate",
+              "value": "10Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
             {
               "name": "StartTime",
               "value": 2.0
@@ -483,8 +495,20 @@
       "networkLayer": 0,
       "applications": [
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "DataRate",
+              "value": "10Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
             {
               "name": "StartTime",
               "value": 2.0
@@ -507,8 +531,20 @@
           ]
         },
         {
-          "name": "ns3::BulkSendApplication",
+          "name": "ns3::OnOffApplication",
           "attributes": [
+            {
+              "name": "DataRate",
+              "value": "10Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
             {
               "name": "StartTime",
               "value": 2.0
@@ -535,11 +571,11 @@
           "attributes": [
             {
               "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
+              "value": "ns3::UdpSocketFactory"
             },
             {
               "name": "StartTime",
-              "value": 2.0
+              "value": 0.0
             },
             {
               "name": "StopTime",
@@ -559,11 +595,11 @@
           "attributes": [
             {
               "name": "Protocol",
-              "value": "ns3::TcpSocketFactory"
+              "value": "ns3::UdpSocketFactory"
             },
             {
               "name": "StartTime",
-              "value": 2.0
+              "value": 0.0
             },
             {
               "name": "StopTime",

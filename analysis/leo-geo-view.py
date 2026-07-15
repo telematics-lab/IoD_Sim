@@ -13,7 +13,7 @@ def select_results_folder():
     Interactive menu to select a folder from ../results containing tracking CSV files
     Returns the paths to the selected leo-sat-trace.csv, vehicle-trace.csv and rem output files
     """
-    results_path = "../../results"
+    results_path = "../results"
 
     if not os.path.exists(results_path):
         print(f"Error: Directory '{results_path}' not found.")

@@ -1,10 +1,44 @@
 #include "scenario.h"
 #include "ns3/command-line.h"
+#include <ns3/node-list.h>
+#include <ns3/ipv4.h>
+#include <ns3/nr-gnb-net-device.h>
+#include <ns3/nr-ue-net-device.h>
+#include <ns3/nr-ue-rrc.h>
+
 
 namespace ns3
 {
 
 NS_LOG_COMPONENT_DEFINE("Scenario");
+
+namespace {
+    static Ptr<OutputStreamWrapper> g_ueRrcEventsStream;
+
+    void OnConnectionEstablished(uint32_t nodeId, uint64_t imsi, uint16_t cellId, uint16_t rnti) {
+        if (g_ueRrcEventsStream) {
+            *g_ueRrcEventsStream->GetStream() << Simulator::Now().GetSeconds() << "," 
+                                              << nodeId << "," << imsi << ",Attach,," 
+                                              << cellId << "," << rnti << "\n" << std::flush;
+        }
+    }
+
+    void OnHandoverStart(uint32_t nodeId, uint64_t imsi, uint16_t sourceCellId, uint16_t rnti, uint16_t targetCellId) {
+        if (g_ueRrcEventsStream) {
+            *g_ueRrcEventsStream->GetStream() << Simulator::Now().GetSeconds() << "," 
+                                              << nodeId << "," << imsi << ",HandoverStart," 
+                                              << sourceCellId << "," << targetCellId << "," << rnti << "\n" << std::flush;
+        }
+    }
+
+    void OnHandoverEndOk(uint32_t nodeId, uint64_t imsi, uint16_t cellId, uint16_t rnti) {
+        if (g_ueRrcEventsStream) {
+            *g_ueRrcEventsStream->GetStream() << Simulator::Now().GetSeconds() << "," 
+                                              << nodeId << "," << imsi << ",HandoverEndOk,," 
+                                              << cellId << "," << rnti << "\n" << std::flush;
+        }
+    }
+}
 
 Scenario* Scenario::s_instance = nullptr;
 
@@ -640,6 +674,29 @@ Scenario::operator()()
                              (*progressLogSink->GetStream())};
     ShowProgress progressStdout{Seconds(PROGRESS_REFRESH_INTERVAL_SECONDS), std::cout};
 
+    DumpNodeInfo();
+
+    std::stringstream ueRrcEventsPath;
+    ueRrcEventsPath << CONFIGURATOR->GetResultsPath() << "ue-rrc-events.csv";
+    g_ueRrcEventsStream = Create<OutputStreamWrapper>(ueRrcEventsPath.str(), std::ios::out);
+    *g_ueRrcEventsStream->GetStream() << "Time,NodeId,IMSI,Event,SourceCellId,TargetCellId,RNTI\n" << std::flush;
+
+    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it) {
+        Ptr<Node> node = *it;
+        for (uint32_t d = 0; d < node->GetNDevices(); ++d) {
+            Ptr<NetDevice> dev = node->GetDevice(d);
+            if (dev->GetInstanceTypeId().GetName() == "ns3::NrUeNetDevice") {
+                Ptr<ns3::NrUeNetDevice> ueDev = DynamicCast<ns3::NrUeNetDevice>(dev);
+                if (ueDev && ueDev->GetRrc()) {
+                    uint32_t nodeId = node->GetId();
+                    ueDev->GetRrc()->TraceConnectWithoutContext("ConnectionEstablished", MakeBoundCallback(&OnConnectionEstablished, nodeId));
+                    ueDev->GetRrc()->TraceConnectWithoutContext("HandoverStart", MakeBoundCallback(&OnHandoverStart, nodeId));
+                    ueDev->GetRrc()->TraceConnectWithoutContext("HandoverEndOk", MakeBoundCallback(&OnHandoverEndOk, nodeId));
+                }
+            }
+        }
+    }
+
     Simulator::Run();
 
     // Stop UDP statistics collection
@@ -859,6 +916,80 @@ Scenario::GetNetId(Ptr<NetDevice> dev) const
     }
 
     return std::nullopt;
+}
+
+void
+Scenario::DumpNodeInfo() const
+{
+    std::ostringstream path;
+    path << CONFIGURATOR->GetResultsPath() << "node-roles.csv";
+    std::ofstream file(path.str());
+    
+    if (!file.is_open()) return;
+
+    file << "NodeId,KeyIndex,NetDevicesCount,NetDeviceTypes,IpAddresses,CellIds\n";
+
+    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it)
+    {
+        Ptr<Node> node = *it;
+        uint32_t id = node->GetId();
+        
+        std::string keyIndex = "unknown";
+        for (uint32_t i = 0; i < m_vehicles.GetN(); ++i) {
+            if (m_vehicles.Get(i)->GetId() == id) keyIndex = "vehicles[" + std::to_string(i) + "]";
+        }
+        for (uint32_t i = 0; i < m_leoSats.GetN(); ++i) {
+            if (m_leoSats.Get(i)->GetId() == id) keyIndex = "leo-sats[" + std::to_string(i) + "]";
+        }
+        for (uint32_t i = 0; i < m_remoteNodes.GetN(); ++i) {
+            if (m_remoteNodes.Get(i)->GetId() == id) keyIndex = "internet[" + std::to_string(i) + "]";
+        }
+        for (uint32_t i = 0; i < m_drones.GetN(); ++i) {
+            if (m_drones.Get(i)->GetId() == id) keyIndex = "drones[" + std::to_string(i) + "]";
+        }
+        for (uint32_t i = 0; i < m_zsps.GetN(); ++i) {
+            if (m_zsps.Get(i)->GetId() == id) keyIndex = "ZSPs[" + std::to_string(i) + "]";
+        }
+        for (uint32_t i = 0; i < m_plainNodes.GetN(); ++i) {
+            if (m_plainNodes.Get(i)->GetId() == id) keyIndex = "nodes[" + std::to_string(i) + "]";
+        }
+        if (keyIndex == "unknown") {
+            keyIndex = "epc";
+        }
+
+        uint32_t numDevs = node->GetNDevices();
+        std::string devTypes = "";
+        std::string ipAddrs = "";
+        std::string cellIds = "";
+
+        for (uint32_t d = 0; d < numDevs; ++d) {
+            Ptr<NetDevice> dev = node->GetDevice(d);
+            devTypes += dev->GetInstanceTypeId().GetName() + " ";
+            
+            if (dev->GetInstanceTypeId().GetName() == "ns3::NrGnbNetDevice") {
+                Ptr<ns3::NrGnbNetDevice> gnbDev = DynamicCast<ns3::NrGnbNetDevice>(dev);
+                if (gnbDev) {
+                    uint16_t cid = gnbDev->GetCellId();
+                    cellIds += std::to_string(cid) + " ";
+                }
+            }
+            
+            Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+            if (ipv4) {
+                int32_t ifIndex = ipv4->GetInterfaceForDevice(dev);
+                if (ifIndex >= 0) {
+                    for (uint32_t a = 0; a < ipv4->GetNAddresses(ifIndex); ++a) {
+                        std::ostringstream addrStr;
+                        ipv4->GetAddress(ifIndex, a).GetLocal().Print(addrStr);
+                        ipAddrs += addrStr.str() + " ";
+                    }
+                }
+            }
+        }
+        
+        file << id << "," << keyIndex << "," << numDevs << "," << devTypes << "," << ipAddrs << "," << cellIds << "\n";
+    }
+    file.close();
 }
 
 } // namespace ns3
