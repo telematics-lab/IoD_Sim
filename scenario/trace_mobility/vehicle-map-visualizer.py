@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
@@ -6,7 +7,7 @@ import os
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Visualizzazione 2D su mappa per tracce di veicoli urbani
+# Visualizzazione 2D su mappa per tracce di veicoli urbani (con mappa di sfondo OSM)
 
 
 def select_results_folder():
@@ -102,153 +103,87 @@ print(f"\nNumero di veicoli: {len(unique_nodes)}")
 # Palette di colori per i veicoli
 colors = px.colors.qualitative.Plotly + px.colors.qualitative.Set1
 
-# Crea figura con mappa Mapbox
+# ---------------------------------------------------------------------------
+# Scelta dell'API mappe in base alla versione di Plotly installata.
+#   - Plotly >= 5.24: go.Scattermap  + layout.map     (MapLibre, consigliato)
+#   - Plotly <  5.24: go.Scattermapbox + layout.mapbox (deprecato ma funzionante)
+# Nessuno dei due richiede un token quando si usa lo stile "open-street-map".
+# ---------------------------------------------------------------------------
+_plotly_ver = tuple(int(p) for p in plotly.__version__.split(".")[:2])
+_use_new_map = _plotly_ver >= (5, 24)
+
+ScatterMap = go.Scattermap if _use_new_map else go.Scattermapbox
+map_layout_key = "map" if _use_new_map else "mapbox"
+
+# Stile della mappa di sfondo (gratuiti, senza token):
+#   "open-street-map", "carto-positron", "carto-darkmatter", "carto-voyager"
+map_style = "open-street-map"
+
+# Crea figura
 fig = go.Figure()
 
-# Opzione 1: Usa Mapbox (richiede token, ma offre mappe dettagliate)
-# Mapbox styles: "open-street-map", "carto-positron", "carto-darkmatter", "stamen-terrain", "stamen-toner", "stamen-watercolor"
-use_mapbox = False  # Cambia a False per usare scatter geografico semplice
+# Aggiungi una traccia (linea + marker) per ogni veicolo sopra la mappa
+for i, node in enumerate(unique_nodes):
+    node_df = df[df["Node"] == node].sort_values("Time")
+    color = colors[i % len(colors)]
 
-if use_mapbox:
-    # Aggiungi tracce per ogni veicolo con linee di percorso
-    for i, node in enumerate(unique_nodes):
-        node_df = df[df["Node"] == node].sort_values("Time")
-        color = colors[i % len(colors)]
-
-        # Linea del percorso
-        fig.add_trace(
-            go.Scattermapbox(
-                lat=node_df["Latitude"],
-                lon=node_df["Longitude"],
-                mode="lines+markers",
-                marker=dict(
-                    size=8,
-                    color=color,
-                    opacity=0.7,
-                ),
-                line=dict(
-                    width=2,
-                    color=color,
-                ),
-                hovertemplate="<b>Veicolo %{text}</b><br>"
-                + "Lat: %{lat:.6f}°<br>"
-                + "Lon: %{lon:.6f}°<br>"
-                + "Alt: %{customdata[0]:.1f}m<br>"
-                + "Tempo: %{customdata[1]:.1f}s<br>"
-                + "<extra></extra>",
-                text=[node] * len(node_df),
-                customdata=np.column_stack((node_df["Altitude"], node_df["Time"])),
-                name=f"Veicolo {node}",
-            )
+    fig.add_trace(
+        ScatterMap(
+            lat=node_df["Latitude"],
+            lon=node_df["Longitude"],
+            mode="lines+markers",
+            marker=dict(size=8, color=color, opacity=0.85),
+            line=dict(width=2, color=color),
+            hovertemplate="<b>Veicolo %{text}</b><br>"
+            + "Lat: %{lat:.6f}°<br>"
+            + "Lon: %{lon:.6f}°<br>"
+            + "Alt: %{customdata[0]:.1f}m<br>"
+            + "Tempo: %{customdata[1]:.1f}s<br>"
+            + "<extra></extra>",
+            text=[node] * len(node_df),
+            customdata=np.column_stack((node_df["Altitude"], node_df["Time"])),
+            name=f"Veicolo {node}",
         )
-
-    # Layout per Mapbox - Fullscreen
-    fig.update_layout(
-        title="Visualizzazione Tracce Veicoli - Mappa Urbana",
-        mapbox=dict(
-            style="open-street-map",  # Mappa stradale gratuita
-            center=dict(lat=center_lat, lon=center_lon),
-            zoom=12,
-        ),
-        autosize=True,
-        margin=dict(l=0, r=0, t=40, b=0),  # Margini minimi
-        showlegend=True,
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.01,
-            bgcolor="rgba(255, 255, 255, 0.8)",
-        ),
     )
 
+# Calcola uno zoom automatico in base all'estensione delle tracce
+lat_range = latitudes.max() - latitudes.min()
+lon_range = longitudes.max() - longitudes.min()
+max_range = max(lat_range, lon_range)
+if max_range > 0:
+    zoom = float(np.clip(np.log2(360.0 / max_range), 1, 18))
 else:
-    # Opzione 2: Usa Scatter Geo semplice (non richiede token)
-    for i, node in enumerate(unique_nodes):
-        node_df = df[df["Node"] == node].sort_values("Time")
-        color = colors[i % len(colors)]
+    zoom = 14  # tutte le tracce in un solo punto
 
-        # Linea del percorso
-        fig.add_trace(
-            go.Scattergeo(
-                lat=node_df["Latitude"],
-                lon=node_df["Longitude"],
-                mode="lines+markers",
-                marker=dict(
-                    size=6,
-                    color=color,
-                    opacity=0.8,
-                    line=dict(width=0.5, color="white"),
-                ),
-                line=dict(
-                    width=2,
-                    color=color,
-                ),
-                hovertemplate="<b>Veicolo %{text}</b><br>"
-                + "Lat: %{lat:.6f}°<br>"
-                + "Lon: %{lon:.6f}°<br>"
-                + "Alt: %{customdata[0]:.1f}m<br>"
-                + "Tempo: %{customdata[1]:.1f}s<br>"
-                + "<extra></extra>",
-                text=[node] * len(node_df),
-                customdata=np.column_stack((node_df["Altitude"], node_df["Time"])),
-                name=f"Veicolo {node}",
-            )
-        )
+# Impostazioni della mappa (chiave "map" o "mapbox" a seconda della versione)
+map_settings = dict(
+    style=map_style,
+    center=dict(lat=center_lat, lon=center_lon),
+    zoom=zoom,
+)
 
-    # Calcola i bounds della mappa
-    lat_range = latitudes.max() - latitudes.min()
-    lon_range = longitudes.max() - longitudes.min()
-
-    # Layout per Scatter Geo
-    fig.update_layout(
-        title={
-            "text": "Visualizzazione Tracce Veicoli - Mappa Topografica",
-            "x": 0.5,
-            "xanchor": "center",
-            "font": {"size": 20},
-        },
-        geo=dict(
-            scope="world",
-            projection_type="mercator",
-            center=dict(lat=center_lat, lon=center_lon),
-            lonaxis=dict(
-                range=[
-                    longitudes.min() - lon_range * 0.1,
-                    longitudes.max() + lon_range * 0.1,
-                ]
-            ),
-            lataxis=dict(
-                range=[
-                    latitudes.min() - lat_range * 0.1,
-                    latitudes.max() + lat_range * 0.1,
-                ]
-            ),
-            showland=True,
-            landcolor="rgb(243, 243, 243)",
-            coastlinecolor="rgb(204, 204, 204)",
-            showlakes=True,
-            lakecolor="rgb(200, 220, 240)",
-            showrivers=True,
-            rivercolor="rgb(200, 220, 240)",
-            showcountries=True,
-            countrycolor="rgb(204, 204, 204)",
-            resolution=50,  # Alta risoluzione
-            domain=dict(x=[0, 1], y=[0, 1]),  # Occupa 100% dello spazio
-        ),
-        height=900,  # Altezza fissa grande per forzare fullscreen
-        margin=dict(l=0, r=0, t=60, b=0),  # Margini minimi
-        showlegend=True,
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.01,
-            bgcolor="rgba(255, 255, 255, 0.9)",
-            bordercolor="Black",
-            borderwidth=1,
-        ),
-    )
+fig.update_layout(
+    title={
+        "text": "Visualizzazione Tracce Veicoli - Mappa Urbana",
+        "x": 0.5,
+        "xanchor": "center",
+        "font": {"size": 20},
+    },
+    autosize=True,
+    height=900,
+    margin=dict(l=0, r=0, t=60, b=0),  # Margini minimi
+    showlegend=True,
+    legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01,
+        bgcolor="rgba(255, 255, 255, 0.9)",
+        bordercolor="Black",
+        borderwidth=1,
+    ),
+    **{map_layout_key: map_settings},
+)
 
 # Mostra visualizzazione
 print("\nGenerazione visualizzazione mappa...")
@@ -259,7 +194,7 @@ fig.show(renderer="browser")
 # Salva come HTML interattivo
 output_file = "vehicle_map_visualization.html"
 print(f"\nSalvataggio file HTML interattivo come '{output_file}'...")
-# fig.write_html(output_file)
+fig.write_html(output_file)
 print(f"✓ Visualizzazione completata! File salvato come '{output_file}'")
 
 # Stampa istruzioni
@@ -268,7 +203,6 @@ print("ISTRUZIONI:")
 print("- Usa il mouse per pan/zoom sulla mappa")
 print("- Clicca sulle legende per mostrare/nascondere veicoli")
 print("- Passa sopra i punti per vedere i dettagli")
-if use_mapbox:
-    print("- Per cambiare stile mappa, modifica 'style' nel codice:")
-    print("  'open-street-map', 'carto-positron', 'stamen-terrain', etc.")
+print("- Per cambiare stile mappa modifica 'map_style' nel codice:")
+print("  'open-street-map', 'carto-positron', 'carto-darkmatter', 'carto-voyager'")
 print("=" * 60)
