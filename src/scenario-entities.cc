@@ -287,11 +287,14 @@ Scenario::ConfigureEntityWifiStack(const std::string entityKey,
                                                  devContainer.Get(0)->GetIfIndex());
 
         // Configure WiFi PCAP Logging
-        pcapLog << CONFIGURATOR->GetResultsPath() << "wifi-phy-" << netId << "-" << entityKey
-                << "-host";
-        wifiPhy->GetWifiPhyHelper()->EnablePcap(pcapLog.str(),
-                                                entityNode->GetId(),
-                                                devContainer.Get(0)->GetIfIndex());
+        if (CONFIGURATOR->GetPcapLog())
+        {
+            pcapLog << CONFIGURATOR->GetResultsPath() << "wifi-phy-" << netId << "-" << entityKey
+                    << "-host";
+            wifiPhy->GetWifiPhyHelper()->EnablePcap(pcapLog.str(),
+                                                    entityNode->GetId(),
+                                                    devContainer.Get(0)->GetIfIndex());
+        }
     }
 
     return devContainer;

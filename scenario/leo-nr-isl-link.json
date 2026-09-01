@@ -6,6 +6,14 @@
   "appStatisticsReportInterval": 0.05,
   "staticNs3Config": [
     {
+      "name": "ns3::NrUeMac::SrTransMax",
+      "value": 1000000
+    },
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 1048576
+    },
+    {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
       "value": "SPHERE"
     },
@@ -16,10 +24,6 @@
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
       "value": "50ms"
-    },
-    {
-      "name": "ns3::NrRlcUm::MaxTxBufferSize",
-      "value": 999999999
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
@@ -103,7 +107,7 @@
                 "centralFrequency": 28e9,
                 "bandwidth": 100e6,
                 "numComponentCarriers": 1,
-                "numBandwidthParts": 1
+                "numBandwidthParts": 2
               }
             }
           ]
@@ -164,14 +168,29 @@
         ]
       },
       "ueAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 28000000000.0
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 20.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 0.01
+          }
+        ],
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 4
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 4
+            "value": 1
           }
         ]
       },
@@ -408,6 +427,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": {
             "mode": "earth-centered"
           }
@@ -421,6 +452,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": {
             "mode": "earth-centered"
           }
@@ -459,6 +502,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": {
             "mode": "earth-centered"
           }
@@ -564,16 +619,6 @@
     }
   ],
   "logComponents": [
-    "UdpClient",
-    "UdpServer",
-    "NrPdcp",
-    "Scenario",
-    "UdpEchoClientApplication",
-    "UdpEchoServerApplication",
-    "PacketSink",
-    "UdpL4Protocol",
-    "NrSpectrumPhy",
-    "NrEesmErrorModel",
-    "ThreeGppSpectrumPropagationLossModel"
+    "Scenario"
   ]
 }

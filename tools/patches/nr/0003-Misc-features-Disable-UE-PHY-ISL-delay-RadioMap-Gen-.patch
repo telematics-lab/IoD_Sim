@@ -1,7 +1,7 @@
-From 5db8e4c6f24eca613e7c5a8b61c0875e12367d34 Mon Sep 17 00:00:00 2001
+From 4fb851fff414808b8f4ea5e77dfee717b8de0056 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 6 Jul 2026 15:56:33 +0200
-Subject: [PATCH 3/3] Misc features (Disable UE PHY, ISL delay, RadioMap Gen,
+Subject: [PATCH 3/5] Misc features (Disable UE PHY, ISL delay, RadioMap Gen,
  BWP list)
 
 ---
@@ -16,11 +16,11 @@ Subject: [PATCH 3/3] Misc features (Disable UE PHY, ISL delay, RadioMap Gen,
  model/nr-gnb-mac.cc                       | 58 ++++++++++++++++++++++-
  model/nr-gnb-mac.h                        |  5 ++
  model/nr-gnb-rrc.h                        | 13 ++---
- model/nr-interference.cc                  | 34 ++++++++++---
+ model/nr-interference.cc                  | 36 +++++++++++---
  model/nr-interference.h                   | 13 ++++-
  model/nr-qos-rule-classifier.cc           |  3 ++
  model/nr-qos-rule.h                       | 10 ++++
- 15 files changed, 213 insertions(+), 27 deletions(-)
+ 15 files changed, 215 insertions(+), 27 deletions(-)
 
 diff --git a/helper/nr-epc-helper.h b/helper/nr-epc-helper.h
 index c8938183..b9c5e15a 100644
@@ -402,10 +402,10 @@ index 52778024..bb8809bc 100644
      uint8_t m_numberOfRaPreambles;  ///< number of RA preambles
      uint8_t m_preambleTransMax;     ///< preamble transmit maximum
 diff --git a/model/nr-gnb-rrc.h b/model/nr-gnb-rrc.h
-index c08e6633..4ab3a545 100644
+index efaf93e7..41670f65 100644
 --- a/model/nr-gnb-rrc.h
 +++ b/model/nr-gnb-rrc.h
-@@ -175,7 +175,8 @@ class NR_EXPORT NrUeManager : public Object
+@@ -182,7 +182,8 @@ class NR_EXPORT NrUeManager : public Object
      void SetupDataRadioBearer(NrQosFlow flow,
                                uint8_t qfi,
                                uint32_t gtpTeid,
@@ -415,7 +415,7 @@ index c08e6633..4ab3a545 100644
  
      /**
       * Start all configured data radio bearers. It is safe to call this
-@@ -483,13 +484,13 @@ class NR_EXPORT NrUeManager : public Object
+@@ -497,13 +498,13 @@ class NR_EXPORT NrUeManager : public Object
  
    private:
      /**
@@ -435,7 +435,7 @@ index c08e6633..4ab3a545 100644
      /**
       * @param drbid the Data Radio Bearer id
 diff --git a/model/nr-interference.cc b/model/nr-interference.cc
-index 109c42e6..0eedb049 100644
+index b5ac4282..13f051b8 100644
 --- a/model/nr-interference.cc
 +++ b/model/nr-interference.cc
 @@ -8,7 +8,10 @@
@@ -449,7 +449,7 @@ index 109c42e6..0eedb049 100644
  
  #include <algorithm>
  
-@@ -153,12 +156,12 @@ NrInterference::ConditionallyEvaluateChunk()
+@@ -157,12 +160,14 @@ NrInterference::ConditionallyEvaluateChunk()
  
          for (auto& cp : m_mimoChunkProcessors)
          {
@@ -459,13 +459,15 @@ index 109c42e6..0eedb049 100644
              // Compute the MIMO SINR separately for each received signal.
              for (auto& rxSignal : m_rxSignalsMimo)
              {
-+                // Covariance matrix of noise plus out-of-cell interference
++                // Covariance matrix of noise plus out-of-cell interference. IoD_Sim computes
++                // it per received signal, so that the signal under evaluation is excluded from
++                // its own interference.
 +                auto outOfCellInterfCov = CalcOutOfCellInterfCov(rxSignal);
 +
-                 // Use the UE's RNTI to distinguish multiple received signals
-                 auto nrRxSignal = DynamicCast<const NrSpectrumSignalParametersDataFrame>(rxSignal);
-                 uint16_t rnti = nrRxSignal ? nrRxSignal->rnti : 0;
-@@ -411,8 +414,14 @@ NrInterference::IsChunkProcessorSet()
+                 // Use the UE's RNTI and the cell it belongs to in order to distinguish multiple
+                 // received signals. The cell is needed because RNTIs are per-cell values that
+                 // are reused, so the RNTI on its own does not identify the signal.
+@@ -418,8 +423,14 @@ NrInterference::IsChunkProcessorSet()
      return (!m_mimoChunkProcessors.empty());
  }
  
@@ -481,7 +483,7 @@ index 109c42e6..0eedb049 100644
  {
      // Extract dimensions from first receive signal. Interference signals have equal dimensions
      NS_ASSERT_MSG(!(m_rxSignalsMimo.empty()), "At least one receive signal is required");
-@@ -441,7 +450,7 @@ NrInterference::CalcOutOfCellInterfCov() const
+@@ -448,7 +459,7 @@ NrInterference::CalcOutOfCellInterfCov() const
              continue;
          }
  
@@ -490,7 +492,7 @@ index 109c42e6..0eedb049 100644
      }
      return allSignalsNoiseCov;
  }
-@@ -463,14 +472,25 @@ NrInterference::CalcCurrInterfCov(Ptr<const SpectrumSignalParameters> rxSignal,
+@@ -470,14 +481,25 @@ NrInterference::CalcCurrInterfCov(Ptr<const SpectrumSignalParameters> rxSignal,
                         m_allSignalsMimo.end()),
                        "RX signal already deleted from m_allSignalsMimo");
  
@@ -596,6 +598,3 @@ index 2ac72da8..411ea5f4 100644
    private:
      std::list<PacketFilter> m_filters; ///< packet filter list
      uint8_t m_numFilters;              ///< number of packet filters applied to this QoS rule
--- 
-2.50.1 (Apple Git-155)
-

@@ -513,6 +513,20 @@ Scenario::ConfigureNrGnb(Ptr<Node> entityNode,
                             {
                                 antenna->SetAttribute(attr.name, *attr.value);
                             }
+
+                            // Changing the array geometry invalidates the beamforming
+                            // vector: UniformPlanarArray::SetNumRows/SetNumColumns and the
+                            // element-spacing setters all clear the validity flag, because a
+                            // vector sized for the previous geometry no longer applies. The
+                            // vector these antennas start with is the quasi-omni one that
+                            // BeamManager::Configure() installed at construction time, so
+                            // re-install it for the geometry we just set; otherwise the next
+                            // PhasedArrayModel::GetBeamformingVector() aborts before the
+                            // beamforming helper has had a chance to compute a real vector.
+                            if (auto beamManager = specPhy->GetBeamManager())
+                            {
+                                beamManager->ChangeToQuasiOmniBeamformingVector();
+                            }
                         }
                     }
                 }
@@ -692,6 +706,14 @@ Scenario::ConfigureNrUe(Ptr<Node> entityNode,
                         for (auto& attr : antConf.model.GetAttributes())
                         {
                             antenna->SetAttribute(attr.name, *attr.value);
+                        }
+
+                        // Same as above: re-install the quasi-omni vector after changing
+                        // the array geometry, so the array is never left with an invalid
+                        // beamforming vector.
+                        if (auto beamManager = specPhy->GetBeamManager())
+                        {
+                            beamManager->ChangeToQuasiOmniBeamformingVector();
                         }
                     }
                 }

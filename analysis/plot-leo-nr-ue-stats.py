@@ -1,9 +1,78 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import re
 import argparse
 import numpy as np
 import warnings
+
+# Scenario::UpdateIslDelay (src/scenario-link.cc) writes TotalDelay = 3600 s when
+# a satellite has no route to any ground station. Anything at or above this is
+# that sentinel, not a real propagation delay (real ones are in the millisecond
+# range).
+ISL_NO_PATH_DELAY_MS = 3.5e6
+
+# Path descriptions that mean "this UE currently has no usable ISL route".
+DISCONNECTED_PATHS = frozenset({"No Path", "Unknown"})
+
+
+def group_by_cell_rnti(df, cell_col, rnti_col):
+    """Map (cellId, rnti) -> positional row indices for a whole trace.
+
+    Computed once, then reused for every UE. Scanning an 800k-row frame with one
+    boolean mask per UE is what dominated this script's runtime.
+    """
+    if df.empty or cell_col not in df.columns or rnti_col not in df.columns:
+        return {}
+    return {(int(cell), int(rnti)): idx
+            for (cell, rnti), idx in df.groupby([cell_col, rnti_col]).indices.items()}
+
+
+def select_ue_rows(df, groups, intervals, ue_id, what, time_col='Time'):
+    """Return the rows of `df` that belong to one UE.
+
+    `intervals` holds the (start, end, cellId, rnti) windows during which the UE
+    was attached; a row is kept when it matches one of those (cell, rnti) pairs
+    *and* falls inside the matching window.
+
+    With no RRC history there is nothing to attribute rows by, so the caller gets
+    the frame unchanged — correct for single-UE runs. When the history is known
+    but nothing matches, the previous code fell back to the *entire* frame, which
+    silently drew other UEs' samples on this UE's plot. Return an empty frame and
+    say so instead.
+    """
+    if df.empty or not intervals:
+        return df
+
+    times = df[time_col].to_numpy()
+    keep = []
+    for start_t, end_t, cell, rnti in intervals:
+        idx = groups.get((cell, rnti))
+        if idx is None:
+            continue
+        t = times[idx]
+        keep.append(idx[(t >= start_t) & (t < end_t)])
+
+    if not keep:
+        print(f"  warning: no {what} samples match UE {ue_id}'s attached cells; "
+              f"leaving that series empty")
+        return df.iloc[0:0]
+
+    return df.take(np.unique(np.concatenate(keep)))
+
+
+def annotate_event(ax, x, text, color):
+    """Label a vertical event line.
+
+    The y position is given in axes coordinates, so the label stays just below
+    the top of the plot no matter how the y axis is autoscaled afterwards. The
+    previous code read get_ylim() before the data was final, which pushed labels
+    off-screen on plots with large outliers.
+    """
+    ax.annotate(text,
+                xy=(x, 0.98), xycoords=ax.get_xaxis_transform(),
+                xytext=(3, 0), textcoords='offset points',
+                color=color, rotation=90, va='top', ha='left', fontsize=8)
 def plot_user_isl_experience(results_dir):
     app_stats_file = os.path.join(results_dir, 'app-statistics-periodic.txt')
     vehicle_trace_file = os.path.join(results_dir, 'vehicle-trace.csv')
@@ -80,6 +149,12 @@ def plot_user_isl_experience(results_dir):
         except pd.errors.EmptyDataError:
             pass
 
+    # Indexed once here; select_ue_rows() then slices per UE instead of masking
+    # the whole frame 50 times over.
+    rx_groups = group_by_cell_rnti(df_rx_packet, 'cellId', 'rnti')
+    data_sinr_groups = group_by_cell_rnti(df_data_sinr, 'CellId', 'RNTI')
+    ctrl_sinr_groups = group_by_cell_rnti(df_ctrl_sinr, 'CellId', 'RNTI')
+
     global_sat_stats = []
     global_sat_sinr_stats = []
 
@@ -149,12 +224,20 @@ def plot_user_isl_experience(results_dir):
             current_rnti = None
             last_time = 0.0
 
+            def cell_rnti(row):
+                # Kept as ints so they can key the (cellId, rnti) index built above;
+                # the CSV columns come through as floats whenever a row leaves
+                # SourceCellId empty.
+                cell, rnti = row['TargetCellId'], row['RNTI']
+                if pd.isna(cell) or pd.isna(rnti):
+                    return None, None
+                return int(cell), int(rnti)
+
             for _, row in df_ue_rrc.iterrows():
                 if row['Event'] == 'Attach':
                     if current_cell is not None and current_rnti is not None:
                         active_cells_rntis.append((last_time, row['Time'], current_cell, current_rnti))
-                    current_cell = row['TargetCellId']
-                    current_rnti = row['RNTI']
+                    current_cell, current_rnti = cell_rnti(row)
                     last_time = row['Time']
                 elif row['Event'] == 'HandoverStart':
                     if current_cell is not None and current_rnti is not None:
@@ -162,8 +245,7 @@ def plot_user_isl_experience(results_dir):
                     current_cell = None
                     current_rnti = None
                 elif row['Event'] == 'HandoverEndOk':
-                    current_cell = row['TargetCellId']
-                    current_rnti = row['RNTI']
+                    current_cell, current_rnti = cell_rnti(row)
                     last_time = row['Time']
 
             if current_cell is not None and current_rnti is not None:
@@ -174,15 +256,8 @@ def plot_user_isl_experience(results_dir):
         df_dl_data_sinr_grouped = pd.DataFrame()
 
         if not df_rx_packet.empty:
-            if active_cells_rntis:
-                mask = pd.Series(False, index=df_rx_packet.index)
-                for start_t, end_t, cid, rnti in active_cells_rntis:
-                    mask = mask | ((df_rx_packet['Time'] >= start_t) & (df_rx_packet['Time'] < end_t) & (df_rx_packet['cellId'] == cid) & (df_rx_packet['rnti'] == rnti))
-                filtered_rx = df_rx_packet[mask]
-                if filtered_rx.empty:
-                    filtered_rx = df_rx_packet
-            else:
-                filtered_rx = df_rx_packet
+            filtered_rx = select_ue_rows(df_rx_packet, rx_groups, active_cells_rntis,
+                                         ue_id, 'RxPacketTrace')
 
             ul_rx = filtered_rx[filtered_rx['direction'] == 'UL']
             dl_rx = filtered_rx[filtered_rx['direction'] == 'DL']
@@ -193,150 +268,136 @@ def plot_user_isl_experience(results_dir):
                 df_dl_data_sinr_grouped = dl_rx.groupby('Time').agg({'SINR(dB)': 'mean'}).reset_index()
                 
         if df_dl_data_sinr_grouped.empty and not df_data_sinr.empty:
-            if active_cells_rntis:
-                # Build a boolean mask for precise filtering
-                mask = pd.Series(False, index=df_data_sinr.index)
-                for start_t, end_t, cid, rnti in active_cells_rntis:
-                    mask = mask | ((df_data_sinr['Time'] >= start_t) & (df_data_sinr['Time'] < end_t) & (df_data_sinr['CellId'] == cid) & (df_data_sinr['RNTI'] == rnti))
-
-                filtered_data_sinr = df_data_sinr[mask]
-                if filtered_data_sinr.empty:
-                    # Fallback if strict filtering fails
-                    filtered_data_sinr = df_data_sinr
-            else:
-                filtered_data_sinr = df_data_sinr
+            filtered_data_sinr = select_ue_rows(df_data_sinr, data_sinr_groups,
+                                                active_cells_rntis, ue_id, 'DlDataSinr')
 
             df_dl_data_sinr_grouped = filtered_data_sinr.groupby('Time').agg({'SINR(dB)': 'mean'}).reset_index()
 
         if not df_ctrl_sinr.empty:
-            if active_cells_rntis:
-                mask = pd.Series(False, index=df_ctrl_sinr.index)
-                for start_t, end_t, cid, rnti in active_cells_rntis:
-                    mask = mask | ((df_ctrl_sinr['Time'] >= start_t) & (df_ctrl_sinr['Time'] < end_t) & (df_ctrl_sinr['CellId'] == cid) & (df_ctrl_sinr['RNTI'] == rnti))
-
-                filtered_ctrl_sinr = df_ctrl_sinr[mask]
-                if filtered_ctrl_sinr.empty:
-                    filtered_ctrl_sinr = df_ctrl_sinr
-            else:
-                filtered_ctrl_sinr = df_ctrl_sinr
+            filtered_ctrl_sinr = select_ue_rows(df_ctrl_sinr, ctrl_sinr_groups,
+                                                active_cells_rntis, ue_id, 'DlCtrlSinr')
 
             df_ctrl_sinr_grouped = filtered_ctrl_sinr.groupby('Time').agg({'SINR(dB)': 'mean'}).reset_index()
         else:
             df_ctrl_sinr_grouped = pd.DataFrame()
 
-        # 4. Determine Topology Changes
-        # Topology changes when either the Attached Sat changes, or the Sat's ISL path changes
-        # Merge vehicle trace with delay trace based on Time and NearestSatId == GNbNodeId
+        # 4. Determine topology changes
+        #
+        # For every vehicle-trace sample we need the ISL route of the satellite
+        # the UE is attached to, plus the geometry to that satellite. Both are
+        # "the most recent row at or before this time, for this satellite", which
+        # is exactly merge_asof; the previous per-row scans of the delay and
+        # satellite traces made this the slowest part of the script.
+        df_ue_veh = df_ue_veh.sort_values('Time').reset_index(drop=True)
 
-        # We need to approximate the join because times might not match exactly.
-        # Let's use merge_asof
-        df_ue_veh['Time_ms'] = (df_ue_veh['Time'] * 1000).astype(int)
-        df_delay['Time_ms'] = (df_delay['Time'] * 1000).astype(int)
+        # Which satellite serves the UE at each sample.
+        sat_ids = np.full(len(df_ue_veh), np.nan)
+        veh_times = df_ue_veh['Time'].to_numpy()
+        if not df_ue_rrc.empty:
+            for start_t, end_t, cell, rnti in active_cells_rntis:
+                node = cell_to_node.get(cell)
+                if node is None:
+                    continue
+                sat_ids[(veh_times >= start_t) & (veh_times < end_t)] = node
+        elif 'NearestSatId' in df_ue_veh.columns:
+            sat_ids = df_ue_veh['NearestSatId'].to_numpy(dtype=float)
+        df_ue_veh['SatId'] = sat_ids
 
-        df_ue_veh.sort_values('Time_ms', inplace=True)
-        df_delay.sort_values('Time_ms', inplace=True)
+        # merge_asof cannot group on NaN, so park unattached samples on a
+        # sentinel that no satellite id can take.
+        NO_SAT = -1.0
+        df_ue_veh['_sat_key'] = df_ue_veh['SatId'].fillna(NO_SAT)
 
-        # For each vehicle time point, we want the ISL path of its NearestSatId
-        # We can iterate or do a custom merge
-        paths = []
-        last_path = None
-        last_clean_path = None
-        topology_change_times = []
-        isl_break_times = []
-        isl_restore_times = []
+        # ISL route and delay of the serving satellite.
+        df_ue_veh['NextHopPath'] = np.nan
+        df_ue_veh['TotalDelay'] = np.nan
+        if not df_delay.empty:
+            delay_right = (df_delay[['Time', 'GNbNodeId', 'NextHopPath', 'TotalDelay']]
+                           .dropna(subset=['Time', 'GNbNodeId'])
+                           .astype({'GNbNodeId': float})
+                           .sort_values('Time'))
+            merged = pd.merge_asof(
+                df_ue_veh[['Time', '_sat_key']],
+                delay_right.rename(columns={'GNbNodeId': '_sat_key'}),
+                on='Time', by='_sat_key', direction='backward')
+            df_ue_veh['NextHopPath'] = merged['NextHopPath'].to_numpy()
+            df_ue_veh['TotalDelay'] = merged['TotalDelay'].to_numpy()
 
-        distances = []
-        elevations = []
-        isl_delays = []
+        isl_delay_ms = df_ue_veh['TotalDelay'].to_numpy(dtype=float) * 1000.0
+        has_delay_row = ~np.isnan(isl_delay_ms)
+        no_route = np.isnan(isl_delay_ms) | (isl_delay_ms >= ISL_NO_PATH_DELAY_MS) \
+            | df_ue_veh['NextHopPath'].isna().to_numpy()
+        # The sentinel is not a delay: blank it out rather than plotting 3600 s.
+        isl_delay_ms = np.where(no_route, np.nan, isl_delay_ms)
+        df_ue_veh['ISL_Delay_ms'] = isl_delay_ms
 
-        import re
+        # "[Node_30;1.2m;0.1s] -> [Ground;...]" becomes "Node_30 -> Ground".
+        # Cached over unique strings: a run has a handful of distinct routes.
+        path_cache = {}
 
-        for idx, row in df_ue_veh.iterrows():
-            t = row['Time']
+        def clean_route(raw):
+            if raw not in path_cache:
+                path_cache[raw] = " -> ".join(re.findall(r'\[([^;]+)', str(raw)))
+            return path_cache[raw]
 
-            # Determine actual connected satellite (if known from RRC), else fallback to NearestSatId ONLY for old logs
-            sat_id = None
-            if not df_ue_rrc.empty:
-                for start_t, end_t, cid, rnti in active_cells_rntis:
-                    if start_t <= t < end_t:
-                        sat_id = cell_to_node.get(cid)
-                        break
-            else:
-                sat_id = row['NearestSatId']
+        clean_paths = np.where(
+            no_route,
+            np.where(has_delay_row, "No Path", "Unknown"),
+            [clean_route(v) for v in df_ue_veh['NextHopPath']])
 
-            # Find the closest delay trace for this satellite before or at this time
-            sat_delays = df_delay[(df_delay['GNbNodeId'] == sat_id) & (df_delay['Time'] <= t)]
-            if not sat_delays.empty:
-                current_path = sat_delays.iloc[-1]['NextHopPath']
-                curr_isl_delay = sat_delays.iloc[-1]['TotalDelay'] * 1000.0 # Convert to ms
+        full_paths = np.where(
+            df_ue_veh['SatId'].isna().to_numpy(),
+            "Unknown",
+            ["Sat_%d -> %s" % (s, c) if not np.isnan(s) else "Unknown"
+             for s, c in zip(df_ue_veh['SatId'], clean_paths)])
 
-                # Strip out weights to keep only the node sequence
-                # Example: "[Node_30;1.2m;0.1s] -> [Ground;...]" -> "Node_30 -> Ground"
-                if pd.isna(current_path) or curr_isl_delay >= 3500000.0:
-                    clean_path = "No Path"
-                    curr_isl_delay = np.nan
-                else:
-                    nodes_in_path = re.findall(r'\[([^;]+)', str(current_path))
-                    clean_path = " -> ".join(nodes_in_path)
-            else:
-                clean_path = "Unknown"
-                curr_isl_delay = np.nan
+        # Transitions, skipping the first sample (nothing to compare it against).
+        changed = full_paths[1:] != full_paths[:-1]
+        topology_change_times = list(veh_times[1:][changed])
 
-            isl_delays.append(curr_isl_delay)
+        was_conn = ~np.isin(clean_paths[:-1], list(DISCONNECTED_PATHS))
+        is_conn = ~np.isin(clean_paths[1:], list(DISCONNECTED_PATHS))
+        isl_break_times = list(veh_times[1:][was_conn & ~is_conn])
+        isl_restore_times = list(veh_times[1:][~was_conn & is_conn])
 
-            # The full user path is logically: User -> Sat(sat_id) -> ISL(clean_path)
-            if sat_id is not None:
-                full_path = f"Sat_{int(sat_id)} -> {clean_path}"
-            else:
-                full_path = "Unknown"
-                
-            paths.append(full_path)
+        # Distance to, and elevation of, the serving satellite.
+        distances = np.full(len(df_ue_veh), np.nan)
+        elevations = np.full(len(df_ue_veh), np.nan)
+        if not df_sat.empty:
+            sat_right = (df_sat[['Time', 'Node', 'X', 'Y', 'Z']]
+                         .dropna(subset=['Time', 'Node'])
+                         .astype({'Node': float})
+                         .sort_values('Time')
+                         .rename(columns={'Node': '_sat_key',
+                                          'X': 'SatX', 'Y': 'SatY', 'Z': 'SatZ'}))
+            geo = pd.merge_asof(df_ue_veh[['Time', '_sat_key']], sat_right,
+                                on='Time', by='_sat_key', direction='backward')
 
-            if last_path is not None and full_path != last_path:
-                topology_change_times.append(t)
+            sx = geo['SatX'].to_numpy(dtype=float)
+            sy = geo['SatY'].to_numpy(dtype=float)
+            sz = geo['SatZ'].to_numpy(dtype=float)
+            ux = df_ue_veh['X'].to_numpy(dtype=float)
+            uy = df_ue_veh['Y'].to_numpy(dtype=float)
+            uz = df_ue_veh['Z'].to_numpy(dtype=float)
 
+            vx, vy, vz = sx - ux, sy - uy, sz - uz
+            v_norm = np.sqrt(vx * vx + vy * vy + vz * vz)
+            u_norm = np.sqrt(ux * ux + uy * uy + uz * uz)
 
-            if last_clean_path is not None:
-                if last_clean_path != "Unknown" and clean_path == "Unknown":
-                    isl_break_times.append(t)
-                elif last_clean_path == "Unknown" and clean_path != "Unknown":
-                    isl_restore_times.append(t)
+            distances = v_norm / 1000.0
 
-            last_path = full_path
-            last_clean_path = clean_path
-
-            # Compute distance and elevation
-            if sat_id is not None and not df_sat.empty:
-                sat_row = df_sat[(df_sat['Node'] == sat_id) & (df_sat['Time'] <= t)]
-                if not sat_row.empty:
-                    sat_row = sat_row.iloc[-1]
-                    sx, sy, sz = sat_row['X'], sat_row['Y'], sat_row['Z']
-                    ux, uy, uz = row['X'], row['Y'], row['Z']
-
-                    dist = np.sqrt((sx - ux)**2 + (sy - uy)**2 + (sz - uz)**2)
-                    distances.append(dist / 1000.0)
-
-                    vx, vy, vz = sx - ux, sy - uy, sz - uz
-                    v_norm = np.sqrt(vx**2 + vy**2 + vz**2)
-                    u_norm = np.sqrt(ux**2 + uy**2 + uz**2)
-
-                    if u_norm > 0 and v_norm > 0:
-                        dot_prod = (vx*ux + vy*uy + vz*uz) / (v_norm * u_norm)
-                        dot_prod = max(-1.0, min(1.0, dot_prod))
-                        elev = 90.0 - np.degrees(np.arccos(dot_prod))
-                        elevations.append(elev)
-                    else:
-                        elevations.append(np.nan)
-                else:
-                    distances.append(np.nan)
-                    elevations.append(np.nan)
-            else:
-                distances.append(np.nan)
-                elevations.append(np.nan)
+            # Elevation above the local horizon: 90 deg minus the angle between
+            # the UE's zenith (its ECEF position vector) and the satellite.
+            with np.errstate(invalid='ignore', divide='ignore'):
+                cos_a = (vx * ux + vy * uy + vz * uz) / (v_norm * u_norm)
+                cos_a = np.clip(cos_a, -1.0, 1.0)
+                elevations = 90.0 - np.degrees(np.arccos(cos_a))
+            bad = (u_norm <= 0) | (v_norm <= 0) | np.isnan(sx)
+            distances = np.where(bad, np.nan, distances)
+            elevations = np.where(bad, np.nan, elevations)
 
         df_ue_veh['Distance_km'] = distances
         df_ue_veh['Elevation_deg'] = elevations
-        df_ue_veh['ISL_Delay_ms'] = isl_delays
 
         # Create the subplots
         # We want to plot: Delay, Throughput, SINR, Distance/Elevation
@@ -375,22 +436,27 @@ def plot_user_isl_experience(results_dir):
         axes[1].grid(True, linestyle='--', alpha=0.6)
 
         # Plot 3: SINR
+        def break_gaps(df, max_gap=0.5):
+            """Insert NaNs where samples are more than max_gap apart, so matplotlib
+            leaves a hole instead of drawing a straight line across the silence."""
+            out = df.copy()
+            out.loc[out['Time'].diff() > max_gap, 'SINR(dB)'] = np.nan
+            return out
+
         has_sinr = False
         if not df_ctrl_sinr_grouped.empty:
-            axes[2].plot(df_ctrl_sinr_grouped['Time'], df_ctrl_sinr_grouped['SINR(dB)'], color='tab:gray', linestyle=':', label='DL Ctrl SINR (dB)', linewidth=1.5)
+            ctrl_plot = break_gaps(df_ctrl_sinr_grouped)
+            axes[2].plot(ctrl_plot['Time'], ctrl_plot['SINR(dB)'], color='tab:gray', linestyle=':', label='DL Ctrl SINR (dB)', linewidth=1.0, alpha=0.6)
             has_sinr = True
 
         if not df_dl_data_sinr_grouped.empty:
-            # Break the line if the time gap is more than 0.5 seconds
-            df_dl_data_sinr_grouped['Time_diff'] = df_dl_data_sinr_grouped['Time'].diff()
-            df_dl_data_sinr_grouped.loc[df_dl_data_sinr_grouped['Time_diff'] > 0.5, 'SINR(dB)'] = np.nan
-            axes[2].plot(df_dl_data_sinr_grouped['Time'], df_dl_data_sinr_grouped['SINR(dB)'], color='tab:green', marker='.', markersize=4, label='DL Data SINR (dB)', linewidth=2)
+            dl_plot = break_gaps(df_dl_data_sinr_grouped)
+            axes[2].plot(dl_plot['Time'], dl_plot['SINR(dB)'], color='tab:green', marker='.', markersize=4, label='DL Data SINR (dB)', linewidth=2)
             has_sinr = True
 
         if not df_ul_data_sinr_grouped.empty:
-            df_ul_data_sinr_grouped['Time_diff'] = df_ul_data_sinr_grouped['Time'].diff()
-            df_ul_data_sinr_grouped.loc[df_ul_data_sinr_grouped['Time_diff'] > 0.5, 'SINR(dB)'] = np.nan
-            axes[2].plot(df_ul_data_sinr_grouped['Time'], df_ul_data_sinr_grouped['SINR(dB)'], color='tab:orange', marker='.', markersize=4, label='UL Data SINR (dB)', linewidth=2)
+            ul_plot = break_gaps(df_ul_data_sinr_grouped)
+            axes[2].plot(ul_plot['Time'], ul_plot['SINR(dB)'], color='tab:orange', marker='.', markersize=4, label='UL Data SINR (dB)', linewidth=2)
             has_sinr = True
 
         if has_sinr:
@@ -398,8 +464,7 @@ def plot_user_isl_experience(results_dir):
         else:
             axes[2].text(0.5, 0.5, 'SINR data not available', horizontalalignment='center', verticalalignment='center', transform=axes[2].transAxes)
 
-        axes[2].set_ylabel('SINR (dB)', color='tab:green')
-        axes[2].tick_params(axis='y', labelcolor='tab:green')
+        axes[2].set_ylabel('SINR (dB)')
         axes[2].grid(True, linestyle='--', alpha=0.6)
 
         # Plot 4: Distance and Elevation
@@ -446,7 +511,7 @@ def plot_user_isl_experience(results_dir):
                 for ax in axes:
                     ax.axvline(x=t, color='blue', linestyle='-', linewidth=2, alpha=0.8)
         if isl_restore_times:
-            legend_elements.append(Line2D([0], [0], color='blue', linestyle='--', lw=2, label='ISL Restore'))
+            legend_elements.append(Line2D([0], [0], color='blue', linestyle='-', lw=2, label='ISL Restore'))
 
         # Plot RRC Events
         if not df_ue_rrc.empty:
@@ -489,8 +554,7 @@ def plot_user_isl_experience(results_dir):
                 for ax in axes:
                     ax.axvline(x=t, color=color, linestyle='--', alpha=0.8)
 
-                # Add text label slightly to the right
-                axes[0].text(t + 0.05, axes[0].get_ylim()[1] * 0.9, evt + label_suffix, color=color, rotation=90, verticalalignment='top', fontsize=8)
+                annotate_event(axes[0], t, evt + label_suffix, color)
 
             # Only add legend elements if we actually plotted them
             plotted_events = set(row['Event'] for row in events_to_plot)
@@ -502,42 +566,48 @@ def plot_user_isl_experience(results_dir):
                 legend_elements.append(Line2D([0], [0], color='orange', linestyle='--', lw=2, label='Handover Success'))
 
 
-            if not df_custom_labels.empty:
-                for _, cl_row in df_custom_labels.iterrows():
-                    ct = cl_row['Time']
-                    clbl = cl_row['Label']
-                    for ax in axes:
-                        ax.axvline(x=ct, color='purple', linestyle=':', alpha=0.8)
-                    axes[0].text(ct + 0.05, axes[0].get_ylim()[1] * 0.9, clbl, color='purple', rotation=90, verticalalignment='top', fontsize=8)
+        # Custom time labels are independent of the RRC events: plot them whether
+        # or not this UE produced any.
+        if not df_custom_labels.empty:
+            for _, cl_row in df_custom_labels.iterrows():
+                ct = cl_row['Time']
+                clbl = cl_row['Label']
+                for ax in axes:
+                    ax.axvline(x=ct, color='purple', linestyle=':', alpha=0.8)
+                annotate_event(axes[0], ct, clbl, 'purple')
+            legend_elements.append(Line2D([0], [0], color='purple', linestyle=':', lw=2, label='Scenario event'))
 
         if legend_elements:
             axes[0].legend(handles=legend_elements, loc='upper right')
 
 
 
-        if not df_ul_data_sinr_grouped.empty:
-            for _, r in df_ul_data_sinr_grouped.iterrows():
-                t = r['Time']
-                sat_id = None
-                if not df_ue_rrc.empty:
-                    for start_t, end_t, cid, rnti in active_cells_rntis:
-                        if start_t <= t < end_t:
-                            sat_id = cell_to_node.get(cid)
-                            break
-                if sat_id is not None:
-                    global_sat_sinr_stats.append({'Time': t, 'SatId': sat_id, 'UL_SINR': r['SINR(dB)'], 'DL_SINR': np.nan})
-                    
-        if not df_dl_data_sinr_grouped.empty:
-            for _, r in df_dl_data_sinr_grouped.iterrows():
-                t = r['Time']
-                sat_id = None
-                if not df_ue_rrc.empty:
-                    for start_t, end_t, cid, rnti in active_cells_rntis:
-                        if start_t <= t < end_t:
-                            sat_id = cell_to_node.get(cid)
-                            break
-                if sat_id is not None:
-                    global_sat_sinr_stats.append({'Time': t, 'SatId': sat_id, 'UL_SINR': np.nan, 'DL_SINR': r['SINR(dB)']})
+        def serving_sat(times):
+            """Serving satellite id for each timestamp, NaN when unattached."""
+            out = np.full(len(times), np.nan)
+            if df_ue_rrc.empty:
+                return out
+            times = np.asarray(times, dtype=float)
+            for start_t, end_t, cell, rnti in active_cells_rntis:
+                node = cell_to_node.get(cell)
+                if node is not None:
+                    out[(times >= start_t) & (times < end_t)] = node
+            return out
+
+        for grouped, col in ((df_ul_data_sinr_grouped, 'UL_SINR'),
+                             (df_dl_data_sinr_grouped, 'DL_SINR')):
+            if grouped.empty:
+                continue
+            sats = serving_sat(grouped['Time'].to_numpy())
+            keep = ~np.isnan(sats)
+            if not keep.any():
+                continue
+            block = pd.DataFrame({'Time': grouped['Time'].to_numpy()[keep],
+                                  'SatId': sats[keep],
+                                  'UL_SINR': np.nan,
+                                  'DL_SINR': np.nan})
+            block[col] = grouped['SINR(dB)'].to_numpy()[keep]
+            global_sat_sinr_stats.append(block)
 
         # --- Collect global satellite stats ---
         if not df_ul_grouped.empty or not df_dl_grouped.empty:
@@ -546,29 +616,33 @@ def plot_user_isl_experience(results_dir):
                 df_dl_grouped if not df_dl_grouped.empty else pd.DataFrame(columns=['Time_s', 'RxThroughput_kbps', 'Delay_ms']),
                 on='Time_s', how='outer', suffixes=('_UL', '_DL')
             )
-            for _, r in df_merged.iterrows():
-                t = r['Time_s']
-                sat_id = None
-                if not df_ue_rrc.empty:
-                    for start_t, end_t, cid, rnti in active_cells_rntis:
-                        if start_t <= t < end_t:
-                            sat_id = cell_to_node.get(cid)
-                            break
-                else:
-                    if not df_ue_veh.empty:
-                        # find nearest in time
-                        sat_id = df_ue_veh.iloc[(df_ue_veh['Time'] - t).abs().argsort()[:1]]['NearestSatId'].values[0]
-                
-                if sat_id is not None:
-                    global_sat_stats.append({
-                        'Time': t,
-                        'SatId': sat_id,
-                        'UEId': ue_id,
-                        'UL_Throughput': r.get('RxThroughput_kbps_UL', np.nan),
-                        'DL_Throughput': r.get('RxThroughput_kbps_DL', np.nan),
-                        'UL_Delay': r.get('Delay_ms_UL', np.nan),
-                        'DL_Delay': r.get('Delay_ms_DL', np.nan)
-                    })
+            times = df_merged['Time_s'].to_numpy(dtype=float)
+            if not df_ue_rrc.empty:
+                sats = serving_sat(times)
+            elif not df_ue_veh.empty and 'NearestSatId' in df_ue_veh.columns:
+                # No RRC history: fall back to the nearest satellite recorded in
+                # the vehicle trace at the closest sample in time.
+                veh_t = df_ue_veh['Time'].to_numpy(dtype=float)
+                nearest = np.searchsorted(veh_t, times).clip(0, len(veh_t) - 1)
+                sats = df_ue_veh['NearestSatId'].to_numpy(dtype=float)[nearest]
+            else:
+                sats = np.full(len(times), np.nan)
+
+            keep = ~np.isnan(sats)
+            if keep.any():
+                global_sat_stats.append(pd.DataFrame({
+                    'Time': times[keep],
+                    'SatId': sats[keep],
+                    'UEId': ue_id,
+                    'UL_Throughput': df_merged.get('RxThroughput_kbps_UL', np.nan).to_numpy()[keep]
+                        if 'RxThroughput_kbps_UL' in df_merged else np.nan,
+                    'DL_Throughput': df_merged.get('RxThroughput_kbps_DL', np.nan).to_numpy()[keep]
+                        if 'RxThroughput_kbps_DL' in df_merged else np.nan,
+                    'UL_Delay': df_merged['Delay_ms_UL'].to_numpy()[keep]
+                        if 'Delay_ms_UL' in df_merged else np.nan,
+                    'DL_Delay': df_merged['Delay_ms_DL'].to_numpy()[keep]
+                        if 'Delay_ms_DL' in df_merged else np.nan,
+                }))
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
@@ -579,10 +653,12 @@ def plot_user_isl_experience(results_dir):
 
 
     # --- Generate per-satellite aggregate graphs ---
-    df_global = pd.DataFrame(global_sat_stats)
+    df_global = pd.concat(global_sat_stats, ignore_index=True) if global_sat_stats else pd.DataFrame()
+    df_global_sinr = (pd.concat(global_sat_sinr_stats, ignore_index=True)
+                      if global_sat_sinr_stats else pd.DataFrame())
     if not df_global.empty:
         for sat_id, df_sat_grp in df_global.groupby('SatId'):
-            fig, axes = plt.subplots(3, 1, figsize=(12, 18))
+            fig, axes = plt.subplots(4, 1, figsize=(12, 22), sharex=True)
             
             # Aggregate per Time
             df_sat_time = df_sat_grp.groupby('Time').agg({
@@ -598,15 +674,20 @@ def plot_user_isl_experience(results_dir):
             
             t = df_sat_time['Time']
             
-            # Throughput
+            # Throughput. The band is one standard deviation across the served
+            # UEs; clipped at zero, since neither throughput nor delay can be
+            # negative and an unclipped band suggests they can.
+            def band(mean_col, var_col, scale=1.0):
+                mean = df_sat_time[mean_col] / scale
+                std = df_sat_time[var_col].fillna(0) ** 0.5 / scale
+                return (mean - std).clip(lower=0), mean + std
+
             axes[0].plot(t, df_sat_time['UL_Throughput_mean'] / 1000.0, label='UL Mean (Mbps)', color='blue')
-            axes[0].fill_between(t, (df_sat_time['UL_Throughput_mean'] - df_sat_time['UL_Throughput_var'].fillna(0)**0.5)/1000.0,
-                                    (df_sat_time['UL_Throughput_mean'] + df_sat_time['UL_Throughput_var'].fillna(0)**0.5)/1000.0, color='blue', alpha=0.2)
-            
+            axes[0].fill_between(t, *band('UL_Throughput_mean', 'UL_Throughput_var', 1000.0), color='blue', alpha=0.2)
+
             axes[0].plot(t, df_sat_time['DL_Throughput_mean'] / 1000.0, label='DL Mean (Mbps)', color='orange')
-            axes[0].fill_between(t, (df_sat_time['DL_Throughput_mean'] - df_sat_time['DL_Throughput_var'].fillna(0)**0.5)/1000.0,
-                                    (df_sat_time['DL_Throughput_mean'] + df_sat_time['DL_Throughput_var'].fillna(0)**0.5)/1000.0, color='orange', alpha=0.2)
-            
+            axes[0].fill_between(t, *band('DL_Throughput_mean', 'DL_Throughput_var', 1000.0), color='orange', alpha=0.2)
+
             axes[0].set_ylabel('Throughput (Mbps)')
             axes[0].set_title(f'Satellite {int(sat_id)} Average Throughput')
             axes[0].legend()
@@ -614,13 +695,11 @@ def plot_user_isl_experience(results_dir):
             
             # Delay
             axes[1].plot(t, df_sat_time['UL_Delay_mean'], label='UL Delay (ms)', color='blue')
-            axes[1].fill_between(t, df_sat_time['UL_Delay_mean'] - df_sat_time['UL_Delay_var'].fillna(0)**0.5,
-                                    df_sat_time['UL_Delay_mean'] + df_sat_time['UL_Delay_var'].fillna(0)**0.5, color='blue', alpha=0.2)
-            
+            axes[1].fill_between(t, *band('UL_Delay_mean', 'UL_Delay_var'), color='blue', alpha=0.2)
+
             axes[1].plot(t, df_sat_time['DL_Delay_mean'], label='DL Delay (ms)', color='orange')
-            axes[1].fill_between(t, df_sat_time['DL_Delay_mean'] - df_sat_time['DL_Delay_var'].fillna(0)**0.5,
-                                    df_sat_time['DL_Delay_mean'] + df_sat_time['DL_Delay_var'].fillna(0)**0.5, color='orange', alpha=0.2)
-                                    
+            axes[1].fill_between(t, *band('DL_Delay_mean', 'DL_Delay_var'), color='orange', alpha=0.2)
+
             axes[1].set_ylabel('Delay (ms)')
             axes[1].set_title(f'Satellite {int(sat_id)} Average Delay')
             axes[1].legend()
@@ -629,10 +708,36 @@ def plot_user_isl_experience(results_dir):
             # Users Count
             axes[2].plot(t, df_sat_time['UEId_nunique'], label='Connected UEs', color='purple', drawstyle='steps-post')
             axes[2].set_ylabel('Number of UEs')
-            axes[2].set_xlabel('Time (s)')
             axes[2].set_title(f'Satellite {int(sat_id)} Connected UEs')
             axes[2].legend()
             axes[2].grid(True)
+
+            # SINR across every UE this satellite serves. These samples were
+            # already being collected but never plotted.
+            axes[3].set_ylabel('SINR (dB)')
+            axes[3].set_xlabel('Time (s)')
+            axes[3].set_title(f'Satellite {int(sat_id)} SINR across served UEs')
+            axes[3].grid(True)
+
+            sat_sinr = (df_global_sinr[df_global_sinr['SatId'] == sat_id]
+                        if not df_global_sinr.empty else pd.DataFrame())
+            if not sat_sinr.empty:
+                agg = sat_sinr.groupby('Time').agg(
+                    UL_mean=('UL_SINR', 'mean'), UL_min=('UL_SINR', 'min'), UL_max=('UL_SINR', 'max'),
+                    DL_mean=('DL_SINR', 'mean'), DL_min=('DL_SINR', 'min'), DL_max=('DL_SINR', 'max'),
+                ).reset_index()
+                st = agg['Time']
+                for mean, lo, hi, color, label in (
+                        ('UL_mean', 'UL_min', 'UL_max', 'tab:orange', 'UL SINR (mean)'),
+                        ('DL_mean', 'DL_min', 'DL_max', 'tab:green', 'DL SINR (mean)')):
+                    if agg[mean].notna().any():
+                        axes[3].plot(st, agg[mean], color=color, label=label, linewidth=1.5)
+                        axes[3].fill_between(st, agg[lo], agg[hi], color=color, alpha=0.15,
+                                             label=f'{label.split(" ")[0]} min-max')
+                axes[3].legend(loc='lower left')
+            else:
+                axes[3].text(0.5, 0.5, 'No SINR samples attributed to this satellite',
+                             ha='center', va='center', transform=axes[3].transAxes)
 
             # Custom labels
             if not df_custom_labels.empty:
@@ -641,7 +746,7 @@ def plot_user_isl_experience(results_dir):
                     clbl = cl_row['Label']
                     for ax in axes:
                         ax.axvline(x=ct, color='purple', linestyle=':', alpha=0.8)
-                    axes[0].text(ct + 0.05, axes[0].get_ylim()[1] * 0.9, clbl, color='purple', rotation=90, verticalalignment='top', fontsize=8)
+                    annotate_event(axes[0], ct, clbl, 'purple')
             
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)

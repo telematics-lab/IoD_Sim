@@ -18,6 +18,7 @@
 #include "phy-layer-configuration-helper.h"
 
 #include "model-configuration-helper.h"
+#include "scenario-configuration-helper.h"
 
 #include <ns3/assert.h>
 #include <ns3/beamforming-helper-base.h>
@@ -200,6 +201,10 @@ PhyLayerConfigurationHelper::GetConfiguration(const rapidyyjson::Value& jsonPhyL
             nrConfig->SetFullMeshX2Links(jsonPhyLayer["fullMeshX2Links"].GetBool());
         }
 
+        // Deliberately NOT defaulted from the global 'pcapLog' switch. The NR EPC
+        // captures open one file per S1-U and X2 link, and on a fullMeshX2Links
+        // topology that is hundreds of simultaneously open files: enabling them
+        // wholesale aborts the run. They stay an explicit, per-layer opt-in.
         if (jsonPhyLayer.HasMember("enablePcap"))
         {
             NS_ASSERT_MSG(jsonPhyLayer["enablePcap"].IsBool(),

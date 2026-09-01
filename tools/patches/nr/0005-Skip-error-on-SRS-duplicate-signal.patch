@@ -1,17 +1,17 @@
-From 6b3678205f81fd812de94a8f6ccf14a338cc008d Mon Sep 17 00:00:00 2001
+From e75bc08b53387be7bdbe763bbfd219dc5e9734e8 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Wed, 15 Jul 2026 09:27:59 +0200
-Subject: [PATCH] Skip error on SRS duplicate signal
+Subject: [PATCH 5/5] Skip error on SRS duplicate signal
 
 ---
  model/nr-spectrum-phy.cc | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/model/nr-spectrum-phy.cc b/model/nr-spectrum-phy.cc
-index 02aaf3b5..cdd30027 100644
+index b58ed692..7d5cfb7b 100644
 --- a/model/nr-spectrum-phy.cc
 +++ b/model/nr-spectrum-phy.cc
-@@ -1461,7 +1461,7 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
+@@ -1485,7 +1485,7 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
      // UL SRS signals 3) SRS should be received only one at a time, otherwise this function
      // should assert 4) CTRL message list contains only one message and that one is SRS CTRL
      // message
@@ -20,7 +20,7 @@ index 02aaf3b5..cdd30027 100644
                params->ctrlMsgList.size() == 1 &&
                (*params->ctrlMsgList.begin())->GetMessageType() == NrControlMessage::SRS);
  
-@@ -1480,6 +1480,9 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
+@@ -1504,6 +1504,9 @@ NrSpectrumPhy::StartRxSrs(const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& para
          NS_FATAL_ERROR(
              "gNB should not receive simultaneously non SRS and SRS uplink control signals");
          break;
@@ -30,6 +30,3 @@ index 02aaf3b5..cdd30027 100644
      case CCA_BUSY:
          NS_LOG_INFO("Start receiving UL SRS while channel in CCA_BUSY state.");
          /* no break */
--- 
-2.50.1 (Apple Git-155)
-

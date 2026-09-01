@@ -4,6 +4,7 @@ This document describes all configurable options in simulations using the leo an
 
 ## Index
 1. [Global Configuration](#global-configuration)
+  - [`logOnFile`](#logonfile), [`pcapLog`](#pcaplog) and [`logComponents`](#logcomponents)
 2. [World Configuration](#world-configuration)
 3. [NR Configuration](#nr-configuration)
   - [NR Band Configurations](#nr-band-configurations)
@@ -28,6 +29,78 @@ This document describes all configurable options in simulations using the leo an
 ```json
 {
   "resultsPath": "../results/"
+}
+```
+
+### `logOnFile`
+**Type:** `boolean` — **Default:** `true`
+
+**Description:** Enables the textual and structured output of a run: the XML report, the
+NR/LTE statistic traces (`Nr*MacStats.txt`, `Nr*RlcStats.txt`, `RxPacketTrace.txt`, ...), the
+IPv4 routing table dump, and the redirection of `NS_LOG` output into `scenario.log`. These are
+the files the scripts in `analysis/` read, and they are small, so it is on by default.
+
+Note that it also redirects `std::clog`: with `logOnFile` enabled `NS_LOG` output goes to
+`<resultPath>/scenario.log`, and with it disabled it goes to standard output. It never goes to
+standard error. Disabling it also disables `NrHelper::EnableTraces()`, so a run without it
+produces no NR statistic file at all.
+
+**Example:**
+```json
+{
+  "logOnFile": true
+}
+```
+
+### `pcapLog`
+**Type:** `boolean` — **Default:** `false`
+
+**Description:** Enables per-packet captures: the `.pcap` files and the equivalent ASCII `.tr`
+dumps of the internet backbone CSMA links, the WiFi PHY captures, and the LTE S1-U/X2 link
+captures.
+
+It deliberately does *not* cover the NR EPC captures, which stay behind the separate
+per-layer `phyLayer[].enablePcap` key: those open one file per S1-U and X2 link, and on a
+`fullMeshX2Links` topology that means hundreds of simultaneously open files, which aborts the
+run. Enable that one only on small topologies.
+
+These files are orders of magnitude larger than everything else a run produces: on the 50-UE
+`leo-nr-congestion-50users` scenario they amount to roughly 3.9 GB out of the ~4.5 GB a run
+writes, so turning them off removes about 82% of the output. The saving is in disk space and
+I/O rather than CPU — these scenarios are simulation-bound, so do not expect a large speedup —
+which is why they are opt-in and fully independent from `logOnFile`.
+
+Enable it when you need the pcap-based scripts in `analysis/` (`pcap-get_pdr.py`,
+`pcap-throughput_per_drone.py`, `pcap-get_udp.sh`, ...); leave it off otherwise.
+
+**Example:**
+```json
+{
+  "pcapLog": true
+}
+```
+
+### `logComponents`
+**Type:** `array[string]` — **Default:** `[]`
+
+**Description:** ns-3 log components to enable, at `LOG_ALL`, for the run. Their output goes
+wherever `logOnFile` sends it (`scenario.log` or standard output).
+
+Be careful with per-packet components — `NrSpectrumPhy`, `NrEesmErrorModel`,
+`ThreeGppSpectrumPropagationLossModel`, `UdpL4Protocol`, `PacketSink`, `NrPdcp` — as they log
+once per transmission and dominate everything else a run produces. On the 30 s single-UE
+`leo-nr-isl-link` scenario, a list containing those three produced a **3.5 GB** `scenario.log`;
+reducing the list to `["Scenario"]` brought it to **4 KB**, and the whole run output from
+3.5 GB to 3.2 MB.
+
+`Scenario` alone is IoD_Sim's own high-level narrative (configuration steps, entity setup) and
+costs nothing, so it is a good default to keep. Enable the per-packet components only for a
+targeted debugging run, on a short duration.
+
+**Example:**
+```json
+{
+  "logComponents": ["Scenario"]
 }
 ```
 

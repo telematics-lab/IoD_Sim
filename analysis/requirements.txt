@@ -1,5 +1,7 @@
 jstyleson
 numpy
+pandas
 matplotlib
+plotly
 ipykernel
 plyfile

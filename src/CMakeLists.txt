@@ -10,7 +10,25 @@ find_package(LibArchive REQUIRED)
 
 
 include_directories(${LIBXML2_INCLUDE_DIR})
-include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/json-interface)
+# rapidyyjson provides the RapidJSON 1.1.0 API on top of yyjson. It is header
+# only: the rapidyyjson::rapidyyjson INTERFACE target carries its include
+# directory and resolves yyjson on its own, so neither include_directories() nor
+# a manual find_library() is needed here. Bump GIT_TAG to update the library.
+include(FetchContent)
+FetchContent_Declare(
+  rapidyyjson
+  GIT_REPOSITORY https://github.com/domysh/rapidyyjson.git
+  GIT_TAG a3c436f726c34319a9a8102e51e1190963c8f551
+)
+FetchContent_MakeAvailable(rapidyyjson)
+
+# Export the rapidyyjson target so that iodsim, which is exported by build_lib(),
+# can depend on it: CMake rejects an exported target that requires one that is
+# not exported too. Its headers are installed as well, since iodsim's own public
+# headers include <rapidyyjson/...>.
+install(TARGETS rapidyyjson EXPORT ns3ExportTargets)
+install(DIRECTORY ${rapidyyjson_SOURCE_DIR}/include/rapidyyjson
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${LibArchive_INCLUDE_DIRS})
 
 option(ENABLE_CLI_COMMANDS "Enable execution of CLI commands from the simulation code" ON)
@@ -304,7 +322,6 @@ if(NS3_STATIC)
         ${XXHASH_LIBRARY}
     )
 endif()
-find_library(YYJSON_LIBRARY NAMES yyjson REQUIRED)
 
 
 build_lib(
@@ -323,7 +340,7 @@ build_lib(
                     ${LibArchive_LIBRARIES}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}
-                    ${YYJSON_LIBRARY}
+                    rapidyyjson::rapidyyjson
                     ${STATIC_DEPS}
 )
 

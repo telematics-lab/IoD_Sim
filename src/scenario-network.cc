@@ -184,7 +184,7 @@ Scenario::ConfigureInternetBackbone()
         }
     }
 
-    if (CONFIGURATOR->GetLogOnFile())
+    if (CONFIGURATOR->GetPcapLog())
     {
         std::stringstream logFilePathBuilder;
         logFilePathBuilder << CONFIGURATOR->GetResultsPath() << "internet";

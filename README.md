@@ -80,7 +80,8 @@ To build IoD_Sim as a library, launch the following commands in the root folder 
 # Install all the required dependencies (working for Fedora, Arch Linux and Debian-based distros, manual installation required for MacOS users)
 ./tools/install-dependencies.sh
 
-# Clone ns3 and apply IoD_Sim patches
+# Clone ns3 and its contrib modules, and apply IoD_Sim patches.
+# Safe to re-run: it does nothing if everything is already prepared.
 ./tools/prepare-ns3.sh
 
 # Configure IoD_Sim (debug mode, add "--mode default" for default one, release not yet supported)
@@ -143,7 +144,7 @@ Each version of IoD_Sim relies on a specific release of ns-3. A compatibility ta
 
 | IoD_Sim version| ns-3 version | 5G LENA version | Build system  | Release date       |
 | :------------: | :-----------:| :-------------: | :-----------: |--------------------|
-| v4.2.0         | ns-3.48      | 5g-lena-v5.0.y  | cmake         |        TBA         |
+| v4.2.0         | ns-3.48      | 5g-lena-v5.1.y  | cmake         |        TBA         |
 | v4.1.0         | ns-3.45      | 5g-lena-v4.1.y  | cmake         | January 9, 2026    |
 | v4.0.2         | ns-3.42      |      N/A        | cmake         | January 9, 2025    |
 | v4.0.1         | ns-3.42      |      N/A        | cmake         | June 5, 2024       |

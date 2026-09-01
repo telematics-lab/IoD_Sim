@@ -1,7 +1,7 @@
-From 38047204c8e9d186f01b0de8204300f9c8addfde Mon Sep 17 00:00:00 2001
+From e85bf986286945be634a3993a3b1608dc0240b51 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 6 Jul 2026 15:56:33 +0200
-Subject: [PATCH 1/3] Handover fixes and adaptations for IoD_Sim
+Subject: [PATCH 1/5] Handover fixes and adaptations for IoD_Sim
 
 ---
  examples/gsoc-leo-demo-example.cc      |   8 +-
@@ -15,15 +15,14 @@ Subject: [PATCH 1/3] Handover fixes and adaptations for IoD_Sim
  model/nr-epc-ue-nas.cc                 |   7 +-
  model/nr-epc-x2.cc                     |  87 +++++++++++++++++---
  model/nr-gnb-rrc.cc                    | 106 ++++++++++++++++++-------
- model/nr-mac-scheduler-ns3.cc          |  11 ++-
  model/nr-mimo-matrices-eigen.cc        |   4 +
- 13 files changed, 344 insertions(+), 102 deletions(-)
+ 12 files changed, 334 insertions(+), 101 deletions(-)
 
 diff --git a/examples/gsoc-leo-demo-example.cc b/examples/gsoc-leo-demo-example.cc
-index 7e54a5c7..65d36d8d 100644
+index 2bb5f690..16a57632 100644
 --- a/examples/gsoc-leo-demo-example.cc
 +++ b/examples/gsoc-leo-demo-example.cc
-@@ -335,12 +335,12 @@ main(int argc, char* argv[])
+@@ -336,12 +336,12 @@ main(int argc, char* argv[])
      auto firstSatellitePositionGEO =
          GeographicPositions::CartesianToGeographicCoordinates(firstSatelliteMobility->GetPosition(),
                                                                GeographicPositions::SPHERE);
@@ -453,10 +452,10 @@ index df100194..08765373 100644
       * @brief Function that forwards the SRS SINR to the correct RealisticBeamformingAlgorithm
       * @param srsSinr
 diff --git a/model/nr-epc-ue-nas.cc b/model/nr-epc-ue-nas.cc
-index 3b754368..b6533e78 100644
+index c3a6bc01..a1e1bf55 100644
 --- a/model/nr-epc-ue-nas.cc
 +++ b/model/nr-epc-ue-nas.cc
-@@ -170,10 +170,9 @@ NrEpcUeNas::ActivateQosFlow(NrQosFlow flow, Ptr<NrQosRule> rule)
+@@ -174,10 +174,9 @@ NrEpcUeNas::ActivateQosFlow(NrQosFlow flow, Ptr<NrQosRule> rule)
      switch (m_state)
      {
      case ACTIVE:
@@ -646,10 +645,10 @@ index e14201c7..58e4f101 100644
  
  //
 diff --git a/model/nr-gnb-rrc.cc b/model/nr-gnb-rrc.cc
-index 7fa9a312..41fca106 100644
+index aa4998d5..dc0653f9 100644
 --- a/model/nr-gnb-rrc.cc
 +++ b/model/nr-gnb-rrc.cc
-@@ -435,18 +435,31 @@ void
+@@ -443,18 +443,31 @@ void
  NrUeManager::SetupDataRadioBearer(NrQosFlow flow,
                                    uint8_t qfi,
                                    uint32_t gtpTeid,
@@ -684,7 +683,7 @@ index 7fa9a312..41fca106 100644
      drbInfo->m_qosFlow = flow;
      drbInfo->m_qosFlowIdentity = qfi;
      drbInfo->m_drbIdentity = drbid;
-@@ -784,6 +797,7 @@ NrUeManager::PrepareHandover(uint16_t cellId)
+@@ -792,6 +805,7 @@ NrUeManager::PrepareHandover(uint16_t cellId)
          m_pendingHandoverTargetCellId = cellId;
          return; // do NOT fall through; no X2 message yet
  
@@ -692,7 +691,7 @@ index 7fa9a312..41fca106 100644
      case HANDOVER_PATH_SWITCH: // already handed-over UE
      case HANDOVER_LEAVING:     // concurrent HO in progress
      case HANDOVER_JOINING:
-@@ -999,12 +1013,20 @@ NrUeManager::SendData(uint8_t qfi, Ptr<Packet> p)
+@@ -1023,12 +1037,20 @@ NrUeManager::SendData(uint8_t qfi, Ptr<Packet> p)
      case HANDOVER_LEAVING: {
          NS_LOG_INFO("forwarding data to target gNB over X2-U");
          uint8_t drbid = nr::Qfi2Drbid(qfi);
@@ -719,7 +718,7 @@ index 7fa9a312..41fca106 100644
      }
      break;
  
-@@ -1639,24 +1661,36 @@ NrUeManager::BuildHoCancelMsg()
+@@ -1709,24 +1731,36 @@ NrUeManager::BuildHoCancelMsg()
  }
  
  uint8_t
@@ -767,7 +766,7 @@ index 7fa9a312..41fca106 100644
              }
          }
      }
-@@ -3124,10 +3158,12 @@ NrGnbRrc::DoRecvHandoverRequest(NrEpcX2SapUser::HandoverRequestParams req)
+@@ -3309,10 +3343,12 @@ NrGnbRrc::DoRecvHandoverRequest(NrEpcX2SapUser::HandoverRequestParams req)
  
      for (auto it = req.bearers.begin(); it != req.bearers.end(); ++it)
      {
@@ -781,7 +780,7 @@ index 7fa9a312..41fca106 100644
          NrEpcX2Sap::ErabAdmittedItem i;
          i.erabId = it->erabId;
          ackParams.admittedBearers.push_back(i);
-@@ -3182,8 +3218,14 @@ NrGnbRrc::DoRecvHandoverRequestAck(NrEpcX2SapUser::HandoverRequestAckParams para
+@@ -3367,8 +3403,14 @@ NrGnbRrc::DoRecvHandoverRequestAck(NrEpcX2SapUser::HandoverRequestAckParams para
      NS_LOG_LOGIC("targetCellId = " << params.targetCellId);
  
      uint16_t rnti = params.oldGnbUeX2apId;
@@ -798,7 +797,7 @@ index 7fa9a312..41fca106 100644
  }
  
  void
-@@ -3205,7 +3247,10 @@ NrGnbRrc::DoRecvHandoverPreparationFailure(NrEpcX2SapUser::HandoverPreparationFa
+@@ -3390,7 +3432,10 @@ NrGnbRrc::DoRecvHandoverPreparationFailure(NrEpcX2SapUser::HandoverPreparationFa
      if (HasUeManager(rnti))
      {
          Ptr<NrUeManager> ueManager = GetUeManager(rnti);
@@ -810,7 +809,7 @@ index 7fa9a312..41fca106 100644
      }
  }
  
-@@ -3227,7 +3272,10 @@ NrGnbRrc::DoRecvSnStatusTransfer(NrEpcX2SapUser::SnStatusTransferParams params)
+@@ -3412,7 +3457,10 @@ NrGnbRrc::DoRecvSnStatusTransfer(NrEpcX2SapUser::SnStatusTransferParams params)
      if (HasUeManager(rnti))
      {
          Ptr<NrUeManager> ueManager = GetUeManager(rnti);
@@ -822,7 +821,7 @@ index 7fa9a312..41fca106 100644
      }
  }
  
-@@ -3246,8 +3294,12 @@ NrGnbRrc::DoRecvUeContextRelease(NrEpcX2SapUser::UeContextReleaseParams params)
+@@ -3431,8 +3479,12 @@ NrGnbRrc::DoRecvUeContextRelease(NrEpcX2SapUser::UeContextReleaseParams params)
      // check if the RNTI to be removed is not stale
      if (HasUeManager(rnti))
      {
@@ -837,28 +836,6 @@ index 7fa9a312..41fca106 100644
      }
  }
  
-diff --git a/model/nr-mac-scheduler-ns3.cc b/model/nr-mac-scheduler-ns3.cc
-index 66d16dcf..ff8d44a1 100644
---- a/model/nr-mac-scheduler-ns3.cc
-+++ b/model/nr-mac-scheduler-ns3.cc
-@@ -947,7 +947,16 @@ NrMacSchedulerNs3::DoSchedDlCqiInfoReq(
- 
-     for (const auto& cqi : params.m_cqiList)
-     {
--        NS_ASSERT(m_ueMap.find(cqi.m_rnti) != m_ueMap.end());
-+        if (m_ueMap.find(cqi.m_rnti) == m_ueMap.end())
-+        {
-+            NS_LOG_WARN("Transfer in a forced way the context for RNTI " << cqi.m_rnti);
-+            NrMacCschedSapProvider::CschedUeConfigReqParameters req;
-+            req.m_rnti = cqi.m_rnti;
-+            req.m_beamId = ns3::BeamId(0, 0);
-+            req.m_transmissionMode = 0;
-+            req.m_reconfigureFlag = false;
-+            DoCschedUeConfigReq(req);
-+        }
-         const std::shared_ptr<NrMacSchedulerUeInfo>& ue = m_ueMap.find(cqi.m_rnti)->second;
-         m_cqiManagement.DlCqiReported(cqi, ue, expirationTime, m_maxDlMcs, GetBandwidthInRbg());
-         m_csiFeedbackReceived(GetCellId(), GetBwpId(), ue);
 diff --git a/model/nr-mimo-matrices-eigen.cc b/model/nr-mimo-matrices-eigen.cc
 index 9eed6f22..27d74410 100644
 --- a/model/nr-mimo-matrices-eigen.cc
@@ -875,6 +852,3 @@ index 9eed6f22..27d74410 100644
          auto V = svd.matrixV();
          for (size_t i = 0; i < m_numRows; i++)
          {
--- 
-2.50.1 (Apple Git-155)
-

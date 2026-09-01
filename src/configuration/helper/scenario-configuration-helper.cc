@@ -168,11 +168,29 @@ ScenarioConfigurationHelper::GetResultsPath()
 const bool
 ScenarioConfigurationHelper::GetLogOnFile() const
 {
-    // this is an optional parameter. Default to false if not specified.
+    // this is an optional parameter. Default to true if not specified: the files it
+    // gates (XML report, NR/LTE statistics, routing tables, scenario.log) are small
+    // and are what the analysis scripts read.
     if (m_config.HasMember("logOnFile"))
     {
         NS_ASSERT_MSG(m_config["logOnFile"].IsBool(), "'logOnFile' property must be boolean.");
         return m_config["logOnFile"].GetBool();
+    }
+    else
+    {
+        return true;
+    }
+}
+
+const bool
+ScenarioConfigurationHelper::GetPcapLog() const
+{
+    // this is an optional parameter. Default to false if not specified: per-packet
+    // captures are several GB per run and writing them dominates the runtime.
+    if (m_config.HasMember("pcapLog"))
+    {
+        NS_ASSERT_MSG(m_config["pcapLog"].IsBool(), "'pcapLog' property must be boolean.");
+        return m_config["pcapLog"].GetBool();
     }
     else
     {

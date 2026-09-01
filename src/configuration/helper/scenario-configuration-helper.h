@@ -89,8 +89,24 @@ class ScenarioConfigurationHelper : public Singleton<ScenarioConfigurationHelper
 
     /**
      * \brief Check if the user wants to save trace results or not.
+     *
+     * Enabled by default: it gates the XML report, the NR/LTE statistic traces,
+     * the routing table dump and the redirection of NS_LOG to scenario.log, all
+     * of which are small and are what a run is normally analysed from.
+     * Per-packet captures are *not* covered by this flag, see GetPcapLog().
      */
     const bool GetLogOnFile() const;
+
+    /**
+     * \brief Check if the user wants per-packet captures (pcap and the
+     *        equivalent ASCII .tr dumps) or not.
+     *
+     * Disabled by default. These files are orders of magnitude larger than
+     * everything else a run produces (several GB on a 50-UE scenario) and
+     * writing them dominates the runtime, so they are opt-in and independent
+     * from GetLogOnFile().
+     */
+    const bool GetPcapLog() const;
 
     /**
      * \return The file path of the logging file.

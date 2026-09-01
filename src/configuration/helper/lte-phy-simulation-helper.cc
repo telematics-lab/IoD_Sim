@@ -60,11 +60,11 @@ LtePhySimulationHelper::LtePhySimulationHelper(const size_t stackId)
     : m_lte{CreateObject<LteHelper>()},
       m_epc{CreateObjectWithAttributes<PointToPointEpcHelper>(
           "S1uLinkEnablePcap",
-          BooleanValue(CONFIGURATOR->GetLogOnFile()),
+          BooleanValue(CONFIGURATOR->GetPcapLog()),
           "S1uLinkPcapPrefix",
           StringValue(LtePhySimulationHelperPriv::GetS1uLinkPcapPrefix(stackId)),
           "X2LinkEnablePcap",
-          BooleanValue(CONFIGURATOR->GetLogOnFile()),
+          BooleanValue(CONFIGURATOR->GetPcapLog()),
           "X2LinkPcapPrefix",
           StringValue(LtePhySimulationHelperPriv::GetX2LinkPcapPrefix(stackId)))}
 {

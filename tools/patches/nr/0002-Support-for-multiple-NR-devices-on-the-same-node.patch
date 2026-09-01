@@ -1,7 +1,7 @@
-From 79e9cc00e01cf4e7e0143cdd5f40a818358bcb9d Mon Sep 17 00:00:00 2001
+From b3f5357d37eb6bae0f37d1c5b4448bc7a4ecab08 Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Mon, 6 Jul 2026 15:56:33 +0200
-Subject: [PATCH 2/3] Support for multiple NR devices on the same node
+Subject: [PATCH 2/5] Support for multiple NR devices on the same node
 
 ---
  helper/nr-helper.cc      | 121 ++++++++++++++++++++++++++++++++++++---
@@ -13,7 +13,7 @@ Subject: [PATCH 2/3] Support for multiple NR devices on the same node
  6 files changed, 220 insertions(+), 8 deletions(-)
 
 diff --git a/helper/nr-helper.cc b/helper/nr-helper.cc
-index 7c8cc094..b9c4246f 100644
+index 84346766..65c18841 100644
 --- a/helper/nr-helper.cc
 +++ b/helper/nr-helper.cc
 @@ -24,6 +24,9 @@
@@ -38,7 +38,7 @@ index 7c8cc094..b9c4246f 100644
  {
      NS_LOG_FUNCTION(this);
      m_channelFactory.SetTypeId(MultiModelSpectrumChannel::GetTypeId());
-@@ -186,12 +193,15 @@ uint32_t
+@@ -195,12 +202,15 @@ uint32_t
  NrHelper::GetNumberBwp(const Ptr<const NetDevice>& gnbDevice)
  {
      NS_LOG_FUNCTION(gnbDevice);
@@ -58,7 +58,7 @@ index 7c8cc094..b9c4246f 100644
  }
  
  Ptr<NrGnbPhy>
-@@ -615,6 +625,10 @@ NrHelper::InstallSingleUeDevice(
+@@ -632,6 +642,10 @@ NrHelper::InstallSingleUeDevice(
      dev->SetAttribute("NrUeComponentCarrierManager", PointerValue(ccmUe));
      dev->SetAttribute("Imsi", UintegerValue(n->GetId()));
  
@@ -69,7 +69,7 @@ index 7c8cc094..b9c4246f 100644
      n->AddDevice(dev);
  
      if (m_nrEpcHelper != nullptr)
-@@ -946,7 +960,16 @@ NrHelper::InstallSingleGnbDevice(
+@@ -963,7 +977,16 @@ NrHelper::InstallSingleGnbDevice(
      {
          NS_LOG_INFO("adding this gNB to the EPC");
          m_nrEpcHelper->AddGnb(n, dev, cellId);
@@ -87,7 +87,7 @@ index 7c8cc094..b9c4246f 100644
          NS_ASSERT_MSG(gnbApp != nullptr, "cannot retrieve NrEpcGnbApplication");
  
          // S1 SAPs
-@@ -955,7 +978,7 @@ NrHelper::InstallSingleGnbDevice(
+@@ -972,7 +995,7 @@ NrHelper::InstallSingleGnbDevice(
  
          // X2 SAPs
          Ptr<NrEpcX2> x2 = n->GetObject<NrEpcX2>();
@@ -96,7 +96,7 @@ index 7c8cc094..b9c4246f 100644
          rrc->SetEpcX2SapProvider(x2->GetEpcX2SapProvider());
      }
      return dev;
-@@ -1007,6 +1030,31 @@ NrHelper::AddX2Interface(Ptr<Node> gnbNode1, Ptr<Node> gnbNode2)
+@@ -1024,6 +1047,31 @@ NrHelper::AddX2Interface(Ptr<Node> gnbNode1, Ptr<Node> gnbNode2)
      m_nrEpcHelper->AddX2Interface(gnbNode1, gnbNode2);
  }
  
@@ -128,7 +128,7 @@ index 7c8cc094..b9c4246f 100644
  void
  NrHelper::HandoverRequest(Time hoTime,
                            Ptr<NetDevice> ueDev,
-@@ -1191,7 +1239,7 @@ NrHelper::AttachToGnb(const Ptr<NetDevice>& ueDevice, const Ptr<NetDevice>& gnbD
+@@ -1270,7 +1318,7 @@ NrHelper::DoAttachToGnb(const Ptr<NetDevice>& ueDevice, const Ptr<NetDevice>& gn
          }
      }
  
@@ -137,7 +137,7 @@ index 7c8cc094..b9c4246f 100644
      {
          // activate default QoS flow
          m_nrEpcHelper->ActivateQosFlow(ueDevice,
-@@ -1212,6 +1260,65 @@ NrHelper::AttachToGnb(const Ptr<NetDevice>& ueDevice, const Ptr<NetDevice>& gnbD
+@@ -1291,6 +1339,65 @@ NrHelper::DoAttachToGnb(const Ptr<NetDevice>& ueDevice, const Ptr<NetDevice>& gn
      }
  }
  
@@ -204,10 +204,10 @@ index 7c8cc094..b9c4246f 100644
  NrHelper::ActivateDedicatedQosFlow(NetDeviceContainer ueDevices,
                                     NrQosFlow flow,
 diff --git a/helper/nr-helper.h b/helper/nr-helper.h
-index fea639fa..262eb1bb 100644
+index 02f7f3fe..37b30575 100644
 --- a/helper/nr-helper.h
 +++ b/helper/nr-helper.h
-@@ -321,6 +321,25 @@ class NR_EXPORT NrHelper : public Object
+@@ -328,6 +328,25 @@ class NR_EXPORT NrHelper : public Object
       */
      void AttachToGnb(const Ptr<NetDevice>& ueDevice, const Ptr<NetDevice>& gnbDevice);
  
@@ -233,7 +233,7 @@ index fea639fa..262eb1bb 100644
      /**
       * @brief Enables the following traces:
       * Transmitted/Received Control Messages
-@@ -1041,6 +1060,8 @@ class NR_EXPORT NrHelper : public Object
+@@ -1048,6 +1067,8 @@ class NR_EXPORT NrHelper : public Object
      // Handover related functions
      void AddX2Interface(NodeContainer gnbNodes);
      void AddX2Interface(Ptr<Node> gnbNode1, Ptr<Node> gnbNode2);
@@ -242,7 +242,7 @@ index fea639fa..262eb1bb 100644
  
      std::string GetHandoverAlgorithmType() const;
      void SetHandoverAlgorithmType(std::string type);
-@@ -1146,7 +1167,8 @@ class NR_EXPORT NrHelper : public Object
+@@ -1164,7 +1185,8 @@ class NR_EXPORT NrHelper : public Object
      ObjectFactory m_fhControlFactory;
      ObjectFactory m_initialAttachmentFactory; //!< initial attachment factory
  
@@ -253,10 +253,10 @@ index fea639fa..262eb1bb 100644
      Ptr<NrEpcHelper> m_nrEpcHelper{nullptr};                 //!< Ptr to the EPC helper (optional)
      Ptr<BeamformingHelperBase> m_beamformingHelper{nullptr}; //!< Ptr to the beamforming helper
 diff --git a/model/nr-spectrum-phy.cc b/model/nr-spectrum-phy.cc
-index 422c7eda..02aaf3b5 100644
+index 132cb707..b58ed692 100644
 --- a/model/nr-spectrum-phy.cc
 +++ b/model/nr-spectrum-phy.cc
-@@ -165,6 +165,12 @@ NrSpectrumPhy::GetTypeId()
+@@ -169,6 +169,12 @@ NrSpectrumPhy::GetTypeId()
                  UintegerValue(1),
                  MakeUintegerAccessor(&NrSpectrumPhy::SetNumPanels, &NrSpectrumPhy::GetNumPanels),
                  MakeUintegerChecker<uint8_t>())
@@ -269,7 +269,7 @@ index 422c7eda..02aaf3b5 100644
              .AddTraceSource("RxPacketTraceGnb",
                              "The no. of packets received and transmitted by the Base Station",
                              MakeTraceSourceAccessor(&NrSpectrumPhy::m_rxPacketTraceGnb),
-@@ -656,6 +662,21 @@ NrSpectrumPhy::StartRx(Ptr<SpectrumSignalParameters> params)
+@@ -660,6 +666,21 @@ NrSpectrumPhy::StartRx(Ptr<SpectrumSignalParameters> params)
          params->spectrumChannelMatrix = CreateSpectrumChannelMatrix(params);
      }
  
@@ -292,10 +292,10 @@ index 422c7eda..02aaf3b5 100644
      m_interferenceData->AddSignalMimo(params, duration);
  
 diff --git a/model/nr-spectrum-phy.h b/model/nr-spectrum-phy.h
-index 9cab98b4..c165e640 100644
+index 0cfa850f..ef8574f1 100644
 --- a/model/nr-spectrum-phy.h
 +++ b/model/nr-spectrum-phy.h
-@@ -795,6 +795,8 @@ class NR_EXPORT NrSpectrumPhy : public SpectrumPhy
+@@ -798,6 +798,8 @@ class NR_EXPORT NrSpectrumPhy : public SpectrumPhy
          false}; //!< Whether this spectrum phy is configure to work in an unlicensed mode.
                  //   Unlicensed mode additionally to licensed mode allows channel monitoring to
                  //   discover if is busy before transmission.
@@ -305,7 +305,7 @@ index 9cab98b4..c165e640 100644
      Ptr<SpectrumChannel> m_channel{
          nullptr}; //!< channel is needed to be able to connect listener spectrum phy (AddRx) or to
 diff --git a/model/nr-ue-phy.cc b/model/nr-ue-phy.cc
-index 108f792c..9bb688e0 100644
+index d1a8e89c..f78dc7e7 100644
 --- a/model/nr-ue-phy.cc
 +++ b/model/nr-ue-phy.cc
 @@ -41,6 +41,7 @@ NS_OBJECT_ENSURE_REGISTERED(NrUePhy);
@@ -316,7 +316,7 @@ index 108f792c..9bb688e0 100644
      m_wbCqiLast = Simulator::Now();
      m_ueCphySapProvider = new MemberNrUeCphySapProvider<NrUePhy>(this);
      m_powerControl = CreateObject<NrUePowerControl>(this);
-@@ -317,6 +318,24 @@ NrUePhy::GetTxPower() const
+@@ -325,6 +326,24 @@ NrUePhy::GetTxPower() const
      return m_txPower;
  }
  
@@ -341,7 +341,7 @@ index 108f792c..9bb688e0 100644
  double
  NrUePhy::GetRsrp() const
  {
-@@ -606,6 +625,11 @@ void
+@@ -614,6 +633,11 @@ void
  NrUePhy::PhyCtrlMessagesReceived(const Ptr<NrControlMessage>& msg)
  {
      NS_LOG_FUNCTION(this);
@@ -353,7 +353,7 @@ index 108f792c..9bb688e0 100644
  
      if (msg->GetMessageType() == NrControlMessage::DL_DCI)
      {
-@@ -1372,6 +1396,11 @@ NrUePhy::EndVarTti(const std::shared_ptr<DciInfoElementTdma>& dci)
+@@ -1380,6 +1404,11 @@ NrUePhy::EndVarTti(const std::shared_ptr<DciInfoElementTdma>& dci)
  void
  NrUePhy::PhyDataPacketReceived(const Ptr<Packet>& p)
  {
@@ -365,7 +365,7 @@ index 108f792c..9bb688e0 100644
      Simulator::ScheduleWithContext(m_netDevice->GetNode()->GetId(),
                                     GetTbDecodeLatency(),
                                     &NrUePhySapUser::ReceivePhyPdu,
-@@ -1386,6 +1415,12 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
+@@ -1394,6 +1423,12 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
                            const std::shared_ptr<DciInfoElementTdma>& dci,
                            const Time& duration)
  {
@@ -378,7 +378,7 @@ index 108f792c..9bb688e0 100644
      if (pb->GetNPackets() > 0)
      {
          NrRadioBearerTag tag;
-@@ -1401,6 +1436,15 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
+@@ -1409,6 +1444,15 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
  void
  NrUePhy::SendCtrlChannels(Time duration)
  {
@@ -395,7 +395,7 @@ index 108f792c..9bb688e0 100644
      m_ctrlMsgs.clear();
  }
 diff --git a/model/nr-ue-phy.h b/model/nr-ue-phy.h
-index 5baac201..413e34b7 100644
+index 00861723..53d4e945 100644
 --- a/model/nr-ue-phy.h
 +++ b/model/nr-ue-phy.h
 @@ -296,6 +296,20 @@ class NR_EXPORT NrUePhy : public NrPhy
@@ -428,6 +428,3 @@ index 5baac201..413e34b7 100644
      /**
       * @brief A function called by NrHelper to configure in NrUePhy what is the CSI feedback type.
       * @param csiFeedbackType CSI feedback type that is configured by NrHelper
--- 
-2.50.1 (Apple Git-155)
-

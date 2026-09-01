@@ -1,0 +1,86 @@
+From 76cb86669153846a89ab263d4f629168e6dbf0c5 Mon Sep 17 00:00:00 2001
+From: Domingo Dirutigliano <me@domy.sh>
+Date: Mon, 31 Aug 2026 21:53:02 +0200
+Subject: [PATCH] Fix TDMA round-robin starvation when active UEs exceed
+ available symbols
+
+The RR comparison functions rank UEs by the resources assigned to them within
+the current slot (NrMacSchedulerUeInfoRR::CompareUeWeights{Dl,Ul} read
+m_dlRBG/m_ulRBG), which is zero for every UE when the slot starts, so all of
+them compare equal. SortUeVector() is a std::stable_sort and therefore keeps
+the order in which the UEs came out of NrMacSchedulerNs3::m_ueMap, an
+unordered_map: arbitrary, but identical in every slot.
+
+AssignRBGTDMA() hands out one whole symbol per iteration, so when there are
+more active UEs than assignable symbols the UEs sitting at the back of that
+order are passed over in every single slot and starve indefinitely, while the
+ones at the front take everything. A UE in that state keeps sending scheduling
+requests that the gNB receives and acknowledges into m_srBytesPending, is
+computed as active by ComputeActiveUe() with a known non-empty buffer, and is
+still dropped by the m_ulRBG.empty() check because AssignULRBG() never gave it
+a resource. Adding UEs to the cell rehashes the map and redraws the set of
+winners, which is why the victims change exactly when new UEs attach and never
+recover afterwards.
+
+Rotate the starting point of the tie by one UE per call. The rotation only
+permutes UEs that compare equal, so the ranking itself is unchanged, and it is
+deterministic, so runs stay reproducible.
+
+Observed on a 50-UE NTN scenario: with 13 assignable symbols and 20 active UEs
+the same 7 UEs were passed over in 179 of 180 consecutive scheduling
+opportunities and never transmitted again. With this change all of them keep
+being served.
+---
+ model/nr-mac-scheduler-tdma.cc | 18 ++++++++++++++++++
+ model/nr-mac-scheduler-tdma.h  |  6 ++++++
+ 2 files changed, 24 insertions(+)
+
+diff --git a/model/nr-mac-scheduler-tdma.cc b/model/nr-mac-scheduler-tdma.cc
+index d14fc700..6740ddc7 100644
+--- a/model/nr-mac-scheduler-tdma.cc
++++ b/model/nr-mac-scheduler-tdma.cc
+@@ -120,6 +120,24 @@ NrMacSchedulerTdma::AssignRBGTDMA(uint32_t symAvail,
+     // Create vector of UE (without considering the beam)
+     std::vector<UePtrAndBufferReq> ueVector = GetUeVectorFromActiveUeMap(activeUe);
+ 
++    // Round-robin fairness across slots. The RR comparison functions rank UEs by the
++    // resources already assigned to them *within the current slot*, which is zero for
++    // every UE when the slot starts, so all of them compare equal. SortUeVector() is a
++    // stable sort, and therefore preserves the order in which the UEs came out of the
++    // scheduler's unordered_map: arbitrary, but identical in every slot. When there are
++    // more active UEs than assignable symbols, the UEs that happen to sit at the back of
++    // that order are passed over in every single slot and starve indefinitely, while the
++    // ones at the front take everything. Rotating the starting point by one UE per call
++    // gives each of them its turn at the head of the tie. The rotation only permutes UEs
++    // that compare equal, so it does not affect the ranking itself, and it is
++    // deterministic, so runs stay reproducible.
++    if (!ueVector.empty())
++    {
++        std::rotate(ueVector.begin(),
++                    ueVector.begin() + (m_tieRotation++ % ueVector.size()),
++                    ueVector.end());
++    }
++
+     // Distribute the symbols following the selected behaviour among UEs
+     uint32_t resources = symAvail;
+     FTResources assigned(0, 0);
+diff --git a/model/nr-mac-scheduler-tdma.h b/model/nr-mac-scheduler-tdma.h
+index 0ac0cbd6..6d47c5a3 100644
+--- a/model/nr-mac-scheduler-tdma.h
++++ b/model/nr-mac-scheduler-tdma.h
+@@ -254,6 +254,12 @@ class NR_EXPORT NrMacSchedulerTdma : public NrMacSchedulerNs3
+     virtual void SortUeVector(std::vector<UePtrAndBufferReq>* ueVector,
+                               [[maybe_unused]] const GetCompareUeFn& GetCompareFn) const;
+ 
++    /**
++     * @brief Rotating starting point used to break ties between UEs that have
++     * been assigned the same amount of resources in the current slot.
++     */
++    mutable uint32_t m_tieRotation{0};
++
+   private:
+     /**
+      * @brief Retrieve the UE vector from an ActiveUeMap
+-- 
+2.50.1 (Apple Git-155)
+

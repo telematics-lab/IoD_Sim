@@ -12,11 +12,13 @@ The `analysis` directory contains various scripts used to generate graphs and an
 - **get_rssi.py**: Extracts Received Signal Strength Indicator (RSSI) from the XML summary file.
 - **latency_lte.py**: Analyzes and plots latency data for scenarios in which LTE technology is employed.
 - **latency_wifi+lte.py**: Analyzes and plots latency data for scenarios in which both Wi-Fi and LTE technologies are adopted.
+- **leo-geo-view.py**: Interactive 3D viewer for LEO/NR runs. Draws the constellation, the UEs, the ISL routing tree, the UE-to-satellite service links and the REM in ECEF coordinates, animated over simulated time. Takes a results directory (or asks for one), writes `leo-geo-view.html` into it and opens it. Three views are available as buttons in the page: *Simulated* (nodes, links and trails move with the time slider), *Trajectories* (every path at once) and *Both*; `--view` picks the one to open on, and defaults to showing everything unless the run is large enough that the paths would slow the animation. Each node keeps one colour across its path, marker and trail, and gets its own legend entry when the layer has few enough nodes. Use `--max-points` / `--max-frames` / `--trail` to trade detail for smoothness on large runs, `--no-animation` for a static view and `--no-browser` to only write the file.
 - **lte-split_MacUlStats_per_drone.py**: Parse LTE MAC Ul Stats file and output one CSV per drone containing LTE Cell ID and TB size.
 - **lte-split_RlcUlStats_per_drone.py**: Parse LTE Rlc Ul Stats file and output one file per drone/IMSI containing the LTE Cell ID.
 - **lte-throughput_per_drone.py**: Computes LTE throughput statistics per drone.
 - **merge_trajectory_powerconsumption.py**: Merges drone trajectory data with power consumption statistics.
 - **pcap-get_pdr.py**: Given a pcap file, for each drone connected to the LTE network extrapolate tcp payload length and export everything in CSV.
+- **plot-leo-nr-ue-stats.py**: Per-UE experience plots for LEO/NR runs: delay and jitter, throughput, SINR (data and control) and the distance/elevation of the serving satellite, with RRC events, ISL path changes and scenario labels marked on the time axis. Also produces one aggregate figure per satellite (throughput, delay, connected UEs, SINR across served UEs). Takes a results directory and writes into its `graphs/` subfolder.
 - **plr_datarate.py**: Plot PDR/PLR data over distance for different simulations with different datarate.
 - **plr_\*.py**: Scripts to evaluate packet loss rate in different scenarios.
 - **preview.py**: Provides a preview of a given simulation configuration in terms of drone trajectories and ZSPs position..

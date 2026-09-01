@@ -25,6 +25,14 @@
   ],
   "staticNs3Config": [
     {
+      "name": "ns3::NrUeMac::SrTransMax",
+      "value": 1000000
+    },
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 1048576
+    },
+    {
       "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
       "value": "SPHERE"
     },
@@ -87,7 +95,9 @@
               "type": "contiguous",
               "carrier": {
                 "centralFrequency": 28000000000.0,
-                "bandwidth": 300000000.0
+                "bandwidth": 300000000.0,
+          "numComponentCarriers": 1,
+          "numBandwidthParts": 2
               }
             }
           ]
@@ -122,15 +132,29 @@
         "attributes": []
       },
       "ueAntenna": {
-        "type": "ns3::IsotropicAntennaModel",
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 28000000000.0
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 20.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 0.01
+          }
+        ],
         "arrayProperties": [
           {
             "name": "NumRows",
-            "value": 4
+            "value": 1
           },
           {
             "name": "NumColumns",
-            "value": 4
+            "value": 1
           }
         ]
       },
@@ -166,7 +190,7 @@
       "uePhyAttributes": [
         {
           "name": "TxPower",
-          "value": 40.0
+          "value": 33.0
         }
       ],
       "gnbPhyAttributes": [
@@ -213,6 +237,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -318,6 +345,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -423,6 +453,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -528,6 +561,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -633,6 +669,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -738,6 +777,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -843,6 +885,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -948,6 +993,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1053,6 +1101,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1158,6 +1209,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1263,6 +1317,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1368,6 +1425,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1473,6 +1533,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1578,6 +1641,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1683,6 +1749,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1788,6 +1857,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1893,6 +1965,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -1998,6 +2073,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2103,6 +2181,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2208,6 +2289,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2313,6 +2397,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2418,6 +2505,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2523,6 +2613,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2628,6 +2721,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2733,6 +2829,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2838,6 +2937,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -2943,6 +3045,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3048,6 +3153,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3153,6 +3261,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3258,6 +3369,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3363,6 +3477,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3468,6 +3585,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3573,6 +3693,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3678,6 +3801,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3783,6 +3909,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3888,6 +4017,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -3993,6 +4125,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4098,6 +4233,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4203,6 +4341,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4308,6 +4449,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4413,6 +4557,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4518,6 +4665,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4623,6 +4773,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4728,6 +4881,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4833,6 +4989,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -4938,6 +5097,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -5043,6 +5205,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -5148,6 +5313,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -5253,6 +5421,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -5358,6 +5529,9 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
           "qosFlows": [
             {
               "type": "NGBR_VIDEO_TCP_DEFAULT"
@@ -5465,6 +5639,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": [
             {
               "mode": "earth-centered"
@@ -5475,6 +5661,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": [
             {
               "mode": "earth-centered",
@@ -5513,6 +5711,18 @@
           "type": "nr",
           "networkLayer": 0,
           "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
           "directivity": [
             {
               "mode": "earth-centered"

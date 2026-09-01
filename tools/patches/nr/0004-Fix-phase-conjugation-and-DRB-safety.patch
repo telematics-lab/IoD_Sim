@@ -1,7 +1,7 @@
-From e4157ca906197d31aaf74c4ba63c24e135c1f345 Mon Sep 17 00:00:00 2001
+From c014864f41ea7889a844531fdfeb6e9dcacb225c Mon Sep 17 00:00:00 2001
 From: Domingo Dirutigliano <me@domy.sh>
 Date: Tue, 7 Jul 2026 19:26:10 +0200
-Subject: [PATCH] Fix phase conjugation and DRB safety
+Subject: [PATCH 4/5] Fix phase conjugation and DRB safety
 
 ---
  model/beamforming-vector.cc | 8 ++++----
@@ -49,10 +49,10 @@ index 5fc16f8e..e5198caa 100644
      return bfVector;
  }
 diff --git a/model/nr-gnb-rrc.cc b/model/nr-gnb-rrc.cc
-index 41fca106..f4350d9e 100644
+index dc0653f9..d8f5df36 100644
 --- a/model/nr-gnb-rrc.cc
 +++ b/model/nr-gnb-rrc.cc
-@@ -1704,7 +1704,11 @@ NrUeManager::GetDataRadioBearerInfo(uint8_t drbid)
+@@ -1774,7 +1774,11 @@ NrUeManager::GetDataRadioBearerInfo(uint8_t drbid)
      NS_LOG_FUNCTION(this << (uint32_t)drbid);
      NS_ASSERT(0 != drbid);
      auto it = m_drbMap.find(drbid);
@@ -65,6 +65,3 @@ index 41fca106..f4350d9e 100644
      return it->second;
  }
  
--- 
-2.50.1 (Apple Git-155)
-
