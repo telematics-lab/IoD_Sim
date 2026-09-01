@@ -1,87 +1,101 @@
 import sys
 import re
-import math
 import argparse
 import tarfile
 import gzip
 import io
 
-"""
-This script parses the NS2 mobility format (.tcl / .ns2mobility.tcl):
-
-  $node_(N) set X_ value
-  $node_(N) set Y_ value
-  $node_(N) set Z_ value
-  $ns_ at TIME "$node_(N) setdest X Y SPEED"
-
-Notes:
-  - TIME is in seconds (float); converted to milliseconds in the output.
-  - The third argument of setdest is SPEED (m/s), not altitude.
-  - Altitude is taken from the initial "set Z_" declaration and kept
-    constant for all waypoints of that node (NS2 mobility is 2D).
-  - X and Y are simulation-space coordinates in meters. If --lat/--lon are
-    provided, they are converted to geographic coordinates using a flat-Earth
-    approximation: the given lat/lon is treated as the geographic position of
-    the center of the Cartesian bounding box.
-
-The output is an "output.trace" tar file containing:
-
--- nodes.csv.gz
-   Format: id_device;relative_first_time_ms;latitude;longitude;altitude
-   One entry per node, describing the first waypoint.
-
--- traces.csv.gz
-   Format: node;relative_time_ms;latitude;longitude;altitude
-   All waypoints sorted by time.
-
-Both CSVs have no header.
-"""
+from pyproj import Transformer
 
 RE_SET = re.compile(r'^\$node_\((\d+)\) set ([XYZ])_ ([\d.eE+\-]+)')
 RE_SETDEST = re.compile(
     r'^\$ns_ at ([\d.eE+\-]+) "\$node_\((\d+)\) setdest ([\d.eE+\-]+) ([\d.eE+\-]+) ([\d.eE+\-]+)"'
 )
 
-METERS_PER_DEGREE_LAT = 111320.0
+def parse_location_tag(text):
+    """Extract the SUMO <location .../> attributes from a chunk of text.
 
-
-def cartesian_to_geo(x, y, center_x, center_y, ref_lat, ref_lon):
-    """Convert Cartesian (meters) to geographic coordinates.
-
-    The center of the Cartesian bounding box maps to (ref_lat, ref_lon).
-    X grows east, Y grows north.
+    Returns netOffset (x, y), convBoundary, origBoundary
+    (each a tuple of floats) and projParameter (str). Missing attributes are
+    returned as None.
     """
-    delta_x = x - center_x
-    delta_y = y - center_y
-    lat = ref_lat + delta_y / METERS_PER_DEGREE_LAT
-    lon = ref_lon + delta_x / (METERS_PER_DEGREE_LAT * math.cos(math.radians(ref_lat)))
-    return lat, lon
+    m = re.search(r'<location\b[^>]*>', text)
+    if not m:
+        raise ValueError("No <location ...> tag found.")
+    tag = m.group(0)
 
+    def attr(name):
+        a = re.search(name + r'\s*=\s*"([^"]*)"', tag)
+        return a.group(1) if a else None
+
+    def floats(s):
+        return tuple(float(v) for v in s.split(",")) if s else None
+
+    return {
+        "netOffset": floats(attr("netOffset")),
+        "convBoundary": floats(attr("convBoundary")),
+        "origBoundary": floats(attr("origBoundary")),
+        "projParameter": attr("projParameter"),
+    }
+
+def load_location(arg):
+    """Interpret --location: a raw tag string, or a path to a file with one."""
+    text = arg
+    # If it doesn't look like a tag, treat it as a file path.
+    if "<location" not in arg:
+        with open(arg, "r") as f:
+            text = f.read()
+    return parse_location_tag(text)
+
+def make_unprojector(proj_param):
+    """Return a function (proj_x, proj_y) -> (lat, lon) for the given projParameter."""
+    transformer = Transformer.from_crs(proj_param, "EPSG:4326", always_xy=True)
+
+    def unproject(px, py):
+        lon, lat = transformer.transform(px, py)
+        return lat, lon
+
+    return unproject
 
 def main():
     parser = argparse.ArgumentParser(
         description="Convert NS2 mobility .tcl file to IoD_Sim .trace format."
     )
     parser.add_argument("input_file", help="Input .tcl file")
+
     parser.add_argument(
-        "--lat",
-        type=float,
+        "--net-file",
         default=None,
-        help="Latitude of the center of the Cartesian coordinate space",
+        help="SUMO .net.xml file; its <location> tag is used for geo-referencing.",
     )
     parser.add_argument(
-        "--lon",
-        type=float,
+        "--location",
         default=None,
-        help="Longitude of the center of the Cartesian coordinate space",
+        help='SUMO <location .../> tag, given directly as a string or as a path to a '
+             'file containing it. Alternative to --net-file.',
     )
     args = parser.parse_args()
 
-    if (args.lat is None) != (args.lon is None):
-        print("Error: --lat and --lon must be provided together.")
+    if bool(args.net_file) == bool(args.location):
+        print("Error: provide exactly one of --net-file / --location.")
         sys.exit(1)
 
-    convert = args.lat is not None
+    try:
+        if args.net_file:
+            with open(args.net_file, "r") as f:
+                location = parse_location_tag(f.read())
+        else:
+            location = load_location(args.location)
+    except (OSError, ValueError) as e:
+        print(f"Error reading location: {e}")
+        sys.exit(1)
+
+    if location["netOffset"] is None or location["projParameter"] is None:
+        print("Error: <location> tag is missing netOffset or projParameter.")
+        sys.exit(1)
+
+    unproject = make_unprojector(location["projParameter"])
+    off_x, off_y = location["netOffset"]
 
     node_init = {}  # node_id -> {'X': float, 'Y': float, 'Z': float}
     waypoints = []  # list of dicts: node, time_ms, x, y
@@ -122,17 +136,10 @@ def main():
 
     waypoints.sort(key=lambda w: w["time_ms"])
 
-    if convert:
-        all_x = [w["x"] for w in waypoints]
-        all_y = [w["y"] for w in waypoints]
-        center_x = (min(all_x) + max(all_x)) / 2
-        center_y = (min(all_y) + max(all_y)) / 2
-
     def get_coords(w):
-        if convert:
-            lat, lon = cartesian_to_geo(w["x"], w["y"], center_x, center_y, args.lat, args.lon)
-            return lat, lon
-        return w["x"], w["y"]
+        proj_x = w["x"] - off_x
+        proj_y = w["y"] - off_y
+        return unproject(proj_x, proj_y)
 
     # nodes.csv: one entry per node at its first appearance
     node_first = {}
@@ -172,9 +179,8 @@ def main():
 
     print(f"Successfully created '{output_filename}'")
     print(f"  Nodes: {len(node_first)}, Waypoints: {len(waypoints)}")
-    if convert:
-        print(f"  Cartesian center: ({center_x:.2f}, {center_y:.2f}) m")
-        print(f"  Mapped to: ({args.lat}, {args.lon})")
+    print(f"  netOffset: ({off_x}, {off_y})")
+    print(f"  projParameter: {location['projParameter']}")
 
 
 if __name__ == "__main__":

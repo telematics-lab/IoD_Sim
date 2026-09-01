@@ -16,7 +16,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ "$ENABLE_CLI" = true ]; then
-    ENABLE_CLI="-DENABLE_CLI_COMMANDS"
+    ENABLE_CLI="-DENABLE_CLI_COMMANDS=ON"
 else
     ENABLE_CLI=""
 fi
