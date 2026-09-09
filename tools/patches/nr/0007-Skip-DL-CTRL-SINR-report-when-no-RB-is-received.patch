@@ -1,0 +1,40 @@
+From 5fbf47369911bccce7d1c8facb0dd11966630f05 Mon Sep 17 00:00:00 2001
+From: dpugliese6 <daniele.pugliese@poliba.it>
+Date: Fri, 4 Sep 2026 13:48:26 +0000
+Subject: [PATCH] Skip DL CTRL SINR report when no RB is received
+
+In NTN scenarios the serving satellite may not transmit CTRL towards a UE in a
+given slot, so every RB reports a zero SINR and rbUsed ends up at zero.
+NS_ASSERT(rbUsed) then aborted the whole simulation.
+
+Treat it as a missing measurement instead: skip the report rather than dividing
+by zero.
+
+---
+ model/nr-ue-phy.cc | 12 +++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/model/nr-ue-phy.cc b/model/nr-ue-phy.cc
+index 9bb688e0..e924a55c 100644
+--- a/model/nr-ue-phy.cc
++++ b/model/nr-ue-phy.cc
+@@ -1845,7 +1845,16 @@ NrUePhy::ReportDlCtrlSinr(const SpectrumValue& sinr)
+         }
+     }
+
+-    NS_ASSERT(rbUsed);
++    // In NTN scenarios the serving satellite may not transmit CTRL towards this UE in a given
++    // slot, so every RB reports a zero SINR. That is a missing measurement rather than a
++    // measurement of zero quality: averaging it would divide by zero, and feeding it to RLF
++    // detection would inject spurious out-of-sync indications.
++    if (rbUsed == 0)
++    {
++        NS_LOG_WARN("No CTRL RB with non-zero SINR received. Ignoring measurement.");
++        return;
++    }
++
+     m_ctrlSinrForRlf = sinr;
+     m_dlCtrlSinrTrace(GetCellId(), m_rnti, sinrSum / rbUsed, GetBwpId());
+
+--
+2.48.1
