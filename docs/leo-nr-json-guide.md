@@ -977,6 +977,8 @@ It requires the following attributes:
 | `Threshold` | double | 2.0 | Hysteresis threshold (in dB) for switching gNBs. The target gNB SINR must be greater than the serving gNB SINR by this threshold. |
 | `DistanceSinrTable` | string | "" | A formatted table mapping the maximum distance to the minimum SINR required. Format: `maxDist1:minSinr1|maxDist2:minSinr2`. |
 | `TimeToTrigger` | Time | 256ms | Time during which neighbour cell's SINR must be continuously higher than serving cell's to trigger a handover. |
+| `HandoverDelay` | Time | 0s | Artificial delay added before triggering the handover. |
+
 
 **Example:**
 ```json

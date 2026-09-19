@@ -10,23 +10,30 @@ find_package(LibArchive REQUIRED)
 
 
 include_directories(${LIBXML2_INCLUDE_DIR})
-# rapidyyjson provides the RapidJSON 1.1.0 API on top of yyjson. It is header
-# only: the rapidyyjson::rapidyyjson INTERFACE target carries its include
-# directory and resolves yyjson on its own, so neither include_directories() nor
-# a manual find_library() is needed here. Bump GIT_TAG to update the library.
+# rapidyyjson provides the RapidJSON 1.1.0 API on top of yyjson. Only its
+# headers are used, so the checkout is populated without configuring its CMake
+# project: SOURCE_SUBDIR names a directory that holds no CMakeLists.txt, which
+# makes FetchContent skip the add_subdirectory() step. Bump GIT_TAG to update
+# the library.
+#
+# Its rapidyyjson::rapidyyjson INTERFACE target is deliberately left out of the
+# build: ns-3 recompiles every module as an OBJECT library for the static and
+# monolib builds and copies only the directory-level INCLUDE_DIRECTORIES onto
+# it, so an include path carried by a target usage requirement never reaches
+# that compilation. The include directory is therefore declared here, like
+# libxml2's above, and yyjson is linked as a plain library path (see below).
 include(FetchContent)
 FetchContent_Declare(
   rapidyyjson
   GIT_REPOSITORY https://github.com/domysh/rapidyyjson.git
   GIT_TAG a3c436f726c34319a9a8102e51e1190963c8f551
+  SOURCE_SUBDIR headers-only-no-cmake-project
 )
 FetchContent_MakeAvailable(rapidyyjson)
 
-# Export the rapidyyjson target so that iodsim, which is exported by build_lib(),
-# can depend on it: CMake rejects an exported target that requires one that is
-# not exported too. Its headers are installed as well, since iodsim's own public
-# headers include <rapidyyjson/...>.
-install(TARGETS rapidyyjson EXPORT ns3ExportTargets)
+include_directories(${rapidyyjson_SOURCE_DIR}/include)
+
+# iodsim's own public headers include <rapidyyjson/...>, so install them too.
 install(DIRECTORY ${rapidyyjson_SOURCE_DIR}/include/rapidyyjson
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${LibArchive_INCLUDE_DIRS})
@@ -323,6 +330,16 @@ if(NS3_STATIC)
     )
 endif()
 
+# yyjson is the library rapidyyjson is built on. It is looked up here, after the
+# block above has put .a first in CMAKE_FIND_LIBRARY_SUFFIXES, so that a static
+# build links libyyjson.a rather than the shared library. A plain path is also
+# what ns-3 expects in this list: when NS3_STATIC is on it rewrites every
+# non-ns-3 dependency from its shared to its static flavor, a step that only
+# copes with library paths.
+find_path(YYJSON_INCLUDE_DIR NAMES yyjson.h REQUIRED)
+find_library(YYJSON_LIBRARY NAMES yyjson REQUIRED)
+include_directories(${YYJSON_INCLUDE_DIR})
+
 
 build_lib(
   LIBNAME iodsim
@@ -340,7 +357,7 @@ build_lib(
                     ${LibArchive_LIBRARIES}
                     ${ZLIB_LIBRARIES}
                     ${LIBXML2_LIBRARIES}
-                    rapidyyjson::rapidyyjson
+                    ${YYJSON_LIBRARY}
                     ${STATIC_DEPS}
 )
 
