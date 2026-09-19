@@ -59,6 +59,14 @@
     {
       "name": "ns3::TcpSocket::SegmentSize",
       "value": "1380"
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
     }
   ],
   "world": {
@@ -96,8 +104,8 @@
               "carrier": {
                 "centralFrequency": 28000000000.0,
                 "bandwidth": 300000000.0,
-          "numComponentCarriers": 1,
-          "numBandwidthParts": 2
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 2
               }
             }
           ]

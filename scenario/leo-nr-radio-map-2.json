@@ -47,7 +47,7 @@
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-      "value": false
+      "value": true
     },
     {
       "name": "ns3::GeoLeoOrbitMobility::Precision",
@@ -56,6 +56,14 @@
     {
       "name": "ns3::GeoConstantVelocityMobility::Precision",
       "value": "50ms"
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
     }
   ],
   "world": {

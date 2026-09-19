@@ -32,6 +32,14 @@
     { // This option removes interference caused by devices on the same node.
       "name": "ns3::NrSpectrumPhy::SameNodeInterference",
       "value": false
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
     }
   ],
   "world": {

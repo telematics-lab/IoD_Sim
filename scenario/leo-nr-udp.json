@@ -23,7 +23,15 @@
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-      "value": false // Deactivated HARQ for satellite communication
+      "value": true
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
     }
   ],
   "world": {

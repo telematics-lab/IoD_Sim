@@ -42,13 +42,21 @@
     },
     {
       "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-      "value": false // Disabilitazione standard per comunicazioni satellitari dove il delay e' troppo elevato per l'HARQ
+      "value": true
     },
     {
       // Parametro essenziale in scenari multibeam al fine di evitare interferenza tra le varie
       // gNB presenti sullo stesso nodo che ricreano l'ambiente multibeam
       "name": "ns3::NrSpectrumPhy::SameNodeInterference",
       "value": false
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
     }
   ],
   // 2. DIMENSIONI DEL MONDO

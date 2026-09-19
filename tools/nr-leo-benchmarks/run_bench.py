@@ -45,11 +45,19 @@ def generate_scenario(num_sats, num_vehs, precision, enable_nr, duration, index)
             },
             {
                 "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
-                "value": False
+                "value": True
             },
             {
                 "name": "ns3::NrSpectrumPhy::SameNodeInterference",
                 "value": False
+            },
+            {
+            "name": "ns3::NrGnbMac::NumHarqProcess",
+            "value": 32
+            },
+            {
+            "name": "ns3::NrUeMac::NumHarqProcess",
+            "value": 32
             }
         ],
         "world": {
