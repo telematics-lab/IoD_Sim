@@ -1,0 +1,6 @@
+um_satellites: [1, 5, 25]
+num_vehicles: [10, 20, 30]
+mobility_precisions: ["100ms", "200ms", "500ms"]
+enable_nr: [true, false]
+durations: [120]
+repetitions: 3

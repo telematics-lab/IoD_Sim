@@ -231,16 +231,35 @@ def run_simulation(binary_path, scenario_file):
     return execution_time, status
 
 def worker(task):
-    i, num_sats, num_vehs, precision, enable_nr, duration, binary_path, total = task
-    print(f"Starting benchmark {i}/{total}: sats={num_sats}, vehs={num_vehs}, precision={precision}, nr={enable_nr}, duration={duration}")
-    scenario_file = generate_scenario(num_sats, num_vehs, precision, enable_nr, duration, i)
-    exec_time, status = run_simulation(binary_path, scenario_file)
-    print(f"Finished benchmark {i}/{total} in {exec_time:.2f}s with status {status}")
+    i, num_sats, num_vehs, precision, enable_nr, duration, repetitions, binary_path, total = task
+    print(f"Starting benchmark {i}/{total}: sats={num_sats}, vehs={num_vehs}, precision={precision}, nr={enable_nr}, duration={duration}, repetitions={repetitions}")
 
-    with csv_lock:
-        with open(RESULTS_FILE, "a", newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([num_sats, num_vehs, precision, enable_nr, duration, f"{exec_time:.4f}", status])
+    # executor.map() silently swallows exceptions raised here unless its result is consumed,
+    # so every failure must be caught and recorded instead of being allowed to propagate.
+    try:
+        scenario_file = generate_scenario(num_sats, num_vehs, precision, enable_nr, duration, i)
+    except Exception as exc:
+        print(f"Benchmark {i}/{total} failed to generate its scenario: {exc}")
+        with csv_lock:
+            with open(RESULTS_FILE, "a", newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                for run in range(1, repetitions + 1):
+                    writer.writerow([num_sats, num_vehs, precision, enable_nr, duration, run, "0.0000", f"ERROR: {exc}"])
+        return
+
+    for run in range(1, repetitions + 1):
+        try:
+            exec_time, status = run_simulation(binary_path, scenario_file)
+        except Exception as exc:
+            print(f"Benchmark {i}/{total} run {run}/{repetitions} raised an exception: {exc}")
+            exec_time, status = 0.0, f"ERROR: {exc}"
+        else:
+            print(f"Finished benchmark {i}/{total} run {run}/{repetitions} in {exec_time:.2f}s with status {status}")
+
+        with csv_lock:
+            with open(RESULTS_FILE, "a", newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([num_sats, num_vehs, precision, enable_nr, duration, run, f"{exec_time:.4f}", status])
 
 def main():
     parser = argparse.ArgumentParser(description="Run benchmarks")
@@ -278,6 +297,7 @@ def main():
     precisions = config.get("mobility_precisions", ["1s"])
     enable_nr_list = config.get("enable_nr", [False])
     durations = config.get("durations", [1])
+    repetitions = config.get("repetitions", 1)
 
     combinations = list(itertools.product(num_sats_list, num_vehs_list, precisions, enable_nr_list, durations))
     total = len(combinations)
@@ -286,13 +306,15 @@ def main():
     with open(RESULTS_FILE, "a", newline='') as csvfile:
         writer = csv.writer(csvfile)
         if write_header:
-            writer.writerow(["num_satellites", "num_vehicles", "mobility_precision", "enable_nr", "duration", "execution_time_s", "status"])
+            writer.writerow(["num_satellites", "num_vehicles", "mobility_precision", "enable_nr", "duration", "run", "execution_time_s", "status"])
 
-    tasks = [(i+1, num_sats, num_vehs, precision, enable_nr, duration, binary_path, total) for i, (num_sats, num_vehs, precision, enable_nr, duration) in enumerate(combinations)]
+    tasks = [(i+1, num_sats, num_vehs, precision, enable_nr, duration, repetitions, binary_path, total) for i, (num_sats, num_vehs, precision, enable_nr, duration) in enumerate(combinations)]
 
-    print(f"Starting {total} benchmarks using {args.jobs} concurrent process(es)...")
+    print(f"Starting {total} benchmarks ({repetitions} repetition(s) each) using {args.jobs} concurrent process(es)...")
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as executor:
-        executor.map(worker, tasks)
+        # Consume the iterator so that any exception unexpectedly escaping worker()
+        # surfaces here instead of being silently discarded.
+        list(executor.map(worker, tasks))
 
 if __name__ == "__main__":
     main()
