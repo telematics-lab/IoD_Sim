@@ -174,7 +174,8 @@ def read_csv(path, **kwargs):
     except (pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
         print(f'  warning: could not read {os.path.basename(path)}: {exc}')
         return pd.DataFrame()
-    df.columns = df.columns.str.strip()
+    if df.columns.inferred_type == 'string':
+        df.columns = df.columns.str.strip()
     return df
 
 
@@ -392,7 +393,7 @@ def add_trajectories(fig, df, kind, colours, visible=True):
     return indices
 
 
-def add_rem(fig, rem, max_points):
+def add_rem(fig, rem, max_points, metric='SINR'):
     if rem.empty:
         return
     rem, step = decimate(rem, max_points, group_col=None)
@@ -401,16 +402,17 @@ def add_rem(fig, rem, max_points):
 
     custom = np.column_stack([rem['SINR'], rem['SNR'], rem['RxPwr'],
                               rem['Latitude'], rem['Longitude']])
-    finite = rem['SINR'].replace([np.inf, -np.inf], np.nan).dropna()
+    finite = rem[metric].replace([np.inf, -np.inf], np.nan).dropna()
     cmin, cmax = (float(finite.quantile(0.02)), float(finite.quantile(0.98))) \
         if not finite.empty else (-50.0, 50.0)
 
+    unit = 'dBm' if metric == 'RxPwr' else 'dB'
     fig.add_trace(go.Scatter3d(
         x=rem['X'], y=rem['Y'], z=rem['Z'],
         mode='markers',
-        marker=dict(size=2.5, color=rem['SINR'], colorscale='Inferno',
+        marker=dict(size=2.5, color=rem[metric], colorscale='Inferno',
                     cmin=cmin, cmax=cmax, symbol='diamond',
-                    colorbar=dict(title='REM SINR (dB)', x=0.0, len=0.6)),
+                    colorbar=dict(title=f'REM {metric} ({unit})', x=0.0, len=0.6)),
         customdata=custom,
         hovertemplate=('<b>REM</b><br>SINR %{customdata[0]:.2f} dB<br>'
                        'SNR %{customdata[1]:.2f} dB<br>'
@@ -930,7 +932,7 @@ def build_figure(run, args):
                                             visible=show_paths)
 
     add_ground_stations(fig, run['isl'])
-    add_rem(fig, run['rem'], args.max_points)
+    add_rem(fig, run['rem'], args.max_points, args.rem_metric)
     add_earth(fig)
 
     if frames:
@@ -976,6 +978,12 @@ def main(argv=None):
                         help='run directory; omit to pick one interactively')
     parser.add_argument('--output', help='HTML file to write '
                                          '(default: <results_dir>/leo-geo-view.html)')
+    parser.add_argument('--rem-metric', default='SINR',
+                        choices=('SNR', 'SINR', 'RxPwr', 'SIR'),
+                        help='REM column used to colour the points. SNR shows a '
+                             'beam layout most clearly, since SINR folds in the '
+                             'interference between overlapping beams '
+                             '(default: %(default)s)')
     parser.add_argument('--max-points', type=int, default=20000,
                         help='point budget per static layer, 0 to disable '
                              'decimation (default: %(default)s)')
