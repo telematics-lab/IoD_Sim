@@ -5,6 +5,8 @@ The `analysis` directory contains various scripts used to generate graphs and an
 ## Python Scripts
 
 - **drone_peripheral_consumption_to_state.py**: Analyzes drone peripheral power consumption and maps it to different operational states.
+- **v2leosim_preprocessor.py**: Processes a LEO/NR results folder into tab-separated text logs. FlowMonitor samples are keyed by flow, PHY traces by `(cellId, rnti)` and mobility traces by node id. The result is one time series per vehicle plus an aggregate.
+- **v2leosim_viewer.py**: Renders those logs.
 - **geo2kml-line.py**: Converts geographical coordinates into KML format as a line.
 - **geo2kml.py**: Transforms geographical data into KML format.
 - **geosnr-single.py**: Visualizes Signal-to-Noise Ratio (SNR) for a single simulation with a GEO satellite.

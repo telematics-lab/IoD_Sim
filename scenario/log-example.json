@@ -1,0 +1,1256 @@
+{
+  // A five-vehicle ground fleet is served by a three-satellite LEO train at
+  // 400 km. The lead satellite carries two beams, so the constellation exposes
+  // four NR cells in total; vehicles move through those footprints and are
+  // handed over by ns3::NrSinrDistanceHandoverAlgorithm. Every vehicle runs a
+  // bidirectional UDP session against the remote host, and satellite-to-ground
+  // traffic is delayed by the inter-satellite-link model through a single
+  // ground station at 30°N 102°E.
+  "name": "log-example",
+  "resultsPath": "../results/",
+  "logOnFile": true,
+  "duration": 60.0,
+  "appStatisticsReportInterval": 0.25,
+  "staticNs3Config": [
+    {
+      "name": "ns3::NrUeMac::SrTransMax",
+      "value": 1000000
+    },
+    {
+      "name": "ns3::NrRlcUm::MaxTxBufferSize",
+      "value": 1048576
+    },
+    {
+      "name": "ns3::GeocentricMobilityModel::EarthSpheroidType",
+      "value": "SPHERE"
+    },
+    {
+      "name": "ns3::NrMacSchedulerNs3::EnableHarqReTx",
+      "value": true
+    },
+    {
+      "name": "ns3::GeoLeoOrbitMobility::Precision",
+      "value": "200ms"
+    },
+    {
+      "name": "ns3::GeoConstantVelocityMobility::Precision",
+      "value": "200ms"
+    },
+    {
+      "name": "ns3::ThreeGppChannelModel::UpdatePeriod",
+      "value": "200ms"
+    },
+    {
+      "name": "ns3::NrSpectrumPhy::SameNodeInterference",
+      "value": false
+    },
+    {
+      "name": "ns3::NrGnbMac::NumHarqProcess",
+      "value": 32
+    },
+    {
+      "name": "ns3::NrUeMac::NumHarqProcess",
+      "value": 32
+    }
+  ],
+  "world": {
+    "size": {
+      "X": "40000000",
+      "Y": "40000000",
+      "Z": "40000000"
+    },
+    "buildings": []
+  },
+  "phyLayer": [
+    {
+      "type": "nr",
+      "attachMethod": "sinr-distance-dynamic",
+      "channels": [
+        {
+          "scenario": "NTN-Rural",
+          "conditionModel": "Default",
+          "propagationModel": "ThreeGpp",
+          "pathlossAttributes": [
+            {
+              "name": "ShadowingEnabled",
+              "value": false
+            }
+          ],
+          "channelConditionAttributes": [
+            {
+              "name": "UpdatePeriod",
+              "value": "200ms"
+            }
+          ],
+          "bands": [
+            {
+              "type": "contiguous",
+              "carrier": {
+                "centralFrequency": 2e9,
+                "bandwidth": 20e6,
+                "numComponentCarriers": 1,
+                "numBandwidthParts": 2 // bwp 0 = DL, bwp 1 = UL
+              }
+            }
+          ]
+        }
+      ],
+      "handover": {
+        "algorithm": "ns3::NrSinrDistanceHandoverAlgorithm",
+        "attributes": [
+          {
+            "name": "DistanceSinrTable",
+            "value": "1000000:-5.0"
+          },
+          {
+            "name": "Threshold",
+            "value": 3.0
+          }
+        ]
+      },
+      "epc": {
+        "helper": "ns3::NrPointToPointEpcHelper",
+        "attributes": [
+          {
+            "name": "S1uLinkDelay",
+            "value": "0ms"
+          }
+        ]
+      },
+      "beamforming": {
+        "helper": "ns3::IdealBeamformingHelper",
+        "method": "ns3::DirectPathBeamforming",
+        "algorithmAttributes": [],
+        "attributes": []
+      },
+      "ueAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 2e9
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 20.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 1.0
+          }
+        ],
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 1
+          },
+          {
+            "name": "NumColumns",
+            "value": 1
+          }
+        ]
+      },
+      "gnbAntenna": {
+        "type": "ns3::CircularApertureAntennaModel",
+        "properties": [
+          {
+            "name": "OperatingFrequency",
+            "value": 2e9
+          },
+          {
+            "name": "AntennaMaxGainDb",
+            "value": 50.0
+          },
+          {
+            "name": "AntennaCircularApertureRadius",
+            "value": 2.0
+          }
+        ],
+        "arrayProperties": [
+          {
+            "name": "NumRows",
+            "value": 1
+          },
+          {
+            "name": "NumColumns",
+            "value": 1
+          }
+        ]
+      },
+      "uePhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 33.0
+        }
+      ],
+      "gnbPhyAttributes": [
+        {
+          "name": "TxPower",
+          "value": 60.0
+        }
+      ],
+      "advancedOptions": {
+        "islDelayMode": {
+          "precision": "100ms",
+          "additionalDelay": "0ms",
+          "maxISLSatDistance": 4000e3,
+          "maxGroundStationDistance": 2500e3,
+          "groundStations": [
+            [
+              30.0,
+              102.0
+            ]
+          ],
+          "updateLog": true
+        }
+      },
+      "fullMeshX2Links": true // required so any cell can hand over to any other
+    }
+  ],
+  "macLayer": [
+    {
+      "type": "nr"
+    }
+  ],
+  "networkLayer": [
+    {
+      "type": "ipv4",
+      "address": "7.0.0.0",
+      "mask": "255.255.255.0",
+      "gateway": "7.0.0.1"
+    }
+  ],
+  "vehicles": [
+    { // Vehicles 1, heading east
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
+          "qosFlows": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 30.0
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 101.0
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 15.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 90.0
+          }
+        ]
+      },
+      "applications": [
+        { // downlink sink: receives the remote's stream
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
+            }
+          ]
+        },
+        { // uplink source: telemetry to the remote host, port 1240
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "512kbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1240
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { // Vehicles 1, heading NE
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
+          "qosFlows": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 30.4
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 101.6
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 30.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 45.0
+          }
+        ]
+      },
+      "applications": [
+        { // downlink sink: receives the remote's stream
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
+            }
+          ]
+        },
+        { // uplink source: telemetry to the remote host, port 1241
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "512kbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1241
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { // Vehicles 3, heading south
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
+          "qosFlows": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 29.6
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 102.4
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 12.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 180.0
+          }
+        ]
+      },
+      "applications": [
+        { // downlink sink: receives the remote's stream
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
+            }
+          ]
+        },
+        { // uplink source: telemetry to the remote host, port 1242
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "512kbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1242
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { // Vehicles 4, static
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
+          "qosFlows": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 30.2
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 102.9
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 0.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 0.0
+          }
+        ]
+      },
+      "applications": [
+        { // downlink sink: receives the remote's stream
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
+            }
+          ]
+        },
+        { // uplink source: telemetry to the remote host, port 1243
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "512kbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1243
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { // Vehicles 5, heading W
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "UE",
+          "directivity": {
+            "mode": "serving-gnb"
+          },
+          "qosFlows": [
+            {
+              "type": "NGBR_LOW_LAT_EMBB"
+            }
+          ]
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoConstantVelocityMobility",
+        "attributes": [
+          {
+            "name": "InitialLatitude",
+            "value": 29.8
+          },
+          {
+            "name": "InitialLongitude",
+            "value": 103.4
+          },
+          {
+            "name": "Altitude",
+            "value": 0.0
+          },
+          {
+            "name": "Speed",
+            "value": 55.0
+          },
+          {
+            "name": "Azimuth",
+            "value": 270.0
+          }
+        ]
+      },
+      "applications": [
+        { // downlink sink: receives the remote's stream
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1234
+              ]
+            }
+          ]
+        },
+        { // uplink source: telemetry to the remote host, port 1244
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "512kbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "remotes",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1244
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  // 3 LEO satellites acting as gNBs, 4 cells in total
+  "leo-sats": [
+    { // First satellite, two beams
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        },
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
+          "directivity": { // beam steered 40 deg away from nadir
+            "mode": "earth-centered",
+            "downtiltOffset": 0,
+            "bearingOffset": 40
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": 102.0
+          },
+          {
+            "name": "Offset",
+            "value": 3.0
+          }
+        ]
+      },
+      "applications": []
+    },
+    { // Seccond satellite, single beam
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": 102.0
+          },
+          {
+            "name": "Offset",
+            "value": 0.0
+          }
+        ]
+      },
+      "applications": []
+    },
+    { // Third satellite, single beam
+      "netDevices": [
+        {
+          "type": "nr",
+          "networkLayer": 0,
+          "role": "gNB",
+          "phy": [
+            {
+              "bwpId": 0,
+              "name": "Pattern",
+              "value": "DL|DL|DL|DL|DL|DL|DL|DL|DL|DL|"
+            },
+            {
+              "bwpId": 1,
+              "name": "Pattern",
+              "value": "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|"
+            }
+          ],
+          "directivity": {
+            "mode": "earth-centered"
+          }
+        }
+      ],
+      "mobilityModel": {
+        "name": "ns3::GeoLeoOrbitMobility",
+        "attributes": [
+          {
+            "name": "Altitude",
+            "value": 400.0
+          },
+          {
+            "name": "Inclination",
+            "value": 30.0
+          },
+          {
+            "name": "Longitude",
+            "value": 102.0
+          },
+          {
+            "name": "Offset",
+            "value": 357.0
+          }
+        ]
+      },
+      "applications": []
+    }
+  ],
+  "remotes": [
+    {
+      "networkLayer": 0,
+      "applications": [
+        { // downlink stream to vehicles 1
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 0,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            }
+          ]
+        },
+        { // downlink stream to vehicles 2
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 1,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            }
+          ]
+        },
+        { // downlink stream to vehicles 3
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 2,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            }
+          ]
+        },
+        { // downlink stream to vehicles 4
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 3,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            }
+          ]
+        },
+        { // downlink stream to vehicles 5
+          "name": "ns3::OnOffApplication",
+          "attributes": [
+            {
+              "name": "DataRate",
+              "value": "2Mbps"
+            },
+            {
+              "name": "OnTime",
+              "value": "ns3::ConstantRandomVariable[Constant=1]"
+            },
+            {
+              "name": "OffTime",
+              "value": "ns3::ConstantRandomVariable[Constant=0]"
+            },
+            {
+              "name": "PacketSize",
+              "value": 1000
+            },
+            {
+              "name": "StartTime",
+              "value": 1.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Remote",
+              "value": {
+                "@ip": {
+                  "key": "vehicles",
+                  "index": 4,
+                  "device": 0,
+                  "port": 1234
+                }
+              }
+            }
+          ]
+        },
+        { // uplink sink for vehicles 1
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1240
+              ]
+            }
+          ]
+        },
+        { // uplink sink for vehicles 2
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1241
+              ]
+            }
+          ]
+        },
+        { // uplink sink for vehicles 3
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1242
+              ]
+            }
+          ]
+        },
+        { // uplink sink for vehicles 4
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1243
+              ]
+            }
+          ]
+        },
+        { // uplink sink for vehicles 5
+          "name": "ns3::PacketSink",
+          "attributes": [
+            {
+              "name": "Protocol",
+              "value": "ns3::UdpSocketFactory"
+            },
+            {
+              "name": "StartTime",
+              "value": 0.0
+            },
+            {
+              "name": "StopTime",
+              "value": 59.5
+            },
+            {
+              "name": "Local",
+              "value": [
+                "0.0.0.0",
+                1244
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "logComponents": []
+}
